@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# 라이브 검증 작업 파일 (하이쿠 웨이브 배치/결과)
+scripts/_review*
