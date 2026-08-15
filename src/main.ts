@@ -1,536 +1,219 @@
 import './style.css';
 import rawSpotsData from './data/spots.json';
 
+// ---------------------------------------------------------------------------
+// Types & constants
+// ---------------------------------------------------------------------------
+
+type SlotKey = 'day' | 'evening' | 'night' | 'stay';
+
 interface Spot {
-  id: number | string;
+  id: number;
   name: string;
-  filename: string;
+  slot: SlotKey | null;
   region: string;
-  theme: string;
+  mood: string[]; // 'romantic' | 'healing' | 'luxury' | 'gourmet'
   location: string;
-  category: string;
-  price: string;
-  mood: string;
-  tags: string[];
-  full_text: string;
+  price: string | null;
+  summary: string;
+  source: { type: string; url: string | null; note: string };
+  verified: boolean;
 }
+
+interface CourseStep {
+  slot: SlotKey;
+  spotId: number | null; // null = 후보 없음
+}
+
+interface SavedCourse {
+  id: string;
+  createdAt: string; // ISO
+  conditions: { region: string; mood: string; slots: SlotKey[] };
+  spotIds: number[];
+}
+
+const SLOT_ORDER: SlotKey[] = ['day', 'evening', 'night', 'stay'];
+
+const SLOT_META: Record<SlotKey, { emoji: string; label: string }> = {
+  day: { emoji: '☀️', label: '낮' },
+  evening: { emoji: '🌆', label: '저녁' },
+  night: { emoji: '🌙', label: '밤' },
+  stay: { emoji: '🏠', label: '숙박' },
+};
+
+// 지역 필터: key → 매칭되는 데이터 region 값 목록 ('전국' region은 항상 포함)
+const REGIONS: { key: string; label: string; match: string[] }[] = [
+  { key: 'ALL', label: '전체', match: [] },
+  { key: 'SEOUL', label: '서울', match: ['서울'] },
+  { key: 'GYEONGGI', label: '경기·인천', match: ['경기', '인천'] },
+  { key: 'GANGWON', label: '강원', match: ['강원'] },
+  { key: 'CHUNGCHEONG', label: '충청', match: ['충청'] },
+  { key: 'YEONGNAM', label: '영남', match: ['영남'] },
+  { key: 'HONAM', label: '호남', match: ['호남'] },
+  { key: 'JEJU', label: '제주', match: ['제주'] },
+];
+
+const MOODS: { key: string; label: string }[] = [
+  { key: 'ALL', label: '전체' },
+  { key: 'romantic', label: '로맨틱' },
+  { key: 'healing', label: '힐링' },
+  { key: 'luxury', label: '럭셔리' },
+  { key: 'gourmet', label: '미식' },
+];
+
+const STORAGE_KEY = 'oneul_saved_courses';
 
 const spots: Spot[] = rawSpotsData as unknown as Spot[];
 
-// State
-let activeTab: 'explore' | 'course' = 'explore';
-let searchQuery = '';
-let selectedRegion = 'ALL';
-let selectedMood = 'ALL';
-let selectedTrend = 'ALL';
-let displayLimit = 24;
-let wishlist: string[] = JSON.parse(localStorage.getItem('wishlist_spots') || '[]');
+// ---------------------------------------------------------------------------
+// 순수 함수 — 필터 · 후보 계산 · 랜덤 픽 · 코스 생성 · 텍스트 포맷 (상태/DOM 없음)
+// ---------------------------------------------------------------------------
 
-// DOM Elements Container
-const app = document.getElementById('app')!;
-
-function saveWishlist() {
-  localStorage.setItem('wishlist_spots', JSON.stringify(wishlist));
-  updateWishlistUI();
+function isValidSlot(value: unknown): value is SlotKey {
+  return value === 'day' || value === 'evening' || value === 'night' || value === 'stay';
 }
 
-function showToast(msg: string) {
-  let toast = document.querySelector('.toast-msg') as HTMLElement;
-  if (!toast) {
-    toast = document.createElement('div');
-    toast.className = 'toast-msg';
-    document.body.appendChild(toast);
+function matchesRegion(spot: Spot, regionKey: string): boolean {
+  if (regionKey === 'ALL') return true;
+  if (spot.region === '전국') return true;
+  const region = REGIONS.find((r) => r.key === regionKey);
+  if (!region) return true;
+  return region.match.includes(spot.region);
+}
+
+function matchesMood(spot: Spot, moodKey: string): boolean {
+  if (moodKey === 'ALL') return true;
+  return Array.isArray(spot.mood) && spot.mood.includes(moodKey);
+}
+
+/** 슬롯 + 지역 + 분위기 조건에 맞는 후보 목록 (excludeIds 제외) */
+function getCandidates(
+  all: Spot[],
+  slot: SlotKey,
+  regionKey: string,
+  moodKey: string,
+  excludeIds: number[],
+): Spot[] {
+  return all.filter(
+    (s) =>
+      isValidSlot(s.slot) &&
+      s.slot === slot &&
+      matchesRegion(s, regionKey) &&
+      matchesMood(s, moodKey) &&
+      !excludeIds.includes(s.id),
+  );
+}
+
+function pickRandom<T>(arr: T[]): T | undefined {
+  if (arr.length === 0) return undefined;
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+/** 켠 슬롯마다 후보에서 랜덤 1개 (이미 뽑힌 스폿 제외). 후보 0건이면 spotId: null */
+function generateCourse(
+  all: Spot[],
+  slotsOn: SlotKey[],
+  regionKey: string,
+  moodKey: string,
+): CourseStep[] {
+  const picked: number[] = [];
+  return slotsOn.map((slot) => {
+    const candidates = getCandidates(all, slot, regionKey, moodKey, picked);
+    const chosen = pickRandom(candidates);
+    if (chosen) picked.push(chosen.id);
+    return { slot, spotId: chosen ? chosen.id : null };
+  });
+}
+
+function regionLabel(regionKey: string): string {
+  if (regionKey === 'ALL') return '전국';
+  return REGIONS.find((r) => r.key === regionKey)?.label ?? regionKey;
+}
+
+function moodLabel(moodKey: string): string {
+  if (moodKey === 'ALL') return '전체';
+  return MOODS.find((m) => m.key === moodKey)?.label ?? moodKey;
+}
+
+/** 텍스트 복사 포맷 (기획서 3절) */
+function formatCourseText(
+  steps: CourseStep[],
+  spotById: Map<number, Spot>,
+  regionKey: string,
+  moodKey: string,
+): string {
+  const lines: string[] = [];
+  lines.push(`[✨ 데이트 코스 — ${regionLabel(regionKey)} · ${moodLabel(moodKey)}]`);
+  const filled = steps.filter((st): st is CourseStep & { spotId: number } => st.spotId !== null);
+  for (const step of filled) {
+    const spot = spotById.get(step.spotId);
+    if (!spot) continue;
+    const meta = SLOT_META[step.slot];
+    lines.push(`${meta.emoji} ${meta.label}: ${spot.name} (${spot.location})`);
   }
-  toast.textContent = msg;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 2500);
-}
-
-// Region categorization helper
-function matchesRegion(spot: Spot, region: string): boolean {
-  if (region === 'ALL') return true;
-  const loc = (spot.region + ' ' + spot.location + ' ' + spot.name + ' ' + spot.tags.join(' ')).toLowerCase();
-  if (region === 'SEOUL') return loc.includes('서울') || loc.includes('강남') || loc.includes('성수') || loc.includes('한남') || loc.includes('종로') || loc.includes('용산') || loc.includes('송파');
-  if (region === 'GYEONGGI') return loc.includes('경기') || loc.includes('인천') || loc.includes('가평') || loc.includes('양평') || loc.includes('포천') || loc.includes('파주') || loc.includes('수원') || loc.includes('용인') || loc.includes('화성') || loc.includes('강화');
-  if (region === 'GANGWON') return loc.includes('강원') || loc.includes('평창') || loc.includes('강릉') || loc.includes('속초') || loc.includes('양양') || loc.includes('춘천') || loc.includes('정선') || loc.includes('영월') || loc.includes('홍천') || loc.includes('삼척') || loc.includes('고성');
-  if (region === 'CHUNGCHEONG') return loc.includes('충남') || loc.includes('충북') || loc.includes('대전') || loc.includes('세종') || loc.includes('태안') || loc.includes('보령') || loc.includes('단양') || loc.includes('제천') || loc.includes('공주') || loc.includes('부여');
-  if (region === 'GYEONGSANG') return loc.includes('경북') || loc.includes('경남') || loc.includes('부산') || loc.includes('대구') || loc.includes('울산') || loc.includes('경주') || loc.includes('포항') || loc.includes('거제') || loc.includes('통영') || loc.includes('남해') || loc.includes('안동') || loc.includes('울진');
-  if (region === 'JEONLA') return loc.includes('전남') || loc.includes('전북') || loc.includes('광주') || loc.includes('여수') || loc.includes('순천') || loc.includes('담양') || loc.includes('전주') || loc.includes('남원') || loc.includes('구례') || loc.includes('고창') || loc.includes('신안');
-  if (region === 'JEJU') return loc.includes('제주') || loc.includes('서귀포') || loc.includes('애월') || loc.includes('한림') || loc.includes('구좌') || loc.includes('조천') || loc.includes('중문');
-  return true;
-}
-
-// Mood helper
-function matchesMood(spot: Spot, mood: string): boolean {
-  if (mood === 'ALL') return true;
-  const full = (spot.tags.join(' ') + ' ' + spot.theme + ' ' + spot.mood + ' ' + spot.full_text).toLowerCase();
-  if (mood === 'ROMANTIC') return full.includes('romantic') || full.includes('로맨틱') || full.includes('일몰') || full.includes('데이트') || full.includes('와인');
-  if (mood === 'HEALING') return full.includes('healing') || full.includes('peaceful') || full.includes('힐링') || full.includes('자연') || full.includes('숲') || full.includes('쉼');
-  if (mood === 'LUXURY') return full.includes('luxury') || full.includes('럭셔리') || full.includes('호텔') || full.includes('하이엔드') || full.includes('풀빌라') || full.includes('스위트');
-  if (mood === 'GOURMET') return full.includes('food') || full.includes('gourmet') || full.includes('다이닝') || full.includes('오마카세') || full.includes('미식') || full.includes('노포') || full.includes('브루어리');
-  return true;
-}
-
-// Trend helper
-function matchesTrend(spot: Spot, trend: string): boolean {
-  if (trend === 'ALL') return true;
-  const full = (spot.filename + ' ' + spot.tags.join(' ') + ' ' + spot.full_text).toLowerCase();
-  if (trend === 'YOUTUBE') return full.includes('youtube') || full.includes('유튜브') || full.includes('100만뷰') || full.includes('또간집') || full.includes('먹을텐데');
-  if (trend === 'TREEHOUSE') return full.includes('treehouse') || full.includes('오두막') || full.includes('트리하우스') || full.includes('cabin');
-  if (trend === 'SPA_POOL') return full.includes('spa') || full.includes('poolvilla') || full.includes('히노끼') || full.includes('인피니티') || full.includes('자쿠지') || full.includes('온천');
-  if (trend === 'CAMPING') return full.includes('camping') || full.includes('차박') || full.includes('카라반') || full.includes('글램핑');
-  return true;
-}
-
-// Filter logic
-function getFilteredSpots(): Spot[] {
-  return spots.filter((spot) => {
-    // Search
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const searchable = (spot.name + ' ' + spot.location + ' ' + spot.mood + ' ' + spot.theme + ' ' + spot.tags.join(' ')).toLowerCase();
-      if (!searchable.includes(q)) return false;
-    }
-    // Region
-    if (!matchesRegion(spot, selectedRegion)) return false;
-    // Mood
-    if (!matchesMood(spot, selectedMood)) return false;
-    // Trend
-    if (!matchesTrend(spot, selectedTrend)) return false;
-    return true;
-  });
-}
-
-function renderApp() {
-  const filteredSpots = getFilteredSpots();
-  const visibleSpots = filteredSpots.slice(0, displayLimit);
-
-  app.innerHTML = `
-    <!-- Header -->
-    <header class="app-header">
-      <div class="logo-wrap">
-        <div class="logo-badge">✦ 2,000+ CURATED ARCHIVE</div>
-        <h1 class="app-title">SECRET SPOT & COURSE</h1>
-        <p class="app-subtitle">전국 하이엔드 프라이빗 독채 · 시크릿 다이닝 · 유튜브 100만뷰 핫스폿 큐레이션</p>
-      </div>
-      <div class="header-actions">
-        <button class="btn-header" id="btn-wishlist-toggle">
-          💖 위시리스트 <span class="wish-count-badge" id="wish-count">${wishlist.length}</span>
-        </button>
-        <button class="btn-header primary" id="btn-random-pick">
-          🎲 오늘 어디 가지? (랜덤)
-        </button>
-      </div>
-    </header>
-
-    <!-- Main Navigation Tabs -->
-    <div class="view-tabs">
-      <button class="tab-btn ${activeTab === 'explore' ? 'active' : ''}" id="tab-explore">
-        🔍 스폿 탐색 (${filteredSpots.length}선)
-      </button>
-      <button class="tab-btn ${activeTab === 'course' ? 'active' : ''}" id="tab-course">
-        ⚡ 1초 AI 코스 빌더
-      </button>
-    </div>
-
-    ${activeTab === 'explore' ? renderExploreView(filteredSpots, visibleSpots) : renderCourseView()}
-
-    <!-- Wishlist Drawer Modal -->
-    <div class="modal-overlay" id="wishlist-modal">
-      <div class="wishlist-drawer">
-        <div class="drawer-header">
-          <h3 class="drawer-title">💖 내가 찜한 시크릿 스폿 (${wishlist.length})</h3>
-          <button class="btn-close-drawer" id="btn-close-wishlist">✕</button>
-        </div>
-        <div class="wishlist-items-list" id="wishlist-items-container">
-          ${renderWishlistItems()}
-        </div>
-      </div>
-    </div>
-  `;
-
-  attachEventListeners();
-}
-
-function renderExploreView(filteredSpots: Spot[], visibleSpots: Spot[]) {
-  return `
-    <!-- 5D Filter Section -->
-    <section class="filter-container">
-      <div class="search-input-wrap">
-        <span class="search-icon">🔍</span>
-        <input 
-          type="text" 
-          id="search-box"
-          class="search-input" 
-          placeholder="가고 싶은 지역, 숙소명, 테마(오두막, 불멍, 자쿠지, 성시경 등)를 검색해보세요..."
-          value="${escapeHtml(searchQuery)}"
-        />
-      </div>
-
-      <div class="filter-group-row">
-        <!-- Region -->
-        <div class="filter-row">
-          <span class="filter-label">권역</span>
-          <div class="pill-group" id="filter-region">
-            <button class="filter-pill ${selectedRegion === 'ALL' ? 'active' : ''}" data-val="ALL">전체</button>
-            <button class="filter-pill ${selectedRegion === 'SEOUL' ? 'active' : ''}" data-val="SEOUL">서울</button>
-            <button class="filter-pill ${selectedRegion === 'GYEONGGI' ? 'active' : ''}" data-val="GYEONGGI">경기/인천/수도권</button>
-            <button class="filter-pill ${selectedRegion === 'GANGWON' ? 'active' : ''}" data-val="GANGWON">강원 고원/해안</button>
-            <button class="filter-pill ${selectedRegion === 'CHUNGCHEONG' ? 'active' : ''}" data-val="CHUNGCHEONG">충청/서해안</button>
-            <button class="filter-pill ${selectedRegion === 'GYEONGSANG' ? 'active' : ''}" data-val="GYEONGSANG">영남/부산/경주</button>
-            <button class="filter-pill ${selectedRegion === 'JEONLA' ? 'active' : ''}" data-val="JEONLA">호남/지리산/여수</button>
-            <button class="filter-pill ${selectedRegion === 'JEJU' ? 'active' : ''}" data-val="JEJU">제주도</button>
-          </div>
-        </div>
-
-        <!-- Mood -->
-        <div class="filter-row">
-          <span class="filter-label">분위기</span>
-          <div class="pill-group" id="filter-mood">
-            <button class="filter-pill ${selectedMood === 'ALL' ? 'active' : ''}" data-val="ALL">전체</button>
-            <button class="filter-pill ${selectedMood === 'ROMANTIC' ? 'active' : ''}" data-val="ROMANTIC">✨ 로맨틱 & 감성</button>
-            <button class="filter-pill ${selectedMood === 'HEALING' ? 'active' : ''}" data-val="HEALING">🌲 피톤치드 힐링</button>
-            <button class="filter-pill ${selectedMood === 'LUXURY' ? 'active' : ''}" data-val="LUXURY">👑 럭셔리 & 프라이빗</button>
-            <button class="filter-pill ${selectedMood === 'GOURMET' ? 'active' : ''}" data-val="GOURMET">🍷 미식 & 오마카세</button>
-          </div>
-        </div>
-
-        <!-- Trend / Theme -->
-        <div class="filter-row">
-          <span class="filter-label">트렌드</span>
-          <div class="pill-group" id="filter-trend">
-            <button class="filter-pill ${selectedTrend === 'ALL' ? 'active' : ''}" data-val="ALL">전체</button>
-            <button class="filter-pill ${selectedTrend === 'YOUTUBE' ? 'active' : ''}" data-val="YOUTUBE">🎬 유튜브 100만뷰 픽</button>
-            <button class="filter-pill ${selectedTrend === 'TREEHOUSE' ? 'active' : ''}" data-val="TREEHOUSE">🏡 숲속 오두막/트리하우스</button>
-            <button class="filter-pill ${selectedTrend === 'SPA_POOL' ? 'active' : ''}" data-val="SPA_POOL">♨️ 히노끼 & 인피니티풀</button>
-            <button class="filter-pill ${selectedTrend === 'CAMPING' ? 'active' : ''}" data-val="CAMPING">⛺ 감성 글램핑/차박</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Results Status Bar -->
-    <div class="results-bar">
-      <div class="results-count">
-        총 <strong>${filteredSpots.length}</strong>개의 프리미엄 스폿이 검색되었습니다.
-      </div>
-    </div>
-
-    <!-- Spot Cards Grid -->
-    <section class="spots-grid">
-      ${visibleSpots.map((spot) => renderSpotCard(spot)).join('')}
-    </section>
-
-    ${filteredSpots.length > displayLimit ? `
-      <div style="text-align: center; margin-top: 40px;">
-        <button class="btn-generate-big" id="btn-load-more">
-          더 많은 스폿 불러오기 (+24개)
-        </button>
-      </div>
-    ` : ''}
-  `;
-}
-
-function renderSpotCard(spot: Spot) {
-  const spotId = String(spot.id);
-  const isWished = wishlist.includes(spotId);
-  const locationShort = spot.location || spot.region || '전국 프리미엄';
-  const cleanName = spot.name.replace(/\[.*?\]\s*/g, '');
-  const naverMapUrl = `https://map.naver.com/v5/search/${encodeURIComponent(cleanName + ' ' + locationShort)}`;
-
-  return `
-    <article class="spot-card" data-id="${spotId}">
-      <div>
-        <div class="card-top">
-          <div class="spot-meta-badges">
-            <span class="badge-location">📍 ${escapeHtml(locationShort.split(' ')[0] || '전국')}</span>
-            ${spot.tags.some(t => t.includes('youtube')) ? '<span class="badge-trend">🎬 유튜브 픽</span>' : ''}
-            ${spot.tags.some(t => t.includes('spa') || t.includes('hinoki')) ? '<span class="badge-location">♨️ 노천 스파</span>' : ''}
-          </div>
-          <button class="btn-wish ${isWished ? 'wished' : ''}" data-spot-id="${spotId}" title="위시리스트 저장">
-            ${isWished ? '❤️' : '🤍'}
-          </button>
-        </div>
-
-        <h3 class="spot-name">${escapeHtml(cleanName)}</h3>
-        <p class="spot-location-text">📍 ${escapeHtml(locationShort)}</p>
-
-        ${spot.theme ? `
-          <div class="spot-feature-box">
-            <div class="feature-title">✨ 테마 & 카테고리</div>
-            <p class="feature-desc">${escapeHtml(spot.theme)} (${escapeHtml(spot.category)})</p>
-          </div>
-        ` : ''}
-
-        ${spot.mood ? `
-          <div class="spot-feature-box" style="background: rgba(229,169,60,0.06);">
-            <div class="feature-title">🔥 킬링 포인트</div>
-            <p class="feature-desc" style="color: #f5c76c;">${escapeHtml(spot.mood.substring(0, 140))}${spot.mood.length > 140 ? '...' : ''}</p>
-          </div>
-        ` : ''}
-      </div>
-
-      <div class="card-footer">
-        <div class="price-tag">
-          ${spot.price ? `<strong>${escapeHtml(spot.price.substring(0, 30))}</strong>` : '<span>예약제 운영</span>'}
-        </div>
-        <div class="card-actions">
-          <a href="${naverMapUrl}" target="_blank" rel="noopener noreferrer" class="btn-action-map">
-            네이버 지도 ↗
-          </a>
-        </div>
-      </div>
-    </article>
-  `;
-}
-
-function renderCourseView() {
-  return `
-    <section class="course-generator-section">
-      <div class="course-gen-header">
-        <h2>⚡ 1초 AI 맞춤형 데이트 코스 빌더</h2>
-        <p>선택하신 지역과 분위기에 딱 맞추어 [1단계 감성 카페/스폿 → 2단계 시크릿 다이닝 → 3단계 프라이빗 숙소] 환상의 3스텝 코스를 즉시 생성합니다.</p>
-      </div>
-
-      <div class="course-controls">
-        <select class="control-select" id="course-region-select">
-          <option value="ALL">전체 지역 어디든</option>
-          <option value="SEOUL">서울 도심/시크릿</option>
-          <option value="GYEONGGI">경기/인천 수도권 근교</option>
-          <option value="GANGWON">강원 숲속 & 바다</option>
-          <option value="CHUNGCHEONG">충청 서해 & 호수</option>
-          <option value="GYEONGSANG">영남/부산/경주</option>
-          <option value="JEONLA">호남/지리산/여수</option>
-          <option value="JEJU">제주도</option>
-        </select>
-
-        <select class="control-select" id="course-mood-select">
-          <option value="ALL">모든 분위기</option>
-          <option value="ROMANTIC">✨ 로맨틱 & 감성 기념일</option>
-          <option value="HEALING">🌲 오프그리드 숲속 힐링</option>
-          <option value="LUXURY">👑 하이엔드 럭셔리 호캉스</option>
-          <option value="GOURMET">🍷 미식 & 크리에이터 노포 투어</option>
-        </select>
-
-        <button class="btn-generate-big" id="btn-create-course">
-          ✨ 맞춤 코스 생성하기
-        </button>
-      </div>
-
-      <div id="course-result-container">
-        <!-- Generated course will appear here -->
-      </div>
-    </section>
-  `;
-}
-
-function generateAICourse(region: string, mood: string) {
-  let pool = spots.filter(s => matchesRegion(s, region) && matchesMood(s, mood));
-  if (pool.length < 3) pool = spots;
-
-  // Pick 3 diverse spots
-  const shuffled = [...pool].sort(() => 0.5 - Math.random());
-  const step1 = shuffled[0];
-  const step2 = shuffled[1] || shuffled[0];
-  const step3 = shuffled[2] || shuffled[1];
-
-  const container = document.getElementById('course-result-container');
-  if (!container) return;
-
-  const courseTitle = `${region === 'ALL' ? '대한민국 시크릿' : region} ${mood === 'ALL' ? '로맨틱 힐링' : mood} 추천 코스`;
-
-  container.innerHTML = `
-    <div class="generated-course-box">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--accent-gold);">
-          🥂 ${courseTitle}
-        </h3>
-        <button class="btn-header primary" id="btn-copy-course">
-          📋 코스 전체 복사
-        </button>
-      </div>
-
-      <div class="course-timeline">
-        <div class="timeline-step">
-          <div class="timeline-dot"></div>
-          <div class="step-label">STEP 1. 감성 프리뷰 & 티/커피 타임</div>
-          <div class="step-title">${escapeHtml(step1.name)}</div>
-          <p class="step-desc">📍 ${escapeHtml(step1.location)} — ${escapeHtml(step1.mood.substring(0, 100))}</p>
-        </div>
-
-        <div class="timeline-step">
-          <div class="timeline-dot"></div>
-          <div class="step-label">STEP 2. 시크릿 다이닝 & 이색 액티비티</div>
-          <div class="step-title">${escapeHtml(step2.name)}</div>
-          <p class="step-desc">📍 ${escapeHtml(step2.location)} — ${escapeHtml(step2.mood.substring(0, 100))}</p>
-        </div>
-
-        <div class="timeline-step">
-          <div class="timeline-dot"></div>
-          <div class="step-label">STEP 3. 프라이빗 독채 스파 / 야경 & 휴식</div>
-          <div class="step-title">${escapeHtml(step3.name)}</div>
-          <p class="step-desc">📍 ${escapeHtml(step3.location)} — ${escapeHtml(step3.mood.substring(0, 100))}</p>
-        </div>
-      </div>
-    </div>
-  `;
-
-  document.getElementById('btn-copy-course')?.addEventListener('click', () => {
-    const text = `[✨ SECRET SPOT 데이트 코스 추천]\n\n1. ${step1.name} (${step1.location})\n2. ${step2.name} (${step2.location})\n3. ${step3.name} (${step3.location})\n\n자세히 보기: https://map.naver.com/v5/search/${encodeURIComponent(step1.name)}`;
-    navigator.clipboard.writeText(text).then(() => showToast('📋 코스가 클립보드에 복사되었습니다!'));
-  });
-}
-
-function renderWishlistItems() {
-  if (wishlist.length === 0) {
-    return `<div class="empty-state">아직 찜한 스폿이 없습니다.<br>스폿 카드의 하트(🤍)를 눌러 나만의 위시리스트를 완성하세요!</div>`;
+  const first = filled.length > 0 ? spotById.get(filled[0].spotId) : undefined;
+  if (first) {
+    lines.push(`지도: https://map.naver.com/v5/search/${encodeURIComponent(first.name)}`);
   }
-  const wishedSpots = spots.filter(s => wishlist.includes(String(s.id)));
-  return wishedSpots.map(s => `
-    <div class="wish-item-card">
-      <div>
-        <strong style="font-size: 0.95rem;">${escapeHtml(s.name.replace(/\[.*?\]\s*/g, ''))}</strong>
-        <div style="font-size: 0.78rem; color: var(--text-secondary);">📍 ${escapeHtml(s.location)}</div>
-      </div>
-      <button class="btn-remove-wish" data-spot-id="${s.id}" style="color: var(--accent-rose); font-size: 0.9rem; padding: 4px 8px;">
-        ✕ 삭제
-      </button>
-    </div>
-  `).join('');
+  return lines.join('\n');
 }
 
-function updateWishlistUI() {
-  const badge = document.getElementById('wish-count');
-  if (badge) badge.textContent = wishlist.length.toString();
+// ---------------------------------------------------------------------------
+// 상태
+// ---------------------------------------------------------------------------
 
-  const container = document.getElementById('wishlist-items-container');
-  if (container) container.innerHTML = renderWishlistItems();
-
-  document.querySelectorAll('.btn-wish').forEach(btn => {
-    const id = btn.getAttribute('data-spot-id');
-    if (id && wishlist.includes(id)) {
-      btn.classList.add('wished');
-      btn.textContent = '❤️';
-    } else if (btn) {
-      btn.classList.remove('wished');
-      btn.textContent = '🤍';
-    }
-  });
-
-  // Reattach remove listener
-  document.querySelectorAll('.btn-remove-wish').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = btn.getAttribute('data-spot-id');
-      if (id) {
-        wishlist = wishlist.filter(x => x !== id);
-        saveWishlist();
-        showToast('위시리스트에서 삭제되었습니다.');
-      }
-    });
-  });
+interface AppState {
+  slots: Record<SlotKey, boolean>;
+  region: string;
+  mood: string;
+  course: CourseStep[] | null;
+  /** 코스 생성 시점의 조건 스냅샷 — 교체 후보·저장·복사가 이 조건 기준으로 동작 */
+  courseConditions: { region: string; mood: string } | null;
+  sheetStepIndex: number | null; // 교체 바텀시트가 열린 스텝
+  savedOpen: boolean;
 }
 
-function attachEventListeners() {
-  // Tabs
-  document.getElementById('tab-explore')?.addEventListener('click', () => {
-    activeTab = 'explore';
-    renderApp();
-  });
-  document.getElementById('tab-course')?.addEventListener('click', () => {
-    activeTab = 'course';
-    renderApp();
-  });
+const state: AppState = {
+  slots: { day: true, evening: true, night: false, stay: false },
+  region: 'ALL',
+  mood: 'ALL',
+  course: null,
+  courseConditions: null,
+  sheetStepIndex: null,
+  savedOpen: false,
+};
 
-  // Search
-  const searchBox = document.getElementById('search-box') as HTMLInputElement;
-  if (searchBox) {
-    searchBox.addEventListener('input', (e) => {
-      searchQuery = (e.target as HTMLInputElement).value;
-      displayLimit = 24;
-      renderApp();
-    });
+const spotById = new Map<number, Spot>(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
+
+function activeSlots(): SlotKey[] {
+  return SLOT_ORDER.filter((k) => state.slots[k]);
+}
+
+function courseSpotIds(): number[] {
+  if (!state.course) return [];
+  return state.course.filter((st) => st.spotId !== null).map((st) => st.spotId as number);
+}
+
+// ---------------------------------------------------------------------------
+// localStorage — 저장한 코스
+// ---------------------------------------------------------------------------
+
+function loadSavedCourses(): SavedCourse[] {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    return Array.isArray(parsed) ? (parsed as SavedCourse[]) : [];
+  } catch {
+    return [];
   }
-
-  // Filter Pills (Region)
-  document.querySelectorAll('#filter-region .filter-pill').forEach(btn => {
-    btn.addEventListener('click', () => {
-      selectedRegion = btn.getAttribute('data-val') || 'ALL';
-      displayLimit = 24;
-      renderApp();
-    });
-  });
-
-  // Filter Pills (Mood)
-  document.querySelectorAll('#filter-mood .filter-pill').forEach(btn => {
-    btn.addEventListener('click', () => {
-      selectedMood = btn.getAttribute('data-val') || 'ALL';
-      displayLimit = 24;
-      renderApp();
-    });
-  });
-
-  // Filter Pills (Trend)
-  document.querySelectorAll('#filter-trend .filter-pill').forEach(btn => {
-    btn.addEventListener('click', () => {
-      selectedTrend = btn.getAttribute('data-val') || 'ALL';
-      displayLimit = 24;
-      renderApp();
-    });
-  });
-
-  // Load More
-  document.getElementById('btn-load-more')?.addEventListener('click', () => {
-    displayLimit += 24;
-    renderApp();
-  });
-
-  // Wishlist toggle button on cards
-  document.querySelectorAll('.btn-wish').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const id = btn.getAttribute('data-spot-id');
-      if (!id) return;
-      if (wishlist.includes(id)) {
-        wishlist = wishlist.filter(x => x !== id);
-        showToast('위시리스트에서 제외되었습니다.');
-      } else {
-        wishlist.push(id);
-        showToast('💖 위시리스트에 저장되었습니다!');
-      }
-      saveWishlist();
-    });
-  });
-
-  // Wishlist Modal open/close
-  const modal = document.getElementById('wishlist-modal');
-  document.getElementById('btn-wishlist-toggle')?.addEventListener('click', () => {
-    modal?.classList.add('open');
-  });
-  document.getElementById('btn-close-wishlist')?.addEventListener('click', () => {
-    modal?.classList.remove('open');
-  });
-  modal?.addEventListener('click', (e) => {
-    if (e.target === modal) modal.classList.remove('open');
-  });
-
-  // Random Pick
-  document.getElementById('btn-random-pick')?.addEventListener('click', () => {
-    const randomSpot = spots[Math.floor(Math.random() * spots.length)];
-    searchQuery = randomSpot.name.replace(/\[.*?\]\s*/g, '');
-    activeTab = 'explore';
-    renderApp();
-    showToast(`🎲 추천 스폿: ${randomSpot.name}`);
-  });
-
-  // AI Course Generator
-  document.getElementById('btn-create-course')?.addEventListener('click', () => {
-    const r = (document.getElementById('course-region-select') as HTMLSelectElement)?.value || 'ALL';
-    const m = (document.getElementById('course-mood-select') as HTMLSelectElement)?.value || 'ALL';
-    generateAICourse(r, m);
-  });
-
-  updateWishlistUI();
 }
+
+function persistSavedCourses(list: SavedCourse[]): void {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+}
+
+// ---------------------------------------------------------------------------
+// 유틸
+// ---------------------------------------------------------------------------
 
 function escapeHtml(text: string): string {
   return text
@@ -541,5 +224,385 @@ function escapeHtml(text: string): string {
     .replace(/'/g, '&#039;');
 }
 
-// Initial Launch
-renderApp();
+function showToast(msg: string): void {
+  let toast = document.querySelector('.toast-msg') as HTMLElement | null;
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.className = 'toast-msg';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.classList.add('show');
+  window.setTimeout(() => toast?.classList.remove('show'), 2200);
+}
+
+// ---------------------------------------------------------------------------
+// 렌더 — 영역별 분할 (앱 셸은 1회, 조건/결과/시트/오버레이는 개별 재렌더)
+// ---------------------------------------------------------------------------
+
+const app = document.getElementById('app')!;
+
+function renderShell(): void {
+  app.innerHTML = `
+    <header class="topbar">
+      <h1 class="app-title">오늘 데이트</h1>
+      <button class="btn-saved" id="btn-open-saved">저장한 코스</button>
+    </header>
+    <section class="conditions" id="conditions-area"></section>
+    <section class="results" id="results-area"></section>
+    <div class="sheet-root" id="sheet-root"></div>
+    <div class="overlay-root" id="overlay-root"></div>
+  `;
+  document.getElementById('btn-open-saved')!.addEventListener('click', () => {
+    state.savedOpen = true;
+    renderOverlay();
+  });
+  renderConditions();
+  renderResults();
+  renderSheet();
+  renderOverlay();
+}
+
+// --- 조건 영역 -------------------------------------------------------------
+
+function renderConditions(): void {
+  const area = document.getElementById('conditions-area')!;
+  area.innerHTML = `
+    <div class="slot-toggles" role="group" aria-label="시간대 선택">
+      ${SLOT_ORDER.map((k) => {
+        const meta = SLOT_META[k];
+        return `
+          <button class="slot-toggle ${state.slots[k] ? 'on' : ''}" data-slot="${k}" aria-pressed="${state.slots[k]}">
+            <span class="slot-emoji">${meta.emoji}</span>
+            <span class="slot-label">${meta.label}</span>
+          </button>`;
+      }).join('')}
+    </div>
+
+    <div class="filter-row">
+      <span class="filter-label">지역</span>
+      <div class="pill-scroll" id="region-pills">
+        ${REGIONS.map(
+          (r) =>
+            `<button class="pill ${state.region === r.key ? 'active' : ''}" data-region="${r.key}">${r.label}</button>`,
+        ).join('')}
+      </div>
+    </div>
+
+    <div class="filter-row">
+      <span class="filter-label">분위기</span>
+      <div class="pill-scroll" id="mood-pills">
+        ${MOODS.map(
+          (m) =>
+            `<button class="pill ${state.mood === m.key ? 'active' : ''}" data-mood="${m.key}">${m.label}</button>`,
+        ).join('')}
+      </div>
+    </div>
+
+    <button class="btn-primary btn-generate" id="btn-generate">코스 만들기</button>
+  `;
+  bindConditionEvents(area);
+}
+
+function bindConditionEvents(area: HTMLElement): void {
+  area.querySelectorAll<HTMLButtonElement>('.slot-toggle').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const slot = btn.dataset.slot as SlotKey;
+      state.slots[slot] = !state.slots[slot];
+      renderConditions();
+    });
+  });
+  area.querySelectorAll<HTMLButtonElement>('#region-pills .pill').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.region = btn.dataset.region || 'ALL';
+      renderConditions();
+    });
+  });
+  area.querySelectorAll<HTMLButtonElement>('#mood-pills .pill').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.mood = btn.dataset.mood || 'ALL';
+      renderConditions();
+    });
+  });
+  area.querySelector('#btn-generate')!.addEventListener('click', () => {
+    const slotsOn = activeSlots();
+    if (slotsOn.length === 0) {
+      showToast('시간대를 하나 이상 켜주세요');
+      return;
+    }
+    state.course = generateCourse(spots, slotsOn, state.region, state.mood);
+    state.courseConditions = { region: state.region, mood: state.mood };
+    state.sheetStepIndex = null;
+    renderResults();
+    renderSheet();
+  });
+}
+
+// --- 결과 영역 -------------------------------------------------------------
+
+function renderResults(): void {
+  const area = document.getElementById('results-area')!;
+  if (!state.course || !state.courseConditions) {
+    area.innerHTML = `
+      <div class="results-empty">
+        시간대와 조건을 고르고<br /><strong>코스 만들기</strong>를 눌러보세요
+      </div>
+    `;
+    return;
+  }
+
+  const cond = state.courseConditions;
+  area.innerHTML = `
+    <div class="course-head">
+      <span class="course-title">✨ ${escapeHtml(regionLabel(cond.region))} · ${escapeHtml(moodLabel(cond.mood))} 코스</span>
+    </div>
+    <div class="step-list">
+      ${state.course.map((step, i) => renderStepCard(step, i)).join('')}
+    </div>
+    <div class="result-actions">
+      <button class="btn-secondary" id="btn-copy">📋 텍스트 복사</button>
+      <button class="btn-primary" id="btn-save">💾 코스 저장</button>
+    </div>
+  `;
+  bindResultEvents(area);
+}
+
+function renderStepCard(step: CourseStep, index: number): string {
+  const meta = SLOT_META[step.slot];
+  if (step.spotId === null) {
+    return `
+      <article class="step-card empty">
+        <div class="step-slot">${meta.emoji} ${meta.label}</div>
+        <p class="step-empty-msg">이 조건에 맞는 후보가 없어요</p>
+      </article>
+    `;
+  }
+  const spot = spotById.get(step.spotId);
+  if (!spot) {
+    return `
+      <article class="step-card empty">
+        <div class="step-slot">${meta.emoji} ${meta.label}</div>
+        <p class="step-empty-msg">스폿 정보를 찾을 수 없어요</p>
+      </article>
+    `;
+  }
+  return `
+    <article class="step-card">
+      <div class="step-card-head">
+        <div class="step-slot">${meta.emoji} ${meta.label}</div>
+        <button class="btn-swap" data-step-index="${index}" aria-label="${meta.label} 스텝 교체">🔄</button>
+      </div>
+      <h3 class="step-name">${escapeHtml(spot.name)}</h3>
+      <p class="step-location">📍 ${escapeHtml(spot.location)}</p>
+      ${spot.summary ? `<p class="step-summary">${escapeHtml(spot.summary)}</p>` : ''}
+      ${spot.price ? `<p class="step-price">${escapeHtml(spot.price)}</p>` : ''}
+    </article>
+  `;
+}
+
+function bindResultEvents(area: HTMLElement): void {
+  area.querySelectorAll<HTMLButtonElement>('.btn-swap').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.sheetStepIndex = Number(btn.dataset.stepIndex);
+      renderSheet();
+    });
+  });
+  area.querySelector('#btn-copy')?.addEventListener('click', () => {
+    if (!state.course || !state.courseConditions) return;
+    const text = formatCourseText(
+      state.course,
+      spotById,
+      state.courseConditions.region,
+      state.courseConditions.mood,
+    );
+    navigator.clipboard
+      .writeText(text)
+      .then(() => showToast('📋 코스가 복사되었어요'))
+      .catch(() => showToast('복사에 실패했어요'));
+  });
+  area.querySelector('#btn-save')?.addEventListener('click', () => {
+    if (!state.course || !state.courseConditions) return;
+    const ids = courseSpotIds();
+    if (ids.length === 0) {
+      showToast('저장할 스폿이 없어요');
+      return;
+    }
+    const list = loadSavedCourses();
+    const item: SavedCourse = {
+      id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+      createdAt: new Date().toISOString(),
+      conditions: {
+        region: state.courseConditions.region,
+        mood: state.courseConditions.mood,
+        slots: state.course.map((st) => st.slot),
+      },
+      spotIds: ids,
+    };
+    list.unshift(item);
+    persistSavedCourses(list);
+    showToast('💾 코스를 저장했어요');
+  });
+}
+
+// --- 교체 바텀시트 -----------------------------------------------------------
+
+function renderSheet(): void {
+  const root = document.getElementById('sheet-root')!;
+  if (state.sheetStepIndex === null || !state.course || !state.courseConditions) {
+    root.innerHTML = '';
+    return;
+  }
+  const step = state.course[state.sheetStepIndex];
+  const meta = SLOT_META[step.slot];
+  const cond = state.courseConditions;
+  const candidates = getCandidates(spots, step.slot, cond.region, cond.mood, courseSpotIds());
+
+  root.innerHTML = `
+    <div class="sheet-backdrop" id="sheet-backdrop"></div>
+    <div class="sheet" role="dialog" aria-label="${meta.label} 후보 선택">
+      <div class="sheet-head">
+        <span class="sheet-title">${meta.emoji} ${meta.label} 후보 <span class="sheet-count">${candidates.length}곳</span></span>
+        <button class="sheet-close" id="sheet-close" aria-label="닫기">✕</button>
+      </div>
+      <div class="sheet-body">
+        ${
+          candidates.length === 0
+            ? `<div class="sheet-empty">이 조건의 후보를 다 보셨어요</div>`
+            : candidates
+                .map(
+                  (c) => `
+            <button class="sheet-item" data-spot-id="${c.id}">
+              <span class="sheet-item-name">${escapeHtml(c.name)}</span>
+              <span class="sheet-item-location">📍 ${escapeHtml(c.location)}</span>
+              ${c.summary ? `<span class="sheet-item-summary">${escapeHtml(c.summary)}</span>` : ''}
+            </button>`,
+                )
+                .join('')
+        }
+      </div>
+    </div>
+  `;
+
+  const close = () => {
+    state.sheetStepIndex = null;
+    renderSheet();
+  };
+  root.querySelector('#sheet-backdrop')!.addEventListener('click', close);
+  root.querySelector('#sheet-close')!.addEventListener('click', close);
+  root.querySelectorAll<HTMLButtonElement>('.sheet-item').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const spotId = Number(btn.dataset.spotId);
+      if (state.course && state.sheetStepIndex !== null) {
+        state.course[state.sheetStepIndex] = { slot: step.slot, spotId };
+      }
+      state.sheetStepIndex = null;
+      renderResults();
+      renderSheet();
+    });
+  });
+}
+
+// --- 저장한 코스 오버레이 ------------------------------------------------------
+
+function savedCourseSummary(item: SavedCourse): string {
+  const names = item.spotIds
+    .map((id) => spotById.get(id)?.name)
+    .filter((n): n is string => Boolean(n));
+  return names.length > 0 ? names.join(' → ') : '(스폿 정보 없음)';
+}
+
+function renderOverlay(): void {
+  const root = document.getElementById('overlay-root')!;
+  if (!state.savedOpen) {
+    root.innerHTML = '';
+    return;
+  }
+  const list = loadSavedCourses();
+  root.innerHTML = `
+    <div class="overlay-backdrop" id="overlay-backdrop"></div>
+    <div class="overlay-panel" role="dialog" aria-label="저장한 코스">
+      <div class="overlay-head">
+        <span class="overlay-title">저장한 코스 <span class="overlay-count">${list.length}</span></span>
+        <button class="overlay-close" id="overlay-close" aria-label="닫기">✕</button>
+      </div>
+      <div class="overlay-body">
+        ${
+          list.length === 0
+            ? `<div class="overlay-empty">아직 저장한 코스가 없어요</div>`
+            : list
+                .map((item) => {
+                  const date = new Date(item.createdAt);
+                  const dateStr = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+                  return `
+              <div class="saved-item">
+                <button class="saved-item-main" data-course-id="${escapeHtml(item.id)}">
+                  <span class="saved-item-meta">${dateStr} · ${escapeHtml(regionLabel(item.conditions.region))} · ${escapeHtml(moodLabel(item.conditions.mood))}</span>
+                  <span class="saved-item-spots">${escapeHtml(savedCourseSummary(item))}</span>
+                </button>
+                <button class="saved-item-delete" data-delete-id="${escapeHtml(item.id)}" aria-label="삭제">🗑</button>
+              </div>`;
+                })
+                .join('')
+        }
+      </div>
+    </div>
+  `;
+
+  const close = () => {
+    state.savedOpen = false;
+    renderOverlay();
+  };
+  root.querySelector('#overlay-backdrop')!.addEventListener('click', close);
+  root.querySelector('#overlay-close')!.addEventListener('click', close);
+
+  root.querySelectorAll<HTMLButtonElement>('.saved-item-main').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const item = loadSavedCourses().find((c) => c.id === btn.dataset.courseId);
+      if (!item) return;
+      restoreCourse(item);
+      state.savedOpen = false;
+      renderOverlay();
+      showToast('코스를 불러왔어요');
+    });
+  });
+  root.querySelectorAll<HTMLButtonElement>('.saved-item-delete').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const next = loadSavedCourses().filter((c) => c.id !== btn.dataset.deleteId);
+      persistSavedCourses(next);
+      renderOverlay();
+      showToast('삭제했어요');
+    });
+  });
+}
+
+/** 저장한 코스를 결과 영역에 복원 (조건 상태도 함께 복원) */
+function restoreCourse(item: SavedCourse): void {
+  // spotId → 해당 스폿의 slot으로 스텝 재구성 (스폿 데이터가 사라진 ID는 건너뜀)
+  const steps: CourseStep[] = [];
+  for (const id of item.spotIds) {
+    const spot = spotById.get(id);
+    if (spot && isValidSlot(spot.slot)) {
+      steps.push({ slot: spot.slot, spotId: id });
+    }
+  }
+  steps.sort((a, b) => SLOT_ORDER.indexOf(a.slot) - SLOT_ORDER.indexOf(b.slot));
+
+  state.region = item.conditions.region;
+  state.mood = item.conditions.mood;
+  for (const k of SLOT_ORDER) {
+    state.slots[k] = item.conditions.slots.includes(k);
+  }
+  state.course = steps;
+  state.courseConditions = { region: item.conditions.region, mood: item.conditions.mood };
+  state.sheetStepIndex = null;
+
+  renderConditions();
+  renderResults();
+  renderSheet();
+}
+
+// ---------------------------------------------------------------------------
+// 시작
+// ---------------------------------------------------------------------------
+
+renderShell();
