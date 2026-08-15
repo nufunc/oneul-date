@@ -56,7 +56,8 @@
  "도멘청담 (Domaine Cheongdam)": {
   "verified": true,
   "sourceUrl": "https://www.trip.com/travel-guide/attraction/seoul/cheongdam-dong-10800198/",
-  "summary": "강남 청담의 프리미엄 와인바로 프랑스 요리와 세계 명주를 제공합니다."
+  "summary": "강남 청담의 프리미엄 와인바로 프랑스 요리와 세계 명주를 제공합니다.",
+  "slot": "evening"
  },
  "르챔버 (Le Chamber)": {
   "verified": true,
@@ -172,12 +173,14 @@
  },
  "발리오스 승마클럽 (BALIOS Equestrian Club)": {
   "verified": true,
-  "sourceUrl": "https://ggtour.or.kr/travel-info/tourism-info/72655c4c-746a-11ee-b910-0242ac120002"
+  "sourceUrl": "https://ggtour.or.kr/travel-info/tourism-info/72655c4c-746a-11ee-b910-0242ac120002",
+  "slot": "day"
  },
  "로얄새들 승마클럽 (Royal Saddle Riding Club)": {
   "verified": true,
   "sourceUrl": "http://www.royalsaddle.com/",
-  "price": "그룹레슨 주중 9만원, 주말 10만원 / 개인레슨 주중 14만원, 주말 16만원"
+  "price": "그룹레슨 주중 9만원, 주말 10만원 / 개인레슨 주중 14만원, 주말 16만원",
+  "slot": "day"
  },
  "헬레나플라워 청담 아틀리에 (Helena Flower Cheongdam)": {
   "summary": "청담 프리미엄 1:1 VIP 비스포크 플라워 아트 서비스"
@@ -225,12 +228,17 @@
  "카카오다다 (Cacao Dada)": {
   "verified": true,
   "sourceUrl": "https://cacaodada.imweb.me/",
-  "summary": "카카오 빈을 직접 로스팅·분쇄해 만드는 수제 초콜릿 전문점"
+  "summary": "카카오 빈을 직접 로스팅·분쇄해 만드는 수제 초콜릿 전문점",
+  "slot": "day",
+  "mood": [
+   "gourmet"
+  ]
  },
  "트리투바 (Tree to Bar)": {
   "verified": true,
   "sourceUrl": "https://autoreserve.com/ko/restaurants/6Zja1Rhf7EosMLQQKc8R",
-  "summary": "초콜릿 제조 과정을 직접 관찰하고 체험할 수 있는 초콜릿 전문 카페"
+  "summary": "초콜릿 제조 과정을 직접 관찰하고 체험할 수 있는 초콜릿 전문 카페",
+  "slot": "day"
  },
  "JL 디저트바 (JL Dessert Bar)": {
   "verified": true,
@@ -240,7 +248,8 @@
  "비앤테일러 (B&Tailor Cheongdam)": {
   "verified": true,
   "sourceUrl": "https://www.permanentstyle.com/2024/02/btailor-korea-real-bespoke-and-distinctive-style.html",
-  "summary": "청담동 비스포크 맞춤정장 명가로 1967년 설립, 세대 이음 전문 기술력"
+  "summary": "청담동 비스포크 맞춤정장 명가로 1967년 설립, 세대 이음 전문 기술력",
+  "exclude": true
  },
  "메디치 가죽공방 (Medici Leather Studio)": {
   "verified": true,
@@ -574,7 +583,8 @@
  "남양주 베이커리 씨어터 (Bakery Theater)": {
   "verified": true,
   "sourceUrl": "https://www.diningcode.com/profile.php?rid=XrAuPxXPQQRf",
-  "summary": "북한강 뷰 베이커리 카페, 넓은 정원과 실내 공간"
+  "summary": "북한강 뷰 베이커리 카페, 넓은 정원과 실내 공간",
+  "slot": "day"
  },
  "화성 혜경궁 베이커리 (Hyegyeonggung Bakery)": {
   "verified": true,
@@ -728,5 +738,362 @@
   "sourceUrl": "https://camplake.modoo.at/",
   "region": "경기",
   "summary": "신갈저수지 변의 전망 좋은 글램핑장, 가족·커플용 글램핑과 글램하우스 구성"
+ },
+ "여수 모이핀 오션점 (Cafe Moi Fin Ocean) — 전남 여수": {
+  "slot": "day"
+ },
+ "뮤지엄원 (Museum 1)": {
+  "exclude": true
+ },
+ "[Part 5] 경기 웰니스 & 야외 나이트 라이팅 권역 (No 18~20)": {
+  "exclude": true
+ },
+ "시간대별 동선 전략": {
+  "exclude": true
+ },
+ "저조도 카메라 바디 & 렌즈 세팅 노하우": {
+  "exclude": true
+ },
+ "고품질 심야 드라이브 사운드 디자인 (ASMR)": {
+  "exclude": true
+ },
+ "🦇 Chapter 1. 지하 동굴 & 까브(Cave) 콘셉트 와인바": {
+  "exclude": true
+ },
+ "🍇 Chapter 4. 숨겨진 와이너리 & 대형 와인 동굴 투어": {
+  "exclude": true
+ },
+ "🏛️ 파주 권역": {
+  "exclude": true
+ },
+ "🌊 영종도 & 인천 권역": {
+  "exclude": true
+ },
+ "🌿 양평 권역": {
+  "exclude": true
+ },
+ "🌲 용인 권역": {
+  "exclude": true
+ },
+ "☕ 남양주 & 포천 권역": {
+  "exclude": true
+ },
+ "🎨 춘천 & 가평 권역": {
+  "exclude": true
+ },
+ "🏯 [Group 1] 수원 행궁동 & 성곽길": {
+  "exclude": true
+ },
+ "🍂 [Group 2] 고양 일산 밤리단길": {
+  "exclude": true
+ },
+ "⚓ [Group 3] 인천 개항장 & 선재도": {
+  "exclude": true
+ },
+ "🌲 [Group 4] 남양주 & 양평": {
+  "exclude": true
+ },
+ "🌿 [Group 5] 경기 북부 (이색 테마 & 숲속 온실)": {
+  "exclude": true
+ },
+ "☕ [Group 6] 경기 남부 (감성 스트리트 & 생태 피크닉)": {
+  "exclude": true
+ },
+ "⛵ [Category 2] 프라이빗 마리나 & 럭셔리 요트 세일링": {
+  "exclude": true
+ },
+ "☕ [Category 1] 한강·서해 심야 드라이브 카페": {
+  "exclude": true
+ },
+ "🔭 [Category 2] 숲속 별빛 관측소 & 은하수 투어": {
+  "exclude": true
+ },
+ "🎬 [Category 3] 프라이빗 자동차 극장 & 드라이브인 시네마": {
+  "exclude": true
+ },
+ "🎷 [Category 5] 심야 LP 살롱 & 은밀한 불빛 정원": {
+  "exclude": true
+ },
+ "🏛️ [Category 2] 초대형 복합문화공간 & 메가 컨셉 카페": {
+  "exclude": true
+ },
+ "🍵 3. 멘탈 웰니스 & 티 테라피 (Tea Therapy & Mental Care)": {
+  "exclude": true
+ },
+ "🎧 서울 지역 (17선)": {
+  "exclude": true
+ },
+ "🎧 경기/인천 지역 (3선)": {
+  "exclude": true
+ },
+ "디오티 가죽 아틀리에 (Dioti Leather Atelier Hannam)": {
+  "slot": "day"
+ },
+ "노블레스 레더 라운지 (Noblesse Leather Salon Cheongdam)": {
+  "exclude": true
+ },
+ "테일러블 (Tailorable Hannam)": {
+  "exclude": true
+ },
+ "마크론슨 (Mark Ronson Cheongdam)": {
+  "exclude": true
+ },
+ "볼란테 비스포크 (Volante Bespoke)": {
+  "exclude": true
+ },
+ "슈트패브릭 비스포크 하우스 (Suit Fabric Bespoke House)": {
+  "exclude": true
+ },
+ "글라이더스 왕산마리나 선셋 세일링 (Gliders Wangsan Marina Sunset Sailing)": {
+  "slot": "evening"
+ },
+ "왕산마리나 기업 VIP 요트 영접 패키지 (Wangsan Marina Corporate VIP Charter)": {
+  "exclude": true
+ },
+ "아라마리나 한강·서해 연결 선셋 크루즈 (Ara Marina Han River-West Sea Sunset Cruise)": {
+  "slot": "evening"
+ },
+ "🥃 경기/인천 지역 (3선)": {
+  "exclude": true
+ },
+ "문화시민 서울": {
+  "exclude": true
+ },
+ "10월 19일 (October 19th)": {
+  "exclude": true
+ },
+ "주종별 최적의 K-타파스 마리아주 원칙": {
+  "exclude": true
+ },
+ "[경남 거제] 거제 몽돌 카사블랑카 오션 빌라 (Geoje Casablanca Coastal Villa)": {
+  "slot": "stay"
+ },
+ "텍사스식 12시간 참나무 저온 훈연 (Low & Slow) 바비큐의 매력": {
+  "exclude": true
+ },
+ "대한민국 천연 암반 동굴 와인 셀러 & 캔들라이트 다이닝 트렌드 분석": {
+  "exclude": true
+ },
+ "권역별 상세 스폿 심층 큐레이션 (20곳)": {
+  "exclude": true
+ },
+ "[Part 1] 서울 & 수도권 북부·동부 핵심 권역 (No 1~5)": {
+  "exclude": true
+ },
+ "[Part 2] 수도권 남부 & 서부 핵심 권역 (No 6~10)": {
+  "exclude": true
+ },
+ "[Part 3] 강원·영남·부산 해안 권역 (No 11~15)": {
+  "exclude": true
+ },
+ "[Part 4] 호남·영남 내륙 및 제주 특별 권역 (No 16~20)": {
+  "exclude": true
+ },
+ "빛의 방향에 따른 골든 타임 (Golden Hour)": {
+  "exclude": true
+ },
+ "권장 드레스코드 및 소품": {
+  "exclude": true
+ },
+ "아치 볼트 에스파스 성수 (Arch Vault Espace) - 서울 성동구": {
+  "slot": "evening"
+ },
+ "방문 시 주의사항 및 테이스팅 에티켓": {
+  "exclude": true
+ },
+ "카테고리별 특성 비교": {
+  "exclude": true
+ },
+ "🌃 1부. 하이엔드 심야 드라이브 뷰 포인트 (8선)": {
+  "exclude": true
+ },
+ "🎬 3부. 프라이빗 심야 영화관 & 하이엔드 자동차 극장 (5선)": {
+  "exclude": true
+ },
+ "도예공방 도온 (Doteon Atelier Hannam & Yongsan)": {
+  "slot": "day"
+ },
+ "권역별 15개 프리미엄 핫플레이스 상세 DB": {
+  "exclude": true
+ },
+ "[강원 원주] 사니다 카페 (Sanida Garden Cafe)": {
+  "slot": "day"
+ },
+ "대한민국 시크릿 동굴 다이닝 & 와인 케이브 트렌드 분석": {
+  "exclude": true
+ },
+ "사계절 드레스코드 & 체온 유지 요령": {
+  "exclude": true
+ },
+ "유튜브 숏폼 & 릴스 촬영 테크닉": {
+  "exclude": true
+ },
+ "예약 및 방문 시간대 전략": {
+  "exclude": true
+ },
+ "[충남 보령] 원산도 오봉산 해안 절벽 선셋 인피니티 모닥불 라운지 (Boryeong Wonsando Sunset Cliff Infinity Firepit Lounge)": {
+  "slot": "night"
+ },
+ "[경남 통영] 산양일주로 달아노을 해안 절벽 인피니티 파이어핏 (Tongyeong Dara Sunset Clifftop Firepit Lounge)": {
+  "slot": "evening"
+ },
+ "[부산 영도] 절영해안산책로 태종대 단애 40m 선셋 모닥불 라운지 (Busan Yeongdo Taejongdae Cliff Sunset Firepit Lounge)": {
+  "slot": "evening"
+ },
+ "[인천 굴업도] 굴업도 목기미 사구 은하수 듄 라운지 (Guleopdo Mokgimi Dune Lounge)": {
+  "slot": "night"
+ },
+ "이미커피 (Imi Coffee - 연남동)": {
+  "slot": "day"
+ },
+ "지역별 완벽 연계 데이트 코스 매트릭스": {
+  "exclude": true
+ },
+ "춘하추동(春夏秋冬) 약선 식재료 제철 캘린더": {
+  "exclude": true
+ },
+ "💎 카테고리 1. 명품 플래그십 & 하이엔드 브랜드 라운지": {
+  "exclude": true
+ },
+ "🏛️ 카테고리 2. 하이엔드 복합문화공간 & 아티스틱 플랫폼": {
+  "exclude": true
+ },
+ "🥐 카테고리 4. 2026 SNS/커뮤니티 바이럴 폭발 F&B 핫플": {
+  "exclude": true
+ },
+ "🌙 Night & Art Curation Concept": {
+  "exclude": true
+ },
+ "🍸 카테고리 1. 스피크이지 & 히든 도어 비밀 바": {
+  "exclude": true
+ },
+ "🎷 카테고리 2. 프리미엄 라이브 재즈 라운지": {
+  "exclude": true
+ },
+ "🎧 카테고리 3. 하이엔드 오디오 & 바이닐(LP) 청음 라운지": {
+  "exclude": true
+ },
+ "🍲 카테고리 4. 소수 정예 심야식당 & 심야 비스트로": {
+  "exclude": true
+ },
+ "🎨 카테고리 5. 갤러리 연계 바 & 아트 라운지": {
+  "exclude": true
+ },
+ "🏛️ [하이엔드 복합문화 & 건축 랜드마크]": {
+  "exclude": true
+ },
+ "🧖 [이색 니치 오마카세 & 뷰티 살롱]": {
+  "exclude": true
+ },
+ "4단계 큐레이션 테마 (Midnight Aesthetics & Secret Audiophile)": {
+  "exclude": true
+ },
+ "5대 나이트 서브장르별 20개 스팟 상세 DB": {
+  "exclude": true
+ },
+ "☔ Indoor Curation Philosophy": {
+  "exclude": true
+ },
+ "🐠 카테고리 2. 실내 생태 아쿠아리움 & 초대형 온실 식물원": {
+  "exclude": true
+ },
+ "🎬 카테고리 3. 하이엔드 프리미엄 시네마 & 다이닝 극장": {
+  "exclude": true
+ },
+ "🎯 카테고리 4. 올웨더 실내 어드벤처 & 하이엔드 엔터테인먼트": {
+  "exclude": true
+ },
+ "⛵ 카테고리 1. 프라이빗 한강 요트 & 선셋 워터 스포츠": {
+  "exclude": true
+ },
+ "🌲 카테고리 3. 도심 숲길 트레킹 & 파노라마 웰니스": {
+  "exclude": true
+ },
+ "⛳ 카테고리 4. 프라이빗 골프 스튜디오 & 라운지": {
+  "exclude": true
+ },
+ "🍵 [100% 예약제 프리미엄 다도 & 티 오마카세]": {
+  "exclude": true
+ },
+ "📚 [사색과 지적 대화의 독립 서점 & 라이브러리]": {
+  "exclude": true
+ },
+ "🚶‍♂️ Curation Theme (감성 골목길 4대 큐레이션 원칙)": {
+  "exclude": true
+ },
+ "☕ 권역 1. 용리단길 & 신용산 & 삼각지 감성 골목": {
+  "exclude": true
+ },
+ "🍃 권역 2. 서촌 & 통의동 & 부암동 산책길": {
+  "exclude": true
+ },
+ "🏭 권역 3. 성수 뒷골목 & 송정 제방길": {
+  "exclude": true
+ },
+ "🏰 권역 4. 수원 화성행궁 & 방화수류정 성곽 골목": {
+  "exclude": true
+ },
+ "🎨 권역 5. 연희동 & 망원동 & 서교동 감성 골목": {
+  "exclude": true
+ },
+ "프라이빗 다이닝 & 티 오마카세 (마인드풀니스 차멍)": {
+  "exclude": true
+ },
+ "프라이빗 하이엔드 원데이 클래스 (노터치/전담 케어)": {
+  "exclude": true
+ },
+ "그린마일커피 북촌점 (Green Mile Coffee)": {
+  "slot": "day"
+ },
+ "을지로 커피한약방 & 혜민당 (Coffee Hanyabang & Hyemindang)": {
+  "slot": "day"
+ },
+ "[청담 권역] 럭셔리 파인다이닝 & 감성 라운지 (7곳)": {
+  "exclude": true
+ },
+ "레인리포트 호우주의보 (Rain Report Seongsu)": {
+  "slot": "evening"
+ },
+ "[강남 / 압구정 권역] 유럽 감성 브런치 & 트렌디 다이닝 (6곳)": {
+  "exclude": true
+ },
+ "디핀 (deepin - 서울 신당동/용산)": {
+  "slot": "evening"
+ },
+ "JL 디저트바 (JL Dessert Bar - 서울 용산 한남동)": {
+  "slot": "evening"
+ },
+ "알디프 티 바 (ALDIF Tea Bar - 서울 마포 홍대/합정)": {
+  "slot": "evening"
+ },
+ "[경기 김포] 뱀부15-8 (Bamboo 15-8)": {
+  "slot": "day"
+ },
+ "콘래드 서울 37그릴앤바 (37 Grill & Bar)": {
+  "slot": "evening"
+ },
+ "골든블루마리나 한강 프라이빗 요트 선셋 스냅 (Golden Blue Marina)": {
+  "slot": "evening"
+ },
+ "[전남 신안] 신안 자은도 백길 사구 듄스 샌드보딩 캠프 (Jaeundo Baekgil Dune Camp)": {
+  "slot": "day"
+ },
+ "[경북 포항] 포항 칠포-월포 해안사구 익스트림 듄 캠프 (Pohang Chilpo Dune Extreme Camp)": {
+  "slot": "day"
+ },
+ "[전남 여수] 웅천 58ft 폰테인 파조 카타마란 가막만 선셋 다이닝 (Yeosu Ungcheon Fountaine Pajot 58ft Sunset Dining)": {
+  "slot": "evening"
+ },
+ "가평 클럽티파니 레이크 하우스 (Club Tiffany Lake House)": {
+  "slot": "evening"
+ },
+ "[전북 완주] 상관 편백숲 시크릿 바렐 빌라 (Sanggwan Cypress Secret Barrel Villa)": {
+  "slot": "evening"
+ },
+ "[경남 거제] 딴섬(솔섬) 백사장 카타마란 피크닉 (Geoje Ttanseom White Beach Catamaran Picnic)": {
+  "slot": "day"
+ },
+ "[강원 철원] 직탕 나이아가라 클리프 다이닝 (Jiktang Cliff Dining)": {
+  "slot": "evening"
  }
 }
