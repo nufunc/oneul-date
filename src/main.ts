@@ -224,9 +224,31 @@ function moodLabel(moodKey: string): string {
   return MOODS.find((m) => m.key === moodKey)?.label ?? moodKey;
 }
 
-/** 스폿의 네이버 지도 검색 URL (스폿명 + 위치로 검색) */
+/**
+ * 네이버 지도 검색어 정제.
+ * - 이름에서 `[전남 여수]` 같은 대괄호 접두어, `(Yeosu ...)`·`（...）` 괄호 병기를 제거하고 공백 정리
+ * - 정제 후 이름이 비면 원래 이름으로 폴백
+ * - 지역 부착: area(시·군·구) 우선, 없으면 region(단, '전국'이면 이름만)
+ * 네이버 지도 검색은 "상호명 + 동네" 수준의 짧은 질의에서 잘 동작하므로 도로명 주소는 쓰지 않는다.
+ */
+function mapQuery(spot: Spot): string {
+  let name = spot.name
+    .replace(/\[[^\]]*\]/g, '')
+    .replace(/\([^)]*\)/g, '')
+    .replace(/（[^）]*）/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (name.length === 0) name = spot.name.replace(/\s+/g, ' ').trim();
+
+  const area = spotArea(spot);
+  if (area !== null) return `${name} ${area}`;
+  if (spot.region && spot.region !== '전국') return `${name} ${spot.region}`;
+  return name;
+}
+
+/** 스폿의 네이버 지도 검색 URL — 정제된 "상호명 + 동네" 질의로 검색 */
 function naverMapUrl(spot: Spot): string {
-  return `https://map.naver.com/v5/search/${encodeURIComponent(`${spot.name} ${spot.location}`)}`;
+  return `https://map.naver.com/p/search/${encodeURIComponent(mapQuery(spot))}`;
 }
 
 /** 텍스트 복사 포맷 — 장소별 네이버 지도 링크 포함 */
