@@ -543,7 +543,7 @@ function buildTodayCourse(now: Date = new Date()): { dateLabel: string; steps: C
   const dd = String(now.getDate()).padStart(2, '0');
   const rng = mulberry32(hashString(`${yyyy}-${mm}-${dd}`));
   const steps = generateCourse(spots, ['day', 'evening', 'night'], [], 'ALL', { rng });
-  return { dateLabel: `${now.getMonth() + 1}/${now.getDate()}`, steps };
+  return { dateLabel: `${yyyy}.${mm}.${dd}`, steps };
 }
 
 // --- URL 링크 공유 (코스 = 스폿 ID 배열 → 해시 인코딩) -----------------------------
@@ -725,7 +725,7 @@ function renderTodayCourse(): void {
 
   area.innerHTML = `
     <button class="today-course" id="btn-today-course" aria-label="오늘의 추천 코스 불러오기">
-      <span class="today-course-label">✨ 오늘 ${today.dateLabel}의 추천 코스 바로보기</span>
+      <span class="today-course-label">✨ 오늘의 추천 코스! (${today.dateLabel})</span>
       <span class="today-course-arrow" aria-hidden="true">→</span>
     </button>
   `;
