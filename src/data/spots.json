@@ -42480,23 +42480,24 @@
   },
   {
     "id": 2125,
-    "name": "마니에고 레더 스튜디오",
+    "name": "마니에고 가죽공방",
     "slot": "day",
-    "region": "서울",
-    "area": "마포구",
+    "region": "경기",
+    "area": "수원시",
+    "address": "경기 수원시 팔달구 신풍로 48 2층",
     "mood": [
       "active",
-      "view"
+      "trendy"
     ],
-    "location": "서울 마포구 양화로6길 57-12 (합정/상수)",
-    "price": "최고급 이태리 가죽 소품 클래스 130,000원 ~ 280,000원",
-    "summary": "마니에고 레더 스튜디오",
+    "location": "경기 수원시 팔달구 (행궁동)",
+    "price": "최고급 이태리 베지터블 가죽 원데이 클래스 80,000원 ~ 200,000원",
+    "summary": "수원 행궁동에 위치한 최고급 이태리 가죽 소품 원데이 클래스 공방",
     "source": {
       "type": "web",
-      "url": null,
-      "note": "Premium_VIP_Craft_Class_20.md"
+      "url": "https://map.naver.com/p/search/마니에고%20가죽공방",
+      "note": "Verified_Live_2026-08-16"
     },
-    "verified": false
+    "verified": true
   },
   {
     "id": 2126,
