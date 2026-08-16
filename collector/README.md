@@ -1,6 +1,6 @@
 # 🐳 오늘 데이트 24/7 자율 스폿 수집기 & PocketBase DB
 
-별도 VM 서버에서 24시간 자율적으로 핫플/데이트 스폿을 탐색·검증하여 경량 DB에 적재하는 Docker 패키지입니다.
+별도 VM 서버에서 **외부 API 키나 유료 서비스 없이 100% 로컬 자율 규칙 엔진**으로 핫플/데이트 스폿을 탐색·정제하여 경량 DB에 적재하는 Docker 패키지입니다.
 
 ---
 
@@ -15,15 +15,13 @@ cd ~/oneul-collector
 ```
 
 ### 2) 환경 변수 설정 (`.env`)
+API 키 입력 없이 관리자 패스워드만 지정하면 바로 동작합니다:
 ```bash
 cat << 'EOF' > .env
 # PocketBase 관리자 계정 (최초 실행 시 자동 생성됨)
 PB_ADMIN_EMAIL=admin@oneul-date.local
 PB_ADMIN_PASSWORD=oneul_date_admin_pass_2026!
 PB_ENCRYPTION_KEY=oneul_date_secret_key_2026
-
-# Google Gemini API 키 (장소 메타데이터 지능형 추출용 - 무료/극저비용)
-GEMINI_API_KEY=your_gemini_api_key_here
 
 # 수집 주기 (시간 단위, 기본값: 2시간마다 1회)
 COLLECT_INTERVAL_HOURS=2
@@ -49,7 +47,7 @@ docker compose up -d --build
 
 ---
 
-## 🔄 3. 프론트엔드 프로젝트(`oneul-date`)와 동기화
+## 🔄 3. 프론트엔드 프로젝트(`oneul-date`)와의 동기화
 
 로컬 PC 또는 GitHub Actions에서 아래 명령 한 줄로 VM의 최신 스폿 데이터를 땡겨올 수 있습니다:
 

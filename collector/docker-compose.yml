@@ -29,7 +29,6 @@ services:
       - POCKETBASE_URL=http://pocketbase:8090
       - PB_ADMIN_EMAIL=${PB_ADMIN_EMAIL:-admin@oneul-date.local}
       - PB_ADMIN_PASSWORD=${PB_ADMIN_PASSWORD:-oneul_date_admin_pass_2026!}
-      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - COLLECT_INTERVAL_HOURS=${COLLECT_INTERVAL_HOURS:-2}
     depends_on:
       pocketbase:

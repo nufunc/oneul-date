@@ -10,7 +10,7 @@ from config import (
 )
 from pipeline.pb_client import PocketBaseManager
 from pipeline.crawler import discover_new_spot_candidates
-from pipeline.extractor import extract_spot_info_with_gemini
+from pipeline.extractor import extract_spot_info
 from pipeline.verifier import verify_spot_existence
 
 # 로깅 설정
@@ -37,8 +37,8 @@ def run_collection_cycle():
     
     added_count = 0
     for cand in candidates:
-        # 2. LLM 지능형 정제 및 추출
-        spot_info = extract_spot_info_with_gemini(cand["raw_text"], GEMINI_API_KEY)
+        # 2. 로컬 휴리스틱 / 지능형 정제 및 추출
+        spot_info = extract_spot_info(cand["raw_text"], GEMINI_API_KEY)
         if not spot_info or not spot_info.get("name"):
             continue
             

@@ -7,6 +7,7 @@ POCKETBASE_URL = os.getenv("POCKETBASE_URL", "http://localhost:8090")
 PB_ADMIN_EMAIL = os.getenv("PB_ADMIN_EMAIL", "admin@oneul-date.local")
 PB_ADMIN_PASSWORD = os.getenv("PB_ADMIN_PASSWORD", "oneul_date_admin_pass_2026!")
 
+# API 키 없이 100% 로컬 규칙 엔진으로 자율 동작 (원할 경우만 추가 가능)
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 COLLECT_INTERVAL_HOURS = int(os.getenv("COLLECT_INTERVAL_HOURS", "2"))
 
