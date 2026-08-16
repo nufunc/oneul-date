@@ -251,6 +251,39 @@ button {
   font-weight: 700;
 }
 
+/* 세부 인기 데이트존 서브 칩 */
+.filter-row-subzone {
+  animation: fadeInDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pill-subzone {
+  min-height: 38px;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-xs);
+  font-weight: 500;
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border-strong);
+}
+
+.pill-subzone.active {
+  background: var(--color-accent);
+  border: 1px solid var(--color-accent);
+  color: var(--color-on-accent);
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(195, 106, 77, 0.25);
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* 버튼 공통 */
 .btn-primary {
   background: var(--color-accent);

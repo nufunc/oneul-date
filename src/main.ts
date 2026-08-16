@@ -31,7 +31,7 @@ interface SavedCourse {
   id: string;
   createdAt: string; // ISO
   /** region: 현재 포맷은 배열(다중 선택), 과거 저장분은 문자열 — normalizeRegionCond로 복원 */
-  conditions: { region: string[] | string; mood: string; slots: SlotKey[] };
+  conditions: { region: string[] | string; subZones?: string[]; mood: string; slots: SlotKey[] };
   spotIds: number[];
 }
 
@@ -68,6 +68,46 @@ const MOODS: { key: string; emoji: string; label: string }[] = [
   { key: 'trendy', emoji: '🔥', label: '핫플' },
 ];
 
+interface PopularZone {
+  key: string;
+  regionKey: string;
+  label: string;
+  keywords: string[];
+}
+
+const POPULAR_ZONES: PopularZone[] = [
+  // 서울 (SEOUL)
+  { key: 'seongsu', regionKey: 'SEOUL', label: '성수·서울숲', keywords: ['성동구', '성수', '서울숲', '뚝섬'] },
+  { key: 'hannam', regionKey: 'SEOUL', label: '한남·이태원·용산', keywords: ['용산구', '한남', '이태원', '용리단', '해방촌', '경리단'] },
+  { key: 'yeonnam', regionKey: 'SEOUL', label: '연남·연희·홍대', keywords: ['마포구', '서대문구', '연남', '연희', '서교', '망원', '상수'] },
+  { key: 'apgujeong', regionKey: 'SEOUL', label: '압구정·신사·청담', keywords: ['강남구', '압구정', '신사', '청담', '도산', '가로수'] },
+  { key: 'jongno', regionKey: 'SEOUL', label: '서촌·북촌·을지로', keywords: ['종로구', '중구', '서촌', '북촌', '삼청', '익선', '을지로'] },
+  { key: 'jamsil', regionKey: 'SEOUL', label: '잠실·송리단길', keywords: ['송파구', '잠실', '송리단', '방이', '석촌'] },
+
+  // 경기·인천 (GYEONGGI)
+  { key: 'bundang', regionKey: 'GYEONGGI', label: '분당·판교', keywords: ['성남시', '분당', '판교', '백현', '정자'] },
+  { key: 'suwon', regionKey: 'GYEONGGI', label: '수원·행궁동', keywords: ['수원시', '행궁', '인계', '광교'] },
+  { key: 'gapyeong', regionKey: 'GYEONGGI', label: '가평·양평', keywords: ['가평군', '양평군', '청평', '두물머리'] },
+  { key: 'ilsan', regionKey: 'GYEONGGI', label: '일산·파주', keywords: ['고양시', '파주시', '헤이리', '출판도시'] },
+  { key: 'hanam', regionKey: 'GYEONGGI', label: '하남·남양주', keywords: ['하남시', '남양주시', '미사', '팔당', '별내'] },
+  { key: 'songdo', regionKey: 'GYEONGGI', label: '송도·영종도', keywords: ['연수구', '송도', '영종', '을왕리', '인천'] },
+
+  // 강원 (GANGWON)
+  { key: 'gangneung', regionKey: 'GANGWON', label: '강릉 안목·경포', keywords: ['강릉시', '안목', '경포', '초당'] },
+  { key: 'sokcho', regionKey: 'GANGWON', label: '속초·양양', keywords: ['속초시', '양양군', '인구', '하조대', '낙산'] },
+  { key: 'chuncheon', regionKey: 'GANGWON', label: '춘천·홍천', keywords: ['춘천시', '홍천군'] },
+
+  // 영남 (YEONGNAM)
+  { key: 'busan_haeundae', regionKey: 'YEONGNAM', label: '부산 해운대·기장', keywords: ['해운대', '기장', '송정'] },
+  { key: 'busan_gwangalli', regionKey: 'YEONGNAM', label: '부산 광안리·영도', keywords: ['수영구', '영도구', '광안리', '민락', '흰여울'] },
+  { key: 'gyeongju', regionKey: 'YEONGNAM', label: '경주 황리단길', keywords: ['경주시', '황리단', '보문', '월정교'] },
+
+  // 제주 (JEJU)
+  { key: 'jeju_aewol', regionKey: 'JEJU', label: '제주 애월·한림', keywords: ['애월', '한림', '협재', '판포'] },
+  { key: 'jeju_gujwa', regionKey: 'JEJU', label: '제주 구좌·성산', keywords: ['구좌', '성산', '세화', '종달'] },
+  { key: 'jeju_jungmun', regionKey: 'JEJU', label: '제주 중문·서귀포', keywords: ['서귀포', '중문', '안덕'] },
+];
+
 /** '⋯ 더보기'로 접어두는 분위기 4종 — 데이터는 8종 유지, UI만 접기 (PLAN.md 3절) */
 const EXTRA_MOOD_KEYS = ['luxury', 'active', 'view', 'retro'];
 
@@ -95,20 +135,30 @@ function matchesRegion(spot: Spot, regionKeys: string[]): boolean {
   });
 }
 
+function matchesZone(spot: Spot, zoneKeys: string[]): boolean {
+  if (zoneKeys.length === 0) return true;
+  const targetText = `${spot.name} ${spot.location} ${spot.area || ''}`;
+  return zoneKeys.some((zk) => {
+    const zone = POPULAR_ZONES.find((z) => z.key === zk);
+    return zone ? zone.keywords.some((kw) => targetText.includes(kw)) : false;
+  });
+}
+
 function matchesMood(spot: Spot, moodKey: string): boolean {
   if (moodKey === 'ALL') return true;
   return Array.isArray(spot.mood) && spot.mood.includes(moodKey);
 }
 
-/** 슬롯 + 지역 + 분위기 조건에 맞는 후보 목록 (excludeIds 제외) */
+/** 슬롯 + 지역 + 세부존 + 분위기 조건에 맞는 후보 목록 (excludeIds 제외) */
 function getCandidates(
   all: Spot[],
   slot: SlotKey,
   regionKeys: string[],
   moodKey: string,
   excludeIds: number[],
+  zoneKeys: string[] = [],
 ): Spot[] {
-  return all.filter(
+  const base = all.filter(
     (s) =>
       isValidSlot(s.slot) &&
       s.slot === slot &&
@@ -116,6 +166,9 @@ function getCandidates(
       matchesMood(s, moodKey) &&
       !excludeIds.includes(s.id),
   );
+  if (zoneKeys.length === 0) return base;
+  const zoneFiltered = base.filter((s) => matchesZone(s, zoneKeys));
+  return zoneFiltered.length > 0 ? zoneFiltered : base;
 }
 
 /**
@@ -200,6 +253,7 @@ function generateCourse(
   regionKeys: string[],
   moodKey: string,
   opts: GenerateOptions = {},
+  zoneKeys: string[] = [],
 ): CourseStep[] {
   const rng = opts.rng ?? Math.random;
   const avoid = opts.avoidIds ?? new Set<number>();
@@ -208,7 +262,7 @@ function generateCourse(
   let anchorSlot: SlotKey | null = null;
   let anchorPool: Spot[] = [];
   for (const slot of slotsOn) {
-    const candidates = excludeRecent(getCandidates(all, slot, regionKeys, moodKey, []), avoid);
+    const candidates = excludeRecent(getCandidates(all, slot, regionKeys, moodKey, [], zoneKeys), avoid);
     if (candidates.length > 0 && (anchorSlot === null || candidates.length < anchorPool.length)) {
       anchorSlot = slot;
       anchorPool = candidates;
@@ -230,7 +284,7 @@ function generateCourse(
   return slotsOn.map((slot) => {
     if (slot === anchorSlot) return { slot, spotId: anchorSpotId };
     const candidates = excludeRecent(
-      getCandidates(all, slot, regionKeys, moodKey, picked),
+      getCandidates(all, slot, regionKeys, moodKey, picked, zoneKeys),
       avoid,
     );
     const chosen = pickNearRandom(candidates, anchorArea, rng);
@@ -239,8 +293,14 @@ function generateCourse(
   });
 }
 
-/** 선택 지역 라벨을 '·'로 연결. 빈 배열(전체)이면 '전국' */
-function regionsLabel(regionKeys: string[]): string {
+/** 선택 지역 라벨을 '·'로 연결. 세부존이 있으면 세부존 라벨 표시 */
+function regionsLabel(regionKeys: string[], zoneKeys: string[] = []): string {
+  if (zoneKeys.length > 0) {
+    const zoneLabels = zoneKeys
+      .map((zk) => POPULAR_ZONES.find((z) => z.key === zk)?.label ?? zk)
+      .filter((lbl): lbl is string => Boolean(lbl));
+    if (zoneLabels.length > 0) return zoneLabels.join('·');
+  }
   if (regionKeys.length === 0) return '전국';
   return regionKeys
     .map((key) => REGIONS.find((r) => r.key === key)?.label ?? key)
@@ -433,9 +493,10 @@ function formatCourseText(
   byId: Map<number, Spot>,
   regionKeys: string[],
   moodKey: string,
+  zoneKeys: string[] = [],
 ): string {
   const blocks: string[] = [];
-  blocks.push(`✨ 데이트 코스\n📍 ${regionsLabel(regionKeys)} · ${moodLabel(moodKey)}`);
+  blocks.push(`✨ 데이트 코스\n📍 ${regionsLabel(regionKeys, zoneKeys)} · ${moodLabel(moodKey)}`);
   const filled = steps.filter((st): st is CourseStep & { spotId: number } => st.spotId !== null);
   for (const step of filled) {
     const spot = byId.get(step.spotId);
@@ -513,18 +574,21 @@ interface AppState {
   slots: Record<SlotKey, boolean>;
   /** 선택된 지역 키 다중 선택 — 빈 배열이면 '전체' */
   regions: string[];
+  /** 선택된 세부 인기 데이트존 키 다중 선택 — 빈 배열이면 '제한 없음' */
+  subZones: string[];
   mood: string;
   /** 분위기 pill '⋯ 더보기' 펼침 여부 (숨김 mood 선택 시엔 강제 펼침) */
   moodExpanded: boolean;
   course: CourseStep[] | null;
   /** 코스 생성 시점의 조건 스냅샷 — 교체 후보·저장·복사가 이 조건 기준으로 동작 */
-  courseConditions: { regions: string[]; mood: string } | null;
+  courseConditions: { regions: string[]; subZones: string[]; mood: string } | null;
   savedOpen: boolean;
 }
 
 const state: AppState = {
   slots: { day: true, evening: true, night: false, stay: false },
   regions: [],
+  subZones: [],
   mood: 'ALL',
   moodExpanded: false,
   course: null,
@@ -538,7 +602,7 @@ function activeSlots(): SlotKey[] {
   return SLOT_ORDER.filter((k) => state.slots[k]);
 }
 
-const APP_VERSION = 'v0.3.2';
+const APP_VERSION = 'v0.4.0';
 
 function courseSpotIds(): number[] {
   if (!state.course) return [];
@@ -675,9 +739,10 @@ function renderTodayCourse(): void {
     // 오늘의 코스를 결과 영역에 로드 — 이후 교체·복사·저장은 일반 코스와 동일하게 동작
     state.slots = { day: true, evening: true, night: true, stay: false };
     state.regions = [];
+    state.subZones = [];
     state.mood = 'ALL';
     state.course = today.steps.map((st) => ({ ...st }));
-    state.courseConditions = { regions: [], mood: 'ALL' };
+    state.courseConditions = { regions: [], subZones: [], mood: 'ALL' };
     renderConditions();
     renderResults();
   });
@@ -693,6 +758,12 @@ function renderConditions(): void {
   const forcedOpen = EXTRA_MOOD_KEYS.includes(state.mood);
   const expanded = state.moodExpanded || forcedOpen;
   const visibleMoods = expanded ? MOODS : MOODS.filter((m) => !EXTRA_MOOD_KEYS.includes(m.key));
+
+  // 활성화할 인기 데이트존 목록
+  const activeZones =
+    state.regions.length === 0
+      ? POPULAR_ZONES.slice(0, 8)
+      : POPULAR_ZONES.filter((z) => state.regions.includes(z.regionKey));
 
   area.innerHTML = `
     <div class="slot-toggles" role="group" aria-label="시간대 선택">
@@ -715,6 +786,23 @@ function renderConditions(): void {
         }).join('')}
       </div>
     </div>
+
+    ${
+      activeZones.length > 0
+        ? `
+    <div class="filter-row filter-row-subzone">
+      <span class="filter-label">인기 데이트존</span>
+      <div class="pill-scroll" id="zone-pills">
+        ${activeZones
+          .map((z) => {
+            const active = state.subZones.includes(z.key);
+            return `<button class="pill pill-subzone ${active ? 'active' : ''}" data-zone="${z.key}" aria-pressed="${active}">📍 ${escapeHtml(z.label)}</button>`;
+          })
+          .join('')}
+      </div>
+    </div>`
+        : ''
+    }
 
     <div class="filter-row">
       <span class="filter-label">분위기</span>
@@ -754,13 +842,32 @@ function bindConditionEvents(area: HTMLElement): void {
       if (key === 'ALL') {
         // 전체: 모든 개별 선택 해제
         state.regions = [];
+        state.subZones = [];
       } else {
         const next = new Set(state.regions);
         if (next.has(key)) next.delete(key);
         else next.add(key);
         // REGIONS 정의 순서 유지 — 모두 끄면 빈 배열이 되어 자동으로 '전체' 복귀
         state.regions = REGIONS.filter((r) => next.has(r.key)).map((r) => r.key);
+        // 비활성화된 권역의 subZone 정리
+        if (state.regions.length > 0) {
+          state.subZones = state.subZones.filter((zk) => {
+            const z = POPULAR_ZONES.find((item) => item.key === zk);
+            return z ? state.regions.includes(z.regionKey) : false;
+          });
+        }
       }
+      renderConditions();
+    });
+  });
+  area.querySelectorAll<HTMLButtonElement>('#zone-pills .pill-subzone').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const zk = btn.dataset.zone;
+      if (!zk) return;
+      const next = new Set(state.subZones);
+      if (next.has(zk)) next.delete(zk);
+      else next.add(zk);
+      state.subZones = Array.from(next);
       renderConditions();
     });
   });
@@ -782,10 +889,19 @@ function bindConditionEvents(area: HTMLElement): void {
       showToast('시간대를 하나 이상 선택해 주세요');
       return;
     }
-    state.course = generateCourse(spots, slotsOn, state.regions, state.mood, {
-      avoidIds: recentSpotIdSet(),
-    });
-    state.courseConditions = { regions: [...state.regions], mood: state.mood };
+    state.course = generateCourse(
+      spots,
+      slotsOn,
+      state.regions,
+      state.mood,
+      { avoidIds: recentSpotIdSet() },
+      state.subZones,
+    );
+    state.courseConditions = {
+      regions: [...state.regions],
+      subZones: [...state.subZones],
+      mood: state.mood,
+    };
     addRecentSpotIds(courseSpotIds());
     renderResults();
   });
@@ -811,7 +927,7 @@ function renderResults(): void {
   const cond = state.courseConditions;
   area.innerHTML = `
     <div class="course-head">
-      <span class="course-title">✨ ${escapeHtml(regionsLabel(cond.regions))} · ${escapeHtml(moodLabel(cond.mood))} 코스</span>
+      <span class="course-title">✨ ${escapeHtml(regionsLabel(cond.regions, cond.subZones))} · ${escapeHtml(moodLabel(cond.mood))} 코스</span>
       <button class="btn-regenerate" id="btn-regenerate" aria-label="전체 다시 추천받기">
         ${ICON_REFRESH_SVG}
         <span class="btn-regenerate-text">전체 다시 추천</span>
@@ -899,7 +1015,7 @@ function swapStep(index: number): void {
   if (!step) return;
   const cond = state.courseConditions;
   const candidates = excludeRecent(
-    getCandidates(spots, step.slot, cond.regions, cond.mood, courseSpotIds()),
+    getCandidates(spots, step.slot, cond.regions, cond.mood, courseSpotIds(), cond.subZones),
     recentSpotIdSet(),
   );
   const anchorArea = dominantArea(state.course, spotById, index);
@@ -941,9 +1057,14 @@ function regenerateCourse(): void {
   if (!state.course || !state.courseConditions) return;
   const cond = state.courseConditions;
   const slotsOn = state.course.map((st) => st.slot);
-  state.course = generateCourse(spots, slotsOn, cond.regions, cond.mood, {
-    avoidIds: recentSpotIdSet(),
-  });
+  state.course = generateCourse(
+    spots,
+    slotsOn,
+    cond.regions,
+    cond.mood,
+    { avoidIds: recentSpotIdSet() },
+    cond.subZones,
+  );
   addRecentSpotIds(courseSpotIds());
   renderResults();
 }
@@ -965,6 +1086,7 @@ function bindResultEvents(area: HTMLElement): void {
       spotById,
       state.courseConditions.regions,
       state.courseConditions.mood,
+      state.courseConditions.subZones,
     );
     navigator.clipboard
       .writeText(text)
@@ -995,6 +1117,7 @@ function bindResultEvents(area: HTMLElement): void {
       createdAt: new Date().toISOString(),
       conditions: {
         region: [...state.courseConditions.regions],
+        subZones: [...state.courseConditions.subZones],
         mood: state.courseConditions.mood,
         slots: state.course.map((st) => st.slot),
       },
@@ -1182,13 +1305,19 @@ function restoreCourse(item: SavedCourse): void {
 
   // 하위호환: 과거 저장분은 region이 문자열 — 배열로 정규화해 복원
   const regions = normalizeRegionCond(item.conditions.region);
+  const subZones = Array.isArray(item.conditions.subZones) ? item.conditions.subZones : [];
   state.regions = regions;
+  state.subZones = subZones;
   state.mood = item.conditions.mood;
   for (const k of SLOT_ORDER) {
     state.slots[k] = item.conditions.slots.includes(k);
   }
   state.course = steps;
-  state.courseConditions = { regions: [...regions], mood: item.conditions.mood };
+  state.courseConditions = {
+    regions: [...regions],
+    subZones: [...subZones],
+    mood: item.conditions.mood,
+  };
 
   renderConditions();
   renderResults();
