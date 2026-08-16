@@ -4,7 +4,8 @@ import json
 import glob
 
 SOURCE_DIR = r"D:\git\obsidianVault\sources"
-OUTPUT_PATH = r"D:\git\my-private-assistant\src\data\spots.json"
+# 스크립트 위치 기준 상대 경로 — 워크트리 체크아웃에서도 자기 체크아웃에 출력됨
+OUTPUT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src", "data", "spots.json"))
 
 os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
 

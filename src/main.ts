@@ -68,7 +68,12 @@ const MOODS: { key: string; emoji: string; label: string }[] = [
   { key: 'trendy', emoji: '🔥', label: '핫플' },
 ];
 
+/** '⋯ 더보기'로 접어두는 분위기 4종 — 데이터는 8종 유지, UI만 접기 (PLAN.md 3절) */
+const EXTRA_MOOD_KEYS = ['luxury', 'active', 'view', 'retro'];
+
 const STORAGE_KEY = 'oneul_saved_courses';
+const RECENT_KEY = 'oneul_recent_spots';
+const RECENT_MAX = 100;
 
 const spots: Spot[] = rawSpotsData as unknown as Spot[];
 
@@ -113,9 +118,20 @@ function getCandidates(
   );
 }
 
-function pickRandom<T>(arr: T[]): T | undefined {
+/**
+ * 체감 랜덤 보정 — 최근 노출 이력 스폿을 소프트 제외.
+ * 제외하면 후보가 0이 되는 경우 이력을 무시하고 원본 반환 (기능이 후보를 굶기면 안 됨).
+ */
+function excludeRecent(candidates: Spot[], recentIds: ReadonlySet<number>): Spot[] {
+  if (recentIds.size === 0) return candidates;
+  const filtered = candidates.filter((s) => !recentIds.has(s.id));
+  return filtered.length > 0 ? filtered : candidates;
+}
+
+/** rng 주입 가능 랜덤 픽 — 오늘의 코스(시드 PRNG)와 일반 생성(Math.random)이 공유 */
+function pickRandom<T>(arr: T[], rng: () => number = Math.random): T | undefined {
   if (arr.length === 0) return undefined;
-  return arr[Math.floor(Math.random() * arr.length)];
+  return arr[Math.floor(rng() * arr.length)];
 }
 
 /** 스폿의 area 안전 접근 — 필드 부재·null·빈 문자열은 모두 null 취급 */
@@ -129,12 +145,16 @@ function spotArea(spot: Spot | undefined): string | null {
  * ① anchorArea와 같은 area 후보에서 랜덤 (area가 null인 스폿 제외)
  * ② 없으면 전체 후보(=같은 권역 조건 통과분, area null 포함)에서 랜덤 폴백
  */
-function pickNearRandom(candidates: Spot[], anchorArea: string | null): Spot | undefined {
+function pickNearRandom(
+  candidates: Spot[],
+  anchorArea: string | null,
+  rng: () => number = Math.random,
+): Spot | undefined {
   if (anchorArea !== null) {
-    const near = pickRandom(candidates.filter((s) => spotArea(s) === anchorArea));
+    const near = pickRandom(candidates.filter((s) => spotArea(s) === anchorArea), rng);
     if (near) return near;
   }
-  return pickRandom(candidates);
+  return pickRandom(candidates, rng);
 }
 
 /** 스텝 목록에서 excludeIndex를 제외한 스폿들의 최빈 area (null 제외, 동률은 선착순) */
@@ -160,23 +180,35 @@ function dominantArea(
   return best;
 }
 
+interface GenerateOptions {
+  /** 시드 PRNG 주입 (오늘의 코스). 미지정 시 Math.random */
+  rng?: () => number;
+  /** 체감 랜덤 보정 — 소프트 제외할 최근 노출 스폿 ID (오늘의 코스는 미적용) */
+  avoidIds?: ReadonlySet<number>;
+}
+
 /**
  * 앵커 기반 근접 코스 생성.
  * 1) 켠 슬롯 중 후보 수가 가장 적은(단, 1개 이상) 슬롯을 앵커로 먼저 랜덤 선택
  * 2) 나머지 슬롯은 앵커의 area 기준 ① 같은 area → ② 권역 전체 폴백으로 랜덤 선택
  * 후보 0건 슬롯은 spotId: null. area 데이터가 전무하면 전부 ②폴백 = 기존 동작과 동일.
+ * avoidIds(최근 노출 이력)는 슬롯별 소프트 제외 — 제외 후 0건이면 이력 무시.
  */
 function generateCourse(
   all: Spot[],
   slotsOn: SlotKey[],
   regionKeys: string[],
   moodKey: string,
+  opts: GenerateOptions = {},
 ): CourseStep[] {
+  const rng = opts.rng ?? Math.random;
+  const avoid = opts.avoidIds ?? new Set<number>();
+
   // 앵커 슬롯: 후보가 1개 이상인 슬롯 중 후보 수 최소 (동률은 슬롯 순서 선착순)
   let anchorSlot: SlotKey | null = null;
   let anchorPool: Spot[] = [];
   for (const slot of slotsOn) {
-    const candidates = getCandidates(all, slot, regionKeys, moodKey, []);
+    const candidates = excludeRecent(getCandidates(all, slot, regionKeys, moodKey, []), avoid);
     if (candidates.length > 0 && (anchorSlot === null || candidates.length < anchorPool.length)) {
       anchorSlot = slot;
       anchorPool = candidates;
@@ -187,7 +219,7 @@ function generateCourse(
   let anchorArea: string | null = null;
   let anchorSpotId: number | null = null;
   if (anchorSlot !== null) {
-    const anchor = pickRandom(anchorPool);
+    const anchor = pickRandom(anchorPool, rng);
     if (anchor) {
       picked.push(anchor.id);
       anchorSpotId = anchor.id;
@@ -197,8 +229,11 @@ function generateCourse(
 
   return slotsOn.map((slot) => {
     if (slot === anchorSlot) return { slot, spotId: anchorSpotId };
-    const candidates = getCandidates(all, slot, regionKeys, moodKey, picked);
-    const chosen = pickNearRandom(candidates, anchorArea);
+    const candidates = excludeRecent(
+      getCandidates(all, slot, regionKeys, moodKey, picked),
+      avoid,
+    );
+    const chosen = pickNearRandom(candidates, anchorArea, rng);
     if (chosen) picked.push(chosen.id);
     return { slot, spotId: chosen ? chosen.id : null };
   });
@@ -222,6 +257,15 @@ function normalizeRegionCond(value: string[] | string | undefined): string[] {
 function moodLabel(moodKey: string): string {
   if (moodKey === 'ALL') return '전체';
   return MOODS.find((m) => m.key === moodKey)?.label ?? moodKey;
+}
+
+/** 스폿 mood 키 → 한글 라벨 1~2개 (스텝 카드 신뢰 장치용) */
+function moodTagLabels(spot: Spot): string[] {
+  if (!Array.isArray(spot.mood)) return [];
+  return spot.mood
+    .map((key) => MOODS.find((m) => m.key === key)?.label)
+    .filter((label): label is string => Boolean(label))
+    .slice(0, 2);
 }
 
 /**
@@ -251,24 +295,85 @@ function naverMapUrl(spot: Spot): string {
   return `https://map.naver.com/p/search/${encodeURIComponent(mapQuery(spot))}`;
 }
 
-/** 텍스트 복사 포맷 — 장소별 네이버 지도 링크 포함 */
+/**
+ * 텍스트 복사 포맷 v2 (PLAN.md 3절) — 카톡에 붙였을 때 그대로 예쁜 정형 포맷.
+ * 헤더(✨/📍) + 슬롯 블록(슬롯 이모지 · 스폿명 / 전각 들여쓰기 위치 — 이유 / 지도 링크)
+ */
 function formatCourseText(
   steps: CourseStep[],
-  spotById: Map<number, Spot>,
+  byId: Map<number, Spot>,
   regionKeys: string[],
   moodKey: string,
 ): string {
-  const lines: string[] = [];
-  lines.push(`[✨ 데이트 코스 — ${regionsLabel(regionKeys)} · ${moodLabel(moodKey)}]`);
+  const blocks: string[] = [];
+  blocks.push(`✨ 데이트 코스\n📍 ${regionsLabel(regionKeys)} · ${moodLabel(moodKey)}`);
   const filled = steps.filter((st): st is CourseStep & { spotId: number } => st.spotId !== null);
   for (const step of filled) {
-    const spot = spotById.get(step.spotId);
+    const spot = byId.get(step.spotId);
     if (!spot) continue;
     const meta = SLOT_META[step.slot];
-    lines.push(`${meta.emoji} ${meta.label}: ${spot.name} (${spot.location})`);
-    lines.push(naverMapUrl(spot));
+    const lines: string[] = [];
+    lines.push(`${meta.emoji} ${meta.label} · ${spot.name}`);
+    lines.push(`　${spot.location}${spot.summary ? ` — ${spot.summary}` : ''}`);
+    lines.push(`　🗺️ ${naverMapUrl(spot)}`);
+    blocks.push(lines.join('\n'));
   }
-  return lines.join('\n');
+  return blocks.join('\n\n');
+}
+
+// --- 날짜 시드 PRNG (오늘의 코스 전용) ------------------------------------------
+
+/** 문자열 → 32비트 해시 (시드 생성용) */
+function hashString(str: string): number {
+  let h = 1779033703 ^ str.length;
+  for (let i = 0; i < str.length; i++) {
+    h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+    h = (h << 13) | (h >>> 19);
+  }
+  return h >>> 0;
+}
+
+/** mulberry32 시드 PRNG — 같은 시드면 같은 수열 (같은 날 누가 열어도 같은 코스) */
+function mulberry32(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/**
+ * 오늘의 코스 — YYYY-MM-DD 시드 결정적 생성.
+ * 낮+저녁+밤 3슬롯 · 지역 전체 · 분위기 전체, 근접 자동 로직 재사용.
+ * 체감 랜덤 보정(최근 이력 제외)은 결정성 유지를 위해 미적용.
+ */
+function buildTodayCourse(now: Date = new Date()): { dateLabel: string; steps: CourseStep[] } {
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  const rng = mulberry32(hashString(`${yyyy}-${mm}-${dd}`));
+  const steps = generateCourse(spots, ['day', 'evening', 'night'], [], 'ALL', { rng });
+  return { dateLabel: `${now.getMonth() + 1}/${now.getDate()}`, steps };
+}
+
+// --- URL 링크 공유 (코스 = 스폿 ID 배열 → 해시 인코딩) -----------------------------
+
+/** 현재 코스의 공유 URL — 배포 base는 location 기반 동적 생성 (로컬에서도 동작) */
+function buildShareUrl(spotIds: number[]): string {
+  return `${location.origin}${location.pathname}${location.search}#c=${spotIds.join('.')}`;
+}
+
+/** hash에서 공유 코스 ID 배열 파싱. `#c=` 형태가 아니면 null */
+function parseCourseHash(hash: string): number[] | null {
+  const match = hash.match(/^#c=([0-9.]+)$/);
+  if (!match) return null;
+  return match[1]
+    .split('.')
+    .map((part) => Number(part))
+    .filter((n) => Number.isInteger(n) && n > 0);
 }
 
 // ---------------------------------------------------------------------------
@@ -280,6 +385,8 @@ interface AppState {
   /** 선택된 지역 키 다중 선택 — 빈 배열이면 '전체' */
   regions: string[];
   mood: string;
+  /** 분위기 pill '⋯ 더보기' 펼침 여부 (숨김 mood 선택 시엔 강제 펼침) */
+  moodExpanded: boolean;
   course: CourseStep[] | null;
   /** 코스 생성 시점의 조건 스냅샷 — 교체 후보·저장·복사가 이 조건 기준으로 동작 */
   courseConditions: { regions: string[]; mood: string } | null;
@@ -290,6 +397,7 @@ const state: AppState = {
   slots: { day: true, evening: true, night: false, stay: false },
   regions: [],
   mood: 'ALL',
+  moodExpanded: false,
   course: null,
   courseConditions: null,
   savedOpen: false,
@@ -307,7 +415,7 @@ function courseSpotIds(): number[] {
 }
 
 // ---------------------------------------------------------------------------
-// localStorage — 저장한 코스
+// localStorage — 저장한 코스 · 최근 노출 이력
 // ---------------------------------------------------------------------------
 
 function loadSavedCourses(): SavedCourse[] {
@@ -321,6 +429,31 @@ function loadSavedCourses(): SavedCourse[] {
 
 function persistSavedCourses(list: SavedCourse[]): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+}
+
+/** 최근 노출 스폿 ID 이력 (오래된 순 → 최신 순, 최대 RECENT_MAX개 FIFO) */
+function loadRecentSpotIds(): number[] {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+    return Array.isArray(parsed) ? parsed.filter((v): v is number => typeof v === 'number') : [];
+  } catch {
+    return [];
+  }
+}
+
+/** 노출된 스폿을 이력 맨 뒤에 추가 (중복은 최신 위치로 이동), RECENT_MAX 초과분은 앞에서 제거 */
+function addRecentSpotIds(ids: number[]): void {
+  if (ids.length === 0) return;
+  const merged = [...loadRecentSpotIds().filter((id) => !ids.includes(id)), ...ids];
+  try {
+    localStorage.setItem(RECENT_KEY, JSON.stringify(merged.slice(-RECENT_MAX)));
+  } catch {
+    // 저장 실패(용량 등)는 무시 — 보정 기능은 있으면 좋고 없어도 동작
+  }
+}
+
+function recentSpotIdSet(): ReadonlySet<number> {
+  return new Set(loadRecentSpotIds());
 }
 
 // ---------------------------------------------------------------------------
@@ -349,7 +482,7 @@ function showToast(msg: string): void {
 }
 
 // ---------------------------------------------------------------------------
-// 렌더 — 영역별 분할 (앱 셸은 1회, 조건/결과/시트/오버레이는 개별 재렌더)
+// 렌더 — 영역별 분할 (앱 셸은 1회, 오늘의코스/조건/결과/오버레이는 개별 재렌더)
 // ---------------------------------------------------------------------------
 
 const app = document.getElementById('app')!;
@@ -360,6 +493,7 @@ function renderShell(): void {
       <h1 class="app-title">오늘 데이트</h1>
       <button class="btn-saved" id="btn-open-saved">저장한 코스</button>
     </header>
+    <section class="today-course-area" id="today-area"></section>
     <section class="conditions" id="conditions-area"></section>
     <section class="results" id="results-area"></section>
     <div class="overlay-root" id="overlay-root"></div>
@@ -368,15 +502,60 @@ function renderShell(): void {
     state.savedOpen = true;
     renderOverlay();
   });
+  renderTodayCourse();
   renderConditions();
   renderResults();
   renderOverlay();
 }
 
+// --- 오늘의 코스 (S1) -----------------------------------------------------------
+
+function renderTodayCourse(): void {
+  const area = document.getElementById('today-area');
+  if (!area) return;
+  const today = buildTodayCourse();
+  const filled = today.steps.filter((st): st is CourseStep & { spotId: number } => st.spotId !== null);
+  const parts = filled
+    .map((st) => {
+      const spot = spotById.get(st.spotId);
+      return spot ? `${SLOT_META[st.slot].emoji} ${escapeHtml(spot.name)}` : null;
+    })
+    .filter((p): p is string => p !== null);
+
+  if (parts.length === 0) {
+    area.innerHTML = '';
+    return;
+  }
+
+  area.innerHTML = `
+    <button class="today-course" id="btn-today-course" aria-label="오늘의 코스를 결과 영역에 펼치기">
+      <span class="today-course-title">✨ 오늘 ${today.dateLabel}의 코스</span>
+      <span class="today-course-strip">${parts.join(' → ')}</span>
+    </button>
+  `;
+  document.getElementById('btn-today-course')!.addEventListener('click', () => {
+    // 오늘의 코스를 결과 영역에 로드 — 이후 교체·복사·저장은 일반 코스와 동일하게 동작
+    state.slots = { day: true, evening: true, night: true, stay: false };
+    state.regions = [];
+    state.mood = 'ALL';
+    state.course = today.steps.map((st) => ({ ...st }));
+    state.courseConditions = { regions: [], mood: 'ALL' };
+    renderConditions();
+    renderResults();
+  });
+}
+
 // --- 조건 영역 -------------------------------------------------------------
 
 function renderConditions(): void {
-  const area = document.getElementById('conditions-area')!;
+  const area = document.getElementById('conditions-area');
+  if (!area) return;
+
+  // 숨겨진 mood가 선택돼 있으면 강제 펼침 유지 (접기 버튼도 숨김)
+  const forcedOpen = EXTRA_MOOD_KEYS.includes(state.mood);
+  const expanded = state.moodExpanded || forcedOpen;
+  const visibleMoods = expanded ? MOODS : MOODS.filter((m) => !EXTRA_MOOD_KEYS.includes(m.key));
+
   area.innerHTML = `
     <div class="slot-toggles" role="group" aria-label="시간대 선택">
       ${SLOT_ORDER.map((k) => {
@@ -402,10 +581,19 @@ function renderConditions(): void {
     <div class="filter-row">
       <span class="filter-label">분위기</span>
       <div class="pill-scroll" id="mood-pills">
-        ${MOODS.map(
-          (m) =>
-            `<button class="pill ${state.mood === m.key ? 'active' : ''}" data-mood="${m.key}">${m.emoji ? `${m.emoji} ` : ''}${m.label}</button>`,
-        ).join('')}
+        ${visibleMoods
+          .map(
+            (m) =>
+              `<button class="pill ${state.mood === m.key ? 'active' : ''}" data-mood="${m.key}">${m.emoji ? `${m.emoji} ` : ''}${m.label}</button>`,
+          )
+          .join('')}
+        ${
+          expanded
+            ? forcedOpen
+              ? ''
+              : `<button class="pill pill-more" data-mood-expand="0" aria-expanded="true">접기</button>`
+            : `<button class="pill pill-more" data-mood-expand="1" aria-expanded="false">⋯ 더보기</button>`
+        }
       </div>
     </div>
 
@@ -438,9 +626,15 @@ function bindConditionEvents(area: HTMLElement): void {
       renderConditions();
     });
   });
-  area.querySelectorAll<HTMLButtonElement>('#mood-pills .pill').forEach((btn) => {
+  area.querySelectorAll<HTMLButtonElement>('#mood-pills .pill[data-mood]').forEach((btn) => {
     btn.addEventListener('click', () => {
       state.mood = btn.dataset.mood || 'ALL';
+      renderConditions();
+    });
+  });
+  area.querySelectorAll<HTMLButtonElement>('#mood-pills .pill[data-mood-expand]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.moodExpanded = btn.dataset.moodExpand === '1';
       renderConditions();
     });
   });
@@ -450,8 +644,11 @@ function bindConditionEvents(area: HTMLElement): void {
       showToast('시간대를 하나 이상 켜주세요');
       return;
     }
-    state.course = generateCourse(spots, slotsOn, state.regions, state.mood);
+    state.course = generateCourse(spots, slotsOn, state.regions, state.mood, {
+      avoidIds: recentSpotIdSet(),
+    });
     state.courseConditions = { regions: [...state.regions], mood: state.mood };
+    addRecentSpotIds(courseSpotIds());
     renderResults();
   });
 }
@@ -459,7 +656,8 @@ function bindConditionEvents(area: HTMLElement): void {
 // --- 결과 영역 -------------------------------------------------------------
 
 function renderResults(): void {
-  const area = document.getElementById('results-area')!;
+  const area = document.getElementById('results-area');
+  if (!area) return;
   if (!state.course || !state.courseConditions) {
     area.innerHTML = `
       <div class="results-empty">
@@ -478,15 +676,21 @@ function renderResults(): void {
     <div class="step-list">
       ${state.course.map((step, i) => renderStepCard(step, i)).join('')}
     </div>
-    <div class="result-actions">
-      <button class="btn-secondary" id="btn-copy">📋 텍스트 복사</button>
-      <button class="btn-primary" id="btn-save">💾 코스 저장</button>
+    <div class="result-actions result-actions-3">
+      <button class="btn-secondary" id="btn-copy">📋 복사</button>
+      <button class="btn-secondary" id="btn-share-link">🔗 링크</button>
+      <button class="btn-primary" id="btn-save">💾 저장</button>
     </div>
   `;
   bindResultEvents(area);
 }
 
-function renderStepCard(step: CourseStep, index: number): string {
+function renderStepCard(
+  step: CourseStep,
+  index: number,
+  opts: { swappable?: boolean } = {},
+): string {
+  const swappable = opts.swappable !== false;
   const meta = SLOT_META[step.slot];
   if (step.spotId === null) {
     return `
@@ -505,15 +709,25 @@ function renderStepCard(step: CourseStep, index: number): string {
       </article>
     `;
   }
+  const moodTags = moodTagLabels(spot);
+  const metaRow =
+    spot.verified || moodTags.length > 0
+      ? `
+      <div class="step-meta">
+        ${spot.verified ? `<span class="badge-verified">✓ 실존 검증</span>` : ''}
+        ${moodTags.length > 0 ? `<span class="step-mood-tags">${escapeHtml(moodTags.join(' · '))}</span>` : ''}
+      </div>`
+      : '';
   return `
     <article class="step-card">
       <div class="step-card-head">
         <div class="step-slot">${meta.emoji} ${meta.label}</div>
-        <button class="btn-swap" data-step-index="${index}" aria-label="${meta.label} 스텝 랜덤 교체">🔄</button>
+        ${swappable ? `<button class="btn-swap" data-step-index="${index}" aria-label="${meta.label} 스텝 랜덤 교체">🔄</button>` : ''}
       </div>
       <h3 class="step-name">${escapeHtml(spot.name)}</h3>
       <p class="step-location">📍 ${escapeHtml(spot.location)}</p>
-      ${spot.summary ? `<p class="step-summary">${escapeHtml(spot.summary)}</p>` : ''}
+      ${metaRow}
+      ${spot.summary ? `<blockquote class="step-quote">“${escapeHtml(spot.summary)}”</blockquote>` : ''}
       ${spot.price ? `<p class="step-price">${escapeHtml(spot.price)}</p>` : ''}
       <a class="step-map-link" href="${naverMapUrl(spot)}" target="_blank" rel="noopener noreferrer">지도 ↗</a>
     </article>
@@ -523,13 +737,17 @@ function renderStepCard(step: CourseStep, index: number): string {
 /**
  * 스텝 하나를 조건 스냅샷 내 후보에서 랜덤 교체 (현재 코스 스폿·자기 자신 제외).
  * 다른 스텝들의 최빈 area 기준 ① 같은 area → ② 권역 전체 폴백으로 근접 선택.
+ * 최근 노출 이력은 소프트 제외 (제외 후 0건이면 이력 무시).
  */
 function swapStep(index: number): void {
   if (!state.course || !state.courseConditions) return;
   const step = state.course[index];
   if (!step) return;
   const cond = state.courseConditions;
-  const candidates = getCandidates(spots, step.slot, cond.regions, cond.mood, courseSpotIds());
+  const candidates = excludeRecent(
+    getCandidates(spots, step.slot, cond.regions, cond.mood, courseSpotIds()),
+    recentSpotIdSet(),
+  );
   const anchorArea = dominantArea(state.course, spotById, index);
   const chosen = pickNearRandom(candidates, anchorArea);
   if (!chosen) {
@@ -537,15 +755,19 @@ function swapStep(index: number): void {
     return;
   }
   state.course[index] = { slot: step.slot, spotId: chosen.id };
+  addRecentSpotIds([chosen.id]);
   renderResults();
 }
 
-/** 동일 조건 스냅샷으로 모든 스텝 재생성 */
+/** 동일 조건 스냅샷으로 모든 스텝 재생성 (체감 랜덤 보정 적용) */
 function regenerateCourse(): void {
   if (!state.course || !state.courseConditions) return;
   const cond = state.courseConditions;
   const slotsOn = state.course.map((st) => st.slot);
-  state.course = generateCourse(spots, slotsOn, cond.regions, cond.mood);
+  state.course = generateCourse(spots, slotsOn, cond.regions, cond.mood, {
+    avoidIds: recentSpotIdSet(),
+  });
+  addRecentSpotIds(courseSpotIds());
   renderResults();
 }
 
@@ -569,6 +791,17 @@ function bindResultEvents(area: HTMLElement): void {
     navigator.clipboard
       .writeText(text)
       .then(() => showToast('📋 코스가 복사되었어요'))
+      .catch(() => showToast('복사에 실패했어요'));
+  });
+  area.querySelector('#btn-share-link')?.addEventListener('click', () => {
+    const ids = courseSpotIds();
+    if (ids.length === 0) {
+      showToast('공유할 스폿이 없어요');
+      return;
+    }
+    navigator.clipboard
+      .writeText(buildShareUrl(ids))
+      .then(() => showToast('🔗 공유 링크가 복사되었어요'))
       .catch(() => showToast('복사에 실패했어요'));
   });
   area.querySelector('#btn-save')?.addEventListener('click', () => {
@@ -595,6 +828,46 @@ function bindResultEvents(area: HTMLElement): void {
   });
 }
 
+// --- 수신자 뷰 (S5 — 링크로 열었을 때) ---------------------------------------------
+
+/** 공유 ID 배열 → 스텝 목록 (존재하지 않는 스폿·slot 없는 스폿은 건너뜀, 슬롯 순 정렬) */
+function buildSharedSteps(ids: number[]): CourseStep[] {
+  const steps: CourseStep[] = [];
+  for (const id of ids) {
+    const spot = spotById.get(id);
+    if (spot && isValidSlot(spot.slot)) {
+      steps.push({ slot: spot.slot, spotId: id });
+    }
+  }
+  steps.sort((a, b) => SLOT_ORDER.indexOf(a.slot) - SLOT_ORDER.indexOf(b.slot));
+  return steps;
+}
+
+/** URL에서 코스 hash 제거 (히스토리 오염 없이) */
+function clearCourseHash(): void {
+  history.replaceState(null, '', location.pathname + location.search);
+}
+
+/** 조건 영역·오늘의코스·교체 없이 코스 카드만 + [나도 코스 만들기] CTA 하나 */
+function renderReceiverView(steps: CourseStep[]): void {
+  app.innerHTML = `
+    <header class="topbar">
+      <h1 class="app-title">오늘 데이트</h1>
+    </header>
+    <section class="receiver-view">
+      <p class="receiver-title">✨ 친구가 보낸 데이트 코스</p>
+      <div class="step-list">
+        ${steps.map((step, i) => renderStepCard(step, i, { swappable: false })).join('')}
+      </div>
+      <button class="btn-primary btn-make-own" id="btn-make-own">나도 코스 만들기 →</button>
+    </section>
+  `;
+  document.getElementById('btn-make-own')!.addEventListener('click', () => {
+    clearCourseHash();
+    renderShell();
+  });
+}
+
 // --- 저장한 코스 오버레이 ------------------------------------------------------
 
 function savedCourseSummary(item: SavedCourse): string {
@@ -605,7 +878,8 @@ function savedCourseSummary(item: SavedCourse): string {
 }
 
 function renderOverlay(): void {
-  const root = document.getElementById('overlay-root')!;
+  const root = document.getElementById('overlay-root');
+  if (!root) return;
   if (!state.savedOpen) {
     root.innerHTML = '';
     return;
@@ -695,7 +969,22 @@ function restoreCourse(item: SavedCourse): void {
 }
 
 // ---------------------------------------------------------------------------
-// 시작
+// 시작 — hash에 공유 코스(#c=)가 있으면 수신자 뷰, 아니면 홈
 // ---------------------------------------------------------------------------
 
-renderShell();
+function init(): void {
+  const sharedIds = parseCourseHash(location.hash);
+  if (sharedIds !== null) {
+    const steps = buildSharedSteps(sharedIds);
+    if (steps.length > 0) {
+      renderReceiverView(steps);
+      return;
+    }
+    // 전부 무효 ID → 안내 후 홈으로
+    clearCourseHash();
+    showToast('링크의 코스를 찾을 수 없어요');
+  }
+  renderShell();
+}
+
+init();

@@ -1095,5 +1095,118 @@
  },
  "[강원 철원] 직탕 나이아가라 클리프 다이닝 (Jiktang Cliff Dining)": {
   "slot": "evening"
+ },
+ "뉴서울 CC 멤버십 다이닝 & VIP 룸": {
+  "verified": true,
+  "sourceUrl": "https://www.newseoulgolf.co.kr/",
+  "summary": "36홀 회원제 골프장, 공식 홈페이지 2024년까지 활동 중",
+  "location": "경기 광주시 삼지곡길 95",
+  "region": "경기"
+ },
+ "시크릿 바 (Secret Bar) - 안양 평촌": {
+  "verified": true,
+  "sourceUrl": "https://www.instagram.com/p/DX-pTkbD-_4/"
+ },
+ "콜트레인 (Coltrane) - 서울 중구 충무로": {
+  "verified": true,
+  "sourceUrl": "https://polle.com/place/5bMJox/%EC%BD%9C%ED%8A%B8%EB%A0%88%EC%9D%B8"
+ },
+ "씨네안영채 X 모노플렉스 (동탄 라크몽)": {
+  "exclude": true
+ },
+ "경기 광주 파머스대디 (Farmer's Daddy)": {
+  "verified": true,
+  "sourceUrl": "https://www.siksinhot.com/P/480028"
+ },
+ "센트유니크 정자 본점 (Scent Unique Bundang Jeongja)": {
+  "verified": true,
+  "sourceUrl": "https://www.scentunique.com/"
+ },
+ "스캐터라운지 강남본점 (Scatter Lounge)": {
+  "verified": true,
+  "sourceUrl": "https://www.corner.inc/place/1303940"
+ },
+ "포천 파인벨리 럭셔리 VIP 카바나 (Pine Valley VIP Cabana)": {
+  "verified": true,
+  "sourceUrl": "https://www.agoda.com/en-ca/pocheon-pine-valley-1st-branch/hotel/pocheon-kr.html"
+ },
+ "[용인/처인] 묵리459 묵상 프라이빗 티 살롱 (Mukri 459 Private Tea Salon)": {
+  "verified": true,
+  "sourceUrl": "https://mukri459.com/",
+  "price": "1인 티 오마카세 코스 50,000원",
+  "region": "경기",
+  "location": "경기도 용인시 처인구 이동읍 이원로 459",
+  "summary": "공식 웹사이트 운영 중, 2026년 최근 기록 확인"
+ },
+ "[고양/덕양] 플랜테이션 가든 글래스 파빌리온 티살롱 (Plantation Garden Glass Pavilion)": {
+  "price": "파빌리온 2시간 대관 150,000원",
+  "region": "경기",
+  "location": "경기도 고양시 덕양구 통일로 493번길 32",
+  "summary": "고양 플랜테이션은 현재 운영 중, 글래스 파빌리온 티살롱 구체 확인 부족"
+ },
+ "라페트 청담 (Lafete Cheongdam)": {
+  "verified": true,
+  "sourceUrl": "http://plus.hankyung.com/apps/newsinside.view?aid=2017122719751",
+  "summary": "플로리스트 겸 카페 (황수현 황시연 자매 운영, 청담동 주택가 위치)",
+  "location": "서울 강남구 청담동 주택가",
+  "region": "서울"
+ },
+ "플레르다솔 성수 본점 (Fleur Dasol Seongsu)": {
+  "verified": true,
+  "sourceUrl": "https://www.instagram.com/fleur_dasol/",
+  "summary": "플로리스트 장다솔 운영, Instagram @fleur_dasol에서 활동 중 (58,000+ 팔로워)",
+  "location": "서울 성동구 성수동",
+  "region": "서울"
+ },
+ "부산 해운대 메르씨엘 (Merciel)": {
+  "verified": true,
+  "sourceUrl": "https://www.siksinhot.com/P/281057",
+  "summary": "프렌치 레스토랑 (2층 코스 요리, 3층 브라스리), 시식신 등재",
+  "location": "부산광역시 해운대구 달맞이길65번길 154 중동",
+  "price": "상세 가격 미확인",
+  "region": "영남"
+ },
+ "하우스 오브 탄노이 / 하우스오브바이닐 - 서울 성동구 성수동 / 연남동": {
+  "verified": true,
+  "sourceUrl": "https://www.diningcode.com/profile.php?rid=TLXYRLuQw5qS",
+  "summary": "성수점 카페 영업 중",
+  "location": "서울 성동구 아차산로7길 29 2층",
+  "region": "서울",
+  "price": "6000원"
+ },
+ "이문원 두피헤어랩 (Lee Moon Won Scalp Hair Lab)": {
+  "verified": true,
+  "sourceUrl": "https://lmwhairlab.modoo.at/",
+  "price": "70,000~295,000원",
+  "location": "서울특별시 강남구 선릉로132길 (청담동)",
+  "summary": "메디컬 두피헤어랩, 프리미엄 헤드스파 시술 제공"
+ },
+ "부산 기장 아난티 앳 부산 라메르 (Ananti at Busan La Mer)": {
+  "verified": true,
+  "sourceUrl": "https://ananti.kr/ko/busan/BS0301",
+  "region": "영남",
+  "location": "부산광역시 기장군 기장읍 기장해안로 268-31",
+  "summary": "아난티 앳 부산 코브 라메르 레스토랑 정상 영업 중"
+ },
+ "부산 수영만 요트탈래 프라이빗 셰프 라이더 요트 (Yacht Tale Private Yacht Catering)": {
+  "verified": true,
+  "sourceUrl": "https://www.yachttale.com/",
+  "region": "영남",
+  "location": "부산광역시 해운대구 수영만",
+  "summary": "요트탈래 정상 운영 중"
+ },
+ "경남 남해 아난티 남해 아쁘앙 (Ananti Namhae A Point)": {
+  "verified": true,
+  "sourceUrl": "https://ananti.kr/ko/namhae/specialOffer/list",
+  "region": "영남",
+  "location": "경상남도 남해군 남면 남서대로1179번길 40-108",
+  "summary": "아난티 남해 콘도 골프 리조트 정상 영업 중"
+ },
+ "경남 거제 소노캄 마리나베이 요트 차터 & 몬테로쏘 (Sonokam Geoje Marina Bay & Lounge)": {
+  "verified": true,
+  "sourceUrl": "https://mice.sonohotelsresorts.com/daemyung.front.saupjang.geoje.marina_use.ds/dmparse.dm?menuNo=01",
+  "region": "영남",
+  "location": "경상남도 거제시 일운면 거제대로 2660",
+  "summary": "소노츤 거제 마리나베이 정상 운영 중"
  }
 }
