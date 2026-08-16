@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # 1. 초경량 임베디드 DB + 어드민 웹 콘솔 (포트 8090)
+  pocketbase:
+    image: ghcr.io/muchobien/pocketbase:latest
+    container_name: oneul-pocketbase
+    restart: unless-stopped
+    command:
+      - --encryptionEnv=PB_ENCRYPTION_KEY
+    environment:
+      - PB_ENCRYPTION_KEY=${PB_ENCRYPTION_KEY:-oneul_date_secret_key_2026}
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./pb_data:/pb_data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8090/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # 2. 24시간 데이트 스폿 자율 수집기 워커
+  spot-collector:
+    build: .
+    container_name: oneul-collector
+    restart: unless-stopped
+    environment:
+      - POCKETBASE_URL=http://pocketbase:8090
+      - PB_ADMIN_EMAIL=${PB_ADMIN_EMAIL:-admin@oneul-date.local}
+      - PB_ADMIN_PASSWORD=${PB_ADMIN_PASSWORD:-oneul_date_admin_pass_2026!}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - COLLECT_INTERVAL_HOURS=${COLLECT_INTERVAL_HOURS:-2}
+    depends_on:
+      pocketbase:
+        condition: service_healthy
+    volumes:
+      - ./logs:/app/logs

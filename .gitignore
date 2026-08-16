@@ -19,6 +19,9 @@ coverage/
 .env
 .env.*
 !.env.example
+pb_data/
+collector/pb_data/
+collector/logs/
 
 # Documentation & Internal Notes
 docs/
