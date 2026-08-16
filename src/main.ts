@@ -15,6 +15,8 @@ interface Spot {
   mood: string[]; // 'romantic' | 'healing' | 'luxury' | 'gourmet' | 'active' | 'view' | 'retro' | 'trendy'
   /** 시·군·구 단위 근접 지역 (파서가 병렬 추가 중 — 필드 부재/null 허용, spotArea()로만 접근) */
   area?: string | null;
+  /** 도로명 또는 지번 정밀 주소 (검색 및 지역 분류 무결성용) */
+  address?: string | null;
   location: string;
   price: string | null;
   summary: string;
@@ -424,13 +426,36 @@ function mapQuery(spot: Spot): string {
   // 8. 스마트 지역 결합 로직
   let candidateArea: string | null = null;
 
-  // 8-1. spot.area 우선 (시·군·구 단위)
-  const spArea = spotArea(spot);
-  if (spArea && spArea !== '전국' && spArea !== '수도권') {
-    candidateArea = spArea.trim();
+  // 8-0. spot.address 우선 활용 (도로명/지번 주소에서 동/로/길 또는 상세구역 추출)
+  if (spot.address && spot.address.trim().length > 0) {
+    const addr = spot.address.trim();
+    // '은하수로', '성수이로', '신사동', '한남동' 등 유효 도로명/법정동 추출
+    const roadMatch = addr.match(/([가-힣0-9]+(?:로|길|동|읍|면)(?:\s+[0-9]+(?:-[0-9]+)?)?)/);
+    const guMatch = addr.match(/([가-힣]+(?:시|군|구))/g);
+    if (roadMatch) {
+      candidateArea = roadMatch[1];
+    } else if (guMatch && guMatch.length > 0) {
+      candidateArea = guMatch[guMatch.length - 1];
+    }
   }
 
-  // 8-2. spot.location에서 유효 행정구역 추출 (시/군/구/동/읍/면)
+  // 8-1. spot.location 내 괄호나 세부 명소/지명 추출 (예: '영종도', '행궁동', '구읍뱃터')
+  if (!candidateArea && spot.location) {
+    const subLocMatch = spot.location.match(/(영종도|을왕리|월미도|송도|청라|행궁동|성수|한남|연남|서촌|북촌|익선|송리단|문래|대부도|제부도|안목|경포|초당|해운대|광안리|전포)/);
+    if (subLocMatch) {
+      candidateArea = subLocMatch[1];
+    }
+  }
+
+  // 8-2. spot.area (시·군·구 단위)
+  if (!candidateArea) {
+    const spArea = spotArea(spot);
+    if (spArea && spArea !== '전국' && spArea !== '수도권') {
+      candidateArea = spArea.trim();
+    }
+  }
+
+  // 8-3. spot.location에서 유효 행정구역 추출 (시/군/구/동/읍/면)
   if (!candidateArea && spot.location && spot.location !== '전국' && spot.location !== '수도권') {
     const locMatch = spot.location.match(/([가-힣0-9]+(?:시|군|구|동|읍|면))/);
     if (locMatch && !['전국', '수도권', '서울시', '경기도', '인천시', '강원도', '충청도', '전라도', '경상도', '제주도'].includes(locMatch[1])) {
@@ -438,7 +463,7 @@ function mapQuery(spot: Spot): string {
     }
   }
 
-  // 8-3. 괄호 힌트에서 영문 지명 매핑 (Hanam -> 하남, Icheon -> 이천 등)
+  // 8-4. 괄호 힌트에서 영문 지명 매핑 (Hanam -> 하남, Icheon -> 이천 등)
   if (!candidateArea && bracketHints.length > 0) {
     const hintText = bracketHints.join(' ');
     if (/hanam/i.test(hintText)) candidateArea = '하남';
@@ -451,12 +476,23 @@ function mapQuery(spot: Spot): string {
     else if (/jeju/i.test(hintText)) candidateArea = '제주';
   }
 
-  // 8-4. spot.region 폴백 (광역명 제외)
+  // 8-5. spot.region 폴백 (광역명 제외)
   if (!candidateArea && spot.region && !['전국', '수도권', '서울', '경기', '인천', '강원', '충청', '영남', '호남', '제주'].includes(spot.region)) {
     candidateArea = spot.region.trim();
   }
 
-  // 8-5. 중복 결합 방지 검사 및 결합
+  // 8-6. 모호한 전국 공통 구 이름('중구', '서구', '동구', '남구', '북구', '강서구') 방어 처리
+  const AMBIGUOUS_GU = ['중구', '서구', '동구', '남구', '북구', '강서구'];
+  if (candidateArea && AMBIGUOUS_GU.includes(candidateArea)) {
+    // 상호명이 2단어 이상이거나 유니크한 경우 모호한 구 이름 단독 결합은 검색을 망치므로 생략하거나 시·도 접두사를 결합
+    if (spot.region && ['서울', '인천', '부산', '대구', '대전', '광주', '울산'].includes(spot.region)) {
+      candidateArea = `${spot.region} ${candidateArea}`;
+    } else {
+      candidateArea = null;
+    }
+  }
+
+  // 8-7. 중복 결합 방지 검사 및 결합
   if (candidateArea) {
     const simpleArea = candidateArea.replace(/(시|군|구|동|읍|면)$/, '');
     const alreadyHasArea =

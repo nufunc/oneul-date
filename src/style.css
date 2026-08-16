@@ -1,25 +1,33 @@
 /* ==========================================================================
-   오늘 데이트 — 디자인 토큰 ("Sensory Magazine" — DESIGN_SYSTEM_stitch.md)
-   종이(크림) 배경 + 잉크 텍스트 + 테라코타 포인트. 라이트 전용.
+   오늘 데이트 — 디자인 토큰 ("Romantic & Warm Pastel")
+   따뜻하고 포근한 웜 크림 베이지 + 소프트 로즈/코랄 포인트 + 모던 산세리프
    ========================================================================== */
 
 :root {
-  /* 색 — Sensory Magazine: paper #FDFCF8 / ink #2D2D2D / terracotta #C36A4D */
-  --color-bg: #fdfcf8; /* paper-background */
-  --color-surface: #ffffff; /* surface-card */
-  --color-surface-sub: #f4f3ee; /* cream — 비활성 pill·빈 카드 */
-  --color-border: rgba(45, 45, 45, 0.1); /* border-faint */
-  --color-border-strong: rgba(45, 45, 45, 0.3); /* 세컨더리 버튼 잉크 보더 */
-  --color-text: #2d2d2d; /* ink-text (paper 위 대비 ≈ 12.6:1) */
-  --color-text-sub: #5c5c5c; /* 보조 본문 (≈ 6:1) */
-  --color-text-faint: #79746c; /* 라벨·장식 전용 (≈ 4.5:1) */
-  --color-accent: #c36a4d; /* terracotta — fill 전용 (위에는 --color-on-accent만) */
-  --color-accent-text: #a24e32; /* 밝은 배경 위 작은 텍스트 전용 (≈ 5.4:1) */
-  --color-accent-soft: rgba(195, 106, 77, 0.08);
+  /* 메인 컬러 팔레트 */
+  --color-bg: #faf6f2; /* 포근하고 따뜻한 로맨틱 웜 크림 베이지 */
+  --color-surface: #ffffff; /* 순백의 카드 서피스 */
+  --color-surface-sub: #f6f0eb; /* 소프트 웜 파스텔 보조 영역 */
+  --color-surface-tint: #fff6f7; /* 은은한 로즈 틴트 */
+  
+  --color-border: rgba(90, 60, 55, 0.08); /* 부드러운 웜 보더 */
+  --color-border-strong: rgba(90, 60, 55, 0.18); /* 세컨더리 및 포커스 보더 */
+  
+  --color-text: #2d2422; /* 딥 에스프레소 차콜 본문 */
+  --color-text-sub: #685b57; /* 따뜻한 보조 본문 */
+  --color-text-faint: #988a85; /* 부드러운 라벨 및 장식 */
+  
+  --color-accent: #e05a6d; /* 로맨틱 로즈 / 피치 코랄 액센트 */
+  --color-accent-hover: #cc4d60;
+  --color-accent-text: #c83e53; /* 가독성 높은 진한 로즈 텍스트 */
+  --color-accent-soft: rgba(224, 90, 109, 0.09); /* 소프트 핑크 배경 틴트 */
+  --color-accent-medium: rgba(224, 90, 109, 0.16);
+  --color-accent-gradient: linear-gradient(135deg, #e05a6d 0%, #f47f87 100%);
+  --color-accent-gradient-hover: linear-gradient(135deg, #d34e61 0%, #e66f78 100%);
   --color-on-accent: #ffffff;
-  --color-backdrop: rgba(45, 45, 45, 0.35);
+  --color-backdrop: rgba(45, 35, 33, 0.4);
 
-  /* 간격 — 매거진 여백: 섹션 간 넉넉하게(stack-lg), 카드 내부는 조밀하게 */
+  /* 여백 간격 */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -27,31 +35,32 @@
   --space-5: 20px;
   --space-6: 32px;
 
-  /* 라운드 — 지면(紙面)의 각: 카드 0.5rem, 고액션 버튼 0.75rem(rounded-xl) */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  /* 라운드 — 둥글고 부드러운 모던 라운딩 */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
   --radius-full: 999px;
 
   /* 폰트 크기 */
-  --font-xs: 0.75rem;
-  --font-sm: 0.85rem;
-  --font-md: 0.95rem;
-  --font-lg: 1.2rem;
+  --font-xs: 0.76rem;
+  --font-sm: 0.86rem;
+  --font-md: 0.96rem;
+  --font-lg: 1.22rem;
   --font-xl: 1.55rem;
 
-  --font-sans: 'Plus Jakarta Sans', 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-  --font-display: 'Libre Caslon Text', 'Noto Serif KR', serif;
+  --font-sans: 'Pretendard', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  --font-display: 'Pretendard', 'Plus Jakarta Sans', sans-serif;
 
-  /* 라벨 자간 — 목업 "VERIFIED/LOCATION" 스타일, 한글이므로 자간만 */
-  --label-tracking: 0.08em;
+  /* 라벨 자간 */
+  --label-tracking: 0.04em;
 
-  /* 그림자 금지 — hover/active만 은은한 lift (ambient glow 2~4%) */
-  --shadow-card: none;
-  --shadow-lift: 0 2px 12px rgba(45, 45, 45, 0.05);
-  --shadow-float: 0 -8px 32px rgba(45, 45, 45, 0.1);
+  /* 그림자 — 소프트 앰비언트 글로우 & 레이어 */
+  --shadow-card: 0 3px 16px rgba(140, 90, 80, 0.05), 0 1px 3px rgba(0, 0, 0, 0.02);
+  --shadow-lift: 0 8px 24px rgba(224, 90, 109, 0.14), 0 2px 8px rgba(0, 0, 0, 0.03);
+  --shadow-float: 0 -10px 36px rgba(90, 60, 55, 0.12);
 
-  /* 레이아웃 — 세로 매거진 컬럼 */
+  /* 레이아웃 */
   --layout-max: 640px;
 }
 
@@ -71,6 +80,10 @@ html {
 
 body {
   background: var(--color-bg);
+  background-image: 
+    radial-gradient(circle at 10% 15%, rgba(244, 127, 135, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 90% 85%, rgba(224, 90, 109, 0.04) 0%, transparent 45%);
+  background-attachment: fixed;
   color: var(--color-text);
   font-family: var(--font-sans);
   line-height: 1.6;
@@ -87,14 +100,12 @@ button {
   background: none;
 }
 
-/* 모바일 퍼스트(~430px 기준), 데스크톱은 중앙 정렬 매거진 컬럼 */
+/* 모바일 퍼스트 레이아웃 */
 #app {
   max-width: var(--layout-max);
   margin: 0 auto;
-  padding: var(--space-4) var(--space-5) 72px;
+  padding: var(--space-4) var(--space-5) 80px;
 }
-
-/* 라벨 공통 스타일 믹스인 대용 — filter-label·step-slot·badge 등에서 반복 */
 
 /* ==========================================================================
    상단 바
@@ -111,42 +122,63 @@ button {
   font-family: var(--font-display);
   font-size: var(--font-xl);
   font-weight: 800;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   line-height: 1.2;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.app-title::after {
+  content: '✨';
+  font-size: 1.05rem;
+  animation: pulse-sparkle 2.5s infinite ease-in-out;
+}
+
+@keyframes pulse-sparkle {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.9; }
+  50% { transform: scale(1.15) rotate(12deg); opacity: 1; }
 }
 
 .btn-saved {
-  min-height: 44px;
+  min-height: 42px;
   font-size: var(--font-sm);
   font-weight: 600;
-  color: var(--color-text-sub);
-  background: transparent;
+  color: var(--color-accent-text);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-full);
   padding: var(--space-2) var(--space-4);
-  transition: background 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: var(--shadow-card);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .btn-saved:active {
   background: var(--color-surface-sub);
+  transform: scale(0.97);
 }
 
 /* ==========================================================================
-   조건 영역 — 흰 카드 + 1px faint 보더, 그림자 없음
+   조건 영역
    ========================================================================== */
 
 .conditions {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   padding: var(--space-5);
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
   box-shadow: var(--shadow-card);
+  backdrop-filter: blur(10px);
 }
 
-/* 슬롯 토글 4개 — 목업의 카드형 (아이콘+라벨, 활성 시 테라코타 보더/틴트) */
+/* 슬롯 토글 4개 */
 .slot-toggles {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -159,80 +191,85 @@ button {
   align-items: center;
   justify-content: center;
   gap: var(--space-1);
-  min-height: 64px;
+  min-height: 68px;
   padding: var(--space-3) var(--space-1);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  background: var(--color-surface);
+  background: var(--color-surface-sub);
   color: var(--color-text-faint);
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease,
-    box-shadow 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
 }
 
 .slot-toggle .slot-emoji {
-  font-size: var(--font-lg);
+  font-size: 1.3rem;
   line-height: 1.2;
-  filter: grayscale(1);
-  opacity: 0.5;
-  transition: filter 0.15s ease, opacity 0.15s ease;
+  filter: grayscale(0.85);
+  opacity: 0.6;
+  transition: all 0.2s ease;
 }
 
 .slot-toggle .slot-label {
   font-size: var(--font-xs);
   font-weight: 600;
-  letter-spacing: var(--label-tracking);
+  letter-spacing: -0.01em;
 }
 
 .slot-toggle.on {
-  background: var(--color-accent-soft);
-  border-color: var(--color-accent);
+  background: var(--color-surface-tint);
+  border-color: rgba(224, 90, 109, 0.35);
   color: var(--color-accent-text);
+  box-shadow: 0 2px 10px rgba(224, 90, 109, 0.1);
 }
 
 .slot-toggle.on .slot-emoji {
   filter: none;
   opacity: 1;
+  transform: scale(1.08);
 }
 
-/* 지역·분위기 — 가로 스크롤 필터 */
+/* 필터 행 */
 .filter-row {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  min-width: 0; /* pill이 많아져도 행이 컨테이너를 밀어내지 않고 가로 스크롤 */
+  min-width: 0;
 }
 
-/* "LOCATION / MOOD" 스타일 라벨 — 자간으로 정제된 기술적 대비 */
 .filter-label {
   font-size: var(--font-xs);
-  font-weight: 600;
+  font-weight: 700;
   color: var(--color-text-faint);
-  text-transform: uppercase;
   letter-spacing: var(--label-tracking);
   line-height: 1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .pill-scroll {
   display: flex;
   gap: var(--space-2);
-  max-width: calc(100% + 2 * var(--space-5)); /* 음수 마진 폭 이상으로 커지지 않게 고정 */
+  max-width: calc(100% + 2 * var(--space-5));
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   margin: 0 calc(-1 * var(--space-5));
-  padding: 0 var(--space-5);
+  padding: 2px var(--space-5) 6px;
 }
 
 .pill-scroll::-webkit-scrollbar {
   display: none;
 }
 
-/* Mood pill — 비활성: 크림 배경+얇은 보더 / 활성: 잉크 배경+흰 글자 (목업 그대로) */
+/* Pill 칩 */
 .pill {
   flex: 0 0 auto;
-  min-height: 44px;
+  min-height: 40px;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   font-size: var(--font-sm);
   font-weight: 600;
   color: var(--color-text-sub);
@@ -241,42 +278,44 @@ button {
   border-radius: var(--radius-full);
   padding: var(--space-2) var(--space-4);
   white-space: nowrap;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .pill.active {
-  background: var(--color-text);
-  border-color: var(--color-text);
-  color: var(--color-surface);
+  background: var(--color-accent-gradient);
+  border-color: transparent;
+  color: var(--color-on-accent);
   font-weight: 700;
+  box-shadow: 0 3px 12px rgba(224, 90, 109, 0.28);
 }
 
 /* 세부 인기 데이트존 서브 칩 */
 .filter-row-subzone {
-  animation: fadeInDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: fadeInDown 0.24s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .pill-subzone {
-  min-height: 38px;
+  min-height: 36px;
   padding: var(--space-1) var(--space-3);
   font-size: var(--font-xs);
   font-weight: 500;
   background: var(--color-surface);
-  border: 1px dashed var(--color-border-strong);
+  border: 1px solid rgba(224, 90, 109, 0.2);
+  color: var(--color-text-sub);
 }
 
 .pill-subzone.active {
   background: var(--color-accent);
-  border: 1px solid var(--color-accent);
+  border-color: var(--color-accent);
   color: var(--color-on-accent);
   font-weight: 700;
-  box-shadow: 0 2px 8px rgba(195, 106, 77, 0.25);
+  box-shadow: 0 3px 10px rgba(224, 90, 109, 0.25);
 }
 
 @keyframes fadeInDown {
   from {
     opacity: 0;
-    transform: translateY(-4px);
+    transform: translateY(-6px);
   }
   to {
     opacity: 1;
@@ -286,35 +325,46 @@ button {
 
 /* 버튼 공통 */
 .btn-primary {
-  background: var(--color-accent);
+  background: var(--color-accent-gradient);
   color: var(--color-on-accent);
   font-size: var(--font-md);
   font-weight: 700;
-  border-radius: var(--radius-lg); /* rounded-xl — 고액션 */
+  border-radius: var(--radius-md);
   padding: var(--space-3) var(--space-5);
-  min-height: 48px;
-  transition: filter 0.15s ease, box-shadow 0.15s ease;
+  min-height: 50px;
+  box-shadow: 0 4px 16px rgba(224, 90, 109, 0.3);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .btn-primary:active {
-  filter: brightness(0.92);
+  transform: scale(0.98);
+  box-shadow: 0 2px 8px rgba(224, 90, 109, 0.2);
 }
 
-/* 세컨더리 — 투명 배경 + 잉크 보더 (하이엔드 미니멀) */
 .btn-secondary {
-  background: transparent;
+  background: var(--color-surface);
   color: var(--color-text);
   font-size: var(--font-md);
   font-weight: 600;
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   padding: var(--space-3) var(--space-5);
-  min-height: 48px;
-  transition: background 0.15s ease, box-shadow 0.15s ease;
+  min-height: 50px;
+  box-shadow: var(--shadow-card);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 .btn-secondary:active {
   background: var(--color-surface-sub);
+  transform: scale(0.98);
 }
 
 .btn-generate {
@@ -349,6 +399,7 @@ button {
   font-size: var(--font-lg);
   font-weight: 700;
   line-height: 1.3;
+  color: var(--color-text);
 }
 
 /* 전체 다시 뽑기 */
@@ -360,13 +411,13 @@ button {
   gap: 6px;
   font-size: var(--font-xs);
   font-weight: 600;
-  color: var(--color-text-sub);
+  color: var(--color-accent-text);
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  border: 1px solid rgba(224, 90, 109, 0.2);
   border-radius: var(--radius-full);
   padding: var(--space-2) var(--space-3);
-  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease,
-    transform 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: var(--shadow-card);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-regenerate .icon-refresh {
@@ -380,7 +431,7 @@ button {
 
 .btn-regenerate:active {
   background: var(--color-surface-sub);
-  transform: scale(0.97);
+  transform: scale(0.96);
 }
 
 .btn-regenerate.is-spinning .icon-refresh {
@@ -396,41 +447,42 @@ button {
   }
 }
 
-/* 타임라인 — 왼쪽 넘버링 + 얇은 세로 연결선 (마크업 수정 없이 ::before/counter) */
+/* 타임라인 — 로맨틱 파스텔 링 넘버링 & 부드러운 연결선 */
 .step-list {
   counter-reset: step;
   position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  padding-left: 34px;
+  padding-left: 36px;
 }
 
 .step-list::before {
   content: '';
   position: absolute;
-  left: 11px;
-  top: var(--space-3);
-  bottom: var(--space-3);
-  width: 1px;
-  background: var(--color-border);
+  left: 12px;
+  top: var(--space-4);
+  bottom: var(--space-4);
+  width: 2px;
+  background: linear-gradient(to bottom, rgba(224, 90, 109, 0.4), rgba(244, 127, 135, 0.15));
+  border-radius: var(--radius-full);
 }
 
 @keyframes card-appear {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(12px) scale(0.99);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
 @keyframes swap-in {
   0% {
     opacity: 0;
-    transform: scale(0.98);
+    transform: scale(0.97);
   }
   100% {
     opacity: 1;
@@ -442,10 +494,11 @@ button {
   position: relative;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   padding: var(--space-5);
   box-shadow: var(--shadow-card);
-  animation: card-appear 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: card-appear 0.34s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .step-card:nth-child(1) { animation-delay: 0ms; }
@@ -458,26 +511,27 @@ button {
   animation: swap-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* 넘버 칩 — 연결선 위에 종이색 원 + 세리프 숫자 */
+/* 넘버 칩 — 로맨틱 로즈 넘버 뱃지 */
 .step-card::before {
   counter-increment: step;
   content: counter(step);
   position: absolute;
-  left: -34px;
+  left: -36px;
   top: var(--space-4);
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border: 2px solid var(--color-accent);
   border-radius: var(--radius-full);
   font-family: var(--font-display);
-  font-size: 0.7rem;
-  font-weight: 700;
+  font-size: 0.74rem;
+  font-weight: 800;
   color: var(--color-accent-text);
   line-height: 1;
+  box-shadow: 0 2px 8px rgba(224, 90, 109, 0.2);
 }
 
 .step-card.empty {
@@ -493,17 +547,20 @@ button {
   margin-bottom: var(--space-2);
 }
 
-/* 슬롯 라벨 — 목업 "1. AFTERNOON" 스타일: 작은 테라코타 라벨 (배경 없음) */
+/* 슬롯 라벨 */
 .step-slot {
   font-size: var(--font-xs);
   font-weight: 700;
   color: var(--color-accent-text);
-  letter-spacing: var(--label-tracking);
-  text-transform: uppercase;
+  background: var(--color-accent-soft);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  letter-spacing: -0.01em;
   display: inline-block;
 }
 
 .step-card.empty .step-slot {
+  background: var(--color-surface-sub);
   color: var(--color-text-faint);
 }
 
@@ -516,14 +573,13 @@ button {
   align-items: center;
   justify-content: center;
   color: var(--color-text-faint);
-  background: transparent;
-  border: 1px solid transparent;
+  background: var(--color-surface-sub);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-full);
   margin: calc(-1 * var(--space-1)) calc(-1 * var(--space-1)) calc(-1 * var(--space-1)) 0;
   padding: 0;
   line-height: 1;
-  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease,
-    transform 0.15s ease, box-shadow 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-swap .icon-swap {
@@ -545,12 +601,13 @@ button {
   animation: spin 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 세리프 스폿명 — 카드의 주인공 */
+/* 스팟명 */
 .step-name {
   font-family: var(--font-display);
-  font-size: var(--font-lg);
+  font-size: 1.18rem;
   font-weight: 700;
   line-height: 1.35;
+  color: var(--color-text);
   margin-bottom: var(--space-1);
 }
 
@@ -560,46 +617,50 @@ button {
   margin-bottom: var(--space-2);
 }
 
-/* 신뢰 장치 줄 — 뱃지 + mood 라벨 */
+/* 신뢰 장치 줄 */
 .step-meta {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   margin-bottom: var(--space-3);
+  flex-wrap: wrap;
 }
 
 .badge-verified {
   font-size: var(--font-xs);
   font-weight: 700;
   color: var(--color-accent-text);
-  letter-spacing: var(--label-tracking);
-  text-transform: uppercase;
+  background: var(--color-surface-tint);
+  border: 1px solid rgba(224, 90, 109, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 1px 6px;
+  letter-spacing: 0.02em;
 }
 
 .step-mood-tags {
   font-size: var(--font-xs);
   color: var(--color-text-faint);
-  letter-spacing: var(--label-tracking);
 }
 
-/* 추천 이유 인용구 — 세리프 이탤릭, 테라코타 인용선 */
+/* 추천 이유 인용구 — 로맨틱 파스텔 톤 코멘터리 카드 */
 .step-quote {
-  font-family: var(--font-display);
-  font-style: italic;
   font-size: var(--font-sm);
   color: var(--color-text-sub);
-  border-left: 2px solid var(--color-accent);
-  padding: var(--space-1) 0 var(--space-1) var(--space-3);
+  background: var(--color-surface-sub);
+  border-left: 3px solid var(--color-accent);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: var(--space-2) var(--space-3);
   margin: 0;
   line-height: 1.6;
 }
 
-/* 구 스킨 하위호환 — .step-quote 도입 전 마크업 */
 .step-summary {
   font-size: var(--font-sm);
   color: var(--color-text-sub);
-  border-left: 2px solid var(--color-border);
-  padding: var(--space-1) 0 var(--space-1) var(--space-3);
+  background: var(--color-surface-sub);
+  border-left: 3px solid var(--color-border-strong);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: var(--space-2) var(--space-3);
 }
 
 .step-price {
@@ -614,7 +675,7 @@ button {
   margin-top: var(--space-2);
 }
 
-/* 네이버 지도 링크 — 터치 타깃 44px */
+/* 지도 링크 버튼 */
 .step-map-link {
   display: flex;
   align-items: center;
@@ -625,14 +686,16 @@ button {
   font-weight: 600;
   color: var(--color-accent-text);
   text-decoration: none;
-  background: var(--color-accent-soft);
+  background: var(--color-surface-tint);
+  border: 1px solid rgba(224, 90, 109, 0.2);
   border-radius: var(--radius-md);
   padding: var(--space-2) var(--space-3);
-  transition: filter 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 .step-map-link:active {
-  filter: brightness(0.95);
+  background: var(--color-accent-soft);
+  transform: scale(0.99);
 }
 
 /* 결과 하단 액션 */
@@ -643,7 +706,6 @@ button {
   margin-top: var(--space-5);
 }
 
-/* 액션 3개(복사·링크·저장) 변형 — 기존 .result-actions(2열)는 유지 */
 .result-actions.result-actions-3 {
   grid-template-columns: repeat(3, 1fr);
 }
@@ -656,7 +718,7 @@ button {
 }
 
 /* ==========================================================================
-   오늘의 코스 — 상단 슬림 원클릭 배너 버튼
+   오늘의 코스
    ========================================================================== */
 
 .today-course-area:not(:empty) {
@@ -668,22 +730,23 @@ button {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  min-height: 46px;
-  background: var(--color-accent-soft);
-  border: 1px solid rgba(195, 106, 77, 0.2);
+  min-height: 48px;
+  background: linear-gradient(135deg, #fff2f4 0%, #fff7f2 100%);
+  border: 1px solid rgba(224, 90, 109, 0.25);
   border-radius: var(--radius-md);
   padding: var(--space-2) var(--space-4);
-  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 2px 10px rgba(224, 90, 109, 0.08);
+  transition: all 0.2s ease;
 }
 
 .today-course:active {
-  background: rgba(195, 106, 77, 0.15);
-  border-color: var(--color-accent);
+  background: #ffe6ea;
+  transform: scale(0.99);
 }
 
 .today-course-label {
   font-size: var(--font-sm);
-  font-weight: 600;
+  font-weight: 700;
   color: var(--color-accent-text);
   letter-spacing: -0.01em;
   display: inline-flex;
@@ -695,14 +758,14 @@ button {
   font-size: var(--font-sm);
   font-weight: 700;
   color: var(--color-accent-text);
-  transition: transform 0.15s ease;
+  transition: transform 0.2s ease;
 }
 
 .today-course:hover .today-course-arrow {
-  transform: translateX(3px);
+  transform: translateX(4px);
 }
 
-/* 분위기 pill '⋯ 더보기' / '접기' — 텍스트만, 배경·보더 없이 조용하게 */
+/* 분위기 pill '⋯ 더보기' / '접기' */
 .pill-more {
   background: transparent;
   border-color: transparent;
@@ -710,7 +773,7 @@ button {
 }
 
 /* ==========================================================================
-   수신자 뷰 (링크로 열었을 때) — 결과 화면과 동일 톤, CTA 하나 강조
+   수신자 뷰
    ========================================================================== */
 
 .receiver-view {
@@ -720,9 +783,10 @@ button {
 .receiver-title {
   font-family: var(--font-display);
   font-size: var(--font-xl);
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.3;
   margin-bottom: var(--space-5);
+  color: var(--color-text);
 }
 
 .btn-make-own {
@@ -731,15 +795,15 @@ button {
 }
 
 /* ==========================================================================
-   저장한 코스 오버레이 — 라이트 글래스모피즘 (은은한 blur)
+   저장한 코스 오버레이 (바텀시트)
    ========================================================================== */
 
 .overlay-backdrop {
   position: fixed;
   inset: 0;
   background: var(--color-backdrop);
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
   z-index: 100;
   animation: fade-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -793,7 +857,12 @@ button {
   font-size: var(--font-md);
   color: var(--color-text-faint);
   margin: calc(-1 * var(--space-2)) calc(-1 * var(--space-2)) calc(-1 * var(--space-2)) 0;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-full);
+  transition: all 0.15s ease;
+}
+
+.overlay-close:active {
+  background: var(--color-surface-sub);
 }
 
 .overlay-empty {
@@ -810,16 +879,16 @@ button {
   transform: translateX(-50%);
   width: 100%;
   max-width: var(--layout-max);
-  max-height: 80vh;
+  max-height: 82vh;
   display: flex;
   flex-direction: column;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-bottom: none;
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   box-shadow: var(--shadow-float);
   z-index: 101;
-  animation: sheet-up 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: sheet-up 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .overlay-panel.is-closing {
@@ -839,12 +908,16 @@ button {
   font-family: var(--font-display);
   font-size: var(--font-md);
   font-weight: 700;
+  color: var(--color-text);
 }
 
 .overlay-count {
   color: var(--color-accent-text);
-  font-weight: 700;
+  font-weight: 800;
   font-size: var(--font-sm);
+  background: var(--color-accent-soft);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
 }
 
 .overlay-body {
@@ -874,11 +947,12 @@ button {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--space-3) var(--space-4);
-  transition: border-color 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 .saved-item-main:active {
   border-color: var(--color-accent);
+  background: var(--color-surface-tint);
 }
 
 .saved-item-meta {
@@ -948,32 +1022,34 @@ button {
   border-radius: var(--radius-md);
   padding: 0 var(--space-3);
   background: var(--color-surface);
-  transition: color 0.15s ease, border-color 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 .saved-item-delete:active {
   color: var(--color-accent);
   border-color: var(--color-accent);
+  background: var(--color-surface-tint);
 }
 
 /* ==========================================================================
-   토스트 — 부드러운 페이드 + 슬라이드 + 미세 스케일 트랜지션
+   토스트
    ========================================================================== */
 
 .toast-msg {
   position: fixed;
-  bottom: 24px;
+  bottom: 28px;
   left: 50%;
   transform: translateX(-50%) translateY(16px) scale(0.96);
   opacity: 0;
   pointer-events: none;
-  background: var(--color-text);
-  color: var(--color-surface);
+  background: rgba(45, 36, 34, 0.92);
+  backdrop-filter: blur(8px);
+  color: #ffffff;
   font-weight: 600;
   font-size: var(--font-sm);
   padding: var(--space-3) var(--space-5);
   border-radius: var(--radius-full);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.2);
   transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1),
     transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 200;
@@ -988,7 +1064,7 @@ button {
 }
 
 /* ==========================================================================
-   푸터 — Sensory Magazine 은은한 에디토리얼 푸터
+   푸터
    ========================================================================== */
 
 .app-footer {
@@ -1020,7 +1096,7 @@ button {
   font-weight: 700;
   color: var(--color-accent-text);
   background: var(--color-accent-soft);
-  border: 1px solid rgba(195, 106, 77, 0.2);
+  border: 1px solid rgba(224, 90, 109, 0.2);
   border-radius: var(--radius-sm);
   padding: 1px 6px;
   letter-spacing: 0.02em;
@@ -1033,7 +1109,7 @@ button {
 }
 
 /* ==========================================================================
-   hover — 포인터 기기에서만 은은한 lift (ambient glow)
+   hover (포인터 기기)
    ========================================================================== */
 
 @media (hover: hover) {
@@ -1043,33 +1119,36 @@ button {
   .btn-secondary:hover,
   .saved-item-main:hover {
     box-shadow: var(--shadow-lift);
+    transform: translateY(-1px);
   }
 
   .btn-primary:hover,
   .step-map-link:hover {
-    filter: brightness(1.05);
     box-shadow: var(--shadow-lift);
+    filter: brightness(1.03);
+    transform: translateY(-1px);
   }
 
   .pill:not(.active):hover {
     border-color: var(--color-border-strong);
+    background: #ffffff;
   }
 
   .btn-regenerate:hover {
     background: var(--color-surface);
-    border-color: var(--color-border-strong);
-    color: var(--color-text);
+    border-color: var(--color-accent);
+    color: var(--color-accent-text);
     box-shadow: var(--shadow-lift);
   }
 
   .btn-regenerate:hover .icon-refresh {
-    transform: rotate(45deg);
+    transform: rotate(60deg);
   }
 
   .btn-swap:hover {
-    background: var(--color-accent-soft);
-    border-color: rgba(195, 106, 77, 0.25);
-    color: var(--color-accent);
+    background: var(--color-surface-tint);
+    border-color: rgba(224, 90, 109, 0.35);
+    color: var(--color-accent-text);
     box-shadow: var(--shadow-lift);
   }
 

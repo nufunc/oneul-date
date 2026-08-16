@@ -1274,15 +1274,16 @@
     "id": 81,
     "name": "카페 얼트",
     "slot": "day",
-    "region": "서울",
-    "area": "중구",
+    "region": "인천",
+    "area": "인천 중구",
+    "address": "인천 중구 은하수로 1",
     "mood": [
       "view",
       "trendy"
     ],
-    "location": "중구",
+    "location": "인천 중구 (영종도)",
     "price": null,
-    "summary": "통창으로 펼쳐지는 오션뷰가 특징인 신상 카페",
+    "summary": "통창으로 펼쳐지는 영종도 오션뷰가 특징인 감성 카페",
     "source": {
       "type": "web",
       "url": "https://kr.trip.com/moments/poi-cafe-ult-140697507/",
