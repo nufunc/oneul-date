@@ -108,9 +108,6 @@ const POPULAR_ZONES: PopularZone[] = [
   { key: 'jeju_jungmun', regionKey: 'JEJU', label: '제주 중문·서귀포', keywords: ['서귀포', '중문', '안덕'] },
 ];
 
-/** '⋯ 더보기'로 접어두는 분위기 4종 — 데이터는 8종 유지, UI만 접기 (PLAN.md 3절) */
-const EXTRA_MOOD_KEYS = ['luxury', 'active', 'view', 'retro'];
-
 const STORAGE_KEY = 'oneul_saved_courses';
 const RECENT_KEY = 'oneul_recent_spots';
 const RECENT_MAX = 100;
@@ -577,8 +574,6 @@ interface AppState {
   /** 선택된 세부 인기 데이트존 키 다중 선택 — 빈 배열이면 '제한 없음' */
   subZones: string[];
   mood: string;
-  /** 분위기 pill '⋯ 더보기' 펼침 여부 (숨김 mood 선택 시엔 강제 펼침) */
-  moodExpanded: boolean;
   course: CourseStep[] | null;
   /** 코스 생성 시점의 조건 스냅샷 — 교체 후보·저장·복사가 이 조건 기준으로 동작 */
   courseConditions: { regions: string[]; subZones: string[]; mood: string } | null;
@@ -590,7 +585,6 @@ const state: AppState = {
   regions: [],
   subZones: [],
   mood: 'ALL',
-  moodExpanded: false,
   course: null,
   courseConditions: null,
   savedOpen: false,
@@ -701,7 +695,7 @@ function renderShell(): void {
     <section class="conditions" id="conditions-area"></section>
     <section class="results" id="results-area"></section>
     <footer class="app-footer">
-      <p class="footer-copy">오늘 데이트 <span class="footer-version">v1.0.0</span></p>
+      <p class="footer-copy">오늘 데이트 <span class="footer-version">${APP_VERSION}</span></p>
       <p class="footer-sub">조건만 고르면 완성되는 시간대별 데이트 코스</p>
     </footer>
     <div class="overlay-root" id="overlay-root"></div>
@@ -754,16 +748,11 @@ function renderConditions(): void {
   const area = document.getElementById('conditions-area');
   if (!area) return;
 
-  // 숨겨진 mood가 선택돼 있으면 강제 펼침 유지 (접기 버튼도 숨김)
-  const forcedOpen = EXTRA_MOOD_KEYS.includes(state.mood);
-  const expanded = state.moodExpanded || forcedOpen;
-  const visibleMoods = expanded ? MOODS : MOODS.filter((m) => !EXTRA_MOOD_KEYS.includes(m.key));
-
-  // 활성화할 인기 데이트존 목록
+  // 특정 지역이 선택되었을 때만 해당 지역의 세부 인기 데이트존 노출 (전체일 때는 서브존 행 숨김)
   const activeZones =
-    state.regions.length === 0
-      ? POPULAR_ZONES.slice(0, 8)
-      : POPULAR_ZONES.filter((z) => state.regions.includes(z.regionKey));
+    state.regions.length > 0
+      ? POPULAR_ZONES.filter((z) => state.regions.includes(z.regionKey))
+      : [];
 
   area.innerHTML = `
     <div class="slot-toggles" role="group" aria-label="시간대 선택">
@@ -807,19 +796,10 @@ function renderConditions(): void {
     <div class="filter-row">
       <span class="filter-label">분위기</span>
       <div class="pill-scroll" id="mood-pills">
-        ${visibleMoods
-          .map(
-            (m) =>
-              `<button class="pill ${state.mood === m.key ? 'active' : ''}" data-mood="${m.key}">${m.emoji ? `${m.emoji} ` : ''}${m.label}</button>`,
-          )
-          .join('')}
-        ${
-          expanded
-            ? forcedOpen
-              ? ''
-              : `<button class="pill pill-more" data-mood-expand="0" aria-expanded="true">접기</button>`
-            : `<button class="pill pill-more" data-mood-expand="1" aria-expanded="false">⋯ 더보기</button>`
-        }
+        ${MOODS.map(
+          (m) =>
+            `<button class="pill ${state.mood === m.key ? 'active' : ''}" data-mood="${m.key}">${m.emoji ? `${m.emoji} ` : ''}${m.label}</button>`,
+        ).join('')}
       </div>
     </div>
 
@@ -840,7 +820,7 @@ function bindConditionEvents(area: HTMLElement): void {
     btn.addEventListener('click', () => {
       const key = btn.dataset.region || 'ALL';
       if (key === 'ALL') {
-        // 전체: 모든 개별 선택 해제
+        // 전체: 모든 개별 선택 해제 및 서브존 초기화
         state.regions = [];
         state.subZones = [];
       } else {
@@ -855,6 +835,8 @@ function bindConditionEvents(area: HTMLElement): void {
             const z = POPULAR_ZONES.find((item) => item.key === zk);
             return z ? state.regions.includes(z.regionKey) : false;
           });
+        } else {
+          state.subZones = [];
         }
       }
       renderConditions();
@@ -874,12 +856,6 @@ function bindConditionEvents(area: HTMLElement): void {
   area.querySelectorAll<HTMLButtonElement>('#mood-pills .pill[data-mood]').forEach((btn) => {
     btn.addEventListener('click', () => {
       state.mood = btn.dataset.mood || 'ALL';
-      renderConditions();
-    });
-  });
-  area.querySelectorAll<HTMLButtonElement>('#mood-pills .pill[data-mood-expand]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      state.moodExpanded = btn.dataset.moodExpand === '1';
       renderConditions();
     });
   });
