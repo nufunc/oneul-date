@@ -2,6 +2,16 @@
 
 > 2026-08-16. PLAN.md 확정 기능 기준. 디자인 전제: A안 감성 매거진 토큰(DESIGN.md), 모바일 ~430px 기준 / max-width 640px, 마크업 변경 최소.
 
+## 디자인 산출물 (Stitch, 2026-08-16 확정)
+
+- **디자인 시스템**: `DESIGN_SYSTEM_stitch.md` ("Sensory Magazine") — A안의 구체화로 **채택**
+- **목업**: `home_create_course.png`(S1), `home_result.png`(S2), `home_result.html`(S2 HTML 원본)
+- **채택 시 조정사항 (확정)**:
+  1. 하단 탭바(Discover/Creator/Profile) **제거** — 단일 화면 원칙 유지
+  2. 스텝 카드는 **사진 없는 타이포 중심**으로 각색 (DB에 이미지 없음. 이미지 수집은 백로그)
+  3. 폰트 한글 매핑: Libre Caslon Text → **Noto Serif KR**, Plus Jakarta Sans → **Pretendard**
+  4. UI 텍스트 한글화
+
 ## S1. 홈 — 첫 진입 (생성 전)
 
 ```
