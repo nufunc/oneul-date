@@ -187,11 +187,20 @@ EXPLICIT_MOOD_MAP = {
 EXPLICIT_SLOT_RE = re.compile(r"[\-\*]\s*\*\*슬롯\*\*[: \t]*([^\n]+)")
 EXPLICIT_MOOD_RE = re.compile(r"[\-\*]\s*\*\*분위기\*\*[: \t]*([^\n]+)")
 EXPLICIT_SOURCE_RE = re.compile(r"[\-\*]\s*\*\*출처\*\*[: \t]*([^\n]+)")
+EXPLICIT_ADDRESS_RE = re.compile(r"[\-\*]\s*\*\*주소\*\*[: \t]*([^\n]+)")
 URL_RE = re.compile(r"https?://[^\s)\]>]+")
 
 
 def source_type_for_url(url):
     return "youtube" if url and "youtube" in url.lower() else "web"
+
+
+def extract_explicit_address(sec):
+    m = EXPLICIT_ADDRESS_RE.search(sec)
+    if not m:
+        return None
+    val = m.group(1).strip().strip("*: \t")
+    return val if len(val) >= 4 else None
 
 
 def extract_explicit_slot(sec):
@@ -470,27 +479,51 @@ for filepath in md_files:
             mood_match = re.search(r"[\-\*]\s*\*\*유튜브[^\*]*\*\*[: 	]*([^\n]+)", sec)
         mood_str = mood_match.group(1).strip().strip("*: ").strip() if mood_match else ""
 
+        # Explicit address extraction
+        address_str = extract_explicit_address(sec)
+
         # Region category determination
-        combined_text = f"{name_clean} {location_str} {filename}"
-        # "서울 상암 기준 35분" 같은 거리 표기가 서울로 오분류되는 것 방지
-        combined_text = re.sub(r"서울[가-힣\s·/]*기준", "", combined_text)
         region = "전국"
-        if any(k in combined_text for k in ["인천", "송도", "강화", "영흥", "선재", "영종", "을왕리"]):
-            region = "인천"
-        elif any(k in combined_text for k in ["서울", "강남", "성수", "한남", "용산", "연희", "마포", "서초", "송파", "종로", "중구", "문래", "을지로", "익선", "망원"]):
-            region = "서울"
-        elif any(k in combined_text for k in ["경기", "가평", "양평", "파주", "포천", "고양", "성남", "분당", "판교", "과천", "용인", "수원", "이천", "광주", "남양주", "의왕", "안성", "화성", "시흥", "김포", "여주", "의정부", "동두천", "구리", "하남", "부천", "안양", "군포", "오산", "평택", "광명"]):
-            region = "경기"
-        elif any(k in combined_text for k in ["강원", "강릉", "양양", "속초", "동해", "삼척", "춘천", "홍천", "평창", "정선", "영월", "고성", "원주", "태백"]):
-            region = "강원"
-        elif any(k in combined_text for k in ["충남", "충북", "보령", "서천", "서산", "태안", "공주", "충주", "단양", "청주", "천안", "아산", "제천", "영동", "보은"]):
-            region = "충청"
-        elif any(k in combined_text for k in ["경북", "경남", "부산", "대구", "울산", "포항", "경주", "청도", "거제", "통영", "남해", "사천", "밀양", "하동", "산청", "청송", "영덕", "문경", "안동"]):
-            region = "영남"
-        elif any(k in combined_text for k in ["전북", "전남", "광주", "여수", "순천", "담양", "완주", "남원", "곡성", "구례", "전주", "군산", "고창", "신안", "진도"]):
-            region = "호남"
-        elif any(k in combined_text for k in ["제주", "서귀포", "애월", "구좌", "한림", "안덕", "대정", "한경", "조천", "성산"]):
-            region = "제주"
+        if address_str:
+            # 주소가 있을 경우 최우선으로 정확한 광역시·도 판정
+            p0 = address_str.split()[0]
+            if "서울" in p0:
+                region = "서울"
+            elif "경기" in p0:
+                region = "경기"
+            elif "인천" in p0:
+                region = "인천"
+            elif "강원" in p0:
+                region = "강원"
+            elif any(k in p0 for k in ["충북", "충남", "충청", "대전", "세종"]):
+                region = "충청"
+            elif any(k in p0 for k in ["경북", "경남", "경상", "부산", "대구", "울산"]):
+                region = "영남"
+            elif any(k in p0 for k in ["전북", "전남", "전라", "광주"]):
+                region = "호남"
+            elif "제주" in p0:
+                region = "제주"
+
+        if region == "전국":
+            combined_text = f"{name_clean} {location_str} {filename}"
+            # "서울 상암 기준 35분" 같은 거리 표기가 서울로 오분류되는 것 방지
+            combined_text = re.sub(r"서울[가-힣\s·/]*기준", "", combined_text)
+            if any(k in combined_text for k in ["인천", "송도", "강화", "영흥", "선재", "영종", "을왕리", "월미도", "청라"]):
+                region = "인천"
+            elif any(k in combined_text for k in ["서울", "강남", "성수", "한남", "용산", "연희", "마포", "서초", "송파", "종로", "문래", "을지로", "익선", "망원", "서촌", "북촌", "여의도", "압구정", "청담"]):
+                region = "서울"
+            elif any(k in combined_text for k in ["경기", "가평", "양평", "파주", "포천", "고양", "성남", "분당", "판교", "과천", "용인", "수원", "이천", "광주", "남양주", "의왕", "안성", "화성", "시흥", "김포", "여주", "의정부", "동두천", "구리", "하남", "부천", "안양", "군포", "오산", "평택", "광명", "행궁"]):
+                region = "경기"
+            elif any(k in combined_text for k in ["강원", "강릉", "양양", "속초", "동해", "삼척", "춘천", "홍천", "평창", "정선", "영월", "고성", "원주", "태백", "경포", "안목"]):
+                region = "강원"
+            elif any(k in combined_text for k in ["충남", "충북", "보령", "서천", "서산", "태안", "공주", "충주", "단양", "청주", "천안", "아산", "제천", "영동", "보은", "대전", "세종"]):
+                region = "충청"
+            elif any(k in combined_text for k in ["경북", "경남", "부산", "대구", "울산", "포항", "경주", "청도", "거제", "통영", "남해", "사천", "밀양", "하동", "산청", "청송", "영덕", "문경", "안동", "해운대", "광안리"]):
+                region = "영남"
+            elif any(k in combined_text for k in ["전북", "전남", "여수", "순천", "담양", "완주", "남원", "곡성", "구례", "전주", "군산", "고창", "신안", "진도"]):
+                region = "호남"
+            elif any(k in combined_text for k in ["제주", "서귀포", "애월", "구좌", "한림", "안덕", "대정", "한경", "조천", "성산", "협재", "중문"]):
+                region = "제주"
 
         # --- Slot detection (v2) --------------------------------------------
         # Explicit `- **슬롯**:` field wins over heuristics.
@@ -524,6 +557,7 @@ for filepath in md_files:
             "slot": slot,
             "region": region,
             "area": area,
+            "address": address_str if address_str else None,
             "mood": moods,
             "location": location_str if location_str else region,
             "price": price_str if price_str else None,
@@ -533,7 +567,7 @@ for filepath in md_files:
                 "url": source_url,
                 "note": filename,
             },
-            "verified": False,
+            "verified": bool(address_str),
         }
         spots.append(spot)
         spot_id_counter += 1
