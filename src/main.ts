@@ -659,39 +659,16 @@ function renderTodayCourse(): void {
   if (!area) return;
   const today = buildTodayCourse();
   const filled = today.steps.filter((st): st is CourseStep & { spotId: number } => st.spotId !== null);
-  const stepItems = filled
-    .map((st) => {
-      const spot = spotById.get(st.spotId);
-      if (!spot) return null;
-      return { slot: st.slot, name: spot.name };
-    })
-    .filter((item): item is { slot: SlotKey; name: string } => item !== null);
 
-  if (stepItems.length === 0) {
+  if (filled.length === 0) {
     area.innerHTML = '';
     return;
   }
 
-  const chipsHtml = stepItems
-    .map(
-      (item) => `
-      <span class="today-step-chip">
-        <span class="today-step-emoji">${SLOT_META[item.slot].emoji}</span>
-        <span class="today-step-name">${escapeHtml(item.name)}</span>
-      </span>
-    `,
-    )
-    .join('<span class="today-step-sep" aria-hidden="true">›</span>');
-
   area.innerHTML = `
-    <button class="today-course" id="btn-today-course" aria-label="오늘의 코스를 결과 영역에 펼치기">
-      <div class="today-course-header">
-        <span class="today-course-title">✨ 오늘 ${today.dateLabel}의 코스</span>
-        <span class="today-course-hint">터치하여 코스 불러오기</span>
-      </div>
-      <div class="today-course-strip">
-        ${chipsHtml}
-      </div>
+    <button class="today-course" id="btn-today-course" aria-label="오늘의 추천 코스 불러오기">
+      <span class="today-course-label">✨ 오늘 ${today.dateLabel}의 추천 코스 바로보기</span>
+      <span class="today-course-arrow" aria-hidden="true">→</span>
     </button>
   `;
   document.getElementById('btn-today-course')!.addEventListener('click', () => {
