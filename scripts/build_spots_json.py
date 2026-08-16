@@ -1,7 +1,11 @@
 import os
+import sys
 import re
 import json
 import glob
+
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
 SOURCE_DIR = os.environ.get("OBSIDIAN_SOURCE_DIR", r"D:\git\obsidianVault\sources")
 # 스크립트 위치 기준 상대 경로 — 워크트리 체크아웃에서도 자기 체크아웃에 출력됨
@@ -342,7 +346,53 @@ def extract_area(location, name):
         for key in NEIGHBORHOOD_KEYS:
             if key in text:
                 return NEIGHBORHOOD_AREA[key]
-    return None
+BRAND_KO_MAP = {
+    "Aquafield": "아쿠아필드",
+    "Termeden": "테르메덴",
+}
+
+
+def clean_spot_name(raw_name: str) -> str:
+    s = raw_name.strip()
+    # 1. 번호 접두사 제거 (1. / 01. / **1.** / 1) )
+    s = re.sub(r"^\*{0,2}\d+[\.\)]\s*", "", s)
+    s = s.strip("#* ")
+
+    # 2. 대괄호 접두사 및 지역/태그 [성남/분당], [서울], [핫플] 등 제거
+    s = re.sub(r"^\[[^\]]*\]\s*", "", s)
+    s = re.sub(r"\[[^\]]*\]", "", s)
+
+    # 3. 따옴표로 감싸진 경우 따옴표 안의 내용을 우선 고려하거나, 선행 동네명 분리
+    # 예: 백현동 '분당 티 라이브러리 프라이빗 차실' -> 분당 티 라이브러리 프라이빗 차실
+    quote_match = re.search(r"['\"‘“]([^'\"’”]+)['\"’”]", s)
+    if quote_match and len(quote_match.group(1).strip()) >= 2:
+        prefix = s[:quote_match.start()].strip()
+        if re.search(r"[가-힣]{1,6}(?:동|구|시|역|길|리)$", prefix) or not prefix:
+            s = quote_match.group(1).strip()
+
+    # 4. 괄호 병기 제거: (Bundang Tea Library...), (판교/분당 백현동), (Eatanic Garden), （...）
+    cleaned_parens = re.sub(r"\([^)]*\)", "", s)
+    cleaned_parens = re.sub(r"（[^）]*）", "", cleaned_parens).strip()
+    if len(cleaned_parens) >= 2:
+        s = cleaned_parens
+
+    # 5. 따옴표 특수문자 제거
+    s = s.replace("'", "").replace('"', "").replace("‘", "").replace("’", "").replace("“", "").replace("”", "")
+
+    # 6. '호텔명 - 매장명' 복합 표기 정제: '조선팰리스 서울 강남 - 이타닉 가든' -> '조선팰리스 이타닉 가든'
+    if " - " in s:
+        parts = s.split(" - ")
+        hotel_brand = re.sub(r"(서울|강남|부산|제주|인천|판교|해운대|송도)\s*", "", parts[0]).strip()
+        s = f"{hotel_brand} {parts[1]}".strip() if hotel_brand else parts[1].strip()
+
+    # 7. 브랜드 영문 한글화 매핑
+    for eng, kor in BRAND_KO_MAP.items():
+        if eng in s:
+            s = s.replace(eng, kor)
+
+    # 8. 연속 공백 정리 및 양끝 트림
+    s = re.sub(r"\s+", " ", s).strip()
+    return s if s else raw_name.strip()
 
 
 spots = []
@@ -387,12 +437,12 @@ for filepath in md_files:
         if re.search(r"체크리스트|가이드|꿀팁|공략|요약|결론|총정리|활용법|팁(\s|$|\()", header_line):
             continue
 
-        # Name cleanup
-        name_clean = re.sub(r"^\d+[\.\)]\s*", "", header_line)
-        name_clean = re.sub(r"^\*\*\d+[\.\)]\s*", "", name_clean)
-        name_clean = name_clean.strip("#* ")
+        # Standardized clean name
+        name_clean = clean_spot_name(header_line)
         if not name_clean:
             continue
+
+
 
         # Extract location
         loc_match = re.search(r"[\-\*]\s*\*\*위치[^\*]*\*\*[: 	]*([^\n]+)", sec)
@@ -470,6 +520,7 @@ for filepath in md_files:
         spot = {
             "id": spot_id_counter,
             "name": name_clean,
+            "_raw_name": header_line,
             "slot": slot,
             "region": region,
             "area": area,
@@ -504,15 +555,24 @@ if os.path.exists(OVERRIDES_PATH):
     with open(OVERRIDES_PATH, 'r', encoding='utf-8') as f:
         overrides = json.load(f)
 
+    # Build dual-key lookup map (original key and cleaned key)
+    override_lookup = {}
+    for orig_k, ov in overrides.items():
+        override_lookup[orig_k] = (orig_k, ov)
+        cleaned_k = clean_spot_name(orig_k)
+        if cleaned_k not in override_lookup:
+            override_lookup[cleaned_k] = (orig_k, ov)
+
     matched_names = set()
     excluded_count = 0
     kept = []
     for spot in spots:
-        ov = overrides.get(spot["name"])
-        if ov is None:
+        entry = override_lookup.get(spot["name"]) or override_lookup.get(spot.get("_raw_name", ""))
+        if entry is None:
             kept.append(spot)
             continue
-        matched_names.add(spot["name"])
+        orig_key, ov = entry
+        matched_names.add(orig_key)
         if ov.get("exclude"):
             excluded_count += 1
             continue
@@ -528,15 +588,23 @@ if os.path.exists(OVERRIDES_PATH):
         kept.append(spot)
     spots = kept
 
+    # Remove temporary _raw_name field before serialization
+    for s in spots:
+        s.pop("_raw_name", None)
+
     unmatched = [name for name in overrides if name not in matched_names]
     print("\n--- Overrides ---")
     print(f"Loaded {len(overrides)} overrides from {OVERRIDES_PATH}")
     print(f"Matched: {len(matched_names)} / Excluded: {excluded_count}")
     if unmatched:
-        print(f"WARNING: {len(unmatched)} override name(s) did not match any spot:")
-        for name in unmatched:
+        print(f"INFO: {len(unmatched)} override name(s) not matched:")
+        for name in unmatched[:10]:
             print(f"  - {name}")
+        if len(unmatched) > 10:
+            print(f"  ... and {len(unmatched) - 10} more")
 else:
+    for s in spots:
+        s.pop("_raw_name", None)
     print(f"No overrides file at {OVERRIDES_PATH} (skipped).")
 
 with open(OUTPUT_PATH, 'w', encoding='utf-8') as f:
