@@ -31,8 +31,20 @@ orca worktree create --repo id:4bb7d81b-9063-45f8-9c4d-b0add75caf6c \
 ```
 
 - 워크트리라 메인 체크아웃과 격리됨 (파서 출력 경로 상대화 완료 — 자기 체크아웃에 씀)
-- obsidianVault는 공유지만 md 추가는 append-only라 안전
+- obsidianVault는 공유지만 md 추가는 append-only라 안전 (세션마다 md 라벨을 다르게)
 - 완료 후 병합: `git fetch origin && git merge origin/nufunc/db-reinforce-<MMDD>` → 파서 재실행 → 검증
+
+### agy CLI로 띄우는 변형 (에이전트 다변화)
+
+```text
+orca worktree create --repo id:4bb7d81b-9063-45f8-9c4d-b0add75caf6c --name db-agy-<MMDD> --no-parent --json
+orca terminal create --worktree "id:<위 결과의 worktree.id>" --title agy-db --command "agy --mode accept-edits" --json
+orca terminal wait --terminal <handle> --for tui-idle --timeout-ms 60000 --json
+orca terminal send --terminal <handle> --text "<§1 명령문 + 전담 타겟 지정>" --enter --json
+```
+
+- **병행 시 중복 방지**: 세션마다 전담 타겟을 나눠라 (예: A세션=트렌드 수집+낮/저녁/밤 검증, B세션=숙박 검증+저녁 맛집 수집). md 파일명 라벨도 세션별로 구분.
+- agy는 tool 권한 프롬프트가 뜰 수 있음 — Orca 터미널에서 승인하거나 필요 시 재실행 옵션 조정.
 
 ## 3. 운영 주기 제안
 
