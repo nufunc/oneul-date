@@ -332,7 +332,6 @@ const KNOWN_NAME_MAP: Record<string, string> = {
   termeden: '테르메덴',
   'simmons terrace': '시몬스테라스',
 };
-
 const FAMOUS_AREAS = [
   '성수', '청담', '한남', '이태원', '홍대', '서촌', '북촌', '강남', '여의도', '압구정',
   '송파', '잠실', '판교', '분당', '송도', '해운대', '광안리', '서면', '동성로',
@@ -344,15 +343,10 @@ const FAMOUS_AREAS = [
 
 /**
  * 네이버 지도 검색어 고도화 정제.
- * - 괄호(영문 병기/지역 힌트) 추출 및 제거
- * - 콜론(:), 복합 상호명(&, ↔, 및, /), 대시(-) 처리하여 핵심 상호명/명사 추출
- * - 특수기호 제거 및 주요 영문 브랜드 한글화
- * - area(시·군·구) / location 기반 스마트 행정구역 결합 (중복/모호한 광역어 '전국', '수도권' 제외)
  */
 function mapQuery(spot: Spot): string {
   const rawName = (spot.name || '').trim();
 
-  // 1. 괄호 내용 분석 (영문 지역 힌트 등 추출: Hanam, Goyang, Icheon, Yeosu 등)
   const bracketHints: string[] = [];
   const bracketMatches = rawName.match(/\(([^)]+)\)|\[([^\]]+)\]|（([^）]+)）|【([^】]+)】/g);
   if (bracketMatches) {
@@ -362,7 +356,6 @@ function mapQuery(spot: Spot): string {
     }
   }
 
-  // 2. 괄호 제거
   let cleanName = rawName
     .replace(/\[[^\]]*\]/g, '')
     .replace(/\([^)]*\)/g, '')
@@ -371,13 +364,11 @@ function mapQuery(spot: Spot): string {
     .replace(/【[^】]*】/g, '')
     .trim();
 
-  // 괄호 제거 후 비어있으면 괄호 내부 힌트 사용, 그래도 없으면 원본명 폴백
   if (!cleanName && bracketHints.length > 0) {
     cleanName = bracketHints[0];
   }
   if (!cleanName) cleanName = rawName;
 
-  // 3. 콜론(:) 처리 - 수식어: 장소 형태 처리 (예: '고즈넉한 갤러리 산책: 부암동 ↔ 서촌')
   if (cleanName.includes(':')) {
     const parts = cleanName.split(':');
     const prefix = parts[0].trim();
@@ -389,7 +380,6 @@ function mapQuery(spot: Spot): string {
     }
   }
 
-  // 4. 복합 상호명 분리 (&, ↔, 및, +) -> 대표 명사 추출
   if (/(&|\+|↔|&amp;|\s및\s|\s\/\s)/.test(cleanName)) {
     const parts = cleanName.split(/&|\+|↔|&amp;|\s및\s|\s\/\s/);
     if (parts[0].trim().length > 0) {
@@ -397,7 +387,6 @@ function mapQuery(spot: Spot): string {
     }
   }
 
-  // 5. 대시(-) 처리: 브랜드/호텔 - 매장명 형태 (예: '조선팰리스 서울 강남 - 이타닉 가든')
   if (cleanName.includes(' - ')) {
     const parts = cleanName.split(' - ');
     const brand = parts[0].replace(/서울|강남|호텔/g, '').trim();
@@ -409,13 +398,22 @@ function mapQuery(spot: Spot): string {
     }
   }
 
-  // 6. 특수기호 제거 (알파벳, 한글, 숫자, 공백, 온점, 하이픈 외)
+  // 6. 긴 업종/체험/클래스 수식어 다이어트
+  const descriptorRegex = /\s+(VIP|VVIP|프리미엄|명품|수제|원데이클래스|원데이\s*클래스|클래스|아틀리에|갤러리|스튜디오|살롱|공방|옻칠|나전칠기|도자기|가죽공방|도예공방|체험장|체험관|투어|산책로|산책코스|야시장|먹거리|거리|골목|본점|직영점).*$/i;
+  if (descriptorRegex.test(cleanName)) {
+    const trimmed = cleanName.replace(descriptorRegex, '').trim();
+    if (trimmed.length >= 2) {
+      cleanName = trimmed;
+    }
+  }
+
+  // 7. 특수기호 제거 (알파벳, 한글, 숫자, 공백, 온점, 하이픈 외)
   cleanName = cleanName
     .replace(/[^\w\s가-힣0-9.-]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 
-  // 7. 영문 상호 한글화 사전 매핑 (Aquafield -> 아쿠아필드, Termeden -> 테르메덴 등)
+  // 8. 영문 상호 한글화 사전 매핑
   const lower = cleanName.toLowerCase();
   for (const [eng, kor] of Object.entries(KNOWN_NAME_MAP)) {
     if (lower === eng || lower.startsWith(eng + ' ') || lower.endsWith(' ' + eng) || lower.includes(' ' + eng + ' ')) {
@@ -512,8 +510,11 @@ function mapQuery(spot: Spot): string {
   return cleanName || spot.name.trim();
 }
 
-/** 스폿의 네이버 지도 검색 URL — 정제된 핵심 상호명 + 유효 행정구역 질의 */
+/** 스폿의 네이버 지도 검색 URL — 정식 플레이스 URL 최우선 지원 및 정제된 질의 연동 */
 function naverMapUrl(spot: Spot): string {
+  if (spot.source?.url && (spot.source.url.includes('map.naver.com') || spot.source.url.includes('naver.me'))) {
+    return spot.source.url;
+  }
   return `https://map.naver.com/p/search/${encodeURIComponent(mapQuery(spot))}`;
 }
 
