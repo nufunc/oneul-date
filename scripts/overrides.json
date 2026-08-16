@@ -1,7 +1,10 @@
 {
- "[역삼 & 강남역 권역]": {
-  "exclude": true
- },
+  "먼치스앤구디스": {
+    "exclude": true
+  },
+  "[역삼 & 강남역 권역]": {
+    "exclude": true
+  },
  "페리지 (Perigee)": {
   "verified": true,
   "sourceUrl": "https://www.114.co.kr/search/detail?comp_id=8932948",

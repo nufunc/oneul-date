@@ -113,8 +113,18 @@ def run_validation(sample_limit: int = 50):
         "checked": 0,
         "verified_exact": 0,
         "relocated_or_updated": [],
+        "closed_or_excluded": [],
         "not_found": []
     }
+    
+    OVERRIDES_PATH = os.path.join(BASE_DIR, "scripts", "overrides.json")
+    overrides = {}
+    if os.path.exists(OVERRIDES_PATH):
+        try:
+            with open(OVERRIDES_PATH, "r", encoding="utf-8") as f:
+                overrides = json.load(f)
+        except Exception:
+            overrides = {}
     
     # 미검증(verified=false)이거나 주소가 없는 스팟 우선 검증
     target_indices = [
@@ -123,6 +133,7 @@ def run_validation(sample_limit: int = 50):
     ][:sample_limit]
     
     updated_count = 0
+    overrides_changed = False
     for idx in target_indices:
         spot = spots[idx]
         name = spot.get("name", "")
@@ -163,6 +174,7 @@ def run_validation(sample_limit: int = 50):
                 
             updated_count += 1
         else:
+            # 검색 결과가 없거나 폐업 의심되는 경우
             report["not_found"].append({
                 "id": spot.get("id"),
                 "name": name,
@@ -170,12 +182,16 @@ def run_validation(sample_limit: int = 50):
                 "location": loc
             })
             
-        time.sleep(0.1) # Rate limit 방어
+        time.sleep(0.05) # Rate limit 방어
         
     # 변경 사항 저장
     with open(SPOTS_JSON_PATH, "w", encoding="utf-8") as f:
         json.dump(spots, f, ensure_ascii=False, indent=2)
         
+    if overrides_changed:
+        with open(OVERRIDES_PATH, "w", encoding="utf-8") as f:
+            json.dump(overrides, f, ensure_ascii=False, indent=2)
+            
     with open(REPORT_PATH, "w", encoding="utf-8") as f:
         json.dump(report, f, ensure_ascii=False, indent=2)
         
