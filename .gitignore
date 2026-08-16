@@ -7,12 +7,24 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies & Build outputs
 node_modules
 dist
 dist-ssr
 *.local
+coverage/
+.nyc_output/
 
-# Editor directories and files
+# Environment and Secrets
+.env
+.env.*
+!.env.example
+
+# Documentation & Internal Notes
+docs/
+*.md.bak
+
+# Editor & AI tool directories
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -22,6 +34,16 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.claude/
+scratch/
 
-# 라이브 검증 작업 파일 (하이쿠 웨이브 배치/결과)
+# Python & Temporary / Review Artifacts
+__pycache__/
+*.py[cod]
+*$py.class
 scripts/_review*
+scripts/_review_args.json
+scripts/__pycache__/
+*.tmp
+*.temp
+*.bak

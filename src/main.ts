@@ -268,29 +268,158 @@ function moodTagLabels(spot: Spot): string[] {
     .slice(0, 2);
 }
 
+const KNOWN_NAME_MAP: Record<string, string> = {
+  aquafield: '아쿠아필드',
+  termeden: '테르메덴',
+  'simmons terrace': '시몬스테라스',
+};
+
+const FAMOUS_AREAS = [
+  '성수', '청담', '한남', '이태원', '홍대', '서촌', '북촌', '강남', '여의도', '압구정',
+  '송파', '잠실', '판교', '분당', '송도', '해운대', '광안리', '서면', '동성로',
+  '여수', '경주', '제천', '태안', '공주', '강릉', '속초', '춘천', '평창', '양양',
+  '제주', '서귀포', '애월', '협재', '중문', '전주', '익산', '군산', '포항', '안동',
+  '가평', '양평', '파주', '수원', '용인', '화성', '안성', '이천', '하남', '남양주',
+  '김포', '광명', '안양', '부천', '인천', '대전', '대구', '부산', '울산', '광주',
+];
+
 /**
- * 네이버 지도 검색어 정제.
- * - 이름에서 `[전남 여수]` 같은 대괄호 접두어, `(Yeosu ...)`·`（...）` 괄호 병기를 제거하고 공백 정리
- * - 정제 후 이름이 비면 원래 이름으로 폴백
- * - 지역 부착: area(시·군·구) 우선, 없으면 region(단, '전국'이면 이름만)
- * 네이버 지도 검색은 "상호명 + 동네" 수준의 짧은 질의에서 잘 동작하므로 도로명 주소는 쓰지 않는다.
+ * 네이버 지도 검색어 고도화 정제.
+ * - 괄호(영문 병기/지역 힌트) 추출 및 제거
+ * - 콜론(:), 복합 상호명(&, ↔, 및, /), 대시(-) 처리하여 핵심 상호명/명사 추출
+ * - 특수기호 제거 및 주요 영문 브랜드 한글화
+ * - area(시·군·구) / location 기반 스마트 행정구역 결합 (중복/모호한 광역어 '전국', '수도권' 제외)
  */
 function mapQuery(spot: Spot): string {
-  let name = spot.name
+  const rawName = (spot.name || '').trim();
+
+  // 1. 괄호 내용 분석 (영문 지역 힌트 등 추출: Hanam, Goyang, Icheon, Yeosu 등)
+  const bracketHints: string[] = [];
+  const bracketMatches = rawName.match(/\(([^)]+)\)|\[([^\]]+)\]|（([^）]+)）|【([^】]+)】/g);
+  if (bracketMatches) {
+    for (const b of bracketMatches) {
+      const inside = b.replace(/[\(\)\[\]（）\【\】]/g, '').trim();
+      bracketHints.push(inside);
+    }
+  }
+
+  // 2. 괄호 제거
+  let cleanName = rawName
     .replace(/\[[^\]]*\]/g, '')
     .replace(/\([^)]*\)/g, '')
     .replace(/（[^）]*）/g, '')
+    .replace(/\{[^}]*\}/g, '')
+    .replace(/【[^】]*】/g, '')
+    .trim();
+
+  // 괄호 제거 후 비어있으면 괄호 내부 힌트 사용, 그래도 없으면 원본명 폴백
+  if (!cleanName && bracketHints.length > 0) {
+    cleanName = bracketHints[0];
+  }
+  if (!cleanName) cleanName = rawName;
+
+  // 3. 콜론(:) 처리 - 수식어: 장소 형태 처리 (예: '고즈넉한 갤러리 산책: 부암동 ↔ 서촌')
+  if (cleanName.includes(':')) {
+    const parts = cleanName.split(':');
+    const prefix = parts[0].trim();
+    const suffix = parts.slice(1).join(' ').trim();
+    if (/산책|코스|투어|탐방|데이트|스팟|명소|거리|골목|여행|체험|기준|DB/.test(prefix)) {
+      cleanName = suffix || prefix;
+    } else {
+      cleanName = prefix || suffix;
+    }
+  }
+
+  // 4. 복합 상호명 분리 (&, ↔, 및, +) -> 대표 명사 추출
+  if (/(&|\+|↔|&amp;|\s및\s|\s\/\s)/.test(cleanName)) {
+    const parts = cleanName.split(/&|\+|↔|&amp;|\s및\s|\s\/\s/);
+    if (parts[0].trim().length > 0) {
+      cleanName = parts[0].trim();
+    }
+  }
+
+  // 5. 대시(-) 처리: 브랜드/호텔 - 매장명 형태 (예: '조선팰리스 서울 강남 - 이타닉 가든')
+  if (cleanName.includes(' - ')) {
+    const parts = cleanName.split(' - ');
+    const brand = parts[0].replace(/서울|강남|호텔/g, '').trim();
+    const sub = parts[1].trim();
+    if (brand && sub && !brand.includes(sub) && !sub.includes(brand)) {
+      cleanName = `${brand} ${sub}`;
+    } else {
+      cleanName = parts[1].trim() || parts[0].trim();
+    }
+  }
+
+  // 6. 특수기호 제거 (알파벳, 한글, 숫자, 공백, 온점, 하이픈 외)
+  cleanName = cleanName
+    .replace(/[^\w\s가-힣0-9.-]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
-  if (name.length === 0) name = spot.name.replace(/\s+/g, ' ').trim();
 
-  const area = spotArea(spot);
-  if (area !== null) return `${name} ${area}`;
-  if (spot.region && spot.region !== '전국') return `${name} ${spot.region}`;
-  return name;
+  // 7. 영문 상호 한글화 사전 매핑 (Aquafield -> 아쿠아필드, Termeden -> 테르메덴 등)
+  const lower = cleanName.toLowerCase();
+  for (const [eng, kor] of Object.entries(KNOWN_NAME_MAP)) {
+    if (lower === eng || lower.startsWith(eng + ' ') || lower.endsWith(' ' + eng) || lower.includes(' ' + eng + ' ')) {
+      cleanName = cleanName.replace(new RegExp(eng, 'ig'), kor);
+    }
+  }
+
+  // 8. 스마트 지역 결합 로직
+  let candidateArea: string | null = null;
+
+  // 8-1. spot.area 우선 (시·군·구 단위)
+  const spArea = spotArea(spot);
+  if (spArea && spArea !== '전국' && spArea !== '수도권') {
+    candidateArea = spArea.trim();
+  }
+
+  // 8-2. spot.location에서 유효 행정구역 추출 (시/군/구/동/읍/면)
+  if (!candidateArea && spot.location && spot.location !== '전국' && spot.location !== '수도권') {
+    const locMatch = spot.location.match(/([가-힣0-9]+(?:시|군|구|동|읍|면))/);
+    if (locMatch && !['전국', '수도권', '서울시', '경기도', '인천시', '강원도', '충청도', '전라도', '경상도', '제주도'].includes(locMatch[1])) {
+      candidateArea = locMatch[1];
+    }
+  }
+
+  // 8-3. 괄호 힌트에서 영문 지명 매핑 (Hanam -> 하남, Icheon -> 이천 등)
+  if (!candidateArea && bracketHints.length > 0) {
+    const hintText = bracketHints.join(' ');
+    if (/hanam/i.test(hintText)) candidateArea = '하남';
+    else if (/icheon/i.test(hintText)) candidateArea = '이천';
+    else if (/goyang/i.test(hintText)) candidateArea = '고양';
+    else if (/yeosu/i.test(hintText)) candidateArea = '여수';
+    else if (/gangneung/i.test(hintText)) candidateArea = '강릉';
+    else if (/sokcho/i.test(hintText)) candidateArea = '속초';
+    else if (/chuncheon/i.test(hintText)) candidateArea = '춘천';
+    else if (/jeju/i.test(hintText)) candidateArea = '제주';
+  }
+
+  // 8-4. spot.region 폴백 (광역명 제외)
+  if (!candidateArea && spot.region && !['전국', '수도권', '서울', '경기', '인천', '강원', '충청', '영남', '호남', '제주'].includes(spot.region)) {
+    candidateArea = spot.region.trim();
+  }
+
+  // 8-5. 중복 결합 방지 검사 및 결합
+  if (candidateArea) {
+    const simpleArea = candidateArea.replace(/(시|군|구|동|읍|면)$/, '');
+    const alreadyHasArea =
+      cleanName.includes(candidateArea) ||
+      (simpleArea.length >= 2 && cleanName.includes(simpleArea)) ||
+      FAMOUS_AREAS.some(
+        (reg) =>
+          cleanName.includes(reg) &&
+          (candidateArea?.includes(reg) || (spot.location && spot.location.includes(reg))),
+      );
+
+    if (!alreadyHasArea) {
+      cleanName = `${cleanName} ${candidateArea}`.trim();
+    }
+  }
+
+  return cleanName || spot.name.trim();
 }
 
-/** 스폿의 네이버 지도 검색 URL — 정제된 "상호명 + 동네" 질의로 검색 */
+/** 스폿의 네이버 지도 검색 URL — 정제된 핵심 상호명 + 유효 행정구역 질의 */
 function naverMapUrl(spot: Spot): string {
   return `https://map.naver.com/p/search/${encodeURIComponent(mapQuery(spot))}`;
 }
@@ -409,6 +538,8 @@ function activeSlots(): SlotKey[] {
   return SLOT_ORDER.filter((k) => state.slots[k]);
 }
 
+const APP_VERSION = 'v0.3.2';
+
 function courseSpotIds(): number[] {
   if (!state.course) return [];
   return state.course.filter((st) => st.spotId !== null).map((st) => st.spotId as number);
@@ -469,6 +600,8 @@ function escapeHtml(text: string): string {
     .replace(/'/g, '&#039;');
 }
 
+let toastTimer: number | null = null;
+
 function showToast(msg: string): void {
   let toast = document.querySelector('.toast-msg') as HTMLElement | null;
   if (!toast) {
@@ -478,7 +611,14 @@ function showToast(msg: string): void {
   }
   toast.textContent = msg;
   toast.classList.add('show');
-  window.setTimeout(() => toast?.classList.remove('show'), 2200);
+
+  if (toastTimer !== null) {
+    window.clearTimeout(toastTimer);
+  }
+  toastTimer = window.setTimeout(() => {
+    toast?.classList.remove('show');
+    toastTimer = null;
+  }, 2200);
 }
 
 // ---------------------------------------------------------------------------
@@ -496,6 +636,10 @@ function renderShell(): void {
     <section class="today-course-area" id="today-area"></section>
     <section class="conditions" id="conditions-area"></section>
     <section class="results" id="results-area"></section>
+    <footer class="app-footer">
+      <p class="footer-copy">오늘 데이트 <span class="footer-version">v1.0.0</span></p>
+      <p class="footer-sub">조건만 고르면 완성되는 시간대별 데이트 코스</p>
+    </footer>
     <div class="overlay-root" id="overlay-root"></div>
   `;
   document.getElementById('btn-open-saved')!.addEventListener('click', () => {
@@ -515,22 +659,39 @@ function renderTodayCourse(): void {
   if (!area) return;
   const today = buildTodayCourse();
   const filled = today.steps.filter((st): st is CourseStep & { spotId: number } => st.spotId !== null);
-  const parts = filled
+  const stepItems = filled
     .map((st) => {
       const spot = spotById.get(st.spotId);
-      return spot ? `${SLOT_META[st.slot].emoji} ${escapeHtml(spot.name)}` : null;
+      if (!spot) return null;
+      return { slot: st.slot, name: spot.name };
     })
-    .filter((p): p is string => p !== null);
+    .filter((item): item is { slot: SlotKey; name: string } => item !== null);
 
-  if (parts.length === 0) {
+  if (stepItems.length === 0) {
     area.innerHTML = '';
     return;
   }
 
+  const chipsHtml = stepItems
+    .map(
+      (item) => `
+      <span class="today-step-chip">
+        <span class="today-step-emoji">${SLOT_META[item.slot].emoji}</span>
+        <span class="today-step-name">${escapeHtml(item.name)}</span>
+      </span>
+    `,
+    )
+    .join('<span class="today-step-sep" aria-hidden="true">›</span>');
+
   area.innerHTML = `
     <button class="today-course" id="btn-today-course" aria-label="오늘의 코스를 결과 영역에 펼치기">
-      <span class="today-course-title">✨ 오늘 ${today.dateLabel}의 코스</span>
-      <span class="today-course-strip">${parts.join(' → ')}</span>
+      <div class="today-course-header">
+        <span class="today-course-title">✨ 오늘 ${today.dateLabel}의 코스</span>
+        <span class="today-course-hint">터치하여 코스 불러오기</span>
+      </div>
+      <div class="today-course-strip">
+        ${chipsHtml}
+      </div>
     </button>
   `;
   document.getElementById('btn-today-course')!.addEventListener('click', () => {
@@ -641,7 +802,7 @@ function bindConditionEvents(area: HTMLElement): void {
   area.querySelector('#btn-generate')!.addEventListener('click', () => {
     const slotsOn = activeSlots();
     if (slotsOn.length === 0) {
-      showToast('시간대를 하나 이상 켜주세요');
+      showToast('시간대를 하나 이상 선택해 주세요');
       return;
     }
     state.course = generateCourse(spots, slotsOn, state.regions, state.mood, {
@@ -654,6 +815,9 @@ function bindConditionEvents(area: HTMLElement): void {
 }
 
 // --- 결과 영역 -------------------------------------------------------------
+
+const ICON_REFRESH_SVG = `<svg class="icon-refresh" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>`;
+const ICON_SWAP_SVG = `<svg class="icon-swap" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>`;
 
 function renderResults(): void {
   const area = document.getElementById('results-area');
@@ -671,7 +835,10 @@ function renderResults(): void {
   area.innerHTML = `
     <div class="course-head">
       <span class="course-title">✨ ${escapeHtml(regionsLabel(cond.regions))} · ${escapeHtml(moodLabel(cond.mood))} 코스</span>
-      <button class="btn-regenerate" id="btn-regenerate">🔄 전체 다시 뽑기</button>
+      <button class="btn-regenerate" id="btn-regenerate" aria-label="전체 다시 추천받기">
+        ${ICON_REFRESH_SVG}
+        <span class="btn-regenerate-text">전체 다시 추천</span>
+      </button>
     </div>
     <div class="step-list">
       ${state.course.map((step, i) => renderStepCard(step, i)).join('')}
@@ -696,7 +863,7 @@ function renderStepCard(
     return `
       <article class="step-card empty">
         <div class="step-slot">${meta.emoji} ${meta.label}</div>
-        <p class="step-empty-msg">이 조건에 맞는 후보가 없어요</p>
+        <p class="step-empty-msg">이 조건에 맞는 장소를 찾지 못했어요</p>
       </article>
     `;
   }
@@ -705,7 +872,7 @@ function renderStepCard(
     return `
       <article class="step-card empty">
         <div class="step-slot">${meta.emoji} ${meta.label}</div>
-        <p class="step-empty-msg">스폿 정보를 찾을 수 없어요</p>
+        <p class="step-empty-msg">장소 정보를 불러올 수 없어요</p>
       </article>
     `;
   }
@@ -714,7 +881,7 @@ function renderStepCard(
     spot.verified || moodTags.length > 0
       ? `
       <div class="step-meta">
-        ${spot.verified ? `<span class="badge-verified">✓ 실존 검증</span>` : ''}
+        ${spot.verified ? `<span class="badge-verified">✓ 확인된 장소</span>` : ''}
         ${moodTags.length > 0 ? `<span class="step-mood-tags">${escapeHtml(moodTags.join(' · '))}</span>` : ''}
       </div>`
       : '';
@@ -722,7 +889,7 @@ function renderStepCard(
     <article class="step-card">
       <div class="step-card-head">
         <div class="step-slot">${meta.emoji} ${meta.label}</div>
-        ${swappable ? `<button class="btn-swap" data-step-index="${index}" aria-label="${meta.label} 스텝 랜덤 교체">🔄</button>` : ''}
+        ${swappable ? `<button class="btn-swap" data-step-index="${index}" aria-label="${meta.label} 스텝 교체" title="이 장소만 다시 추천받기">${ICON_SWAP_SVG}</button>` : ''}
       </div>
       <h3 class="step-name">${escapeHtml(spot.name)}</h3>
       <p class="step-location">📍 ${escapeHtml(spot.location)}</p>
@@ -734,10 +901,20 @@ function renderStepCard(
   `;
 }
 
+function bindSwapButton(btn: HTMLButtonElement): void {
+  btn.addEventListener('click', () => {
+    btn.classList.add('is-spinning');
+    setTimeout(() => {
+      swapStep(Number(btn.dataset.stepIndex));
+    }, 150);
+  });
+}
+
 /**
  * 스텝 하나를 조건 스냅샷 내 후보에서 랜덤 교체 (현재 코스 스폿·자기 자신 제외).
  * 다른 스텝들의 최빈 area 기준 ① 같은 area → ② 권역 전체 폴백으로 근접 선택.
  * 최근 노출 이력은 소프트 제외 (제외 후 0건이면 이력 무시).
+ * 전체 renderResults 대신 해당 카드만 DOM 교체 + swap-in 트랜지션 적용.
  */
 function swapStep(index: number): void {
   if (!state.course || !state.courseConditions) return;
@@ -751,12 +928,35 @@ function swapStep(index: number): void {
   const anchorArea = dominantArea(state.course, spotById, index);
   const chosen = pickNearRandom(candidates, anchorArea);
   if (!chosen) {
-    showToast('이 조건엔 다른 후보가 없어요');
+    showToast('이 조건에 다른 추천 장소가 없어요');
     return;
   }
   state.course[index] = { slot: step.slot, spotId: chosen.id };
   addRecentSpotIds([chosen.id]);
-  renderResults();
+
+  // 대상 카드만 부드럽게 swap-in 교체
+  const cardList = document.querySelectorAll<HTMLElement>('.step-list > .step-card');
+  const targetCard = cardList[index];
+  if (!targetCard) {
+    renderResults();
+    return;
+  }
+
+  const temp = document.createElement('div');
+  temp.innerHTML = renderStepCard(state.course[index], index);
+  const newCard = temp.firstElementChild as HTMLElement | null;
+  if (!newCard) {
+    renderResults();
+    return;
+  }
+
+  newCard.classList.add('swap-in');
+  targetCard.replaceWith(newCard);
+
+  const newSwapBtn = newCard.querySelector<HTMLButtonElement>('.btn-swap');
+  if (newSwapBtn) {
+    bindSwapButton(newSwapBtn);
+  }
 }
 
 /** 동일 조건 스냅샷으로 모든 스텝 재생성 (체감 랜덤 보정 적용) */
@@ -773,12 +973,13 @@ function regenerateCourse(): void {
 
 function bindResultEvents(area: HTMLElement): void {
   area.querySelectorAll<HTMLButtonElement>('.btn-swap').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      swapStep(Number(btn.dataset.stepIndex));
-    });
+    bindSwapButton(btn);
   });
-  area.querySelector('#btn-regenerate')?.addEventListener('click', () => {
-    regenerateCourse();
+  area.querySelector('#btn-regenerate')?.addEventListener('click', function (this: HTMLButtonElement) {
+    this.classList.add('is-spinning');
+    setTimeout(() => {
+      regenerateCourse();
+    }, 150);
   });
   area.querySelector('#btn-copy')?.addEventListener('click', () => {
     if (!state.course || !state.courseConditions) return;
@@ -791,24 +992,24 @@ function bindResultEvents(area: HTMLElement): void {
     navigator.clipboard
       .writeText(text)
       .then(() => showToast('📋 코스가 복사되었어요'))
-      .catch(() => showToast('복사에 실패했어요'));
+      .catch(() => showToast('복사하지 못했어요'));
   });
   area.querySelector('#btn-share-link')?.addEventListener('click', () => {
     const ids = courseSpotIds();
     if (ids.length === 0) {
-      showToast('공유할 스폿이 없어요');
+      showToast('공유할 장소가 없어요');
       return;
     }
     navigator.clipboard
       .writeText(buildShareUrl(ids))
       .then(() => showToast('🔗 공유 링크가 복사되었어요'))
-      .catch(() => showToast('복사에 실패했어요'));
+      .catch(() => showToast('복사하지 못했어요'));
   });
   area.querySelector('#btn-save')?.addEventListener('click', () => {
     if (!state.course || !state.courseConditions) return;
     const ids = courseSpotIds();
     if (ids.length === 0) {
-      showToast('저장할 스폿이 없어요');
+      showToast('저장할 장소가 없어요');
       return;
     }
     const list = loadSavedCourses();
@@ -859,8 +1060,12 @@ function renderReceiverView(steps: CourseStep[]): void {
       <div class="step-list">
         ${steps.map((step, i) => renderStepCard(step, i, { swappable: false })).join('')}
       </div>
-      <button class="btn-primary btn-make-own" id="btn-make-own">나도 코스 만들기 →</button>
+      <button class="btn-primary btn-make-own" id="btn-make-own">나만의 코스 만들기 →</button>
     </section>
+    <footer class="app-footer">
+      <p class="footer-copy">오늘 데이트 <span class="footer-version">${APP_VERSION}</span></p>
+      <p class="footer-sub">조건만 고르면 완성되는 시간대별 데이트 코스</p>
+    </footer>
   `;
   document.getElementById('btn-make-own')!.addEventListener('click', () => {
     clearCourseHash();
@@ -870,11 +1075,59 @@ function renderReceiverView(steps: CourseStep[]): void {
 
 // --- 저장한 코스 오버레이 ------------------------------------------------------
 
-function savedCourseSummary(item: SavedCourse): string {
-  const names = item.spotIds
-    .map((id) => spotById.get(id)?.name)
-    .filter((n): n is string => Boolean(n));
-  return names.length > 0 ? names.join(' → ') : '(스폿 정보 없음)';
+function savedCourseSpotsHtml(item: SavedCourse): string {
+  const steps = item.spotIds
+    .map((id) => {
+      const spot = spotById.get(id);
+      if (!spot) return null;
+      return { spot, slot: spot.slot };
+    })
+    .filter((entry): entry is { spot: Spot; slot: SlotKey | null } => entry !== null);
+
+  if (steps.length === 0) {
+    return `<span class="saved-spots-empty">(장소 정보 없음)</span>`;
+  }
+
+  return `
+    <div class="saved-step-flow">
+      ${steps
+        .map((entry) => {
+          const emoji = entry.slot && SLOT_META[entry.slot] ? SLOT_META[entry.slot].emoji : '📍';
+          return `
+            <span class="saved-step-chip">
+              <span class="saved-step-emoji">${emoji}</span>
+              <span class="saved-step-name">${escapeHtml(entry.spot.name)}</span>
+            </span>
+          `;
+        })
+        .join('<span class="saved-step-sep" aria-hidden="true">›</span>')}
+    </div>
+  `;
+}
+
+let isClosingOverlay = false;
+
+function closeOverlay(callback?: () => void): void {
+  if (isClosingOverlay || !state.savedOpen) return;
+  const root = document.getElementById('overlay-root');
+  if (!root) return;
+  const backdrop = root.querySelector('.overlay-backdrop');
+  const panel = root.querySelector('.overlay-panel');
+  if (!backdrop || !panel) {
+    state.savedOpen = false;
+    renderOverlay();
+    callback?.();
+    return;
+  }
+  isClosingOverlay = true;
+  backdrop.classList.add('is-closing');
+  panel.classList.add('is-closing');
+  window.setTimeout(() => {
+    state.savedOpen = false;
+    isClosingOverlay = false;
+    renderOverlay();
+    callback?.();
+  }, 220);
 }
 
 function renderOverlay(): void {
@@ -904,7 +1157,7 @@ function renderOverlay(): void {
               <div class="saved-item">
                 <button class="saved-item-main" data-course-id="${escapeHtml(item.id)}">
                   <span class="saved-item-meta">${dateStr} · ${escapeHtml(regionsLabel(normalizeRegionCond(item.conditions.region)))} · ${escapeHtml(moodLabel(item.conditions.mood))}</span>
-                  <span class="saved-item-spots">${escapeHtml(savedCourseSummary(item))}</span>
+                  <div class="saved-item-spots">${savedCourseSpotsHtml(item)}</div>
                 </button>
                 <button class="saved-item-delete" data-delete-id="${escapeHtml(item.id)}" aria-label="삭제">🗑</button>
               </div>`;
@@ -915,21 +1168,17 @@ function renderOverlay(): void {
     </div>
   `;
 
-  const close = () => {
-    state.savedOpen = false;
-    renderOverlay();
-  };
-  root.querySelector('#overlay-backdrop')!.addEventListener('click', close);
-  root.querySelector('#overlay-close')!.addEventListener('click', close);
+  root.querySelector('#overlay-backdrop')!.addEventListener('click', () => closeOverlay());
+  root.querySelector('#overlay-close')!.addEventListener('click', () => closeOverlay());
 
   root.querySelectorAll<HTMLButtonElement>('.saved-item-main').forEach((btn) => {
     btn.addEventListener('click', () => {
       const item = loadSavedCourses().find((c) => c.id === btn.dataset.courseId);
       if (!item) return;
-      restoreCourse(item);
-      state.savedOpen = false;
-      renderOverlay();
-      showToast('코스를 불러왔어요');
+      closeOverlay(() => {
+        restoreCourse(item);
+        showToast('코스를 불러왔어요');
+      });
     });
   });
   root.querySelectorAll<HTMLButtonElement>('.saved-item-delete').forEach((btn) => {
@@ -973,6 +1222,12 @@ function restoreCourse(item: SavedCourse): void {
 // ---------------------------------------------------------------------------
 
 function init(): void {
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && state.savedOpen) {
+      closeOverlay();
+    }
+  });
+
   const sharedIds = parseCourseHash(location.hash);
   if (sharedIds !== null) {
     const steps = buildSharedSteps(sharedIds);
@@ -982,7 +1237,7 @@ function init(): void {
     }
     // 전부 무효 ID → 안내 후 홈으로
     clearCourseHash();
-    showToast('링크의 코스를 찾을 수 없어요');
+    showToast('공유된 코스를 찾을 수 없어요');
   }
   renderShell();
 }
