@@ -606,6 +606,17 @@ function mapQuery(spot: Spot): string {
     }
   }
 
+  // 8-8. 일반명사/업종명 형태의 상호명인 경우 동/도로명 정밀 결합 (검색 결과 수백 개 발산 방지)
+  const GENERIC_NOUNS = ['요리', '다이닝', '식당', '카페', '커피', '베이커리', '바', '펍', '파스타', '스테이크', '브런치', '공방', '스튜디오', '글램핑', '펜션', '야장', '포차'];
+  const isGenericName = GENERIC_NOUNS.some((gn) => cleanName === gn || cleanName.includes(gn)) || cleanName.length <= 4;
+
+  if (isGenericName && spot.address) {
+    const dongRoadMatch = spot.address.match(/([가-힣0-9]+(?:동|읍|면|로[0-9]*길|[0-9]+길))/);
+    if (dongRoadMatch && !cleanName.includes(dongRoadMatch[1])) {
+      cleanName = `${cleanName} ${dongRoadMatch[1]}`.trim();
+    }
+  }
+
   return cleanName || spot.name.trim();
 }
 
