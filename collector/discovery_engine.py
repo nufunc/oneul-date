@@ -240,9 +240,10 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
         "Prefer": "return=minimal"
     }
 
-    # 랜덤 6개 탐색 쿼리 선택 (수집 범위 2배 상향)
-    sampled_queries = random.sample(DISCOVERY_QUERIES, min(6, len(DISCOVERY_QUERIES)))
-    print(f"🧭 [신규 핫플 자율 탐색] 선택된 쿼리: {[q[0] for q in sampled_queries]}")
+    # max_discoveries 수량에 맞춰 탐색 쿼리 수를 유연하게 비례 확장 (기본 10개 ~ 전체 풀 순회)
+    sample_count = min(len(DISCOVERY_QUERIES), max(10, (max_discoveries + 4) // 4))
+    sampled_queries = random.sample(DISCOVERY_QUERIES, sample_count)
+    print(f"🧭 [신규 핫플 자율 탐색] 선택된 쿼리 ({len(sampled_queries)}개): {[q[0] for q in sampled_queries[:5]]} ...")
     if groq_key:
         print("🤖 [Groq AI 에디터 엔진 활성화] 신규 핫플 메타데이터(한줄요약, 무드, 슬롯) 자동 큐레이션 적용")
 
@@ -250,9 +251,9 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
 
     for query_text, region, area, default_moods in sampled_queries:
         places = search_discovery(query_text)
-        time.sleep(0.3)
+        time.sleep(0.2)
 
-        for p in places[:4]:  # 상위 4개 검토
+        for p in places[:8]:  # 상위 8개 정밀 검토
             raw_name = p.get("name", "").strip()
             # 숙소/펜션/호텔/모텔 100% 필터링
             cat = str(p.get("category") or "")

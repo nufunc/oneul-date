@@ -106,8 +106,10 @@ def run_community_mining(supabase_url: str, service_key: str, max_discoveries: i
         "Prefer": "return=minimal"
     }
 
-    sampled = random.sample(COMMUNITY_SEARCH_QUERIES, min(2, len(COMMUNITY_SEARCH_QUERIES)))
-    print(f"💬 [커뮤니티 트렌드 마이닝 시작] 타깃 쿼리: {[q[0] for q in sampled]}")
+    # max_discoveries 수량에 맞춰 커뮤니티 쿼리 수를 유연하게 비례 확장
+    sample_count = min(len(COMMUNITY_SEARCH_QUERIES), max(6, (max_discoveries + 4) // 5))
+    sampled = random.sample(COMMUNITY_SEARCH_QUERIES, sample_count)
+    print(f"💬 [커뮤니티 트렌드 마이닝 시작] 타깃 쿼리 ({len(sampled)}개): {[q[0] for q in sampled[:5]]} ...")
 
     discovered = []
 
@@ -126,9 +128,9 @@ def run_community_mining(supabase_url: str, service_key: str, max_discoveries: i
             continue
 
         raw_candidates = extract_list_items(html_content)
-        time.sleep(0.3)
+        time.sleep(0.2)
 
-        for cand_name in raw_candidates[:6]:
+        for cand_name in raw_candidates[:8]:
             search_query = f"{cand_name} {area}"
             places = search_naver(search_query)
             time.sleep(0.2)
