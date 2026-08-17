@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "name": "아쿠아필드",
+    "slot": "day",
+    "region": "경기",
+    "area": "하남시",
+    "address": "경기 하남시 미사대로 750",
+    "mood": ["healing", "luxury"],
+    "location": "경기 하남 (스타필드)",
+    "price": "3~5만원대",
+    "summary": "인피니티풀과 힐링 찜질스파를 동시에 즐기는 힐링 데이트",
+    "source": { "type": "place", "url": "https://map.naver.com/", "note": "sample" },
+    "verified": true
+  }
+]

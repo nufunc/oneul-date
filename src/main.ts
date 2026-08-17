@@ -1,5 +1,5 @@
 import './style.css';
-import rawSpotsData from './data/spots.json';
+import rawSpotsData from './data/spots.sample.json';
 
 // ---------------------------------------------------------------------------
 // Types & constants

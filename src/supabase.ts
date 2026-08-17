@@ -1,4 +1,4 @@
-import rawSpotsData from './data/spots.json';
+import rawSpotsData from './data/spots.sample.json';
 
 export interface Spot {
   id: number;

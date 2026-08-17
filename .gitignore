@@ -50,3 +50,8 @@ scripts/__pycache__/
 *.tmp
 *.temp
 *.bak
+
+# Database & Data Files (Managed via Supabase Cloud DB)
+src/data/spots.json
+scripts/validation_report.json
+scripts/generate_part*.py
