@@ -1127,7 +1127,8 @@ function activeSlots(): SlotKey[] {
   return SLOT_ORDER.filter((k) => state.slots[k]);
 }
 
-const APP_VERSION = 'v0.6.0';
+declare const __APP_VERSION__: string;
+const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.7.0';
 
 function courseSpotIds(): number[] {
   if (!state.course) return [];
