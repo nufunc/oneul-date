@@ -184,7 +184,8 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
         # 2차 검색 (실패 시 주소 앞 3단어 결합)
         if not places and addr:
             sub_addr = " ".join(addr.split()[:3])
-            places = search_naver(f"{re.sub(r'[^\w가-힣0-9]', '', name)[:10]} {sub_addr}")
+            clean_prefix = re.sub(r'[^\w가-힣0-9]', '', name)[:10]
+            places = search_naver(f"{clean_prefix} {sub_addr}")
             time.sleep(0.1)
 
         patch_data = {}
