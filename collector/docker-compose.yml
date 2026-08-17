@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   collector:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: oneul-collector
     restart: unless-stopped
     env_file:
@@ -10,13 +12,12 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - CHECK_INTERVAL_HOURS=${CHECK_INTERVAL_HOURS:-2}
-      - BATCH_LIMIT=${BATCH_LIMIT:-100}
+      - BATCH_LIMIT=${BATCH_LIMIT:-50}
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
-    # OCI 무료 인스턴스 자원 보호
     deploy:
       resources:
         limits:
