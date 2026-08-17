@@ -1,0 +1,75 @@
+name: Deploy Data Engine
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'collector/**'
+      - '.github/workflows/deploy-collector.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: data-engine-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy to Server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.OCI_HOST }}
+          username: ${{ secrets.OCI_USERNAME }}
+          key: ${{ secrets.OCI_SSH_KEY }}
+          port: ${{ secrets.OCI_PORT || 22 }}
+          script_stop: true
+          script: |
+            set -eo pipefail
+
+            echo "🚀 [CI/CD] Starting data engine update..."
+
+            TARGET_DIR="/mnt/data/git/oneul-date/collector"
+            if [ ! -d "$TARGET_DIR" ]; then
+              TARGET_DIR="$HOME/oneul-date/collector"
+            fi
+
+            if [ ! -d "$TARGET_DIR" ]; then
+              echo "❌ Directory not found"
+              exit 1
+            fi
+
+            cd "$TARGET_DIR"
+
+            sudo mkdir -p /mnt/data/logs 2>/dev/null || mkdir -p /mnt/data/logs
+            chmod 755 /mnt/data/logs 2>/dev/null || true
+
+            if docker compose version &>/dev/null; then
+              COMPOSE_CMD="docker compose"
+            else
+              COMPOSE_CMD="docker-compose"
+            fi
+
+            echo "📥 Syncing latest codebase..."
+            git checkout main
+            git pull origin main
+
+            echo "🔨 Rebuilding containers..."
+            $COMPOSE_CMD down
+            $COMPOSE_CMD up -d --build
+
+            echo "🧹 Cleaning unused images..."
+            docker image prune -f
+
+            echo "🔍 Verifying container health..."
+            sleep 3
+            if docker ps --format '{{.Names}}' | grep -q "oneul-collector"; then
+              echo "🎉 Container successfully started!"
+              docker ps --filter "name=oneul-collector" --format "table {{.Names}}\t{{.Status}}\t{{.Image}}"
+            else
+              echo "⚠️ Failed to start container"
+              $COMPOSE_CMD logs --tail=30
+              exit 1
+            fi
