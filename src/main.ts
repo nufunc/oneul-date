@@ -552,42 +552,45 @@ function formatCourseText(
   return blocks.join('\n\n');
 }
 
-// --- 날짜 시드 PRNG (오늘의 코스 전용) ------------------------------------------
+// --- 내 위치 중심 맞춤 추천 코스 ---------------------------------------------
 
-/** 문자열 → 32비트 해시 (시드 생성용) */
-function hashString(str: string): number {
-  let h = 1779033703 ^ str.length;
-  for (let i = 0; i < str.length; i++) {
-    h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
-    h = (h << 13) | (h >>> 19);
-  }
-  return h >>> 0;
+/** 두 위경도 좌표 간의 거리 계산 (km) */
+function getDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLng = (lng2 - lng1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
 }
 
-/** mulberry32 시드 PRNG — 같은 시드면 같은 수열 (같은 날 누가 열어도 같은 코스) */
-function mulberry32(seed: number): () => number {
-  let a = seed >>> 0;
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let t = a;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
+let userCoords: { lat: number; lng: number } | null = null;
 
 /**
- * 오늘의 코스 — YYYY-MM-DD 시드 결정적 생성.
- * 낮+저녁+밤 3슬롯 · 지역 전체 · 분위기 전체, 근접 자동 로직 재사용.
- * 체감 랜덤 보정(최근 이력 제외)은 결정성 유지를 위해 미적용.
+ * 내 위치 중심 / 실시간 추천 코스 생성 (날짜 제거, 위치 우선)
  */
-function buildTodayCourse(now: Date = new Date()): { dateLabel: string; steps: CourseStep[] } {
-  const yyyy = now.getFullYear();
-  const mm = String(now.getMonth() + 1).padStart(2, '0');
-  const dd = String(now.getDate()).padStart(2, '0');
-  const rng = mulberry32(hashString(`${yyyy}-${mm}-${dd}`));
-  const steps = generateCourse(spots, ['day', 'evening', 'night'], [], 'ALL', { rng });
-  return { dateLabel: `${yyyy}.${mm}.${dd}`, steps };
+function buildNearbyCourse(coords: { lat: number; lng: number } | null): { label: string; steps: CourseStep[] } {
+  let pool = spots;
+  let label = '✨ 지금 가기 좋은 맞춤 코스';
+
+  if (coords && coords.lat && coords.lng) {
+    const spotsWithDist = spots
+      .filter((s) => s.lat != null && s.lng != null)
+      .map((s) => ({ spot: s, dist: getDistanceKm(coords.lat, coords.lng, s.lat!, s.lng!) }))
+      .sort((a, b) => a.dist - b.dist);
+
+    if (spotsWithDist.length >= 10) {
+      pool = spotsWithDist.slice(0, 35).map((item) => item.spot);
+      const nearestDist = Math.round(spotsWithDist[0].dist * 10) / 10;
+      label = `📍 내 주변 추천 코스 (${nearestDist}km 이내)`;
+    }
+  }
+
+  const steps = generateCourse(pool, ['day', 'evening', 'night'], [], 'ALL');
+  return { label, steps };
 }
 
 // --- URL 링크 공유 (코스 = 스폿 ID 배열 → 해시 인코딩) -----------------------------
@@ -759,8 +762,8 @@ function renderShell(): void {
 function renderTodayCourse(): void {
   const area = document.getElementById('today-area');
   if (!area) return;
-  const today = buildTodayCourse();
-  const filled = today.steps.filter((st): st is CourseStep & { spotId: number } => st.spotId !== null);
+  const initial = buildNearbyCourse(userCoords);
+  const filled = initial.steps.filter((st): st is CourseStep & { spotId: number } => st.spotId !== null);
 
   if (filled.length === 0) {
     area.innerHTML = '';
@@ -768,21 +771,46 @@ function renderTodayCourse(): void {
   }
 
   area.innerHTML = `
-    <button class="today-course" id="btn-today-course" aria-label="오늘의 추천 코스 불러오기">
-      <span class="today-course-label">✨ 오늘의 추천 코스! (${today.dateLabel})</span>
+    <button class="today-course" id="btn-today-course" aria-label="내 주변 맞춤 코스 불러오기">
+      <span class="today-course-label">${initial.label}</span>
       <span class="today-course-arrow" aria-hidden="true">→</span>
     </button>
   `;
-  document.getElementById('btn-today-course')!.addEventListener('click', () => {
-    // 오늘의 코스를 결과 영역에 로드 — 이후 교체·복사·저장은 일반 코스와 동일하게 동작
+
+  const btn = document.getElementById('btn-today-course');
+  if (!btn) return;
+
+  function applyCourse(steps: CourseStep[]) {
     state.slots = { day: true, evening: true, night: true, stay: false };
     state.regions = [];
     state.subZones = [];
     state.mood = 'ALL';
-    state.course = today.steps.map((st) => ({ ...st }));
+    state.course = steps.map((st) => ({ ...st }));
     state.courseConditions = { regions: [], subZones: [], mood: 'ALL' };
     renderConditions();
     renderResults();
+  }
+
+  btn.addEventListener('click', () => {
+    if (!userCoords && 'geolocation' in navigator) {
+      const labelSpan = btn.querySelector('.today-course-label');
+      if (labelSpan) labelSpan.textContent = '📍 내 위치 찾는 중...';
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          userCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          const nearby = buildNearbyCourse(userCoords);
+          applyCourse(nearby.steps);
+        },
+        () => {
+          const fallback = buildNearbyCourse(null);
+          applyCourse(fallback.steps);
+        },
+        { timeout: 4000 }
+      );
+    } else {
+      const res = buildNearbyCourse(userCoords);
+      applyCourse(res.steps);
+    }
   });
 }
 
