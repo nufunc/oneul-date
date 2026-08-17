@@ -58,12 +58,14 @@ def get_youtube_video_info(video_id: str) -> dict | None:
             # 설명란 추출
             desc_match = re.search(r'\"shortDescription\":\"(.*?)\"', html)
             if desc_match:
-                # unicode unescape
                 raw_desc = desc_match.group(1)
                 try:
-                    description = bytes(raw_desc, 'utf-8').decode('unicode_escape')
+                    description = json.loads(f'"{raw_desc}"')
                 except Exception:
-                    description = raw_desc.replace('\\n', '\n')
+                    try:
+                        description = raw_desc.encode('utf-8').decode('unicode_escape')
+                    except Exception:
+                        description = raw_desc.replace('\\n', '\n')
             
             # 조회수 추출
             view_match = re.search(r'\"viewCount\":\"(\d+)\"', html)
@@ -89,36 +91,58 @@ def extract_spot_candidates(title: str, description: str) -> list[str]:
     """영상 제목과 설명란에서 유력 장소명 후보군 추출"""
     candidates = []
     
-    # 1. 타임스탬프 라인 파싱 (예: "01:23 선샤인스튜디오", "04:50 반야사 동굴법당", "10:15 커피인터뷰")
-    timestamp_lines = re.findall(r'(?:[0-9]{1,2}:[0-9]{2}(?::[0-9]{2})?)\s*[-~:]?\s*([^\n\r]+)', description)
+    # 1. 타임스탬프 라인 파싱 (예: "01:23 선샤인스튜디오", "04:50 반야사", "00:21 월화원")
+    timestamp_lines = re.findall(r'(?:[0-9]{1,2}:[0-9]{2}(?::[0-9]{2})?)\s*[-~:•·]?\s*([^\n\r]+)', description)
     for line in timestamp_lines:
         clean = re.sub(r'[\(\[\{].*?[\)\]\}]', '', line).strip()
         clean = re.sub(r'^[0-9\.\-\s]+', '', clean).strip()
         if clean and len(clean) >= 2 and len(clean) <= 25:
             candidates.append(clean)
 
-    # 2. 쉼표/구분자 기반 제목 파싱 (예: "논산맛집,선샤인스튜디오,곱창칼국수,동굴법당,딸기떡")
-    # 제목에서 특수문자 분리
-    title_parts = re.split(r'[,|/·•\-\+]', title)
-    for part in title_parts:
-        clean = re.sub(r'[🌾🔥✨💎☕🍕🍜#]', '', part).strip()
-        clean = re.sub(r'당일치기|브이로그|여행|코스|데이트|맛집|핫플|추천|Vlog', '', clean, flags=re.IGNORECASE).strip()
-        if clean and len(clean) >= 2 and len(clean) <= 20:
-            candidates.append(clean)
-
-    # 3. 설명란 내 주소/상호명 패턴 추출 (예: "📍 선샤인스튜디오 : 충남 논산시...", "1. 반야사")
-    labeled_spots = re.findall(r'(?:📍|📌|🏠|☕|🍽️|[0-9]\.)\s*([^\n\r:—\-]+)', description)
-    for spot in labeled_spots:
-        clean = spot.strip()
+    # 2. 번호 리스트 파싱 (예: "1. 초막골생태공원", "2. 수리사", "3) 반월호수공원")
+    numbered_lines = re.findall(r'(?:[0-9]{1,2}[\.\)\-]\s*)([^\n\r:—\-]+)', description)
+    for line in numbered_lines:
+        clean = re.sub(r'[\(\[\{].*?[\)\]\}]', '', line).strip()
         if clean and len(clean) >= 2 and len(clean) <= 25:
             candidates.append(clean)
 
-    # 중복 제거 및 노이즈 필터링
+    # 3. 쉼표/구분자 기반 제목 파싱 (예: "논산맛집,선샤인스튜디오,곱창칼국수,동굴법당,딸기떡")
+    title_parts = re.split(r'[,|/·•\-\+]', title)
+    for part in title_parts:
+        clean = re.sub(r'[🌾🔥✨💎☕🍕🍜#˙ᵕ˙🎈â˜”ðŸ“]', '', part).strip()
+        clean = re.sub(r'당일치기|브이로그|여행지|여행|하루|코스|데이트|맛집|카페|핫플|추천|Vlog|가볼만한곳|이런|마포는|처음이죠|몰라서|못가는|곳', '', clean, flags=re.IGNORECASE).strip()
+        if clean and len(clean) >= 2 and len(clean) <= 20:
+            candidates.append(clean)
+
+    # 4. 설명란 내 아이콘/헤더 기반 장소명 패턴 (예: "📍 선샤인스튜디오", "🏠 월화원", "☕ 범골커피")
+    labeled_spots = re.findall(r'(?:📍|📌|🏠|☕|🍽️|🏛️|🌳|🌿|🎪)\s*([^\n\r:—\-]+)', description)
+    for spot in labeled_spots:
+        clean = re.sub(r'[\(\[\{].*?[\)\]\}]', '', spot).strip()
+        if clean and len(clean) >= 2 and len(clean) <= 25:
+            candidates.append(clean)
+
+    # 중복 제거 및 무의미한 일반명사(불용어) 필터링
     unique_candidates = []
-    stopwords = ["오늘", "이번", "여행", "브이로그", "영상", "더보기", "인스타그램", "협찬", "광고", "구독", "좋아요"]
+    stopwords = [
+        "intro", "outro", "인트로", "아웃트로", "요약", "맛집", "카페", "술집",
+        "미리보기", "엔딩", "인사말", "오프닝", "클로징", "마무리",
+        "오늘", "이번", "여행", "브이로그", "영상", "더보기", "인스타그램", "협찬",
+        "광고", "구독", "좋아요", "정보", "위치", "타임라인", "timestamp", "쇼핑", "시작",
+        "아이스", "가격", "메뉴", "주문", "예약", "주소", "영업시간", "전화",
+    ]
+    # 도로명 주소 패턴 (예: "서울 마포구 증산로 32")
+    addr_pattern = re.compile(r'^[가-힣]+\s+[가-힣]+(?:시|군|구)\s+[가-힣]+(?:로|길|대로)')
     for c in candidates:
         c_clean = c.strip()
-        if any(sw in c_clean for sw in stopwords):
+        if any(c_clean.lower() == sw or c_clean.lower().startswith(sw) for sw in stopwords):
+            continue
+        if len(c_clean) < 2 or len(c_clean) > 25:
+            continue
+        # 도로명 주소 텍스트 제외
+        if addr_pattern.match(c_clean):
+            continue
+        # 순수 숫자·특수문자만 있는 후보 제외
+        if not re.search(r'[가-힣a-zA-Z]', c_clean):
             continue
         if c_clean not in unique_candidates:
             unique_candidates.append(c_clean)
@@ -239,6 +263,19 @@ def mine_youtube_vlog(url: str, supabase_url: str, supabase_key: str):
 
         region = detect_region_from_address(road_addr)
         slot, moods = detect_slot_and_mood(category, f"{cand} {official_name}")
+
+        # 업종 블랙리스트: 데이트 스팟이 아닌 업종 제외
+        cat_lower = (category or "").lower()
+        name_lower = official_name.lower()
+        blacklist_cats = [
+            "주유소", "세차", "편의점", "세븐일레븐", "cu ", "gs25", "이마트24",
+            "아파트", "단지", "오피스텔", "빌라", "주공",
+            "의류", "zara", "h&m", "유니클로", "병원", "약국", "치과", "안과",
+            "은행", "atm", "우체국", "관공서", "경찰서", "소방서",
+            "웨딩", "결혼", "장례", "부동산", "공인중개",
+        ]
+        if any(bl in cat_lower or bl in name_lower for bl in blacklist_cats):
+            continue
 
         # 군/구 단위 지역 추출
         gu_match = re.search(r'([가-힣]+(?:시|군|구))', road_addr)
