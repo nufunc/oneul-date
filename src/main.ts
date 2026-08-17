@@ -161,7 +161,6 @@ function isValidSlot(value: unknown): value is SlotKey {
 /** 선택된 지역 키들의 합집합으로 매칭. 빈 배열 = 전체 */
 function matchesRegion(spot: Spot, regionKeys: string[]): boolean {
   if (regionKeys.length === 0) return true;
-  if (spot.region === '전국') return true;
   return regionKeys.some((key) => {
     const region = REGIONS.find((r) => r.key === key);
     return region ? region.match.includes(spot.region) : false;
@@ -311,8 +310,23 @@ function pickNearRandom(
     }
   }
 
-  // 4순위: 전체 후보 폴백
-  return pickRandom(candidates, rng);
+  // 4순위: 앵커와 동일 광역(region) 내에서 최단 거리 상위 후보 선별 (무제한 전국 난입 완전 차단)
+  const sameRegion = candidates.filter((s) => s.region === anchor.region);
+  const pool = sameRegion.length > 0 ? sameRegion : candidates;
+
+  if (anchor.lat != null && anchor.lng != null) {
+    const withDist = pool
+      .filter((s) => s.lat != null && s.lng != null)
+      .map((s) => ({ spot: s, dist: getDistanceKm(anchor.lat!, anchor.lng!, s.lat!, s.lng!) }))
+      .sort((a, b) => a.dist - b.dist);
+
+    if (withDist.length > 0) {
+      const top3 = withDist.slice(0, 3);
+      return pickRandom(top3, rng)?.spot;
+    }
+  }
+
+  return pickRandom(pool, rng);
 }
 
 /** 스텝 목록에서 excludeIndex를 제외한 스폿 중 가장 대표적인 앵커 스폿 반환 */
@@ -1017,7 +1031,7 @@ async function formatCourseTextAsync(
 let userCoords: { lat: number; lng: number } | null = null;
 
 /**
- * 내 위치 중심 / 실시간 추천 코스 생성 (날짜 제거, 위치 우선)
+ * 내 위치 중심 / 실시간 추천 코스 생성 (실제 생활권 반경 기준)
  */
 function buildNearbyCourse(coords: { lat: number; lng: number } | null): { label: string; steps: CourseStep[] } {
   let pool = spots;
@@ -1030,13 +1044,28 @@ function buildNearbyCourse(coords: { lat: number; lng: number } | null): { label
       .sort((a, b) => a.dist - b.dist);
 
     if (spotsWithDist.length >= 10) {
-      pool = spotsWithDist.slice(0, 35).map((item) => item.spot);
-      const nearestDist = Math.round(spotsWithDist[0].dist * 10) / 10;
-      label = `📍 내 주변 추천 코스 (${nearestDist}km 이내)`;
+      // 내 위치에서 반경 10km 이내 우선 (최소 15개 확보), 부족하면 최단거리 상위 25개 선별
+      const within10km = spotsWithDist.filter((s) => s.dist <= 10.0);
+      const selectedPool = within10km.length >= 12 ? within10km : spotsWithDist.slice(0, 25);
+      pool = selectedPool.map((item) => item.spot);
     }
   }
 
   const steps = generateCourse(pool, ['day', 'evening', 'night'], [], 'ALL');
+
+  // 코스에 포함된 실제 스팟들의 내 위치 기준 최대 이동 반경(Max Distance) 계산
+  if (coords && coords.lat && coords.lng) {
+    const courseSpots = steps
+      .map((st) => (st.spotId != null ? spotById.get(st.spotId) : null))
+      .filter((s): s is Spot => Boolean(s && s.lat != null && s.lng != null));
+
+    if (courseSpots.length > 0) {
+      const maxDist = Math.max(...courseSpots.map((s) => getDistanceKm(coords.lat, coords.lng, s.lat!, s.lng!)));
+      const roundedMax = Math.round(maxDist * 10) / 10;
+      label = `📍 내 주변 생활권 코스 (반경 ${roundedMax}km 이내)`;
+    }
+  }
+
   return { label, steps };
 }
 
