@@ -31,6 +31,7 @@ interface Spot {
   social_links?: import('./supabase').SocialLinks;
   metrics?: import('./supabase').SpotMetrics;
   hot_score?: number;
+  created_at?: string;
 }
 
 interface CourseStep {
@@ -1728,25 +1729,39 @@ function getSpotImageUrl(spot: Spot, slot: SlotKey, usedImages?: Set<string>): s
   return fallbackUrl;
 }
 
-/** SNS와 플랫폼 지표 기반 화제의 핫플레이스 여부 판별 */
+/** 최근 기간 및 플랫폼 실시간 바이럴 기반 초인기 핫플레이스 판별 (상위 5% 이내 엄격 선별) */
 function isSuperHotSpot(spot: Spot): boolean {
   if (!spot) return false;
-  // 1. 유튜브 10만 뷰 이상
-  if (spot.social_links?.youtube?.views && spot.social_links.youtube.views >= 100000) {
+
+  // 1. 유튜브 대형 바이럴 영상 (5만 뷰 이상)
+  if (spot.social_links?.youtube?.views && spot.social_links.youtube.views >= 50000) {
     return true;
   }
-  // 2. 핫스코어 80 이상
+
+  // 2. 실시간 핫스코어 최상위권 (80점 이상)
   if (spot.hot_score && spot.hot_score >= 80) {
     return true;
   }
-  // 3. 카카오맵 평점 4.3 이상
-  if (spot.social_links?.kakaomap?.rating && spot.social_links.kakaomap.rating >= 4.3) {
+
+  // 3. 최근 7일 이내 자동 수집·발굴된 검증된 신상 핫플
+  if (spot.created_at) {
+    try {
+      const created = new Date(spot.created_at).getTime();
+      const now = Date.now();
+      const daysDiff = (now - created) / (1000 * 60 * 60 * 24);
+      if (daysDiff <= 7 && spot.verified) {
+        return true;
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  // 4. 카카오맵 평점 4.6 이상 (초고평점 극찬 명소)
+  if (spot.social_links?.kakaomap?.rating && spot.social_links.kakaomap.rating >= 4.6) {
     return true;
   }
-  // 4. 품질 점수 90점 이상의 탑티어 스팟
-  if (spot.quality_score && spot.quality_score >= 90) {
-    return true;
-  }
+
   return false;
 }
 

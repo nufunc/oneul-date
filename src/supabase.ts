@@ -51,6 +51,7 @@ export interface Spot {
   social_links?: SocialLinks;
   metrics?: SpotMetrics;
   hot_score?: number;
+  created_at?: string;
 }
 
 const SUPABASE_URL =
