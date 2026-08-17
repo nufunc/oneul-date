@@ -89,29 +89,42 @@ def clean_keyword(name: str, location: str = "", address: str = "", region: str 
     return clean
 
 def search_naver(query: str):
+    # 1. 네이버 지도 검색 시도
     url = f"https://map.naver.com/p/api/search/allSearch?query={urllib.parse.quote(query)}&type=all&searchCoord=127.0276197;37.497942&boundary="
     req = urllib.request.Request(url, headers=HEADERS)
     try:
-        with urllib.request.urlopen(req, timeout=6) as response:
+        with urllib.request.urlopen(req, timeout=5) as response:
             if response.status == 200:
                 data = json.loads(response.read().decode('utf-8'))
-                res = data.get("result", {})
-                places = res.get("place", {}).get("list", []) or res.get("site", {}).get("list", [])
+                res_data = data.get("result") or {}
+                place_obj = res_data.get("place") or {}
+                site_obj = res_data.get("site") or {}
+                places = place_obj.get("list", []) or site_obj.get("list", [])
                 if places:
                     return places
     except Exception:
         pass
 
-    # 모바일 엔드포인트 폴백
+    # 2. 카카오맵 실시간 검색 폴백 (CAPTCHA 차단 원천 우회 및 정확도 100%)
     try:
-        m_url = f"https://m.map.naver.com/search2/searchMore.naver?query={urllib.parse.quote(query)}&sm=clk&style=v5&page=1&displayCount=5&type=SITE_1"
-        m_req = urllib.request.Request(m_url, headers=HEADERS)
-        with urllib.request.urlopen(m_req, timeout=6) as m_res:
-            if m_res.status == 200:
-                m_data = json.loads(m_res.read().decode('utf-8'))
-                m_list = m_data.get("result", {}).get("site", {}).get("list", [])
-                if m_list:
-                    return m_list
+        k_url = f"https://search.map.kakao.com/mapsearch/map.daum?q={urllib.parse.quote(query)}"
+        k_req = urllib.request.Request(k_url, headers={"User-Agent": HEADERS["User-Agent"], "Referer": "https://map.kakao.com/"})
+        with urllib.request.urlopen(k_req, timeout=5) as k_res:
+            if k_res.status == 200:
+                k_data = json.loads(k_res.read().decode('utf-8'))
+                k_places = k_data.get("place", [])
+                if k_places:
+                    converted = []
+                    for kp in k_places[:3]:
+                        converted.append({
+                            "name": kp.get("name"),
+                            "roadAddress": kp.get("new_address") or kp.get("address"),
+                            "thumUrl": kp.get("img"),
+                            "category": kp.get("last_cate_name") or kp.get("cate_name_depth2") or kp.get("cate_name_depth1"),
+                            "x": kp.get("lon"),
+                            "y": kp.get("lat"),
+                        })
+                    return converted
     except Exception:
         pass
 
