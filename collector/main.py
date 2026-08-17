@@ -1,95 +1,62 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+오늘 데이트 (oneul-date) — OCI VM 자율 수집 및 동기화 메인 데몬 (24/7 Daemon)
+주기적으로 네이버 플레이스 라이브 검증, 폐업 감지, 주소 보강 및 Supabase 동기화를 수행합니다.
+"""
+
+import os
+import sys
 import time
-import logging
-from apscheduler.schedulers.blocking import BlockingScheduler
-from config import (
-    POCKETBASE_URL,
-    PB_ADMIN_EMAIL,
-    PB_ADMIN_PASSWORD,
-    GEMINI_API_KEY,
-    COLLECT_INTERVAL_HOURS,
-)
-from pipeline.pb_client import PocketBaseManager
-from pipeline.crawler import discover_new_spot_candidates
-from pipeline.extractor import extract_spot_info
-from pipeline.verifier import verify_spot_existence
+import schedule
+from datetime import datetime
+from dotenv import load_dotenv
+from supabase_worker import run_worker
 
-# 로깅 설정
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-)
-logger = logging.getLogger("oneul.collector")
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
-def run_collection_cycle():
-    """1회 수집 사이클 실행"""
-    logger.info("=== Starting Date Spot Collection Cycle ===")
-    
-    pb = PocketBaseManager(POCKETBASE_URL, PB_ADMIN_EMAIL, PB_ADMIN_PASSWORD)
-    if not pb.authenticate():
-        logger.error("PocketBase auth failed. Aborting cycle.")
-        return
-        
-    pb.ensure_schema()
-    
-    # 1. 핫플 후보 탐색
-    candidates = discover_new_spot_candidates()
-    logger.info(f"Discovered {len(candidates)} raw spot candidate entries.")
-    
-    added_count = 0
-    for cand in candidates:
-        # 2. 로컬 휴리스틱 / 지능형 정제 및 추출
-        spot_info = extract_spot_info(cand["raw_text"], GEMINI_API_KEY)
-        if not spot_info or not spot_info.get("name"):
-            continue
-            
-        spot_name = spot_info["name"]
-        
-        # 3. 실존 및 유효성 검증
-        if not verify_spot_existence(spot_name, spot_info.get("location", "")):
-            logger.info(f"Skipping invalid spot candidate: {spot_name}")
-            continue
-            
-        # 4. 중복 검사
-        if pb.spot_exists(spot_name):
-            logger.info(f"Spot '{spot_name}' already exists in DB. Skipping.")
-            continue
-            
-        # 5. DB 등록
-        spot_info["source"] = {
-            "type": "youtube",
-            "url": cand.get("source_url"),
-            "note": cand.get("source_note", "auto_collector"),
-        }
-        spot_info["verified"] = True
-        
-        if pb.insert_spot(spot_info):
-            added_count += 1
+# .env 파일 로드
+load_dotenv()
 
-    logger.info(f"=== Cycle Finished. Successfully added {added_count} new spots to DB. ===")
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
+CHECK_INTERVAL_HOURS = int(os.getenv("CHECK_INTERVAL_HOURS", "2"))
+BATCH_LIMIT = int(os.getenv("BATCH_LIMIT", "100"))
+
+def job_sync_and_validate():
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"\n========================================================")
+    print(f"🚀 [{now_str}] Supabase 라이브 검증 & 동기화 사이클 시작")
+    print(f"========================================================")
+    try:
+        run_worker(SUPABASE_URL, SUPABASE_SERVICE_KEY, limit=BATCH_LIMIT)
+    except Exception as e:
+        print(f"❌ [에러 발생] 작업 중 예외가 발생했습니다: {e}")
+    print(f"💤 다음 사이클 대기 중 ({CHECK_INTERVAL_HOURS}시간 주기)...")
 
 def main():
-    logger.info("Oneul-Date 24/7 Spot Collector Daemon Starting...")
-    
-    # 기동 즉시 1회 초기화 및 실행
-    try:
-        run_collection_cycle()
-    except Exception as e:
-        logger.error(f"Initial cycle error: {e}")
-        
-    # APScheduler 주기적 실행 등록
-    scheduler = BlockingScheduler()
-    scheduler.add_job(
-        run_collection_cycle,
-        "interval",
-        hours=COLLECT_INTERVAL_HOURS,
-        id="date_spot_collector_job",
-    )
-    
-    logger.info(f"Scheduler registered. Running every {COLLECT_INTERVAL_HOURS} hour(s).")
-    try:
-        scheduler.start()
-    except (KeyboardInterrupt, SystemExit):
-        logger.info("Collector Daemon stopped.")
+    print("========================================================")
+    print("✨ 오늘 데이트 (oneul-date) — OCI VM Collector Daemon")
+    print(f"🔗 Supabase URL: {SUPABASE_URL}")
+    print(f"⏱️ 실행 주기: {CHECK_INTERVAL_HOURS}시간마다 {BATCH_LIMIT}건 검증")
+    print("========================================================")
+
+    if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
+        print("❌ 오류: SUPABASE_URL 또는 SUPABASE_SERVICE_KEY 환경변수가 없습니다.")
+        print("   .env 파일에 올바른 키를 입력해주세요.")
+        sys.exit(1)
+
+    # 1. 컨테이너 시작 직후 즉시 1회 검증 사이클 실행
+    job_sync_and_validate()
+
+    # 2. 주기적 스케줄링 등록
+    schedule.every(CHECK_INTERVAL_HOURS).hours.do(job_sync_and_validate)
+
+    # 3. 24/7 무한 루프
+    while True:
+        schedule.run_pending()
+        time.sleep(60)
 
 if __name__ == "__main__":
     main()

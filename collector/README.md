@@ -1,57 +1,52 @@
-# 🐳 오늘 데이트 24/7 자율 스폿 수집기 & PocketBase DB
+# 오늘 데이트 (oneul-date) — OCI VM 자율 수집 및 동기화 도커
 
-별도 VM 서버에서 **외부 API 키나 유료 서비스 없이 100% 로컬 자율 규칙 엔진**으로 핫플/데이트 스폿을 탐색·정제하여 경량 DB에 적재하는 Docker 패키지입니다.
+OCI(Oracle Cloud Infrastructure) 무료 VM(Always Free ARM64 / AMD)에서 24시간 365일 무중단으로 네이버 플레이스 라이브 검증, 폐업 감지, 주소 보강 및 Supabase 클라우드 DB 동기화를 수행하는 경량 도커 컨테이너입니다.
 
 ---
 
-## 🚀 1. VM에서 빠른 시작 (1분 완성)
+## 🚀 OCI VM 3단계 초간단 배포 가이드
 
-### 1) 파일 업로드 또는 클론
-VM 서버의 원하는 폴더(예: `~/oneul-collector`)에 `collector/` 폴더 내 파일들을 복사합니다.
-
+### 1단계: OCI VM에 소스 코드 클론
 ```bash
-mkdir -p ~/oneul-collector
-cd ~/oneul-collector
+# Git 클론 및 디렉토리 이동
+git clone https://github.com/nufunc/oneul-date.git
+cd oneul-date/collector
 ```
 
-### 2) 환경 변수 설정 (`.env`)
-API 키 입력 없이 관리자 패스워드만 지정하면 바로 동작합니다:
+### 2단계: `.env` 환경변수 설정
+`collector/.env` 파일을 생성하고 Supabase 연결 키를 입력합니다:
 ```bash
 cat << 'EOF' > .env
-# PocketBase 관리자 계정 (최초 실행 시 자동 생성됨)
-PB_ADMIN_EMAIL=admin@oneul-date.local
-PB_ADMIN_PASSWORD=oneul_date_admin_pass_2026!
-PB_ENCRYPTION_KEY=oneul_date_secret_key_2026
-
-# 수집 주기 (시간 단위, 기본값: 2시간마다 1회)
-COLLECT_INTERVAL_HOURS=2
+SUPABASE_URL=https://uyhwhnnzzfhtxjernfit.supabase.co
+SUPABASE_SERVICE_KEY=YOUR_SUPABASE_SERVICE_ROLE_KEY_HERE
+CHECK_INTERVAL_HOURS=2
+BATCH_LIMIT=100
 EOF
 ```
 
-### 3) Docker Compose 실행
+### 3단계: 도커 컨테이너 백그라운드 실행
 ```bash
+# 도커 빌드 및 백그라운드 실행
 docker compose up -d --build
+
+# 실시간 로그 확인
+docker compose logs -f
 ```
 
 ---
 
-## 📊 2. 서비스 확인 및 어드민 접속
-
-* **PocketBase 관리자 웹 콘솔**: `http://YOUR_VM_IP:8090/_/`
-  * 로그인: `.env`에 지정한 관리자 이메일 / 패스워드
-  * `spots` 컬렉션에서 수집기가 실시간으로 등록한 장소들을 엑셀처럼 열람/검색/수정/삭제 가능
-* **수집기 로그 실시간 확인**:
-  ```bash
-  docker compose logs -f spot-collector
-  ```
+## ⚙️ 주요 기능 및 동작 방식
+1. **24/7 백그라운드 자율 스케줄러**:
+   - `CHECK_INTERVAL_HOURS` (기본 2시간)마다 Supabase DB에서 장소들을 가져와 네이버 지도 라이브 검증 수행.
+   - 폐업/이전 감지 및 도로명 주소 자동 보강.
+2. **Supabase 7일 휴면 방지 (Keep-alive)**:
+   - 지속적인 API 쿼리를 통해 Supabase 무료 프로젝트가 일시정지(Pause)되지 않고 100% 상시 활성 상태 유지.
+3. **초경량 자원 소모**:
+   - 메모리 50MB~100MB 미만 소모로 OCI 무료 인스턴스(Micro/Ampere)에서 다른 서비스와 함께 쾌적하게 구동 가능.
 
 ---
 
-## 🔄 3. 프론트엔드 프로젝트(`oneul-date`)와의 동기화
-
-로컬 PC 또는 GitHub Actions에서 아래 명령 한 줄로 VM의 최신 스폿 데이터를 땡겨올 수 있습니다:
-
-```bash
-python scripts/sync_from_pocketbase.py --url http://YOUR_VM_IP:8090
-```
-이후 `npm run build`를 거치면 최신 스폿이 라이브 사이트에 즉시 반영됩니다.
+## 🛠️ 유용한 관리 명령어
+- **컨테이너 상태 확인**: `docker compose ps`
+- **컨테이너 재시작**: `docker compose restart`
+- **컨테이너 중지**: `docker compose down`
