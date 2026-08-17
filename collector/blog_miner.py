@@ -147,17 +147,18 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
         "Prefer": "return=minimal"
     }
 
-    # 랜덤 6개 블로그 쿼리 선택 (수집 범위 3배 상향)
-    sampled = random.sample(BLOG_SEARCH_QUERIES, min(6, len(BLOG_SEARCH_QUERIES)))
-    print(f"📝 [블로그 & 웹 마이닝 시작] 타깃 쿼리: {[q[0] for q in sampled]}")
+    # max_discoveries 수량에 맞춰 블로그 쿼리 수를 유연하게 비례 확장
+    sample_count = min(len(BLOG_SEARCH_QUERIES), max(8, (max_discoveries + 4) // 4))
+    sampled = random.sample(BLOG_SEARCH_QUERIES, sample_count)
+    print(f"📝 [블로그 & 웹 마이닝 시작] 타깃 쿼리 ({len(sampled)}개): {[q[0] for q in sampled[:5]]} ...")
 
     discovered = []
 
     for query_text, region, area, moods in sampled:
         raw_candidates = fetch_blog_candidates(query_text)
-        time.sleep(0.3)
+        time.sleep(0.2)
 
-        for candidate_name in raw_candidates[:6]:
+        for candidate_name in raw_candidates[:8]:
             search_query = f"{candidate_name} {area}"
             places = search_naver(search_query)
             time.sleep(0.2)
