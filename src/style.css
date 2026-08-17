@@ -909,92 +909,151 @@ button {
   transform: scale(0.96);
 }
 
-.btn-swap-chip.is-spinning .icon-swap {
-  animation: spin 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+/* --- 스텝 카드 하단 액션 툴바 (미니멀 아이콘 + 네이버 지도 칩) --- */
+.step-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed #F1F5F9;
 }
 
-.step-map-chip {
+.step-actions-icons {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 5px 14px;
-  min-height: 34px;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* 모든 플랫폼 미니멀 동일 크기 원형 아이콘 버튼 (32x32px) */
+.btn-action-icon {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
   border-radius: var(--radius-full);
-  background: var(--color-accent);
-  border: 1px solid var(--color-accent);
-  font-size: var(--font-xs);
-  font-weight: 600;
-  color: var(--color-on-accent);
-  text-decoration: none;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.step-map-chip:hover {
-  background: var(--color-accent-hover);
-  border-color: var(--color-accent-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.15);
-}
-
-.step-map-chip:active {
-  transform: scale(0.96);
-}
-
-/* 멀티 플랫폼 소셜 핫클립 & 평점 칩 */
-.step-social-chip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 5px 11px;
-  min-height: 34px;
-  border-radius: var(--radius-full);
-  font-size: var(--font-xs);
-  font-weight: 600;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  background: #FFFFFF;
+  color: var(--color-text-subtle);
   text-decoration: none;
+  cursor: pointer;
+  padding: 0;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
-.step-social-chip.yt-chip {
-  background: #FFF1F2;
-  border: 1px solid #FECDD3;
-  color: #E11D48;
+.btn-action-icon:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
 }
 
-.step-social-chip.yt-chip:hover {
-  background: #FFE4E6;
-  border-color: #FDA4AF;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgba(225, 29, 72, 0.15);
+.btn-action-icon:active {
+  transform: scale(0.92);
 }
 
-.step-social-chip.yt-chip.yt-review {
+/* 장소 교체 아이콘 */
+.btn-swap-icon {
   background: #F8FAFC;
-  border: 1px solid #E2E8F0;
+  border-color: #E2E8F0;
   color: #475569;
 }
 
-.step-social-chip.yt-chip.yt-review:hover {
+.btn-swap-icon:hover {
   background: #F1F5F9;
   border-color: #CBD5E1;
   color: #0F172A;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
-.step-social-chip.kakao-chip {
-  background: #FEFCE8;
-  border: 1px solid #FEF08A;
-  color: #B45309;
+.btn-swap-icon.is-spinning svg {
+  animation: spin 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.step-social-chip.kakao-chip:hover {
+/* 유튜브 미니 아이콘 */
+.btn-yt-icon {
+  background: #FFF1F2;
+  border-color: #FECDD3;
+  color: #E11D48;
+}
+
+.btn-yt-icon:hover {
+  background: #FFE4E6;
+  border-color: #FDA4AF;
+  color: #BE123C;
+}
+
+/* 카카오맵 미니 아이콘 */
+.btn-kakao-icon {
+  background: #FDFCE8;
+  border-color: #FEF08A;
+  color: #854D0E;
+}
+
+.btn-kakao-icon:hover {
   background: #FEF9C3;
   border-color: #FDE047;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgba(180, 83, 9, 0.12);
+  color: #713F12;
 }
 
-.step-social-chip:active {
-  transform: scale(0.96);
+/* 인스타그램 미니 아이콘 */
+.btn-insta-icon {
+  background: #FDF2F8;
+  border-color: #FBCFE8;
+  color: #DB2777;
+}
+
+.btn-insta-icon:hover {
+  background: #FCE7F3;
+  border-color: #F472B6;
+  color: #BE185D;
+}
+
+/* 네이버 블로그 미니 아이콘 */
+.btn-blog-icon {
+  background: #F0FDF4;
+  border-color: #BBF7D0;
+  color: #16A34A;
+}
+
+.btn-blog-icon:hover {
+  background: #DCFCE7;
+  border-color: #86EFAC;
+  color: #15803D;
+}
+
+/* 네이버 지도 바로가기 단독 칩 (아이콘 + 텍스트) */
+.step-map-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: var(--radius-full);
+  background: #03C75A;
+  border: 1px solid #03C75A;
+  font-size: var(--font-xs);
+  font-weight: 700;
+  color: #FFFFFF;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(3, 199, 90, 0.25);
+  white-space: nowrap;
+}
+
+.step-map-chip:hover {
+  background: #02B150;
+  border-color: #02B150;
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 10px rgba(3, 199, 90, 0.35);
+}
+
+.step-map-chip:active {
+  transform: scale(0.95);
 }
 
 /* 결과 하단 액션 */
