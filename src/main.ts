@@ -1,5 +1,6 @@
 import './style.css';
 import rawSpotsData from './data/spots.sample.json';
+import { renderNativeInfeedAdCard, initAdSense } from './ads';
 
 // ---------------------------------------------------------------------------
 // Types & constants
@@ -1542,7 +1543,13 @@ function renderResults(): void {
       <p class="ai-briefing-text ${!hasCachedStory && GROQ_API_KEY ? 'is-loading' : ''}" id="ai-briefing-content">${initialStoryHtml}</p>
     </div>
     <div class="step-list">
-      ${state.course.map((step, i) => renderStepCard(step, i, { usedImages })).join('')}
+      ${state.course.map((step, i) => {
+        const card = renderStepCard(step, i, { usedImages });
+        if (i === 1 && state.course && state.course.length >= 3) {
+          return card + renderNativeInfeedAdCard();
+        }
+        return card;
+      }).join('')}
     </div>
     <div class="result-actions result-actions-3">
       <button class="btn-secondary" id="btn-copy">📋 복사</button>
@@ -1551,6 +1558,7 @@ function renderResults(): void {
     </div>
   `;
   bindResultEvents(area);
+  initAdSense();
 
   // Groq LLM API 비동기 고도화 브리핑 (결과 도착 시 단 1회 최종 문장 렌더링)
   if (GROQ_API_KEY && !hasCachedStory && state.course) {
@@ -2321,3 +2329,13 @@ async function init(): Promise<void> {
 }
 
 init();
+
+// --- PWA Service Worker Registration ---------------------------------------
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch((err) => {
+      console.warn('[PWA] Service Worker registration failed:', err);
+    });
+  });
+}
+
