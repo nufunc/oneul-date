@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+    @import url('https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Noto+Serif+KR:wght@600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      width: 1200px;
+      height: 630px;
+      overflow: hidden;
+      background-color: #FDFCF8;
+      font-family: 'Plus Jakarta Sans', 'Pretendard', sans-serif;
+      color: #2D2D2D;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 60px 72px 54px;
+      position: relative;
+    }
+
+    /* Ambient texture & border */
+    .outer-border {
+      position: absolute;
+      inset: 20px;
+      border: 1px solid rgba(45, 45, 45, 0.08);
+      border-radius: 24px;
+      pointer-events: none;
+    }
+    .inner-border {
+      position: absolute;
+      inset: 26px;
+      border: 1px dashed rgba(195, 106, 77, 0.2);
+      border-radius: 20px;
+      pointer-events: none;
+    }
+
+    /* Top Brand Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 2;
+    }
+
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #FFFFFF;
+      border: 1px solid rgba(45, 45, 45, 0.1);
+      border-radius: 999px;
+      padding: 8px 18px;
+    }
+
+    .brand-icon {
+      width: 22px;
+      height: 22px;
+    }
+
+    .brand-badge span {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #C36A4D;
+    }
+
+    .version-tag {
+      font-size: 14px;
+      font-weight: 600;
+      color: #79746C;
+      letter-spacing: 0.05em;
+    }
+
+    /* Main Body Area */
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 40px;
+      z-index: 2;
+      margin-top: 10px;
+    }
+
+    .title-group {
+      flex: 1;
+      max-width: 580px;
+    }
+
+    .title-sub {
+      font-size: 20px;
+      font-weight: 600;
+      color: #5C5C5C;
+      margin-bottom: 14px;
+      line-height: 1.4;
+      word-break: keep-all;
+    }
+
+    .title-main {
+      font-family: 'Noto Serif KR', 'Libre Caslon Text', serif;
+      font-size: 64px;
+      font-weight: 800;
+      color: #2D2D2D;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      margin-bottom: 18px;
+    }
+
+    .title-main .accent {
+      color: #C36A4D;
+      display: inline-block;
+    }
+
+    .desc-line {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 17px;
+      font-weight: 600;
+      color: #79746C;
+      background: rgba(195, 106, 77, 0.08);
+      padding: 6px 14px;
+      border-radius: 8px;
+    }
+
+    /* Course Cards Preview */
+    .course-preview {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 440px;
+    }
+
+    .step-card {
+      background: #FFFFFF;
+      border: 1px solid rgba(45, 45, 45, 0.1);
+      border-radius: 14px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 4px 16px rgba(45, 45, 45, 0.04);
+    }
+
+    .step-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #FDFCF8;
+      border: 1px solid rgba(195, 106, 77, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Noto Serif KR', serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: #A24E32;
+      flex-shrink: 0;
+    }
+
+    .step-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #A24E32;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .step-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: #2D2D2D;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .step-tag {
+      font-size: 12px;
+      color: #79746C;
+      font-weight: 500;
+    }
+
+    /* Footer Meta */
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 18px;
+      border-top: 1px solid rgba(45, 45, 45, 0.08);
+      z-index: 2;
+    }
+
+    .footer-features {
+      display: flex;
+      gap: 20px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #5C5C5C;
+    }
+
+    .feature-item .dot {
+      color: #C36A4D;
+      font-weight: 800;
+    }
+
+    .footer-url {
+      font-family: 'Libre Caslon Text', serif;
+      font-style: italic;
+      font-size: 15px;
+      color: #79746C;
+      letter-spacing: 0.02em;
+    }
+  </style>
+</head>
+<body>
+  <div class="outer-border"></div>
+  <div class="inner-border"></div>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="brand-badge">
+      <svg class="brand-icon" viewBox="0 0 64 64" fill="none">
+        <rect width="64" height="64" rx="16" fill="#C36A4D"/>
+        <g transform="translate(32, 32)">
+          <path d="M 0 -18 C 1.2 -6, 6 -1.2, 18 0 C 6 1.2, 1.2 6, 0 18 C -1.2 6, -6 1.2, -18 0 C -6 -1.2, -1.2 -6, 0 -18 Z" fill="#FDFCF8"/>
+        </g>
+      </svg>
+      <span>Sensory Magazine</span>
+    </div>
+    <div class="version-tag">Oneul Date · v1.0.0</div>
+  </div>
+
+  <!-- Hero Section -->
+  <div class="hero">
+    <div class="title-group">
+      <p class="title-sub">조건만 고르면 완성되는 시간대별 코스</p>
+      <h1 class="title-main">오늘 <span class="accent">데이트</span></h1>
+      <div class="desc-line">
+        <span>✨ 서울·경기·강원·제주 등 전국 검증 데이트 스팟 큐레이션</span>
+      </div>
+    </div>
+
+    <!-- 3 Step Course Cards -->
+    <div class="course-preview">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-header">☀️ DAY · 오후 브런치 &amp; 전시</div>
+          <div class="step-name">성수 로컬 갤러리 &amp; 햇살 카페</div>
+        </div>
+        <div class="step-tag">로맨틱 · 감성</div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-header">🌆 EVENING · 노을 뷰 다이닝</div>
+          <div class="step-name">남산 파노라마 뷰 와인 비스트로</div>
+        </div>
+        <div class="step-tag">미식 · 뷰</div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-header">🌙 NIGHT · 야경 산책 &amp; 바</div>
+          <div class="step-name">달빛 산책로 &amp; 프라이빗 라운지</div>
+        </div>
+        <div class="step-tag">힐링 · 야경</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-features">
+      <div class="feature-item"><span class="dot">✦</span> 시간대별 맞춤 조합</div>
+      <div class="feature-item"><span class="dot">✦</span> 원터치 스팟 교체</div>
+      <div class="feature-item"><span class="dot">✦</span> 카카오톡 복사 &amp; 공유</div>
+    </div>
+    <div class="footer-url">oneul-date · Curated for Memorable Days</div>
+  </div>
+</body>
+</html>
