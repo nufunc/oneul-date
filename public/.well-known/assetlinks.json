@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "io.github.nufunc.oneuldate",
+      "sha256_cert_fingerprints": [
+        "C1:93:14:19:37:B2:EB:26:EA:63:C4:B3:2C:37:63:06:75:8C:16:43:BD:0E:B0:4F:6F:7A:78:9D:36:29:BB:0F"
+      ]
+    }
+  }
+]
