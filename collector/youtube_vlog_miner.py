@@ -194,18 +194,18 @@ def detect_region_from_address(address: str) -> str:
     if "제주" in addr: return "제주"
     return "서울"
 
-def mine_youtube_vlog(url: str, supabase_url: str, supabase_key: str):
-    """유튜브 브이로그 URL 역방향 마이닝 실행"""
+def mine_youtube_vlog(url: str, supabase_url: str, supabase_key: str) -> int:
+    """유튜브 브이로그 URL 역방향 마이닝 실행. 신규 등록된 스팟 수를 반환."""
     video_id = extract_video_id(url)
     if not video_id:
         print(f"❌ 유효하지 않은 유튜브 URL입니다: {url}")
-        return
+        return 0
 
     print(f"🎬 [1/3] 유튜브 영상 메타데이터 수집 중... (ID: {video_id})")
     vinfo = get_youtube_video_info(video_id)
     if not vinfo:
-        print(f"❌ 영상 정보를 불러올 수 없습니다.")
-        return
+        print(f"❌ 영상 정보를 불러올 수 없습니다. (ID: {video_id})")
+        return 0
 
     print(f"  • 영상 제목: {vinfo['title']}")
     print(f"  • 채널명: {vinfo['author']} (조회수: {vinfo['views']:,}회)")
@@ -323,7 +323,7 @@ def mine_youtube_vlog(url: str, supabase_url: str, supabase_key: str):
         check_url = f"{supabase_url}/rest/v1/spots?name=eq.{check_q}&select=id"
         check_req = urllib.request.Request(check_url, headers=headers)
         try:
-            with urllib.request.urlopen(check_req) as c_res:
+            with urllib.request.urlopen(check_req, timeout=5) as c_res:
                 existing = json.loads(c_res.read().decode('utf-8'))
                 if existing:
                     print(f"  ⏩ [이미 존재하는 스팟 건너뜀] {official_name} (ID: {existing[0]['id']})")
@@ -345,44 +345,61 @@ def mine_youtube_vlog(url: str, supabase_url: str, supabase_key: str):
     print(f"\n🎉 [3/3] 유튜브 역방향 마이닝 완료: 총 {len(discovered_spots)}개 스팟 신규 등록 완료!")
     for s in discovered_spots:
         print(f"  • {s}")
+    return len(discovered_spots)
 
-def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5):
-    """유튜브에서 최신 데이트/여행 브이로그 영상을 검색하여 자율 역방향 수집 수행"""
+def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5) -> int:
+    """유튜브에서 최신 데이트/여행 브이로그 영상을 검색하여 자율 역방향 수집 수행.
+    등록된 신규 스팟 총 개수를 반환."""
     search_keywords = [
         "데이트 브이로그 코스",
         "당일치기 여행 코스 브이로그",
         "주말 데이트 핫플 브이로그",
         "감성 카페 맛집 데이트 브이로그"
     ]
-    
+
     print(f"🎬 [YouTube Vlog 자율 마이너] 최신 데이트/여행 영상 탐색 시작...")
     found_urls = []
-    
+    # 첫 키워드가 limit을 독식하지 않도록 키워드당 상한 배분
+    per_kw_cap = max(1, -(-limit // len(search_keywords)))
+
     for kw in search_keywords:
+        if len(found_urls) >= limit:
+            break
         encoded = urllib.parse.quote(kw)
         search_url = f"https://www.youtube.com/results?search_query={encoded}"
         req = urllib.request.Request(search_url, headers=HEADERS)
         try:
-            with urllib.request.urlopen(req, timeout=5) as res:
+            with urllib.request.urlopen(req, timeout=10) as res:
                 html = res.read().decode('utf-8', errors='ignore')
                 video_ids = re.findall(r'\"videoId\":\"([a-zA-Z0-9_-]{11})\"', html)
+                if not video_ids:
+                    # 데이터센터 IP에서 컨센트/차단 페이지가 내려오는 경우 진단용
+                    print(f"  ⚠️ 검색 결과에서 영상 ID 미검출 ('{kw}', 응답 {len(html):,}자)")
+                    continue
+                added = 0
                 for vid in video_ids:
                     url = f"https://www.youtube.com/watch?v={vid}"
                     if url not in found_urls:
                         found_urls.append(url)
-                    if len(found_urls) >= limit:
+                        added += 1
+                    if added >= per_kw_cap or len(found_urls) >= limit:
                         break
-        except Exception:
-            pass
-        if len(found_urls) >= limit:
-            break
+                print(f"  • '{kw}' 검색: 영상 {added}개 확보")
+        except Exception as e:
+            print(f"  ⚠️ 유튜브 검색 실패 ('{kw}'): {e}")
+
+    if not found_urls:
+        print(f"  ⚠️ 발견된 영상 0개 — 유튜브 검색이 모두 실패했거나 차단된 상태입니다.")
+        return 0
 
     print(f"  • 발견된 최신 여행 브이로그 영상: {len(found_urls)}개")
+    total_registered = 0
     for vurl in found_urls:
         try:
-            mine_youtube_vlog(vurl, supabase_url, supabase_key)
+            total_registered += mine_youtube_vlog(vurl, supabase_url, supabase_key)
         except Exception as e:
             print(f"  ❌ 영상 마이닝 실패 ({vurl}): {e}")
+    return total_registered
 
 if __name__ == "__main__":
     env = load_env()

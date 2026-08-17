@@ -72,18 +72,40 @@ LOG_DIR = get_log_dir()
 COLLECTOR_LOG_FILE = os.path.join(LOG_DIR, "collector.log")
 DAILY_SUMMARY_LOG_FILE = os.path.join(LOG_DIR, "daily_summary.log")
 
+class _TeeStream:
+    """stdout/stderr를 콘솔과 collector.log 양쪽에 동시 기록.
+    하위 모듈(miner 등)이 print()만 사용해도 로그 파일에 순서대로 남도록 보장."""
+    def __init__(self, stream, path):
+        self._stream = stream
+        self._path = path
+
+    def write(self, data):
+        try:
+            self._stream.write(data)
+        except Exception:
+            pass
+        try:
+            with open(self._path, "a", encoding="utf-8") as f:
+                f.write(data)
+        except Exception:
+            pass
+
+    def flush(self):
+        try:
+            self._stream.flush()
+        except Exception:
+            pass
+
+sys.stdout = _TeeStream(sys.stdout, COLLECTOR_LOG_FILE)
+sys.stderr = _TeeStream(sys.stderr, COLLECTOR_LOG_FILE)
+
 def get_kst_now():
     return datetime.now(KST)
 
 def log(message: str, level: str = "INFO"):
+    # 파일 기록은 _TeeStream이 담당하므로 print 한 번이면 콘솔+파일 모두 남는다
     now_str = get_kst_now().strftime("%Y-%m-%d %H:%M:%S")
-    formatted = f"[{now_str}] [{level}] {message}"
-    print(formatted)
-    try:
-        with open(COLLECTOR_LOG_FILE, "a", encoding="utf-8") as f:
-            f.write(formatted + "\n")
-    except Exception:
-        pass
+    print(f"[{now_str}] [{level}] {message}")
 
 # 마지막 일일 서머리 기록 날짜 추적 (YYYY-MM-DD)
 last_summary_date = None
@@ -139,11 +161,9 @@ def check_and_generate_daily_summary(force: bool = False):
             f"• 저장 로그 경로     : {LOG_DIR}\n"
             f"========================================================\n"
         )
-        print(summary_text)
+        print(summary_text)  # _TeeStream이 collector.log에도 기록
         try:
             with open(DAILY_SUMMARY_LOG_FILE, "a", encoding="utf-8") as f:
-                f.write(summary_text + "\n")
-            with open(COLLECTOR_LOG_FILE, "a", encoding="utf-8") as f:
                 f.write(summary_text + "\n")
         except Exception:
             pass
@@ -203,7 +223,8 @@ def run_cycle():
 
     log(f"▶ 6단계: 최신 유튜브 여행/데이트 브이로그 역방향 장소 마이닝 시작")
     try:
-        run_youtube_vlog_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, limit=5)
+        mined = run_youtube_vlog_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, limit=5)
+        log(f"6단계 완료: 신규 스팟 {mined}개 등록")
     except Exception as e:
         log(f"6단계 유튜브 브이로그 마이닝 오류: {e}", level="ERROR")
 
@@ -212,7 +233,7 @@ def run_cycle():
 
 def main():
     log("========================================================")
-    log("🌟 오늘 데이트 (oneul-date) — 백엔드 데이터 엔진 가동 (v3.2)")
+    log("🌟 오늘 데이트 (oneul-date) — 백엔드 데이터 엔진 가동 (v3.3)")
     log(f"🔗 Supabase: {SUPABASE_URL}")
     log(f"⏱️ 주기: {INTERVAL_DESC} | 1회 발굴 한도: {DISCOVERY_LIMIT}개 | 폐업 검증 한도: {BATCH_LIMIT}개")
     log(f"📁 로그 저장 경로: {LOG_DIR}")
@@ -237,7 +258,7 @@ def main():
         sleep_time = max(30, interval_seconds - elapsed)
 
         next_time = (get_kst_now() + timedelta(seconds=sleep_time)).strftime("%Y-%m-%d %H:%M:%S")
-        log(f"💤 5단계 사이클 완료. 다음 사이클 대기 ({next_time} KST 예정)...")
+        log(f"💤 6단계 전체 사이클 완료 (소요: {elapsed/60:.1f}분). 다음 사이클 대기 ({next_time} KST 예정)...")
         time.sleep(sleep_time)
 
 if __name__ == "__main__":
