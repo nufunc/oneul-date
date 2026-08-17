@@ -1,31 +1,31 @@
 /* ==========================================================================
-   오늘 데이트 — 디자인 토큰 ("Romantic & Warm Pastel")
-   따뜻하고 포근한 웜 크림 베이지 + 소프트 로즈/코랄 포인트 + 모던 산세리프
+   오늘 데이트 — 디자인 토큰 ("Sensory Magazine")
+   감성 매거진 페이퍼 베이지 + 테라코타 로즈 액센트 + 에디토리얼 세리프/산세리프
    ========================================================================== */
 
 :root {
-  /* 메인 컬러 팔레트 */
-  --color-bg: #faf6f2; /* 포근하고 따뜻한 로맨틱 웜 크림 베이지 */
+  /* 메인 컬러 팔레트 (Sensory Magazine) */
+  --color-bg: #faf9f5; /* 페이퍼 크림 웜 베이지 */
   --color-surface: #ffffff; /* 순백의 카드 서피스 */
-  --color-surface-sub: #f6f0eb; /* 소프트 웜 파스텔 보조 영역 */
-  --color-surface-tint: #fff6f7; /* 은은한 로즈 틴트 */
+  --color-surface-sub: #efeeea; /* 소프트 웜 매거진 보조 영역 */
+  --color-surface-tint: #f6f3ef; /* 은은한 페이퍼 틴트 */
   
-  --color-border: rgba(90, 60, 55, 0.08); /* 부드러운 웜 보더 */
-  --color-border-strong: rgba(90, 60, 55, 0.18); /* 세컨더리 및 포커스 보더 */
+  --color-border: rgba(45, 45, 45, 0.08); /* 정갈한 1px 보더 */
+  --color-border-strong: rgba(45, 45, 45, 0.16); /* 세컨더리 및 포커스 보더 */
   
-  --color-text: #2d2422; /* 딥 에스프레소 차콜 본문 */
-  --color-text-sub: #685b57; /* 따뜻한 보조 본문 */
-  --color-text-faint: #988a85; /* 부드러운 라벨 및 장식 */
+  --color-text: #1b1c1a; /* 소프트 잉크 차콜 본문 */
+  --color-text-sub: #55433d; /* 매거진 웜 브라운 보조 본문 */
+  --color-text-faint: #88726c; /* 차분한 라벨 및 장식 */
   
-  --color-accent: #e05a6d; /* 로맨틱 로즈 / 피치 코랄 액센트 */
-  --color-accent-hover: #cc4d60;
-  --color-accent-text: #c83e53; /* 가독성 높은 진한 로즈 텍스트 */
-  --color-accent-soft: rgba(224, 90, 109, 0.09); /* 소프트 핑크 배경 틴트 */
-  --color-accent-medium: rgba(224, 90, 109, 0.16);
-  --color-accent-gradient: linear-gradient(135deg, #e05a6d 0%, #f47f87 100%);
-  --color-accent-gradient-hover: linear-gradient(135deg, #d34e61 0%, #e66f78 100%);
+  --color-accent: #c36a4d; /* 세련된 테라코타 포인트 */
+  --color-accent-hover: #a85237;
+  --color-accent-text: #93452b; /* 가독성 높은 딥 테라코타 텍스트 */
+  --color-accent-soft: rgba(195, 106, 77, 0.09); /* 소프트 테라코타 배경 틴트 */
+  --color-accent-medium: rgba(195, 106, 77, 0.18);
+  --color-accent-gradient: linear-gradient(135deg, #c36a4d 0%, #d87d60 100%);
+  --color-accent-gradient-hover: linear-gradient(135deg, #b25d41 0%, #c36a4d 100%);
   --color-on-accent: #ffffff;
-  --color-backdrop: rgba(45, 35, 33, 0.4);
+  --color-backdrop: rgba(27, 28, 26, 0.4);
 
   /* 여백 간격 */
   --space-1: 4px;
@@ -35,11 +35,11 @@
   --space-5: 20px;
   --space-6: 32px;
 
-  /* 라운드 — 둥글고 부드러운 모던 라운딩 */
+  /* 라운드 — 정갈한 매거진 에디토리얼 라운딩 */
   --radius-sm: 6px;
   --radius-md: 12px;
-  --radius-lg: 18px;
-  --radius-xl: 24px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
   --radius-full: 999px;
 
   /* 폰트 크기 */
@@ -49,16 +49,18 @@
   --font-lg: 1.22rem;
   --font-xl: 1.55rem;
 
+  /* 타이포그래피 */
   --font-sans: 'Pretendard', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-  --font-display: 'Pretendard', 'Plus Jakarta Sans', sans-serif;
+  --font-serif: 'Libre Caslon Text', 'Noto Serif KR', serif;
+  --font-display: 'Noto Serif KR', 'Libre Caslon Text', serif;
 
   /* 라벨 자간 */
   --label-tracking: 0.04em;
 
   /* 그림자 — 소프트 앰비언트 글로우 & 레이어 */
-  --shadow-card: 0 3px 16px rgba(140, 90, 80, 0.05), 0 1px 3px rgba(0, 0, 0, 0.02);
-  --shadow-lift: 0 8px 24px rgba(224, 90, 109, 0.14), 0 2px 8px rgba(0, 0, 0, 0.03);
-  --shadow-float: 0 -10px 36px rgba(90, 60, 55, 0.12);
+  --shadow-card: 0 2px 12px rgba(45, 45, 45, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-lift: 0 6px 20px rgba(195, 106, 77, 0.12), 0 2px 6px rgba(0, 0, 0, 0.02);
+  --shadow-float: 0 -8px 28px rgba(45, 45, 45, 0.08);
 
   /* 레이아웃 */
   --layout-max: 640px;
@@ -81,8 +83,8 @@ html {
 body {
   background: var(--color-bg);
   background-image: 
-    radial-gradient(circle at 10% 15%, rgba(244, 127, 135, 0.05) 0%, transparent 40%),
-    radial-gradient(circle at 90% 85%, rgba(224, 90, 109, 0.04) 0%, transparent 45%);
+    radial-gradient(circle at 10% 15%, rgba(195, 106, 77, 0.04) 0%, transparent 40%),
+    radial-gradient(circle at 90% 85%, rgba(147, 69, 43, 0.03) 0%, transparent 45%);
   background-attachment: fixed;
   color: var(--color-text);
   font-family: var(--font-sans);

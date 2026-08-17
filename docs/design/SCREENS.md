@@ -2,15 +2,19 @@
 
 > 2026-08-16. PLAN.md 확정 기능 기준. 디자인 전제: A안 감성 매거진 토큰(DESIGN.md), 모바일 ~430px 기준 / max-width 640px, 마크업 변경 최소.
 
-## 디자인 산출물 (Stitch, 2026-08-16 확정)
+## 디자인 산출물 (v2 — detailed_date_itinerary 기준 정렬)
 
-- **디자인 시스템**: `DESIGN_SYSTEM_stitch.md` ("Sensory Magazine") — A안의 구체화로 **채택**
-- **목업**: `home_create_course.png`(S1), `home_result.png`(S2), `home_result.html`(S2 HTML 원본)
-- **채택 시 조정사항 (확정)**:
-  1. 하단 탭바(Discover/Creator/Profile) **제거** — 단일 화면 원칙 유지
-  2. 스텝 카드는 **사진 없는 타이포 중심**으로 각색 (DB에 이미지 없음. 이미지 수집은 백로그)
-  3. 폰트 한글 매핑: Libre Caslon Text → **Noto Serif KR**, Plus Jakarta Sans → **Pretendard**
-  4. UI 텍스트 한글화
+- **기준 디자인 시스템**: `detailed_date_itinerary.png` (웜 베이지 `#ECE7E1` & 모던 화이트 카드 & 테라코타 포인트)
+- **전체 화면 목업 갤러리**:
+  1. **코스 생성 홈 화면 (S1)**: `create_course_home.png`
+  2. **상세 일정/코스 결과 (S2)**: `detailed_date_itinerary.png`
+  3. **장소 둘러보기/탐색 (S3)**: `explore_places.png`
+  4. **저장 목록/보관함 (S4)**: `saved_courses.png`
+- **핵심 UI 원칙**:
+  1. 웜 베이지 배경(`--color-bg: #ECE7E1`) 위의 플로팅 화이트 카드 레이아웃
+  2. 스텝 번호 배지(`①, ②, ③`)와 테라코타 오렌지 액센트
+  3. 좌측 썸네일 이미지/아이콘 + 우측 상호명 & 카테고리 정보
+  4. 하단 고정 액션 바 (`복사`, `링크`, `저장`) 및 3단 네비게이션 (`코스 생성`, `둘러보기`, `저장 목록`)
 
 ## S1. 홈 — 첫 진입 (생성 전)
 
