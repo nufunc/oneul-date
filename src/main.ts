@@ -398,19 +398,6 @@ function regionsLabel(regionKeys: string[], zoneKeys: string[] = []): string {
     .join('·');
 }
 
-/** 조회수 숫자 세련된 축약 포맷 (예: 154000 -> 15만+, 92000 -> 9만+) */
-function formatViews(views: number): string {
-  if (views >= 10000) {
-    const man = Math.floor(views / 10000);
-    return `${man}만+`;
-  }
-  if (views >= 1000) {
-    const cheon = Math.floor(views / 1000);
-    return `${cheon}천+`;
-  }
-  return `${views}`;
-}
-
 /** 저장 포맷 하위호환 — 과거 문자열 region('ALL' 포함)을 배열로 정규화 */
 function normalizeRegionCond(value: string[] | string | undefined): string[] {
   if (Array.isArray(value)) return value.filter((k) => k !== 'ALL');
@@ -1485,16 +1472,20 @@ const ICON_INSTA_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="no
 const ICON_BLOG_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="13" y2="11"/></svg>`;
 const ICON_NAVER_MAP_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
 
-function cleanSpotTag(name: string): string {
-  return name.replace(/[^\w가-힣0-9]/g, '');
+function getRealInstagramUrl(spot: Spot): string | null {
+  const soc = spot.social_links?.instagram?.url;
+  if (soc && soc.includes('instagram.com/')) return soc;
+  const src = spot.source?.url;
+  if (src && src.includes('instagram.com/')) return src;
+  return null;
 }
 
-function instagramUrl(spot: Spot): string {
-  return `https://www.instagram.com/explore/tags/${encodeURIComponent(cleanSpotTag(spot.name))}/`;
-}
-
-function naverBlogUrl(spot: Spot): string {
-  return `https://search.naver.com/search.naver?where=blog&query=${encodeURIComponent(mapQuery(spot))}`;
+function getRealBlogUrl(spot: Spot): string | null {
+  const soc = spot.social_links?.blog?.url;
+  if (soc && (soc.includes('blog.naver.com') || soc.includes('tistory.com') || soc.includes('brunch.co.kr'))) return soc;
+  const src = spot.source?.url;
+  if (src && (src.includes('blog.naver.com') || src.includes('tistory.com') || src.includes('brunch.co.kr'))) return src;
+  return null;
 }
 
 function renderResults(): void {
@@ -1800,22 +1791,29 @@ function renderStepCard(
       </div>
       <div class="step-actions-bar">
         <div class="step-actions-icons">
-          ${swappable ? `<button class="btn-action-icon btn-swap-icon" data-step-index="${index}" aria-label="${meta.label} 장소 교체" title="이 장소만 다른 곳으로 교체하기">${ICON_SWAP_SVG}</button>` : ''}
+          ${swappable ? `<button class="btn-action-icon btn-swap-icon" data-step-index="${index}" aria-label="장소 변경" title="장소 변경">${ICON_SWAP_SVG}</button>` : ''}
           ${(() => {
-            const yt = spot.social_links?.youtube;
-            if (!yt?.url) return '';
-            const views = yt.views || 0;
-            const viewTxt = views >= 1000 ? ` (${formatViews(views)})` : '';
-            return `<a class="btn-action-icon btn-yt-icon" href="${escapeHtml(yt.url)}" target="_blank" rel="noopener noreferrer" aria-label="YouTube 리뷰 영상" title="YouTube 영상 보기${viewTxt}">${ICON_YOUTUBE_SVG}</a>`;
+            const yt = spot.social_links?.youtube?.url;
+            if (!yt) return '';
+            return `<a class="btn-action-icon btn-yt-icon" href="${escapeHtml(yt)}" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube">${ICON_YOUTUBE_SVG}</a>`;
           })()}
           ${(() => {
-            const kakaoUrl = spot.social_links?.kakaomap?.url || `https://map.kakao.com/link/search/${encodeURIComponent(mapQuery(spot))}`;
-            return `<a class="btn-action-icon btn-kakao-icon" href="${escapeHtml(kakaoUrl)}" target="_blank" rel="noopener noreferrer" aria-label="카카오맵 실시간 리뷰" title="카카오맵 실시간 리뷰 보기">${ICON_KAKAO_SVG}</a>`;
+            const kakao = spot.social_links?.kakaomap?.url;
+            if (!kakao) return '';
+            return `<a class="btn-action-icon btn-kakao-icon" href="${escapeHtml(kakao)}" target="_blank" rel="noopener noreferrer" aria-label="카카오맵" title="카카오맵">${ICON_KAKAO_SVG}</a>`;
           })()}
-          <a class="btn-action-icon btn-insta-icon" href="${instagramUrl(spot)}" target="_blank" rel="noopener noreferrer" aria-label="인스타그램 피드" title="인스타그램 최신 피드 보기">${ICON_INSTA_SVG}</a>
-          <a class="btn-action-icon btn-blog-icon" href="${naverBlogUrl(spot)}" target="_blank" rel="noopener noreferrer" aria-label="네이버 블로그 후기" title="네이버 블로그 솔직 후기 보기">${ICON_BLOG_SVG}</a>
+          ${(() => {
+            const insta = getRealInstagramUrl(spot);
+            if (!insta) return '';
+            return `<a class="btn-action-icon btn-insta-icon" href="${escapeHtml(insta)}" target="_blank" rel="noopener noreferrer" aria-label="인스타그램" title="인스타그램">${ICON_INSTA_SVG}</a>`;
+          })()}
+          ${(() => {
+            const blog = getRealBlogUrl(spot);
+            if (!blog) return '';
+            return `<a class="btn-action-icon btn-blog-icon" href="${escapeHtml(blog)}" target="_blank" rel="noopener noreferrer" aria-label="블로그" title="블로그">${ICON_BLOG_SVG}</a>`;
+          })()}
         </div>
-        <a class="step-map-chip" href="${naverMapUrl(spot)}" target="_blank" rel="noopener noreferrer" title="네이버 지도에서 길찾기 및 상세 정보 보기">
+        <a class="step-map-chip" href="${naverMapUrl(spot)}" target="_blank" rel="noopener noreferrer" title="네이버 지도">
           ${ICON_NAVER_MAP_SVG}
           <span>지도</span>
         </a>
