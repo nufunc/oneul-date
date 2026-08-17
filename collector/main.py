@@ -24,6 +24,7 @@ from discovery_engine import run_discovery
 from blog_miner import run_blog_mining
 from community_miner import run_community_mining
 from enrich_worker import run_social_enrichment
+from youtube_vlog_miner import run_youtube_vlog_mining
 from notifier import send_daily_digest
 
 if hasattr(sys.stdout, 'reconfigure'):
@@ -197,6 +198,14 @@ def run_cycle():
         run_social_enrichment(SUPABASE_URL, SUPABASE_SERVICE_KEY, batch_size=DISCOVERY_LIMIT)
     except Exception as e:
         log(f"5단계 소셜 동기화 오류: {e}", level="ERROR")
+
+    time.sleep(2)
+
+    log(f"▶ 6단계: 최신 유튜브 여행/데이트 브이로그 역방향 장소 마이닝 시작")
+    try:
+        run_youtube_vlog_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, limit=5)
+    except Exception as e:
+        log(f"6단계 유튜브 브이로그 마이닝 오류: {e}", level="ERROR")
 
     # 일일 서머리 검사
     check_and_generate_daily_summary()
