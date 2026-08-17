@@ -20,19 +20,75 @@ import re
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+ENV_PATH = os.path.join(BASE_DIR, ".env")
+
+def load_env():
+    env = {}
+    if os.path.exists(ENV_PATH):
+        with open(ENV_PATH, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    k, v = line.split("=", 1)
+                    env[k.strip()] = v.strip().strip('"').strip("'")
+    return env
+
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Accept": "application/json, text/plain, */*",
     "Referer": "https://map.naver.com/"
 }
 
-def clean_keyword(name: str, location: str = "") -> str:
-    clean = re.sub(r'\(.*?\)|\[.*?\]', '', name)
-    clean = re.sub(r':.*$', '', clean)
-    clean = re.sub(r' - .*$', '', clean)
-    clean = re.sub(r'\s+(VIP|VVIP|프리미엄|명품|수제|원데이클래스|원데이\s*클래스|클래스|아틀리에|갤러리|스튜디오|살롱|공방|옻칠|나전칠기|도자기|가죽공방|도예공방|체험장|체험관|투어|산책로|산책코스|야시장|먹거리|거리|골목|본점|직영점).*$', '', clean, flags=re.IGNORECASE)
-    clean = clean.strip()
+KNOWN_MAP = {
+    'aquafield': '아쿠아필드',
+    'termeden': '테르메덴',
+    'simmons terrace': '시몬스테라스',
+}
+
+def clean_keyword(name: str, location: str = "", address: str = "", region: str = "") -> str:
+    clean = re.sub(r'\(.*?\)|\[.*?\]|（.*?）|【.*?】', '', name)
+    if ':' in clean:
+        parts = clean.split(':')
+        clean = parts[1].strip() if len(parts) > 1 and parts[1].strip() else parts[0].strip()
+    if ' - ' in clean:
+        parts = clean.split(' - ')
+        clean = parts[1].strip() if len(parts) > 1 and parts[1].strip() else parts[0].strip()
+    if re.search(r'&|\+|↔|&amp;|\s및\s|\s/\s', clean):
+        clean = re.split(r'&|\+|↔|&amp;|\s및\s|\s/\s', clean)[0].strip()
+
+    descriptor_regex = r'\s+(VIP|VVIP|프리미엄|명품|수제|원데이클래스|원데이\s*클래스|클래스|아틀리에|갤러리|스튜디오|살롱|공방|옻칠|나전칠기|도자기|가죽공방|도예공방|체험장|체험관|투어|산책로|산책코스|야시장|먹거리|거리|골목|본점|직영점).*$'
+    clean = re.sub(descriptor_regex, '', clean, flags=re.IGNORECASE).strip()
+    clean = re.sub(r'[^\w\s가-힣0-9.-]', ' ', clean)
+    clean = re.sub(r'\s+', ' ', clean).strip()
+
+    lower = clean.lower()
+    for eng, kor in KNOWN_MAP.items():
+        if eng in lower:
+            clean = re.sub(re.escape(eng), kor, clean, flags=re.IGNORECASE)
+
+    # 지역 결합 (주소나 location에서 시/군/구/동 추출)
+    area_hint = ""
+    if address:
+        m = re.search(r'([가-힣0-9]+(?:로|길|동|읍|면))', address)
+        if m:
+            area_hint = m.group(1)
+    if not area_hint and location:
+        m = re.search(r'([가-힣0-9]+(?:시|군|구|동|읍|면))', location)
+        if m and m.group(1) not in ('전국', '수도권'):
+            area_hint = m.group(1)
+
+    if area_hint and area_hint not in clean:
+        return f"{clean} {area_hint}".strip()
     return clean
+
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Accept": "application/json, text/plain, */*",
+    "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+    "Referer": "https://map.naver.com/",
+    "Origin": "https://map.naver.com"
+}
 
 def search_naver(query: str):
     url = f"https://map.naver.com/p/api/search/allSearch?query={urllib.parse.quote(query)}&type=all&searchCoord=127.0276197;37.497942&boundary="
@@ -43,9 +99,24 @@ def search_naver(query: str):
                 data = json.loads(response.read().decode('utf-8'))
                 res = data.get("result", {})
                 places = res.get("place", {}).get("list", []) or res.get("site", {}).get("list", [])
-                return places
+                if places:
+                    return places
     except Exception:
         pass
+
+    # 모바일 엔드포인트 폴백
+    try:
+        m_url = f"https://m.map.naver.com/search2/searchMore.naver?query={urllib.parse.quote(query)}&sm=clk&style=v5&page=1&displayCount=5&type=SITE_1"
+        m_req = urllib.request.Request(m_url, headers=HEADERS)
+        with urllib.request.urlopen(m_req, timeout=5) as m_res:
+            if m_res.status == 200:
+                m_data = json.loads(m_res.read().decode('utf-8'))
+                m_list = m_data.get("result", {}).get("site", {}).get("list", [])
+                if m_list:
+                    return [{"name": item.get("name"), "roadAddress": item.get("roadAddress") or item.get("address")} for item in m_list]
+    except Exception:
+        pass
+
     return []
 
 def run_worker(supabase_url: str, service_key: str, limit: int = 50):
@@ -82,7 +153,9 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
         s_id = spot["id"]
         name = spot["name"]
         loc = spot.get("location", "")
-        keyword = clean_keyword(name, loc)
+        addr = spot.get("address", "")
+        reg = spot.get("region", "")
+        keyword = clean_keyword(name, loc, addr, reg)
 
         places = search_naver(keyword)
         time.sleep(0.1)
@@ -107,12 +180,11 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                 updated_count += 1
             verified_count += 1
         else:
-            # 검색 0건: 폐업 의심 플래그
+            # 단독 검색 실패 시 즉시 폐업 처리하지 않고 미검증 상태로 플래그
             patch_data = {
-                "is_closed": True
+                "verified": False
             }
             closed_count += 1
-            print(f"  ⚠️ [폐업 의심 감지 -> DB 격리] id: {s_id}, name: {name}")
 
         # Supabase UPDATE
         if patch_data:
@@ -124,12 +196,16 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
             except Exception as e:
                 print(f"  ❌ DB 업데이트 실패 (id: {s_id}): {e}")
 
-    print(f"✅ 검증 완료: 정상 {verified_count}건, 주소보강 {updated_count}건, 폐업/격리 {closed_count}건")
+    print(f"✅ 검증 완료: 정상 확인 {verified_count}건, 주소 보강 {updated_count}건, 재확인 필요 {closed_count}건")
 
 if __name__ == "__main__":
+    env = load_env()
+    default_url = os.getenv("SUPABASE_URL") or env.get("SUPABASE_URL") or env.get("VITE_SUPABASE_URL")
+    default_key = os.getenv("SUPABASE_SERVICE_KEY") or env.get("SUPABASE_SERVICE_KEY") or env.get("VITE_SUPABASE_ANON_KEY")
+
     parser = argparse.ArgumentParser(description="Supabase Cron Validation Worker")
-    parser.add_argument("--url", default=os.getenv("SUPABASE_URL"), help="Supabase Project URL")
-    parser.add_argument("--key", default=os.getenv("SUPABASE_SERVICE_KEY"), help="Supabase Service Role Key")
+    parser.add_argument("--url", default=default_url, help="Supabase Project URL")
+    parser.add_argument("--key", default=default_key, help="Supabase Service Role Key")
     parser.add_argument("--limit", type=int, default=50, help="Number of spots to check")
     args = parser.parse_args()
 
