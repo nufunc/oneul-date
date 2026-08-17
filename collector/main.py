@@ -34,7 +34,8 @@ SUPABASE_URL = os.getenv("SUPABASE_URL") or env.get("SUPABASE_URL") or env.get("
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY") or env.get("SUPABASE_SERVICE_KEY") or env.get("VITE_SUPABASE_ANON_KEY")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY") or os.getenv("VITE_GROQ_API_KEY") or env.get("GROQ_API_KEY") or env.get("VITE_GROQ_API_KEY") or ""
 CHECK_INTERVAL_HOURS = int(os.getenv("CHECK_INTERVAL_HOURS", "1"))
-BATCH_LIMIT = int(os.getenv("BATCH_LIMIT", "100"))
+DISCOVERY_LIMIT = int(os.getenv("DISCOVERY_LIMIT", "50"))      # 1회 신규 발굴/마이닝/소셜동기화 한도 (기본: 50개)
+BATCH_LIMIT = int(os.getenv("BATCH_LIMIT", "100"))            # 1회 라이브 폐업 검증 한도 (기본: 100개)
 DAILY_REPORT_HOUR = int(os.getenv("DAILY_REPORT_HOUR", "9"))  # 매일 리포트 발송 시각 (KST 0~23시, 기본: 9시)
 
 # KST (한국 표준시 UTC+9)
@@ -113,7 +114,7 @@ def check_and_generate_daily_summary(force: bool = False):
             f"• 정상 운영(Active)  : {stats['active']:,}개\n"
             f"• 폐업/휴업(Closed)  : {stats['closed']:,}개\n"
             f"• 고유 이미지 보유율 : {stats['with_img']:,}개 ({(stats['with_img']/max(1, stats['total'])*100):.1f}%)\n"
-            f"• 수집 엔진 가동 상태: 정상 (주기: {CHECK_INTERVAL_HOURS}시간, 1회 발굴 한도: 15개)\n"
+            f"• 수집 엔진 가동 상태: 정상 (주기: {CHECK_INTERVAL_HOURS}시간, 1회 발굴 한도: {DISCOVERY_LIMIT}개)\n"
             f"• 저장 로그 경로     : {LOG_DIR}\n"
             f"========================================================\n"
         )
@@ -151,7 +152,7 @@ def run_cycle():
 
     log("▶ 2단계: 2026 신규 핫플레이스 포털 자율 발굴 시작 (Groq AI 큐레이션)")
     try:
-        run_discovery(SUPABASE_URL, SUPABASE_SERVICE_KEY, groq_key=GROQ_API_KEY, max_discoveries=15)
+        run_discovery(SUPABASE_URL, SUPABASE_SERVICE_KEY, groq_key=GROQ_API_KEY, max_discoveries=DISCOVERY_LIMIT)
     except Exception as e:
         log(f"2단계 포털 발굴 오류: {e}", level="ERROR")
 
@@ -159,13 +160,13 @@ def run_cycle():
 
     log("▶ 3단계: 블로그 & 구글 웹 검색 데이트 스팟 마이닝 시작")
     try:
-        run_blog_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, max_discoveries=15)
+        run_blog_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, max_discoveries=DISCOVERY_LIMIT)
     except Exception as e:
         log(f"3단계 블로그 마이닝 오류: {e}", level="ERROR")
 
     log("▶ 4단계: 커뮤니티(더쿠/블라인드/인벤) 추천 리스트 마이닝 시작")
     try:
-        run_community_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, max_discoveries=15)
+        run_community_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, max_discoveries=DISCOVERY_LIMIT)
     except Exception as e:
         log(f"4단계 커뮤니티 마이닝 오류: {e}", level="ERROR")
 
@@ -173,7 +174,7 @@ def run_cycle():
 
     log("▶ 5단계: 유튜브 핫클립 & 카카오맵 평점 소셜 점진적 동기화 시작")
     try:
-        run_social_enrichment(SUPABASE_URL, SUPABASE_SERVICE_KEY, batch_size=15)
+        run_social_enrichment(SUPABASE_URL, SUPABASE_SERVICE_KEY, batch_size=DISCOVERY_LIMIT)
     except Exception as e:
         log(f"5단계 소셜 동기화 오류: {e}", level="ERROR")
 
