@@ -1531,6 +1531,70 @@ button {
 }
 
 /* ==========================================================================
+   네이티브 인피드 광고 / 큐레이션 TIP 카드
+   ========================================================================== */
+
+.ad-card {
+  background: var(--color-surface-card);
+  border: 1px dashed var(--color-border-hover);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  margin-top: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  transition: border-color var(--dur-normal) var(--ease-out);
+}
+
+.ad-badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ad-sponsor-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ad-tip-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-accent);
+  background: var(--color-accent-subtle);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  letter-spacing: -0.01em;
+}
+
+.ad-tip-title {
+  font-family: var(--font-display-serif);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text-strong);
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.ad-tip-desc {
+  font-size: 0.82rem;
+  color: var(--color-text-sub);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.ad-container {
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* ==========================================================================
    모션 최소화
    ========================================================================== */
 
