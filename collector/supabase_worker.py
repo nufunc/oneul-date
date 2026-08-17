@@ -130,6 +130,18 @@ def search_naver(query: str):
 
     return []
 
+def is_polluted_header_name(name: str) -> bool:
+    """소제목/헤더형 텍스트로 오염된 상호명 여부 판별"""
+    if not name:
+        return False
+    if len(name) >= 25:
+        return True
+    indicators = [
+        " & ", " · ", "복합공간", "명소", "플래그십 &", "살롱 &", "찻자리 &", 
+        "다이닝 &", "명품 한옥", "코스 모음", "추천 리스트", "데이트 코스", "감성 핫플"
+    ]
+    return any(ind in name for ind in indicators)
+
 def calculate_quality_score(spot: dict, place_meta: dict) -> int:
     """스팟 메타데이터의 풍부도를 기반으로 0~100점 품질 점수 산정"""
     score = 40  # 기본 점수
@@ -227,6 +239,14 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                 "fail_count": 0,
                 "quality_score": calculate_quality_score(spot, place_meta)
             }
+
+            # [Auto-Healing] 소제목으로 오염된 상호명을 네이버 공식 상호명으로 자동 치유
+            if is_polluted_header_name(name):
+                official_name = top.get("name", "").strip()
+                if official_name and len(official_name) < 25 and official_name != name:
+                    patch_data["name"] = official_name
+                    old_sum = spot.get("summary") or ""
+                    patch_data["summary"] = f"{name} — {old_sum}"[:150] if old_sum and old_sum not in name else name
 
             if road_addr and not spot.get("address"):
                 patch_data["address"] = road_addr

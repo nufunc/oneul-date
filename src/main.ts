@@ -398,14 +398,15 @@ function regionsLabel(regionKeys: string[], zoneKeys: string[] = []): string {
     .join('·');
 }
 
-/** 조회수 숫자 축약 포맷 (예: 154000 -> 15.4만) */
+/** 조회수 숫자 세련된 축약 포맷 (예: 154000 -> 15만+, 92000 -> 9만+) */
 function formatViews(views: number): string {
   if (views >= 10000) {
-    const man = views / 10000;
-    return man >= 10 ? `${Math.floor(man)}만` : `${man.toFixed(1)}만`;
+    const man = Math.floor(views / 10000);
+    return `${man}만+`;
   }
   if (views >= 1000) {
-    return `${(views / 1000).toFixed(0)}천`;
+    const cheon = Math.floor(views / 1000);
+    return `${cheon}천+`;
   }
   return `${views}`;
 }
@@ -620,23 +621,20 @@ function mapQuery(spot: Spot): string {
   return cleanName || spot.name.trim();
 }
 
-/** 스폿의 네이버/카카오 지도 바로가기 URL — 정식 지도 도메인으로만 엄격하게 한정 */
+/** 스폿의 네이버/카카오 지도 바로가기 URL — 항상 최신 플레이스로 연결되는 정식 지도 검색 URL 표준화 */
 function naverMapUrl(spot: Spot): string {
-  // 1. source.url이 정식 네이버 지도/플레이스 링크인 경우만 허용 (블로그/일반 웹페이지 배제)
-  if (spot.source?.url) {
-    const u = spot.source.url;
-    if (u.includes('map.naver.com') || u.includes('naver.me') || u.includes('m.place.naver.com')) {
-      return u;
-    }
+  // 1. 공식 네이버 지도 단축 링크(naver.me)는 최우선 신뢰
+  if (spot.source?.url && spot.source.url.includes('naver.me/')) {
+    return spot.source.url;
   }
   // 2. 카카오맵 정식 플레이스 상세 링크인 경우
   if (spot.social_links?.kakaomap?.url) {
     const ku = spot.social_links.kakaomap.url;
-    if (ku.includes('place.map.kakao.com') || ku.includes('map.kakao.com/link/map/')) {
+    if (ku.includes('place.map.kakao.com/') || ku.includes('map.kakao.com/link/map/')) {
       return ku;
     }
   }
-  // 3. 그 외 블로그/일반 웹/뉴스 링크 등은 배제하고 정제된 네이버 지도 검색 URL로 통일
+  // 3. 레거시 고정 플레이스 ID(m.place.naver.com 등)의 ID 변경/오연결을 방지하기 위해 정제된 실시간 네이버 지도 검색 URL로 통일
   return `https://map.naver.com/p/search/${encodeURIComponent(mapQuery(spot))}`;
 }
 
@@ -1479,10 +1477,25 @@ function bindConditionEvents(area: HTMLElement): void {
   });
 }
 
-// --- 결과 영역 -------------------------------------------------------------
-
 const ICON_REFRESH_SVG = `<svg class="icon-refresh" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>`;
-const ICON_SWAP_SVG = `<svg class="icon-swap" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>`;
+const ICON_SWAP_SVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>`;
+const ICON_YOUTUBE_SVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`;
+const ICON_KAKAO_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3c-5.523 0-10 3.582-10 8 0 2.828 1.838 5.308 4.622 6.726l-1.173 4.316c-.105.385.318.694.654.477l5.068-3.342c.271.015.548.023.829.023 5.523 0 10-3.582 10-8s-4.477-8-10-8z"/></svg>`;
+const ICON_INSTA_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>`;
+const ICON_BLOG_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="13" y2="11"/></svg>`;
+const ICON_NAVER_MAP_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
+
+function cleanSpotTag(name: string): string {
+  return name.replace(/[^\w가-힣0-9]/g, '');
+}
+
+function instagramUrl(spot: Spot): string {
+  return `https://www.instagram.com/explore/tags/${encodeURIComponent(cleanSpotTag(spot.name))}/`;
+}
+
+function naverBlogUrl(spot: Spot): string {
+  return `https://search.naver.com/search.naver?where=blog&query=${encodeURIComponent(mapQuery(spot))}`;
+}
 
 function renderResults(): void {
   const area = document.getElementById('results-area');
@@ -1786,21 +1799,26 @@ function renderStepCard(
         </div>
       </div>
       <div class="step-actions-bar">
-        ${swappable ? `<button class="btn-swap btn-swap-chip" data-step-index="${index}" aria-label="${meta.label} 장소 변경" title="이 장소만 다시 추천받기">${ICON_SWAP_SVG}<span>다른 장소</span></button>` : ''}
-        ${(() => {
-          const yt = spot.social_links?.youtube;
-          if (!yt?.url) return '';
-          const views = yt.views || 0;
-          if (views >= 10000) {
-            return `<a class="step-social-chip yt-chip" href="${escapeHtml(yt.url)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(yt.title || '유튜브 핫클립')}">▶ 핫클립 (${formatViews(views)})</a>`;
-          }
-          if (views >= 3000) {
-            return `<a class="step-social-chip yt-chip yt-review" href="${escapeHtml(yt.url)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(yt.title || '유튜브 영상')}">▶ 영상리뷰 (${formatViews(views)})</a>`;
-          }
-          return '';
-        })()}
-        ${spot.social_links?.kakaomap?.rating ? `<a class="step-social-chip kakao-chip" href="${escapeHtml(spot.social_links.kakaomap.url || '')}" target="_blank" rel="noopener noreferrer" title="카카오맵 리뷰 보기">★ ${spot.social_links.kakaomap.rating}</a>` : ''}
-        <a class="step-map-chip" href="${naverMapUrl(spot)}" target="_blank" rel="noopener noreferrer">지도 보기 ↗</a>
+        <div class="step-actions-icons">
+          ${swappable ? `<button class="btn-action-icon btn-swap-icon" data-step-index="${index}" aria-label="${meta.label} 장소 교체" title="이 장소만 다른 곳으로 교체하기">${ICON_SWAP_SVG}</button>` : ''}
+          ${(() => {
+            const yt = spot.social_links?.youtube;
+            if (!yt?.url) return '';
+            const views = yt.views || 0;
+            const viewTxt = views >= 1000 ? ` (${formatViews(views)})` : '';
+            return `<a class="btn-action-icon btn-yt-icon" href="${escapeHtml(yt.url)}" target="_blank" rel="noopener noreferrer" aria-label="YouTube 리뷰 영상" title="YouTube 영상 보기${viewTxt}">${ICON_YOUTUBE_SVG}</a>`;
+          })()}
+          ${(() => {
+            const kakaoUrl = spot.social_links?.kakaomap?.url || `https://map.kakao.com/link/search/${encodeURIComponent(mapQuery(spot))}`;
+            return `<a class="btn-action-icon btn-kakao-icon" href="${escapeHtml(kakaoUrl)}" target="_blank" rel="noopener noreferrer" aria-label="카카오맵 실시간 리뷰" title="카카오맵 실시간 리뷰 보기">${ICON_KAKAO_SVG}</a>`;
+          })()}
+          <a class="btn-action-icon btn-insta-icon" href="${instagramUrl(spot)}" target="_blank" rel="noopener noreferrer" aria-label="인스타그램 피드" title="인스타그램 최신 피드 보기">${ICON_INSTA_SVG}</a>
+          <a class="btn-action-icon btn-blog-icon" href="${naverBlogUrl(spot)}" target="_blank" rel="noopener noreferrer" aria-label="네이버 블로그 후기" title="네이버 블로그 솔직 후기 보기">${ICON_BLOG_SVG}</a>
+        </div>
+        <a class="step-map-chip" href="${naverMapUrl(spot)}" target="_blank" rel="noopener noreferrer" title="네이버 지도에서 길찾기 및 상세 정보 보기">
+          ${ICON_NAVER_MAP_SVG}
+          <span>지도</span>
+        </a>
       </div>
     </article>
   `;
@@ -1868,7 +1886,7 @@ function swapStep(index: number): void {
   newCard.classList.add('swap-in');
   targetCard.replaceWith(newCard);
 
-  const newSwapBtn = newCard.querySelector<HTMLButtonElement>('.btn-swap');
+  const newSwapBtn = newCard.querySelector<HTMLButtonElement>('.btn-swap, .btn-swap-icon');
   if (newSwapBtn) {
     bindSwapButton(newSwapBtn);
   }
@@ -1921,7 +1939,7 @@ function regenerateCourse(): void {
 }
 
 function bindResultEvents(area: HTMLElement): void {
-  area.querySelectorAll<HTMLButtonElement>('.btn-swap').forEach((btn) => {
+  area.querySelectorAll<HTMLButtonElement>('.btn-swap, .btn-swap-icon').forEach((btn) => {
     bindSwapButton(btn);
   });
   area.querySelector('#btn-regenerate')?.addEventListener('click', function (this: HTMLButtonElement) {
