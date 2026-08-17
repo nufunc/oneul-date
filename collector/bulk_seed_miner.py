@@ -247,7 +247,7 @@ def enrich_spot_with_groq(raw_name: str, cat: str, region: str, area: str, groq_
     try:
         g_url = "https://api.groq.com/openai/v1/chat/completions"
         payload = {
-            "model": "llama-3.3-70b-versatile",
+            "model": "openai/gpt-oss-120b",
             "messages": [
                 {
                     "role": "system",

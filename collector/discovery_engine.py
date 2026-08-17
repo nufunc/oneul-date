@@ -199,7 +199,7 @@ def enrich_spot_with_groq(raw_name: str, cat: str, region: str, area: str, groq_
 
     try:
         req_data = json.dumps({
-            "model": "llama-3.3-70b-versatile",
+            "model": "openai/gpt-oss-120b",
             "messages": [
                 {"role": "system", "content": "You are an expert dating curator. Output only valid JSON."},
                 {"role": "user", "content": prompt}
