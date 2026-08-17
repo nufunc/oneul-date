@@ -20,6 +20,11 @@ interface Spot {
   location: string;
   price: string | null;
   summary: string;
+  category?: string | null;
+  image_url?: string | null;
+  lat?: number | null;
+  lng?: number | null;
+  quality_score?: number;
   source: { type: string; url: string | null; note: string };
   verified: boolean;
 }
@@ -986,9 +991,10 @@ function renderStepCard(
   }
   const moodTags = moodTagLabels(spot);
   const metaRow =
-    spot.verified || moodTags.length > 0
+    spot.verified || moodTags.length > 0 || spot.category
       ? `
       <div class="step-meta">
+        ${spot.category ? `<span class="step-category-tag">${escapeHtml(spot.category)}</span>` : ''}
         ${spot.verified ? `<span class="badge-verified">✓ 확인된 장소</span>` : ''}
         ${moodTags.length > 0 ? `<span class="step-mood-tags">${escapeHtml(moodTags.join(' · '))}</span>` : ''}
       </div>`

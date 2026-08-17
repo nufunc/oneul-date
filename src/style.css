@@ -637,6 +637,16 @@ button {
   letter-spacing: 0.02em;
 }
 
+.step-category-tag {
+  font-size: var(--font-xs);
+  font-weight: 600;
+  color: var(--color-text-sub);
+  background: var(--color-surface-sub);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 1px 6px;
+}
+
 .step-mood-tags {
   font-size: var(--font-xs);
   color: var(--color-text-faint);

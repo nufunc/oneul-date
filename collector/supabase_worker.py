@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-오늘 데이트 — Cron VM용 Supabase 상시 검증 및 자동 갱신 워커 (Supabase Live Sync Worker)
-Cron에 등록하여 주기적으로 네이버 플레이스를 검증하고 폐업/이전/주소를 Supabase DB에 실시간 동기화합니다.
-
-사용법:
-    python collector/supabase_worker.py --limit 100
+오늘 데이트 — OCI VM 심층 메타데이터 보강 & 폐업 검증 엔진 (Deep Enricher & Safe Validator)
+네이버 지도 API에서 위/경도 좌표, 고화질 이미지, 세부 카테고리, 영업상태를 파싱하여 Supabase DB를 고도화합니다.
 """
 
 import os
@@ -34,16 +31,18 @@ def load_env():
                     env[k.strip()] = v.strip().strip('"').strip("'")
     return env
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Accept": "application/json, text/plain, */*",
-    "Referer": "https://map.naver.com/"
-}
-
 KNOWN_MAP = {
     'aquafield': '아쿠아필드',
     'termeden': '테르메덴',
     'simmons terrace': '시몬스테라스',
+}
+
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Accept": "application/json, text/plain, */*",
+    "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+    "Referer": "https://map.naver.com/",
+    "Origin": "https://map.naver.com"
 }
 
 def clean_keyword(name: str, location: str = "", address: str = "", region: str = "") -> str:
@@ -82,19 +81,11 @@ def clean_keyword(name: str, location: str = "", address: str = "", region: str 
         return f"{clean} {area_hint}".strip()
     return clean
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Accept": "application/json, text/plain, */*",
-    "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
-    "Referer": "https://map.naver.com/",
-    "Origin": "https://map.naver.com"
-}
-
 def search_naver(query: str):
     url = f"https://map.naver.com/p/api/search/allSearch?query={urllib.parse.quote(query)}&type=all&searchCoord=127.0276197;37.497942&boundary="
     req = urllib.request.Request(url, headers=HEADERS)
     try:
-        with urllib.request.urlopen(req, timeout=5) as response:
+        with urllib.request.urlopen(req, timeout=6) as response:
             if response.status == 200:
                 data = json.loads(response.read().decode('utf-8'))
                 res = data.get("result", {})
@@ -108,16 +99,35 @@ def search_naver(query: str):
     try:
         m_url = f"https://m.map.naver.com/search2/searchMore.naver?query={urllib.parse.quote(query)}&sm=clk&style=v5&page=1&displayCount=5&type=SITE_1"
         m_req = urllib.request.Request(m_url, headers=HEADERS)
-        with urllib.request.urlopen(m_req, timeout=5) as m_res:
+        with urllib.request.urlopen(m_req, timeout=6) as m_res:
             if m_res.status == 200:
                 m_data = json.loads(m_res.read().decode('utf-8'))
                 m_list = m_data.get("result", {}).get("site", {}).get("list", [])
                 if m_list:
-                    return [{"name": item.get("name"), "roadAddress": item.get("roadAddress") or item.get("address")} for item in m_list]
+                    return m_list
     except Exception:
         pass
 
     return []
+
+def calculate_quality_score(spot: dict, place_meta: dict) -> int:
+    """스팟 메타데이터의 풍부도를 기반으로 0~100점 품질 점수 산정"""
+    score = 40  # 기본 점수
+
+    if spot.get("summary") and len(spot["summary"]) > 10:
+        score += 15
+    if spot.get("mood") and len(spot["mood"]) > 0:
+        score += 10
+    if place_meta.get("image_url"):
+        score += 15
+    if place_meta.get("lat") and place_meta.get("lng"):
+        score += 10
+    if place_meta.get("category"):
+        score += 5
+    if spot.get("address"):
+        score += 5
+
+    return min(100, score)
 
 def run_worker(supabase_url: str, service_key: str, limit: int = 50):
     if not supabase_url or not service_key:
@@ -132,8 +142,8 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
         "Prefer": "return=minimal"
     }
 
-    # 1. 검증 대상 스팟 가져오기 (미검증 또는 오래된 순)
-    query_url = f"{supabase_url}/rest/v1/spots?select=id,name,location,region,area,address,verified,is_closed&is_closed=eq.false&order=updated_at.asc&limit={limit}"
+    # 1. 검증 및 고도화 대상 스팟 가져오기 (좌표/이미지가 없거나 오래된 순)
+    query_url = f"{supabase_url}/rest/v1/spots?select=*&is_closed=eq.false&order=updated_at.asc&limit={limit}"
     req = urllib.request.Request(query_url, headers=api_headers)
 
     try:
@@ -143,11 +153,12 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
         print(f"❌ Supabase 조회 오류: {e}")
         return
 
-    print(f"🔄 Cron VM 워커 시작: {len(spots)}개 스팟 실시간 검증...")
+    print(f"🔄 OCI VM 고도화 엔진 시작: {len(spots)}개 스팟 심층 분석 및 동기화...")
 
+    enriched_count = 0
     verified_count = 0
+    fail_warn_count = 0
     closed_count = 0
-    updated_count = 0
 
     for spot in spots:
         s_id = spot["id"]
@@ -155,36 +166,76 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
         loc = spot.get("location", "")
         addr = spot.get("address", "")
         reg = spot.get("region", "")
+        fail_count = spot.get("fail_count", 0)
+
         keyword = clean_keyword(name, loc, addr, reg)
 
+        # 1차 검색
         places = search_naver(keyword)
         time.sleep(0.1)
 
-        if not places:
-            # 주소 힌트로 2차 검색
-            if spot.get("address"):
-                sub_addr = " ".join(spot["address"].split()[:3])
-                places = search_naver(f"{keyword} {sub_addr}")
-                time.sleep(0.1)
+        # 2차 검색 (실패 시 주소 앞 3단어 결합)
+        if not places and addr:
+            sub_addr = " ".join(addr.split()[:3])
+            places = search_naver(f"{re.sub(r'[^\w가-힣0-9]', '', name)[:10]} {sub_addr}")
+            time.sleep(0.1)
 
         patch_data = {}
         if places and len(places) > 0:
             top = places[0]
             road_addr = top.get("roadAddress") or top.get("address")
+            thum = top.get("thumUrl") or top.get("image") or top.get("imageUrl") or top.get("thumbUrl")
+            category = top.get("category") or top.get("categoryPath", [""])[0] if isinstance(top.get("categoryPath"), list) else top.get("category")
+            
+            # 좌표 파싱 (x: 경도, y: 위도)
+            x_coord = top.get("x") or top.get("lng")
+            y_coord = top.get("y") or top.get("lat")
+            lat_val = float(y_coord) if y_coord else None
+            lng_val = float(x_coord) if x_coord else None
+
+            place_meta = {
+                "image_url": thum,
+                "lat": lat_val,
+                "lng": lng_val,
+                "category": str(category) if category else None
+            }
+
             patch_data = {
                 "verified": True,
-                "is_closed": False
+                "is_closed": False,
+                "fail_count": 0,
+                "quality_score": calculate_quality_score(spot, place_meta)
             }
+
             if road_addr and not spot.get("address"):
                 patch_data["address"] = road_addr
-                updated_count += 1
+            if thum and not spot.get("image_url"):
+                patch_data["image_url"] = thum
+                enriched_count += 1
+            if lat_val and lng_val and not spot.get("lat"):
+                patch_data["lat"] = lat_val
+                patch_data["lng"] = lng_val
+                enriched_count += 1
+            if category and not spot.get("category"):
+                patch_data["category"] = str(category)
+
             verified_count += 1
         else:
-            # 단독 검색 실패 시 즉시 폐업 처리하지 않고 미검증 상태로 플래그
-            patch_data = {
-                "verified": False
-            }
-            closed_count += 1
+            # 3단계 다단계 폐업 안전 판별
+            new_fail = fail_count + 1
+            if new_fail >= 3:
+                patch_data = {
+                    "is_closed": True,
+                    "fail_count": new_fail
+                }
+                closed_count += 1
+                print(f"  ⚠️ [3회 연속 검색 실패 -> 폐업 격리] id: {s_id}, name: {name}")
+            else:
+                patch_data = {
+                    "verified": False,
+                    "fail_count": new_fail
+                }
+                fail_warn_count += 1
 
         # Supabase UPDATE
         if patch_data:
@@ -192,18 +243,18 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
             patch_bytes = json.dumps(patch_data).encode('utf-8')
             patch_req = urllib.request.Request(patch_url, data=patch_bytes, headers=api_headers, method='PATCH')
             try:
-                urllib.request.urlopen(patch_req, timeout=5)
+                urllib.request.urlopen(patch_req, timeout=6)
             except Exception as e:
                 print(f"  ❌ DB 업데이트 실패 (id: {s_id}): {e}")
 
-    print(f"✅ 검증 완료: 정상 확인 {verified_count}건, 주소 보강 {updated_count}건, 재확인 필요 {closed_count}건")
+    print(f"✅ OCI 엔진 완료: 정상검증 {verified_count}건, 신규메타보강 {enriched_count}건, 주의플래그 {fail_warn_count}건, 폐업격리 {closed_count}건")
 
 if __name__ == "__main__":
     env = load_env()
     default_url = os.getenv("SUPABASE_URL") or env.get("SUPABASE_URL") or env.get("VITE_SUPABASE_URL")
     default_key = os.getenv("SUPABASE_SERVICE_KEY") or env.get("SUPABASE_SERVICE_KEY") or env.get("VITE_SUPABASE_ANON_KEY")
 
-    parser = argparse.ArgumentParser(description="Supabase Cron Validation Worker")
+    parser = argparse.ArgumentParser(description="Supabase Deep Enrichment & Validation Worker")
     parser.add_argument("--url", default=default_url, help="Supabase Project URL")
     parser.add_argument("--key", default=default_key, help="Supabase Service Role Key")
     parser.add_argument("--limit", type=int, default=50, help="Number of spots to check")

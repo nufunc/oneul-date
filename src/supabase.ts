@@ -11,6 +11,11 @@ export interface Spot {
   location: string;
   price: string | null;
   summary: string;
+  category?: string | null;
+  image_url?: string | null;
+  lat?: number | null;
+  lng?: number | null;
+  quality_score?: number;
   source: { type: string; url: string | null; note: string };
   verified: boolean;
   is_closed?: boolean;
