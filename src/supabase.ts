@@ -69,19 +69,55 @@ export async function loadSpots(): Promise<Spot[]> {
   }
 
   try {
-    const endpoint = `${SUPABASE_URL.replace(/\/$/, '')}/rest/v1/spots?select=*&is_closed=eq.false&limit=10000`;
-    const res = await fetch(endpoint, {
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-      },
+    const baseUrl = `${SUPABASE_URL.replace(/\/$/, '')}/rest/v1/spots?select=*&is_closed=eq.false`;
+    const headers = {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    };
+
+    // 1회차 조회 (0~999) + 전체 exact count 헤더 확인
+    const firstRes = await fetch(`${baseUrl}&limit=1000`, {
+      headers: { ...headers, Prefer: 'count=exact' },
     });
 
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        console.log(`⚡ [Supabase] 실시간 DB 연동 성공: ${data.length}개 활성 스팟 로드`);
-        return data as Spot[];
+    if (firstRes.ok) {
+      const firstBatch = await firstRes.json();
+      if (Array.isArray(firstBatch) && firstBatch.length > 0) {
+        const contentRange = firstRes.headers.get('Content-Range') || '';
+        const total = contentRange.includes('/') ? parseInt(contentRange.split('/')[1], 10) : firstBatch.length;
+
+        // 전체가 1,000개 이하면 즉시 반환
+        if (total <= firstBatch.length) {
+          console.log(`⚡ [Supabase Live] ${firstBatch.length}개 활성 스팟 로드 완료`);
+          return firstBatch as Spot[];
+        }
+
+        // 1,000개 초과 시 나머지 청크 병렬 페칭 (Range 헤더)
+        const allSpots: Spot[] = [...firstBatch];
+        const fetchPromises: Promise<Spot[]>[] = [];
+
+        for (let offset = 1000; offset < total; offset += 1000) {
+          const end = Math.min(offset + 999, total - 1);
+          const p = fetch(baseUrl, {
+            headers: {
+              ...headers,
+              Range: `${offset}-${end}`,
+            },
+          })
+            .then((r) => (r.ok ? r.json() : []))
+            .catch(() => []);
+          fetchPromises.push(p);
+        }
+
+        const remainingBatches = await Promise.all(fetchPromises);
+        remainingBatches.forEach((batch) => {
+          if (Array.isArray(batch)) {
+            allSpots.push(...batch);
+          }
+        });
+
+        console.log(`⚡ [Supabase Live] 1,000개 제한 돌파: 총 ${allSpots.length}개 전체 스팟 로드 완료`);
+        return allSpots;
       }
     }
   } catch (err) {
