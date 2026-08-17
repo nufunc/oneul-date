@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="terracotta-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C36A4D"/>
+      <stop offset="100%" stop-color="#A85237"/>
+    </linearGradient>
+    <filter id="soft-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#2D2D2D" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Background: Terracotta Rounded Square -->
+  <rect width="64" height="64" rx="16" fill="url(#terracotta-grad)"/>
+
+  <!-- Subtle Paper-tone Inner Border -->
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="none" stroke="#FDFCF8" stroke-width="1.5" stroke-opacity="0.25"/>
+
+  <!-- Centered Spark / Compass Star (Sensory Magazine Symbol) -->
+  <g filter="url(#soft-shadow)" transform="translate(32, 32)">
+    <!-- 4-point Primary Spark -->
+    <path d="M 0 -19 C 1.2 -7, 7 -1.2, 19 0 C 7 1.2, 1.2 7, 0 19 C -1.2 7, -7 1.2, -19 0 C -7 -1.2, -1.2 -7, 0 -19 Z"
+          fill="#FDFCF8"/>
+    
+    <!-- 4-point Secondary Diagonal Spark -->
+    <path d="M 0 -10 C 0.8 -3.5, 3.5 -0.8, 10 0 C 3.5 0.8, 0.8 3.5, 0 10 C -0.8 3.5, -3.5 0.8, -10 0 C -3.5 -0.8, -0.8 -3.5, 0 -10 Z"
+          fill="#F5EDE4" opacity="0.8" transform="rotate(45)"/>
+
+    <!-- Delicate Center Heart / Core Accent -->
+    <circle cx="0" cy="0" r="2.2" fill="#C36A4D"/>
+  </g>
+</svg>
