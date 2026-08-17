@@ -112,9 +112,11 @@ const POPULAR_ZONES: PopularZone[] = [
 
 const STORAGE_KEY = 'oneul_saved_courses';
 const RECENT_KEY = 'oneul_recent_spots';
+import { loadSpots } from './supabase';
+
 const RECENT_MAX = 100;
 
-const spots: Spot[] = rawSpotsData as unknown as Spot[];
+let spots: Spot[] = rawSpotsData as unknown as Spot[];
 
 // ---------------------------------------------------------------------------
 // 순수 함수 — 필터 · 후보 계산 · 랜덤 픽 · 코스 생성 · 텍스트 포맷 (상태/DOM 없음)
@@ -627,7 +629,7 @@ const state: AppState = {
   savedOpen: false,
 };
 
-const spotById = new Map<number, Spot>(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
+let spotById = new Map<number, Spot>(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
 
 function activeSlots(): SlotKey[] {
   return SLOT_ORDER.filter((k) => state.slots[k]);
@@ -1359,6 +1361,17 @@ function init(): void {
     showToast('공유된 코스를 찾을 수 없어요');
   }
   renderShell();
+
+  // Supabase 실시간 DB 동기화 (환경변수 VITE_SUPABASE_URL 설정 시 비동기 활성화)
+  loadSpots().then((liveSpots) => {
+    if (liveSpots && liveSpots.length > 0 && liveSpots !== spots) {
+      spots = liveSpots;
+      spotById = new Map(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
+      renderTodayCourse();
+      renderConditions();
+      console.log(`⚡ [Supabase Live] ${spots.length}개 스팟 동기화 완료`);
+    }
+  });
 }
 
 init();
