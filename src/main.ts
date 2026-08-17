@@ -643,7 +643,7 @@ function activeSlots(): SlotKey[] {
   return SLOT_ORDER.filter((k) => state.slots[k]);
 }
 
-const APP_VERSION = 'v0.4.0';
+const APP_VERSION = 'v0.5.0';
 
 function courseSpotIds(): number[] {
   if (!state.course) return [];
