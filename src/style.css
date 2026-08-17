@@ -714,6 +714,28 @@ button {
   align-self: flex-start;
 }
 
+/* 사진 좌측 상단 플로팅 핫플 뱃지 (안 A) */
+.badge-hot-floating {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: linear-gradient(135deg, #FF385C 0%, #E11D48 100%);
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  padding: 2.5px 7px;
+  border-radius: var(--radius-full);
+  box-shadow: 0 2px 6px rgba(225, 29, 72, 0.4);
+  line-height: 1.25;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+}
+
 .step-fallback-box {
   position: absolute;
   inset: 0;
