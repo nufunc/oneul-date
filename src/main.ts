@@ -1728,6 +1728,28 @@ function getSpotImageUrl(spot: Spot, slot: SlotKey, usedImages?: Set<string>): s
   return fallbackUrl;
 }
 
+/** SNS와 플랫폼 지표 기반 화제의 핫플레이스 여부 판별 */
+function isSuperHotSpot(spot: Spot): boolean {
+  if (!spot) return false;
+  // 1. 유튜브 10만 뷰 이상
+  if (spot.social_links?.youtube?.views && spot.social_links.youtube.views >= 100000) {
+    return true;
+  }
+  // 2. 핫스코어 80 이상
+  if (spot.hot_score && spot.hot_score >= 80) {
+    return true;
+  }
+  // 3. 카카오맵 평점 4.3 이상
+  if (spot.social_links?.kakaomap?.rating && spot.social_links.kakaomap.rating >= 4.3) {
+    return true;
+  }
+  // 4. 품질 점수 90점 이상의 탑티어 스팟
+  if (spot.quality_score && spot.quality_score >= 90) {
+    return true;
+  }
+  return false;
+}
+
 function renderStepCard(
   step: CourseStep,
   index: number,
@@ -1764,9 +1786,11 @@ function renderStepCard(
 
   const fallbackIcon = getSpotFallbackIcon(spot, step.slot);
   const targetImgUrl = getSpotImageUrl(spot, step.slot, opts.usedImages);
+  const isHot = isSuperHotSpot(spot);
 
   const thumbHtml = `
     <div class="step-thumb-col">
+      ${isHot ? `<span class="badge-hot-floating" title="SNS와 플랫폼에서 검증된 화제의 핫플레이스예요 🔥">🔥 핫플</span>` : ''}
       <div class="step-fallback-box">${fallbackIcon}</div>
       <img class="step-thumb-img" src="${escapeHtml(targetImgUrl)}" alt="${escapeHtml(spot.name)}" loading="lazy" referrerpolicy="no-referrer" onload="this.classList.add('is-loaded');" onerror="this.classList.add('is-hidden'); this.previousElementSibling?.classList.add('is-active');" />
     </div>`;
@@ -1791,7 +1815,7 @@ function renderStepCard(
       </div>
       <div class="step-actions-bar">
         <div class="step-actions-icons">
-          ${swappable ? `<button class="btn-action-icon btn-swap-icon" data-step-index="${index}" aria-label="장소 변경" title="장소 변경">${ICON_SWAP_SVG}</button>` : ''}
+          ${swappable ? `<button class="btn-action-icon btn-swap-icon" data-step-index="${index}" aria-label="다시 추천" title="다시 추천">${ICON_SWAP_SVG}</button>` : ''}
           ${(() => {
             const yt = spot.social_links?.youtube?.url;
             if (!yt) return '';
