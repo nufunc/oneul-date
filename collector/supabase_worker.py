@@ -252,6 +252,9 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
             patch_req = urllib.request.Request(patch_url, data=patch_bytes, headers=api_headers, method='PATCH')
             try:
                 urllib.request.urlopen(patch_req, timeout=6)
+            except urllib.error.HTTPError as e:
+                err_msg = e.read().decode('utf-8', errors='replace')
+                print(f"  ❌ DB 업데이트 실패 (id: {s_id}, HTTP {e.code}): {err_msg}")
             except Exception as e:
                 print(f"  ❌ DB 업데이트 실패 (id: {s_id}): {e}")
 
