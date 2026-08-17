@@ -180,6 +180,25 @@ function matchesMood(spot: Spot, moodKey: string): boolean {
   return Array.isArray(spot.mood) && spot.mood.includes(moodKey);
 }
 
+const STAY_KEYWORDS = ['호텔', '리조트', '펜션', '풀빌라', '글램핑', '캠핑', '카라반', '한옥', '료칸', '게스트하우스', '스테이', '민박', '모텔', '독채', '숙소', '콘도'];
+const NON_STAY_KEYWORDS = ['카페', '베이커리', '디저트', '식당', '음식점', '술집', '주점', '와인바', '이자카야', '영화관', '서점', '해수욕장', '공원', '약국', '경찰서', '문화원'];
+
+/** 숙박(stay) 슬롯 장소의 진위 여부 엄격 검증 (카페/식당/영화관 등 오분류 원천 차단) */
+function isRealStaySpot(spot: Spot): boolean {
+  if (spot.slot !== 'stay') return true;
+  const name = spot.name.toLowerCase();
+  const cat = (spot.category || '').toLowerCase();
+  const summary = (spot.summary || '').toLowerCase();
+  const text = `${name} ${cat} ${summary}`;
+
+  if (NON_STAY_KEYWORDS.some((kw) => cat.includes(kw) || name.includes(kw))) {
+    if (!STAY_KEYWORDS.some((stay) => name.includes(stay))) {
+      return false;
+    }
+  }
+  return STAY_KEYWORDS.some((kw) => text.includes(kw));
+}
+
 /** 슬롯 + 지역 + 세부존 + 분위기 조건에 맞는 후보 목록 (excludeIds 제외) */
 function getCandidates(
   all: Spot[],
@@ -195,7 +214,8 @@ function getCandidates(
       s.slot === slot &&
       matchesRegion(s, regionKeys) &&
       matchesMood(s, moodKey) &&
-      !excludeIds.includes(s.id),
+      !excludeIds.includes(s.id) &&
+      (slot !== 'stay' || isRealStaySpot(s)),
   );
   if (zoneKeys.length === 0) return base;
   const zoneFiltered = base.filter((s) => matchesZone(s, zoneKeys));
@@ -725,24 +745,25 @@ async function fetchGroqAiStory(
         messages: [
           {
             role: 'system',
-            content: `당신은 2030 트렌디 라이프스타일 매거진(아이즈매거진, 보그)의 수석 데이트 큐레이터입니다.
-[필수 지침]
-1. 번역투나 기계적인 나열식 문형(~에서 시작하여 ~를 즐기고 ~하세요)은 절대 금지합니다.
-2. 장소명을 자연스럽게 녹여내며, 문맥이 매끄럽게 연결되는 감성적인 한국어 1~2문장(60~90자)으로 작성하세요.
-3. 종결 어미는 '~한 코스예요 ✨', '~로 이어지는 완벽한 하루예요', '~를 완성해보세요' 같이 세련되고 부드럽게 마무리하세요.
-4. 불필요한 따옴표나 서두 없이 완성된 문장 본문만 출력하세요.
+            content: `당신은 킨포크(Kinfolk)와 아이즈매거진(eyesmag)의 수석 데이트 큐레이터입니다.
+[필수 원칙]
+1. 단순 동선 나열식 문형(~에서 시작해 ~를 거쳐 ~로 마무리하는 코스예요)은 '절대 금지'합니다.
+2. 공간의 질감, 빛과 분위기, 두 사람의 감정선이 자연스럽게 이어지는 깊이 있는 에디토리얼 산문(1~2문장, 70~100자)으로 작성하세요.
+3. 장소명은 억지로 욱여넣지 않고 이야기 속에 유려하게 녹여내세요.
+4. 불필요한 따옴표나 서두 없이 정제된 본문 텍스트만 출력하세요.
 
-[모범 예시]
-- 빈티지한 러스트베이커리에서 커피 한잔으로 시작해, 시금치통닭 명소 양키통닭을 거쳐 신흥상회 와인으로 깊어가는 밤을 완성하는 로맨틱 코스예요 ✨
-- 햇살 가득한 서울숲 카페에서 여유를 즐기고, 정갈한 다이닝과 은은한 루프탑 바에서 둘만의 특별한 추억을 만들어보세요.`,
+[에디터 모범 톤앤매너 예시]
+- 나른한 오후를 깨우는 러스트베이커리의 향긋한 버터 풍미, 양키통닭의 바삭한 온기 너머 신흥상회의 잔잔한 와인 한잔으로 젖어드는 둘만의 깊은 밤.
+- 따스한 햇살이 머무는 서울숲의 감성 공간에서 정갈한 다이닝으로, 그리고 달빛 아래 루프탑의 그윽한 무드로 이어지는 완벽한 템포의 하루.
+- 번잡한 일상을 잊고 마주 앉아 나누는 공간의 미학과 미식의 깊이, 두 사람의 계절을 가장 로맨틱하게 기록할 여정.`,
           },
           {
             role: 'user',
-            content: `[데이트 코스]\n${spotDescriptions}\n\n[분위기 테마]: ${moodLabel(moodKey)}\n\n위 코스에 어울리는 감각적이고 세련된 에디터 브리핑 한 줄을 작성해줘.`,
+            content: `[스팟 리스트]\n${spotDescriptions}\n\n[무드 테마]: ${moodLabel(moodKey)}\n\n위 장소들이 빚어내는 공간의 분위기와 감정선을 살려, 잡지 에디터 노트 스타일의 감도 높은 브리핑을 작성해줘.`,
           },
         ],
-        temperature: 0.65,
-        max_tokens: 130,
+        temperature: 0.72,
+        max_tokens: 150,
       }),
       signal: controller.signal,
     });
@@ -765,8 +786,8 @@ async function fetchGroqAiStory(
 }
 
 /**
- * 완성된 코스의 슬롯별 스팟들을 종합 분석하여 감성적인 로컬 다채로운 AI 에디터 코스 브리핑 생성
- * 스팟 ID들의 해시 시드를 활용하여 동일 코스에 대해 항상 안정적이고 일관된 문형 제공 (깜빡임 방지)
+ * 완성된 코스의 슬롯별 스팟들을 종합 분석하여 감성 매거진 에디토리얼 스타일의 10가지 다채로운 브리핑 생성
+ * 단순 나열식 문형을 완전히 탈피하고, 공간의 질감, 빛의 흐름, 감정선 중심의 10대 고감도 스타일 템플릿 적용
  */
 function generateCourseStory(
   steps: CourseStep[],
@@ -775,9 +796,9 @@ function generateCourseStory(
   forHtml: boolean = true,
 ): string {
   const filled = steps.filter((st): st is CourseStep & { spotId: number } => st.spotId !== null);
-  if (filled.length === 0) return '두 사람만을 위해 엄선된 맞춤형 데이트 코스예요.';
+  if (filled.length === 0) return '두 사람의 취향을 온전히 담아낸 프라이빗 데이트 코스예요.';
 
-  // 스팟 ID 기반 결정론적 시드 (동일 코스에서 텍스트 번복 방지)
+  // 스팟 ID 기반 결정론적 시드 (동일 코스에서 텍스트 일관성 보장)
   const idSum = filled.reduce((acc, st) => acc + st.spotId, 0);
 
   const spotMap = new Map<SlotKey, Spot>();
@@ -786,94 +807,157 @@ function generateCourseStory(
     if (s) spotMap.set(st.slot, s);
   });
 
-  const daySpot = spotMap.get('day');
-  const eveSpot = spotMap.get('evening');
-  const nightSpot = spotMap.get('night');
-  const staySpot = spotMap.get('stay');
+  const day = spotMap.get('day');
+  const eve = spotMap.get('evening');
+  const night = spotMap.get('night');
+  const stay = spotMap.get('stay');
 
-  const wrapName = (name: string) => (forHtml ? `<strong>${escapeHtml(name)}</strong>` : name);
+  const wrap = (name: string) => (forHtml ? `<strong>${escapeHtml(name)}</strong>` : name);
 
-  const clauses: string[] = [];
-
-  // 낮 스팟 포인트
-  if (daySpot) {
-    const cat = `${daySpot.category || ''} ${daySpot.name} ${daySpot.summary || ''}`.toLowerCase();
-    if (cat.includes('카페') || cat.includes('디저트') || cat.includes('베이커리') || cat.includes('커피')) {
-      const phrases = [
-        `낮에는 ${wrapName(daySpot.name)}에서 향긋한 커피와 달콤한 디저트로 설레게 시작해`,
-        `낮 시간엔 감성 넘치는 ${wrapName(daySpot.name)}에서 여유로운 티타임을 즐기고`,
-        `오후에는 ${wrapName(daySpot.name)}에서 둘만의 오붓한 대화로 데이트의 문을 열어`,
-      ];
-      clauses.push(phrases[(idSum + 1) % phrases.length]);
-    } else if (cat.includes('전시') || cat.includes('공방') || cat.includes('체험') || cat.includes('문화') || cat.includes('박물관')) {
-      const phrases = [
-        `낮에는 ${wrapName(daySpot.name)}에서 특별한 추억을 남기는 이색 체험을 즐기고`,
-        `낮 시간엔 ${wrapName(daySpot.name)}에서 감각적인 전시와 예술적 영감을 나누며`,
-      ];
-      clauses.push(phrases[(idSum + 2) % phrases.length]);
-    } else if (cat.includes('공원') || cat.includes('산책') || cat.includes('자연') || cat.includes('호수')) {
-      clauses.push(`낮에는 ${wrapName(daySpot.name)}에서 싱그러운 풍경을 따라 가볍게 산책하며 시작해`);
-    } else {
-      clauses.push(`낮에는 분위기 좋은 ${wrapName(daySpot.name)}에서 데이트를 시작하고`);
-    }
+  // 단일 슬롯 선택 시
+  if (filled.length === 1) {
+    const s = filled[0];
+    const spot = byId.get(s.spotId)!;
+    const singleStyles = [
+      `남다른 감각과 무드가 돋보이는 ${wrap(spot.name)}에서 오롯이 둘만의 시간에 집중해보세요.`,
+      `공간 그 자체로 특별한 영감을 전하는 ${wrap(spot.name)}에서의 여유로운 순간이에요.`,
+      `취향을 섬세하게 어루만지는 ${wrap(spot.name)}에서 잊지 못할 여운을 만끽해보세요.`,
+    ];
+    return singleStyles[idSum % singleStyles.length];
   }
 
-  // 저녁 스팟 포인트
-  if (eveSpot) {
-    const cat = `${eveSpot.category || ''} ${eveSpot.name} ${eveSpot.summary || ''}`.toLowerCase();
-    if (cat.includes('다이닝') || cat.includes('양식') || cat.includes('일식') || cat.includes('스테이크') || cat.includes('파스타') || cat.includes('맛집') || cat.includes('카츠') || cat.includes('고기')) {
-      const phrases = [
-        `저녁에는 ${wrapName(eveSpot.name)}에서 오감을 사로잡는 정갈한 미식을 함께한 뒤`,
-        `해 질 녘엔 ${wrapName(eveSpot.name)}에서 분위기 가득한 로맨틱 디너를 맛보고`,
-        `저녁 시간엔 ${wrapName(eveSpot.name)}에서 근사한 요리로 하루의 하이라이트를 채운 후`,
-      ];
-      clauses.push(phrases[(idSum + 3) % phrases.length]);
-    } else if (cat.includes('와인') || cat.includes('바') || cat.includes('주점')) {
-      clauses.push(`저녁에는 ${wrapName(eveSpot.name)}에서 은은한 조명 아래 와인 한잔을 기울이고`);
-    } else {
-      clauses.push(`저녁에는 ${wrapName(eveSpot.name)}에서 특별하고 맛있는 식사를 나눈 뒤`);
-    }
-  }
-
-  // 밤 스팟 포인트
-  if (nightSpot) {
-    const cat = `${nightSpot.category || ''} ${nightSpot.name} ${nightSpot.summary || ''}`.toLowerCase();
-    if (cat.includes('바') || cat.includes('와인') || cat.includes('칵테일') || cat.includes('주점') || cat.includes('펍') || cat.includes('라운지')) {
-      const phrases = [
-        `밤에는 ${wrapName(nightSpot.name)}에서 감미로운 음악과 칵테일로 무드 있게 마무리하는`,
-        `늦은 밤엔 ${wrapName(nightSpot.name)}에서 깊어가는 밤의 정취를 나누는`,
-      ];
-      clauses.push(phrases[(idSum + 4) % phrases.length]);
-    } else if (cat.includes('야경') || cat.includes('공원') || cat.includes('한강') || cat.includes('산책') || cat.includes('전망')) {
-      const phrases = [
-        `밤에는 ${wrapName(nightSpot.name)}에서 반짝이는 도시 야경을 바라보며 산책하는`,
-        `밤 시간엔 ${wrapName(nightSpot.name)}에서 시원한 밤바람과 함께 여운을 남기는`,
-      ];
-      clauses.push(phrases[(idSum + 5) % phrases.length]);
-    } else {
-      clauses.push(`밤에는 ${wrapName(nightSpot.name)}에서 로맨틱한 밤을 완성하는`);
-    }
-  }
-
-  // 숙박 스팟 포인트
-  if (staySpot) {
-    clauses.push(`마지막으로 ${wrapName(staySpot.name)}에서 포근하고 아늑한 힐링 스테이를 누리는`);
-  }
-
-  if (clauses.length === 0) return '두 사람만의 특별한 추억을 만들어줄 완벽한 데이트 코스예요.';
-
-  const moodDescList = {
-    romantic: ['로맨틱한 감성 코스예요 ✨', '설렘 가득한 로맨틱 데이트예요 💖', '영화 같은 무드의 데이트 코스예요 ✨'],
-    healing: ['몸과 마음이 편안해지는 힐링 코스예요 🌿', '포근하고 여유로운 힐링 데이트예요 🍃'],
-    scenic: ['탁 트인 뷰와 인생샷을 남길 수 있는 코스예요 📸', '전망과 풍경이 아름다운 감성 코스예요 🌅'],
-    active: ['신나고 활기찬 에너지를 채우는 코스예요 ⚡', '지루할 틈 없이 즐거운 데이트 코스예요 🎈'],
-    cost_effective: ['알차고 가성비 넘치는 똑똑한 데이트 코스예요 💡', '부담 없이 완벽하게 즐기는 추천 코스예요 ✨'],
+  const moodClosing: Record<string, string> = {
+    romantic: '영화 속 한 장면처럼 로맨틱하게 기억될 코스예요 ✨',
+    healing: '마음의 여백을 넉넉하게 채워줄 다정한 힐링 여정이에요 🌿',
+    scenic: '시선이 머무는 곳마다 그림 같은 풍경을 선사하는 코스예요 🌅',
+    luxury: '일상에 우아한 감각과 특별함을 더해줄 하이엔드 데이트예요 🥂',
+    gourmet: '오감을 풍요롭게 자극하는 감각적인 미식 코스예요 🍷',
+    trendy: '트렌디한 감각과 독보적인 감성이 돋보이는 코스예요 힙 ✨',
+    active: '지루할 틈 없이 활기찬 에너지를 채워줄 데이트예요 ⚡',
   };
+  const defaultClosing = moodClosing[moodKey] || '일상 속에서 잊지 못할 설렘을 선물할 추천 코스예요 💖';
 
-  const descOptions = moodDescList[moodKey as keyof typeof moodDescList] || ['실패 없는 완벽한 데이트 코스예요 ✨', '두 사람에게 꼭 맞는 추천 코스예요 🌟'];
-  const finalDesc = descOptions[idSum % descOptions.length];
+  // 10가지 다채로운 에디토리얼 스타일 패턴 (0 ~ 9)
+  const pattern = idSum % 10;
 
-  return `${clauses.join(', ')} ${finalDesc}`;
+  switch (pattern) {
+    // 0. 공간의 감각 & 템포 연결형 (Cinematic Rhythm)
+    case 0: {
+      const parts: string[] = [];
+      if (day) parts.push(`${wrap(day.name)}의 나른하고 따스한 공기`);
+      if (eve) parts.push(`${wrap(eve.name)}에서 마주하는 정갈한 미식`);
+      if (night) parts.push(`${wrap(night.name)}의 은은한 조명 아래 낭만으로 물드는 밤`);
+      if (stay) parts.push(`${wrap(stay.name)}에서 누리는 아늑한 여운`);
+      return `${parts.join(', ')} — 두 사람의 템포에 꼭 맞춘 특별한 하루예요.`;
+    }
+
+    // 1. 에디토리얼 스토리텔링형 (Sensory Narrative)
+    case 1: {
+      if (day && eve && night) {
+        return `${wrap(day.name)}에서 나누는 설레는 대화가 ${wrap(eve.name)}의 근사한 테이블로, 그리고 ${wrap(night.name)}의 감미로운 무드로 자연스레 젖어드는 완벽한 여정이에요.`;
+      }
+      if (day && eve) {
+        return `${wrap(day.name)}의 여유로운 감성에서 시작해 ${wrap(eve.name)}의 황홀한 맛으로 이어지는 감각적인 데이트예요.`;
+      }
+      if (eve && night) {
+        return `${wrap(eve.name)}의 로맨틱한 식사 뒤에 ${wrap(night.name)}에서 깊어가는 밤의 정취를 온전히 누려보세요.`;
+      }
+      break;
+    }
+
+    // 2. 공간 미학과 감정선 중심형 (Atmospheric Romance)
+    case 2: {
+      const segments: string[] = [];
+      if (day) segments.push(`햇살이 머무는 ${wrap(day.name)}의 여유`);
+      if (eve) segments.push(`${wrap(eve.name)}에서 나누는 특별한 한 끼`);
+      if (night) segments.push(`${wrap(night.name)}에서 이어지는 둘만의 밀도 높은 대화`);
+      if (stay) segments.push(`${wrap(stay.name)}에서의 온전한 쉼`);
+      return `${segments.join(', ')}. ${defaultClosing}`;
+    }
+
+    // 3. 시적 계절감 & 빛의 흐름형 (Lyrical Light & Shadow)
+    case 3: {
+      const lights: string[] = [];
+      if (day) lights.push(`오후의 따스한 볕을 품은 ${wrap(day.name)}`);
+      if (eve) lights.push(`노을빛 아래 그윽해지는 ${wrap(eve.name)}`);
+      if (night) lights.push(`달빛 아래 잔잔한 속삭임이 맴도는 ${wrap(night.name)}`);
+      if (stay) lights.push(`별빛을 마주하는 ${wrap(stay.name)}`);
+      return `${lights.join('부터 ')}까지, 시간의 결을 따라 물드는 로맨틱한 하루예요.`;
+    }
+
+    // 4. 취향 & 큐레이션 찬사형 (Curated Taste)
+    case 4: {
+      const tastes: string[] = [];
+      if (day) tastes.push(`${wrap(day.name)}의 감각적인 무드`);
+      if (eve) tastes.push(`${wrap(eve.name)}의 섬세한 요리`);
+      if (night) tastes.push(`${wrap(night.name)}의 아늑한 온기`);
+      if (stay) tastes.push(`${wrap(stay.name)}의 편안한 휴식`);
+      return `${tastes.join('와 ')}가 조화롭게 어우러져 두 사람의 취향을 온전히 만족시킬 셀렉션이에요.`;
+    }
+
+    // 5. 일상 탈출 & 몰입형 (Urban Sanctuary)
+    case 5: {
+      const escapes: string[] = [];
+      if (day) escapes.push(`${wrap(day.name)}에서 찾는 작은 쉼`);
+      if (eve) escapes.push(`${wrap(eve.name)}의 깊은 풍미`);
+      if (night) escapes.push(`${wrap(night.name)}의 은은한 밤공기`);
+      if (stay) escapes.push(`${wrap(stay.name)}에서의 하룻밤`);
+      return `도심의 소음을 벗어나 ${escapes.join(', 그리고 ')}에 오롯이 빠져보는 낭만적인 시간이에요.`;
+    }
+
+    // 6. 시네마틱 모먼트형 (Cinematic Moments)
+    case 6: {
+      if (day && eve && night) {
+        return `${wrap(day.name)}의 기분 좋은 시작, ${wrap(eve.name)}에서 마주하는 설레는 순간, ${wrap(night.name)}의 감미로운 음악이 더해져 영화 속 한 장면처럼 기억될 코스예요.`;
+      }
+      if (day && eve) {
+        return `${wrap(day.name)}에서 빚어낸 미소와 ${wrap(eve.name)}에서의 로맨틱한 순간이 오래도록 마음에 남을 데이트예요.`;
+      }
+      if (eve && night) {
+        return `${wrap(eve.name)}의 황홀한 테이블과 ${wrap(night.name)}의 반짝이는 밤 풍경이 한 편의 영화처럼 이어져요.`;
+      }
+      break;
+    }
+
+    // 7. 비밀스러운 아지트 & 낭만형 (Secret Hideout)
+    case 7: {
+      const spots: string[] = [];
+      if (day) spots.push(`둘만의 아지트 같은 ${wrap(day.name)}`);
+      if (eve) spots.push(`정성 어린 요리가 있는 ${wrap(eve.name)}`);
+      if (night) spots.push(`시간이 멈춘 듯 아늑한 ${wrap(night.name)}`);
+      if (stay) spots.push(`프라이빗한 쉼터 ${wrap(stay.name)}`);
+      return `${spots.join(', ')}에서 다른 누구에게도 방해받지 않는 둘만의 온기를 느껴보세요.`;
+    }
+
+    // 8. 오감 자극 미식 & 감성형 (Sensory Symphony)
+    case 8: {
+      const senses: string[] = [];
+      if (day) senses.push(`${wrap(day.name)}의 향긋한 티타임`);
+      if (eve) senses.push(`${wrap(eve.name)}에서 터져 나오는 풍성한 미식`);
+      if (night) senses.push(`${wrap(night.name)}의 감미로운 한잔`);
+      if (stay) senses.push(`${wrap(stay.name)}의 포근한 침구`);
+      return `${senses.join('과 ')}으로 오감이 충만해지는 감각적인 코스예요 ✨`;
+    }
+
+    // 9. 기억 & 영원성형 (Everlasting Memory)
+    case 9:
+    default: {
+      const memories: string[] = [];
+      if (day) memories.push(`${wrap(day.name)}에서 피어난 다정한 미소`);
+      if (eve) memories.push(`${wrap(eve.name)}의 따뜻한 식탁`);
+      if (night) memories.push(`${wrap(night.name)}의 깊은 밤하늘`);
+      if (stay) memories.push(`${wrap(stay.name)}의 고요한 아침`);
+      return `${memories.join('가 ')} 하나로 이어져, 두 사람에게 가장 소중한 계절의 한 페이지로 기록될 여정이에요.`;
+    }
+  }
+
+  // 폴백
+  const firstSpot = byId.get(filled[0].spotId);
+  const lastSpot = byId.get(filled[filled.length - 1].spotId);
+  if (firstSpot && lastSpot) {
+    return `${wrap(firstSpot.name)}부터 ${wrap(lastSpot.name)}까지 감각적인 무드가 자연스럽게 흐르는 완벽한 데이트예요.`;
+  }
+  return '두 사람의 취향을 온전히 담아낸 프라이빗 데이트 코스예요.';
 }
 
 /**
