@@ -87,29 +87,34 @@ def log(message: str, level: str = "INFO"):
 # 마지막 일일 서머리 기록 날짜 추적 (YYYY-MM-DD)
 last_summary_date = None
 
-def get_total_spot_stats():
-    """Supabase에서 실시간 총 스팟 및 검증 상태 카운트 조회"""
+def get_exact_count(filter_query: str = "") -> int:
+    """Supabase REST API exact count 헤더를 통해 1,000개 제한 없이 정확한 전체 수량 집계"""
     if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
-        return {"total": 0, "active": 0, "closed": 0, "with_img": 0}
-    
-    url = f"{SUPABASE_URL.rstrip('/')}/rest/v1/spots?select=id,is_closed,image_url"
+        return 0
+    url = f"{SUPABASE_URL.rstrip('/')}/rest/v1/spots?select=id{filter_query}"
     headers = {
         "apikey": SUPABASE_SERVICE_KEY,
-        "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}"
+        "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
+        "Range": "0-0",
+        "Prefer": "count=exact"
     }
     try:
         req = urllib.request.Request(url, headers=headers)
         with urllib.request.urlopen(req, timeout=5) as res:
-            if res.status == 200:
-                data = json.loads(res.read().decode('utf-8'))
-                total = len(data)
-                closed = sum(1 for s in data if s.get("is_closed") is True)
-                active = total - closed
-                with_img = sum(1 for s in data if s.get("image_url") and len(str(s.get("image_url")).strip()) > 5)
-                return {"total": total, "active": active, "closed": closed, "with_img": with_img}
+            cr = res.headers.get("Content-Range", "")
+            if "/" in cr:
+                return int(cr.split("/")[1])
     except Exception:
         pass
-    return {"total": 0, "active": 0, "closed": 0, "with_img": 0}
+    return 0
+
+def get_total_spot_stats():
+    """Supabase에서 실시간 총 스팟 및 검증 상태 카운트 정확히 조회 (1,000개 페이징 한도 돌파)"""
+    total = get_exact_count()
+    closed = get_exact_count("&is_closed=eq.true")
+    active = total - closed
+    with_img = get_exact_count("&image_url=not.is.null")
+    return {"total": total, "active": active, "closed": closed, "with_img": with_img}
 
 def check_and_generate_daily_summary(force: bool = False):
     """지정된 KST 시각(기본: 오전 09시) 기준 일일 서머리 생성 및 이메일/구글챗 리포트 자동 발송"""
