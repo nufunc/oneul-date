@@ -512,35 +512,34 @@ function mapQuery(spot: Spot): string {
     }
   }
 
-  // 8. 스마트 지역 결합 로직
+  // 8. 스마트 지역 결합 로직 (시/군/구 또는 동/읍/면 단위로만 스마트 결합, 번지수 절대 배제)
   let candidateArea: string | null = null;
 
-  // 8-0. spot.address 우선 활용 (도로명/지번 주소에서 동/로/길 또는 상세구역 추출)
-  if (spot.address && spot.address.trim().length > 0) {
-    const addr = spot.address.trim();
-    // '은하수로', '성수이로', '신사동', '한남동' 등 유효 도로명/법정동 추출
-    const roadMatch = addr.match(/([가-힣0-9]+(?:로|길|동|읍|면)(?:\s+[0-9]+(?:-[0-9]+)?)?)/);
-    const guMatch = addr.match(/([가-힣]+(?:시|군|구))/g);
-    if (roadMatch) {
-      candidateArea = roadMatch[1];
-    } else if (guMatch && guMatch.length > 0) {
-      candidateArea = guMatch[guMatch.length - 1];
-    }
-  }
-
-  // 8-1. spot.location 내 괄호나 세부 명소/지명 추출 (예: '영종도', '행궁동', '구읍뱃터')
-  if (!candidateArea && spot.location) {
+  // 8-0. spot.location 내 주요 명소/핵심 지명 우선 추출 (예: '영종도', '성수', '한남', '해운대')
+  if (spot.location) {
     const subLocMatch = spot.location.match(/(영종도|을왕리|월미도|송도|청라|행궁동|성수|한남|연남|서촌|북촌|익선|송리단|문래|대부도|제부도|안목|경포|초당|해운대|광안리|전포)/);
     if (subLocMatch) {
       candidateArea = subLocMatch[1];
     }
   }
 
-  // 8-2. spot.area (시·군·구 단위)
+  // 8-1. spot.area (시·군·구 단위)
   if (!candidateArea) {
     const spArea = spotArea(spot);
     if (spArea && spArea !== '전국' && spArea !== '수도권') {
       candidateArea = spArea.trim();
+    }
+  }
+
+  // 8-2. spot.address에서 시/군/구 또는 동/읍/면만 깔끔하게 추출 (번지수, 도로번호 배제)
+  if (!candidateArea && spot.address && spot.address.trim().length > 0) {
+    const addr = spot.address.trim();
+    const guMatch = addr.match(/([가-힣]+(?:시|군|구))/g);
+    const dongMatch = addr.match(/([가-힣]+(?:동|읍|면))/);
+    if (guMatch && guMatch.length > 0) {
+      candidateArea = guMatch[guMatch.length - 1];
+    } else if (dongMatch) {
+      candidateArea = dongMatch[1];
     }
   }
 
