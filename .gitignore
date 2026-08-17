@@ -23,8 +23,7 @@ pb_data/
 collector/pb_data/
 collector/logs/
 
-# Documentation & Internal Notes
-docs/
+# Temporary files
 *.md.bak
 
 # Editor & AI tool directories
