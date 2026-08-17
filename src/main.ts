@@ -1270,13 +1270,20 @@ function renderTodayCourse(): void {
   const btn = document.getElementById('btn-today-course');
   if (!btn) return;
 
-  function applyCourse(steps: CourseStep[]) {
+  function applyCourse(steps: CourseStep[], customLabel?: string) {
     state.slots = { day: true, evening: true, night: true, stay: false };
     state.regions = [];
     state.subZones = [];
     state.mood = 'ALL';
     state.course = steps.map((st) => ({ ...st }));
     state.courseConditions = { regions: [], subZones: [], mood: 'ALL' };
+
+    // 버튼 라벨을 원래의 맞춤/주변 추천 문구로 복원
+    const labelSpan = btn?.querySelector('.today-course-label');
+    if (labelSpan) {
+      labelSpan.textContent = customLabel || buildNearbyCourse(userCoords).label;
+    }
+
     renderConditions();
     renderResults();
   }
@@ -1293,7 +1300,7 @@ function renderTodayCourse(): void {
         if (!resolved) {
           resolved = true;
           const fallback = buildNearbyCourse(null);
-          applyCourse(fallback.steps);
+          applyCourse(fallback.steps, fallback.label);
         }
       }, 2500);
 
@@ -1305,14 +1312,14 @@ function renderTodayCourse(): void {
             window.clearTimeout(timer);
             userCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
             const nearby = buildNearbyCourse(userCoords);
-            applyCourse(nearby.steps);
+            applyCourse(nearby.steps, nearby.label);
           },
           () => {
             if (resolved) return;
             resolved = true;
             window.clearTimeout(timer);
             const fallback = buildNearbyCourse(null);
-            applyCourse(fallback.steps);
+            applyCourse(fallback.steps, fallback.label);
           },
           { timeout: 2500, maximumAge: 600000, enableHighAccuracy: false },
         );
@@ -1321,12 +1328,12 @@ function renderTodayCourse(): void {
           resolved = true;
           window.clearTimeout(timer);
           const fallback = buildNearbyCourse(null);
-          applyCourse(fallback.steps);
+          applyCourse(fallback.steps, fallback.label);
         }
       }
     } else {
       const res = buildNearbyCourse(userCoords);
-      applyCourse(res.steps);
+      applyCourse(res.steps, res.label);
     }
   });
 }
