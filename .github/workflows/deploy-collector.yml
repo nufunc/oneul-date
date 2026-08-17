@@ -53,8 +53,8 @@ jobs:
             fi
 
             echo "📥 Syncing latest codebase..."
-            git checkout main
-            git pull origin main
+            git fetch origin main
+            git reset --hard origin/main
 
             echo "🔨 Rebuilding containers..."
             $COMPOSE_CMD down
