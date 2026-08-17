@@ -13,6 +13,7 @@ services:
       - TZ=Asia/Seoul
       - LOG_DIR=/mnt/data/logs
       - CHECK_INTERVAL_HOURS=${CHECK_INTERVAL_HOURS:-1}
+      - DISCOVERY_LIMIT=${DISCOVERY_LIMIT:-50}
       - BATCH_LIMIT=${BATCH_LIMIT:-100}
       - GROQ_API_KEY=${GROQ_API_KEY:-}
       - DAILY_REPORT_HOUR=${DAILY_REPORT_HOUR:-9}
