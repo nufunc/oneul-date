@@ -601,6 +601,29 @@ button {
   animation: spin 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* 썸네일 이미지 */
+.step-image-wrap {
+  width: 100%;
+  height: 150px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: var(--space-3);
+  background: var(--color-surface-sub);
+  border: 1px solid var(--color-border);
+}
+
+.step-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.step-card:hover .step-image {
+  transform: scale(1.04);
+}
+
 /* 스팟명 */
 .step-name {
   font-family: var(--font-display);

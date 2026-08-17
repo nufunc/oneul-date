@@ -999,12 +999,20 @@ function renderStepCard(
         ${moodTags.length > 0 ? `<span class="step-mood-tags">${escapeHtml(moodTags.join(' · '))}</span>` : ''}
       </div>`
       : '';
+  const imageBlock = spot.image_url
+    ? `
+      <div class="step-image-wrap">
+        <img class="step-image" src="${escapeHtml(spot.image_url)}" alt="${escapeHtml(spot.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.style.display='none';" />
+      </div>`
+    : '';
+
   return `
-    <article class="step-card">
+    <article class="step-card ${spot.image_url ? 'has-image' : ''}">
       <div class="step-card-head">
         <div class="step-slot">${meta.emoji} ${meta.label}</div>
         ${swappable ? `<button class="btn-swap" data-step-index="${index}" aria-label="${meta.label} 스텝 교체" title="이 장소만 다시 추천받기">${ICON_SWAP_SVG}</button>` : ''}
       </div>
+      ${imageBlock}
       <h3 class="step-name">${escapeHtml(spot.name)}</h3>
       <p class="step-location">📍 ${escapeHtml(spot.location)}</p>
       ${metaRow}
