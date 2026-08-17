@@ -1,0 +1,36 @@
+services:
+  collector:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: oneul-date/data-collector:latest
+    container_name: oneul-collector
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TZ=Asia/Seoul
+      - LOG_DIR=/mnt/data/logs
+      - CHECK_INTERVAL_HOURS=${CHECK_INTERVAL_HOURS:-1}
+      - BATCH_LIMIT=${BATCH_LIMIT:-100}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - DAILY_REPORT_HOUR=${DAILY_REPORT_HOUR:-9}
+      - SMTP_SERVER=${SMTP_SERVER:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+      - RECEIVER_EMAIL=${RECEIVER_EMAIL:-}
+      - GOOGLE_CHAT_WEBHOOK_URL=${GOOGLE_CHAT_WEBHOOK_URL:-}
+      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL:-}
+    volumes:
+      - /mnt/data:/mnt/data
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 128M
