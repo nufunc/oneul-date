@@ -10,6 +10,15 @@ v3.4 개선 사항
   C. 네이버 결과 카테고리 화이트리스트 + 상호명 비(非)스팟 패턴 차단
   D. region_hints 를 실제 행정구역 사전으로 검증 (예: "남자친구" 오탐 제거)
   E. 영상별 1줄 요약 로그 + 사이클 집계 로그, --dry-run 지원
+
+v3.5 개선 사항
+  F. 슬롯 오염 차단 — stay 는 '네이버 공식 카테고리'로만 판정(정규식 가드 도입),
+     숙박 업종은 수집 단계에서 배제(다른 미너와 동일 정책)
+  G. 지역 게이트 정상화 — 접미사 없는 시·군 지명("서산", "청주")도 힌트로 인정,
+     거주지/출발지 수식 지명 제외, 기초 힌트 우선, 권역은 derive_region_area 재사용
+  H. 상호명 유사도 게이트 강화 — 어절 경계 정렬 포함만 인정
+     (구움당↮구움미, 경품↮경품왕국, 옥경이네↮옥경이네건생선)
+  I. 소품샵·편집숍 업종 허용 + 체인 SPA/대형유통 브랜드 차단
 """
 
 import os
@@ -26,7 +35,8 @@ if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from supabase_worker import search_naver, calculate_quality_score, load_env
+from supabase_worker import (search_naver, calculate_quality_score, load_env,
+                             derive_region_area)
 
 UA_DESKTOP = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
               "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
@@ -166,6 +176,28 @@ DISTRICT_NAMES = set("""
 # 접미사(시/군/구)를 뗀 지명 (예: "논산", "경주") — 후보가 이것 단독이면 상호명이 아님
 BARE_CITY_NAMES = {d[:-1] for d in DISTRICT_NAMES if len(d) >= 3}
 
+# 접미사 없이 등장해도 지역 힌트로 인정할 시·군 지명 (예: "서산 당일치기", "청주 힐링코스").
+# 브이로그 제목은 접미사를 거의 쓰지 않아, 접미사 필수 정규식이 정탐을 통째로 죽였다.
+#  - 자치구(수영/연수/동안/미추홀 ...)의 접미사 뗀 형태는 일반명사와 겹쳐 제외한다.
+#  - 시·군 중에서도 동음이의어(동해/화성/영광/예산/고령 ...)는 제외한다.
+BARE_HINT_EXCLUDE = {
+    "동해", "남해", "서해", "화성", "고성", "영광", "예산", "고령", "정선", "성주",
+    "청도", "장수", "광명", "구리", "하남", "완주", "진안", "무주", "의성", "고창",
+}
+BARE_CITY_HINTS = {
+    d[:-1] for d in DISTRICT_NAMES if len(d) >= 3 and d.endswith(("시", "군"))
+} - BARE_HINT_EXCLUDE
+
+# 여러 시도에 중복 존재해 지역 판별력이 없는 자치구명 — 힌트로 쓰지 않는다.
+AMBIGUOUS_DISTRICTS = {"중구", "남구", "북구", "동구", "서구"}
+
+# 지명 뒤에 이 말이 붙으면 '여행 대상 지역'이 아니라 화자의 거주지/출발지다.
+# 예: "서울 직장인의 청주 나홀로 힐링 코스" → 대상은 청주, 서울은 힌트가 아니다.
+RESIDENCE_MARKERS = (
+    "근교", "직장인", "사는", "살고", "거주", "출신", "토박이", "주민", "촌놈",
+    "출발", "떠나", "벗어나", "탈출", "사람",
+)
+
 # ─────────────────────────────────────────────────────────────
 # [C] 카테고리 화이트/블랙리스트
 # ─────────────────────────────────────────────────────────────
@@ -195,11 +227,16 @@ CATEGORY_WHITELIST = [
     "체험", "공방", "원데이", "클래스", "도예", "방탈출", "보드게임", "볼링", "당구", "실내",
     "아쿠아리움", "동물원", "목장", "농장", "수족관", "케이블카", "루지", "레저", "스포츠",
     "사진관", "스튜디오", "포토", "플라워", "꽃집", "소품", "편집샵", "복합문화",
-    # 휴식 / 숙박
-    "숙박", "호텔", "리조트", "펜션", "게스트하우스", "풀빌라", "글램핑", "캠핑", "한옥",
+    # 휴식 (숙박 업종은 CATEGORY_BLACKLIST_LODGING 으로 배제 — 다른 미너와 동일 정책)
     "스파", "온천", "찜질", "사우나", "워터파크",
     # 시장 / 거리
     "시장", "먹자골목", "거리", "쇼핑몰", "백화점",
+    # 소품 / 편집숍 / 라이프스타일 (네이버 실제 표기: 패션잡화점·주방용품·생활용품점·
+    #   인테리어장식판매 ...). 로컬 편집숍·소품샵은 실제로 좋은 데이트 코스다.
+    #   체인 SPA·대형마트는 아래 CHAIN_BRAND_BLACKLIST 로 따로 막는다.
+    "잡화", "패션잡화", "패션", "의류", "주방용품", "생활용품", "문구", "팬시",
+    "리빙", "인테리어장식", "인테리어소품", "향수", "캔들", "디퓨저", "공예품",
+    "골동품", "빈티지", "레코드", "음반", "라이프스타일", "팝업", "select",
 ]
 
 # 정확 일치로만 허용하는 1~2자 카테고리 토큰 (부분 매칭 시 오탐이 큰 것들)
@@ -210,7 +247,7 @@ CATEGORY_BLACKLIST = [
     # 기존
     "주유소", "세차", "편의점", "세븐일레븐", "cu ", "gs25", "이마트24",
     "아파트", "단지", "오피스텔", "빌라", "주공",
-    "의류", "zara", "h&m", "유니클로", "병원", "약국", "치과", "안과", "의원", "한의원",
+    "양복", "병원", "약국", "치과", "안과", "의원", "한의원",
     "은행", "atm", "관공서", "경찰서", "소방서", "주민센터", "행정복지",
     "웨딩", "결혼", "장례", "부동산", "공인중개",
     # 신규 — 언론/방송
@@ -224,13 +261,32 @@ CATEGORY_BLACKLIST = [
     "자동차", "모터스", "motors", "정비", "카센터", "타이어", "중고차", "렌터카", "카센타",
     "오토", "매매단지",
     # 신규 — 개발/건설
-    "관광개발", "개발", "건설", "엔지니어링", "토목", "시공", "인테리어", "설계사무소",
+    "관광개발", "개발", "건설", "엔지니어링", "토목", "시공", "인테리어공사",
+    "인테리어시공", "설계사무소",
     # 신규 — 교육
     "학원", "교습", "과외", "학교", "유치원", "어린이집", "대학교", "직업훈련",
     # 신규 — 단체
     "협회", "재단", "조합", "공사", "공단", "센터본부", "지사", "사무소", "법인",
     # 신규 — 물류
     "물류", "창고", "택배", "운수", "화물", "운송",
+]
+
+# 체인 SPA·대형 유통 브랜드 — 업종(의류/잡화/생활용품)은 허용하되 체인점은 막는다.
+# 로컬 편집숍·소품샵과 ZARA/유니클로/다이소는 데이트 코스로서 성격이 완전히 다르다.
+CHAIN_BRAND_BLACKLIST = [
+    "zara", "h&m", "유니클로", "uniqlo", "스파오", "탑텐", "지오다노", "에잇세컨즈",
+    "폴햄", "무신사", "나이키", "아디다스", "뉴발란스", "무인양품",
+    "다이소", "이마트", "홈플러스", "롯데마트", "코스트코", "하이마트", "올리브영",
+    "다이슨", "노브랜드", "아성다이소",
+]
+
+# 숙박 업종 (데이트 "코스" 슬롯 대상이 아니므로 수집 단계에서 배제한다).
+# 주의: 카테고리에만 적용한다. 상호명에 적용하면 '스테이크하우스'(스테이),
+#       '호텔델루나 카페' 같은 정상 스팟이 오탈락한다.
+CATEGORY_BLACKLIST_LODGING = [
+    "숙박", "숙소", "펜션", "호텔", "모텔", "여관", "콘도", "리조트", "게스트하우스",
+    "호스텔", "민박", "글램핑", "야영", "캠핑", "카라반", "풀빌라", "한옥숙소", "료칸",
+    "hotel", "resort", "pension", "hostel", "glamping",
 ]
 
 # 상호명 자체가 명백히 비(非)스팟인 패턴
@@ -292,6 +348,13 @@ STOPWORDS = [
     "데이트", "코스", "추천", "핫플", "숙소", "일정", "준비물", "경비", "총정리",
     "이동", "출발", "도착", "점심", "저녁", "아침", "야식", "간식", "휴식", "산책",
     "문의", "협업", "비즈니스", "메일", "이메일", "채널", "구독자", "댓글", "링크",
+    # 여행 보통명사 — "파주 놀거리", "대전 가볼만한곳" 류의 검색어형 후보 차단용
+    "국내", "놀거리", "볼거리", "먹거리", "즐길거리", "가볼만한곳", "가볼만한", "가볼만",
+    "총정리", "당일치기", "나들이", "근교", "여행지", "관광지", "나홀로", "명소",
+    "겨울", "여름", "봄나들이", "가을",
+    # 이벤트/경품 보일러플레이트 — 설명란 하단 고정 문구에서 새어 나오는 후보
+    "경품", "발표", "추첨", "응모", "당첨", "참여방법", "참여", "폼링크", "비밀링크",
+    "행사기간", "이벤트", "신청", "공지", "안내", "혜택", "적립", "선착순", "기간",
 ]
 
 # 상호명에 절대 쓰이지 않는 토큰 (하나라도 어절로 등장하면 문장 조각)
@@ -697,6 +760,21 @@ def passes_spot_name_gate(raw: str) -> tuple[bool, str, str]:
     if name in METRO_REGIONS or name in DISTRICT_NAMES or name in BARE_CITY_NAMES:
         return False, "", "행정구역단독"
 
+    # 13-b. '지명 + 일반어' 조합 (예: "파주 놀거리", "대전 가볼만한곳", "국내 여행").
+    #        상호명이 아니라 검색어다. 이런 후보를 지도에 던지면 그 지역의
+    #        아무 업체(파주엠모터스, 대전일보 ...)나 최상위로 걸려 오등록된다.
+    def _is_place_token(tok: str) -> bool:
+        return (tok in METRO_REGIONS or tok in DISTRICT_NAMES
+                or tok in BARE_CITY_NAMES or bool(ADMIN_ONLY_PATTERN.match(tok)))
+
+    def _is_stop_token(tok: str) -> bool:
+        tl = tok.lower()
+        return any(tl == sw or (tl.startswith(sw) and len(tl) - len(sw) <= 1)
+                   for sw in STOPWORDS)
+
+    if all(_is_place_token(t) or _is_stop_token(t) for t in tokens):
+        return False, "", "지명+불용어"
+
     return True, name, ""
 
 
@@ -778,19 +856,60 @@ def extract_spot_candidates(title: str, description: str) -> list[str]:
 # ─────────────────────────────────────────────────────────────
 
 def extract_region_hints(text: str) -> list[str]:
-    """텍스트에서 지역 힌트를 뽑되 실제 행정구역 사전으로 검증"""
+    """텍스트에서 지역 힌트를 뽑되 실제 행정구역 사전으로 검증한다.
+
+    v3.5 수정 — 접미사(시/군/구)가 붙은 형태만 잡던 정규식이 양방향 오류를 냈다.
+      · 정탐 오탈락: "청주 나홀로 힐링" → 청주가 안 잡혀 진짜 청주 스팟이 거부됨
+      · 오탐 통과:   "서산 당일치기"   → 힌트 0개 → 지역 게이트 자체가 무력화
+
+    규칙
+      1. 접미사형(청주시/상당구)과 접미사 없는 시·군형(청주/서산)을 모두 인정하되,
+         사전(METRO_REGIONS | DISTRICT_NAMES | BARE_CITY_HINTS)으로 검증한다.
+      2. 거주지/출발지 수식을 받는 지명은 여행 대상이 아니므로 제외한다.
+         ("서울 근교", "서울 직장인의", "서울에서 출발")
+      3. 기초자치단체 힌트가 하나라도 있으면 광역 힌트는 버린다.
+         (['서울','청주'] 가 공존하면 any() 매칭이라 게이트가 느슨해진다)
+      4. 여러 시도에 중복 존재하는 자치구명(중구/남구 ...)은 판별력이 없어 제외한다.
+    """
     text = text or ""
-    # "서울근교", "부산 근교" 처럼 광역 지명이 '근교'와 붙으면 그 광역은 힌트가 아니다
-    near_metros = set(re.findall(r'(서울|부산|대구|인천|광주|대전|울산|경기|수도권)\s*근교', text))
-    hints = []
-    for m in re.findall(r'(서울|부산|대구|인천|광주|대전|울산|세종|경기|강원|충북|충남|전북|전남|경북|경남|제주|[가-힣]{2,5}(?:시|군|구))', text or ""):
-        token = m.strip()
-        if token in near_metros:
+
+    def _is_residence(token: str) -> bool:
+        """해당 지명의 모든 등장이 거주지/출발지 수식을 받으면 True"""
+        spots = [m.end() for m in re.finditer(re.escape(token), text)]
+        if not spots:
+            return False
+        return all(
+            any(mk in text[end:end + 8] for mk in RESIDENCE_MARKERS)
+            for end in spots
+        )
+
+    metro_hints, local_hints = [], []
+    # 한글 어절 덩어리의 앞부분에서 지명을 찾는다 ("서산에서", "청주힐링" 처럼
+    # 조사·수식어가 붙어도 잡히도록 — 접미사 필수 정규식이 놓치던 부분)
+    tokens = []
+    for run in re.findall(r'[가-힣]+', text):
+        for length in (5, 4, 3, 2):
+            if len(run) < length:
+                continue
+            head = run[:length]
+            if head in DISTRICT_NAMES or head in BARE_CITY_HINTS or head in METRO_REGIONS:
+                tokens.append(head)
+                break
+    for token in tokens:
+        if token in AMBIGUOUS_DISTRICTS:
             continue
-        if token in METRO_REGIONS or token in DISTRICT_NAMES:
-            if token not in hints:
-                hints.append(token)
-    return hints
+        is_local = token in DISTRICT_NAMES or token in BARE_CITY_HINTS
+        is_metro = token in METRO_REGIONS
+        if not (is_local or is_metro):
+            continue
+        if _is_residence(token):
+            continue
+        bucket = local_hints if is_local else metro_hints
+        if token not in bucket:
+            bucket.append(token)
+
+    # 기초 힌트 우선 — 광역은 기초가 없을 때만 쓴다
+    return local_hints or metro_hints
 
 
 # ─────────────────────────────────────────────────────────────
@@ -817,6 +936,16 @@ def is_date_spot_category(category: str, name: str) -> tuple[bool, str]:
     if not cat:
         return False, "카테고리없음"
 
+    # 2-a. 체인 SPA·대형 유통 브랜드 (카테고리/상호명 모두 검사)
+    for br in CHAIN_BRAND_BLACKLIST:
+        if br in cat_low or br in name_low:
+            return False, f"체인브랜드({br})"
+
+    # 2-b. 숙박 업종 (카테고리에만 적용)
+    for bl in CATEGORY_BLACKLIST_LODGING:
+        if bl in cat_low:
+            return False, f"숙박업종({bl})"
+
     # 3. 화이트리스트
     tokens = [t.strip() for t in re.split(r'[>,/·|]', cat) if t.strip()]
     for t in tokens:
@@ -831,37 +960,150 @@ def is_date_spot_category(category: str, name: str) -> tuple[bool, str]:
     return False, f"화이트리스트외({cat[:14]})"
 
 
+# 지점/본점 접미 (상호명 비교 시 제거)
+BRANCH_SUFFIX_RE = re.compile(r'(본점|직영점|지점|[0-9]{1,2}호점|점포)$')
+
+# 후보 앞뒤에 흔히 붙는 업종 일반어 (핵심어 비교 시 제거)
+GENERIC_NAME_AFFIX = ("카페", "cafe", "맛집", "식당", "레스토랑", "베이커리", "브런치")
+
+
+def _norm_name(s: str) -> str:
+    """비교용 정규화 — 공백/구두점 제거 + 소문자화"""
+    return re.sub(r"[\s\.\-'’,&]", "", (s or "")).lower()
+
+
+def _strip_generic(s: str) -> str:
+    """핵심어 추출 — 앞뒤에 붙은 업종 일반어를 떼어낸다"""
+    out = s
+    for g in GENERIC_NAME_AFFIX:
+        if out.startswith(g) and len(out) - len(g) >= 2:
+            out = out[len(g):]
+        if out.endswith(g) and len(out) - len(g) >= 2:
+            out = out[:-len(g)]
+    return out
+
+
+def _token_aligned(inner: str, outer_tokens: list[str]) -> bool:
+    """inner(공백제거)가 outer 의 앞 k어절 또는 뒤 k어절과 정확히 일치하는가.
+
+    '어절 경계 포함'만 인정한다. 이 규칙이 아래 오등록을 전부 걸러낸다.
+      경품 ⊂ 경품왕국 / 발표 ⊂ 편선생스피치발표 / 옥경이네 ⊂ 옥경이네건생선
+    반면 정상 매칭은 살린다.
+      블루보틀 ≡ '블루보틀 성수'[앞 1어절] / '구월의 유요' ≡ 책방 '구월의유요'[뒤 1어절]
+    """
+    for k in range(1, len(outer_tokens) + 1):
+        if _norm_name("".join(outer_tokens[:k])) == inner:
+            return True
+        if _norm_name("".join(outer_tokens[-k:])) == inner:
+            return True
+    return False
+
+
 def is_name_match(candidate: str, official_name: str) -> bool:
     """지도 검색 결과 상호명이 후보 키워드와 실제로 연관되는지 검증.
-    (네이버/카카오가 무관한 업체를 반환하는 오등록 차단)"""
-    cand = re.sub(r'\s+', '', candidate or "")
-    name = re.sub(r'\s+', '', official_name or "")
-    if not cand or not name:
+
+    v3.5 강화 — 기존 규칙은 '부분문자열이면 통과'라 지역 힌트가 없을 때
+    아래 오등록을 그대로 통과시켰다.
+      구움당 → 구움미(경기 군포) / 카페 오프 → 카페나드오프(경기 안산)
+      옥경이네 → 옥경이네건생선(서울 중구) / 경품 → 경품왕국
+    """
+    cand_txt = (candidate or "").strip()
+    name_txt = re.sub(r'<[^>]+>', '', official_name or "").strip()
+    c = _norm_name(cand_txt)
+    n = _norm_name(name_txt)
+    if not c or not n:
         return False
-    if cand in name or name in cand:
+    if c == n:
         return True
-    # 어절 단위 부분 일치 (2자 이상 토큰이 상대 상호명에 포함되면 인정)
-    for tok in (candidate or "").split():
-        if len(tok) >= 2 and tok in name:
-            return True
-    return difflib.SequenceMatcher(None, cand, name).ratio() >= 0.55
+
+    # 지점 접미를 뗀 뒤 재비교 (성심당 ≡ 성심당본점)
+    n_nb = _norm_name(BRANCH_SUFFIX_RE.sub("", name_txt))
+    if c == n_nb:
+        return True
+
+    # 어절 경계에 정렬된 포함만 인정
+    c_tokens = cand_txt.split()
+    n_tokens = BRANCH_SUFFIX_RE.sub("", name_txt).split()
+    if len(n_tokens) > 1 and _token_aligned(c, n_tokens):
+        return True
+    if len(c_tokens) > 1 and _token_aligned(n_nb, c_tokens):
+        return True
+
+    # 마지막으로 핵심어 유사도 — 길이 균형과 높은 유사도를 동시에 요구한다
+    core_c = _strip_generic(c)
+    core_n = _strip_generic(n_nb)
+    if len(core_c) < 2 or len(core_n) < 2:
+        return False
+    if min(len(core_c), len(core_n)) / max(len(core_c), len(core_n)) < 0.7:
+        return False
+    return difflib.SequenceMatcher(None, core_c, core_n).ratio() >= 0.8
 
 
-def detect_slot_and_mood(category: str, summary: str) -> tuple[str, list[str]]:
-    """업종 및 설명 기반 슬롯(day/evening/night/stay) 및 분위기(mood) 자동 분류"""
-    text = f"{category} {summary}".lower()
+# ─────────────────────────────────────────────────────────────
+# 슬롯/무드 판정
+#   빌더(scripts/build_spots_json.py)와 동일한 정규식 가드를 사용한다.
+#     '스테이(?!크)' : 스테이크·스테이크하우스·스테이션·힐스테이트 오매칭 방지
+#     '바(?!다)'     : 바다·바베큐·바스크 오매칭 방지 (단독 '바'는 매칭하지 않는다)
+#   stay 는 '네이버 공식 카테고리'로만 판정한다. 유튜브 원문(제목/설명/후보 문자열)에
+#   '호텔'·'숙소' 가 스치기만 해도 stay 가 되던 오염 경로를 끊기 위함이다.
+# ─────────────────────────────────────────────────────────────
+
+SLOT_STAY_CAT_RE = re.compile(
+    r"(숙박|숙소|펜션|호텔|모텔|여관|콘도|리조트|게스트하우스|호스텔|민박|글램핑|"
+    r"야영|캠핑|카라반|풀\s*빌라|료칸|산장|스테이(?!크)|"
+    r"\bhotel\b|\bresort\b|pension|glamping|hostel)",
+    re.IGNORECASE,
+)
+
+# 카테고리는 숙박인데 상호명이 명백한 비(非)숙박 업종이면 stay 로 보지 않는다.
+# (예: 카테고리 '한옥숙소' + 상호명 '전주한옥마을 도예공방' → stay 아님)
+SLOT_STAY_VETO_RE = re.compile(
+    r"(카페|커피|베이커리|제과|디저트|찻집|공방|공예|체험관|박물관|미술관|갤러리|전시|"
+    r"식당|맛집|레스토랑|다이닝|횟집|고깃집|라운지|펍|주점|포차|공원|해수욕장|해변|"
+    r"전망대|수목원|식물원|시장|서점|도서관|바$|\bbar\b|\bcafe\b)",
+    re.IGNORECASE,
+)
+
+SLOT_NIGHT_RE = re.compile(
+    r"((와인|칵테일|루프탑|재즈|몰트|위스키|하이볼|오뎅|스탠딩|스피크이지|라운지)\s*바(?!다)|"
+    r"바\(bar\)|\bbar\b|\bpub\b|펍|호프|주점|술집|포차|포장마차|이자카야|"
+    r"칵테일|위스키|막걸리|전통주|맥주|브루어리|야경|나이트)",
+    re.IGNORECASE,
+)
+
+SLOT_EVENING_RE = re.compile(
+    r"(음식점|한식|양식|일식|중식|분식|뷔페|레스토랑|다이닝|오마카세|이탈리|한정식|노포|"
+    r"육류|고기|갈비|삼겹살|곱창|막창|닭요리|치킨|장어|국밥|칼국수|국수|돈까스|우동|"
+    r"순대|떡볶이|샤브샤브|스테이크|파스타|피자|햄버거|해물|생선|해산물|전복|대게|"
+    r"초밥|스시|횟집|먹자골목|맛집|식당)",
+    re.IGNORECASE,
+)
+
+
+def detect_slot_and_mood(category: str, name: str = "", extra_text: str = "") -> tuple[str, list[str]]:
+    """업종(카테고리) 및 상호명 기반 슬롯(day/evening/night/stay) 및 분위기(mood) 자동 분류.
+
+    - slot 판정 근거: category + 지도 공식 상호명(name) 뿐이다.
+      extra_text(유튜브 후보 문자열/제목 등)는 mood 에만 쓴다.
+    - stay 는 category 가 숙박 업종일 때만, 그리고 상호명이 비숙박 업종을 말하지
+      않을 때만 부여한다.
+    """
+    cat = category or ""
+    nm = name or ""
+    slot_text = f"{cat} {nm}"
 
     # 1. Slot
-    if any(k in text for k in ["호텔", "리조트", "펜션", "풀빌라", "글램핑", "스테이", "숙소"]):
+    if SLOT_STAY_CAT_RE.search(cat) and not SLOT_STAY_VETO_RE.search(nm):
         slot = "stay"
-    elif any(k in text for k in ["바", "펍", "와인", "이자카야", "야경", "포차", "주점", "칵테일"]):
+    elif SLOT_NIGHT_RE.search(slot_text):
         slot = "night"
-    elif any(k in text for k in ["식당", "맛집", "다이닝", "오마카세", "고기", "파스타", "스시", "레스토랑", "갈비"]):
+    elif SLOT_EVENING_RE.search(slot_text):
         slot = "evening"
     else:
         slot = "day"  # 카페, 전시, 스튜디오, 베이커리, 공원 등
 
-    # 2. Mood
+    # 2. Mood (유튜브 원문까지 포함해 폭넓게 본다 — 장식용 태그라 오염 위험이 낮다)
+    text = f"{cat} {nm} {extra_text}".lower()
     moods = []
     if any(k in text for k in ["감성", "로맨틱", "분위기", "데이트", "와인", "뷰", "선셋"]):
         moods.append("romantic")
@@ -880,20 +1122,6 @@ def detect_slot_and_mood(category: str, summary: str) -> tuple[str, list[str]]:
     return slot, moods[:3]
 
 
-def detect_region_from_address(address: str) -> str:
-    """주소 텍스트에서 7대 권역(서울/경기/인천/강원/충청/호남/영남/제주) 판별"""
-    addr = address or ""
-    if "서울" in addr: return "서울"
-    if "인천" in addr: return "인천"
-    if "경기" in addr: return "경기"
-    if any(k in addr for k in ["강원", "강릉", "속초", "춘천", "양양", "평창"]): return "강원"
-    if any(k in addr for k in ["충남", "충북", "대전", "세종", "논산", "천안", "공주", "단양", "태안"]): return "충청"
-    if any(k in addr for k in ["전남", "전북", "광주", "여수", "순천", "전주", "목포", "담양"]): return "호남"
-    if any(k in addr for k in ["부산", "대구", "울산", "경남", "경북", "경주", "포항", "거제", "통영"]): return "영남"
-    if "제주" in addr: return "제주"
-    return "서울"
-
-
 # ─────────────────────────────────────────────────────────────
 # 마이닝 본체
 # ─────────────────────────────────────────────────────────────
@@ -904,6 +1132,7 @@ def _new_stats() -> dict:
         "candidates_gated": 0,
         "no_search_result": 0,
         "region_mismatch": 0,
+        "region_underivable": 0,
         "name_mismatch": 0,
         "category_rejected": 0,
         "duplicated": 0,
@@ -943,11 +1172,19 @@ def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
         'Prefer': 'return=minimal'
     }
 
-    # 지역 힌트 (행정구역 사전 검증 완료)
+    # 지역 힌트 (행정구역 사전 검증 완료). 제목 우선, 없으면 설명란 앞부분으로 폴백.
     region_hints = extract_region_hints(vinfo["title"])
-    region_hint = " ".join(region_hints) if region_hints else ""
-    if verbose and region_hints:
-        print(f"  • 지역 힌트: {region_hints}")
+    hint_src = "제목"
+    if not region_hints:
+        region_hints = extract_region_hints((vinfo.get("description") or "")[:600])
+        hint_src = "설명란"
+    # 검색 쿼리에는 가장 구체적인 힌트 1개만 붙인다 (여러 개를 붙이면 검색이 깨진다)
+    region_hint = region_hints[0] if region_hints else ""
+    if verbose:
+        if region_hints:
+            print(f"  • 지역 힌트({hint_src}): {region_hints} → 검색 결합어 '{region_hint}'")
+        else:
+            print(f"  • 지역 힌트 없음 — 상호명 유사도 게이트로만 검증합니다")
 
     for cand in candidates:
         if len(cand) < 2:
@@ -1011,12 +1248,16 @@ def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
                 print(f"    🚫 '{cand}' → {official_name} [{category or '카테고리없음'}] 거부: {cat_reason}")
             continue
 
-        region = detect_region_from_address(road_addr)
-        slot, moods = detect_slot_and_mood(category, f"{cand} {official_name}")
+        # 권역/기초자치단체는 supabase_worker.derive_region_area 를 재사용한다
+        # (일반구 → 부모 시 정규화 + 8개 권역 체계. 판정 실패 시 등록하지 않는다)
+        region, area_val = derive_region_area(road_addr)
+        if not region:
+            stats["region_underivable"] += 1
+            if verbose:
+                print(f"    ⏩ '{cand}' → {official_name} — 주소에서 권역 도출 실패 ({road_addr[:24]})")
+            continue
 
-        # 군/구 단위 지역 추출
-        gu_match = re.search(r'([가-힣]+(?:시|군|구))', road_addr)
-        area_val = gu_match.group(1) if gu_match else None
+        slot, moods = detect_slot_and_mood(category, official_name, extra_text=cand)
 
         # 중복 검사 (동일 상호명이 이미 있는지 확인 — 읽기 전용)
         if supabase_url and supabase_key:
@@ -1221,6 +1462,7 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
         "zero_candidate": 0,
         "category_rejected": 0,
         "region_mismatch": 0,
+        "region_underivable": 0,
         "name_mismatch": 0,
         "no_search_result": 0,
         "duplicated": 0,
@@ -1292,6 +1534,7 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
             agg["zero_candidate"] += 1
         agg["category_rejected"] += stats["category_rejected"]
         agg["region_mismatch"] += stats["region_mismatch"]
+        agg["region_underivable"] += stats["region_underivable"]
         agg["name_mismatch"] += stats["name_mismatch"]
         agg["no_search_result"] += stats["no_search_result"]
         agg["duplicated"] += stats["duplicated"]
@@ -1317,6 +1560,7 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
     print(f"  • 후보 0건 영상: {agg['zero_candidate']}개")
     print(f"  • 지도 검색 무결과: {agg['no_search_result']}건")
     print(f"  • 지역 불일치 탈락: {agg['region_mismatch']}건")
+    print(f"  • 권역 도출 실패 탈락: {agg['region_underivable']}건")
     print(f"  • 상호명 불일치 탈락: {agg['name_mismatch']}건")
     print(f"  • 카테고리 거부: {agg['category_rejected']}건")
     print(f"  • 중복 스킵: {agg['duplicated']}건")
