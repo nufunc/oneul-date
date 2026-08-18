@@ -57,7 +57,7 @@ const SLOT_META: Record<SlotKey, { emoji: string; label: string }> = {
   stay: { emoji: '🏠', label: '숙박' },
 };
 
-// 지역 필터: key → 매칭되는 데이터 region 값 목록 ('전국' region은 항상 포함)
+// 지역 필터: key → 매칭되는 데이터 region 값 목록 (matchesRegion 주석 참고)
 const REGIONS: { key: string; label: string; match: string[] }[] = [
   { key: 'ALL', label: '전체', match: [] },
   { key: 'SEOUL', label: '서울', match: ['서울'] },
@@ -158,7 +158,12 @@ function isValidSlot(value: unknown): value is SlotKey {
   return value === 'day' || value === 'evening' || value === 'night' || value === 'stay';
 }
 
-/** 선택된 지역 키들의 합집합으로 매칭. 빈 배열 = 전체 */
+/**
+ * 선택된 지역 키들의 합집합으로 매칭. 빈 배열(= 지역 '전체')은 모든 스폿 통과.
+ * 특정 지역을 고르면 region '전국'(광역 미상) 스폿은 제외된다 — 지리적으로 고정할 수 없는
+ * 항목을 특정 지역 결과에 섞지 않기 위한 의도된 동작이다.
+ * (기존 주석은 "'전국' region은 항상 포함"이라 되어 있었으나 구현과 반대였다.)
+ */
 function matchesRegion(spot: Spot, regionKeys: string[]): boolean {
   if (regionKeys.length === 0) return true;
   return regionKeys.some((key) => {
@@ -223,26 +228,210 @@ function matchesMood(spot: Spot, moodKey: string): boolean {
   return Array.isArray(spot.mood) && spot.mood.includes(moodKey);
 }
 
-const STAY_KEYWORDS = ['호텔', '리조트', '펜션', '풀빌라', '글램핑', '캠핑', '카라반', '한옥', '료칸', '게스트하우스', '스테이', '민박', '모텔', '독채', '숙소', '콘도'];
-const NON_STAY_KEYWORDS = ['카페', '베이커리', '디저트', '식당', '음식점', '술집', '주점', '와인바', '이자카야', '영화관', '서점', '해수욕장', '공원', '약국', '경찰서', '문화원'];
+/** 숙박 카테고리 화이트리스트 — category가 이 계열이면 즉시 통과 */
+const STAY_CATEGORY_KEYWORDS = [
+  '호텔', '리조트', '펜션', '풀빌라', '빌라', '글램핑', '캠핑', '야영', '카라반', '한옥숙소',
+  '료칸', '게스트하우스', '민박', '모텔', '여관', '콘도', '숙박', '숙소', '유스호스텔',
+];
 
-/** 숙박(stay) 슬롯 장소의 진위 여부 엄격 검증 (카페/식당/영화관 등 오분류 원천 차단) */
-function isRealStaySpot(spot: Spot): boolean {
-  if (spot.slot !== 'stay') return true;
-  const name = spot.name.toLowerCase();
-  const cat = (spot.category || '').toLowerCase();
-  const summary = (spot.summary || '').toLowerCase();
-  const text = `${name} ${cat} ${summary}`;
+/** 숙박 '형태' 명사 — category가 없을 때(현 데이터의 77%) 통과를 인정하는 강한 근거 */
+const LODGING_FORM_KEYWORDS = [
+  '펜션', '풀빌라', '글램핑', '카라반', '료칸', '게스트하우스', '민박', '모텔', '여관', '콘도',
+  '독채', '숙소', '스테이', '객실', '스위트', '롯지', '로지', '캐빈', '샬레', '코티지', '방갈로',
+  '카바나', '별장', '오두막', '통나무집', '촌캉스', '호스텔', '빌라', '한채', '펜트하우스',
+  '산장', '트리하우스', '나무집', '리야드',
+];
 
-  if (NON_STAY_KEYWORDS.some((kw) => cat.includes(kw) || name.includes(kw))) {
-    if (!STAY_KEYWORDS.some((stay) => name.includes(stay))) {
-      return false;
-    }
-  }
-  return STAY_KEYWORDS.some((kw) => text.includes(kw));
+/** 단독으로는 약한 신호 — 부대시설어와 함께 오면 숙소가 아니라 호텔 내 업장이다 */
+const SOFT_STAY_KEYWORDS = ['호텔', '리조트', '한옥', '캠핑'];
+
+/** 명백한 비숙박 업종어 (카페/식당/전시/액티비티 등 오분류 원천 차단) */
+const NON_STAY_KEYWORDS = [
+  '레스토랑', '한정식', '다이닝', '그릴', '뷔페', '라운지', '스파', '온천', '찻집', '다실',
+  '전시', '미술관', '박물관', '테니스', '클라이밍', '스포츠', '골프', '서핑', '영화관', '서점',
+  '해수욕장', '약국', '경찰서', '문화원', '카페', '베이커리', '디저트', '식당', '음식점', '술집',
+  '주점', '와인바', '이자카야', '포차', '비스트로', '브루어리', '양조장', '탭룸', '와이너리',
+  '에스테이트', '수목원', '식물원', '놀이공원', '테마파크', '워터파크', '케이블카', '백화점',
+  '아울렛', '공원',
+];
+
+/** 호텔·리조트 부대시설/식음업장 신호 — 이름에 '호텔·리조트'가 있어도 이게 붙으면 숙소가 아니다 */
+const FACILITY_KEYWORDS = [
+  '그릴', '다이닝', 'bbq', '뷔페', '라운지', '스파', '카페', '루프탑', '레스토랑', '델리',
+  '클럽하우스', '바베큐', '베이커리', '펍',
+];
+
+/**
+ * substring 오탐 차단 — 키워드를 '숙주 단어'로 삼는 가짜 매칭을 먼저 제거한다.
+ * '스테이'→스테이크·스테이션·힐스테이트, '한옥'→한옥마을(지명), '캠핑'→캠핑용품,
+ * '스파'→인스파이어·에스파스·예스파크, '빌라'→타임빌라스(아울렛).
+ */
+const KEYWORD_FALSE_HOSTS: Record<string, string[]> = {
+  '스테이': ['스테이크', '스테이션', '힐스테이트', '에스테이트', '스테이지'],
+  '한옥': ['한옥마을'],
+  '캠핑': ['캠핑용품', '캠핑장비'],
+  '스파': ['인스파이어', '에스파스', '예스파크', '아그네스파크', '파라스파라', '스파크', '스파이', '스파게티'],
+  '빌라': ['타임빌라스', '빌라드'],
+  '카페': ['카페거리', '카페산'],
+  '공원': ['공원뷰'],
+};
+
+function hasKeyword(text: string, keyword: string): boolean {
+  const hosts = KEYWORD_FALSE_HOSTS[keyword];
+  if (!hosts) return text.includes(keyword);
+  let stripped = text;
+  for (const host of hosts) stripped = stripped.split(host).join(' ');
+  return stripped.includes(keyword);
 }
 
-/** 슬롯 + 지역 + 세부존 + 분위기 조건에 맞는 후보 목록 (excludeIds 제외) */
+function hasAnyKeyword(text: string, keywords: string[]): boolean {
+  return keywords.some((kw) => hasKeyword(text, kw));
+}
+
+function nameTokens(name: string): string[] {
+  return name.split(/[\s&,·\-—~/()[\]]+/).filter(Boolean);
+}
+
+/** '바'는 한글 substring 오탐(바다·바비큐·바위)이 심해 단독 토큰/명시 합성어일 때만 술집 신호로 인정 */
+function hasBarToken(name: string): boolean {
+  if (/(?:칵테일|와인|루프탑|스카이|재즈|샴페인|위스키|하이볼|오마카세)\s?바(?![다렌])/.test(name)) return true;
+  return nameTokens(name).some((t) => t === '바' || t === 'bar');
+}
+
+/** 부대시설어는 독립 토큰일 때만 인정 ('스파리조트'·'인스파이어' 같은 합성어 오탐 차단) */
+function hasFacilityToken(name: string): boolean {
+  const tokens = nameTokens(name);
+  return tokens.some((t) => FACILITY_KEYWORDS.includes(t)) || hasBarToken(name);
+}
+
+/** 호텔/리조트 + 부대시설어 조합 = 숙소가 아니라 그 안의 바·그릴·스파 (실측 12건 이상 제거) */
+function hasFacilityConflict(name: string): boolean {
+  if (!hasKeyword(name, '호텔') && !hasKeyword(name, '리조트')) return false;
+  return hasFacilityToken(name);
+}
+
+/** '1박 30만원'·'평일/주말' 요금제 = 확정 숙박 신호. 시간제·1인 코스 요금은 식음/체험 업장 */
+function hasLodgingPrice(price: string | null | undefined): boolean {
+  if (!price) return false;
+  const p = price.toLowerCase();
+  const perNight = /[0-9]\s*박/.test(p);
+  if (/[0-9]\s*시간|1인|인당|코스|오마카세|입장료/.test(p)) return perNight;
+  if (perNight) return true;
+  return p.includes('평일') && p.includes('주말');
+}
+
+/** 목차·리스티클·문서 섹션 항목 (실제 장소가 아닌 원본 노트의 제목 줄) */
+const LISTICLE_NAME_PATTERNS: RegExp[] = [
+  /[0-9]+\s*선(?!착)/,
+  /상세\s*(분석|명세)/,
+  /트렌드\s*분석/,
+  /마크다운|아카이브/,
+  /\bpart\s*[0-9]/i,
+  /\bchapter\s*[0-9]/i,
+  /카테고리\s*[0-9]/,
+  /[0-9]+\s*부\./,
+  /curation\s+(criteria|philosophy)/i,
+  /출처\s*메모/,
+];
+
+/** '…20선 상세 명세'·'Part 2.'·이모지만 있는 제목 등 코스에 올릴 수 없는 문서 항목인지 */
+function isListicleEntry(spot: Spot): boolean {
+  const name = (spot.name || '').trim();
+  if (name.length === 0) return true;
+  if (!/[0-9A-Za-z가-힣]/.test(name)) return true;
+  return LISTICLE_NAME_PATTERNS.some((re) => re.test(name));
+}
+
+/**
+ * 숙박(stay) 슬롯 장소의 진위 여부 검증 — 화이트리스트 우선 구조.
+ * ① 문서/목차 항목·지역 미상 항목 탈락 → ② 호텔 부대시설 탈락 → ③ 숙박 category면 즉시 통과
+ * → ④ 1박 요금제면 통과 → ⑤ category가 있는데 숙박 계열이 아니면 즉시 탈락
+ * → ⑥ category === null일 때만 이름 기반 보수적 판정.
+ * summary는 통과 근거로 쓰지 않는다 (비대칭 판정이 오염 72건을 통과시키던 원인).
+ */
+function isRealStaySpot(spot: Spot): boolean {
+  if (spot.slot !== 'stay') return true;
+  const name = (spot.name || '').toLowerCase();
+  const cat = (spot.category || '').trim().toLowerCase();
+
+  if (isListicleEntry(spot)) return false;
+  // 광역도 시·군·구도 특정되지 않은 항목은 실재 숙소가 아닌 문서 섹션이다
+  if (spot.region === '전국' && !(typeof spot.area === 'string' && spot.area.trim().length > 0)) {
+    return false;
+  }
+  if (hasFacilityConflict(name)) return false;
+
+  if (cat.length > 0 && hasAnyKeyword(cat, STAY_CATEGORY_KEYWORDS)) return true;
+  if (hasLodgingPrice(spot.price)) return true;
+  if (cat.length > 0) return false;
+
+  if (hasBarToken(name)) return false;
+  if (hasAnyKeyword(name, LODGING_FORM_KEYWORDS)) return true;
+  if (hasAnyKeyword(name, NON_STAY_KEYWORDS)) return false;
+  if (hasAnyKeyword(name, SOFT_STAY_KEYWORDS)) return !hasFacilityToken(name);
+  return false;
+}
+
+/** 코스 후보로 올릴 수 있는 스폿인지 — 생성·공유복원·저장복원 전 경로가 공유하는 단일 관문 */
+function isCourseEligible(spot: Spot): boolean {
+  return isValidSlot(spot.slot) && !isListicleEntry(spot) && isRealStaySpot(spot);
+}
+
+/**
+ * 존 내 후보가 0건이라 광역 전체로 완화됐을 때 숙박에 허용하는 앵커 반경 (km).
+ * 실측 기준: 성수·문래·한남은 3.6~8.8km 안에 숙소가 있어 그대로 채워지고,
+ * 청주(최근접 33km)·광주(최근접 76km)는 후보 없음으로 떨어져 엉뚱한 숙소 대신 안내 카드가 뜬다.
+ */
+const STAY_ZONE_FALLBACK_RADIUS_KM = 20;
+
+interface CandidatePool {
+  spots: Spot[];
+  /** 세부존을 선택했지만 존 내 후보가 0건이라 광역 전체로 조건이 완화됐는지 */
+  relaxed: boolean;
+}
+
+/**
+ * 슬롯 + 지역 + 세부존 + 분위기 조건에 맞는 후보 풀 (excludeIds 제외).
+ * 존 내 후보가 0건이면 광역으로 넓히되, 넓혔다는 사실을 relaxed로 호출자에게 알린다.
+ */
+function getCandidatePool(
+  all: Spot[],
+  slot: SlotKey,
+  regionKeys: string[],
+  moodKey: string,
+  excludeIds: number[],
+  zoneKeys: string[] = [],
+): CandidatePool {
+  const base = all.filter(
+    (s) =>
+      isCourseEligible(s) &&
+      s.slot === slot &&
+      matchesRegion(s, regionKeys) &&
+      matchesMood(s, moodKey) &&
+      !excludeIds.includes(s.id),
+  );
+  if (zoneKeys.length === 0) return { spots: base, relaxed: false };
+  const zoneFiltered = base.filter((s) => matchesZone(s, zoneKeys));
+  if (zoneFiltered.length > 0) return { spots: zoneFiltered, relaxed: false };
+  return { spots: base, relaxed: true };
+}
+
+/**
+ * 숙박만 광역 폴백 차단 — 낮/저녁/밤은 존 안에 남는데 숙박만 밀도가 낮아 조용히 광역으로
+ * 튀면서 "숙박만 뜬금없이 멀다"는 체감을 만든다. 앵커 반경 밖이면 차라리 후보 없음 처리.
+ */
+function applyStayZonePolicy(pool: CandidatePool, slot: SlotKey, anchor: Spot | null): Spot[] {
+  if (slot !== 'stay' || !pool.relaxed) return pool.spots;
+  if (!anchor || anchor.lat == null || anchor.lng == null) return [];
+  return pool.spots.filter(
+    (s) =>
+      s.lat != null &&
+      s.lng != null &&
+      getDistanceKm(anchor.lat!, anchor.lng!, s.lat!, s.lng!) <= STAY_ZONE_FALLBACK_RADIUS_KM,
+  );
+}
+
+/** 슬롯 + 지역 + 세부존 + 분위기 조건에 맞는 후보 목록 (숙박 광역 폴백 정책 적용) */
 function getCandidates(
   all: Spot[],
   slot: SlotKey,
@@ -250,19 +439,10 @@ function getCandidates(
   moodKey: string,
   excludeIds: number[],
   zoneKeys: string[] = [],
+  anchor: Spot | null = null,
 ): Spot[] {
-  const base = all.filter(
-    (s) =>
-      isValidSlot(s.slot) &&
-      s.slot === slot &&
-      matchesRegion(s, regionKeys) &&
-      matchesMood(s, moodKey) &&
-      !excludeIds.includes(s.id) &&
-      (slot !== 'stay' || isRealStaySpot(s)),
-  );
-  if (zoneKeys.length === 0) return base;
-  const zoneFiltered = base.filter((s) => matchesZone(s, zoneKeys));
-  return zoneFiltered.length > 0 ? zoneFiltered : base;
+  const pool = getCandidatePool(all, slot, regionKeys, moodKey, excludeIds, zoneKeys);
+  return applyStayZonePolicy(pool, slot, anchor);
 }
 
 /**
@@ -410,6 +590,7 @@ function generateCourse(
   const avoid = opts.avoidIds ?? new Set<number>();
 
   // 앵커 슬롯: 후보가 1개 이상인 슬롯 중 후보 수 최소 (동률은 슬롯 순서 선착순)
+  // 앵커가 아직 없으므로 광역 폴백된 숙박은 여기서 0건이 되어 앵커 후보에서 자연히 빠진다.
   let anchorSlot: SlotKey | null = null;
   let anchorPool: Spot[] = [];
   for (const slot of slotsOn) {
@@ -421,23 +602,34 @@ function generateCourse(
   }
 
   const picked: number[] = [];
+  const pickedSpots: Spot[] = [];
   let anchorSpot: Spot | null = null;
   if (anchorSlot !== null) {
     const anchor = pickRandom(anchorPool, rng);
     if (anchor) {
       picked.push(anchor.id);
+      pickedSpots.push(anchor);
       anchorSpot = anchor;
     }
   }
 
   return slotsOn.map((slot) => {
     if (slot === anchorSlot) return { slot, spotId: anchorSpot ? anchorSpot.id : null };
+    // 숙박 반경 판정용 기준점 — 앵커에 좌표가 없으면 이미 고른 스텝 중 좌표가 있는 것을 쓴다
+    // (좌표 없는 앵커 하나 때문에 숙박이 통째로 '후보 없음'이 되는 것을 방지)
+    const geoAnchor =
+      anchorSpot && anchorSpot.lat != null && anchorSpot.lng != null
+        ? anchorSpot
+        : (pickedSpots.find((s) => s.lat != null && s.lng != null) ?? anchorSpot);
     const candidates = excludeRecent(
-      getCandidates(all, slot, regionKeys, moodKey, picked, zoneKeys),
+      getCandidates(all, slot, regionKeys, moodKey, picked, zoneKeys, geoAnchor),
       avoid,
     );
     const chosen = pickNearRandom(candidates, anchorSpot, rng);
-    if (chosen) picked.push(chosen.id);
+    if (chosen) {
+      picked.push(chosen.id);
+      pickedSpots.push(chosen);
+    }
     return { slot, spotId: chosen ? chosen.id : null };
   });
 }
@@ -1863,7 +2055,11 @@ function renderStepCard(
         <div class="step-card-head">
           <div class="step-slot">${meta.emoji} ${meta.label}</div>
         </div>
-        <p class="step-empty-msg">이 조건에 맞는 장소를 찾지 못했어요</p>
+        <p class="step-empty-msg">${
+          step.slot === 'stay'
+            ? '이 조건에 맞는 숙소를 찾지 못했어요'
+            : '이 조건에 맞는 장소를 찾지 못했어요'
+        }</p>
       </article>
     `;
   }
@@ -1966,14 +2162,18 @@ function swapStep(index: number): void {
   const step = state.course[index];
   if (!step) return;
   const cond = state.courseConditions;
+  const anchor = dominantAnchorSpot(state.course, spotById, index);
   const candidates = excludeRecent(
-    getCandidates(spots, step.slot, cond.regions, cond.mood, courseSpotIds(), cond.subZones),
+    getCandidates(spots, step.slot, cond.regions, cond.mood, courseSpotIds(), cond.subZones, anchor),
     recentSpotIdSet(),
   );
-  const anchor = dominantAnchorSpot(state.course, spotById, index);
   const chosen = pickNearRandom(candidates, anchor);
   if (!chosen) {
-    showToast('이 조건에 다른 추천 장소가 없어요');
+    showToast(
+      step.slot === 'stay'
+        ? '이 조건에 맞는 다른 숙소를 찾지 못했어요'
+        : '이 조건에 다른 추천 장소가 없어요',
+    );
     return;
   }
   state.course[index] = { slot: step.slot, spotId: chosen.id };
@@ -2124,13 +2324,17 @@ function bindResultEvents(area: HTMLElement): void {
 
 // --- 수신자 뷰 (S5 — 링크로 열었을 때) ---------------------------------------------
 
-/** 공유 ID 배열 → 스텝 목록 (존재하지 않는 스폿·slot 없는 스폿은 건너뜀, 슬롯 순 정렬) */
+/**
+ * 공유 ID 배열 → 스텝 목록 (슬롯 순 정렬).
+ * 존재하지 않는 스폿·slot 없는 스폿뿐 아니라 숙박 검증(isRealStaySpot)에 실패한 스폿도 제외한다.
+ * 링크에 담긴 ID를 그대로 믿으면 생성 경로의 방어막을 통째로 우회하기 때문.
+ */
 function buildSharedSteps(ids: number[]): CourseStep[] {
   const steps: CourseStep[] = [];
   for (const id of ids) {
     const spot = spotById.get(id);
-    if (spot && isValidSlot(spot.slot)) {
-      steps.push({ slot: spot.slot, spotId: id });
+    if (spot && isCourseEligible(spot)) {
+      steps.push({ slot: spot.slot as SlotKey, spotId: id });
     }
   }
   steps.sort((a, b) => SLOT_ORDER.indexOf(a.slot) - SLOT_ORDER.indexOf(b.slot));
@@ -2299,13 +2503,20 @@ function renderOverlay(): void {
 
 /** 저장한 코스를 결과 영역에 복원 (조건 상태도 함께 복원) */
 function restoreCourse(item: SavedCourse): void {
-  // spotId → 해당 스폿의 slot으로 스텝 재구성 (스폿 데이터가 사라진 ID는 건너뜀)
+  // spotId → 해당 스폿의 slot으로 스텝 재구성
+  // (스폿 데이터가 사라진 ID, 그리고 숙박 검증에 실패한 과거 저장분은 건너뜀)
   const steps: CourseStep[] = [];
+  let droppedCount = 0;
   for (const id of item.spotIds) {
     const spot = spotById.get(id);
-    if (spot && isValidSlot(spot.slot)) {
-      steps.push({ slot: spot.slot, spotId: id });
+    if (spot && isCourseEligible(spot)) {
+      steps.push({ slot: spot.slot as SlotKey, spotId: id });
+    } else if (spot) {
+      droppedCount += 1;
     }
+  }
+  if (droppedCount > 0) {
+    showToast(`검증에 실패한 장소 ${droppedCount}곳을 코스에서 제외했어요`);
   }
   steps.sort((a, b) => SLOT_ORDER.indexOf(a.slot) - SLOT_ORDER.indexOf(b.slot));
 
