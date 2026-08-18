@@ -1201,7 +1201,7 @@ function activeSlots(): SlotKey[] {
 }
 
 declare const __APP_VERSION__: string;
-const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.8.2';
+const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.8.3';
 
 function courseSpotIds(): number[] {
   if (!state.course) return [];
@@ -1301,7 +1301,7 @@ function renderShell(): void {
     <section class="results" id="results-area"></section>
     <footer class="app-footer">
       <p class="footer-copy">오늘 데이트 <span class="footer-version">${APP_VERSION}</span></p>
-      <p class="footer-sub">조건만 고르면 완성되는 시간대별 데이트 코스</p>
+      <p class="footer-sub">검증된 스팟만 골라 담은 오늘의 데이트 코스</p>
     </footer>
     <div class="overlay-root" id="overlay-root"></div>
   `;
@@ -2176,7 +2176,7 @@ function renderReceiverView(steps: CourseStep[]): void {
     </section>
     <footer class="app-footer">
       <p class="footer-copy">오늘 데이트 <span class="footer-version">${APP_VERSION}</span></p>
-      <p class="footer-sub">조건만 고르면 완성되는 시간대별 데이트 코스</p>
+      <p class="footer-sub">검증된 스팟만 골라 담은 오늘의 데이트 코스</p>
     </footer>
   `;
   const goHome = (e: Event) => {
