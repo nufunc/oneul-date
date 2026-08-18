@@ -23,17 +23,42 @@ print(f"Found {len(md_files)} markdown files in {SOURCE_DIR}")
 #   pass 2: filename + frontmatter tags (fallback only, to avoid a file-level
 #           theme like "Glamping_Omakase" overriding per-spot signals)
 # ---------------------------------------------------------------------------
+# 숙박 브랜드명 뒤에 부대시설어가 붙으면(예: "호텔 라운지", "리조트 스파") 그 스팟은
+# 숙소가 아니라 그 부대시설이므로 stay에서 탈락시킨다.
+# '바'는 바다/바람/바닥 오매칭을 막기 위해 뒤에 한글이 오지 않을 때만 인정.
+# 같은 줄 24자 이내를 본다 ("JW 메리어트 호텔 모보 바", "호텔 ... 뷰티 라운지").
+STAY_FACILITY_SUFFIX = (
+    r"(?![^\n]{0,24}(?:바(?![가-힣])|라운지|카페|다이닝|뷔페|레스토랑|그릴|전시|미술관|"
+    r"스파|루프탑|베이커리|델리|펍|클럽|살롱|아틀리에|공방|스튜디오|플로리스트|클래스))"
+)
+
 SLOT_PATTERNS = [
+    # stay는 detect_slot()에서 '상호명 + 명시 카테고리 필드'에만 적용된다(본문 산문 제외).
     ("stay", [
-        r"독채", r"풀\s*빌라", r"펜션", r"스테이(?!크)",  # 스테이크(steak) 오매칭 방지
-        r"료칸", r"글램핑", r"카라반", r"차박", r"호텔", r"리조트",
+        # '독채' 단독은 룸/좌석 형태 묘사("한옥 독채 룸 파인다이닝")라 숙소어와 결합할 때만
+        r"독채[\s·]*(?:펜션|스테이|숙소|풀\s*빌라|한옥|글램핑|카라반|민박|빌라|villa)",
+        r"풀\s*빌라", r"펜션",
+        # 스테이크/스테이션/스테이지/스테이징/스테이셔너리/힐스테이트·에스테이트/스테이블 방지
+        r"스테이(?!크|션|지|징|셔너리|트|블)",
+        r"료칸", r"글램핑", r"카라반", r"차박",
+        r"호텔" + STAY_FACILITY_SUFFIX, r"리조트" + STAY_FACILITY_SUFFIX,
         r"숙소", r"숙박", r"민박", r"호스텔", r"게스트하우스",
-        r"트리\s*하우스", r"오두막", r"샬레", r"통나무집",
-        r"pool\s*villa", r"\bstay\b", r"\bhotel\b", r"\bresort\b",
-        r"glamping", r"treehouse", r"\bcabin\b", r"chalet", r"pension",
+        r"트리\s*하우스", r"통나무집",
+        r"pool\s*villa", r"\bhotel\b", r"\bresort\b",
+        r"glamping", r"treehouse", r"chalet", r"pension",
         r"\bryokan\b", r"한옥\s*(스테이|숙소)?체험", r"호캉스",
-        r"고택", r"종택", r"산장", r"롯지", r"\blodge\b", r"별장",
-        r"객실", r"체크인", r"입실", r"\d\s*박\s", r"조식",
+        r"롯지", r"\blodge\b",
+        r"객실", r"체크인", r"입실", r"\d\s*박\s",
+        # 제거된 키워드: 별장·산장·오두막·고택·종택·조식·\bstay\b·\bcabin\b·\blodge\b(영문)
+        #   실측 근거(상호명 기준): 고택 41건 중 다수가 "아원고택 갤러리카페"류 카페,
+        #   산장 17건에 "카페 라파르 군산장자도"(군산+장자도) 오매칭, 별장 7건은
+        #   "카페 코히별장"·"주유별장 디타워점"·"청남대 대통령별장", 종택은 대부분 다이닝/관람.
+        #   영문 cabin/lodge/stay는 상호명 매치 0~1건으로 사실상 무의미.
+        # '샬레'는 유지한다: 상호명 매치 179건 중 대다수가 Premium_*_Chalet_20.md 계열의
+        #   실제 1박 숙소("영월 어라연 리버사이드 샬레", 가격 "평일 58만~70만원대")다.
+        #   본문 산문에서는 비유 표현이 많지만, stay 판정이 상호명 한정으로 좁혀진 뒤로는
+        #   그 위험이 사라졌다.
+        r"샬레",
     ]),
     ("night", [
         # '바'는 단어 경계 주의: '바다' 오매칭 금지 → 구체 합성어만 매칭
@@ -67,10 +92,24 @@ SLOT_COMPILED = [
 ]
 
 
-def detect_slot(text):
+def detect_slot(text, stay_text=None):
+    """우선순위 stay > night > evening > day, 첫 매치 승리.
+
+    `stay_text`는 stay를 추론해도 되는 *좁은* 범위 — 상호명 + 명시 카테고리 필드.
+    섹션 본문 산문은 의도적으로 제외한다: "별장 같은", "호텔급 파우더룸",
+    "글램핑 감성" 같은 비유 표현이 카페/식당을 숙박으로 뒤집은 것이
+    stay 오염(1,551건)의 주원인이었다.
+    stay_text가 비어 있으면 stay 후보 자체를 건너뛴다(문서 단위 폴백에 사용).
+    """
     for slot, pats in SLOT_COMPILED:
+        if slot == "stay":
+            if not stay_text:
+                continue
+            target = stay_text
+        else:
+            target = text
         for p in pats:
-            if p.search(text):
+            if p.search(target):
                 return slot
     return None
 
@@ -163,12 +202,27 @@ def detect_moods(text, tags):
 # priority over the heuristics above. Regexes match within a single line only
 # (no newline leakage), same style as the 위치/가격 extractors.
 # ---------------------------------------------------------------------------
+# 한글 값은 부분일치(기존 동작 유지). 원본 문서의 91.7%는 영문 값(day/evening/
+# night)이라 반드시 인정해야 한다 — 다만 영문은 임의 영단어 오매칭을 막기 위해
+# 소문자 정규화 후 '토큰 완전일치'로만 인정한다.
 EXPLICIT_SLOT_MAP = {
     "낮": "day",
     "저녁": "evening",
     "밤": "night",
     "숙박": "stay",
 }
+
+EXPLICIT_SLOT_EN_MAP = {
+    "day": "day",
+    "evening": "evening",
+    "night": "night",
+    "stay": "stay",
+}
+
+# 복합 값("저녁 | 밤", "낮 / 저녁", "낮 | 저녁 | 밤")은 slot이 단일 문자열
+# 스키마이므로 '첫 토큰 채택'으로 결정론적으로 처리한다.
+EXPLICIT_SLOT_SPLIT_RE = re.compile(r"[|/,·]")
+EN_WORD_RE = re.compile(r"[a-z]+")
 
 EXPLICIT_MOOD_MAP = {
     "로맨틱": "romantic",
@@ -208,9 +262,19 @@ def extract_explicit_slot(sec):
     if not m:
         return None
     value = m.group(1).strip().strip("*: ").strip()
-    for ko, slot in EXPLICIT_SLOT_MAP.items():
-        if ko in value:
-            return slot
+    for token in EXPLICIT_SLOT_SPLIT_RE.split(value):
+        token = token.strip().strip("*`_ ").strip()
+        if not token:
+            continue
+        # 1) 영문: 소문자 정규화 후 단어 단위 완전일치 (부분일치 금지)
+        for word in EN_WORD_RE.findall(token.lower()):
+            slot = EXPLICIT_SLOT_EN_MAP.get(word)
+            if slot:
+                return slot
+        # 2) 한글: 기존 부분일치 유지
+        for ko, slot in EXPLICIT_SLOT_MAP.items():
+            if ko in token:
+                return slot
     return None
 
 
@@ -404,6 +468,105 @@ def clean_spot_name(raw_name: str) -> str:
     return s if s else raw_name.strip()
 
 
+# ---------------------------------------------------------------------------
+# Section splitting (v3).
+#
+# 구버전은 `\n#{2,4}\s+(?=\d+[\.\)]|\[|\*\*|\d{2}\.)` 로 "번호/대괄호/볼드로
+# 시작하는 헤딩"만 분리점으로 인정했다. 최신 Live_Research 문서는 `### 아원고택
+# 갤러리카페` 같은 평범한 헤딩을 쓰므로 전체 헤딩 11,265개 중 6,918개(61%)가
+# 상위 롤업 헤딩에 흡수됐고, 롤업 본문(스팟 20개분 텍스트)이 통째로 한 스팟의
+# 판정 근거가 되면서 슬롯·지역 오염의 폭발 반경을 키웠다.
+#
+# v3는 헤딩 트리를 그대로 파싱한다:
+#   * 하위 헤딩을 2개 이상 거느린 헤딩 = 롤업(컨테이너) → 스팟이 아니므로 스킵
+#     (자식들이 각자 스팟으로 나온다)
+#   * 하위 헤딩이 0~1개인 헤딩 = 스팟. 본문은 자기 서브트리까지.
+#   * 가이드/요약/개요류 헤딩은 자신은 물론 그 하위 헤딩까지 전부 스킵
+#     (롤업이 쪼개지면서 "촬영 가이드" 같은 섹션의 소제목이 스팟으로
+#      승격되는 것을 막는다)
+# ---------------------------------------------------------------------------
+HEADING_RE = re.compile(r"^(#{2,6})[ \t]+(.+?)[ \t]*$", re.M)
+
+SKIP_HEADER_WORDS = (
+    "Sub-Theme", "개요", "선정 기준", "비교 요약", "핵심 가이드",
+    "총괄 요약", "목차", "안내",
+)
+# 하위 헤딩까지 통째로 버려도 되는 단어 — "Sub-Theme"은 제외한다.
+# `## 🍱 [Sub-Theme 1] 수도권 정통 료칸` 처럼 그 자신은 스팟이 아니지만
+# 하위 `### 1. 양평 길조호텔` 은 진짜 스팟인 컨테이너이기 때문이다.
+SKIP_SUBTREE_WORDS = tuple(w for w in SKIP_HEADER_WORDS if w != "Sub-Theme")
+SKIP_HEADER_RE = re.compile(r"체크리스트|가이드|꿀팁|공략|요약|결론|총정리|활용법|팁(\s|$|\()")
+
+
+def is_skippable_header(header_line):
+    if any(word in header_line for word in SKIP_HEADER_WORDS):
+        return True
+    return bool(SKIP_HEADER_RE.search(header_line))
+
+
+def skips_whole_subtree(header_line):
+    if any(word in header_line for word in SKIP_SUBTREE_WORDS):
+        return True
+    return bool(SKIP_HEADER_RE.search(header_line))
+
+
+# 가이드/요약 헤딩 밑에서도 살아남아야 하는 진짜 스팟의 표식.
+# `## 3. 스폿별 상세 가이드 (1~20)` 처럼 제목에 '가이드'가 들어갔지만 실제로는
+# 스팟 컨테이너인 경우가 있어, 조상 스킵은 '스팟 필드가 하나도 없을 때'만 적용한다.
+SPOT_FIELD_RE = re.compile(
+    r"\*\*[^\*\n]{0,12}(?:주소|위치|가격|슬롯|카테고리|한줄소개|분위기|시그니처)[^\*\n]*\*\*"
+)
+
+
+def iter_spot_sections(content):
+    """(header_line, section_text) 튜플을 스팟 헤딩에 대해서만 yield.
+
+    section_text는 구버전 `re.split` 결과와 동일한 형태 — 헤딩 마크(`###`)만
+    제거된 제목 줄로 시작하고 이어서 본문이 온다.
+    """
+    heads = [
+        (m.start(), len(m.group(1)), m.group(2).strip())
+        for m in HEADING_RE.finditer(content)
+    ]
+    n = len(heads)
+    stack = []  # [(level, skipped_subtree)]
+    for i, (pos, level, title) in enumerate(heads):
+        while stack and stack[-1][0] >= level:
+            stack.pop()
+        ancestor_skipped = any(flag for _, flag in stack)
+
+        # 서브트리 끝 = 같거나 더 얕은 다음 헤딩. 그 안에서 최상위 깊이 헤딩 = 직속 자식.
+        end = len(content)
+        sub_levels = []
+        for j in range(i + 1, n):
+            if heads[j][1] <= level:
+                end = heads[j][0]
+                break
+            sub_levels.append(heads[j][1])
+        child_count = sub_levels.count(min(sub_levels)) if sub_levels else 0
+
+        skip_self = is_skippable_header(title)
+        stack.append((level, skips_whole_subtree(title) or ancestor_skipped))
+        if skip_self:
+            continue
+        if child_count >= 2:
+            continue  # 롤업 컨테이너: 스팟이 아님
+
+        sec = re.sub(r"^#{2,6}[ \t]+", "", content[pos:end], count=1)
+        if ancestor_skipped and not SPOT_FIELD_RE.search(sec):
+            continue  # 가이드/요약 서브트리의 순수 설명 섹션
+        yield title, sec
+
+
+# 명시 카테고리 필드 — stay 판정에 허용되는 유일한 본문 필드
+EXPLICIT_CATEGORY_RE = re.compile(r"[\-\*]\s*\*\*(?:카테고리|유형|숙소\s*유형)[^\*]*\*\*[: \t]*([^\n]+)")
+
+
+def extract_explicit_category(sec):
+    m = EXPLICIT_CATEGORY_RE.search(sec)
+    return m.group(1).strip().strip("*: ").strip() if m else ""
+
+
 spots = []
 spot_id_counter = 1
 
@@ -425,27 +588,9 @@ for filepath in md_files:
             else:
                 tags = [t.strip()[1:].strip() for t in raw_tags.split("\n") if t.strip().startswith("-")]
 
-    # Normalize split regex: handles ### 1., ## 1., ### [지역], ### 01., etc.
-    # We look for lines starting with ## or ### followed by numbers or brackets or bold titles
-    sections = re.split(r"\n#{2,4}\s+(?=\d+[\.\)]|\[|\*\*|\d{2}\.)", content)
-
-    # If standard split doesn't find many sections, fallback to ###
-    if len(sections) <= 1:
-        sections = re.split(r"\n#{2,4}\s+", content)
-
-    for sec in sections[1:]:
-        lines = sec.strip().split("\n")
-        if not lines:
-            continue
-        header_line = lines[0].strip()
-
-        # Skip sub-theme headers like "[Sub-Theme 1] ..." or "테마 요약" or "📌 DB 개요"
-        if any(skip_word in header_line for skip_word in ["Sub-Theme", "개요", "선정 기준", "비교 요약", "핵심 가이드", "총괄 요약", "목차", "안내"]):
-            continue
-        # Skip guide/tip/summary sections that are not actual spots
-        if re.search(r"체크리스트|가이드|꿀팁|공략|요약|결론|총정리|활용법|팁(\s|$|\()", header_line):
-            continue
-
+    # Section split v3 — 헤딩 트리 기반. 롤업 컨테이너와 가이드/요약 서브트리는
+    # iter_spot_sections() 내부에서 이미 걸러져 나온다.
+    for header_line, sec in iter_spot_sections(content):
         # Standardized clean name
         name_clean = clean_spot_name(header_line)
         if not name_clean:
@@ -529,10 +674,16 @@ for filepath in md_files:
         # Explicit `- **슬롯**:` field wins over heuristics.
         slot = extract_explicit_slot(sec)
         if slot is None:
-            # Pass 1: per-spot signal (name + section body)
+            # Pass 1: per-spot signal (name + section body).
+            # stay만은 상호명 + 명시 카테고리 필드로 범위를 좁힌다.
             spot_text = f"{name_clean}\n{sec}"
-            slot = detect_slot(spot_text)
-            # Pass 2 (fallback): file-level signal (filename + frontmatter tags)
+            stay_text = f"{name_clean} {extract_explicit_category(sec)}"
+            slot = detect_slot(spot_text, stay_text=stay_text)
+            # Pass 2 (fallback): file-level signal (filename + frontmatter tags).
+            # stay_text를 넘기지 않으므로 stay는 이 폴백으로 절대 생기지 않는다.
+            # (파일명 "Premium_Glamping_..."/"..._Stay_20" 하나가 소속 스팟 전체를
+            #  숙박으로 뒤집어 618건을 오염시켰다. day/evening/night는 파일 테마가
+            #  약한 신호로나마 유효하고 스팟 자체 신호가 전무할 때만 쓰이므로 유지.)
             if slot is None:
                 file_text = f"{filename} {' '.join(tags)}"
                 slot = detect_slot(file_text)
