@@ -91,7 +91,7 @@ interface PopularZone {
 const POPULAR_ZONES: PopularZone[] = [
   // 서울 (SEOUL) — 핵심 핫플레이스 존
   { key: 'seongsu', regionKey: 'SEOUL', label: '성수·서울숲', keywords: ['성동구', '성수', '서울숲', '뚝섬'] },
-  { key: 'mullae', regionKey: 'SEOUL', label: '영등포·문래·여의도', keywords: ['영등포구', '문래', '여의도', '당산', '영등포', '양평'] },
+  { key: 'mullae', regionKey: 'SEOUL', label: '영등포·문래·여의도', keywords: ['영등포구', '문래', '여의도', '당산', '영등포', '양평동'] },
   { key: 'yeonnam', regionKey: 'SEOUL', label: '연남·연희·홍대', keywords: ['마포구', '서대문구', '연남', '연희', '서교', '망원', '상수', '합정'] },
   { key: 'hannam', regionKey: 'SEOUL', label: '한남·이태원·용산', keywords: ['용산구', '한남', '이태원', '용리단', '해방촌', '경리단', '삼각지'] },
   { key: 'apgujeong', regionKey: 'SEOUL', label: '압구정·신사·청담', keywords: ['강남구', '압구정', '신사', '청담', '도산', '가로수', '논현'] },
@@ -132,7 +132,7 @@ const POPULAR_ZONES: PopularZone[] = [
   { key: 'busan_haeundae', regionKey: 'YEONGNAM', label: '부산 해운대·기장', keywords: ['해운대', '기장', '송정', '달맞이', '청사포'] },
   { key: 'busan_seomyeon', regionKey: 'YEONGNAM', label: '부산 서면·전포', keywords: ['부산진구', '서면', '전포', '부전', '카페거리'] },
   { key: 'gyeongju', regionKey: 'YEONGNAM', label: '경주 황리단길', keywords: ['경주시', '황리단', '보문', '월정교', '첨성대'] },
-  { key: 'daegu', regionKey: 'YEONGNAM', label: '대구 동성로·교동', keywords: ['중구', '남구', '동성로', '교동', '앞산', '수성못', '삼덕동'] },
+  { key: 'daegu', regionKey: 'YEONGNAM', label: '대구 동성로·교동', keywords: ['대구', '동성로', '교동', '앞산', '수성못', '삼덕동'] },
   { key: 'pohang', regionKey: 'YEONGNAM', label: '포항 영일대·호미곶', keywords: ['포항시', '영일대', '호미곶', '구룡포', '스페이스워크'] },
 
   // 제주 (JEJU)
@@ -167,12 +167,54 @@ function matchesRegion(spot: Spot, regionKeys: string[]): boolean {
   });
 }
 
+/** 행정구역 단위 접미사 — 존 키워드·area 경계 판별용 */
+const ADMIN_UNIT_SUFFIXES = ['구', '시', '군', '동', '읍', '면'];
+
+/** REGIONS에 정의된 실제 데이터 region 값 집합 ('전국' 등 미등록 값은 광역 판정에서 제외) */
+const KNOWN_REGION_VALUES = new Set(REGIONS.flatMap((r) => r.match));
+
+/** '영등포구'·'양평동'처럼 행정구역 접미사로 끝나는 지명인지 */
+function hasAdminUnitSuffix(text: string): boolean {
+  return ADMIN_UNIT_SUFFIXES.includes(text.slice(-1));
+}
+
+/**
+ * 스폿 area(시·군·구)와 존 키워드의 행정구역 단위 일치 판정 (단순 부분일치 금지).
+ * - 완전 일치: area '영등포구' vs 키워드 '영등포구' → true
+ * - 접미사만 덧붙은 동일 지명: area '영등포구' vs 키워드 '영등포' → true
+ * - 접미사가 다른 별개 행정구역: area '양평군' vs 키워드 '양평동' → false
+ */
+function areaMatchesZoneKeyword(area: string, keyword: string): boolean {
+  if (area === keyword) return true;
+  if (hasAdminUnitSuffix(keyword)) return false;
+  return area.length === keyword.length + 1 && area.startsWith(keyword) && hasAdminUnitSuffix(area);
+}
+
+/** 스폿이 존의 광역권에 속하는지 — 서울 중구 ↔ 대구 중구처럼 동명 자치구 광역 오매칭 차단 */
+function zoneCoversRegion(spot: Spot, zone: PopularZone): boolean {
+  if (!KNOWN_REGION_VALUES.has(spot.region)) return true;
+  const region = REGIONS.find((r) => r.key === zone.regionKey);
+  if (!region || region.match.length === 0) return true;
+  return region.match.includes(spot.region);
+}
+
+/**
+ * 세부존 매칭 — area(시·군·구) 기준 정밀 매칭이 1순위, 실패 시에만 name+location 부분일치 폴백.
+ * 광역 오매칭 3중 차단: ① 존 광역권 밖 스폿 배제 ② area는 행정구역 단위로만 일치 인정
+ * ③ 폴백 텍스트에서 area 제외 (경기 양평군 스폿이 서울 영등포·문래·여의도 존에 잡히던 문제 해결)
+ */
 function matchesZone(spot: Spot, zoneKeys: string[]): boolean {
   if (zoneKeys.length === 0) return true;
-  const targetText = `${spot.name} ${spot.location} ${spot.area || ''}`;
   return zoneKeys.some((zk) => {
     const zone = POPULAR_ZONES.find((z) => z.key === zk);
-    return zone ? zone.keywords.some((kw) => targetText.includes(kw)) : false;
+    if (!zone) return false;
+    if (!zoneCoversRegion(spot, zone)) return false;
+
+    const area = spotArea(spot);
+    if (area && zone.keywords.some((kw) => areaMatchesZoneKeyword(area, kw))) return true;
+
+    const targetText = `${spot.name} ${spot.location}`;
+    return zone.keywords.some((kw) => targetText.includes(kw));
   });
 }
 

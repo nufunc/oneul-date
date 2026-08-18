@@ -161,6 +161,66 @@ def calculate_quality_score(spot: dict, place_meta: dict) -> int:
 
     return min(100, score)
 
+# ---------------------------------------------------------------------------
+# 주소 기반 권역/기초자치단체 도출 (8개 권역 체계)
+#   서울 / 경기 / 인천 / 강원 / 충청 / 영남 / 호남 / 제주
+# ---------------------------------------------------------------------------
+
+# 시도 접두어 -> 권역. 긴 접두어가 먼저 오도록 정렬된 순서로 매칭한다.
+SIDO_REGION_RULES = [
+    ("서울", "서울"),
+    ("경기", "경기"),
+    ("인천", "인천"),
+    ("강원", "강원"),
+    ("충청북도", "충청"), ("충청남도", "충청"), ("충북", "충청"), ("충남", "충청"),
+    ("대전", "충청"), ("세종", "충청"),
+    ("전라북도", "호남"), ("전라남도", "호남"), ("전북", "호남"), ("전남", "호남"),
+    ("광주", "호남"),
+    ("경상북도", "영남"), ("경상남도", "영남"), ("경북", "영남"), ("경남", "영남"),
+    ("부산", "영남"), ("대구", "영남"), ("울산", "영남"),
+    ("제주", "제주"),
+]
+
+def derive_region_area(address):
+    """도로명/지번 주소에서 (region, area) 를 도출한다.
+
+    - region: 프로젝트 8개 권역 체계 (서울/경기/인천/강원/충청/영남/호남/제주)
+    - area:   기초자치단체(시·군·구). 일반시 산하 일반구는 부모 시로 정규화
+              (경기도 성남시 분당구 -> 성남시), 광역시 산하 구는 그대로 유지
+              (부산광역시 해운대구 -> 해운대구)
+    - 주소가 없거나 판정 불가하면 (None, None) 을 반환한다. 호출부는 이 경우
+      기존 DB 값을 절대 덮어쓰면 안 된다.
+    """
+    if not address or not isinstance(address, str):
+        return (None, None)
+
+    tokens = address.replace("　", " ").split()
+    if not tokens:
+        return (None, None)
+
+    head = tokens[0]
+    region = None
+    for prefix, mapped in SIDO_REGION_RULES:
+        if head.startswith(prefix):
+            region = mapped
+            break
+    if not region:
+        return (None, None)
+
+    # 세종특별자치시는 산하 기초자치단체가 없는 단층제 -> 자기 자신이 area
+    if head.startswith("세종"):
+        return (region, "세종시")
+
+    # 시도 토큰 이후 첫 번째 시/군/구 토큰이 기초자치단체.
+    # 일반구(분당구, 팔달구 ...)는 앞선 '○○시' 토큰이 먼저 잡히므로 자동으로
+    # 부모 시로 정규화된다.
+    for tok in tokens[1:]:
+        if len(tok) >= 2 and tok[-1] in ("시", "군", "구"):
+            return (region, tok)
+
+    return (region, None)
+
+
 def run_worker(supabase_url: str, service_key: str, limit: int = 50):
     if not supabase_url or not service_key:
         print("❌ Supabase 환경변수가 설정되지 않았습니다 (SUPABASE_URL, SUPABASE_SERVICE_KEY).")
@@ -189,6 +249,7 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
 
     enriched_count = 0
     verified_count = 0
+    region_fixed_count = 0
     fail_warn_count = 0
     closed_count = 0
 
@@ -250,6 +311,29 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
 
             if road_addr and not spot.get("address"):
                 patch_data["address"] = road_addr
+
+            # [Region Healing] 검증된 주소를 근거로 region/area 오염을 교정한다.
+            # 기존 값이 이미 있어도 주소 근거가 있으면 덮어쓴다(도출 실패 시에만 보존).
+            if road_addr:
+                d_region, d_area = derive_region_area(road_addr)
+                if d_region or d_area:
+                    old_region = spot.get("region")
+                    old_area = spot.get("area")
+                    fixed = False
+                    if d_region and d_region != old_region:
+                        patch_data["region"] = d_region
+                        fixed = True
+                    if d_area and d_area != old_area:
+                        patch_data["area"] = d_area
+                        fixed = True
+                    if fixed:
+                        region_fixed_count += 1
+                        print(
+                            f"  🔧 [Region Fix] id={s_id} "
+                            f"{old_region or '-'}/{old_area or '-'} → "
+                            f"{d_region or old_region or '-'}/{d_area or old_area or '-'} "
+                            f"({road_addr})"
+                        )
             if thum and not spot.get("image_url"):
                 patch_data["image_url"] = thum
                 enriched_count += 1
@@ -291,7 +375,7 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
             except Exception as e:
                 print(f"  ❌ DB 업데이트 실패 (id: {s_id}): {e}")
 
-    print(f"✅ OCI 엔진 완료: 정상검증 {verified_count}건, 신규메타보강 {enriched_count}건, 주의플래그 {fail_warn_count}건, 폐업격리 {closed_count}건")
+    print(f"✅ OCI 엔진 완료: 정상검증 {verified_count}건, 신규메타보강 {enriched_count}건, 지역교정 {region_fixed_count}건, 주의플래그 {fail_warn_count}건, 폐업격리 {closed_count}건")
 
 if __name__ == "__main__":
     env = load_env()
