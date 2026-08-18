@@ -56,3 +56,7 @@ scripts/validation_report.json
 scripts/generate_part*.py
 collector/.processed_videos.json
 scripts/_deleted_youtube_junk.json
+
+# Supabase (CLI 로컬 상태·함수 시크릿 — 커밋 금지)
+supabase/.temp/
+supabase/functions/.env.local

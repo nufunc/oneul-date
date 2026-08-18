@@ -750,14 +750,29 @@ async function shortenUrl(longUrl: string): Promise<string> {
   return longUrl;
 }
 
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY || '';
+const SUPABASE_URL =
+  import.meta.env.VITE_SUPABASE_URL || 'https://uyhwhnnzzfhtxjernfit.supabase.co';
+
+/** Groq 키를 프론트 번들에 노출하지 않기 위한 Supabase Edge Function 프록시 엔드포인트 */
+const AI_BRIEFING_ENDPOINT = `${SUPABASE_URL.replace(/\/$/, '')}/functions/v1/ai-briefing`;
+/** 프록시 주소가 확보된 경우에만 AI 브리핑을 시도한다 (실패 시 로컬 템플릿 폴백) */
+const AI_BRIEFING_ENABLED = Boolean(SUPABASE_URL);
+
 const aiStoryCache = new Map<string, string>();
 
+interface AiBriefingSpot {
+  slot: string;
+  name: string;
+  category: string;
+  summary: string;
+}
+
 /**
- * Groq Llama 3.3 초고속 무료 API를 호출하여 세련된 AI 에디터 코스 브리핑 한 줄 생성
- * API 키가 없거나 호출 실패 시 null을 반환하여 기존 텍스트의 불필요한 깜빡임 방지
+ * Supabase Edge Function(ai-briefing) 프록시를 통해 AI 에디터 코스 브리핑 한 줄 생성
+ * 프롬프트·모델·API 키는 전부 서버가 보유하며, 호출 실패 시 null을 반환하여
+ * 로컬 템플릿(generateCourseStory) 폴백에 위임하고 기존 텍스트의 불필요한 깜빡임을 방지한다
  */
-async function fetchGroqAiStory(
+async function fetchAiBriefing(
   steps: CourseStep[],
   byId: Map<number, Spot>,
   moodKey: string,
@@ -770,74 +785,48 @@ async function fetchGroqAiStory(
     return aiStoryCache.get(cacheKey)!;
   }
 
-  if (!GROQ_API_KEY) {
+  if (!AI_BRIEFING_ENABLED) {
     return null;
   }
 
-  const spotDescriptions = filled
-    .map((st) => {
-      const s = byId.get(st.spotId);
-      if (!s) return '';
-      const meta = SLOT_META[st.slot];
-      return `${meta.label}: ${s.name} (${s.category || ''}, ${s.summary || ''})`;
-    })
-    .filter(Boolean)
-    .join('\n');
+  const spots: AiBriefingSpot[] = [];
+  for (const st of filled) {
+    const s = byId.get(st.spotId);
+    if (!s) continue;
+    spots.push({
+      slot: SLOT_META[st.slot].label,
+      name: s.name,
+      category: s.category || '',
+      summary: s.summary || '',
+    });
+  }
+  if (spots.length === 0) return null;
 
   try {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 2000); // 2초 타임아웃
+    const timer = setTimeout(() => controller.abort(), 3500); // 3.5초 타임아웃 (프록시 왕복 1단계 반영)
 
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const res = await fetch(AI_BRIEFING_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${GROQ_API_KEY}`,
       },
-      body: JSON.stringify({
-        model: 'openai/gpt-oss-120b',
-        messages: [
-          {
-            role: 'system',
-            content: `당신은 킨포크(Kinfolk)와 아이즈매거진(eyesmag)의 수석 데이트 큐레이터입니다.
-[절대 금지]
-1. 장소의 실제 카테고리와 다른 활동 묘사 금지 (예: 미술관에 "티타임", 카페에 "전시 관람" 등 ❌).
-2. 단순 동선 나열식 문형(~에서 시작해 ~를 거쳐 ~로 마무리하는 코스예요)은 '절대 금지'.
-3. "터져 나오는", "오감이 충만", "감각적인 코스" 같은 과장된 클리셰 금지.
-4. 장소명을 3개 이상 억지로 나열하지 마세요. 코스 전체 분위기를 1~2곳만 자연스럽게 언급하며 압축하세요.
-
-[필수 원칙]
-1. 각 장소의 카테고리(미술관, 식당, 카페, 바 등)에 정확히 부합하는 체험을 묘사하세요.
-2. 공간의 질감, 빛, 두 사람의 감정선이 자연스럽게 이어지는 에디토리얼 산문(1~2문장, 60~90자)으로 작성하세요.
-3. 불필요한 따옴표나 서두 없이 정제된 본문 텍스트만 출력하세요.
-
-[톤앤매너 예시]
-- 나른한 오후, 러스트베이커리의 버터 풍미를 따라가다 양키통닭의 바삭한 온기를 지나 신흥상회에서 와인 한잔에 젖어드는 둘만의 깊은 밤.
-- 서울숲 산책로에 드리운 나른한 빛, 정갈한 다이닝의 여운, 그리고 루프탑에서 마주하는 도시의 밤.`,
-          },
-          {
-            role: 'user',
-            content: `[스팟 리스트 — 카테고리를 반드시 참고하세요]\n${spotDescriptions}\n\n[무드 테마]: ${moodLabel(moodKey)}\n\n위 장소들의 실제 카테고리에 맞는 체험을 살려, 과장 없이 잡지 에디터 노트 스타일로 브리핑을 작성해줘.`,
-          },
-        ],
-        temperature: 0.72,
-        max_tokens: 150,
-      }),
+      body: JSON.stringify({ spots, mood: moodKey }),
       signal: controller.signal,
     });
     clearTimeout(timer);
 
     if (res.ok) {
       const data = await res.json();
-      const rawText = data?.choices?.[0]?.message?.content?.trim();
-      if (rawText && rawText.length >= 15) {
+      const rawText = typeof data?.text === 'string' ? data.text.trim() : '';
+      if (rawText.length >= 15) {
         const cleanText = rawText.replace(/^["'“”]/, '').replace(/["'“”]$/, '').trim();
         aiStoryCache.set(cacheKey, cleanText);
         return cleanText;
       }
     }
-  } catch (err) {
-    // 타임아웃 또는 네트워크 오류 시 조용히 null 반환
+  } catch {
+    // 타임아웃·네트워크 오류·429 등 모든 실패는 조용히 null 반환 (로컬 템플릿 폴백)
   }
 
   return null;
@@ -1032,7 +1021,9 @@ async function formatCourseTextAsync(
   const blocks: string[] = [];
   const regionText = regionsLabel(regionKeys, zoneKeys);
   const moodText = moodLabel(moodKey);
-  const story = await fetchGroqAiStory(steps, byId, moodKey);
+  const aiStory = await fetchAiBriefing(steps, byId, moodKey);
+  // AI 프록시 실패/타임아웃 시 로컬 템플릿으로 폴백 (복사 텍스트에 null 노출 방지)
+  const story = aiStory || generateCourseStory(steps, byId, moodKey, false);
 
   blocks.push(`[ 오늘 데이트 코스 ]\n${regionText} · ${moodText}\n\n✨ AI 브리핑: "${story}"`);
 
@@ -1596,7 +1587,7 @@ function renderResults(): void {
   let initialStoryHtml = '';
   if (hasCachedStory) {
     initialStoryHtml = `“${aiStoryCache.get(cacheKey)!}”`;
-  } else if (GROQ_API_KEY) {
+  } else if (AI_BRIEFING_ENABLED) {
     initialStoryHtml = `<span class="ai-loading-pulse">두 사람만을 위한 맞춤 코스 브리핑을 작성하고 있어요...</span>`;
   } else {
     initialStoryHtml = `“${generateCourseStory(state.course, spotById, cond.mood, true)}”`;
@@ -1615,7 +1606,7 @@ function renderResults(): void {
         <span class="ai-sparkle-icon">✨</span>
         <span>AI 에디터 브리핑</span>
       </div>
-      <p class="ai-briefing-text ${!hasCachedStory && GROQ_API_KEY ? 'is-loading' : ''}" id="ai-briefing-content">${initialStoryHtml}</p>
+      <p class="ai-briefing-text ${!hasCachedStory && AI_BRIEFING_ENABLED ? 'is-loading' : ''}" id="ai-briefing-content">${initialStoryHtml}</p>
     </div>
     <div class="step-list">
       ${state.course.map((step, i) => {
@@ -1635,10 +1626,10 @@ function renderResults(): void {
   bindResultEvents(area);
   initAdSense();
 
-  // Groq LLM API 비동기 고도화 브리핑 (결과 도착 시 단 1회 최종 문장 렌더링)
-  if (GROQ_API_KEY && !hasCachedStory && state.course) {
+  // AI 브리핑 프록시 비동기 호출 (결과 도착 시 단 1회 최종 문장 렌더링)
+  if (AI_BRIEFING_ENABLED && !hasCachedStory && state.course) {
     const currentCourse = state.course;
-    fetchGroqAiStory(currentCourse, spotById, cond.mood).then((aiText) => {
+    fetchAiBriefing(currentCourse, spotById, cond.mood).then((aiText) => {
       const el = document.getElementById('ai-briefing-content');
       if (!el) return;
       const finalText = aiText || generateCourseStory(currentCourse, spotById, cond.mood, false);
@@ -2030,11 +2021,11 @@ function swapStep(index: number): void {
     if (aiStoryCache.has(cacheKey)) {
       briefingEl.innerHTML = `“${aiStoryCache.get(cacheKey)!}”`;
       briefingEl.classList.remove('is-loading');
-    } else if (GROQ_API_KEY && state.course) {
+    } else if (AI_BRIEFING_ENABLED && state.course) {
       const currentCourse = state.course;
       briefingEl.classList.add('is-loading');
       briefingEl.innerHTML = `<span class="ai-loading-pulse">새로운 코스에 맞춰 브리핑을 작성하고 있어요...</span>`;
-      fetchGroqAiStory(currentCourse, spotById, mood).then((aiText) => {
+      fetchAiBriefing(currentCourse, spotById, mood).then((aiText) => {
         const el = document.getElementById('ai-briefing-content');
         if (!el) return;
         const finalText = aiText || generateCourseStory(currentCourse, spotById, mood, false);
