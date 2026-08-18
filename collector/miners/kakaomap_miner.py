@@ -37,16 +37,24 @@ def search_kakaomap_place(spot_name: str, address_or_area: str = "") -> dict | N
                     review_count = int(best.get("review_count") or best.get("comment_count") or 0)
                     
                     if place_id:
-                        return {
+                        # 평점은 '실제로 받아낸 경우에만' 싣는다.
+                        # 예전에는 실패 시 4.2를 채워 넣었는데, lookup 엔드포인트가
+                        # {"code":-40400}로 응답하는 현재 상태에서는 전 스팟이 예외 없이
+                        # 4.2가 되어 (a) 점수 축의 변별력이 0이 되고
+                        # (b) 이메일 리포트에 존재하지 않는 ★4.2 배지가 찍혔다.
+                        # 모르면 비워 두는 편이 낫다.
+                        place = {
                             "url": f"https://place.map.kakao.com/{place_id}",
-                            "rating": rating if rating > 0 else 4.2,
-                            "review_count": review_count,
                         }
+                        if rating > 0:
+                            place["rating"] = rating
+                        if review_count > 0:
+                            place["review_count"] = review_count
+                        return place
     except Exception:
         pass
-    
-    # 폴백: 카카오맵 검색 바로가기 URL
+
+    # 폴백: 장소를 특정하지 못했으므로 검색 바로가기 링크만 돌려준다(평점 없음).
     return {
         "url": f"https://map.kakao.com/link/search/{urllib.parse.quote(clean_name)}",
-        "rating": 4.2,
     }

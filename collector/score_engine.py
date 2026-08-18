@@ -41,20 +41,22 @@ def calculate_hot_score(youtube_data: dict | None, kakaomap_data: dict | None, i
         yt_score = 15.0 # 기본값
         
     # 2. 카카오맵 평점 점수 (최대 35점)
-    kakao_score = 0.0
+    #    평점이 '없는' 경우와 '낮은' 경우는 다르다. 모르는 것에 점수를 매기지 않고
+    #    중립값(25.0)을 준다 — 예전에는 rating 기본값 4.0을 채워 넣어, 평점을
+    #    한 번도 받아오지 못한 스팟까지 실제 평가를 받은 것처럼 처리했다.
+    kakao_score = 25.0
     if kakaomap_data and kakaomap_data.get("url"):
         social_links["kakaomap"] = kakaomap_data
-        rating = kakaomap_data.get("rating", 4.0)
-        if rating >= 4.5:
-            kakao_score = 35.0
-        elif rating >= 4.2:
-            kakao_score = 30.0
-        elif rating >= 4.0:
-            kakao_score = 25.0
-        else:
-            kakao_score = 20.0
-    else:
-        kakao_score = 25.0
+        rating = kakaomap_data.get("rating")
+        if rating is not None:
+            if rating >= 4.5:
+                kakao_score = 35.0
+            elif rating >= 4.2:
+                kakao_score = 30.0
+            elif rating >= 4.0:
+                kakao_score = 25.0
+            else:
+                kakao_score = 20.0
 
     # 3. 에디터 검증 보너스 (최대 20점)
     verified_bonus = 20.0 if is_verified else 10.0
