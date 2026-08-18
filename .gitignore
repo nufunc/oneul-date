@@ -54,3 +54,5 @@ scripts/__pycache__/
 src/data/spots.json
 scripts/validation_report.json
 scripts/generate_part*.py
+collector/.processed_videos.json
+scripts/_deleted_youtube_junk.json
