@@ -37,18 +37,10 @@ export function renderNativeInfeedAdCard(): string {
     `;
   }
 
-  // 광고 ID가 아직 없거나 비활성화 상태일 때는 사용자 경험을 해치지 않는 미니멀 큐레이션 팁 카드 렌더링
-  return `
-    <article class="step-card ad-card ad-curation-tip">
-      <div class="ad-badge-row">
-        <span class="ad-tip-label">💡 데이트 큐레이션 TIP</span>
-      </div>
-      <div class="ad-tip-content">
-        <p class="ad-tip-title">“웨이팅 없이 즐기는 낭만 데이트 팁”</p>
-        <p class="ad-tip-desc">인기 핫플은 캐치테이블이나 네이버 플레이스 사전 예약을 활용하시면 대기 없이 더욱 여유롭게 코스를 즐기실 수 있어요.</p>
-      </div>
-    </article>
-  `;
+  // 광고가 비활성 상태이면 아무것도 렌더링하지 않는다.
+  // (자리만 채우던 고정 문구 '데이트 큐레이션 TIP' 카드는 매번 같은 내용인데다
+  //  스텝 카드 사이에 끼어들어 타임라인 흐름을 끊어 제거 — 2026-08-18)
+  return '';
 }
 
 /**
