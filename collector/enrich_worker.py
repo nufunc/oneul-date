@@ -12,6 +12,7 @@ import json
 import time
 import sys
 import os
+from datetime import datetime, timezone
 
 from miners.youtube_miner import search_youtube_hotclip
 from miners.kakaomap_miner import search_kakaomap_place
@@ -33,8 +34,8 @@ def run_social_enrichment(supabase_url: str, service_key: str, batch_size: int =
         "Prefer": "return=minimal"
     }
 
-    # 아직 social_links가 없거나 metrics가 비어있는 스팟 우선 조회
-    fetch_url = f"{supabase_url}/rest/v1/spots?select=id,name,location,area,verified,social_links,metrics&order=id.asc&limit={batch_size}"
+    # 아직 social_links가 없거나 동기화가 가장 오래된 스팟 우선 순환 조회
+    fetch_url = f"{supabase_url}/rest/v1/spots?select=id,name,location,area,verified,social_links,metrics&is_closed=eq.false&order=metrics->>last_synced_at.asc.nullsfirst,id.asc&limit={batch_size}"
     
     try:
         req = urllib.request.Request(fetch_url, headers=api_headers)
@@ -48,15 +49,15 @@ def run_social_enrichment(supabase_url: str, service_key: str, batch_size: int =
         return
 
     if not spots_to_enrich:
-        print("✅ 보강할 스팟이 없습니다.")
+        print("✅ 업데이트 대상 스팟이 없습니다.")
         return
 
-    print(f"🎬 [소셜 메타데이터 점진적 동기화 시작] 대상 스팟: {len(spots_to_enrich)}개")
+    print(f"🔄 총 {len(spots_to_enrich)}개 스팟 소셜 메타데이터 보강 시작...\n")
 
     enriched_count = 0
     for s in spots_to_enrich:
         spot_id = s.get("id")
-        name = s.get("name", "")
+        name = s.get("name", "").strip()
         location = s.get("location", "") or s.get("area", "")
         is_verified = bool(s.get("verified", False))
 
@@ -82,7 +83,8 @@ def run_social_enrichment(supabase_url: str, service_key: str, batch_size: int =
             payload = json.dumps({
                 "social_links": social_links,
                 "metrics": metrics,
-                "hot_score": hot_score
+                "hot_score": hot_score,
+                "updated_at": datetime.now(timezone.utc).isoformat()
             }).encode('utf-8')
 
             patch_req = urllib.request.Request(patch_url, data=payload, headers=api_headers, method='PATCH')

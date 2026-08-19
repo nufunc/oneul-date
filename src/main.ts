@@ -2236,7 +2236,7 @@ function swapStep(index: number): void {
     }
   });
 
-  const cardList = document.querySelectorAll<HTMLElement>('.step-list > .step-card');
+  const cardList = document.querySelectorAll<HTMLElement>('.step-list > .step-card:not(.ad-card)');
   const targetCard = cardList[index];
   if (!targetCard) {
     renderResults();
@@ -2252,6 +2252,13 @@ function swapStep(index: number): void {
   }
 
   newCard.classList.add('swap-in');
+  newCard.addEventListener(
+    'animationend',
+    () => {
+      newCard.classList.remove('swap-in');
+    },
+    { once: true },
+  );
   targetCard.replaceWith(newCard);
 
   const newSwapBtn = newCard.querySelector<HTMLButtonElement>('.btn-swap, .btn-swap-icon');

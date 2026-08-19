@@ -67,13 +67,168 @@
 }
 
 /* ==========================================================================
-   베이스
+   다크 모드 — Slate Navy ("Midnight Slate Minimal Magazine")
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #0b0f19;
+    --color-surface: #131b2e;
+    --color-surface-sub: #1c263d;
+    --color-surface-tint: #182238;
+    
+    --color-border: #25334f;
+    --color-border-strong: #3b4d73;
+    
+    --color-text: #f1f5f9;
+    --color-text-sub: #94a3b8;
+    --color-text-faint: #64748b;
+    
+    --color-accent: #f8fafc;
+    --color-accent-hover: #ffffff;
+    --color-accent-text: #38bdf8;
+    --color-accent-soft: rgba(56, 189, 248, 0.12);
+    --color-accent-medium: rgba(56, 189, 248, 0.2);
+    --color-accent-gradient: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+    --color-accent-gradient-hover: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    --color-on-accent: #0f172a;
+    --color-backdrop: rgba(0, 0, 0, 0.65);
+    
+    --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    --shadow-lift: 0 8px 24px rgba(0, 0, 0, 0.6);
+    --shadow-float: 0 -8px 28px rgba(0, 0, 0, 0.6);
+  }
+
+  body {
+    background-image: 
+      radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.03) 0%, transparent 40%),
+      radial-gradient(circle at 85% 85%, rgba(56, 189, 248, 0.03) 0%, transparent 45%);
+  }
+
+  /* 타임라인 라인 */
+  .step-list::before {
+    background: linear-gradient(to bottom, #38bdf8 0%, #25334f 100%);
+  }
+
+  /* AI 브리핑 카드 */
+  .ai-briefing-card {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+    border-left-color: var(--color-accent-text);
+  }
+
+  .ai-briefing-badge {
+    color: var(--color-accent-text);
+  }
+
+  /* 스텝 액션 바 */
+  .step-actions-bar {
+    border-top-color: var(--color-border);
+  }
+
+  /* 액션 아이콘 버튼들 */
+  .btn-action-icon {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+    color: var(--color-text-sub);
+  }
+
+  .btn-action-icon:hover {
+    background: var(--color-surface-sub);
+    border-color: var(--color-border-strong);
+    color: var(--color-text);
+  }
+
+  .btn-swap-icon {
+    background: var(--color-surface-sub);
+    border-color: var(--color-border);
+    color: var(--color-text-sub);
+  }
+
+  .btn-swap-icon:hover {
+    background: var(--color-surface-tint);
+    border-color: var(--color-border-strong);
+    color: var(--color-accent);
+  }
+
+  .btn-yt-icon {
+    background: rgba(225, 29, 72, 0.15);
+    border-color: rgba(225, 29, 72, 0.3);
+    color: #fb7185;
+  }
+  .btn-yt-icon:hover {
+    background: rgba(225, 29, 72, 0.25);
+    border-color: rgba(225, 29, 72, 0.45);
+    color: #fda4af;
+  }
+
+  .btn-kakao-icon {
+    background: rgba(234, 179, 8, 0.15);
+    border-color: rgba(234, 179, 8, 0.3);
+    color: #fde047;
+  }
+  .btn-kakao-icon:hover {
+    background: rgba(234, 179, 8, 0.25);
+    border-color: rgba(234, 179, 8, 0.45);
+    color: #fef08a;
+  }
+
+  .btn-insta-icon {
+    background: rgba(219, 39, 119, 0.15);
+    border-color: rgba(219, 39, 119, 0.3);
+    color: #f472b6;
+  }
+  .btn-insta-icon:hover {
+    background: rgba(219, 39, 119, 0.25);
+    border-color: rgba(219, 39, 119, 0.45);
+    color: #fbcfe8;
+  }
+
+  .btn-blog-icon {
+    background: rgba(22, 163, 74, 0.15);
+    border-color: rgba(22, 163, 74, 0.3);
+    color: #4ade80;
+  }
+  .btn-blog-icon:hover {
+    background: rgba(22, 163, 74, 0.25);
+    border-color: rgba(22, 163, 74, 0.45);
+    color: #86efac;
+  }
+
+  .btn-swap-chip:hover {
+    background: var(--color-surface-tint);
+  }
+
+  .step-quote {
+    border-left-color: var(--color-accent-text);
+  }
+
+  .toast-msg {
+    background: rgba(19, 27, 46, 0.95);
+    border: 1px solid var(--color-border-strong);
+    color: var(--color-text);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.6);
+  }
+
+  .footer-version {
+    border-color: var(--color-border);
+  }
+}
+
+/* ==========================================================================
+   베이스 & 접근성
    ========================================================================== */
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+/* 전역 포커스 링 (접근성) */
+:focus-visible {
+  outline: 2px solid var(--color-accent-text);
+  outline-offset: 2px;
 }
 
 html {
@@ -100,6 +255,7 @@ button {
   cursor: pointer;
   border: none;
   background: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* 모바일 퍼스트 레이아웃 */
@@ -167,7 +323,7 @@ button {
   border-radius: var(--radius-full);
   padding: var(--space-2) var(--space-4);
   box-shadow: var(--shadow-card);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -217,7 +373,7 @@ button {
   border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-text-faint);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   overflow: hidden;
 }
@@ -225,6 +381,10 @@ button {
 .slot-toggle:hover {
   border-color: var(--color-border-strong);
   color: var(--color-text-sub);
+}
+
+.slot-toggle:active {
+  transform: scale(0.97);
 }
 
 .slot-toggle .slot-emoji {
@@ -304,7 +464,7 @@ button {
   border-radius: var(--radius-full);
   padding: var(--space-2) var(--space-4);
   white-space: nowrap;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .pill:hover {
@@ -318,6 +478,10 @@ button {
   color: var(--color-on-accent);
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.16);
+}
+
+.pill:active {
+  transform: scale(0.97);
 }
 
 /* 세부 인기 데이트존 서브 칩 */
@@ -364,7 +528,7 @@ button {
   padding: var(--space-3) var(--space-5);
   min-height: 50px;
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -380,7 +544,7 @@ button {
 }
 
 .btn-primary:active {
-  transform: translateY(0) scale(0.99);
+  transform: translateY(0) scale(0.97);
 }
 
 .btn-secondary {
@@ -393,7 +557,7 @@ button {
   padding: var(--space-3) var(--space-5);
   min-height: 50px;
   box-shadow: var(--shadow-card);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -407,7 +571,7 @@ button {
 
 .btn-secondary:active {
   background: var(--color-surface-sub);
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 
 .btn-generate {
@@ -448,7 +612,7 @@ button {
 /* 전체 다시 뽑기 */
 .btn-regenerate {
   flex-shrink: 0;
-  min-height: 36px;
+  min-height: 38px;
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -460,7 +624,7 @@ button {
   border-radius: var(--radius-full);
   padding: var(--space-1) var(--space-3);
   box-shadow: var(--shadow-card);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-regenerate:hover {
@@ -479,7 +643,7 @@ button {
 
 .btn-regenerate:active {
   background: var(--color-surface-sub);
-  transform: scale(0.96);
+  transform: scale(0.97);
 }
 
 .btn-regenerate.is-spinning .icon-refresh {
@@ -897,12 +1061,25 @@ button {
   align-items: center;
 }
 
+.btn-swap {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-swap:active {
+  transform: scale(0.97);
+}
+
 .btn-swap-chip {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 5px 12px;
-  min-height: 34px;
+  padding: 6px 14px;
+  min-height: 38px;
   border-radius: var(--radius-full);
   background: var(--color-surface-sub);
   border: 1px solid var(--color-border);
@@ -910,7 +1087,7 @@ button {
   font-weight: 600;
   color: var(--color-text-sub);
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-swap-chip .icon-swap {
@@ -928,7 +1105,7 @@ button {
 }
 
 .btn-swap-chip:active {
-  transform: scale(0.96);
+  transform: scale(0.97);
 }
 
 /* --- 스텝 카드 하단 액션 툴바 (미니멀 아이콘 + 네이버 지도 칩) --- */
@@ -949,7 +1126,7 @@ button {
   flex-wrap: wrap;
 }
 
-/* 모든 플랫폼 미니멀 동일 크기 원형 아이콘 버튼 (32x32px) */
+/* 모든 플랫폼 미니멀 동일 크기 원형 아이콘 버튼 (32x32px 시각적 크기 + 44x44px 터치 히트 영역) */
 .btn-action-icon {
   width: 32px;
   height: 32px;
@@ -965,8 +1142,22 @@ button {
   text-decoration: none;
   cursor: pointer;
   padding: 0;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* 터치 타깃 44x44px 영역 확보 */
+.btn-action-icon::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 44px;
+  min-height: 44px;
+  width: 100%;
+  height: 100%;
 }
 
 .btn-action-icon:hover {
@@ -1116,7 +1307,7 @@ button {
   border-radius: var(--radius-md);
   padding: var(--space-2) var(--space-4);
   box-shadow: var(--shadow-card);
-  transition: all 0.2s ease;
+  transition: all 0.2s ease, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .today-course:hover {
@@ -1125,7 +1316,7 @@ button {
 
 .today-course:active {
   background: var(--color-surface-sub);
-  transform: scale(0.99);
+  transform: scale(0.97);
 }
 
 .today-course-label {
@@ -1242,11 +1433,12 @@ button {
   color: var(--color-text-faint);
   margin: calc(-1 * var(--space-2)) calc(-1 * var(--space-2)) calc(-1 * var(--space-2)) 0;
   border-radius: var(--radius-full);
-  transition: all 0.15s ease;
+  transition: all 0.15s ease, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .overlay-close:active {
   background: var(--color-surface-sub);
+  transform: scale(0.97);
 }
 
 .overlay-empty {
@@ -1400,19 +1592,24 @@ button {
 .saved-item-delete {
   flex-shrink: 0;
   min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: var(--font-md);
   color: var(--color-text-faint);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: 0 var(--space-3);
   background: var(--color-surface);
-  transition: all 0.2s ease;
+  transition: all 0.2s ease, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .saved-item-delete:active {
   color: var(--color-accent);
   border-color: var(--color-accent);
   background: var(--color-surface-tint);
+  transform: scale(0.97);
 }
 
 /* ==========================================================================

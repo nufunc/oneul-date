@@ -13,6 +13,7 @@ import urllib.request
 import urllib.parse
 import time
 import re
+from datetime import datetime, timezone
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -505,7 +506,8 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                 "verified": True,
                 "is_closed": False,
                 "fail_count": 0,
-                "quality_score": calculate_quality_score(spot, place_meta)
+                "quality_score": calculate_quality_score(spot, place_meta),
+                "updated_at": datetime.now(timezone.utc).isoformat()
             }
 
             # [Auto-Healing] 소제목으로 오염된 상호명을 네이버 공식 상호명으로 자동 치유
