@@ -177,6 +177,22 @@ import { loadSpots } from './supabase';
 
 const RECENT_MAX = 100;
 
+export interface QuickTagItem {
+  label: string; // 화면에 표시될 뱃지 텍스트 (예: '#삼겹살')
+  query: string; // 실제 검색창에 입력될 키워드 (예: '삼겹살')
+  synonyms: string[]; // 확장 동의어/연관어 매칭 풀
+}
+
+export const POPULAR_QUICK_TAGS: QuickTagItem[] = [
+  { label: '#삼겹살', query: '삼겹살', synonyms: ['삼겹', '고기', '돼지', '육류', '목살', '구이'] },
+  { label: '#와인·위스키', query: '와인', synonyms: ['와인', '위스키', 'wine', 'whisky', '바', '칵테일', '다이닝'] },
+  { label: '#스파·마사지', query: '스파', synonyms: ['스파', '마사지', 'spa', '온천', '찜질', '사우나', '테르메덴', '아쿠아필드'] },
+  { label: '#오션뷰·루프탑', query: '오션뷰', synonyms: ['오션뷰', '루프탑', '바다', '전망', '뷰', '야경', '테라스'] },
+  { label: '#소품샵·쇼핑', query: '소품샵', synonyms: ['소품', '편집숍', '잡화', '문구', '쇼핑', '공예'] },
+  { label: '#공방·이색체험', query: '공방', synonyms: ['공방', '체험', '원데이', '클래스', '도자기', '향수', '드로잉', '베이킹'] },
+  { label: '#호캉스·독채', query: '호텔', synonyms: ['호텔', '리조트', '펜션', '독채', '스테이', '풀빌라', '글램핑'] },
+];
+
 let spots: Spot[] = rawSpotsData as unknown as Spot[];
 
 // ---------------------------------------------------------------------------
@@ -652,25 +668,54 @@ interface GenerateOptions {
   searchQuery?: string;
 }
 
-/** 검색어 및 태그 매칭 헬퍼 */
+/** 검색어 및 퀵 태그 매칭 헬퍼 (특수문자 정제, 다중 토큰, 동의어 풀 매칭 지원) */
 function matchesSearchQuery(spot: Spot, query: string): boolean {
   if (!query || !query.trim()) return true;
-  const cleanQ = query.replace(/^#/, '').trim().toLowerCase();
-  if (!cleanQ) return true;
-  const tokens = cleanQ.split(/\s+/).filter(Boolean);
-  const targetText = [
-    spot.name,
-    spot.category,
-    spot.summary,
-    spot.location,
-    spot.area,
-    spot.address,
-    ...(Array.isArray(spot.mood) ? spot.mood : [spot.mood || '']),
-  ]
-    .join(' ')
-    .toLowerCase();
 
-  return tokens.every((t) => targetText.includes(t));
+  // 1. # 및 구분자(·, /, , 등) 정제
+  const cleanQ = query.replace(/[#·,/\\]/g, ' ').trim().toLowerCase();
+  if (!cleanQ) return true;
+
+  // 2. 검색 대상 텍스트 조립
+  const targetParts: string[] = [
+    spot.name || '',
+    spot.category || '',
+    spot.summary || '',
+    spot.location || '',
+    spot.area || '',
+    spot.address || '',
+    ...(spot.signature_items || []),
+    ...(spot.mood_tags || []),
+    ...(Array.isArray(spot.mood) ? spot.mood : [spot.mood || '']),
+  ];
+  const targetText = targetParts.join(' ').toLowerCase();
+
+  // 3. 퀵 태그 동의어 풀 매칭 검사
+  const matchedQuickTag = POPULAR_QUICK_TAGS.find(
+    (t) =>
+      cleanQ.includes(t.query.toLowerCase()) ||
+      t.query.toLowerCase().includes(cleanQ) ||
+      t.label.replace(/[#·,/\\]/g, ' ').trim().toLowerCase() === cleanQ
+  );
+
+  if (matchedQuickTag && matchedQuickTag.synonyms.length > 0) {
+    const hasSynonymMatch = matchedQuickTag.synonyms.some((syn) =>
+      targetText.includes(syn.toLowerCase())
+    );
+    if (hasSynonymMatch) return true;
+  }
+
+  // 4. 일반 토큰 검색 (모든 단어가 포함되거나, 분리된 토큰 중 핵심 단어가 매칭)
+  const tokens = cleanQ.split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) return true;
+
+  // 단일 토큰이면 부분 일치 검사
+  if (tokens.length === 1) {
+    return targetText.includes(tokens[0]);
+  }
+
+  // 다중 토큰이면 모든 토큰이 포함되거나 첫 번째 주요 토큰이 포함되면 통과
+  return tokens.every((t) => targetText.includes(t)) || tokens.some((t) => t.length >= 2 && targetText.includes(t));
 }
 
 /**
@@ -1721,16 +1766,6 @@ function renderTodayCourse(): void {
 
 // --- 조건 영역 (대안 2: 통합 검색창 + 1줄 셀렉터 바) ---------------------------------
 
-const POPULAR_QUICK_TAGS = [
-  '#삼겹살',
-  '#와인·위스키',
-  '#스파·마사지',
-  '#오션뷰·루프탑',
-  '#소품샵·쇼핑',
-  '#공방·이색체험',
-  '#호캉스·독채',
-];
-
 function getRegionSelectorLabel(): { title: string; subtitle: string; isSelected: boolean } {
   if (state.regions.length === 0) {
     return { title: '전국 어디서나', subtitle: '대한민국 전체', isSelected: false };
@@ -1778,7 +1813,7 @@ function renderConditions(): void {
           type="search" 
           class="search-input" 
           id="search-input" 
-          placeholder="가고 싶은 곳이나 키워드 검색 (예: 삼겹살, 위스키, 성수다락)" 
+          placeholder="가고 싶은 곳이나 키워드 검색 (예: 삼겹살, 와인, 호텔, 스파)" 
           value="${escapeHtml(state.searchQuery)}"
           autocomplete="off"
         />
@@ -1786,8 +1821,8 @@ function renderConditions(): void {
       </div>
       <div class="search-tags">
         ${POPULAR_QUICK_TAGS.map((tag) => {
-          const isActive = state.searchQuery === tag;
-          return `<button class="search-tag-chip ${isActive ? 'active' : ''}" data-tag="${escapeHtml(tag)}">${escapeHtml(tag)}</button>`;
+          const isActive = state.searchQuery === tag.query || state.searchQuery === tag.label;
+          return `<button class="search-tag-chip ${isActive ? 'active' : ''}" data-query="${escapeHtml(tag.query)}" data-label="${escapeHtml(tag.label)}">${escapeHtml(tag.label)}</button>`;
         }).join('')}
       </div>
     </div>
@@ -1866,14 +1901,14 @@ function bindConditionEvents(area: HTMLElement): void {
     });
   }
 
-  // 퀵 태그 클릭 이벤트
+  // 퀵 태그 클릭 이벤트 (순수 키워드 query 바인딩 및 토글)
   area.querySelectorAll<HTMLButtonElement>('.search-tag-chip').forEach((chip) => {
     chip.addEventListener('click', () => {
-      const tag = chip.dataset.tag || '';
-      if (state.searchQuery === tag) {
+      const q = chip.dataset.query || '';
+      if (state.searchQuery === q) {
         state.searchQuery = '';
       } else {
-        state.searchQuery = tag;
+        state.searchQuery = q;
       }
       renderConditions();
       triggerCourseGeneration();
