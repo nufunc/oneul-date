@@ -1480,6 +1480,9 @@ function parseCourseHash(hash: string): number[] | null {
 // 상태
 // ---------------------------------------------------------------------------
 
+export type ThemeMode = 'light' | 'dark' | 'auto';
+const THEME_STORAGE_KEY = 'oneul_theme_mode';
+
 interface AppState {
   slots: Record<SlotKey, boolean>;
   /** 선택된 지역 키 다중 선택 — 빈 배열이면 '전체' */
@@ -1489,6 +1492,8 @@ interface AppState {
   mood: string;
   /** 사용자 입력 키워드/상호명/카테고리 검색어 */
   searchQuery: string;
+  /** 테마 모드: light(낮, 기본값) | dark(밤) | auto(시스템) */
+  themeMode: ThemeMode;
   course: CourseStep[] | null;
   /** 코스 생성 시점의 조건 스냅샷 — 교체 후보·저장·복사가 이 조건 기준으로 동작 */
   courseConditions: { regions: string[]; subZones: string[]; mood: string; searchQuery?: string } | null;
@@ -1496,6 +1501,15 @@ interface AppState {
   regionSheetOpen: boolean;
   moodSheetOpen: boolean;
   activeRegionTab: string;
+}
+
+/** 저장된 테마 모드 불러오기 (기본값: 'light' 낮 테마) */
+function getInitialThemeMode(): ThemeMode {
+  const saved = localStorage.getItem(THEME_STORAGE_KEY);
+  if (saved === 'light' || saved === 'dark' || saved === 'auto') {
+    return saved;
+  }
+  return 'light';
 }
 
 /** 현재 시각 기준 최적의 기본 시간대 슬롯 반환 (15시 기준 낮 자동 제외) */
@@ -1539,6 +1553,7 @@ const state: AppState = {
   subZones: [],
   mood: 'ALL',
   searchQuery: '',
+  themeMode: getInitialThemeMode(),
   course: null,
   courseConditions: null,
   savedOpen: false,
@@ -1638,16 +1653,71 @@ function showToast(msg: string): void {
 }
 
 // ---------------------------------------------------------------------------
+// 테마 관리 — 낮(기본) | 밤 | 시스템 3단 전환
+// ---------------------------------------------------------------------------
+
+function getThemeModeLabel(mode: ThemeMode): string {
+  switch (mode) {
+    case 'light':
+      return '☀️ 낮';
+    case 'dark':
+      return '🌙 밤';
+    case 'auto':
+      return '⚙️ 시스템';
+  }
+}
+
+function applyTheme(mode: ThemeMode, notify = false): void {
+  state.themeMode = mode;
+  localStorage.setItem(THEME_STORAGE_KEY, mode);
+  document.documentElement.setAttribute('data-theme', mode);
+
+  const themeBtn = document.getElementById('btn-theme-toggle');
+  if (themeBtn) {
+    themeBtn.textContent = getThemeModeLabel(mode);
+  }
+
+  // 모바일 브라우저 상단 상태바 테마 컬러 동기화
+  const metaTheme = document.querySelector('meta[name="theme-color"]:not([media])');
+  if (metaTheme) {
+    const isDark = mode === 'dark' || (mode === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    metaTheme.setAttribute('content', isDark ? '#0b0f19' : '#f5f6f8');
+  }
+
+  if (notify) {
+    const msg =
+      mode === 'light'
+        ? '☀️ 산뜻한 낮 테마가 적용되었어요'
+        : mode === 'dark'
+        ? '🌙 은은한 밤 테마가 적용되었어요'
+        : '⚙️ 시스템 설정을 따라가는 자동 테마예요';
+    showToast(msg);
+  }
+}
+
+function cycleThemeMode(): void {
+  const nextMode: ThemeMode =
+    state.themeMode === 'light' ? 'dark' : state.themeMode === 'dark' ? 'auto' : 'light';
+  applyTheme(nextMode, true);
+}
+
+// ---------------------------------------------------------------------------
 // 렌더 — 영역별 분할 (앱 셸은 1회, 오늘의코스/조건/결과/오버레이는 개별 재렌더)
 // ---------------------------------------------------------------------------
 
 const app = document.getElementById('app')!;
 
 function renderShell(): void {
+  // 앱 시작 시 테마 즉시 적용 (기본값: light 낮 테마)
+  applyTheme(state.themeMode, false);
+
   app.innerHTML = `
     <header class="topbar">
       <h1 class="app-title"><a href="#" class="app-title-link" id="brand-home-link" title="홈으로 이동">오늘 데이트</a></h1>
-      <button class="btn-saved" id="btn-open-saved">저장한 코스</button>
+      <div class="topbar-actions">
+        <button class="btn-theme-toggle" id="btn-theme-toggle" title="테마 변경 (낮/밤/시스템)">${getThemeModeLabel(state.themeMode)}</button>
+        <button class="btn-saved" id="btn-open-saved">저장한 코스</button>
+      </div>
     </header>
     <section class="today-course-area" id="today-area"></section>
     <section class="conditions" id="conditions-area"></section>
@@ -1662,6 +1732,9 @@ function renderShell(): void {
     e.preventDefault();
     clearCourseHash();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  document.getElementById('btn-theme-toggle')?.addEventListener('click', () => {
+    cycleThemeMode();
   });
   document.getElementById('btn-open-saved')!.addEventListener('click', () => {
     state.savedOpen = true;
