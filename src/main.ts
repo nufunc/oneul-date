@@ -491,6 +491,8 @@ function getCandidates(
   return applyStayZonePolicy(pool, slot, anchor);
 }
 
+
+
 /**
  * 체감 랜덤 보정 — 최근 노출 이력 스폿을 소프트 제외.
  * 제외하면 후보가 0이 되는 경우 이력을 무시하고 원본 반환 (기능이 후보를 굶기면 안 됨).
@@ -617,12 +619,36 @@ interface GenerateOptions {
   rng?: () => number;
   /** 체감 랜덤 보정 — 소프트 제외할 최근 노출 스폿 ID (오늘의 코스는 미적용) */
   avoidIds?: ReadonlySet<number>;
+  /** 사용자 입력 키워드 또는 퀵 태그 (예: 삼겹살, 위스키, 성수다락 등) */
+  searchQuery?: string;
+}
+
+/** 검색어 및 태그 매칭 헬퍼 */
+function matchesSearchQuery(spot: Spot, query: string): boolean {
+  if (!query || !query.trim()) return true;
+  const cleanQ = query.replace(/^#/, '').trim().toLowerCase();
+  if (!cleanQ) return true;
+  const tokens = cleanQ.split(/\s+/).filter(Boolean);
+  const targetText = [
+    spot.name,
+    spot.category,
+    spot.summary,
+    spot.location,
+    spot.area,
+    spot.address,
+    ...(Array.isArray(spot.mood) ? spot.mood : [spot.mood || '']),
+  ]
+    .join(' ')
+    .toLowerCase();
+
+  return tokens.every((t) => targetText.includes(t));
 }
 
 /**
  * 앵커 기반 근접 코스 생성 (물리적 거리 및 자치구 클러스터링).
- * 1) 켠 슬롯 중 후보 수가 가장 적은(단, 1개 이상) 슬롯을 앵커로 먼저 랜덤 선택
- * 2) 나머지 슬롯은 앵커와의 거리(5~10km) 및 자치구 기준으로 밀착 선택
+ * 1) 검색어(searchQuery)가 있는 경우 해당 키워드 매칭 스팟을 앵커로 최우선 선정
+ * 2) 켠 슬롯 중 후보 수가 가장 적은(단, 1개 이상) 슬롯을 앵커로 랜덤 선택
+ * 3) 나머지 슬롯은 앵커와의 거리(5~10km) 및 자치구 기준으로 밀착 선택
  */
 function generateCourse(
   all: Spot[],
@@ -634,16 +660,31 @@ function generateCourse(
 ): CourseStep[] {
   const rng = opts.rng ?? Math.random;
   const avoid = opts.avoidIds ?? new Set<number>();
+  const query = opts.searchQuery?.trim();
 
-  // 앵커 슬롯: 후보가 1개 이상인 슬롯 중 후보 수 최소 (동률은 슬롯 순서 선착순)
-  // 앵커가 아직 없으므로 광역 폴백된 숙박은 여기서 0건이 되어 앵커 후보에서 자연히 빠진다.
   let anchorSlot: SlotKey | null = null;
   let anchorPool: Spot[] = [];
-  for (const slot of slotsOn) {
-    const candidates = excludeRecent(getCandidates(all, slot, regionKeys, moodKey, [], zoneKeys), avoid);
-    if (candidates.length > 0 && (anchorSlot === null || candidates.length < anchorPool.length)) {
-      anchorSlot = slot;
-      anchorPool = candidates;
+
+  // 1. 검색어가 있는 경우: 검색어 매칭 스팟을 보유한 슬롯 중 앵커 후보 우선 탐색
+  if (query) {
+    for (const slot of slotsOn) {
+      const candidates = excludeRecent(getCandidates(all, slot, regionKeys, moodKey, [], zoneKeys), avoid);
+      const matched = candidates.filter((s) => matchesSearchQuery(s, query));
+      if (matched.length > 0 && (anchorSlot === null || matched.length < anchorPool.length)) {
+        anchorSlot = slot;
+        anchorPool = matched;
+      }
+    }
+  }
+
+  // 2. 검색어 매칭이 없거나 검색어가 비어있는 경우: 기존 앵커 로직(최소 후보 슬롯) 적용
+  if (anchorSlot === null || anchorPool.length === 0) {
+    for (const slot of slotsOn) {
+      const candidates = excludeRecent(getCandidates(all, slot, regionKeys, moodKey, [], zoneKeys), avoid);
+      if (candidates.length > 0 && (anchorSlot === null || candidates.length < anchorPool.length)) {
+        anchorSlot = slot;
+        anchorPool = candidates;
+      }
     }
   }
 
@@ -1372,10 +1413,15 @@ interface AppState {
   /** 선택된 세부 인기 데이트존 키 다중 선택 — 빈 배열이면 '제한 없음' */
   subZones: string[];
   mood: string;
+  /** 사용자 입력 키워드/상호명/카테고리 검색어 */
+  searchQuery: string;
   course: CourseStep[] | null;
   /** 코스 생성 시점의 조건 스냅샷 — 교체 후보·저장·복사가 이 조건 기준으로 동작 */
-  courseConditions: { regions: string[]; subZones: string[]; mood: string } | null;
+  courseConditions: { regions: string[]; subZones: string[]; mood: string; searchQuery?: string } | null;
   savedOpen: boolean;
+  regionSheetOpen: boolean;
+  moodSheetOpen: boolean;
+  activeRegionTab: string;
 }
 
 /** 현재 시각 기준 최적의 기본 시간대 슬롯 반환 (15시 기준 낮 자동 제외) */
@@ -1418,9 +1464,13 @@ const state: AppState = {
   regions: ['SEOUL'],
   subZones: [],
   mood: 'ALL',
+  searchQuery: '',
   course: null,
   courseConditions: null,
   savedOpen: false,
+  regionSheetOpen: false,
+  moodSheetOpen: false,
+  activeRegionTab: 'SEOUL',
 };
 
 let spotById = new Map<number, Spot>(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
@@ -1430,7 +1480,7 @@ function activeSlots(): SlotKey[] {
 }
 
 declare const __APP_VERSION__: string;
-const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.8.5';
+const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.8.6';
 
 function courseSpotIds(): number[] {
   if (!state.course) return [];
@@ -1640,19 +1690,80 @@ function renderTodayCourse(): void {
   });
 }
 
-// --- 조건 영역 -------------------------------------------------------------
+// --- 조건 영역 (대안 2: 통합 검색창 + 1줄 셀렉터 바) ---------------------------------
+
+const POPULAR_QUICK_TAGS = [
+  '#삼겹살',
+  '#와인·위스키',
+  '#스파·마사지',
+  '#오션뷰·루프탑',
+  '#소품샵·쇼핑',
+  '#공방·이색체험',
+  '#호캉스·독채',
+];
+
+function getRegionSelectorLabel(): { title: string; subtitle: string; isSelected: boolean } {
+  if (state.regions.length === 0) {
+    return { title: '전국 어디서나', subtitle: '대한민국 전체', isSelected: false };
+  }
+  const regionNames = state.regions
+    .map((k) => REGIONS.find((r) => r.key === k)?.label || k)
+    .join(', ');
+
+  if (state.subZones.length > 0) {
+    const firstZone = POPULAR_ZONES.find((z) => z.key === state.subZones[0])?.label || state.subZones[0];
+    const displayTitle =
+      state.subZones.length > 1 ? `${firstZone} 외 ${state.subZones.length - 1}곳` : firstZone;
+    return { title: displayTitle, subtitle: regionNames, isSelected: true };
+  }
+
+  return {
+    title: regionNames,
+    subtitle: state.regions.length === 1 ? '해당 권역 전체' : `${state.regions.length}개 권역`,
+    isSelected: true,
+  };
+}
+
+function getMoodSelectorLabel(): { title: string; subtitle: string; isSelected: boolean } {
+  if (state.mood === 'ALL') {
+    return { title: '모든 분위기', subtitle: '취향 전체', isSelected: false };
+  }
+  const m = MOODS.find((item) => item.key === state.mood);
+  if (!m) return { title: '모든 분위기', subtitle: '전체', isSelected: false };
+  return { title: `${m.emoji ? `${m.emoji} ` : ''}${m.label}`, subtitle: '선택된 무드', isSelected: true };
+}
 
 function renderConditions(): void {
   const area = document.getElementById('conditions-area');
   if (!area) return;
 
-  // 특정 지역이 선택되었을 때만 해당 지역의 세부 인기 데이트존 노출 (전체일 때는 서브존 행 숨김)
-  const activeZones =
-    state.regions.length > 0
-      ? POPULAR_ZONES.filter((z) => state.regions.includes(z.regionKey))
-      : [];
+  const regLabel = getRegionSelectorLabel();
+  const moodLabelInfo = getMoodSelectorLabel();
 
   area.innerHTML = `
+    <!-- 1. 통합 검색창 & 퀵 태그 -->
+    <div class="search-container">
+      <div class="search-box">
+        <span class="search-input-icon">🔍</span>
+        <input 
+          type="search" 
+          class="search-input" 
+          id="search-input" 
+          placeholder="가고 싶은 곳이나 키워드 검색 (예: 삼겹살, 위스키, 성수다락)" 
+          value="${escapeHtml(state.searchQuery)}"
+          autocomplete="off"
+        />
+        <button class="search-clear ${state.searchQuery ? 'is-visible' : ''}" id="search-clear" aria-label="검색어 지우기">✕</button>
+      </div>
+      <div class="search-tags">
+        ${POPULAR_QUICK_TAGS.map((tag) => {
+          const isActive = state.searchQuery === tag;
+          return `<button class="search-tag-chip ${isActive ? 'active' : ''}" data-tag="${escapeHtml(tag)}">${escapeHtml(tag)}</button>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <!-- 2. 시간대 4종 토글 -->
     <div class="slot-toggles" role="group" aria-label="시간대 선택">
       ${SLOT_ORDER.map((k) => {
         const meta = SLOT_META[k];
@@ -1664,49 +1775,83 @@ function renderConditions(): void {
       }).join('')}
     </div>
 
-    <div class="filter-row">
-      <span class="filter-label">지역</span>
-      <div class="pill-scroll" id="region-pills">
-        ${REGIONS.map((r) => {
-          const active = r.key === 'ALL' ? state.regions.length === 0 : state.regions.includes(r.key);
-          return `<button class="pill ${active ? 'active' : ''}" data-region="${r.key}" aria-pressed="${active}">${r.label}</button>`;
-        }).join('')}
-      </div>
+    <!-- 3. 에어비앤비 스타일 1줄 2버튼 셀렉터 바 -->
+    <div class="selector-bar">
+      <button class="selector-btn ${regLabel.isSelected ? 'is-selected' : ''}" id="btn-trigger-region" aria-haspopup="dialog">
+        <div class="selector-left">
+          <span class="selector-icon">📍</span>
+          <div class="selector-text">
+            <span class="selector-label">어디로 갈까요?</span>
+            <span class="selector-value">${escapeHtml(regLabel.title)}</span>
+          </div>
+        </div>
+        <span class="selector-arrow">▾</span>
+      </button>
+
+      <button class="selector-btn ${moodLabelInfo.isSelected ? 'is-selected' : ''}" id="btn-trigger-mood" aria-haspopup="dialog">
+        <div class="selector-left">
+          <span class="selector-icon">✨</span>
+          <div class="selector-text">
+            <span class="selector-label">어떤 분위기?</span>
+            <span class="selector-value">${escapeHtml(moodLabelInfo.title)}</span>
+          </div>
+        </div>
+        <span class="selector-arrow">▾</span>
+      </button>
     </div>
 
-    ${
-      activeZones.length > 0
-        ? `
-    <div class="filter-row filter-row-subzone">
-      <span class="filter-label">인기 데이트존</span>
-      <div class="pill-scroll" id="zone-pills">
-        ${activeZones
-          .map((z) => {
-            const active = state.subZones.includes(z.key);
-            return `<button class="pill pill-subzone ${active ? 'active' : ''}" data-zone="${z.key}" aria-pressed="${active}">📍 ${escapeHtml(z.label)}</button>`;
-          })
-          .join('')}
-      </div>
-    </div>`
-        : ''
-    }
-
-    <div class="filter-row">
-      <span class="filter-label">분위기</span>
-      <div class="pill-scroll" id="mood-pills">
-        ${MOODS.map(
-          (m) =>
-            `<button class="pill ${state.mood === m.key ? 'active' : ''}" data-mood="${m.key}">${m.emoji ? `${m.emoji} ` : ''}${m.label}</button>`,
-        ).join('')}
-      </div>
-    </div>
-
-    <button class="btn-primary btn-generate" id="btn-generate">코스 만들기</button>
+    <button class="btn-primary btn-generate" id="btn-generate">🚀 오늘 데이트 코스 만들기</button>
   `;
   bindConditionEvents(area);
 }
 
 function bindConditionEvents(area: HTMLElement): void {
+  // 검색창 입력 이벤트
+  const searchInput = area.querySelector<HTMLInputElement>('#search-input');
+  const clearBtn = area.querySelector<HTMLButtonElement>('#search-clear');
+
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      state.searchQuery = searchInput.value.trim();
+      if (clearBtn) {
+        clearBtn.classList.toggle('is-visible', Boolean(state.searchQuery));
+      }
+    });
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        state.searchQuery = searchInput.value.trim();
+        triggerCourseGeneration();
+      }
+    });
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      state.searchQuery = '';
+      if (searchInput) {
+        searchInput.value = '';
+        searchInput.focus();
+      }
+      clearBtn.classList.remove('is-visible');
+      renderConditions();
+    });
+  }
+
+  // 퀵 태그 클릭 이벤트
+  area.querySelectorAll<HTMLButtonElement>('.search-tag-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const tag = chip.dataset.tag || '';
+      if (state.searchQuery === tag) {
+        state.searchQuery = '';
+      } else {
+        state.searchQuery = tag;
+      }
+      renderConditions();
+      triggerCourseGeneration();
+    });
+  });
+
+  // 슬롯 토글
   area.querySelectorAll<HTMLButtonElement>('.slot-toggle').forEach((btn) => {
     btn.addEventListener('click', () => {
       const slot = btn.dataset.slot as SlotKey;
@@ -1714,72 +1859,64 @@ function bindConditionEvents(area: HTMLElement): void {
       renderConditions();
     });
   });
-  area.querySelectorAll<HTMLButtonElement>('#region-pills .pill').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const key = btn.dataset.region || 'ALL';
-      if (key === 'ALL') {
-        // 전체: 모든 개별 선택 해제 및 서브존 초기화
-        state.regions = [];
-        state.subZones = [];
-      } else {
-        const next = new Set(state.regions);
-        if (next.has(key)) next.delete(key);
-        else next.add(key);
-        // REGIONS 정의 순서 유지 — 모두 끄면 빈 배열이 되어 자동으로 '전체' 복귀
-        state.regions = REGIONS.filter((r) => next.has(r.key)).map((r) => r.key);
-        // 비활성화된 권역의 subZone 정리
-        if (state.regions.length > 0) {
-          state.subZones = state.subZones.filter((zk) => {
-            const z = POPULAR_ZONES.find((item) => item.key === zk);
-            return z ? state.regions.includes(z.regionKey) : false;
-          });
-        } else {
-          state.subZones = [];
-        }
-      }
-      renderConditions();
-    });
+
+  // 지역 바텀시트 트리거
+  area.querySelector('#btn-trigger-region')?.addEventListener('click', () => {
+    state.regionSheetOpen = true;
+    state.activeRegionTab = state.regions[0] || 'SEOUL';
+    renderOverlay();
   });
-  area.querySelectorAll<HTMLButtonElement>('#zone-pills .pill-subzone').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const zk = btn.dataset.zone;
-      if (!zk) return;
-      const next = new Set(state.subZones);
-      if (next.has(zk)) next.delete(zk);
-      else next.add(zk);
-      state.subZones = Array.from(next);
-      renderConditions();
-    });
+
+  // 분위기 바텀시트 트리거
+  area.querySelector('#btn-trigger-mood')?.addEventListener('click', () => {
+    state.moodSheetOpen = true;
+    renderOverlay();
   });
-  area.querySelectorAll<HTMLButtonElement>('#mood-pills .pill[data-mood]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      state.mood = btn.dataset.mood || 'ALL';
-      renderConditions();
-    });
-  });
-  area.querySelector('#btn-generate')!.addEventListener('click', () => {
-    const slotsOn = activeSlots();
-    if (slotsOn.length === 0) {
-      showToast('시간대를 하나 이상 선택해 주세요');
-      return;
-    }
-    state.course = generateCourse(
-      spots,
-      slotsOn,
-      state.regions,
-      state.mood,
-      { avoidIds: recentSpotIdSet() },
-      state.subZones,
-    );
-    state.courseConditions = {
-      regions: [...state.regions],
-      subZones: [...state.subZones],
-      mood: state.mood,
-    };
-    addRecentSpotIds(courseSpotIds());
-    renderResults();
+
+  // 코스 만들기 버튼
+  area.querySelector('#btn-generate')?.addEventListener('click', () => {
+    triggerCourseGeneration();
   });
 }
+
+function triggerCourseGeneration(): void {
+  const slotsOn = activeSlots();
+  if (slotsOn.length === 0) {
+    showToast('시간대를 하나 이상 선택해 주세요');
+    return;
+  }
+  state.course = generateCourse(
+    spots,
+    slotsOn,
+    state.regions,
+    state.mood,
+    { avoidIds: recentSpotIdSet(), searchQuery: state.searchQuery },
+    state.subZones,
+  );
+  state.courseConditions = {
+    regions: [...state.regions],
+    subZones: [...state.subZones],
+    mood: state.mood,
+    searchQuery: state.searchQuery,
+  };
+  addRecentSpotIds(courseSpotIds());
+  renderResults();
+
+  // 검색어가 포함된 경우 토스트 피드백
+  if (state.searchQuery) {
+    const hasMatchedSpot = state.course?.some((st) => {
+      if (!st.spotId) return false;
+      const spot = spotById.get(st.spotId);
+      return spot ? matchesSearchQuery(spot, state.searchQuery) : false;
+    });
+    if (hasMatchedSpot) {
+      showToast(`'${state.searchQuery}' 중심 맞춤 코스를 추천했어요`);
+    } else {
+      showToast(`'${state.searchQuery}' 매칭 스팟이 없어 인기 코스로 추천했어요`);
+    }
+  }
+}
+
 
 const ICON_REFRESH_SVG = `<svg class="icon-refresh" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>`;
 const ICON_SWAP_SVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>`;
@@ -2477,16 +2614,32 @@ function savedCourseSpotsHtml(item: SavedCourse): string {
   `;
 }
 
+function getMoodDescription(key: string): string {
+  switch (key) {
+    case 'romantic': return '은은한 조명과 다정한 대화가 흐르는 설레는 코스';
+    case 'healing': return '도심을 벗어나 편안한 쉼과 여유를 즐기는 힐링 코스';
+    case 'gourmet': return '풍부한 아로마와 정갈한 플레이팅의 미식 여행';
+    case 'trendy': return '감각적인 공간 미학과 위트 있는 에너지가 가득한 핫플';
+    case 'view': return '탁 트인 시야, 노을과 윤슬이 빛나는 전망 명소';
+    case 'luxury': return '격조 높은 우아함과 프라이빗한 프리미엄 스팟';
+    case 'retro': return '아날로그 감성과 시간의 결이 묻어나는 골목길';
+    case 'active': return '생동감 넘치는 움직임과 함께 몰입하는 이색 체험';
+    default: return '다채로운 매력의 장소들을 균형 있게 믹스한 코스';
+  }
+}
+
 let isClosingOverlay = false;
 
 function closeOverlay(callback?: () => void): void {
-  if (isClosingOverlay || !state.savedOpen) return;
+  if (isClosingOverlay || (!state.savedOpen && !state.regionSheetOpen && !state.moodSheetOpen)) return;
   const root = document.getElementById('overlay-root');
   if (!root) return;
   const backdrop = root.querySelector('.overlay-backdrop');
-  const panel = root.querySelector('.overlay-panel');
+  const panel = root.querySelector('.overlay-panel, .location-sheet-panel');
   if (!backdrop || !panel) {
     state.savedOpen = false;
+    state.regionSheetOpen = false;
+    state.moodSheetOpen = false;
     renderOverlay();
     callback?.();
     return;
@@ -2496,8 +2649,11 @@ function closeOverlay(callback?: () => void): void {
   panel.classList.add('is-closing');
   window.setTimeout(() => {
     state.savedOpen = false;
+    state.regionSheetOpen = false;
+    state.moodSheetOpen = false;
     isClosingOverlay = false;
     renderOverlay();
+    renderConditions();
     callback?.();
   }, 220);
 }
@@ -2505,62 +2661,283 @@ function closeOverlay(callback?: () => void): void {
 function renderOverlay(): void {
   const root = document.getElementById('overlay-root');
   if (!root) return;
-  if (!state.savedOpen) {
-    root.innerHTML = '';
-    return;
-  }
-  const list = loadSavedCourses();
-  root.innerHTML = `
-    <div class="overlay-backdrop" id="overlay-backdrop"></div>
-    <div class="overlay-panel" role="dialog" aria-label="저장한 코스">
-      <div class="overlay-head">
-        <span class="overlay-title">저장한 코스 <span class="overlay-count">${list.length}</span></span>
-        <button class="overlay-close" id="overlay-close" aria-label="닫기">✕</button>
-      </div>
-      <div class="overlay-body">
-        ${
-          list.length === 0
-            ? `<div class="overlay-empty">아직 저장한 코스가 없어요</div>`
-            : list
-                .map((item) => {
-                  const date = new Date(item.createdAt);
-                  const dateStr = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
-                  return `
-              <div class="saved-item">
-                <button class="saved-item-main" data-course-id="${escapeHtml(item.id)}">
-                  <span class="saved-item-meta">${dateStr} · ${escapeHtml(regionsLabel(normalizeRegionCond(item.conditions.region)))} · ${escapeHtml(moodLabel(item.conditions.mood))}</span>
-                  <div class="saved-item-spots">${savedCourseSpotsHtml(item)}</div>
-                </button>
-                <button class="saved-item-delete" data-delete-id="${escapeHtml(item.id)}" aria-label="삭제">🗑</button>
-              </div>`;
-                })
-                .join('')
-        }
-      </div>
-    </div>
-  `;
 
-  root.querySelector('#overlay-backdrop')!.addEventListener('click', () => closeOverlay());
-  root.querySelector('#overlay-close')!.addEventListener('click', () => closeOverlay());
+  // 1. 저장한 코스 바텀시트
+  if (state.savedOpen) {
+    const list = loadSavedCourses();
+    root.innerHTML = `
+      <div class="overlay-backdrop" id="overlay-backdrop"></div>
+      <div class="overlay-panel" role="dialog" aria-label="저장한 코스">
+        <div class="overlay-head">
+          <span class="overlay-title">저장한 코스 <span class="overlay-count">${list.length}</span></span>
+          <button class="overlay-close" id="overlay-close" aria-label="닫기">✕</button>
+        </div>
+        <div class="overlay-body">
+          ${
+            list.length === 0
+              ? `<div class="overlay-empty">아직 저장한 코스가 없어요</div>`
+              : list
+                  .map((item) => {
+                    const date = new Date(item.createdAt);
+                    const dateStr = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+                    return `
+                <div class="saved-item">
+                  <button class="saved-item-main" data-course-id="${escapeHtml(item.id)}">
+                    <span class="saved-item-meta">${dateStr} · ${escapeHtml(regionsLabel(normalizeRegionCond(item.conditions.region)))} · ${escapeHtml(moodLabel(item.conditions.mood))}</span>
+                    <div class="saved-item-spots">${savedCourseSpotsHtml(item)}</div>
+                  </button>
+                  <button class="saved-item-delete" data-delete-id="${escapeHtml(item.id)}" aria-label="삭제">🗑</button>
+                </div>`;
+                  })
+                  .join('')
+          }
+        </div>
+      </div>
+    `;
 
-  root.querySelectorAll<HTMLButtonElement>('.saved-item-main').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const item = loadSavedCourses().find((c) => c.id === btn.dataset.courseId);
-      if (!item) return;
-      closeOverlay(() => {
-        restoreCourse(item);
-        showToast('코스를 불러왔어요');
+    root.querySelector('#overlay-backdrop')!.addEventListener('click', () => closeOverlay());
+    root.querySelector('#overlay-close')!.addEventListener('click', () => closeOverlay());
+
+    root.querySelectorAll<HTMLButtonElement>('.saved-item-main').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const item = loadSavedCourses().find((c) => c.id === btn.dataset.courseId);
+        if (!item) return;
+        closeOverlay(() => {
+          restoreCourse(item);
+          showToast('코스를 불러왔어요');
+        });
       });
     });
-  });
-  root.querySelectorAll<HTMLButtonElement>('.saved-item-delete').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const next = loadSavedCourses().filter((c) => c.id !== btn.dataset.deleteId);
-      persistSavedCourses(next);
-      renderOverlay();
-      showToast('삭제했어요');
+    root.querySelectorAll<HTMLButtonElement>('.saved-item-delete').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const next = loadSavedCourses().filter((c) => c.id !== btn.dataset.deleteId);
+        persistSavedCourses(next);
+        renderOverlay();
+        showToast('삭제했어요');
+      });
     });
-  });
+    return;
+  }
+
+  // 2. 에어비앤비 스타일 2단 지역 선택 바텀시트
+  if (state.regionSheetOpen) {
+    const activeReg = state.activeRegionTab || 'SEOUL';
+    const subZonesInTab = POPULAR_ZONES.filter((z) => z.regionKey === activeReg);
+    const isAllTab = activeReg === 'ALL';
+
+    root.innerHTML = `
+      <div class="overlay-backdrop" id="overlay-backdrop"></div>
+      <div class="location-sheet-panel" role="dialog" aria-label="지역 선택">
+        <div class="location-sheet-head">
+          <span class="location-sheet-title">📍 어디로 데이트를 떠날까요?</span>
+          <button class="overlay-close" id="overlay-close" aria-label="닫기">✕</button>
+        </div>
+        <div class="location-split">
+          <!-- 좌측 8대 권역 탭 -->
+          <div class="location-regions" role="tablist">
+            ${REGIONS.map((r) => {
+              const isSelectedTab = state.activeRegionTab === r.key;
+              const hasSelectedZones = state.subZones.some((zk) => {
+                const z = POPULAR_ZONES.find((item) => item.key === zk);
+                return z ? z.regionKey === r.key : false;
+              });
+              const isRegSelected = r.key === 'ALL' ? state.regions.length === 0 : state.regions.includes(r.key);
+              return `
+                <button class="region-tab-item ${isSelectedTab ? 'active' : ''}" data-region-tab="${r.key}">
+                  <span>${r.label}</span>
+                  ${isRegSelected || hasSelectedZones ? `<span class="region-tab-badge">●</span>` : ''}
+                </button>
+              `;
+            }).join('')}
+          </div>
+
+          <!-- 우측 세부 핫플존 리스트 -->
+          <div class="location-subzones">
+            ${
+              isAllTab
+                ? `
+              <div class="all-regions-desc">
+                <p class="all-desc-title">🇰🇷 전국 어디서나 탐색</p>
+                <p class="all-desc-sub">특정 지역 제한 없이 대한민국 전역의 핫플레이스를 폭넓게 추천받을 수 있어요.</p>
+                <button class="btn-primary btn-select-all-korea" id="btn-select-all-korea">전국 모드로 선택</button>
+              </div>
+            `
+                : `
+              <div class="subzones-header">
+                <span class="subzones-title">${REGIONS.find((r) => r.key === activeReg)?.label} 인기 데이트존</span>
+                <button class="btn-toggle-all-zones" id="btn-toggle-all-zones">
+                  ${state.regions.includes(activeReg) && subZonesInTab.every((z) => !state.subZones.includes(z.key)) ? '권역 전체 해제' : '권역 전체 선택'}
+                </button>
+              </div>
+              <div class="subzones-grid">
+                ${subZonesInTab
+                  .map((z) => {
+                    const isChecked = state.subZones.includes(z.key);
+                    return `
+                    <label class="zone-check-item ${isChecked ? 'is-checked' : ''}" data-zone-key="${z.key}">
+                      <input type="checkbox" class="zone-checkbox" value="${z.key}" ${isChecked ? 'checked' : ''} />
+                      <span class="zone-label">${escapeHtml(z.label)}</span>
+                    </label>
+                  `;
+                  })
+                  .join('')}
+              </div>
+            `
+            }
+          </div>
+        </div>
+
+        <div class="location-sheet-footer">
+          <button class="btn-location-reset" id="btn-location-reset">초기화</button>
+          <button class="btn-primary btn-location-submit" id="btn-location-submit">선택 완료</button>
+        </div>
+      </div>
+    `;
+
+    root.querySelector('#overlay-backdrop')!.addEventListener('click', () => closeOverlay());
+    root.querySelector('#overlay-close')!.addEventListener('click', () => closeOverlay());
+
+    // 권역 탭 클릭
+    root.querySelectorAll<HTMLButtonElement>('.region-tab-item').forEach((tabBtn) => {
+      tabBtn.addEventListener('click', () => {
+        state.activeRegionTab = tabBtn.dataset.regionTab || 'SEOUL';
+        renderOverlay();
+      });
+    });
+
+    // 전국 모드 선택 버튼
+    root.querySelector('#btn-select-all-korea')?.addEventListener('click', () => {
+      state.regions = [];
+      state.subZones = [];
+      closeOverlay();
+    });
+
+    // 권역 전체 선택/해제 토글
+    root.querySelector('#btn-toggle-all-zones')?.addEventListener('click', () => {
+      const isFullRegion =
+        state.regions.includes(activeReg) && subZonesInTab.every((z) => !state.subZones.includes(z.key));
+
+      if (isFullRegion) {
+        state.regions = state.regions.filter((r) => r !== activeReg);
+      } else {
+        if (!state.regions.includes(activeReg)) {
+          state.regions.push(activeReg);
+        }
+        // 권역 전체 모드 시 해당 권역의 개별 세부존은 클리어 (권역 전체로 탐색)
+        state.subZones = state.subZones.filter((zk) => {
+          const z = POPULAR_ZONES.find((item) => item.key === zk);
+          return z ? z.regionKey !== activeReg : true;
+        });
+      }
+      renderOverlay();
+    });
+
+    // 세부존 체크박스 토글 (스크롤 점프 방지: 국소 DOM 업데이트)
+    root.querySelectorAll<HTMLLabelElement>('.zone-check-item').forEach((item) => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        const zk = item.dataset.zoneKey;
+        if (!zk) return;
+
+        const next = new Set(state.subZones);
+        const willCheck = !next.has(zk);
+        if (willCheck) {
+          next.add(zk);
+        } else {
+          next.delete(zk);
+        }
+        state.subZones = Array.from(next);
+
+        // UI 즉시 반영 (스크롤 위치 유지)
+        item.classList.toggle('is-checked', willCheck);
+        const cb = item.querySelector<HTMLInputElement>('.zone-checkbox');
+        if (cb) cb.checked = willCheck;
+
+        // 서브존 선택 시 해당 권역 포함 보장
+        const hasAnyInReg = state.subZones.some((k) => {
+          const z = POPULAR_ZONES.find((item) => item.key === k);
+          return z ? z.regionKey === activeReg : false;
+        });
+        if (hasAnyInReg && !state.regions.includes(activeReg)) {
+          state.regions.push(activeReg);
+        }
+
+        // 좌측 탭 인디케이터 뱃지 동기화
+        const activeTabEl = root.querySelector<HTMLButtonElement>(
+          `.region-tab-item[data-region-tab="${activeReg}"]`,
+        );
+        if (activeTabEl) {
+          const isRegSelected = state.regions.includes(activeReg);
+          let badge = activeTabEl.querySelector('.region-tab-badge');
+          if (isRegSelected || hasAnyInReg) {
+            if (!badge) {
+              const span = document.createElement('span');
+              span.className = 'region-tab-badge';
+              span.textContent = '●';
+              activeTabEl.appendChild(span);
+            }
+          } else if (badge) {
+            badge.remove();
+          }
+        }
+      });
+    });
+
+    // 초기화 버튼
+    root.querySelector('#btn-location-reset')?.addEventListener('click', () => {
+      state.regions = ['SEOUL'];
+      state.subZones = [];
+      renderOverlay();
+    });
+
+    // 선택 완료 버튼
+    root.querySelector('#btn-location-submit')?.addEventListener('click', () => {
+      closeOverlay();
+    });
+
+    return;
+  }
+
+  // 3. 무드 선택 바텀시트
+  if (state.moodSheetOpen) {
+    root.innerHTML = `
+      <div class="overlay-backdrop" id="overlay-backdrop"></div>
+      <div class="overlay-panel mood-sheet-panel" role="dialog" aria-label="분위기 선택">
+        <div class="overlay-head">
+          <span class="overlay-title">✨ 어떤 분위기의 데이트를 원하세요?</span>
+          <button class="overlay-close" id="overlay-close" aria-label="닫기">✕</button>
+        </div>
+        <div class="overlay-body mood-cards-grid">
+          ${MOODS.map((m) => {
+            const isSelected = state.mood === m.key;
+            return `
+              <button class="mood-card ${isSelected ? 'active' : ''}" data-mood="${m.key}">
+                <span class="mood-card-emoji">${m.emoji || '✨'}</span>
+                <div class="mood-card-info">
+                  <span class="mood-card-name">${m.label}</span>
+                  <span class="mood-card-desc">${getMoodDescription(m.key)}</span>
+                </div>
+              </button>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+
+    root.querySelector('#overlay-backdrop')!.addEventListener('click', () => closeOverlay());
+    root.querySelector('#overlay-close')!.addEventListener('click', () => closeOverlay());
+
+    root.querySelectorAll<HTMLButtonElement>('.mood-card').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.mood = btn.dataset.mood || 'ALL';
+        closeOverlay();
+      });
+    });
+    return;
+  }
+
+
+  root.innerHTML = '';
 }
 
 /** 저장한 코스를 결과 영역에 복원 (조건 상태도 함께 복원) */
