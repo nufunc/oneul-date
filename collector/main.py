@@ -233,7 +233,7 @@ def run_cycle():
 
 def main():
     log("========================================================")
-    log("🌟 오늘 데이트 (oneul-date) — 백엔드 데이터 엔진 가동 (v3.3)")
+    log("🌟 오늘 데이트 (oneul-date) — 백엔드 데이터 엔진 가동 (v3.5)")
     log(f"🔗 Supabase: {SUPABASE_URL}")
     log(f"⏱️ 주기: {INTERVAL_DESC} | 1회 발굴 한도: {DISCOVERY_LIMIT}개 | 폐업 검증 한도: {BATCH_LIMIT}개")
     log(f"📁 로그 저장 경로: {LOG_DIR}")
