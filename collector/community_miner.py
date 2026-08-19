@@ -15,6 +15,7 @@ import random
 import re
 from supabase_worker import load_env, search_naver
 from discovery_engine import infer_slot
+from category_filter import is_date_spot_category
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -60,21 +61,33 @@ HEADERS = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 }
 
+_COMMUNITY_STOP_WORDS = frozenset([
+    "추천", "맛집", "카페", "위치", "가격", "메뉴", "분위기", "주차", "예약", "후기",
+    "데이트", "코스", "서울", "경기", "부산", "제주", "대구", "대전", "광주", "인천",
+    "블라인드", "더쿠", "인벤", "클리앙", "에타", "질문", "공유", "모음", "리스트"
+])
+
 def extract_list_items(html_text: str):
     """커뮤니티 글 본문에서 '1. 상호명', '- 상호명:', '① 상호명' 등의 목록형 장소명 추출"""
     candidates = set()
 
-    # 패턴 1: 숫자/기호 리스트 (1. 성수다락, 2. 난포, ① 쵸이닷 등)
-    numbered = re.findall(r'(?:[0-9]{1,2}\.|\([0-9]{1,2}\)|[①-⑩]|\-|\*)\s*([가-힣a-zA-Z0-9\s]{2,12})(?:\s*[-:—–~]|\s*<|\s*\n)', html_text)
+    # 패턴 1: 숫자/기호 리스트 (1. 성수다락, 2. 난포, ① 쵸이닷, [1] 등)
+    numbered = re.findall(r'(?:[0-9]{1,2}\.|\([0-9]{1,2}\)|\[[0-9]{1,2}\]|[①-⑩]|\-|\*|▶|✔)\s*([가-힣a-zA-Z0-9\s]{2,12})(?:\s*[-:—–~|/(]|\s*<|\s*\n)', html_text)
     for item in numbered:
         clean = item.strip()
-        if len(clean) >= 2 and not any(w in clean for w in ["추천", "맛집", "카페", "위치", "가격", "메뉴", "분위기", "주차", "예약", "후기", "데이트", "코스", "서울", "경기", "부산"]):
+        if 2 <= len(clean) <= 12 and not any(w in clean for w in _COMMUNITY_STOP_WORDS):
             candidates.add(clean)
 
-    # 패턴 2: 해시태그 (#성수다락, #난포)
+    # 패턴 2: 대괄호 및 따옴표 ([성수다락], "난포", '쵸이닷')
+    for q in re.findall(r'[\'\"「『\[]([가-힣a-zA-Z0-9\s]{2,12})[\'\"」』\]]', html_text):
+        clean_q = q.strip()
+        if 2 <= len(clean_q) <= 12 and not any(w in clean_q for w in _COMMUNITY_STOP_WORDS):
+            candidates.add(clean_q)
+
+    # 패턴 3: 해시태그 (#성수다락, #난포)
     hashtags = re.findall(r'#([가-힣a-zA-Z0-9]{2,10})', html_text)
     for tag in hashtags:
-        if not any(w in tag for w in ["맛집", "카페", "데이트", "먹스타그램", "핫플", "추천", "일상", "여행", "주말"]):
+        if 2 <= len(tag) <= 10 and not any(w in tag for w in _COMMUNITY_STOP_WORDS):
             candidates.add(tag)
 
     return list(candidates)
@@ -147,7 +160,9 @@ def run_community_mining(supabase_url: str, service_key: str, max_discoveries: i
             cat = str(top.get("category") or "")
             road_addr = top.get("roadAddress") or top.get("address") or ""
 
-            if any(k in cat for k in ["숙박", "모텔", "호텔", "펜션", "게스트하우스", "리조트"]):
+            # 데이트 스팟 카테고리 & 상호명 엄격 검증 (비데이트 업종·숙박·체인브랜드 차단)
+            ok_cat, cat_reason = is_date_spot_category(cat, real_name)
+            if not ok_cat:
                 continue
 
             if not real_name or not road_addr:

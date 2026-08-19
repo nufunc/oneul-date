@@ -37,6 +37,15 @@ if hasattr(sys.stdout, 'reconfigure'):
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from supabase_worker import (search_naver, calculate_quality_score, load_env,
                              derive_region_area)
+from category_filter import (
+    is_date_spot_category,
+    CATEGORY_WHITELIST,
+    CATEGORY_WHITELIST_EXACT,
+    CATEGORY_BLACKLIST,
+    CHAIN_BRAND_BLACKLIST,
+    CATEGORY_BLACKLIST_LODGING,
+    NAME_BLACKLIST_PATTERNS,
+)
 
 UA_DESKTOP = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
               "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
@@ -64,6 +73,31 @@ WATCH_HEADERS = {
 INNERTUBE_URL = ("https://www.youtube.com/youtubei/v1/player"
                  "?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8&prettyPrint=false")
 INNERTUBE_CLIENTS = [
+    {
+        "label": "innertube_android",
+        "context": {"client": {
+            "clientName": "ANDROID", "clientVersion": "19.09.37",
+            "androidSdkVersion": 30, "hl": "ko", "gl": "KR",
+        }},
+        "headers": {
+            "User-Agent": "com.google.android.youtube/19.09.37 (Linux; U; Android 11) gzip",
+            "X-YouTube-Client-Name": "3",
+            "X-YouTube-Client-Version": "19.09.37",
+        },
+    },
+    {
+        "label": "innertube_embed",
+        "context": {"client": {
+            "clientName": "WEB_EMBEDDED_PLAYER", "clientVersion": "1.20250101.00.00",
+            "hl": "ko", "gl": "KR",
+        }},
+        "headers": {
+            "User-Agent": UA_DESKTOP,
+            "X-YouTube-Client-Name": "56",
+            "X-YouTube-Client-Version": "1.20250101.00.00",
+            "Referer": "https://www.youtube.com/",
+        },
+    },
     {
         "label": "innertube_web",
         "context": {"client": {
@@ -197,108 +231,6 @@ RESIDENCE_MARKERS = (
     "근교", "직장인", "사는", "살고", "거주", "출신", "토박이", "주민", "촌놈",
     "출발", "떠나", "벗어나", "탈출", "사람",
 )
-
-# ─────────────────────────────────────────────────────────────
-# [C] 카테고리 화이트/블랙리스트
-# ─────────────────────────────────────────────────────────────
-
-# 데이트 스팟다운 업종 (부분 문자열 매칭, 2자 이상 키워드만)
-CATEGORY_WHITELIST = [
-    # 카페 / 디저트
-    "카페", "커피", "베이커리", "제과", "빵집", "디저트", "빙수", "브런치", "티하우스", "찻집",
-    "아이스크림", "도넛", "케이크", "roastery", "cafe",
-    # 음식점
-    "음식점", "한식", "양식", "일식", "중식", "분식", "아시아음식", "뷔페", "레스토랑", "다이닝",
-    "이탈리", "프랑스", "스테이크", "파스타", "피자", "햄버거", "치킨", "고기", "육류", "해물",
-    "해산물", "국수", "면요리", "덮밥", "돈까스", "초밥", "스시", "쌈밥", "칼국수", "곱창",
-    "닭갈비", "삼겹살", "샤브샤브", "오마카세", "퓨전", "베트남", "태국", "인도", "멕시코",
-    # 주점 / 바
-    "주점", "술집", "와인", "칵테일", "이자카야", "포차", "호프", "펍", "요리주점", "바(bar)",
-    "위스키", "맥주", "전통주", "막걸리",
-    # 문화 / 전시
-    "전시", "미술관", "갤러리", "박물관", "문화", "공연", "극장", "영화관", "서점", "책방",
-    "도서관", "아트", "기념관", "과학관",
-    # 자연 / 관광
-    "공원", "관광", "명소", "유원지", "테마파크", "놀이", "정원", "수목원", "식물원", "해수욕장",
-    "해변", "해안", "계곡", "전망대", "야경", "전망", "산책로", "둘레길", "휴양림", "생태",
-    "호수", "폭포", "동굴", "섬", "항구", "등대", "고궁", "궁궐", "한옥마을", "사찰", "유적",
-    "성곽", "다리", "저수지", "습지",
-    # 체험 / 액티비티
-    "체험", "공방", "원데이", "클래스", "도예", "방탈출", "보드게임", "볼링", "당구", "실내",
-    "아쿠아리움", "동물원", "목장", "농장", "수족관", "케이블카", "루지", "레저", "스포츠",
-    "사진관", "스튜디오", "포토", "플라워", "꽃집", "소품", "편집샵", "복합문화",
-    # 휴식 (숙박 업종은 CATEGORY_BLACKLIST_LODGING 으로 배제 — 다른 미너와 동일 정책)
-    "스파", "온천", "찜질", "사우나", "워터파크",
-    # 시장 / 거리
-    "시장", "먹자골목", "거리", "쇼핑몰", "백화점",
-    # 소품 / 편집숍 / 라이프스타일 (네이버 실제 표기: 패션잡화점·주방용품·생활용품점·
-    #   인테리어장식판매 ...). 로컬 편집숍·소품샵은 실제로 좋은 데이트 코스다.
-    #   체인 SPA·대형마트는 아래 CHAIN_BRAND_BLACKLIST 로 따로 막는다.
-    "잡화", "패션잡화", "패션", "의류", "주방용품", "생활용품", "문구", "팬시",
-    "리빙", "인테리어장식", "인테리어소품", "향수", "캔들", "디퓨저", "공예품",
-    "골동품", "빈티지", "레코드", "음반", "라이프스타일", "팝업", "select",
-]
-
-# 정확 일치로만 허용하는 1~2자 카테고리 토큰 (부분 매칭 시 오탐이 큰 것들)
-CATEGORY_WHITELIST_EXACT = {"바", "회", "산", "절", "탕", "떡", "면", "빵", "술", "숲", "성"}
-
-# 데이트 스팟이 아닌 업종 (카테고리 또는 상호명에 포함 시 즉시 탈락)
-CATEGORY_BLACKLIST = [
-    # 기존
-    "주유소", "세차", "편의점", "세븐일레븐", "cu ", "gs25", "이마트24",
-    "아파트", "단지", "오피스텔", "빌라", "주공",
-    "양복", "병원", "약국", "치과", "안과", "의원", "한의원",
-    "은행", "atm", "관공서", "경찰서", "소방서", "주민센터", "행정복지",
-    "웨딩", "결혼", "장례", "부동산", "공인중개",
-    # 신규 — 언론/방송
-    "신문", "일보", "언론", "방송", "통신사", "출판", "뉴스",
-    # 신규 — 제조/공업/산업
-    "제조", "공업", "산업", "기계", "플랜트", "설비", "부품", "금형", "철강", "화학", "펌프",
-    "공장", "제작소",
-    # 신규 — 우편
-    "우체국", "우편",
-    # 신규 — 자동차
-    "자동차", "모터스", "motors", "정비", "카센터", "타이어", "중고차", "렌터카", "카센타",
-    "오토", "매매단지",
-    # 신규 — 개발/건설
-    "관광개발", "개발", "건설", "엔지니어링", "토목", "시공", "인테리어공사",
-    "인테리어시공", "설계사무소",
-    # 신규 — 교육
-    "학원", "교습", "과외", "학교", "유치원", "어린이집", "대학교", "직업훈련",
-    # 신규 — 단체
-    "협회", "재단", "조합", "공사", "공단", "센터본부", "지사", "사무소", "법인",
-    # 신규 — 물류
-    "물류", "창고", "택배", "운수", "화물", "운송",
-]
-
-# 체인 SPA·대형 유통 브랜드 — 업종(의류/잡화/생활용품)은 허용하되 체인점은 막는다.
-# 로컬 편집숍·소품샵과 ZARA/유니클로/다이소는 데이트 코스로서 성격이 완전히 다르다.
-CHAIN_BRAND_BLACKLIST = [
-    "zara", "h&m", "유니클로", "uniqlo", "스파오", "탑텐", "지오다노", "에잇세컨즈",
-    "폴햄", "무신사", "나이키", "아디다스", "뉴발란스", "무인양품",
-    "다이소", "이마트", "홈플러스", "롯데마트", "코스트코", "하이마트", "올리브영",
-    "다이슨", "노브랜드", "아성다이소",
-]
-
-# 숙박 업종 (데이트 "코스" 슬롯 대상이 아니므로 수집 단계에서 배제한다).
-# 주의: 카테고리에만 적용한다. 상호명에 적용하면 '스테이크하우스'(스테이),
-#       '호텔델루나 카페' 같은 정상 스팟이 오탈락한다.
-CATEGORY_BLACKLIST_LODGING = [
-    "숙박", "숙소", "펜션", "호텔", "모텔", "여관", "콘도", "리조트", "게스트하우스",
-    "호스텔", "민박", "글램핑", "야영", "캠핑", "카라반", "풀빌라", "한옥숙소", "료칸",
-    "hotel", "resort", "pension", "hostel", "glamping",
-]
-
-# 상호명 자체가 명백히 비(非)스팟인 패턴
-NAME_BLACKLIST_PATTERNS = [
-    re.compile(r'일보$'), re.compile(r'신문(사)?$'), re.compile(r'방송(국)?$'),
-    re.compile(r'산업(\s*\(주\))?$'), re.compile(r'공업'), re.compile(r'중공업'),
-    re.compile(r'모터스'), re.compile(r'우편취급국'), re.compile(r'우체국'),
-    re.compile(r'개발\s*\(주\)'), re.compile(r'관광개발'), re.compile(r'^주식회사'),
-    re.compile(r'주식회사$'), re.compile(r'^\(주\)'), re.compile(r'\(주\)$'),
-    re.compile(r'^유한회사'), re.compile(r'^\(유\)'), re.compile(r'대리점$'),
-    re.compile(r'정비소$'), re.compile(r'(주민센터|행정복지센터)$'), re.compile(r'파출소$'),
-]
 
 # ─────────────────────────────────────────────────────────────
 # [B] 후보 품질 게이트 설정
@@ -912,52 +844,7 @@ def extract_region_hints(text: str) -> list[str]:
     return local_hints or metro_hints
 
 
-# ─────────────────────────────────────────────────────────────
-# [C] 카테고리 검증
-# ─────────────────────────────────────────────────────────────
 
-def is_date_spot_category(category: str, name: str) -> tuple[bool, str]:
-    """네이버/카카오 카테고리와 상호명이 데이트 스팟다운지 검증.
-    (통과여부, 탈락사유) 반환. 애매하면 보수적으로 거부한다."""
-    cat = (category or "").strip()
-    cat_low = cat.lower()
-    name_low = (name or "").lower()
-
-    # 1. 상호명 자체가 명백한 비(非)스팟 패턴
-    for pat in NAME_BLACKLIST_PATTERNS:
-        if pat.search(name or ""):
-            return False, "상호명패턴"
-
-    # 2. 블랙리스트 (카테고리 또는 상호명)
-    for bl in CATEGORY_BLACKLIST:
-        if bl in cat_low or bl in name_low:
-            return False, f"블랙리스트({bl.strip()})"
-
-    if not cat:
-        return False, "카테고리없음"
-
-    # 2-a. 체인 SPA·대형 유통 브랜드 (카테고리/상호명 모두 검사)
-    for br in CHAIN_BRAND_BLACKLIST:
-        if br in cat_low or br in name_low:
-            return False, f"체인브랜드({br})"
-
-    # 2-b. 숙박 업종 (카테고리에만 적용)
-    for bl in CATEGORY_BLACKLIST_LODGING:
-        if bl in cat_low:
-            return False, f"숙박업종({bl})"
-
-    # 3. 화이트리스트
-    tokens = [t.strip() for t in re.split(r'[>,/·|]', cat) if t.strip()]
-    for t in tokens:
-        t_low = t.lower()
-        if t in CATEGORY_WHITELIST_EXACT:
-            return True, ""
-        for wl in CATEGORY_WHITELIST:
-            if wl in t_low:
-                return True, ""
-
-    # 4. 화이트리스트에도 블랙리스트에도 없는 애매한 카테고리 → 등록하지 않음
-    return False, f"화이트리스트외({cat[:14]})"
 
 
 # 지점/본점 접미 (상호명 비교 시 제거)

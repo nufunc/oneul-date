@@ -15,6 +15,7 @@ import random
 import re
 from supabase_worker import load_env, search_naver, calculate_quality_score
 from discovery_engine import infer_slot
+from category_filter import is_date_spot_category
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -87,34 +88,44 @@ HEADERS = {
     "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8",
 }
 
+_BLOG_STOP_WORDS = frozenset(["후기", "내돈내산", "추천", "데이트", "맛집", "카페", "일상", "서울", "경기", "부산", "제주", "코스", "분위기", "사진", "리뷰", "솔직", "주말", "존맛", "강추", "정리", "모음", "베스트", "best"])
+
 def fetch_blog_candidates(query: str):
     """네이버 뷰/블로그 검색 피드에서 유망한 데이트 스팟 상호명 추출"""
     encoded = urllib.parse.quote(query)
     candidates = set()
 
-    # 1. 네이버 뷰(블로그) 피드
+    # 1. 네이버 뷰/블로그 피드
     try:
         url = f"https://search.naver.com/search.naver?where=view&sm=tab_jum&query={encoded}"
         req = urllib.request.Request(url, headers=HEADERS)
         with urllib.request.urlopen(req, timeout=5) as res:
             if res.status == 200:
                 html = res.read().decode('utf-8', errors='ignore')
-                raw_titles = re.findall(r'<a[^>]+class="title_link[^>]*>(.*?)</a>', html)
+                raw_titles = re.findall(r'<a[^>]+class="[^"]*(?:title_link|total_tit|headline|title_area|news_tit)[^"]*"[^>]*>(.*?)</a>', html)
+                if not raw_titles:
+                    raw_titles = re.findall(r'<a[^>]+href="https?://(?:blog\.naver\.com|tistory\.com|brunch\.co\.kr)[^>]*>(.*?)</a>', html)
+
                 for t in raw_titles:
                     clean_t = re.sub(r'<[^>]+>', '', t).strip()
-                    # '[성수] 상호명'
-                    matched = re.findall(r'\[([^\]]+)\]', clean_t)
-                    for m in matched:
+                    # '[성수] 상호명' 또는 '[상호명]'
+                    for m in re.findall(r'\[([^\]]+)\]', clean_t):
                         clean_m = m.strip()
-                        if 2 <= len(clean_m) <= 10 and not any(w in clean_m for w in ["후기", "내돈내산", "추천", "데이트", "맛집", "카페", "일상", "서울", "경기"]):
+                        if 2 <= len(clean_m) <= 12 and not any(w in clean_m for w in _BLOG_STOP_WORDS):
                             candidates.add(clean_m)
                     
-                    # 큰따옴표/작은따옴표
-                    quotes = re.findall(r'["\']([^"\']{2,10})["\']', clean_t)
-                    for q in quotes:
+                    # 큰따옴표/작은따옴표/특수괄호
+                    for q in re.findall(r'["\'「『]([가-힣a-zA-Z0-9\s]{2,12})["\'」』]', clean_t):
                         clean_q = q.strip()
-                        if not any(w in clean_q for w in ["후기", "맛집", "카페", "데이트", "강추", "존맛", "추천"]):
+                        if not any(w in clean_q for w in _BLOG_STOP_WORDS):
                             candidates.add(clean_q)
+
+                    # 콜론/하이픈 앞 접두 상호명 (예: '성수다락 - 감성 파스타 맛집')
+                    m_prefix = re.match(r'^([가-힣a-zA-Z0-9\s]{2,10})\s*[-:|·]\s*', clean_t)
+                    if m_prefix:
+                        cand = m_prefix.group(1).strip()
+                        if not any(w in cand for w in _BLOG_STOP_WORDS):
+                            candidates.add(cand)
     except Exception:
         pass
 
@@ -128,7 +139,7 @@ def fetch_blog_candidates(query: str):
                 quote_matches = re.findall(r'[\'\"「『]([가-힣a-zA-Z0-9\s]{2,15})[\'\"」』]', html)
                 for m in quote_matches:
                     clean_m = m.strip()
-                    if len(clean_m) >= 2 and not any(w in clean_m for w in ["데이트", "코스", "맛집", "추천", "카페", "분위기", "사진", "리뷰", "솔직", "후기", "주말", "내돈내산", "일상"]):
+                    if len(clean_m) >= 2 and not any(w in clean_m for w in _BLOG_STOP_WORDS):
                         candidates.add(clean_m)
     except Exception:
         pass
@@ -175,8 +186,9 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
             cat = str(top.get("category") or "")
             road_addr = top.get("roadAddress") or top.get("address") or ""
 
-            # 숙소 100% 필터링
-            if any(k in cat for k in ["숙박", "모텔", "호텔", "펜션", "게스트하우스", "리조트"]):
+            # 데이트 스팟 카테고리 & 상호명 엄격 검증 (비데이트 업종·숙박·체인브랜드 차단)
+            ok_cat, cat_reason = is_date_spot_category(cat, real_name)
+            if not ok_cat:
                 continue
 
             if not real_name or not road_addr:

@@ -564,8 +564,15 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                 patch_data["lat"] = lat_val
                 patch_data["lng"] = lng_val
                 enriched_count += 1
-            if category and not spot.get("category"):
-                patch_data["category"] = str(category)
+            # [Category Healing] 기존 카테고리가 없거나 비스팟 오염(은행/다이소/요양원 등)인 경우에만 교정
+            if category:
+                new_cat_str = str(category).strip()
+                old_cat = (spot.get("category") or "").strip()
+                is_old_polluted = any(p.search(old_cat) for p in SLOT_NONSPOT_RE) if old_cat else True
+                if not old_cat or is_old_polluted:
+                    patch_data["category"] = new_cat_str
+                    if old_cat and new_cat_str != old_cat:
+                        print(f"  🔧 [Category Fix] id={s_id} '{old_cat}' → '{new_cat_str}'")
 
             verified_count += 1
         else:

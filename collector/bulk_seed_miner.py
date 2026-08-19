@@ -22,6 +22,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from miners.youtube_miner import search_youtube_hotclip
 from miners.kakaomap_miner import search_kakaomap_place
 from score_engine import calculate_hot_score
+from category_filter import is_date_spot_category
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -352,16 +353,9 @@ def run_bulk_mining(target_count: int = 1000, enable_social: bool = True):
             raw_name = p.get("name", "").strip()
             cat = str(p.get("category") or "")
             
-            # 비데이트 업종 및 편의시설 철저 필터링 (데이트 명소만 엄선)
-            combined_txt = f"{raw_name} {cat}".lower()
-            INVALID_KEYWORDS = [
-                "숙박", "모텔", "호텔", "펜션", "게스트하우스", "리조트", "민박",
-                "주차장", "cu", "gs25", "세븐일레븐", "이마트24", "미니스톱", "편의점",
-                "미용실", "헤어", "바버샵", "네일", "주유소", "세탁", "부동산", "공인중개사",
-                "학원", "병원", "약국", "의원", "치과", "한의원", "세무", "법무", "변호사",
-                "철물", "마트", "슈퍼", "정비", "세차", "공업사", "골프연습", "스크린골프", "목욕", "사우나"
-            ]
-            if any(k in combined_txt for k in INVALID_KEYWORDS):
+            # 데이트 스팟 카테고리 & 상호명 엄격 검증 (비데이트 업종·숙박·체인브랜드 차단)
+            ok_cat, cat_reason = is_date_spot_category(cat, raw_name)
+            if not ok_cat:
                 continue
 
             road_addr = p.get("roadAddress") or p.get("address") or ""

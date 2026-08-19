@@ -49,11 +49,32 @@ def parse_view_count(view_text: str) -> int:
     
     return 0
 
+def _norm_name(s: str) -> str:
+    """비교용 정규화 — 공백/특수문자 제거 후 소문자화"""
+    return re.sub(r'[\s\.\-_,\'\"()\[\]&]', '', s or '').lower()
+
+def _extract_core_name(name: str) -> str:
+    """상호명에서 지점/업종 일반어를 제거한 핵심 키워드 추출"""
+    clean = re.sub(r'\(.*?\)|\[.*?\]', '', name).strip()
+    clean = re.sub(r'(본점|직영점|지점|[0-9]{1,2}호점|점포)$', '', clean).strip()
+    # 접두/접미 일반어 제거
+    for prefix in ["카페", "베이커리", "식당", "레스토랑", "공방", "스튜디오"]:
+        if clean.startswith(prefix) and len(clean) > len(prefix) + 1:
+            clean = clean[len(prefix):].strip()
+        if clean.endswith(prefix) and len(clean) > len(prefix) + 1:
+            clean = clean[:-len(prefix)].strip()
+    return clean or name
+
 def search_youtube_hotclip(spot_name: str, region_or_area: str = "") -> dict | None:
     """
     장소명으로 유튜브 검색을 수행하여 가장 관련성 높은 쇼츠 또는 최신 핫영상을 추출합니다.
+    영상 제목에 실제 상호명이 명확히 포함된 경우에만 인정합니다.
     """
     clean_name = re.sub(r'\(.*?\)|\[.*?\]', '', spot_name).strip()
+    core_name = _extract_core_name(spot_name)
+    if not clean_name or len(clean_name) < 2:
+        return None
+
     query = f"{region_or_area} {clean_name} 데이트" if region_or_area else f"{clean_name} 핫플 데이트"
     encoded_query = urllib.parse.quote(query)
     url = f"https://www.youtube.com/results?search_query={encoded_query}"
@@ -90,8 +111,11 @@ def search_youtube_hotclip(spot_name: str, region_or_area: str = "") -> dict | N
             if not contents:
                 return None
             
-            # 상위 3개 영상 중 핫클립 선정
-            for video in contents[:3]:
+            norm_clean = _norm_name(clean_name)
+            norm_core = _norm_name(core_name)
+
+            # 상위 5개 영상 중 실제 상호명이 포함된 영상만 선정
+            for video in contents[:5]:
                 video_id = video.get("videoId")
                 if not video_id:
                     continue
@@ -103,8 +127,19 @@ def search_youtube_hotclip(spot_name: str, region_or_area: str = "") -> dict | N
                     runs = video["title"].get("runs", [])
                     title = "".join(r.get("text", "") for r in runs)
                 
-                # 장소명이 제목에 포함되거나 데이트/핫플 관련 영상인지 검증
-                if not any(k.lower() in title.lower() for k in [clean_name[:3], "데이트", "핫플", "맛집", "카페", "코스"]):
+                if not title:
+                    continue
+
+                norm_title = _norm_name(title)
+
+                # 상호명 또는 핵심 상호명이 제목에 실제로 존재하는지 엄격히 검증
+                # ('데이트', '핫플' 등 일반 불용어만 있는 일반 모음 영상은 철저 배제)
+                has_name_match = (
+                    (len(norm_clean) >= 2 and norm_clean in norm_title) or
+                    (len(norm_core) >= 2 and norm_core in norm_title)
+                )
+
+                if not has_name_match:
                     continue
                 
                 view_str = ""

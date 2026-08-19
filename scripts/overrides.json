@@ -2,1578 +2,1476 @@
   "먼치스앤구디스": {
     "exclude": true
   },
-  "[역삼 & 강남역 권역]": {
+  "페리지 (Perigee)": {
+    "verified": true,
+    "sourceUrl": "https://www.114.co.kr/search/detail?comp_id=8932948",
+    "summary": "강남역 인근 프렌치 파스타 레스토랑"
+  },
+  "파크 하얏트 서울 - 더 팀버 하우스 (The Timber House)": {
+    "verified": true,
+    "sourceUrl": "https://www.hotelrestaurant.co.kr/news/article.html?no=15086",
+    "summary": "프리미엄 위스키 칵테일 바 라이브 DJ 공연"
+  },
+  "바 티센트 (Bar Tea Scent)": {
+    "verified": true,
+    "sourceUrl": "https://www.tripadvisor.co.kr/ShowUserReviews-g294197-d19070247-r720459922-Bar_Tea_Scent-Seoul.html",
+    "summary": "차를 활용한 창작 칵테일 바",
+    "location": "서울 강남구 선릉로162길 16 지하 1층"
+  },
+  "소피텔 앰배서더 서울 - 라티튜드32 (Latitude32)": {
+    "verified": true,
+    "sourceUrl": "https://www.sofitel-seoul.com/en/dining-offers/latitude32-jazz-night-2026/",
+    "summary": "32층 루프탑 파리 스피크이지 우주 테마 바"
+  },
+  "소호앤노호 청담 본점 (Soho & Noho Cheongdam)": {
+    "verified": true,
+    "sourceUrl": "https://sohoandnoho.com/",
+    "summary": "청담동 프리미엄 플라워 샵으로 럭셔리 센터피스 클래스를 제공합니다."
+  },
+  "블레스유플라워 청담 본점 (Bless You Flower Cheongdam)": {
+    "verified": true,
+    "sourceUrl": "https://blessyouflower.com/",
+    "summary": "청담동 플로리스트 스쿨로 프라이빗 비스포크 마스터클래스를 운영합니다."
+  },
+  "르자당 플라워 도산 (Le Jardin Flower Dosan)": {
+    "verified": true,
+    "sourceUrl": "https://www.siksinhot.com/P/1269950",
+    "summary": "도산 프리미엄 플라워 샵으로 유러피안 오트 쿠튀르 레슨을 제공합니다."
+  },
+  "Key Categories": {
     "exclude": true
   },
- "페리지 (Perigee)": {
-  "verified": true,
-  "sourceUrl": "https://www.114.co.kr/search/detail?comp_id=8932948",
-  "summary": "강남역 인근 프렌치 파스타 레스토랑"
- },
- "[삼성동 권역]": {
-  "exclude": true
- },
- "파크 하얏트 서울 - 더 팀버 하우스 (The Timber House)": {
-  "verified": true,
-  "sourceUrl": "https://www.hotelrestaurant.co.kr/news/article.html?no=15086",
-  "summary": "프리미엄 위스키 칵테일 바 라이브 DJ 공연"
- },
- "바 티센트 (Bar Tea Scent)": {
-  "verified": true,
-  "sourceUrl": "https://www.tripadvisor.co.kr/ShowUserReviews-g294197-d19070247-r720459922-Bar_Tea_Scent-Seoul.html",
-  "summary": "차를 활용한 창작 칵테일 바",
-  "location": "서울 강남구 선릉로162길 16 지하 1층"
- },
- "[잠실 & 석촌호수 권역]": {
-  "exclude": true
- },
- "소피텔 앰배서더 서울 - 라티튜드32 (Latitude32)": {
-  "verified": true,
-  "sourceUrl": "https://www.sofitel-seoul.com/en/dining-offers/latitude32-jazz-night-2026/",
-  "summary": "32층 루프탑 파리 스피크이지 우주 테마 바"
- },
- "[반포 & 서초 권역]": {
-  "exclude": true
- },
- "소호앤노호 청담 본점 (Soho & Noho Cheongdam)": {
-  "verified": true,
-  "sourceUrl": "https://sohoandnoho.com/",
-  "summary": "청담동 프리미엄 플라워 샵으로 럭셔리 센터피스 클래스를 제공합니다."
- },
- "블레스유플라워 청담 본점 (Bless You Flower Cheongdam)": {
-  "verified": true,
-  "sourceUrl": "https://blessyouflower.com/",
-  "summary": "청담동 플로리스트 스쿨로 프라이빗 비스포크 마스터클래스를 운영합니다."
- },
- "르자당 플라워 도산 (Le Jardin Flower Dosan)": {
-  "verified": true,
-  "sourceUrl": "https://www.siksinhot.com/P/1269950",
-  "summary": "도산 프리미엄 플라워 샵으로 유러피안 오트 쿠튀르 레슨을 제공합니다."
- },
- "Key Categories": {
-  "exclude": true
- },
- "[청담 & 압구정 권역]": {
-  "exclude": true
- },
- "도멘청담 (Domaine Cheongdam)": {
-  "verified": true,
-  "sourceUrl": "https://www.trip.com/travel-guide/attraction/seoul/cheongdam-dong-10800198/",
-  "summary": "강남 청담의 프리미엄 와인바로 프랑스 요리와 세계 명주를 제공합니다.",
-  "slot": "evening"
- },
- "르챔버 (Le Chamber)": {
-  "verified": true,
-  "sourceUrl": "https://www.tripadvisor.com/Attraction_Review-g294197-d9996738-Reviews-Le_Chamber-Seoul.html",
-  "summary": "청담의 프리미엄 칵테일 바로 명성 높은 바텐더들의 셰이킹 아트를 경험",
-  "price": "입장료 1만원, 칵테일 2만3천~3만원대"
- },
- "[신사 & 도산공원 권역]": {
-  "exclude": true
- },
- "더 시에나 라운지 청담 & 루프탑 디아만테 (The Siena Lounge)": {
-  "verified": true,
-  "sourceUrl": "https://thesiena.co.kr/content/cheongdam",
-  "summary": "청담의 고급 복합 라운지로 와인, 위스키바, 다이닝, 루프탑바 등 다층 시설"
- },
- "앨리스 프로젝트 (Alice Project)": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=alkksvvyGkX7",
-  "summary": "양재천변 산책로의 시그니처 피스타치오 케이크가 인기인 디저트 카페"
- },
- "소나 (SONA)": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=dB0Q1dXc5wSQ",
-  "summary": "신사동 가로수길의 프리미엄 디저트 카페, 전문 패스트리 셰프 운영"
- },
- "김씨부인 (Kim C Buin)": {
-  "verified": true,
-  "sourceUrl": "https://www.siksinhot.com/P/859332",
-  "summary": "서래마을의 전통 한식 디저트와 차를 제공하는 아늑한 카페"
- },
- "오설록 티하우스 북촌점 (가회다실)": {
-  "verified": true,
-  "sourceUrl": "https://www.osulloc.com/kr/ko/store-introduction/312",
-  "price": "차 코스 39천원~",
-  "summary": "전통 차와 현대적 감각이 결합된 북촌 한옥마을의 프리미엄 티하우스"
- },
- "오설록 1979": {
-  "verified": true,
-  "sourceUrl": "https://www.osulloc.com/kr/ko/store-introduction/174",
-  "summary": "오설록의 정신과 휴식의 가치를 담은 프리미엄 티룸, 한강 조망"
- },
- "맥파이앤타이거 성수/신사 티룸": {
-  "verified": true,
-  "sourceUrl": "https://www.mangoplate.com/restaurants/jEmQU2HkQdbh",
-  "summary": "차를 마시는 시간을 특별하게 공유하는 프리미엄 티룸"
- },
- "Summary": {
-  "exclude": true
- },
- "Key Destination Options": {
-  "exclude": true
- },
- "가죽공방 루니에 (Lunie Leather Atelier Seongsu)": {
-  "verified": true,
-  "sourceUrl": "https://www.instagram.com/lunie_leather/",
-  "summary": "성수동 소재 이탈리아 정규과정 수료 가죽공방으로 원데이 클래스와 맞춤 가죽제품 제작을 제공"
- },
- "아뜰리에 르솔 (Atelier Lesol Seongsu)": {
-  "verified": true,
-  "sourceUrl": "https://www.instagram.com/lesol_atelier/",
-  "summary": "성수동 소재 헤어스타일링과 메이크업 전문 살롱으로 1인 맞춤 서비스 제공 중"
- },
- "Termeden & Simmons Terrace (Icheon)": {
-  "verified": true,
-  "sourceUrl": "https://www.frommers.com/destinations/icheon/attractions/termeden-spa-and-resort/"
- },
- "2단계 큐레이션 테마 (Atmospheric Alley Stroll & Relaxed Aesthetics)": {
-  "exclude": true
- },
- "정식당 (Jungsik Cheongdam)": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=TFmNhx1RJTs6",
-  "price": "점심 20만원, 저녁 30만원",
-  "summary": "청담동의 미슐랭 레스토랑, 신선한 한국 재료를 활용한 파인다이닝"
- },
- "피플더테라스 (People The Terrace)": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=L4DmIB4n3VWk",
-  "summary": "청담 도산대로의 유럽풍 고급 다이닝바, 셀럽 선호 공간"
- },
- "조선팰리스 서울 강남 - 이타닉 가든 (Eatanic Garden)": {
-  "verified": true,
-  "sourceUrl": "https://jpg.josunhotel.com/dining/EatanicGarden.do",
-  "summary": "강남 조선팰리스 36층 미슐랭 1스타 현대 한식 파인다이닝"
- },
- "페어몬트 앰배서더 서울 - 마리포사 & M29 (Mariposa & M29)": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=N8DulXpzK0lo",
-  "summary": "여의도 페어몬트 앰배서더 29층 현대 유럽 요리 파인다이닝"
- },
- "Overview": {
-  "exclude": true
- },
- "핀즈 (FINZ)": {
-  "verified": true,
-  "sourceUrl": "https://www.siksinhot.com/P/1286849",
-  "summary": "강남 압구정 도산공원 로데오거리 한우 그릴 레스토랑"
- },
- "오모트 (OMOT)": {
-  "verified": true,
-  "sourceUrl": "https://omot-omot.com/",
-  "price": "1인 3만5천원",
-  "summary": "한국 전통차와 계절 디저트를 경험하는 75분 예약제 티코스"
- },
- "놋그릇가지런히 (NOSHI)": {
-  "verified": true,
-  "sourceUrl": "https://korean.visitseoul.net/restaurants/",
-  "price": "6천원~8천원대",
-  "summary": "서촌 한옥 카페, 유기그릇에 담긴 수박셔벗과 홍시단팥 디저트"
- },
- "무드페어링 (Mood Pairing)": {
-  "summary": "수원 행궁동 시즈널 디저트 오마카세 카페"
- },
- "발리오스 승마클럽 (BALIOS Equestrian Club)": {
-  "verified": true,
-  "sourceUrl": "https://ggtour.or.kr/travel-info/tourism-info/72655c4c-746a-11ee-b910-0242ac120002",
-  "slot": "day"
- },
- "로얄새들 승마클럽 (Royal Saddle Riding Club)": {
-  "verified": true,
-  "sourceUrl": "http://www.royalsaddle.com/",
-  "price": "그룹레슨 주중 9만원, 주말 10만원 / 개인레슨 주중 14만원, 주말 16만원",
-  "slot": "day"
- },
- "헬레나플라워 청담 아틀리에 (Helena Flower Cheongdam)": {
-  "summary": "청담 프리미엄 1:1 VIP 비스포크 플라워 아트 서비스"
- },
- "스티븐 승마클럽 (Steven Riding Club)": {
-  "verified": true,
-  "sourceUrl": "https://www.icheon.go.kr/tour/cultureTour/manage/view.do?idx=55&mid=0302020000",
-  "location": "경기도 이천시 호법면 이섭대천로527번길 151",
-  "summary": "1986년 아시안게임 메달리스트가 운영하는 한국마사회 협력 승마장"
- },
- "남서울 승마클럽 (Namseoul Riding Club)": {
-  "verified": true,
-  "sourceUrl": "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=5b7d4692-ec08-4f76-be9b-f8ab0307f662",
-  "region": "경기",
-  "summary": "강남 30분, 분당 10분 거리의 프리미엄 가족형 승마클럽"
- },
- "디원호스클럽 (D1 Horse Club)": {
-  "verified": true,
-  "sourceUrl": "http://theonehorse.co.kr/sub/sub02_01.php",
-  "location": "경기도 남양주시 와부읍 월문천로 280-7",
-  "summary": "5세 이상 누구나 가능한 가족형 승마클럽"
- },
- "W홀스랜드 (W Horseland)": {
-  "verified": true,
-  "sourceUrl": "https://tripinfo.co.kr/info.html?content_id=1988431&content_type_id=28",
-  "summary": "국내 최대 규모 4만평 유럽형 승마클럽, 5개 난이도 외승코스"
- },
- "레이크밸리 승마클럽 (Lake Valley Riding Club)": {
-  "verified": true,
-  "sourceUrl": "https://www.youtube.com/watch?v=Wuex4FpiYok",
-  "summary": "서울근교 포천의 자연친화적 승마클럽"
- },
- "동서울 승마클럽 (East Seoul Riding Club)": {
-  "verified": true,
-  "sourceUrl": "https://place.tripmate.co.kr/ko/detail.php?contentId=3085278&contentTypeId=28",
-  "region": "경기",
-  "location": "경기도 남양주시 와부읍 월문천로 280-7",
-  "summary": "예봉산 기슭, 5세부터 80대까지 가능한 가족형 클럽"
- },
- "홀스메이트 승마클럽 (Horsemate Riding Club)": {
-  "verified": true,
-  "sourceUrl": "https://www.instagram.com/horsemate_official/",
-  "summary": "화성의 자연친화적 승마시설, 숙박 및 BBQ 시설 완비"
- },
- "카카오다다 (Cacao Dada)": {
-  "verified": true,
-  "sourceUrl": "https://cacaodada.imweb.me/",
-  "summary": "카카오 빈을 직접 로스팅·분쇄해 만드는 수제 초콜릿 전문점",
-  "slot": "day",
-  "mood": [
-   "gourmet"
-  ]
- },
- "트리투바 (Tree to Bar)": {
-  "verified": true,
-  "sourceUrl": "https://autoreserve.com/ko/restaurants/6Zja1Rhf7EosMLQQKc8R",
-  "summary": "초콜릿 제조 과정을 직접 관찰하고 체험할 수 있는 초콜릿 전문 카페",
-  "slot": "day"
- },
- "JL 디저트바 (JL Dessert Bar)": {
-  "verified": true,
-  "sourceUrl": "https://www.catchtable.net/shop/jldessertbar",
-  "summary": "셰프 저스틴 리가 선보이는 수제 디저트 코스 레스토랑"
- },
- "비앤테일러 (B&Tailor Cheongdam)": {
-  "verified": true,
-  "sourceUrl": "https://www.permanentstyle.com/2024/02/btailor-korea-real-bespoke-and-distinctive-style.html",
-  "summary": "청담동 비스포크 맞춤정장 명가로 1967년 설립, 세대 이음 전문 기술력",
-  "exclude": true
- },
- "메디치 가죽공방 (Medici Leather Studio)": {
-  "verified": true,
-  "sourceUrl": "https://v.daum.net/v/c85bNgkfCC",
-  "summary": "이탈리아 천연 식물성 태닝 가죽으로 만드는 프리미엄 가죽공예 원데이 클래스"
- },
- "YH 가죽공방 (YH Leather Workshop)": {
-  "location": "서울 강남구 논현동 22 논현아파트 쇼핑몰 2층"
- },
- "라온디 (LaonD)": {
-  "exclude": true
- },
- "한국초콜릿연구소뮤지엄 스튜디오 (Korea Chocolate Institute Museum Studio)": {
-  "verified": true,
-  "sourceUrl": "https://kr.trip.com/travel-guide/attraction/gapyeong-gun/korea-chocolate-institute-museum-99588533/",
-  "summary": "가평의 초콜릿 박물관에서 직접 만드는 경험과 초콜릿 클래스 제공"
- },
- "세빛섬 무드서울 (MOOD SEOUL)": {
-  "verified": true,
-  "sourceUrl": "https://www.4th.kr/news/articleView.html?idxno=2056824",
-  "summary": "한강 360도 야경을 감상하며 시푸드·와인·위스키를 즐기는 고급 바"
- },
- "[여의도 권역]": {
-  "exclude": true
- },
- "🌲 Part 2. 아트 컬렉터의 숲 & 수목원·야외조각 갤러리 (경기/서울 근교)": {
-  "exclude": true
- },
- "수도권 20선 라운지별 상세 리포트": {
-  "exclude": true
- },
- "[포천/소흘] 국립광릉수목원 자락 송설 분재원 온실 다실 (Gwangneung Songseol Bonsai Greenhouse)": {
-  "region": "경기"
- },
- "최고급 호텔 프라이빗 에스테틱 & 뷰티 라운지": {
-  "exclude": true
- },
- "하이엔드 럭셔리 스킨/페이셜 커플 스파 라운지": {
-  "exclude": true
- },
- "3단계 큐레이션 원칙 (Active, Private & Refreshing)": {
-  "exclude": true
- },
- "Key Highlights": {
-  "exclude": true
- },
- "부여농부의집 (Buyeo Farmer's House — 부여)": {
-  "region": "충청",
-  "location": "충청남도 부여군 부여읍 일대",
-  "summary": "부여 지역의 한옥 펜션으로 부소산성, 정림사지 근처"
- },
- "부여 안방마님 펜션 (Anbangnmanim — 부여)": {
-  "region": "충청",
-  "location": "충청남도 부여군 부여읍 일대"
- },
- "현암리 돌담집 (Hyeonamri Stone Wall House — 부여)": {
-  "region": "충청",
-  "location": "충청남도 부여군 현암리 일대"
- },
- "가림재 (Garimjae — 부여)": {
-  "region": "충청",
-  "location": "충청남도 부여군 임천면 일대"
- },
- "청담황토한옥 (Cheongdam Hwangto Hanok — 익산 금마)": {
-  "region": "호남",
-  "location": "전라북도 익산시 금마면 일대"
- },
- "남촌 CC 멤버십 다이닝 & 라운지": {
-  "verified": true,
-  "sourceUrl": "https://www.namchoncc.co.kr",
-  "summary": "멤버십 기반 다이닝 운영 중, 활발한 예약 시스템 운영"
- },
- "아시아나 CC 클럽하우스 다이닝": {
-  "verified": true,
-  "sourceUrl": "https://m.asianacc.co.kr",
-  "summary": "예약 시스템 활성, 날씨 정보 업데이트 운영 중"
- },
- "크리스찬 유앤브이 한남 (Christian U&V)": {
-  "verified": true,
-  "sourceUrl": "https://www.instagram.com/christian.unv/"
- },
- "헤드스파K 논현 VIP 본점 (Head Spa K)": {
-  "verified": true,
-  "sourceUrl": "https://headspak.com/index.php?mid=partners"
- },
- "더트리니티스파 판교점 (The Trinity Spa)": {
-  "verified": true,
-  "sourceUrl": "https://www.trinityspa.co.kr/location"
- },
- "라이카시네마 프라이빗 대관 (연희동)": {
-  "verified": true,
-  "sourceUrl": "http://laikacinema.com/about",
-  "summary": "연희동 아트 영화관, 2021년 오픈, 프라이빗 상영 대관 가능"
- },
- "👑 Chapter 3. VIP 회원제 & 프라이빗 와인 셀러 다이닝": {
-  "exclude": true
- },
- "CGV 프라이빗 박스 (PRIVATE BOX - 용산아이파크몰)": {
-  "verified": true,
-  "sourceUrl": "https://cgv.co.kr/cnm/bzplcCgv/0013001",
-  "summary": "용산아이파크몰 6~7층 프라이빗 박스 영화관 현재 운영 중"
- },
- "롯데시네마 샤롯데 프라이빗 (월드타워점 / 건대입구점)": {
-  "verified": true,
-  "sourceUrl": "https://namu.wiki/w/%EB%A1%AF%EB%8D%B0%EC%8B%9C%EB%84%A4%EB%A7%88/%EC%8A%A4%ED%8E%98%EC%85%9C%EA%B4%80",
-  "summary": "롯데월드타워 11관 샤롯데 프라이빗(8석) 현재 운영 중"
- },
- "BOID (보이드 - 가로수길)": {
-  "verified": true,
-  "sourceUrl": "https://www.boid.me/",
-  "summary": "가로수길 BOID 4K 돌비 프라이빗 시어터 현재 운영 중"
- },
- "칠인더시네마 (Chillin Cinema - 용산/홍대)": {
-  "verified": true,
-  "sourceUrl": "https://kr.trip.com/moments/detail/hongdae-2135592-138807867/",
-  "summary": "홍대 칠인더시네마 프라이빗 영화관 현재 운영 중"
- },
- "을지영화관 (Eulji Cinema - 을지로)": {
-  "verified": true,
-  "sourceUrl": "https://www.facebook.com/euljicinema/",
-  "summary": "을지로 프라이빗 시네마 130인치 4K 스크린 현재 운영"
- },
- "시글루 (SEAGLOO - 건대)": {
-  "verified": true,
-  "sourceUrl": "https://linktr.ee/cigloo",
-  "summary": "CIGLOO/시글루 건대 프라이빗 영화관 현재 운영 중"
- },
- "세빛섬 채빛퀴진 (Floating Island Chavit Cuisine)": {
-  "verified": true,
-  "sourceUrl": "https://www.somesevit.co.kr/kr/business/chavit/introduce.do",
-  "summary": "한강 전망의 대형 수상 뷔페 레스토랑, 160여 가지 메뉴"
- },
- "세빛섬 골든블루마리나 프라이빗 샴페인 라운지 (Golden Blue Marina)": {
-  "verified": true,
-  "sourceUrl": "https://www.instagram.com/goldenbluemarina/",
-  "summary": "세빛섬 2025 시즌 운영, 프라이빗 샴페인 라운지"
- },
- "김포 아라마리나 요트클럽 프라이빗 차터 (Gimpo Ara Marina Yacht Club)": {
-  "verified": true,
-  "sourceUrl": "https://eco.gimpo.go.kr/culture/selectTourCntntsWebView.do?tourNo=421",
-  "summary": "수상레저 체험시설, 수요일~일요일 09시~18시 운영"
- },
- "화성 전곡항 마리나 요트 다이닝 (Jeonggok Marina Yacht Dining)": {
-  "verified": true,
-  "sourceUrl": "https://www.hsuco.or.kr/www/M040000/M040500/M0405005/M04050052.jsp",
-  "summary": "국제 요트대회 개최 마리나, 113척 규모 계류시설"
- },
- "화성 제부마리나 럭셔리 요트 라운지 (Jebu Marina Luxury Yacht Lounge)": {
-  "verified": true,
-  "sourceUrl": "https://www.gppc.or.kr/ko/business/detail-11",
-  "summary": "연중무휴 운영, 요트/모터보트 계류 및 클럽하우스"
- },
- "시흥 거북섬 시화호 마리나 (Siheung Turtle Island Marina)": {
-  "verified": true,
-  "sourceUrl": "https://www.ajunews.com/view/20251018143133084",
-  "summary": "2025 경기국제보트쇼 개최, 90선석 계류시설"
- },
- "인천 영종도 왕산마리나 요트 다이닝 (Wangsan Marina Sunset Dining)": {
-  "verified": true,
-  "sourceUrl": "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=b646d21c-248f-4271-8f7d-6523d8efec46",
-  "summary": "319척 계류시설, 요트 투어 및 낙조 관광 명소"
- },
- "의정부 파크프리베 (Park Prive)": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=bESYZMBtIt2l",
-  "summary": "의정부 장암동 프라이빗 카페·다이닝, 현재 영업 중"
- },
- "데이빗앤룰스 '더 체임버 룸' (David & Rules 'The Chamber') - 서판교": {
-  "verified": true,
-  "sourceUrl": "https://davidnrules.kr/",
-  "summary": "분당 프리미엄 스테이크하우스, 드라이에이징 숙성 스테이크"
- },
- "우몽블랙 판교점 (Woomong Black) - 판교": {
-  "verified": true,
-  "sourceUrl": "https://woomong.kr/",
-  "summary": "판교 한우오마카세 전문점, 알파돔타워 2층"
- },
- "서울마리나 셰프 온 더 요트 (Seoul Marina Chef on the Yacht)": {
-  "verified": true,
-  "sourceUrl": "https://seoulmarina.club/",
-  "summary": "여의도 한강공원 내 요트클럽, 요트투어·카페·레스토랑"
- },
- "양평 더그림 (The Greem)": {
-  "verified": true,
-  "sourceUrl": "https://ggtour.or.kr/story/travel.php?tmenu=&smenu=&stitle=&tsort=1&msort=8&board_code=5&board=5&s_category_name=&key=&page=3&mode=detail&no=40389",
-  "summary": "미니식물원 카페, 정원 방송 촬영 명소 60여 편, 아름다운 유럽식 정원과 포토존 보유",
-  "price": "8,000원(성인)/7,000원(어린이)"
- },
- "남양주 비루개 (Birugae)": {
-  "verified": true,
-  "sourceUrl": "https://kr.trip.com/moments/detail/namyangju-si-121872-119521602/",
-  "summary": "유리온실 형태 수목원 카페, 그네·평상·보드게임 등 다양한 놀거리 구비"
- },
- "용인 칼리오페 (Calliope)": {
-  "verified": true,
-  "sourceUrl": "https://www.instagram.com/calliope_corp/",
-  "summary": "700평 규모 그리스 로마 신화 테마 복합문화공간, 카페·베이커리·와인바·무대"
- },
- "용인 묵리459 (Mukri 459)": {
-  "verified": true,
-  "sourceUrl": "https://mukri459.com/",
-  "summary": "갤러리 감성 카페, 자연경관 조망 가능한 목재톤 내부, 천연효모 브런치 인기"
- },
- "용인 어 로프 슬라이스 피스 (A Loaf Slice Piece)": {
-  "verified": true,
-  "sourceUrl": "https://www.instagram.com/a_loaf_slice_piece/",
-  "summary": "대형 베이커리 카페, 목재톤 따뜻한 분위기, 시그니처 밧줄빵·뜀틀빵 등"
- },
- "김포 아보고가 (Abogoga)": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=pM5dB6uHAyeN",
-  "summary": "피라미드 형태 독특한 건축미 카페, 한강뷰, 베이커리·샌드위치 전문"
- },
- "양평 하우스 베이커리 (Haus Bakery)": {
-  "verified": true,
-  "sourceUrl": "https://www.instagram.com/haus.bakery/?hl=ko",
-  "summary": "배우 이영애 구 저택 한옥 베이커리, 캐나다·호주·프랑스산 유기농 버터 사용"
- },
- "이천 이진상회 (Ijin Sanghoe)": {
-  "verified": true,
-  "sourceUrl": "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=6e4e9af2-9378-4a8b-97eb-b97e2db90ed7",
-  "summary": "도자기 도시 특화, 16,000㎡ 규모 복합문화공간, 디저트 담은 도자기 무료 제공"
- },
- "르플랑 에떼 안국 (Le Plein Ete Anguk Atelier)": {
-  "summary": "한국 도시의 고유 향을 담은 니치 향수 브랜드, 안국 플래그십 스토어"
- },
- "다니엘 트루스 퍼퓸 하우스 성수 (Daniel's Truth Perfume House Seongsu)": {
-  "summary": "오일 퍼퓸 1:1 퍼스널 조향 체험, 성수동 플래그십 하우스"
- },
- "스파에코 분당정자점 (Spa Eco)": {
-  "verified": true,
-  "sourceUrl": "http://www.spaeco.co.kr/"
- },
- "모에드 일산 헤드스파 스튜디오 (Moed)": {
-  "verified": true,
-  "sourceUrl": "https://moadd.co.kr/"
- },
- "목탄장 판교점 (Moktanjang) - 판교": {
-  "verified": true,
-  "sourceUrl": "https://app.catchtable.co.kr/ct/shop/moktanjang_pangyo",
-  "summary": "숯불다이닝과 와인바를 결합한 프리미엄 다이닝 레스토랑. 판교타워 1층 위치"
- },
- "뮤즈온 (Muse On) - 서울 강남구 신사동 (가로수길)": {
-  "verified": true,
-  "sourceUrl": "https://app.catchtable.co.kr/ct/shop/museon_garosugil",
-  "summary": "신사동 가로수길 LP뮤지엄, 약 10,000장 LP 보유, 기네스 맥주와 칵테일 제공"
- },
- "서촌 온그라운드 뮤직바 (OnGround Music Bar) - 서울 종로구 창성동": {
-  "verified": true,
-  "sourceUrl": "https://app.catchtable.co.kr/ct/shop/ongroundgallery",
-  "summary": "서촌 갤러리 겸 LP바, 다이닝코드 평점 4.4별, 예술작품 전시"
- },
- "사운드카페 소리 (Sound Cafe Sori) - 서울 마포구 상수동": {
-  "verified": true,
-  "sourceUrl": "https://shareit.kr/venue/1282",
-  "summary": "마포 상수동, 수십년 수집 앰프·스피커·진공관, 최고급 음악감상 공간"
- },
- "오르페오 (ORFEO) - 서울 용산구 한남동": {
-  "verified": true,
-  "sourceUrl": "https://www.monoplex.com/space/m005",
-  "summary": "용산 한남동 사운즈 한남 5층, 국내 최초 사운드 시어터, 1인 25,000원"
- },
- "이촌동 카펜터스 (Carpenters) - 서울 용산구 이촌동": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=T8GifY4hylsz",
-  "summary": "이촌동 LP바, 19:30-02:00 영업(일요일 휴무), 이촌역 3-1번 출구 250m"
- },
- "사운드 플래닛 (Sound Planet) - 서울 성동구 성수동": {
-  "verified": true,
-  "sourceUrl": "https://polle.com/place/4NnWAw/%EC%82%AC%EC%9A%B4%EB%93%9C%20%ED%94%8C%EB%9E%98%EB%8B%9B",
-  "summary": "성수동 뚝섬역 인근 바, 2만원대 칵테일, 팝콘향의 이태원갬성 인테리어"
- },
- "인천 드림파크 승마장 (Incheon Dreampark Riding Center)": {
-  "verified": true,
-  "sourceUrl": "https://www.k-lifetv.co.kr/news/articleView.html?idxno=29905"
- },
- "용인 신갈 승마클럽 (Singal Riding Club)": {
-  "verified": true,
-  "sourceUrl": "https://www.earthtory.com/ko/city/yongin-si_10924/attraction/%EC%8B%A0%EA%B0%88%EC%8A%B9%EB%A7%88%ED%81%B4%EB%9F%BD_845594"
- },
- "스피크이지 몰타르 (Speakeasy Mortar) - 서울 용산구 한남동": {
-  "verified": true,
-  "sourceUrl": "https://wanderlog.com/place/details/1078174/speakeasy-mortar",
-  "summary": "신비로운 입장 구성의 서울 대표 스피크이지 바"
- },
- "한남 더부즈 (Hannam The Booze) - 서울 용산구 한남동": {
-  "verified": true,
-  "sourceUrl": "https://www.menupan.com/Restaurant/GoodRest/GoodRest_View.asp?id=179846",
-  "summary": "품질 좋은 얼음 큐브 사용하는 숨은 위스키 바"
- },
- "블라인드 피그 (Blind Pig) - 서울 용산구 한남동": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=ysxAKVaKnxGq",
-  "summary": "한남동 명물 프리미엄 위스키 바"
- },
- "을지로 숙희 (Sukhee) - 서울 중구 을지로/명동": {
-  "verified": true,
-  "sourceUrl": "https://www.siksinhot.com/P/1101370",
-  "summary": "을지로 서정 넘치는 레트로 감성 술집"
- },
- "장프리고 (Jean Frigo) - 서울 중구 광희동 (동대문/을지로)": {
-  "verified": true,
-  "sourceUrl": "https://ko.foursquare.com/v/jean-frigo-%EC%9E%A5%ED%94%84%EB%A6%AC%EA%B3%A0/589ecfbdd9705c7b877b87fe",
-  "summary": "냉장고 문 뒤의 독특한 프랑스식 칵테일 바"
- },
- "포지티브 제로 몽크 / 포지티브제로라운지 (Positive Zero Lounge) - 서울 성동구 성수동": {
-  "verified": true,
-  "sourceUrl": "https://www.siksinhot.com/P/978610",
-  "summary": "서울숲 근처 라이브 재즈 공연 매일 진행"
- },
- "디도 재즈 라운지 (Dido Jazz Lounge) - 서울 광진구 구의동": {
-  "verified": true,
-  "sourceUrl": "https://english.visitseoul.net/restaurants/Dido-Jazz-Lounge/ENP040935",
-  "summary": "라라랜드 감성의 라이브 재즈 라운지"
- },
- "연남 5701 (Yeonnam 5701) - 서울 마포구 연남동": {
-  "verified": true,
-  "sourceUrl": "https://www.siksinhot.com/P/1270279",
-  "summary": "연남동 와인과 라이브 재즈 즐기는 클럽"
- },
- "전남 여수 웅천 이순신마리나 요트콜라 선상 차터 (Yeosu Yacht Cola Private Charter)": {
-  "verified": true,
-  "sourceUrl": "https://yisunsinmarina.co.kr/free/116",
-  "summary": "여수 이순신마리나 요트 차터 서비스, 해상 데이트 스팟"
- },
- "갤러리 더 스퀘어 (Gallery The Square)": {
-  "verified": true,
-  "sourceUrl": "https://polle.com/place/5BhL8A/%EA%B0%A4%EB%9F%AC%EB%A6%AC%20%EB%8D%94%20%EC%8A%A4%ED%80%98%EC%96%B4",
-  "summary": "종로 계동 북촌 갤러리 티룸, 예약 가능"
- },
- "남양주 베이커리 씨어터 (Bakery Theater)": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=XrAuPxXPQQRf",
-  "summary": "북한강 뷰 베이커리 카페, 넓은 정원과 실내 공간",
-  "slot": "day"
- },
- "화성 혜경궁 베이커리 (Hyegyeonggung Bakery)": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=FUNCxKWz1I0J",
-  "summary": "화성 정남면 한옥 베이커리 카페, 산책로와 야외 공간"
- },
- "몰트 바 소마 (Malt Bar Soma) - 판교": {
-  "verified": true,
-  "sourceUrl": "https://www.siksinhot.com/P/1110788",
-  "summary": "판교 유스페이스 위스키&칵테일 바, 유럽식 인테리어"
- },
- "더 모멘토 바 (The Momento Bar) - 분당 정자": {
-  "verified": true,
-  "sourceUrl": "https://polle.com/p/1JJTKc",
-  "summary": "분당 정자 위스키 바, 무료 애피타이저 제공"
- },
- "스튜디오 지구 (Studio Jigu) - 판교": {
-  "verified": true,
-  "sourceUrl": "https://polle.com/place/2hMUi2/%EC%8A%A4%ED%8A%9C%EB%94%94%EC%98%A4%20%EC%A7%80%EA%B5%AC",
-  "summary": "판교 유스페이스 와인 바, 세련된 분위기"
- },
- "힐즈앤유로파 (Hills & Europa) - 서울 용산구 해방촌": {
-  "verified": true,
-  "sourceUrl": "https://www.instagram.com/hillsandeuropa/",
-  "summary": "용산 해방촌 카페겸 바. 주말 오후, 평일저녁 바로 운영"
- },
- "써라운드 (Surround) - 경기 남양주시 화도읍": {
-  "verified": true,
-  "sourceUrl": "https://www.hankyung.com/article/202503260009i",
-  "summary": "남양주 화도의 산자락 카페, 5.3m 대창 창문이 특징"
- },
- "베토벤하우스 - 인천 중구 영종도": {
-  "verified": true,
-  "sourceUrl": "https://www.hankyung.com/article/202503257472i",
-  "summary": "영종도 베토벤 컨셉 카페, 음악감상실에 고급 클래식 스피커"
- },
- "🎳 하이엔드 볼링 펍 & 라운지": {
-  "exclude": true
- },
- "르챔버 (Le Chamber) - 서울 강남구 청담동": {
-  "exclude": true
- },
- "앨리스 청담 (Alice Cheongdam) - 서울 강남구 청담동": {
-  "exclude": true
- },
- "겟올라잇 청담 (Get All Right) - 서울 강남구 청담동": {
-  "exclude": true
- },
- "케이원 시크릿 와인 룸 (K-One Secret Wine Room) - 과천": {
-  "verified": true,
-  "sourceUrl": "https://www.threads.com/@kone.cafe/post/DP5s45lkfDt/",
-  "location": "경기 과천시 중앙로 429",
-  "summary": "과천의 카페. 최근 민생지원금 사용 가능 안내."
- },
- "리홀뮤직갤러리 - 서울 성북구 성북동": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=h4hEtPNfFBoE",
-  "price": "10000",
-  "summary": "성북동 음악감상실. 12만여 장 LP와 1930년대 빈티지 스피커. 입장료 1만원."
- },
- "콩치노 콩크리트 (Concino Concrete) - 경기 파주시 탄현면": {
-  "verified": true,
-  "sourceUrl": "https://www.paju.go.kr/news/user/BD_newsView.do?q_ctgCd=1002&newsSeq=914",
-  "price": "20000",
-  "summary": "파주 헤이리의 세계 최대 규모 개인소유 LP 감상실. 입장료 2만원."
- },
- "황인용 뮤직스페이스 카메라타 (Camerata) - 경기 파주시 탄현면": {
-  "verified": true,
-  "sourceUrl": "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=068556d5-c944-4382-9509-925971b2d9e7",
-  "summary": "파주 헤이리의 명품 음악감상실. 10만여 장 LP와 웨스턴일렉트릭 오디오 시스템."
- },
- "피터폴앤드메리 (Peter Paul & Mary) - 서울 강남구 압구정동": {
-  "verified": true,
-  "sourceUrl": "https://www.saramin.co.kr/zf_user/company-info/view/csn/eXVMYmFrZFUyS0RFeDU5cXRvWXVXUT09/company_nm/",
-  "summary": "강남 압구정의 LP바. 2만여 개 LP와 돌비 애트모스 공간음향 시스템 장착."
- },
- "오드 메종 (ODE Maison) - 서울 강남구 청담동": {
-  "verified": true,
-  "sourceUrl": "https://l-room.co.kr/",
-  "summary": "강남의 세계 최대 규모 오디오 전시장. 리스닝룸, 바, 피아노 라운지 운영."
- },
- "강남 플랫나인 (Flat Nine) - 서울 서초구 서초동 (강남역)": {
-  "verified": true,
-  "sourceUrl": "https://app.catchtable.co.kr/ct/shop/flatnine_jazzbar",
-  "summary": "서초동 강남역 인근 재즈바, 라이브 공연 및 칵테일 제공"
- },
- "Aquafield (Hanam / Goyang)": {
-  "verified": true,
-  "sourceUrl": "https://www.aquafield-ssg.co.kr/"
- },
- "고즈넉한 갤러리 산책: 부암동 ↔ 서촌": {
-  "verified": true,
-  "sourceUrl": "https://brunch.co.kr/@aimho/12"
- },
- "시그니엘 서울 - STAY (스테이)": {
-  "verified": true,
-  "sourceUrl": "https://www.lottehotel.com/seoul-signiel/en",
-  "summary": "롯데월드타워 76~101층 초호화 호텔 스테이"
- },
- "JW 메리어트 호텔 서울 - 모보 바 (MOBO Bar)": {
-  "summary": "신반포 JW 메리어트 내 프리미엄 칵테일 바"
- },
- "함라한옥체험단지 (Hamna Hanok Complex — 익산 함라)": {
-  "verified": true,
-  "sourceUrl": "https://www.iksan.go.kr/reserve/board/list.iksan?boardId=BBS_0000444"
- },
- "가평 무아레 478 럭셔리 카바나 (Moire 478)": {
-  "exclude": true
- },
- "가평 마이다스 호텔 앤 리조트 - 헤스티아 카바나 글램핑 (Midas Hestia)": {
-  "verified": true,
-  "sourceUrl": "https://www.midashotel.co.kr/",
-  "summary": "마이다스 호텔 헤스티아 카바나 글램핑, 2026년 예약 가능"
- },
- "가평 아난티 코드 - 캐빈 빌라 글램핑 BBQ (Ananti Chord)": {
-  "verified": true,
-  "sourceUrl": "https://ananti.kr/ko/chord",
-  "summary": "아난티 코드 펜트하우스 럭셔리 카바나, 공식사이트 활성"
- },
- "가평 세라핌 럭셔리 카바나 글램핑 (Seraphim Cabana)": {
-  "verified": true,
-  "sourceUrl": "https://www.yeogi.com/domestic-accommodations/61532",
-  "summary": "가평 세라핌 글램핑, 여기어때 예약 가능 (2026년)"
- },
- "포천 글램파크 캠핑리조트 VIP 카바나 (Glampark VIP Cabana)": {
-  "verified": true,
-  "sourceUrl": "https://www.yeogi.com/domestic-accommodations/73975",
-  "summary": "포천 글램파크 캠핑리조트, 글램핑/카라반 예약 가능"
- },
- "포천 노블글램핑 & 롯지 (Noble Glamping)": {
-  "verified": true,
-  "sourceUrl": "https://site.onda.me/%ED%8F%AC%EC%B2%9C-%EB%85%B8%EB%B8%94%EA%B8%80%EB%9E%A8%ED%95%91-117843/roomtypes/detail/1699281/1553475",
-  "summary": "포천 영중면 위치 럭셔리 글램핑 시설. 4.82점 평점 371개 리뷰로 현재 활발 운영"
- },
- "양평 빌라드샬롯 럭셔리 카바나 (Villa de Charlotte)": {
-  "region": "경기"
- },
- "양평 더포레스트 테라스 카바나 (The Forest Terrace)": {
-  "region": "경기"
- },
- "양평 솔베르크 프라이빗 카바나 (Solberg Luxury Cabana)": {
-  "verified": true,
-  "sourceUrl": "https://seulburg.kr/",
-  "summary": "양평 옥천면 위치. 개별 온수풀빌라·제트스파·테라스 바베큐 제공하는 운영 시설"
- },
- "용인 딥포레스트 럭셔리 돔 카바나 (Deep Forest Glamping)": {
-  "region": "경기"
- },
- "용인 캠프레이크 글램핑 & 바비큐 라운지 (Camp Lake)": {
-  "verified": true,
-  "sourceUrl": "https://camplake.modoo.at/",
-  "region": "경기",
-  "summary": "신갈저수지 변의 전망 좋은 글램핑장, 가족·커플용 글램핑과 글램하우스 구성"
- },
- "여수 모이핀 오션점 (Cafe Moi Fin Ocean) — 전남 여수": {
-  "slot": "day"
- },
- "뮤지엄원 (Museum 1)": {
-  "exclude": true
- },
- "[Part 5] 경기 웰니스 & 야외 나이트 라이팅 권역 (No 18~20)": {
-  "exclude": true
- },
- "시간대별 동선 전략": {
-  "exclude": true
- },
- "저조도 카메라 바디 & 렌즈 세팅 노하우": {
-  "exclude": true
- },
- "고품질 심야 드라이브 사운드 디자인 (ASMR)": {
-  "exclude": true
- },
- "🦇 Chapter 1. 지하 동굴 & 까브(Cave) 콘셉트 와인바": {
-  "exclude": true
- },
- "🍇 Chapter 4. 숨겨진 와이너리 & 대형 와인 동굴 투어": {
-  "exclude": true
- },
- "🏛️ 파주 권역": {
-  "exclude": true
- },
- "🌊 영종도 & 인천 권역": {
-  "exclude": true
- },
- "🌿 양평 권역": {
-  "exclude": true
- },
- "🌲 용인 권역": {
-  "exclude": true
- },
- "☕ 남양주 & 포천 권역": {
-  "exclude": true
- },
- "🎨 춘천 & 가평 권역": {
-  "exclude": true
- },
- "🏯 [Group 1] 수원 행궁동 & 성곽길": {
-  "exclude": true
- },
- "🍂 [Group 2] 고양 일산 밤리단길": {
-  "exclude": true
- },
- "⚓ [Group 3] 인천 개항장 & 선재도": {
-  "exclude": true
- },
- "🌲 [Group 4] 남양주 & 양평": {
-  "exclude": true
- },
- "🌿 [Group 5] 경기 북부 (이색 테마 & 숲속 온실)": {
-  "exclude": true
- },
- "☕ [Group 6] 경기 남부 (감성 스트리트 & 생태 피크닉)": {
-  "exclude": true
- },
- "⛵ [Category 2] 프라이빗 마리나 & 럭셔리 요트 세일링": {
-  "exclude": true
- },
- "☕ [Category 1] 한강·서해 심야 드라이브 카페": {
-  "exclude": true
- },
- "🔭 [Category 2] 숲속 별빛 관측소 & 은하수 투어": {
-  "exclude": true
- },
- "🎬 [Category 3] 프라이빗 자동차 극장 & 드라이브인 시네마": {
-  "exclude": true
- },
- "🎷 [Category 5] 심야 LP 살롱 & 은밀한 불빛 정원": {
-  "exclude": true
- },
- "🏛️ [Category 2] 초대형 복합문화공간 & 메가 컨셉 카페": {
-  "exclude": true
- },
- "🍵 3. 멘탈 웰니스 & 티 테라피 (Tea Therapy & Mental Care)": {
-  "exclude": true
- },
- "🎧 서울 지역 (17선)": {
-  "exclude": true
- },
- "🎧 경기/인천 지역 (3선)": {
-  "exclude": true
- },
- "디오티 가죽 아틀리에 (Dioti Leather Atelier Hannam)": {
-  "slot": "day"
- },
- "노블레스 레더 라운지 (Noblesse Leather Salon Cheongdam)": {
-  "exclude": true
- },
- "테일러블 (Tailorable Hannam)": {
-  "exclude": true
- },
- "마크론슨 (Mark Ronson Cheongdam)": {
-  "exclude": true
- },
- "볼란테 비스포크 (Volante Bespoke)": {
-  "exclude": true
- },
- "슈트패브릭 비스포크 하우스 (Suit Fabric Bespoke House)": {
-  "exclude": true
- },
- "글라이더스 왕산마리나 선셋 세일링 (Gliders Wangsan Marina Sunset Sailing)": {
-  "slot": "evening"
- },
- "왕산마리나 기업 VIP 요트 영접 패키지 (Wangsan Marina Corporate VIP Charter)": {
-  "exclude": true
- },
- "아라마리나 한강·서해 연결 선셋 크루즈 (Ara Marina Han River-West Sea Sunset Cruise)": {
-  "slot": "evening"
- },
- "🥃 경기/인천 지역 (3선)": {
-  "exclude": true
- },
- "문화시민 서울": {
-  "exclude": true
- },
- "10월 19일 (October 19th)": {
-  "exclude": true
- },
- "주종별 최적의 K-타파스 마리아주 원칙": {
-  "exclude": true
- },
- "[경남 거제] 거제 몽돌 카사블랑카 오션 빌라 (Geoje Casablanca Coastal Villa)": {
-  "slot": "stay"
- },
- "텍사스식 12시간 참나무 저온 훈연 (Low & Slow) 바비큐의 매력": {
-  "exclude": true
- },
- "대한민국 천연 암반 동굴 와인 셀러 & 캔들라이트 다이닝 트렌드 분석": {
-  "exclude": true
- },
- "권역별 상세 스폿 심층 큐레이션 (20곳)": {
-  "exclude": true
- },
- "[Part 1] 서울 & 수도권 북부·동부 핵심 권역 (No 1~5)": {
-  "exclude": true
- },
- "[Part 2] 수도권 남부 & 서부 핵심 권역 (No 6~10)": {
-  "exclude": true
- },
- "[Part 3] 강원·영남·부산 해안 권역 (No 11~15)": {
-  "exclude": true
- },
- "[Part 4] 호남·영남 내륙 및 제주 특별 권역 (No 16~20)": {
-  "exclude": true
- },
- "빛의 방향에 따른 골든 타임 (Golden Hour)": {
-  "exclude": true
- },
- "권장 드레스코드 및 소품": {
-  "exclude": true
- },
- "아치 볼트 에스파스 성수 (Arch Vault Espace) - 서울 성동구": {
-  "slot": "evening"
- },
- "방문 시 주의사항 및 테이스팅 에티켓": {
-  "exclude": true
- },
- "카테고리별 특성 비교": {
-  "exclude": true
- },
- "🌃 1부. 하이엔드 심야 드라이브 뷰 포인트 (8선)": {
-  "exclude": true
- },
- "🎬 3부. 프라이빗 심야 영화관 & 하이엔드 자동차 극장 (5선)": {
-  "exclude": true
- },
- "도예공방 도온 (Doteon Atelier Hannam & Yongsan)": {
-  "slot": "day"
- },
- "권역별 15개 프리미엄 핫플레이스 상세 DB": {
-  "exclude": true
- },
- "[강원 원주] 사니다 카페 (Sanida Garden Cafe)": {
-  "slot": "day"
- },
- "대한민국 시크릿 동굴 다이닝 & 와인 케이브 트렌드 분석": {
-  "exclude": true
- },
- "사계절 드레스코드 & 체온 유지 요령": {
-  "exclude": true
- },
- "유튜브 숏폼 & 릴스 촬영 테크닉": {
-  "exclude": true
- },
- "예약 및 방문 시간대 전략": {
-  "exclude": true
- },
- "[충남 보령] 원산도 오봉산 해안 절벽 선셋 인피니티 모닥불 라운지 (Boryeong Wonsando Sunset Cliff Infinity Firepit Lounge)": {
-  "slot": "night"
- },
- "[경남 통영] 산양일주로 달아노을 해안 절벽 인피니티 파이어핏 (Tongyeong Dara Sunset Clifftop Firepit Lounge)": {
-  "slot": "evening"
- },
- "[부산 영도] 절영해안산책로 태종대 단애 40m 선셋 모닥불 라운지 (Busan Yeongdo Taejongdae Cliff Sunset Firepit Lounge)": {
-  "slot": "evening"
- },
- "[인천 굴업도] 굴업도 목기미 사구 은하수 듄 라운지 (Guleopdo Mokgimi Dune Lounge)": {
-  "slot": "night"
- },
- "이미커피 (Imi Coffee - 연남동)": {
-  "slot": "day"
- },
- "지역별 완벽 연계 데이트 코스 매트릭스": {
-  "exclude": true
- },
- "춘하추동(春夏秋冬) 약선 식재료 제철 캘린더": {
-  "exclude": true
- },
- "💎 카테고리 1. 명품 플래그십 & 하이엔드 브랜드 라운지": {
-  "exclude": true
- },
- "🏛️ 카테고리 2. 하이엔드 복합문화공간 & 아티스틱 플랫폼": {
-  "exclude": true
- },
- "🥐 카테고리 4. 2026 SNS/커뮤니티 바이럴 폭발 F&B 핫플": {
-  "exclude": true
- },
- "🌙 Night & Art Curation Concept": {
-  "exclude": true
- },
- "🍸 카테고리 1. 스피크이지 & 히든 도어 비밀 바": {
-  "exclude": true
- },
- "🎷 카테고리 2. 프리미엄 라이브 재즈 라운지": {
-  "exclude": true
- },
- "🎧 카테고리 3. 하이엔드 오디오 & 바이닐(LP) 청음 라운지": {
-  "exclude": true
- },
- "🍲 카테고리 4. 소수 정예 심야식당 & 심야 비스트로": {
-  "exclude": true
- },
- "🎨 카테고리 5. 갤러리 연계 바 & 아트 라운지": {
-  "exclude": true
- },
- "🏛️ [하이엔드 복합문화 & 건축 랜드마크]": {
-  "exclude": true
- },
- "🧖 [이색 니치 오마카세 & 뷰티 살롱]": {
-  "exclude": true
- },
- "4단계 큐레이션 테마 (Midnight Aesthetics & Secret Audiophile)": {
-  "exclude": true
- },
- "5대 나이트 서브장르별 20개 스팟 상세 DB": {
-  "exclude": true
- },
- "☔ Indoor Curation Philosophy": {
-  "exclude": true
- },
- "🐠 카테고리 2. 실내 생태 아쿠아리움 & 초대형 온실 식물원": {
-  "exclude": true
- },
- "🎬 카테고리 3. 하이엔드 프리미엄 시네마 & 다이닝 극장": {
-  "exclude": true
- },
- "🎯 카테고리 4. 올웨더 실내 어드벤처 & 하이엔드 엔터테인먼트": {
-  "exclude": true
- },
- "⛵ 카테고리 1. 프라이빗 한강 요트 & 선셋 워터 스포츠": {
-  "exclude": true
- },
- "🌲 카테고리 3. 도심 숲길 트레킹 & 파노라마 웰니스": {
-  "exclude": true
- },
- "⛳ 카테고리 4. 프라이빗 골프 스튜디오 & 라운지": {
-  "exclude": true
- },
- "🍵 [100% 예약제 프리미엄 다도 & 티 오마카세]": {
-  "exclude": true
- },
- "📚 [사색과 지적 대화의 독립 서점 & 라이브러리]": {
-  "exclude": true
- },
- "🚶‍♂️ Curation Theme (감성 골목길 4대 큐레이션 원칙)": {
-  "exclude": true
- },
- "☕ 권역 1. 용리단길 & 신용산 & 삼각지 감성 골목": {
-  "exclude": true
- },
- "🍃 권역 2. 서촌 & 통의동 & 부암동 산책길": {
-  "exclude": true
- },
- "🏭 권역 3. 성수 뒷골목 & 송정 제방길": {
-  "exclude": true
- },
- "🏰 권역 4. 수원 화성행궁 & 방화수류정 성곽 골목": {
-  "exclude": true
- },
- "🎨 권역 5. 연희동 & 망원동 & 서교동 감성 골목": {
-  "exclude": true
- },
- "프라이빗 다이닝 & 티 오마카세 (마인드풀니스 차멍)": {
-  "exclude": true
- },
- "프라이빗 하이엔드 원데이 클래스 (노터치/전담 케어)": {
-  "exclude": true
- },
- "그린마일커피 북촌점 (Green Mile Coffee)": {
-  "slot": "day"
- },
- "을지로 커피한약방 & 혜민당 (Coffee Hanyabang & Hyemindang)": {
-  "slot": "day"
- },
- "[청담 권역] 럭셔리 파인다이닝 & 감성 라운지 (7곳)": {
-  "exclude": true
- },
- "레인리포트 호우주의보 (Rain Report Seongsu)": {
-  "slot": "evening"
- },
- "[강남 / 압구정 권역] 유럽 감성 브런치 & 트렌디 다이닝 (6곳)": {
-  "exclude": true
- },
- "디핀 (deepin - 서울 신당동/용산)": {
-  "slot": "evening"
- },
- "JL 디저트바 (JL Dessert Bar - 서울 용산 한남동)": {
-  "slot": "evening"
- },
- "알디프 티 바 (ALDIF Tea Bar - 서울 마포 홍대/합정)": {
-  "slot": "evening"
- },
- "[경기 김포] 뱀부15-8 (Bamboo 15-8)": {
-  "slot": "day"
- },
- "콘래드 서울 37그릴앤바 (37 Grill & Bar)": {
-  "slot": "evening"
- },
- "골든블루마리나 한강 프라이빗 요트 선셋 스냅 (Golden Blue Marina)": {
-  "slot": "evening"
- },
- "[전남 신안] 신안 자은도 백길 사구 듄스 샌드보딩 캠프 (Jaeundo Baekgil Dune Camp)": {
-  "slot": "day"
- },
- "[경북 포항] 포항 칠포-월포 해안사구 익스트림 듄 캠프 (Pohang Chilpo Dune Extreme Camp)": {
-  "slot": "day"
- },
- "[전남 여수] 웅천 58ft 폰테인 파조 카타마란 가막만 선셋 다이닝 (Yeosu Ungcheon Fountaine Pajot 58ft Sunset Dining)": {
-  "slot": "evening"
- },
- "가평 클럽티파니 레이크 하우스 (Club Tiffany Lake House)": {
-  "slot": "evening"
- },
- "[전북 완주] 상관 편백숲 시크릿 바렐 빌라 (Sanggwan Cypress Secret Barrel Villa)": {
-  "slot": "evening"
- },
- "[경남 거제] 딴섬(솔섬) 백사장 카타마란 피크닉 (Geoje Ttanseom White Beach Catamaran Picnic)": {
-  "slot": "day"
- },
- "[강원 철원] 직탕 나이아가라 클리프 다이닝 (Jiktang Cliff Dining)": {
-  "slot": "evening"
- },
- "뉴서울 CC 멤버십 다이닝 & VIP 룸": {
-  "verified": true,
-  "sourceUrl": "https://www.newseoulgolf.co.kr/",
-  "summary": "36홀 회원제 골프장, 공식 홈페이지 2024년까지 활동 중",
-  "location": "경기 광주시 삼지곡길 95",
-  "region": "경기"
- },
- "시크릿 바 (Secret Bar) - 안양 평촌": {
-  "verified": true,
-  "sourceUrl": "https://www.instagram.com/p/DX-pTkbD-_4/"
- },
- "콜트레인 (Coltrane) - 서울 중구 충무로": {
-  "verified": true,
-  "sourceUrl": "https://polle.com/place/5bMJox/%EC%BD%9C%ED%8A%B8%EB%A0%88%EC%9D%B8"
- },
- "씨네안영채 X 모노플렉스 (동탄 라크몽)": {
-  "exclude": true
- },
- "경기 광주 파머스대디 (Farmer's Daddy)": {
-  "verified": true,
-  "sourceUrl": "https://www.siksinhot.com/P/480028"
- },
- "센트유니크 정자 본점 (Scent Unique Bundang Jeongja)": {
-  "verified": true,
-  "sourceUrl": "https://www.scentunique.com/"
- },
- "스캐터라운지 강남본점 (Scatter Lounge)": {
-  "verified": true,
-  "sourceUrl": "https://www.corner.inc/place/1303940"
- },
- "포천 파인벨리 럭셔리 VIP 카바나 (Pine Valley VIP Cabana)": {
-  "verified": true,
-  "sourceUrl": "https://www.agoda.com/en-ca/pocheon-pine-valley-1st-branch/hotel/pocheon-kr.html"
- },
- "[용인/처인] 묵리459 묵상 프라이빗 티 살롱 (Mukri 459 Private Tea Salon)": {
-  "verified": true,
-  "sourceUrl": "https://mukri459.com/",
-  "price": "1인 티 오마카세 코스 50,000원",
-  "region": "경기",
-  "location": "경기도 용인시 처인구 이동읍 이원로 459",
-  "summary": "공식 웹사이트 운영 중, 2026년 최근 기록 확인"
- },
- "[고양/덕양] 플랜테이션 가든 글래스 파빌리온 티살롱 (Plantation Garden Glass Pavilion)": {
-  "price": "파빌리온 2시간 대관 150,000원",
-  "region": "경기",
-  "location": "경기도 고양시 덕양구 통일로 493번길 32",
-  "summary": "고양 플랜테이션은 현재 운영 중, 글래스 파빌리온 티살롱 구체 확인 부족"
- },
- "라페트 청담 (Lafete Cheongdam)": {
-  "verified": true,
-  "sourceUrl": "http://plus.hankyung.com/apps/newsinside.view?aid=2017122719751",
-  "summary": "플로리스트 겸 카페 (황수현 황시연 자매 운영, 청담동 주택가 위치)",
-  "location": "서울 강남구 청담동 주택가",
-  "region": "서울"
- },
- "플레르다솔 성수 본점 (Fleur Dasol Seongsu)": {
-  "verified": true,
-  "sourceUrl": "https://www.instagram.com/fleur_dasol/",
-  "summary": "플로리스트 장다솔 운영, Instagram @fleur_dasol에서 활동 중 (58,000+ 팔로워)",
-  "location": "서울 성동구 성수동",
-  "region": "서울"
- },
- "부산 해운대 메르씨엘 (Merciel)": {
-  "verified": true,
-  "sourceUrl": "https://www.siksinhot.com/P/281057",
-  "summary": "프렌치 레스토랑 (2층 코스 요리, 3층 브라스리), 시식신 등재",
-  "location": "부산광역시 해운대구 달맞이길65번길 154 중동",
-  "price": "상세 가격 미확인",
-  "region": "영남"
- },
- "하우스 오브 탄노이 / 하우스오브바이닐 - 서울 성동구 성수동 / 연남동": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=TLXYRLuQw5qS",
-  "summary": "성수점 카페 영업 중",
-  "location": "서울 성동구 아차산로7길 29 2층",
-  "region": "서울",
-  "price": "6000원"
- },
- "이문원 두피헤어랩 (Lee Moon Won Scalp Hair Lab)": {
-  "verified": true,
-  "sourceUrl": "https://lmwhairlab.modoo.at/",
-  "price": "70,000~295,000원",
-  "location": "서울특별시 강남구 선릉로132길 (청담동)",
-  "summary": "메디컬 두피헤어랩, 프리미엄 헤드스파 시술 제공"
- },
- "부산 기장 아난티 앳 부산 라메르 (Ananti at Busan La Mer)": {
-  "verified": true,
-  "sourceUrl": "https://ananti.kr/ko/busan/BS0301",
-  "region": "영남",
-  "location": "부산광역시 기장군 기장읍 기장해안로 268-31",
-  "summary": "아난티 앳 부산 코브 라메르 레스토랑 정상 영업 중"
- },
- "부산 수영만 요트탈래 프라이빗 셰프 라이더 요트 (Yacht Tale Private Yacht Catering)": {
-  "verified": true,
-  "sourceUrl": "https://www.yachttale.com/",
-  "region": "영남",
-  "location": "부산광역시 해운대구 수영만",
-  "summary": "요트탈래 정상 운영 중"
- },
- "경남 남해 아난티 남해 아쁘앙 (Ananti Namhae A Point)": {
-  "verified": true,
-  "sourceUrl": "https://ananti.kr/ko/namhae/specialOffer/list",
-  "region": "영남",
-  "location": "경상남도 남해군 남면 남서대로1179번길 40-108",
-  "summary": "아난티 남해 콘도 골프 리조트 정상 영업 중"
- },
- "경남 거제 소노캄 마리나베이 요트 차터 & 몬테로쏘 (Sonokam Geoje Marina Bay & Lounge)": {
-  "verified": true,
-  "sourceUrl": "https://mice.sonohotelsresorts.com/daemyung.front.saupjang.geoje.marina_use.ds/dmparse.dm?menuNo=01",
-  "region": "영남",
-  "location": "경상남도 거제시 일운면 거제대로 2660",
-  "summary": "소노츤 거제 마리나베이 정상 운영 중"
- },
- "여수 오동도": {
-  "verified": true,
-  "sourceUrl": "https://access.visitkorea.or.kr/opentour/detail.do?cotId=c3fee7f2-2797-4f92-902d-54f950aed048"
- },
- "청송 주산지 (Jusanji Lake) — 경북 청송": {
-  "verified": true,
-  "sourceUrl": "https://korean.visitkorea.or.kr/detail/rem_detail.do?cotid=c9b07bd6-4a96-49bf-8693-d24fc6256bdf"
- },
- "[경기 가평] 호명산 로코갤러리 와인딩 코스 ➔ 호명산 로코갤러리": {
-  "verified": true,
-  "sourceUrl": "http://www.dealbada.com/bbs/board.php?bo_table=forum_bike&wr_id=240331"
- },
- "한라산 어승생악 야간 탐방": {
-  "verified": true,
-  "sourceUrl": "https://view.asiae.co.kr/article/2026070616362879620"
- },
- "제부마리나 & 서해랑 해상케이블카 연계 투어": {
-  "verified": true,
-  "sourceUrl": "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=8c6edec0-af2b-413c-8e3d-1363b3d89620"
- },
- "토템오어 (Totem Ore - 제주 한경면 용수리)": {
-  "verified": true,
-  "sourceUrl": "https://triple.guide/restaurants/bd24b3e7-57c9-4667-9a17-a825ac85d1a6"
- },
- "티철판요리 (T-Teppan)": {
-  "verified": true,
-  "sourceUrl": "https://tableofteppanyaki.modoo.at/"
- },
- "라팰리스 청담 (La Palace Cheongdam)": {
-  "verified": true,
-  "sourceUrl": "https://www.instagram.com/lapalais_cheongdam/"
- },
- "카엘리움": {
-  "verified": true,
-  "sourceUrl": "https://www.busan.com/view/busan/view.php?code=2025052516411934953"
- },
- "[전북 익산] 아가페정원 & 포레스트 티하우스 (Agape Garden)": {
-  "verified": true,
-  "sourceUrl": "https://tour.jb.go.kr/travel/info/view.do?menuCd=&contentsSid=30&category_top_id=a&ctnt_id=25180",
-  "price": "입장료 무료"
- },
- "헤르츠 (Hertz Jazz Lounge) - 경기 수원시 영통구 광교": {
-  "verified": true,
-  "sourceUrl": "https://www.instagram.com/hertz_tuneyourtime/"
- },
- "야키토리 묵 (연남점 / 신사점)": {
-  "verified": true,
-  "sourceUrl": "https://app.catchtable.co.kr/ct/shop/yakitorimook_sinsa"
- },
- "피크닉 (Piknic / 카페 피크닉 & 바 피크닉)": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=pRpaYVK7sIeH"
- },
- "이호테우해변": {
-  "verified": true,
-  "sourceUrl": "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=5ea8d513-cffc-4993-abad-197d736651da"
- },
- "갤러리 더 스퀘어 (Gallery The Square - 삼청동)": {
-  "verified": true,
-  "sourceUrl": "https://app.catchtable.co.kr/ct/shop/gallery_the_square"
- },
- "더 플라자 지스텀하우스 가든 (ZYSTUM House Garden)": {
-  "verified": true,
-  "sourceUrl": "http://mticket.interpark.com/Place/Detail?placeCode=14000459"
- },
- "몬드리안 서울 이태원 프리빌리지 바 (Privilege Bar)": {
-  "verified": true,
-  "sourceUrl": "https://mondrianhotels.com/seoul-itaewon/dining/privilege-bar/"
- },
- "레인리포트 호우주의보 (Rain Report)": {
-  "verified": true,
-  "sourceUrl": "https://triple.guide/restaurants/49114530-22c0-4911-9704-8eacd2c21011"
- },
- "파주 퍼스트가든 별빛 라운지 & 헤이리 테라스 (Paju First Garden Starlight Lounge)": {
-  "verified": true,
-  "sourceUrl": "https://firstgarden.co.kr/"
- },
- "빛의 벙커 (Bunker de Lumières 제주)": {
-  "verified": true,
-  "sourceUrl": "https://www.deslumieres.co.kr/bunker",
-  "price": "성인 19,000원 / 청소년 14,000원 / 어린이 11,000원 / 미취학아동 9,000원"
- },
- "오크우드 프리미어 인천 파노라믹 65 (Panoramic 65)": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=TvAEBUrc6aLM"
- },
- "[서울 종로] 북악스카이웨이 2청운각 우회 쉼터 & 자하문 와인딩 ➔ 종로 도심 야경": {
-  "verified": true,
-  "sourceUrl": "https://korean.visitkorea.or.kr/detail/rem_detail.do?cotid=4f0d1973-9945-436f-b602-126f87ed6715"
- },
- "[인천 영종도] 메이드림 (MADE RIM)": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=PsNCvwWyhOSf"
- },
- "전축 (Jeonchuk)": {
-  "verified": true,
-  "sourceUrl": "https://www.instagram.com/jeonchuk/?hl=ko"
- },
- "경남 거제 아그네스파크 오션 테라스 다이닝 (Geoje Agnes Park Ocean Terrace)": {
-  "verified": true,
-  "sourceUrl": "https://kr.trip.com/moments/detail/geoje-si-14781-13975424/"
- },
- "시그니엘 서울 바 81 (Bar 81)": {
-  "verified": true,
-  "sourceUrl": "https://autoreserve.com/en/restaurants/tihz2dGynQ9MN3WkSbJQ"
- },
- "소나 (SONA - 신사동 가로수길)": {
-  "exclude": true,
-  "sourceUrl": "https://www.menupan.com/restaurant/onepage.asp?acode=d102590"
- },
- "[충북 충주 / 계명산 종민동] 충주 계명산 치유의 숲 공중 트리탑 티 살롱": {
-  "verified": true,
-  "sourceUrl": "https://www.cjfmc.or.kr/gmf/index.do"
- },
- "L7 명동 루프탑 플로팅 (Floating Rooftop Bar)": {
-  "verified": true,
-  "sourceUrl": "https://www.lottehotel.com/myeongdong-l7/ko/dining/rooftop-bar-floating.html"
- },
- "[강원 춘천] 제이드가든 살롱 드 제이드 & 분재 가든": {
-  "verified": true,
-  "sourceUrl": "https://www.chuncheon.go.kr/tour/destination/all-tour/detail/?tourId=228"
- },
- "아베크 청담 (Avec Cheongdam)": {
-  "exclude": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=oRIebMICSZbA"
- },
- "수린 한남 (Surin Hannam)": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=eGY74MvftDQx"
- },
- "설화수 북촌 플래그십 스토어 & 오설록 티하우스 가회동점 (바설화)": {
-  "verified": true,
-  "sourceUrl": "https://www.osulloc.com/kr/ko/store-introduction/312"
- },
- "데이오프데이": {
-  "verified": true,
-  "sourceUrl": "https://www.instagram.com/dayoffday_busan/"
- },
- "세상의 모든 아침 (All The Sky) — 여의도점": {
-  "verified": true,
-  "sourceUrl": "https://www.theskyfarm.co.kr/allday1"
- },
- "이호테우 해변": {
-  "verified": true,
-  "sourceUrl": "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=5ea8d513-cffc-4993-abad-197d736651da"
- },
- "[경기 김포] 아라마리나 프라이빗 해상 파빌리온 카바나 & 선셋 요트 (Ara Marina Sunset Pavilion Cabana & Yacht Charter)": {
-  "verified": true,
-  "sourceUrl": "https://eco.gimpo.go.kr/culture/selectTourCntntsWebView.do?tourNo=421"
- },
- "스시도쿠 더송도": {
-  "verified": true,
-  "sourceUrl": "https://www.instagram.com/p/DSoZWcaE6Be/"
- },
- "그랑핸드 서촌 (GRANHAND Seochon)": {
-  "verified": true,
-  "sourceUrl": "https://granhand.com/stores"
- },
- "은혜전복": {
-  "exclude": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=8dQrQRKO8lHP",
-  "note": "다이닝코드에 폐업으로 표시됨"
- },
- "세븐스도어 (7th Door)": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=Li7nz9NKgK2e"
- },
- "평창무이예술관": {
-  "verified": true,
-  "sourceUrl": "https://access.visitkorea.or.kr/ms/detail.do?cotId=94a259af-e028-4c92-8e3c-270bde5df5a3"
- },
- "대박갈비탕": {
-  "verified": true,
-  "sourceUrl": "https://polle.com/place/4zCDTa/%EB%8C%80%EB%B0%95%EA%B0%88%EB%B9%84%ED%83%95",
-  "price": "갈비탕 9,000원"
- },
- "세라듀 강남 본점 (Ceradu Ceramic Atelier Gangnam)": {
-  "verified": true,
-  "sourceUrl": "https://www.ceradu.com/"
- },
- "잔향실 (Janhyangsil 전포)": {
-  "verified": true,
-  "sourceUrl": "https://triple.guide/attractions/ae337ca2-ac70-4207-a8cb-e8acb67e0896"
- },
- "솔밤 (Solbam)": {
-  "exclude": true,
-  "sourceUrl": "https://www.siksinhot.com/P/1315217",
-  "note": "식신 검색 결과 '폐업 신고' 표시"
- },
- "[경남 거제] 온더선셋 (On the Sunset Beach Lounge)": {
-  "verified": true,
-  "sourceUrl": "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=cce56015-c0bb-4b06-a44d-b5f602385989"
- },
- "남한산성": {
-  "verified": true,
-  "sourceUrl": "https://www.gjcity.go.kr/portal/contents.do?mId=0101060100"
- },
- "제주 마노르블랑 (Manor Blanc) — 제주 서귀포": {
-  "verified": true,
-  "sourceUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=df8c22a2-24cd-4504-9f5e-400ef9362737"
- },
- "뚝도농원 (성수동)": {
-  "exclude": true,
-  "sourceUrl": "https://www.threads.com/@fnb_docent/post/DW_VJ3wEtC9/"
- },
- "달마시안 (Dalmation Apgujeong)": {
-  "verified": true,
-  "sourceUrl": "https://www.instagram.com/dalmatian_dosan/"
- },
- "카페루시아": {
-  "verified": true,
-  "sourceUrl": "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=f44a1c68-1fc9-45fe-b551-d02a2c54ba4d"
- },
- "인천아트플랫폼": {
-  "verified": true,
-  "sourceUrl": "http://www.inartplatform.kr/"
- },
- "온6.5 (ON6.5 - 서울 종로 안국동)": {
-  "exclude": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=MRXjUV6ZahxY"
- },
- "[의왕] 백운호수 '흙과나무 VIP 수변정원 차실' (Earth & Tree VIP Water Garden Tea Lounge)": {
-  "verified": true,
-  "sourceUrl": "https://kr.trip.com/moments/detail/uiwang-si-1446505-14413544/",
-  "price": "약 20,000원대"
- },
- "힐링힐스": {
-  "exclude": true,
-  "sourceUrl": "https://www.siksinhot.com/P/1021104"
- },
- "볼트스테이크하우스 (Vault Steakhouse)": {
-  "verified": true,
-  "sourceUrl": "http://www.vaultsteakhouse.co.kr/"
- },
- "[경남 김해] 카사벨라 (Casabella)": {
-  "exclude": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=WgDkjpWW876x"
- },
- "별바다부산 나이트 마켓": {
-  "verified": true,
-  "sourceUrl": "https://www.instagram.com/starry_night_busan.kr/"
- },
- "미메시스 아트 뮤지엄 북앤아트 카페 (Mimesis Art Museum)": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=i2ZHzV7k9JDV"
- },
- "부산 해운대 더베이101 요트클럽 & 샴페인 라운지 (The Bay 101 Yacht Club & Lounge)": {
-  "verified": true,
-  "sourceUrl": "https://www.myrealtrip.com/offers/82225"
- },
- "비스트로 스파크 (Bistro Spark)": {
-  "exclude": true,
-  "sourceUrl": "https://financialfragrance.com/%EC%95%95%EA%B5%AC%EC%A0%95-%EB%B9%84%EC%8A%A4%ED%8A%B8%EB%A1%9C-%EC%8A%A4%ED%8C%8C%ED%81%AC-%ED%8F%90%EC%97%85-%EC%9D%B4%EC%9C%A0-%EC%9D%B8%EA%B8%B0-%EB%A9%94%EB%89%B4-%EC%9E%AC%EC%98%A4%ED%94%88/",
-  "note": "2024년 폐업 확인. 과거 운영시간: 월정휴, 화~일 12:00-22:00 (21:00 라스트오더)"
- },
- "[인천 강화도] 토크라피 (Talkraphy)": {
-  "exclude": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=6F5sUyOQWjt3",
-  "note": "다이닝코드에 '폐업 신고' 표시 확인. 과거 운영시간: 10:00~21:00"
- },
- "오반장 바비큐": {
-  "verified": true,
-  "sourceUrl": "https://www.siksinhot.com/P/256840"
- },
- "우시야 (신사 본점 / 압구정 / 판교)": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=ZUHfWWnsXDiD"
- },
- "바솔트 꺄브 드 제주 (Basalt Cave de Jeju) - 제주 서귀포시": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=pAYskQwBtkhh"
- },
- "스퀴즈 브루어리 춘천본점 (Squeeze Brewery) - 강원 춘천": {
-  "verified": true,
-  "sourceUrl": "https://www.siksinhot.com/P/1087143"
- },
- "[부산 기장] 웨이브온 커피 & 루프탑 카바나 (Waveon Oceanfront Rooftop)": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=oiGlPX3PGzL3"
- },
- "송도 센트럴파크 코마린 보트하우스 (송도국제도시)": {
-  "verified": true,
-  "sourceUrl": "https://triple.guide/attractions/0d8a0bba-c68a-4122-9167-cb210de46214"
- },
- "[경기 성남·광주] 남한산성 동문 계곡로 ➔ 수어장대 하부 시크릿 서울 분지 야경": {
-  "verified": true,
-  "sourceUrl": "https://korean.visitkorea.or.kr/detail/rem_detail.do?cotid=ab04751d-31d0-4d88-9fc7-3388e1cb72e7"
- },
- "페어몬트 앰배서더 서울 - M29 루프탑 바 & 스파 온수풀": {
-  "verified": true,
-  "sourceUrl": "https://www.siksinhot.com/P/1270126"
- },
- "제나일 프리미엄 우드터닝 만년필 공방 (Zenyle Yeongdeungpo)": {
-  "verified": true,
-  "sourceUrl": "https://www.seoul.co.kr/news/society/2025/08/27/20250827500219"
- },
- "국립제주박물관": {
-  "verified": true,
-  "sourceUrl": "https://jeju.museum.go.kr/"
- },
- "632Street Cafe": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=IaN6Gv9kP5m6"
- },
- "스카이베이 호텔 스카이 라운지 (Sky Bay Hotel Sky Lounge)": {
-  "verified": true,
-  "sourceUrl": "https://www.booking.com/hotel/kr/golden-tulip-skybay-gyeongpo.html"
- },
- "카페 트윈트리": {
-  "verified": true,
-  "sourceUrl": "https://www.mangoplate.com/restaurants/Jkb2G3F6SPry"
- },
- "달맞이봉공원": {
-  "verified": true,
-  "sourceUrl": "https://parks.seoul.go.kr/parks/detailView.do?pIdx=1011"
- },
- "전곡 마리나클럽 VIP 선상 샴페인 바 (Jeonggok Marina Club VIP Champagne Bar)": {
-  "verified": true,
-  "sourceUrl": "https://korean.visitkorea.or.kr/detail/rem_detail.do?cotid=e3e194d6-2a9f-4046-a40a-3defd4f5a2ca"
- },
- "바 올드패션드 (Bar Old Fashioned)": {
-  "verified": true,
-  "sourceUrl": "https://www.siksinhot.com/P/372597"
- },
- "감도 (Gamdo) 성수": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=3N7bXAMLcnmc"
- },
- "간월암": {
-  "verified": true,
-  "sourceUrl": "https://ganweolam.kr/"
- },
- "김포 아라마리나 & 현대요트 김포 (경인아라뱃길)": {
-  "verified": true,
-  "sourceUrl": "https://eco.gimpo.go.kr/culture/selectTourCntntsWebView.do?tourNo=421&pageUnit=8&pageIndex=1&searchCnd=ALL&searchKrwd=%EC%95%84%EB%9D%BC%EB%A7%88%EB%A6%AC%EB%82%98&key=6806&ctgry=2&sortTy=RECOMEND"
- },
- "제천 청풍문화재단지": {
-  "verified": true,
-  "sourceUrl": "https://www.ccdailynews.com/news/articleView.html?idxno=2311821"
- },
- "더쉐프인젤코바 (The Chef in Zelkova)": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=ht3KhgvwW7Xx"
- },
- "세븐스플로어": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=C236yzXReRux"
- },
- "용산 용산마루 (서울 용산 한강로)": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=vN96BkMHAX2V"
- },
- "차귀도": {
-  "verified": true,
-  "sourceUrl": "https://www.visitjeju.net/kr/detail/view?contentsid=CONT_000000000500612"
- },
- "코블러 서촌 (Cobbler)": {
-  "verified": true,
-  "sourceUrl": "https://www.diningcode.com/profile.php?rid=DOnsMNhY0lEX"
- },
- "안성 팜랜드": {
-  "verified": true,
-  "sourceUrl": "https://korean.visitkorea.or.kr/detail/rem_detail.do?cotid=da0fa852-a113-47ab-9c92-a512de3fee28"
- }
+  "도멘청담 (Domaine Cheongdam)": {
+    "verified": true,
+    "sourceUrl": "https://www.trip.com/travel-guide/attraction/seoul/cheongdam-dong-10800198/",
+    "summary": "강남 청담의 프리미엄 와인바로 프랑스 요리와 세계 명주를 제공합니다.",
+    "slot": "evening"
+  },
+  "르챔버 (Le Chamber)": {
+    "verified": true,
+    "sourceUrl": "https://www.tripadvisor.com/Attraction_Review-g294197-d9996738-Reviews-Le_Chamber-Seoul.html",
+    "summary": "청담의 프리미엄 칵테일 바로 명성 높은 바텐더들의 셰이킹 아트를 경험",
+    "price": "입장료 1만원, 칵테일 2만3천~3만원대"
+  },
+  "더 시에나 라운지 청담 & 루프탑 디아만테 (The Siena Lounge)": {
+    "verified": true,
+    "sourceUrl": "https://thesiena.co.kr/content/cheongdam",
+    "summary": "청담의 고급 복합 라운지로 와인, 위스키바, 다이닝, 루프탑바 등 다층 시설"
+  },
+  "앨리스 프로젝트 (Alice Project)": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=alkksvvyGkX7",
+    "summary": "양재천변 산책로의 시그니처 피스타치오 케이크가 인기인 디저트 카페"
+  },
+  "소나 (SONA)": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=dB0Q1dXc5wSQ",
+    "summary": "신사동 가로수길의 프리미엄 디저트 카페, 전문 패스트리 셰프 운영"
+  },
+  "김씨부인 (Kim C Buin)": {
+    "verified": true,
+    "sourceUrl": "https://www.siksinhot.com/P/859332",
+    "summary": "서래마을의 전통 한식 디저트와 차를 제공하는 아늑한 카페"
+  },
+  "오설록 티하우스 북촌점 (가회다실)": {
+    "verified": true,
+    "sourceUrl": "https://www.osulloc.com/kr/ko/store-introduction/312",
+    "price": "차 코스 39천원~",
+    "summary": "전통 차와 현대적 감각이 결합된 북촌 한옥마을의 프리미엄 티하우스"
+  },
+  "오설록 1979": {
+    "verified": true,
+    "sourceUrl": "https://www.osulloc.com/kr/ko/store-introduction/174",
+    "summary": "오설록의 정신과 휴식의 가치를 담은 프리미엄 티룸, 한강 조망"
+  },
+  "맥파이앤타이거 성수/신사 티룸": {
+    "verified": true,
+    "sourceUrl": "https://www.mangoplate.com/restaurants/jEmQU2HkQdbh",
+    "summary": "차를 마시는 시간을 특별하게 공유하는 프리미엄 티룸"
+  },
+  "Summary": {
+    "exclude": true
+  },
+  "Key Destination Options": {
+    "exclude": true
+  },
+  "가죽공방 루니에 (Lunie Leather Atelier Seongsu)": {
+    "verified": true,
+    "sourceUrl": "https://www.instagram.com/lunie_leather/",
+    "summary": "성수동 소재 이탈리아 정규과정 수료 가죽공방으로 원데이 클래스와 맞춤 가죽제품 제작을 제공"
+  },
+  "아뜰리에 르솔 (Atelier Lesol Seongsu)": {
+    "verified": true,
+    "sourceUrl": "https://www.instagram.com/lesol_atelier/",
+    "summary": "성수동 소재 헤어스타일링과 메이크업 전문 살롱으로 1인 맞춤 서비스 제공 중"
+  },
+  "Termeden & Simmons Terrace (Icheon)": {
+    "verified": true,
+    "sourceUrl": "https://www.frommers.com/destinations/icheon/attractions/termeden-spa-and-resort/"
+  },
+  "2단계 큐레이션 테마 (Atmospheric Alley Stroll & Relaxed Aesthetics)": {
+    "exclude": true
+  },
+  "정식당 (Jungsik Cheongdam)": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=TFmNhx1RJTs6",
+    "price": "점심 20만원, 저녁 30만원",
+    "summary": "청담동의 미슐랭 레스토랑, 신선한 한국 재료를 활용한 파인다이닝"
+  },
+  "피플더테라스 (People The Terrace)": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=L4DmIB4n3VWk",
+    "summary": "청담 도산대로의 유럽풍 고급 다이닝바, 셀럽 선호 공간"
+  },
+  "조선팰리스 서울 강남 - 이타닉 가든 (Eatanic Garden)": {
+    "verified": true,
+    "sourceUrl": "https://jpg.josunhotel.com/dining/EatanicGarden.do",
+    "summary": "강남 조선팰리스 36층 미슐랭 1스타 현대 한식 파인다이닝"
+  },
+  "페어몬트 앰배서더 서울 - 마리포사 & M29 (Mariposa & M29)": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=N8DulXpzK0lo",
+    "summary": "여의도 페어몬트 앰배서더 29층 현대 유럽 요리 파인다이닝"
+  },
+  "Overview": {
+    "exclude": true
+  },
+  "핀즈 (FINZ)": {
+    "verified": true,
+    "sourceUrl": "https://www.siksinhot.com/P/1286849",
+    "summary": "강남 압구정 도산공원 로데오거리 한우 그릴 레스토랑"
+  },
+  "오모트 (OMOT)": {
+    "verified": true,
+    "sourceUrl": "https://omot-omot.com/",
+    "price": "1인 3만5천원",
+    "summary": "한국 전통차와 계절 디저트를 경험하는 75분 예약제 티코스"
+  },
+  "놋그릇가지런히 (NOSHI)": {
+    "verified": true,
+    "sourceUrl": "https://korean.visitseoul.net/restaurants/",
+    "price": "6천원~8천원대",
+    "summary": "서촌 한옥 카페, 유기그릇에 담긴 수박셔벗과 홍시단팥 디저트"
+  },
+  "무드페어링 (Mood Pairing)": {
+    "summary": "수원 행궁동 시즈널 디저트 오마카세 카페"
+  },
+  "발리오스 승마클럽 (BALIOS Equestrian Club)": {
+    "verified": true,
+    "sourceUrl": "https://ggtour.or.kr/travel-info/tourism-info/72655c4c-746a-11ee-b910-0242ac120002",
+    "slot": "day"
+  },
+  "로얄새들 승마클럽 (Royal Saddle Riding Club)": {
+    "verified": true,
+    "sourceUrl": "http://www.royalsaddle.com/",
+    "price": "그룹레슨 주중 9만원, 주말 10만원 / 개인레슨 주중 14만원, 주말 16만원",
+    "slot": "day"
+  },
+  "헬레나플라워 청담 아틀리에 (Helena Flower Cheongdam)": {
+    "summary": "청담 프리미엄 1:1 VIP 비스포크 플라워 아트 서비스"
+  },
+  "스티븐 승마클럽 (Steven Riding Club)": {
+    "verified": true,
+    "sourceUrl": "https://www.icheon.go.kr/tour/cultureTour/manage/view.do?idx=55&mid=0302020000",
+    "location": "경기도 이천시 호법면 이섭대천로527번길 151",
+    "summary": "1986년 아시안게임 메달리스트가 운영하는 한국마사회 협력 승마장"
+  },
+  "남서울 승마클럽 (Namseoul Riding Club)": {
+    "verified": true,
+    "sourceUrl": "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=5b7d4692-ec08-4f76-be9b-f8ab0307f662",
+    "region": "경기",
+    "summary": "강남 30분, 분당 10분 거리의 프리미엄 가족형 승마클럽"
+  },
+  "디원호스클럽 (D1 Horse Club)": {
+    "verified": true,
+    "sourceUrl": "http://theonehorse.co.kr/sub/sub02_01.php",
+    "location": "경기도 남양주시 와부읍 월문천로 280-7",
+    "summary": "5세 이상 누구나 가능한 가족형 승마클럽"
+  },
+  "W홀스랜드 (W Horseland)": {
+    "verified": true,
+    "sourceUrl": "https://tripinfo.co.kr/info.html?content_id=1988431&content_type_id=28",
+    "summary": "국내 최대 규모 4만평 유럽형 승마클럽, 5개 난이도 외승코스"
+  },
+  "레이크밸리 승마클럽 (Lake Valley Riding Club)": {
+    "verified": true,
+    "sourceUrl": "https://www.youtube.com/watch?v=Wuex4FpiYok",
+    "summary": "서울근교 포천의 자연친화적 승마클럽"
+  },
+  "동서울 승마클럽 (East Seoul Riding Club)": {
+    "verified": true,
+    "sourceUrl": "https://place.tripmate.co.kr/ko/detail.php?contentId=3085278&contentTypeId=28",
+    "region": "경기",
+    "location": "경기도 남양주시 와부읍 월문천로 280-7",
+    "summary": "예봉산 기슭, 5세부터 80대까지 가능한 가족형 클럽"
+  },
+  "홀스메이트 승마클럽 (Horsemate Riding Club)": {
+    "verified": true,
+    "sourceUrl": "https://www.instagram.com/horsemate_official/",
+    "summary": "화성의 자연친화적 승마시설, 숙박 및 BBQ 시설 완비"
+  },
+  "카카오다다 (Cacao Dada)": {
+    "verified": true,
+    "sourceUrl": "https://cacaodada.imweb.me/",
+    "summary": "카카오 빈을 직접 로스팅·분쇄해 만드는 수제 초콜릿 전문점",
+    "slot": "day",
+    "mood": [
+      "gourmet"
+    ]
+  },
+  "트리투바 (Tree to Bar)": {
+    "verified": true,
+    "sourceUrl": "https://autoreserve.com/ko/restaurants/6Zja1Rhf7EosMLQQKc8R",
+    "summary": "초콜릿 제조 과정을 직접 관찰하고 체험할 수 있는 초콜릿 전문 카페",
+    "slot": "day"
+  },
+  "JL 디저트바 (JL Dessert Bar)": {
+    "verified": true,
+    "sourceUrl": "https://www.catchtable.net/shop/jldessertbar",
+    "summary": "셰프 저스틴 리가 선보이는 수제 디저트 코스 레스토랑"
+  },
+  "비앤테일러 (B&Tailor Cheongdam)": {
+    "verified": true,
+    "sourceUrl": "https://www.permanentstyle.com/2024/02/btailor-korea-real-bespoke-and-distinctive-style.html",
+    "summary": "청담동 비스포크 맞춤정장 명가로 1967년 설립, 세대 이음 전문 기술력",
+    "exclude": true
+  },
+  "메디치 가죽공방 (Medici Leather Studio)": {
+    "verified": true,
+    "sourceUrl": "https://v.daum.net/v/c85bNgkfCC",
+    "summary": "이탈리아 천연 식물성 태닝 가죽으로 만드는 프리미엄 가죽공예 원데이 클래스"
+  },
+  "YH 가죽공방 (YH Leather Workshop)": {
+    "location": "서울 강남구 논현동 22 논현아파트 쇼핑몰 2층"
+  },
+  "라온디 (LaonD)": {
+    "exclude": true
+  },
+  "한국초콜릿연구소뮤지엄 스튜디오 (Korea Chocolate Institute Museum Studio)": {
+    "verified": true,
+    "sourceUrl": "https://kr.trip.com/travel-guide/attraction/gapyeong-gun/korea-chocolate-institute-museum-99588533/",
+    "summary": "가평의 초콜릿 박물관에서 직접 만드는 경험과 초콜릿 클래스 제공"
+  },
+  "세빛섬 무드서울 (MOOD SEOUL)": {
+    "verified": true,
+    "sourceUrl": "https://www.4th.kr/news/articleView.html?idxno=2056824",
+    "summary": "한강 360도 야경을 감상하며 시푸드·와인·위스키를 즐기는 고급 바"
+  },
+  "[여의도 권역]": {
+    "exclude": true
+  },
+  "🌲 Part 2. 아트 컬렉터의 숲 & 수목원·야외조각 갤러리 (경기/서울 근교)": {
+    "exclude": true
+  },
+  "[포천/소흘] 국립광릉수목원 자락 송설 분재원 온실 다실 (Gwangneung Songseol Bonsai Greenhouse)": {
+    "region": "경기"
+  },
+  "최고급 호텔 프라이빗 에스테틱 & 뷰티 라운지": {
+    "exclude": true
+  },
+  "하이엔드 럭셔리 스킨/페이셜 커플 스파 라운지": {
+    "exclude": true
+  },
+  "3단계 큐레이션 원칙 (Active, Private & Refreshing)": {
+    "exclude": true
+  },
+  "Key Highlights": {
+    "exclude": true
+  },
+  "부여농부의집 (Buyeo Farmer's House — 부여)": {
+    "region": "충청",
+    "location": "충청남도 부여군 부여읍 일대",
+    "summary": "부여 지역의 한옥 펜션으로 부소산성, 정림사지 근처"
+  },
+  "부여 안방마님 펜션 (Anbangnmanim — 부여)": {
+    "region": "충청",
+    "location": "충청남도 부여군 부여읍 일대"
+  },
+  "현암리 돌담집 (Hyeonamri Stone Wall House — 부여)": {
+    "region": "충청",
+    "location": "충청남도 부여군 현암리 일대"
+  },
+  "가림재 (Garimjae — 부여)": {
+    "region": "충청",
+    "location": "충청남도 부여군 임천면 일대"
+  },
+  "청담황토한옥 (Cheongdam Hwangto Hanok — 익산 금마)": {
+    "region": "호남",
+    "location": "전라북도 익산시 금마면 일대"
+  },
+  "남촌 CC 멤버십 다이닝 & 라운지": {
+    "verified": true,
+    "sourceUrl": "https://www.namchoncc.co.kr",
+    "summary": "멤버십 기반 다이닝 운영 중, 활발한 예약 시스템 운영"
+  },
+  "아시아나 CC 클럽하우스 다이닝": {
+    "verified": true,
+    "sourceUrl": "https://m.asianacc.co.kr",
+    "summary": "예약 시스템 활성, 날씨 정보 업데이트 운영 중"
+  },
+  "크리스찬 유앤브이 한남 (Christian U&V)": {
+    "verified": true,
+    "sourceUrl": "https://www.instagram.com/christian.unv/"
+  },
+  "헤드스파K 논현 VIP 본점 (Head Spa K)": {
+    "verified": true,
+    "sourceUrl": "https://headspak.com/index.php?mid=partners"
+  },
+  "더트리니티스파 판교점 (The Trinity Spa)": {
+    "verified": true,
+    "sourceUrl": "https://www.trinityspa.co.kr/location"
+  },
+  "라이카시네마 프라이빗 대관 (연희동)": {
+    "verified": true,
+    "sourceUrl": "http://laikacinema.com/about",
+    "summary": "연희동 아트 영화관, 2021년 오픈, 프라이빗 상영 대관 가능"
+  },
+  "👑 Chapter 3. VIP 회원제 & 프라이빗 와인 셀러 다이닝": {
+    "exclude": true
+  },
+  "CGV 프라이빗 박스 (PRIVATE BOX - 용산아이파크몰)": {
+    "verified": true,
+    "sourceUrl": "https://cgv.co.kr/cnm/bzplcCgv/0013001",
+    "summary": "용산아이파크몰 6~7층 프라이빗 박스 영화관 현재 운영 중"
+  },
+  "롯데시네마 샤롯데 프라이빗 (월드타워점 / 건대입구점)": {
+    "verified": true,
+    "sourceUrl": "https://namu.wiki/w/%EB%A1%AF%EB%8D%B0%EC%8B%9C%EB%84%A4%EB%A7%88/%EC%8A%A4%ED%8E%98%EC%85%9C%EA%B4%80",
+    "summary": "롯데월드타워 11관 샤롯데 프라이빗(8석) 현재 운영 중"
+  },
+  "BOID (보이드 - 가로수길)": {
+    "verified": true,
+    "sourceUrl": "https://www.boid.me/",
+    "summary": "가로수길 BOID 4K 돌비 프라이빗 시어터 현재 운영 중"
+  },
+  "칠인더시네마 (Chillin Cinema - 용산/홍대)": {
+    "verified": true,
+    "sourceUrl": "https://kr.trip.com/moments/detail/hongdae-2135592-138807867/",
+    "summary": "홍대 칠인더시네마 프라이빗 영화관 현재 운영 중"
+  },
+  "을지영화관 (Eulji Cinema - 을지로)": {
+    "verified": true,
+    "sourceUrl": "https://www.facebook.com/euljicinema/",
+    "summary": "을지로 프라이빗 시네마 130인치 4K 스크린 현재 운영"
+  },
+  "시글루 (SEAGLOO - 건대)": {
+    "verified": true,
+    "sourceUrl": "https://linktr.ee/cigloo",
+    "summary": "CIGLOO/시글루 건대 프라이빗 영화관 현재 운영 중"
+  },
+  "세빛섬 채빛퀴진 (Floating Island Chavit Cuisine)": {
+    "verified": true,
+    "sourceUrl": "https://www.somesevit.co.kr/kr/business/chavit/introduce.do",
+    "summary": "한강 전망의 대형 수상 뷔페 레스토랑, 160여 가지 메뉴"
+  },
+  "세빛섬 골든블루마리나 프라이빗 샴페인 라운지 (Golden Blue Marina)": {
+    "verified": true,
+    "sourceUrl": "https://www.instagram.com/goldenbluemarina/",
+    "summary": "세빛섬 2025 시즌 운영, 프라이빗 샴페인 라운지"
+  },
+  "김포 아라마리나 요트클럽 프라이빗 차터 (Gimpo Ara Marina Yacht Club)": {
+    "verified": true,
+    "sourceUrl": "https://eco.gimpo.go.kr/culture/selectTourCntntsWebView.do?tourNo=421",
+    "summary": "수상레저 체험시설, 수요일~일요일 09시~18시 운영"
+  },
+  "화성 전곡항 마리나 요트 다이닝 (Jeonggok Marina Yacht Dining)": {
+    "verified": true,
+    "sourceUrl": "https://www.hsuco.or.kr/www/M040000/M040500/M0405005/M04050052.jsp",
+    "summary": "국제 요트대회 개최 마리나, 113척 규모 계류시설"
+  },
+  "화성 제부마리나 럭셔리 요트 라운지 (Jebu Marina Luxury Yacht Lounge)": {
+    "verified": true,
+    "sourceUrl": "https://www.gppc.or.kr/ko/business/detail-11",
+    "summary": "연중무휴 운영, 요트/모터보트 계류 및 클럽하우스"
+  },
+  "시흥 거북섬 시화호 마리나 (Siheung Turtle Island Marina)": {
+    "verified": true,
+    "sourceUrl": "https://www.ajunews.com/view/20251018143133084",
+    "summary": "2025 경기국제보트쇼 개최, 90선석 계류시설"
+  },
+  "인천 영종도 왕산마리나 요트 다이닝 (Wangsan Marina Sunset Dining)": {
+    "verified": true,
+    "sourceUrl": "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=b646d21c-248f-4271-8f7d-6523d8efec46",
+    "summary": "319척 계류시설, 요트 투어 및 낙조 관광 명소"
+  },
+  "의정부 파크프리베 (Park Prive)": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=bESYZMBtIt2l",
+    "summary": "의정부 장암동 프라이빗 카페·다이닝, 현재 영업 중"
+  },
+  "데이빗앤룰스 '더 체임버 룸' (David & Rules 'The Chamber') - 서판교": {
+    "verified": true,
+    "sourceUrl": "https://davidnrules.kr/",
+    "summary": "분당 프리미엄 스테이크하우스, 드라이에이징 숙성 스테이크"
+  },
+  "우몽블랙 판교점 (Woomong Black) - 판교": {
+    "verified": true,
+    "sourceUrl": "https://woomong.kr/",
+    "summary": "판교 한우오마카세 전문점, 알파돔타워 2층"
+  },
+  "서울마리나 셰프 온 더 요트 (Seoul Marina Chef on the Yacht)": {
+    "verified": true,
+    "sourceUrl": "https://seoulmarina.club/",
+    "summary": "여의도 한강공원 내 요트클럽, 요트투어·카페·레스토랑"
+  },
+  "양평 더그림 (The Greem)": {
+    "verified": true,
+    "sourceUrl": "https://ggtour.or.kr/story/travel.php?tmenu=&smenu=&stitle=&tsort=1&msort=8&board_code=5&board=5&s_category_name=&key=&page=3&mode=detail&no=40389",
+    "summary": "미니식물원 카페, 정원 방송 촬영 명소 60여 편, 아름다운 유럽식 정원과 포토존 보유",
+    "price": "8,000원(성인)/7,000원(어린이)"
+  },
+  "남양주 비루개 (Birugae)": {
+    "verified": true,
+    "sourceUrl": "https://kr.trip.com/moments/detail/namyangju-si-121872-119521602/",
+    "summary": "유리온실 형태 수목원 카페, 그네·평상·보드게임 등 다양한 놀거리 구비"
+  },
+  "용인 칼리오페 (Calliope)": {
+    "verified": true,
+    "sourceUrl": "https://www.instagram.com/calliope_corp/",
+    "summary": "700평 규모 그리스 로마 신화 테마 복합문화공간, 카페·베이커리·와인바·무대"
+  },
+  "용인 묵리459 (Mukri 459)": {
+    "verified": true,
+    "sourceUrl": "https://mukri459.com/",
+    "summary": "갤러리 감성 카페, 자연경관 조망 가능한 목재톤 내부, 천연효모 브런치 인기"
+  },
+  "용인 어 로프 슬라이스 피스 (A Loaf Slice Piece)": {
+    "verified": true,
+    "sourceUrl": "https://www.instagram.com/a_loaf_slice_piece/",
+    "summary": "대형 베이커리 카페, 목재톤 따뜻한 분위기, 시그니처 밧줄빵·뜀틀빵 등"
+  },
+  "김포 아보고가 (Abogoga)": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=pM5dB6uHAyeN",
+    "summary": "피라미드 형태 독특한 건축미 카페, 한강뷰, 베이커리·샌드위치 전문"
+  },
+  "양평 하우스 베이커리 (Haus Bakery)": {
+    "verified": true,
+    "sourceUrl": "https://www.instagram.com/haus.bakery/?hl=ko",
+    "summary": "배우 이영애 구 저택 한옥 베이커리, 캐나다·호주·프랑스산 유기농 버터 사용"
+  },
+  "이천 이진상회 (Ijin Sanghoe)": {
+    "verified": true,
+    "sourceUrl": "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=6e4e9af2-9378-4a8b-97eb-b97e2db90ed7",
+    "summary": "도자기 도시 특화, 16,000㎡ 규모 복합문화공간, 디저트 담은 도자기 무료 제공"
+  },
+  "르플랑 에떼 안국 (Le Plein Ete Anguk Atelier)": {
+    "summary": "한국 도시의 고유 향을 담은 니치 향수 브랜드, 안국 플래그십 스토어"
+  },
+  "다니엘 트루스 퍼퓸 하우스 성수 (Daniel's Truth Perfume House Seongsu)": {
+    "summary": "오일 퍼퓸 1:1 퍼스널 조향 체험, 성수동 플래그십 하우스"
+  },
+  "스파에코 분당정자점 (Spa Eco)": {
+    "verified": true,
+    "sourceUrl": "http://www.spaeco.co.kr/"
+  },
+  "모에드 일산 헤드스파 스튜디오 (Moed)": {
+    "verified": true,
+    "sourceUrl": "https://moadd.co.kr/"
+  },
+  "목탄장 판교점 (Moktanjang) - 판교": {
+    "verified": true,
+    "sourceUrl": "https://app.catchtable.co.kr/ct/shop/moktanjang_pangyo",
+    "summary": "숯불다이닝과 와인바를 결합한 프리미엄 다이닝 레스토랑. 판교타워 1층 위치"
+  },
+  "뮤즈온 (Muse On) - 서울 강남구 신사동 (가로수길)": {
+    "verified": true,
+    "sourceUrl": "https://app.catchtable.co.kr/ct/shop/museon_garosugil",
+    "summary": "신사동 가로수길 LP뮤지엄, 약 10,000장 LP 보유, 기네스 맥주와 칵테일 제공"
+  },
+  "서촌 온그라운드 뮤직바 (OnGround Music Bar) - 서울 종로구 창성동": {
+    "verified": true,
+    "sourceUrl": "https://app.catchtable.co.kr/ct/shop/ongroundgallery",
+    "summary": "서촌 갤러리 겸 LP바, 다이닝코드 평점 4.4별, 예술작품 전시"
+  },
+  "사운드카페 소리 (Sound Cafe Sori) - 서울 마포구 상수동": {
+    "verified": true,
+    "sourceUrl": "https://shareit.kr/venue/1282",
+    "summary": "마포 상수동, 수십년 수집 앰프·스피커·진공관, 최고급 음악감상 공간"
+  },
+  "오르페오 (ORFEO) - 서울 용산구 한남동": {
+    "verified": true,
+    "sourceUrl": "https://www.monoplex.com/space/m005",
+    "summary": "용산 한남동 사운즈 한남 5층, 국내 최초 사운드 시어터, 1인 25,000원"
+  },
+  "이촌동 카펜터스 (Carpenters) - 서울 용산구 이촌동": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=T8GifY4hylsz",
+    "summary": "이촌동 LP바, 19:30-02:00 영업(일요일 휴무), 이촌역 3-1번 출구 250m"
+  },
+  "사운드 플래닛 (Sound Planet) - 서울 성동구 성수동": {
+    "verified": true,
+    "sourceUrl": "https://polle.com/place/4NnWAw/%EC%82%AC%EC%9A%B4%EB%93%9C%20%ED%94%8C%EB%9E%98%EB%8B%9B",
+    "summary": "성수동 뚝섬역 인근 바, 2만원대 칵테일, 팝콘향의 이태원갬성 인테리어"
+  },
+  "인천 드림파크 승마장 (Incheon Dreampark Riding Center)": {
+    "verified": true,
+    "sourceUrl": "https://www.k-lifetv.co.kr/news/articleView.html?idxno=29905"
+  },
+  "용인 신갈 승마클럽 (Singal Riding Club)": {
+    "verified": true,
+    "sourceUrl": "https://www.earthtory.com/ko/city/yongin-si_10924/attraction/%EC%8B%A0%EA%B0%88%EC%8A%B9%EB%A7%88%ED%81%B4%EB%9F%BD_845594"
+  },
+  "스피크이지 몰타르 (Speakeasy Mortar) - 서울 용산구 한남동": {
+    "verified": true,
+    "sourceUrl": "https://wanderlog.com/place/details/1078174/speakeasy-mortar",
+    "summary": "신비로운 입장 구성의 서울 대표 스피크이지 바"
+  },
+  "한남 더부즈 (Hannam The Booze) - 서울 용산구 한남동": {
+    "verified": true,
+    "sourceUrl": "https://www.menupan.com/Restaurant/GoodRest/GoodRest_View.asp?id=179846",
+    "summary": "품질 좋은 얼음 큐브 사용하는 숨은 위스키 바"
+  },
+  "블라인드 피그 (Blind Pig) - 서울 용산구 한남동": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=ysxAKVaKnxGq",
+    "summary": "한남동 명물 프리미엄 위스키 바"
+  },
+  "을지로 숙희 (Sukhee) - 서울 중구 을지로/명동": {
+    "verified": true,
+    "sourceUrl": "https://www.siksinhot.com/P/1101370",
+    "summary": "을지로 서정 넘치는 레트로 감성 술집"
+  },
+  "장프리고 (Jean Frigo) - 서울 중구 광희동 (동대문/을지로)": {
+    "verified": true,
+    "sourceUrl": "https://ko.foursquare.com/v/jean-frigo-%EC%9E%A5%ED%94%84%EB%A6%AC%EA%B3%A0/589ecfbdd9705c7b877b87fe",
+    "summary": "냉장고 문 뒤의 독특한 프랑스식 칵테일 바"
+  },
+  "포지티브 제로 몽크 / 포지티브제로라운지 (Positive Zero Lounge) - 서울 성동구 성수동": {
+    "verified": true,
+    "sourceUrl": "https://www.siksinhot.com/P/978610",
+    "summary": "서울숲 근처 라이브 재즈 공연 매일 진행"
+  },
+  "디도 재즈 라운지 (Dido Jazz Lounge) - 서울 광진구 구의동": {
+    "verified": true,
+    "sourceUrl": "https://english.visitseoul.net/restaurants/Dido-Jazz-Lounge/ENP040935",
+    "summary": "라라랜드 감성의 라이브 재즈 라운지"
+  },
+  "연남 5701 (Yeonnam 5701) - 서울 마포구 연남동": {
+    "verified": true,
+    "sourceUrl": "https://www.siksinhot.com/P/1270279",
+    "summary": "연남동 와인과 라이브 재즈 즐기는 클럽"
+  },
+  "전남 여수 웅천 이순신마리나 요트콜라 선상 차터 (Yeosu Yacht Cola Private Charter)": {
+    "verified": true,
+    "sourceUrl": "https://yisunsinmarina.co.kr/free/116",
+    "summary": "여수 이순신마리나 요트 차터 서비스, 해상 데이트 스팟"
+  },
+  "갤러리 더 스퀘어 (Gallery The Square)": {
+    "verified": true,
+    "sourceUrl": "https://polle.com/place/5BhL8A/%EA%B0%A4%EB%9F%AC%EB%A6%AC%20%EB%8D%94%20%EC%8A%A4%ED%80%98%EC%96%B4",
+    "summary": "종로 계동 북촌 갤러리 티룸, 예약 가능"
+  },
+  "남양주 베이커리 씨어터 (Bakery Theater)": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=XrAuPxXPQQRf",
+    "summary": "북한강 뷰 베이커리 카페, 넓은 정원과 실내 공간",
+    "slot": "day"
+  },
+  "화성 혜경궁 베이커리 (Hyegyeonggung Bakery)": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=FUNCxKWz1I0J",
+    "summary": "화성 정남면 한옥 베이커리 카페, 산책로와 야외 공간"
+  },
+  "몰트 바 소마 (Malt Bar Soma) - 판교": {
+    "verified": true,
+    "sourceUrl": "https://www.siksinhot.com/P/1110788",
+    "summary": "판교 유스페이스 위스키&칵테일 바, 유럽식 인테리어"
+  },
+  "더 모멘토 바 (The Momento Bar) - 분당 정자": {
+    "verified": true,
+    "sourceUrl": "https://polle.com/p/1JJTKc",
+    "summary": "분당 정자 위스키 바, 무료 애피타이저 제공"
+  },
+  "스튜디오 지구 (Studio Jigu) - 판교": {
+    "verified": true,
+    "sourceUrl": "https://polle.com/place/2hMUi2/%EC%8A%A4%ED%8A%9C%EB%94%94%EC%98%A4%20%EC%A7%80%EA%B5%AC",
+    "summary": "판교 유스페이스 와인 바, 세련된 분위기"
+  },
+  "힐즈앤유로파 (Hills & Europa) - 서울 용산구 해방촌": {
+    "verified": true,
+    "sourceUrl": "https://www.instagram.com/hillsandeuropa/",
+    "summary": "용산 해방촌 카페겸 바. 주말 오후, 평일저녁 바로 운영"
+  },
+  "써라운드 (Surround) - 경기 남양주시 화도읍": {
+    "verified": true,
+    "sourceUrl": "https://www.hankyung.com/article/202503260009i",
+    "summary": "남양주 화도의 산자락 카페, 5.3m 대창 창문이 특징"
+  },
+  "베토벤하우스 - 인천 중구 영종도": {
+    "verified": true,
+    "sourceUrl": "https://www.hankyung.com/article/202503257472i",
+    "summary": "영종도 베토벤 컨셉 카페, 음악감상실에 고급 클래식 스피커"
+  },
+  "🎳 하이엔드 볼링 펍 & 라운지": {
+    "exclude": true
+  },
+  "르챔버 (Le Chamber) - 서울 강남구 청담동": {
+    "exclude": true
+  },
+  "앨리스 청담 (Alice Cheongdam) - 서울 강남구 청담동": {
+    "exclude": true
+  },
+  "겟올라잇 청담 (Get All Right) - 서울 강남구 청담동": {
+    "exclude": true
+  },
+  "케이원 시크릿 와인 룸 (K-One Secret Wine Room) - 과천": {
+    "verified": true,
+    "sourceUrl": "https://www.threads.com/@kone.cafe/post/DP5s45lkfDt/",
+    "location": "경기 과천시 중앙로 429",
+    "summary": "과천의 카페. 최근 민생지원금 사용 가능 안내."
+  },
+  "리홀뮤직갤러리 - 서울 성북구 성북동": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=h4hEtPNfFBoE",
+    "price": "10000",
+    "summary": "성북동 음악감상실. 12만여 장 LP와 1930년대 빈티지 스피커. 입장료 1만원."
+  },
+  "콩치노 콩크리트 (Concino Concrete) - 경기 파주시 탄현면": {
+    "verified": true,
+    "sourceUrl": "https://www.paju.go.kr/news/user/BD_newsView.do?q_ctgCd=1002&newsSeq=914",
+    "price": "20000",
+    "summary": "파주 헤이리의 세계 최대 규모 개인소유 LP 감상실. 입장료 2만원."
+  },
+  "황인용 뮤직스페이스 카메라타 (Camerata) - 경기 파주시 탄현면": {
+    "verified": true,
+    "sourceUrl": "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=068556d5-c944-4382-9509-925971b2d9e7",
+    "summary": "파주 헤이리의 명품 음악감상실. 10만여 장 LP와 웨스턴일렉트릭 오디오 시스템."
+  },
+  "피터폴앤드메리 (Peter Paul & Mary) - 서울 강남구 압구정동": {
+    "verified": true,
+    "sourceUrl": "https://www.saramin.co.kr/zf_user/company-info/view/csn/eXVMYmFrZFUyS0RFeDU5cXRvWXVXUT09/company_nm/",
+    "summary": "강남 압구정의 LP바. 2만여 개 LP와 돌비 애트모스 공간음향 시스템 장착."
+  },
+  "오드 메종 (ODE Maison) - 서울 강남구 청담동": {
+    "verified": true,
+    "sourceUrl": "https://l-room.co.kr/",
+    "summary": "강남의 세계 최대 규모 오디오 전시장. 리스닝룸, 바, 피아노 라운지 운영."
+  },
+  "강남 플랫나인 (Flat Nine) - 서울 서초구 서초동 (강남역)": {
+    "verified": true,
+    "sourceUrl": "https://app.catchtable.co.kr/ct/shop/flatnine_jazzbar",
+    "summary": "서초동 강남역 인근 재즈바, 라이브 공연 및 칵테일 제공"
+  },
+  "Aquafield (Hanam / Goyang)": {
+    "verified": true,
+    "sourceUrl": "https://www.aquafield-ssg.co.kr/"
+  },
+  "고즈넉한 갤러리 산책: 부암동 ↔ 서촌": {
+    "verified": true,
+    "sourceUrl": "https://brunch.co.kr/@aimho/12"
+  },
+  "시그니엘 서울 - STAY (스테이)": {
+    "verified": true,
+    "sourceUrl": "https://www.lottehotel.com/seoul-signiel/en",
+    "summary": "롯데월드타워 76~101층 초호화 호텔 스테이"
+  },
+  "JW 메리어트 호텔 서울 - 모보 바 (MOBO Bar)": {
+    "summary": "신반포 JW 메리어트 내 프리미엄 칵테일 바"
+  },
+  "함라한옥체험단지 (Hamna Hanok Complex — 익산 함라)": {
+    "verified": true,
+    "sourceUrl": "https://www.iksan.go.kr/reserve/board/list.iksan?boardId=BBS_0000444"
+  },
+  "가평 무아레 478 럭셔리 카바나 (Moire 478)": {
+    "exclude": true
+  },
+  "가평 마이다스 호텔 앤 리조트 - 헤스티아 카바나 글램핑 (Midas Hestia)": {
+    "verified": true,
+    "sourceUrl": "https://www.midashotel.co.kr/",
+    "summary": "마이다스 호텔 헤스티아 카바나 글램핑, 2026년 예약 가능"
+  },
+  "가평 아난티 코드 - 캐빈 빌라 글램핑 BBQ (Ananti Chord)": {
+    "verified": true,
+    "sourceUrl": "https://ananti.kr/ko/chord",
+    "summary": "아난티 코드 펜트하우스 럭셔리 카바나, 공식사이트 활성"
+  },
+  "가평 세라핌 럭셔리 카바나 글램핑 (Seraphim Cabana)": {
+    "verified": true,
+    "sourceUrl": "https://www.yeogi.com/domestic-accommodations/61532",
+    "summary": "가평 세라핌 글램핑, 여기어때 예약 가능 (2026년)"
+  },
+  "포천 글램파크 캠핑리조트 VIP 카바나 (Glampark VIP Cabana)": {
+    "verified": true,
+    "sourceUrl": "https://www.yeogi.com/domestic-accommodations/73975",
+    "summary": "포천 글램파크 캠핑리조트, 글램핑/카라반 예약 가능"
+  },
+  "포천 노블글램핑 & 롯지 (Noble Glamping)": {
+    "verified": true,
+    "sourceUrl": "https://site.onda.me/%ED%8F%AC%EC%B2%9C-%EB%85%B8%EB%B8%94%EA%B8%80%EB%9E%A8%ED%95%91-117843/roomtypes/detail/1699281/1553475",
+    "summary": "포천 영중면 위치 럭셔리 글램핑 시설. 4.82점 평점 371개 리뷰로 현재 활발 운영"
+  },
+  "양평 빌라드샬롯 럭셔리 카바나 (Villa de Charlotte)": {
+    "region": "경기"
+  },
+  "양평 더포레스트 테라스 카바나 (The Forest Terrace)": {
+    "region": "경기"
+  },
+  "양평 솔베르크 프라이빗 카바나 (Solberg Luxury Cabana)": {
+    "verified": true,
+    "sourceUrl": "https://seulburg.kr/",
+    "summary": "양평 옥천면 위치. 개별 온수풀빌라·제트스파·테라스 바베큐 제공하는 운영 시설"
+  },
+  "용인 딥포레스트 럭셔리 돔 카바나 (Deep Forest Glamping)": {
+    "region": "경기"
+  },
+  "용인 캠프레이크 글램핑 & 바비큐 라운지 (Camp Lake)": {
+    "verified": true,
+    "sourceUrl": "https://camplake.modoo.at/",
+    "region": "경기",
+    "summary": "신갈저수지 변의 전망 좋은 글램핑장, 가족·커플용 글램핑과 글램하우스 구성"
+  },
+  "여수 모이핀 오션점 (Cafe Moi Fin Ocean) — 전남 여수": {
+    "slot": "day"
+  },
+  "뮤지엄원 (Museum 1)": {
+    "exclude": true
+  },
+  "🦇 Chapter 1. 지하 동굴 & 까브(Cave) 콘셉트 와인바": {
+    "exclude": true
+  },
+  "🍇 Chapter 4. 숨겨진 와이너리 & 대형 와인 동굴 투어": {
+    "exclude": true
+  },
+  "🏛️ 파주 권역": {
+    "exclude": true
+  },
+  "🌊 영종도 & 인천 권역": {
+    "exclude": true
+  },
+  "🌿 양평 권역": {
+    "exclude": true
+  },
+  "🌲 용인 권역": {
+    "exclude": true
+  },
+  "☕ 남양주 & 포천 권역": {
+    "exclude": true
+  },
+  "🎨 춘천 & 가평 권역": {
+    "exclude": true
+  },
+  "🏯 [Group 1] 수원 행궁동 & 성곽길": {
+    "exclude": true
+  },
+  "🍂 [Group 2] 고양 일산 밤리단길": {
+    "exclude": true
+  },
+  "⚓ [Group 3] 인천 개항장 & 선재도": {
+    "exclude": true
+  },
+  "🌲 [Group 4] 남양주 & 양평": {
+    "exclude": true
+  },
+  "🌿 [Group 5] 경기 북부 (이색 테마 & 숲속 온실)": {
+    "exclude": true
+  },
+  "☕ [Group 6] 경기 남부 (감성 스트리트 & 생태 피크닉)": {
+    "exclude": true
+  },
+  "⛵ [Category 2] 프라이빗 마리나 & 럭셔리 요트 세일링": {
+    "exclude": true
+  },
+  "☕ [Category 1] 한강·서해 심야 드라이브 카페": {
+    "exclude": true
+  },
+  "🔭 [Category 2] 숲속 별빛 관측소 & 은하수 투어": {
+    "exclude": true
+  },
+  "🎬 [Category 3] 프라이빗 자동차 극장 & 드라이브인 시네마": {
+    "exclude": true
+  },
+  "🎷 [Category 5] 심야 LP 살롱 & 은밀한 불빛 정원": {
+    "exclude": true
+  },
+  "🏛️ [Category 2] 초대형 복합문화공간 & 메가 컨셉 카페": {
+    "exclude": true
+  },
+  "🍵 3. 멘탈 웰니스 & 티 테라피 (Tea Therapy & Mental Care)": {
+    "exclude": true
+  },
+  "🎧 서울 지역 (17선)": {
+    "exclude": true
+  },
+  "🎧 경기/인천 지역 (3선)": {
+    "exclude": true
+  },
+  "디오티 가죽 아틀리에 (Dioti Leather Atelier Hannam)": {
+    "slot": "day"
+  },
+  "노블레스 레더 라운지 (Noblesse Leather Salon Cheongdam)": {
+    "exclude": true
+  },
+  "테일러블 (Tailorable Hannam)": {
+    "exclude": true
+  },
+  "마크론슨 (Mark Ronson Cheongdam)": {
+    "exclude": true
+  },
+  "볼란테 비스포크 (Volante Bespoke)": {
+    "exclude": true
+  },
+  "슈트패브릭 비스포크 하우스 (Suit Fabric Bespoke House)": {
+    "exclude": true
+  },
+  "글라이더스 왕산마리나 선셋 세일링 (Gliders Wangsan Marina Sunset Sailing)": {
+    "slot": "evening"
+  },
+  "왕산마리나 기업 VIP 요트 영접 패키지 (Wangsan Marina Corporate VIP Charter)": {
+    "exclude": true
+  },
+  "아라마리나 한강·서해 연결 선셋 크루즈 (Ara Marina Han River-West Sea Sunset Cruise)": {
+    "slot": "evening"
+  },
+  "🥃 경기/인천 지역 (3선)": {
+    "exclude": true
+  },
+  "문화시민 서울": {
+    "exclude": true
+  },
+  "10월 19일 (October 19th)": {
+    "exclude": true
+  },
+  "[경남 거제] 거제 몽돌 카사블랑카 오션 빌라 (Geoje Casablanca Coastal Villa)": {
+    "slot": "stay"
+  },
+  "대한민국 천연 암반 동굴 와인 셀러 & 캔들라이트 다이닝 트렌드 분석": {
+    "exclude": true
+  },
+  "아치 볼트 에스파스 성수 (Arch Vault Espace) - 서울 성동구": {
+    "slot": "evening"
+  },
+  "방문 시 주의사항 및 테이스팅 에티켓": {
+    "exclude": true
+  },
+  "🌃 1부. 하이엔드 심야 드라이브 뷰 포인트 (8선)": {
+    "exclude": true
+  },
+  "🎬 3부. 프라이빗 심야 영화관 & 하이엔드 자동차 극장 (5선)": {
+    "exclude": true
+  },
+  "도예공방 도온 (Doteon Atelier Hannam & Yongsan)": {
+    "slot": "day"
+  },
+  "[강원 원주] 사니다 카페 (Sanida Garden Cafe)": {
+    "slot": "day"
+  },
+  "대한민국 시크릿 동굴 다이닝 & 와인 케이브 트렌드 분석": {
+    "exclude": true
+  },
+  "[충남 보령] 원산도 오봉산 해안 절벽 선셋 인피니티 모닥불 라운지 (Boryeong Wonsando Sunset Cliff Infinity Firepit Lounge)": {
+    "slot": "night"
+  },
+  "[경남 통영] 산양일주로 달아노을 해안 절벽 인피니티 파이어핏 (Tongyeong Dara Sunset Clifftop Firepit Lounge)": {
+    "slot": "evening"
+  },
+  "[부산 영도] 절영해안산책로 태종대 단애 40m 선셋 모닥불 라운지 (Busan Yeongdo Taejongdae Cliff Sunset Firepit Lounge)": {
+    "slot": "evening"
+  },
+  "[인천 굴업도] 굴업도 목기미 사구 은하수 듄 라운지 (Guleopdo Mokgimi Dune Lounge)": {
+    "slot": "night"
+  },
+  "이미커피 (Imi Coffee - 연남동)": {
+    "slot": "day"
+  },
+  "지역별 완벽 연계 데이트 코스 매트릭스": {
+    "exclude": true
+  },
+  "💎 카테고리 1. 명품 플래그십 & 하이엔드 브랜드 라운지": {
+    "exclude": true
+  },
+  "🏛️ 카테고리 2. 하이엔드 복합문화공간 & 아티스틱 플랫폼": {
+    "exclude": true
+  },
+  "🥐 카테고리 4. 2026 SNS/커뮤니티 바이럴 폭발 F&B 핫플": {
+    "exclude": true
+  },
+  "🌙 Night & Art Curation Concept": {
+    "exclude": true
+  },
+  "🍸 카테고리 1. 스피크이지 & 히든 도어 비밀 바": {
+    "exclude": true
+  },
+  "🎷 카테고리 2. 프리미엄 라이브 재즈 라운지": {
+    "exclude": true
+  },
+  "🎧 카테고리 3. 하이엔드 오디오 & 바이닐(LP) 청음 라운지": {
+    "exclude": true
+  },
+  "🍲 카테고리 4. 소수 정예 심야식당 & 심야 비스트로": {
+    "exclude": true
+  },
+  "🎨 카테고리 5. 갤러리 연계 바 & 아트 라운지": {
+    "exclude": true
+  },
+  "🏛️ [하이엔드 복합문화 & 건축 랜드마크]": {
+    "exclude": true
+  },
+  "🧖 [이색 니치 오마카세 & 뷰티 살롱]": {
+    "exclude": true
+  },
+  "4단계 큐레이션 테마 (Midnight Aesthetics & Secret Audiophile)": {
+    "exclude": true
+  },
+  "☔ Indoor Curation Philosophy": {
+    "exclude": true
+  },
+  "🐠 카테고리 2. 실내 생태 아쿠아리움 & 초대형 온실 식물원": {
+    "exclude": true
+  },
+  "🎬 카테고리 3. 하이엔드 프리미엄 시네마 & 다이닝 극장": {
+    "exclude": true
+  },
+  "🎯 카테고리 4. 올웨더 실내 어드벤처 & 하이엔드 엔터테인먼트": {
+    "exclude": true
+  },
+  "⛵ 카테고리 1. 프라이빗 한강 요트 & 선셋 워터 스포츠": {
+    "exclude": true
+  },
+  "🌲 카테고리 3. 도심 숲길 트레킹 & 파노라마 웰니스": {
+    "exclude": true
+  },
+  "⛳ 카테고리 4. 프라이빗 골프 스튜디오 & 라운지": {
+    "exclude": true
+  },
+  "🍵 [100% 예약제 프리미엄 다도 & 티 오마카세]": {
+    "exclude": true
+  },
+  "📚 [사색과 지적 대화의 독립 서점 & 라이브러리]": {
+    "exclude": true
+  },
+  "🚶‍♂️ Curation Theme (감성 골목길 4대 큐레이션 원칙)": {
+    "exclude": true
+  },
+  "☕ 권역 1. 용리단길 & 신용산 & 삼각지 감성 골목": {
+    "exclude": true
+  },
+  "🍃 권역 2. 서촌 & 통의동 & 부암동 산책길": {
+    "exclude": true
+  },
+  "🏭 권역 3. 성수 뒷골목 & 송정 제방길": {
+    "exclude": true
+  },
+  "🏰 권역 4. 수원 화성행궁 & 방화수류정 성곽 골목": {
+    "exclude": true
+  },
+  "🎨 권역 5. 연희동 & 망원동 & 서교동 감성 골목": {
+    "exclude": true
+  },
+  "프라이빗 다이닝 & 티 오마카세 (마인드풀니스 차멍)": {
+    "exclude": true
+  },
+  "프라이빗 하이엔드 원데이 클래스 (노터치/전담 케어)": {
+    "exclude": true
+  },
+  "그린마일커피 북촌점 (Green Mile Coffee)": {
+    "slot": "day"
+  },
+  "을지로 커피한약방 & 혜민당 (Coffee Hanyabang & Hyemindang)": {
+    "slot": "day"
+  },
+  "레인리포트 호우주의보 (Rain Report Seongsu)": {
+    "slot": "evening"
+  },
+  "디핀 (deepin - 서울 신당동/용산)": {
+    "slot": "evening"
+  },
+  "알디프 티 바 (ALDIF Tea Bar - 서울 마포 홍대/합정)": {
+    "slot": "evening"
+  },
+  "[경기 김포] 뱀부15-8 (Bamboo 15-8)": {
+    "slot": "day"
+  },
+  "콘래드 서울 37그릴앤바 (37 Grill & Bar)": {
+    "slot": "evening"
+  },
+  "골든블루마리나 한강 프라이빗 요트 선셋 스냅 (Golden Blue Marina)": {
+    "slot": "evening"
+  },
+  "[전남 신안] 신안 자은도 백길 사구 듄스 샌드보딩 캠프 (Jaeundo Baekgil Dune Camp)": {
+    "slot": "day"
+  },
+  "[경북 포항] 포항 칠포-월포 해안사구 익스트림 듄 캠프 (Pohang Chilpo Dune Extreme Camp)": {
+    "slot": "day"
+  },
+  "[전남 여수] 웅천 58ft 폰테인 파조 카타마란 가막만 선셋 다이닝 (Yeosu Ungcheon Fountaine Pajot 58ft Sunset Dining)": {
+    "slot": "evening"
+  },
+  "가평 클럽티파니 레이크 하우스 (Club Tiffany Lake House)": {
+    "slot": "evening"
+  },
+  "[전북 완주] 상관 편백숲 시크릿 바렐 빌라 (Sanggwan Cypress Secret Barrel Villa)": {
+    "slot": "evening"
+  },
+  "[경남 거제] 딴섬(솔섬) 백사장 카타마란 피크닉 (Geoje Ttanseom White Beach Catamaran Picnic)": {
+    "slot": "day"
+  },
+  "[강원 철원] 직탕 나이아가라 클리프 다이닝 (Jiktang Cliff Dining)": {
+    "slot": "evening"
+  },
+  "뉴서울 CC 멤버십 다이닝 & VIP 룸": {
+    "verified": true,
+    "sourceUrl": "https://www.newseoulgolf.co.kr/",
+    "summary": "36홀 회원제 골프장, 공식 홈페이지 2024년까지 활동 중",
+    "location": "경기 광주시 삼지곡길 95",
+    "region": "경기"
+  },
+  "시크릿 바 (Secret Bar) - 안양 평촌": {
+    "verified": true,
+    "sourceUrl": "https://www.instagram.com/p/DX-pTkbD-_4/"
+  },
+  "콜트레인 (Coltrane) - 서울 중구 충무로": {
+    "verified": true,
+    "sourceUrl": "https://polle.com/place/5bMJox/%EC%BD%9C%ED%8A%B8%EB%A0%88%EC%9D%B8"
+  },
+  "씨네안영채 X 모노플렉스 (동탄 라크몽)": {
+    "exclude": true
+  },
+  "경기 광주 파머스대디 (Farmer's Daddy)": {
+    "verified": true,
+    "sourceUrl": "https://www.siksinhot.com/P/480028"
+  },
+  "센트유니크 정자 본점 (Scent Unique Bundang Jeongja)": {
+    "verified": true,
+    "sourceUrl": "https://www.scentunique.com/"
+  },
+  "스캐터라운지 강남본점 (Scatter Lounge)": {
+    "verified": true,
+    "sourceUrl": "https://www.corner.inc/place/1303940"
+  },
+  "포천 파인벨리 럭셔리 VIP 카바나 (Pine Valley VIP Cabana)": {
+    "verified": true,
+    "sourceUrl": "https://www.agoda.com/en-ca/pocheon-pine-valley-1st-branch/hotel/pocheon-kr.html"
+  },
+  "[용인/처인] 묵리459 묵상 프라이빗 티 살롱 (Mukri 459 Private Tea Salon)": {
+    "verified": true,
+    "sourceUrl": "https://mukri459.com/",
+    "price": "1인 티 오마카세 코스 50,000원",
+    "region": "경기",
+    "location": "경기도 용인시 처인구 이동읍 이원로 459",
+    "summary": "공식 웹사이트 운영 중, 2026년 최근 기록 확인"
+  },
+  "[고양/덕양] 플랜테이션 가든 글래스 파빌리온 티살롱 (Plantation Garden Glass Pavilion)": {
+    "price": "파빌리온 2시간 대관 150,000원",
+    "region": "경기",
+    "location": "경기도 고양시 덕양구 통일로 493번길 32",
+    "summary": "고양 플랜테이션은 현재 운영 중, 글래스 파빌리온 티살롱 구체 확인 부족"
+  },
+  "라페트 청담 (Lafete Cheongdam)": {
+    "verified": true,
+    "sourceUrl": "http://plus.hankyung.com/apps/newsinside.view?aid=2017122719751",
+    "summary": "플로리스트 겸 카페 (황수현 황시연 자매 운영, 청담동 주택가 위치)",
+    "location": "서울 강남구 청담동 주택가",
+    "region": "서울"
+  },
+  "플레르다솔 성수 본점 (Fleur Dasol Seongsu)": {
+    "verified": true,
+    "sourceUrl": "https://www.instagram.com/fleur_dasol/",
+    "summary": "플로리스트 장다솔 운영, Instagram @fleur_dasol에서 활동 중 (58,000+ 팔로워)",
+    "location": "서울 성동구 성수동",
+    "region": "서울"
+  },
+  "부산 해운대 메르씨엘 (Merciel)": {
+    "verified": true,
+    "sourceUrl": "https://www.siksinhot.com/P/281057",
+    "summary": "프렌치 레스토랑 (2층 코스 요리, 3층 브라스리), 시식신 등재",
+    "location": "부산광역시 해운대구 달맞이길65번길 154 중동",
+    "price": "상세 가격 미확인",
+    "region": "영남"
+  },
+  "하우스 오브 탄노이 / 하우스오브바이닐 - 서울 성동구 성수동 / 연남동": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=TLXYRLuQw5qS",
+    "summary": "성수점 카페 영업 중",
+    "location": "서울 성동구 아차산로7길 29 2층",
+    "region": "서울",
+    "price": "6000원"
+  },
+  "이문원 두피헤어랩 (Lee Moon Won Scalp Hair Lab)": {
+    "verified": true,
+    "sourceUrl": "https://lmwhairlab.modoo.at/",
+    "price": "70,000~295,000원",
+    "location": "서울특별시 강남구 선릉로132길 (청담동)",
+    "summary": "메디컬 두피헤어랩, 프리미엄 헤드스파 시술 제공"
+  },
+  "부산 기장 아난티 앳 부산 라메르 (Ananti at Busan La Mer)": {
+    "verified": true,
+    "sourceUrl": "https://ananti.kr/ko/busan/BS0301",
+    "region": "영남",
+    "location": "부산광역시 기장군 기장읍 기장해안로 268-31",
+    "summary": "아난티 앳 부산 코브 라메르 레스토랑 정상 영업 중"
+  },
+  "부산 수영만 요트탈래 프라이빗 셰프 라이더 요트 (Yacht Tale Private Yacht Catering)": {
+    "verified": true,
+    "sourceUrl": "https://www.yachttale.com/",
+    "region": "영남",
+    "location": "부산광역시 해운대구 수영만",
+    "summary": "요트탈래 정상 운영 중"
+  },
+  "경남 남해 아난티 남해 아쁘앙 (Ananti Namhae A Point)": {
+    "verified": true,
+    "sourceUrl": "https://ananti.kr/ko/namhae/specialOffer/list",
+    "region": "영남",
+    "location": "경상남도 남해군 남면 남서대로1179번길 40-108",
+    "summary": "아난티 남해 콘도 골프 리조트 정상 영업 중"
+  },
+  "경남 거제 소노캄 마리나베이 요트 차터 & 몬테로쏘 (Sonokam Geoje Marina Bay & Lounge)": {
+    "verified": true,
+    "sourceUrl": "https://mice.sonohotelsresorts.com/daemyung.front.saupjang.geoje.marina_use.ds/dmparse.dm?menuNo=01",
+    "region": "영남",
+    "location": "경상남도 거제시 일운면 거제대로 2660",
+    "summary": "소노츤 거제 마리나베이 정상 운영 중"
+  },
+  "여수 오동도": {
+    "verified": true,
+    "sourceUrl": "https://access.visitkorea.or.kr/opentour/detail.do?cotId=c3fee7f2-2797-4f92-902d-54f950aed048"
+  },
+  "청송 주산지 (Jusanji Lake) — 경북 청송": {
+    "verified": true,
+    "sourceUrl": "https://korean.visitkorea.or.kr/detail/rem_detail.do?cotid=c9b07bd6-4a96-49bf-8693-d24fc6256bdf"
+  },
+  "[경기 가평] 호명산 로코갤러리 와인딩 코스 ➔ 호명산 로코갤러리": {
+    "verified": true,
+    "sourceUrl": "http://www.dealbada.com/bbs/board.php?bo_table=forum_bike&wr_id=240331"
+  },
+  "한라산 어승생악 야간 탐방": {
+    "verified": true,
+    "sourceUrl": "https://view.asiae.co.kr/article/2026070616362879620"
+  },
+  "제부마리나 & 서해랑 해상케이블카 연계 투어": {
+    "verified": true,
+    "sourceUrl": "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=8c6edec0-af2b-413c-8e3d-1363b3d89620"
+  },
+  "토템오어 (Totem Ore - 제주 한경면 용수리)": {
+    "verified": true,
+    "sourceUrl": "https://triple.guide/restaurants/bd24b3e7-57c9-4667-9a17-a825ac85d1a6"
+  },
+  "티철판요리 (T-Teppan)": {
+    "verified": true,
+    "sourceUrl": "https://tableofteppanyaki.modoo.at/"
+  },
+  "라팰리스 청담 (La Palace Cheongdam)": {
+    "verified": true,
+    "sourceUrl": "https://www.instagram.com/lapalais_cheongdam/"
+  },
+  "카엘리움": {
+    "verified": true,
+    "sourceUrl": "https://www.busan.com/view/busan/view.php?code=2025052516411934953"
+  },
+  "[전북 익산] 아가페정원 & 포레스트 티하우스 (Agape Garden)": {
+    "verified": true,
+    "sourceUrl": "https://tour.jb.go.kr/travel/info/view.do?menuCd=&contentsSid=30&category_top_id=a&ctnt_id=25180",
+    "price": "입장료 무료"
+  },
+  "헤르츠 (Hertz Jazz Lounge) - 경기 수원시 영통구 광교": {
+    "verified": true,
+    "sourceUrl": "https://www.instagram.com/hertz_tuneyourtime/"
+  },
+  "야키토리 묵 (연남점 / 신사점)": {
+    "verified": true,
+    "sourceUrl": "https://app.catchtable.co.kr/ct/shop/yakitorimook_sinsa"
+  },
+  "피크닉 (Piknic / 카페 피크닉 & 바 피크닉)": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=pRpaYVK7sIeH"
+  },
+  "이호테우해변": {
+    "verified": true,
+    "sourceUrl": "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=5ea8d513-cffc-4993-abad-197d736651da"
+  },
+  "더 플라자 지스텀하우스 가든 (ZYSTUM House Garden)": {
+    "verified": true,
+    "sourceUrl": "http://mticket.interpark.com/Place/Detail?placeCode=14000459"
+  },
+  "몬드리안 서울 이태원 프리빌리지 바 (Privilege Bar)": {
+    "verified": true,
+    "sourceUrl": "https://mondrianhotels.com/seoul-itaewon/dining/privilege-bar/"
+  },
+  "파주 퍼스트가든 별빛 라운지 & 헤이리 테라스 (Paju First Garden Starlight Lounge)": {
+    "verified": true,
+    "sourceUrl": "https://firstgarden.co.kr/"
+  },
+  "빛의 벙커 (Bunker de Lumières 제주)": {
+    "verified": true,
+    "sourceUrl": "https://www.deslumieres.co.kr/bunker",
+    "price": "성인 19,000원 / 청소년 14,000원 / 어린이 11,000원 / 미취학아동 9,000원"
+  },
+  "오크우드 프리미어 인천 파노라믹 65 (Panoramic 65)": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=TvAEBUrc6aLM"
+  },
+  "[서울 종로] 북악스카이웨이 2청운각 우회 쉼터 & 자하문 와인딩 ➔ 종로 도심 야경": {
+    "verified": true,
+    "sourceUrl": "https://korean.visitkorea.or.kr/detail/rem_detail.do?cotid=4f0d1973-9945-436f-b602-126f87ed6715"
+  },
+  "[인천 영종도] 메이드림 (MADE RIM)": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=PsNCvwWyhOSf"
+  },
+  "전축 (Jeonchuk)": {
+    "verified": true,
+    "sourceUrl": "https://www.instagram.com/jeonchuk/?hl=ko"
+  },
+  "경남 거제 아그네스파크 오션 테라스 다이닝 (Geoje Agnes Park Ocean Terrace)": {
+    "verified": true,
+    "sourceUrl": "https://kr.trip.com/moments/detail/geoje-si-14781-13975424/"
+  },
+  "시그니엘 서울 바 81 (Bar 81)": {
+    "verified": true,
+    "sourceUrl": "https://autoreserve.com/en/restaurants/tihz2dGynQ9MN3WkSbJQ"
+  },
+  "[충북 충주 / 계명산 종민동] 충주 계명산 치유의 숲 공중 트리탑 티 살롱": {
+    "verified": true,
+    "sourceUrl": "https://www.cjfmc.or.kr/gmf/index.do"
+  },
+  "L7 명동 루프탑 플로팅 (Floating Rooftop Bar)": {
+    "verified": true,
+    "sourceUrl": "https://www.lottehotel.com/myeongdong-l7/ko/dining/rooftop-bar-floating.html"
+  },
+  "[강원 춘천] 제이드가든 살롱 드 제이드 & 분재 가든": {
+    "verified": true,
+    "sourceUrl": "https://www.chuncheon.go.kr/tour/destination/all-tour/detail/?tourId=228"
+  },
+  "아베크 청담 (Avec Cheongdam)": {
+    "exclude": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=oRIebMICSZbA"
+  },
+  "수린 한남 (Surin Hannam)": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=eGY74MvftDQx"
+  },
+  "설화수 북촌 플래그십 스토어 & 오설록 티하우스 가회동점 (바설화)": {
+    "verified": true,
+    "sourceUrl": "https://www.osulloc.com/kr/ko/store-introduction/312"
+  },
+  "데이오프데이": {
+    "verified": true,
+    "sourceUrl": "https://www.instagram.com/dayoffday_busan/"
+  },
+  "세상의 모든 아침 (All The Sky) — 여의도점": {
+    "verified": true,
+    "sourceUrl": "https://www.theskyfarm.co.kr/allday1"
+  },
+  "이호테우 해변": {
+    "verified": true,
+    "sourceUrl": "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=5ea8d513-cffc-4993-abad-197d736651da"
+  },
+  "[경기 김포] 아라마리나 프라이빗 해상 파빌리온 카바나 & 선셋 요트 (Ara Marina Sunset Pavilion Cabana & Yacht Charter)": {
+    "verified": true,
+    "sourceUrl": "https://eco.gimpo.go.kr/culture/selectTourCntntsWebView.do?tourNo=421"
+  },
+  "스시도쿠 더송도": {
+    "verified": true,
+    "sourceUrl": "https://www.instagram.com/p/DSoZWcaE6Be/"
+  },
+  "그랑핸드 서촌 (GRANHAND Seochon)": {
+    "verified": true,
+    "sourceUrl": "https://granhand.com/stores"
+  },
+  "은혜전복": {
+    "exclude": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=8dQrQRKO8lHP",
+    "note": "다이닝코드에 폐업으로 표시됨"
+  },
+  "세븐스도어 (7th Door)": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=Li7nz9NKgK2e"
+  },
+  "평창무이예술관": {
+    "verified": true,
+    "sourceUrl": "https://access.visitkorea.or.kr/ms/detail.do?cotId=94a259af-e028-4c92-8e3c-270bde5df5a3"
+  },
+  "대박갈비탕": {
+    "verified": true,
+    "sourceUrl": "https://polle.com/place/4zCDTa/%EB%8C%80%EB%B0%95%EA%B0%88%EB%B9%84%ED%83%95",
+    "price": "갈비탕 9,000원"
+  },
+  "세라듀 강남 본점 (Ceradu Ceramic Atelier Gangnam)": {
+    "verified": true,
+    "sourceUrl": "https://www.ceradu.com/"
+  },
+  "잔향실 (Janhyangsil 전포)": {
+    "verified": true,
+    "sourceUrl": "https://triple.guide/attractions/ae337ca2-ac70-4207-a8cb-e8acb67e0896"
+  },
+  "솔밤 (Solbam)": {
+    "exclude": true,
+    "sourceUrl": "https://www.siksinhot.com/P/1315217",
+    "note": "식신 검색 결과 '폐업 신고' 표시"
+  },
+  "[경남 거제] 온더선셋 (On the Sunset Beach Lounge)": {
+    "verified": true,
+    "sourceUrl": "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=cce56015-c0bb-4b06-a44d-b5f602385989"
+  },
+  "남한산성": {
+    "verified": true,
+    "sourceUrl": "https://www.gjcity.go.kr/portal/contents.do?mId=0101060100"
+  },
+  "제주 마노르블랑 (Manor Blanc) — 제주 서귀포": {
+    "verified": true,
+    "sourceUrl": "https://korean.visitkorea.or.kr/kfes/detail/fstvlDetail.do?fstvlCntntsId=df8c22a2-24cd-4504-9f5e-400ef9362737"
+  },
+  "뚝도농원 (성수동)": {
+    "exclude": true,
+    "sourceUrl": "https://www.threads.com/@fnb_docent/post/DW_VJ3wEtC9/"
+  },
+  "달마시안 (Dalmation Apgujeong)": {
+    "verified": true,
+    "sourceUrl": "https://www.instagram.com/dalmatian_dosan/"
+  },
+  "카페루시아": {
+    "verified": true,
+    "sourceUrl": "https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid=f44a1c68-1fc9-45fe-b551-d02a2c54ba4d"
+  },
+  "인천아트플랫폼": {
+    "verified": true,
+    "sourceUrl": "http://www.inartplatform.kr/"
+  },
+  "온6.5 (ON6.5 - 서울 종로 안국동)": {
+    "exclude": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=MRXjUV6ZahxY"
+  },
+  "[의왕] 백운호수 '흙과나무 VIP 수변정원 차실' (Earth & Tree VIP Water Garden Tea Lounge)": {
+    "verified": true,
+    "sourceUrl": "https://kr.trip.com/moments/detail/uiwang-si-1446505-14413544/",
+    "price": "약 20,000원대"
+  },
+  "힐링힐스": {
+    "exclude": true,
+    "sourceUrl": "https://www.siksinhot.com/P/1021104"
+  },
+  "볼트스테이크하우스 (Vault Steakhouse)": {
+    "verified": true,
+    "sourceUrl": "http://www.vaultsteakhouse.co.kr/"
+  },
+  "[경남 김해] 카사벨라 (Casabella)": {
+    "exclude": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=WgDkjpWW876x"
+  },
+  "별바다부산 나이트 마켓": {
+    "verified": true,
+    "sourceUrl": "https://www.instagram.com/starry_night_busan.kr/"
+  },
+  "미메시스 아트 뮤지엄 북앤아트 카페 (Mimesis Art Museum)": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=i2ZHzV7k9JDV"
+  },
+  "부산 해운대 더베이101 요트클럽 & 샴페인 라운지 (The Bay 101 Yacht Club & Lounge)": {
+    "verified": true,
+    "sourceUrl": "https://www.myrealtrip.com/offers/82225"
+  },
+  "비스트로 스파크 (Bistro Spark)": {
+    "exclude": true,
+    "sourceUrl": "https://financialfragrance.com/%EC%95%95%EA%B5%AC%EC%A0%95-%EB%B9%84%EC%8A%A4%ED%8A%B8%EB%A1%9C-%EC%8A%A4%ED%8C%8C%ED%81%AC-%ED%8F%90%EC%97%85-%EC%9D%B4%EC%9C%A0-%EC%9D%B8%EA%B8%B0-%EB%A9%94%EB%89%B4-%EC%9E%AC%EC%98%A4%ED%94%88/",
+    "note": "2024년 폐업 확인. 과거 운영시간: 월정휴, 화~일 12:00-22:00 (21:00 라스트오더)"
+  },
+  "[인천 강화도] 토크라피 (Talkraphy)": {
+    "exclude": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=6F5sUyOQWjt3",
+    "note": "다이닝코드에 '폐업 신고' 표시 확인. 과거 운영시간: 10:00~21:00"
+  },
+  "오반장 바비큐": {
+    "verified": true,
+    "sourceUrl": "https://www.siksinhot.com/P/256840"
+  },
+  "우시야 (신사 본점 / 압구정 / 판교)": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=ZUHfWWnsXDiD"
+  },
+  "바솔트 꺄브 드 제주 (Basalt Cave de Jeju) - 제주 서귀포시": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=pAYskQwBtkhh"
+  },
+  "스퀴즈 브루어리 춘천본점 (Squeeze Brewery) - 강원 춘천": {
+    "verified": true,
+    "sourceUrl": "https://www.siksinhot.com/P/1087143"
+  },
+  "[부산 기장] 웨이브온 커피 & 루프탑 카바나 (Waveon Oceanfront Rooftop)": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=oiGlPX3PGzL3"
+  },
+  "송도 센트럴파크 코마린 보트하우스 (송도국제도시)": {
+    "verified": true,
+    "sourceUrl": "https://triple.guide/attractions/0d8a0bba-c68a-4122-9167-cb210de46214"
+  },
+  "[경기 성남·광주] 남한산성 동문 계곡로 ➔ 수어장대 하부 시크릿 서울 분지 야경": {
+    "verified": true,
+    "sourceUrl": "https://korean.visitkorea.or.kr/detail/rem_detail.do?cotid=ab04751d-31d0-4d88-9fc7-3388e1cb72e7"
+  },
+  "페어몬트 앰배서더 서울 - M29 루프탑 바 & 스파 온수풀": {
+    "verified": true,
+    "sourceUrl": "https://www.siksinhot.com/P/1270126"
+  },
+  "제나일 프리미엄 우드터닝 만년필 공방 (Zenyle Yeongdeungpo)": {
+    "verified": true,
+    "sourceUrl": "https://www.seoul.co.kr/news/society/2025/08/27/20250827500219"
+  },
+  "국립제주박물관": {
+    "verified": true,
+    "sourceUrl": "https://jeju.museum.go.kr/"
+  },
+  "632Street Cafe": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=IaN6Gv9kP5m6"
+  },
+  "스카이베이 호텔 스카이 라운지 (Sky Bay Hotel Sky Lounge)": {
+    "verified": true,
+    "sourceUrl": "https://www.booking.com/hotel/kr/golden-tulip-skybay-gyeongpo.html"
+  },
+  "카페 트윈트리": {
+    "verified": true,
+    "sourceUrl": "https://www.mangoplate.com/restaurants/Jkb2G3F6SPry"
+  },
+  "달맞이봉공원": {
+    "verified": true,
+    "sourceUrl": "https://parks.seoul.go.kr/parks/detailView.do?pIdx=1011"
+  },
+  "전곡 마리나클럽 VIP 선상 샴페인 바 (Jeonggok Marina Club VIP Champagne Bar)": {
+    "verified": true,
+    "sourceUrl": "https://korean.visitkorea.or.kr/detail/rem_detail.do?cotid=e3e194d6-2a9f-4046-a40a-3defd4f5a2ca"
+  },
+  "바 올드패션드 (Bar Old Fashioned)": {
+    "verified": true,
+    "sourceUrl": "https://www.siksinhot.com/P/372597"
+  },
+  "감도 (Gamdo) 성수": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=3N7bXAMLcnmc"
+  },
+  "간월암": {
+    "verified": true,
+    "sourceUrl": "https://ganweolam.kr/"
+  },
+  "김포 아라마리나 & 현대요트 김포 (경인아라뱃길)": {
+    "verified": true,
+    "sourceUrl": "https://eco.gimpo.go.kr/culture/selectTourCntntsWebView.do?tourNo=421&pageUnit=8&pageIndex=1&searchCnd=ALL&searchKrwd=%EC%95%84%EB%9D%BC%EB%A7%88%EB%A6%AC%EB%82%98&key=6806&ctgry=2&sortTy=RECOMEND"
+  },
+  "제천 청풍문화재단지": {
+    "verified": true,
+    "sourceUrl": "https://www.ccdailynews.com/news/articleView.html?idxno=2311821"
+  },
+  "더쉐프인젤코바 (The Chef in Zelkova)": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=ht3KhgvwW7Xx"
+  },
+  "세븐스플로어": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=C236yzXReRux"
+  },
+  "용산 용산마루 (서울 용산 한강로)": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=vN96BkMHAX2V"
+  },
+  "차귀도": {
+    "verified": true,
+    "sourceUrl": "https://www.visitjeju.net/kr/detail/view?contentsid=CONT_000000000500612"
+  },
+  "코블러 서촌 (Cobbler)": {
+    "verified": true,
+    "sourceUrl": "https://www.diningcode.com/profile.php?rid=DOnsMNhY0lEX"
+  },
+  "안성 팜랜드": {
+    "verified": true,
+    "sourceUrl": "https://korean.visitkorea.or.kr/detail/rem_detail.do?cotid=da0fa852-a113-47ab-9c92-a512de3fee28"
+  }
 }

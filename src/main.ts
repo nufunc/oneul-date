@@ -186,11 +186,13 @@ function hasAdminUnitSuffix(text: string): boolean {
 /**
  * 스폿 area(시·군·구)와 존 키워드의 행정구역 단위 일치 판정 (단순 부분일치 금지).
  * - 완전 일치: area '영등포구' vs 키워드 '영등포구' → true
- * - 접미사만 덧붙은 동일 지명: area '영등포구' vs 키워드 '영등포' → true
+ * - 접미사만 덧붙은 동일 지명: area '영등포구' vs 키워드 '영등포' / area '대전광역시' vs 키워드 '대전' → true
  * - 접미사가 다른 별개 행정구역: area '양평군' vs 키워드 '양평동' → false
  */
 function areaMatchesZoneKeyword(area: string, keyword: string): boolean {
   if (area === keyword) return true;
+  if (area === `${keyword}시` || area === `${keyword}군` || area === `${keyword}구`) return true;
+  if (area === `${keyword}광역시` || area === `${keyword}특별시` || area === `${keyword}특별자치시`) return true;
   if (hasAdminUnitSuffix(keyword)) return false;
   return area.length === keyword.length + 1 && area.startsWith(keyword) && hasAdminUnitSuffix(area);
 }
@@ -204,9 +206,36 @@ function zoneCoversRegion(spot: Spot, zone: PopularZone): boolean {
 }
 
 /**
- * 세부존 매칭 — area(시·군·구) 기준 정밀 매칭이 1순위, 실패 시에만 name+location 부분일치 폴백.
- * 광역 오매칭 3중 차단: ① 존 광역권 밖 스폿 배제 ② area는 행정구역 단위로만 일치 인정
- * ③ 폴백 텍스트에서 area 제외 (경기 양평군 스폿이 서울 영등포·문래·여의도 존에 잡히던 문제 해결)
+ * 존 키워드가 텍스트 내에서 독립된 지명으로 쓰였는지 검사 (오탐 합성어·근교 표현 차단).
+ * - 차단 예: '대전 근교'(타지역), '광주호'(호수), '대구탕'(음식), '인천공항'(시설)
+ */
+function textContainsZoneKeyword(targetText: string, keyword: string): boolean {
+  if (!targetText.includes(keyword)) return false;
+
+  // '지명 근교', '지명 인근', '지명 출발' 등 타 지역 소개 수식어 배제
+  const nearbyPattern = new RegExp(`${keyword}\\s*(?:근교|인근|출발|방면|고속도로|IC)`, 'g');
+  const sanitizedText = targetText.replace(nearbyPattern, '');
+  if (!sanitizedText.includes(keyword)) return false;
+
+  // 광주호, 대구탕 등 특정 복합명사 오탐 방지
+  // TODO: 대전(대전차방벽), 부산(부산물), 인천(인천공항) 등 추가 지명 복합어가 발견되면 확장
+  if (keyword === '광주' && /광주호/.test(sanitizedText) && !/광주(?:광역시|\s|[시구동길로]|$)/.test(sanitizedText)) {
+    return false;
+  }
+  if (keyword === '대구' && /대구탕|대구뽈/.test(sanitizedText) && !/대구(?:광역시|\s|[시구동길로]|$)/.test(sanitizedText)) {
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * 세부존 매칭 — area(시·군·구) 기준 정밀 매칭이 1순위, 실패 시에만 name+location 정밀 폴백.
+ * 광역/인접 시군 오매칭 4중 차단:
+ * ① 존 광역권 밖 스폿 배제
+ * ② area는 행정구역 단위로만 일치 인정
+ * ③ 스폿 area가 명확한 독립 시·군(예: 공주시, 담양군)인데 존 키워드에 미포함된 경우, 텍스트 폴백에 의한 타 존 흡수 원천 차단
+ * ④ 폴백 텍스트에서 근교·복합어(대전 근교, 광주호 등) 오탐 방지
  */
 function matchesZone(spot: Spot, zoneKeys: string[]): boolean {
   if (zoneKeys.length === 0) return true;
@@ -216,10 +245,27 @@ function matchesZone(spot: Spot, zoneKeys: string[]): boolean {
     if (!zoneCoversRegion(spot, zone)) return false;
 
     const area = spotArea(spot);
-    if (area && zone.keywords.some((kw) => areaMatchesZoneKeyword(area, kw))) return true;
+    if (area) {
+      if (zone.keywords.some((kw) => areaMatchesZoneKeyword(area, kw))) return true;
+
+      // area가 다른 기초자치단체(시/군)로 확정된 스폿은 타 시·군 존 텍스트 폴백에서 배제
+      // 단, 존 키워드에 해당 시/군(또는 접미사 제거 지명)이 포함되어 있으면
+      // 같은 행정 권역이므로 텍스트 폴백을 허용한다.
+      // (예: area '제주시' + 존 키워드 ['애월','한림',...] → 같은 제주 권역이므로 폴백 허용)
+      const isExplicitCityOrCounty = /(?:시|군)$/.test(area);
+      if (isExplicitCityOrCounty) {
+        const areaBase = area.replace(/(?:시|군)$/, '');
+        const zoneHasArea = zone.keywords.some((kw) =>
+          kw === area || kw === areaBase || kw.startsWith(areaBase)
+        );
+        if (!zoneHasArea) {
+          return false;
+        }
+      }
+    }
 
     const targetText = `${spot.name} ${spot.location}`;
-    return zone.keywords.some((kw) => targetText.includes(kw));
+    return zone.keywords.some((kw) => textContainsZoneKeyword(targetText, kw));
   });
 }
 
@@ -1384,7 +1430,7 @@ function activeSlots(): SlotKey[] {
 }
 
 declare const __APP_VERSION__: string;
-const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.8.3';
+const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.8.4';
 
 function courseSpotIds(): number[] {
   if (!state.course) return [];

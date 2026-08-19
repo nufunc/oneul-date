@@ -14,6 +14,8 @@ import time
 import random
 import re
 
+from category_filter import is_date_spot_category
+
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
@@ -136,7 +138,7 @@ def infer_slot(category: str, name: str) -> str:
 
 def search_discovery(query: str):
     # 1. 네이버 지도 검색 시도
-    url = f"https://map.naver.com/p/api/search/allSearch?query={urllib.parse.quote(query)}&type=all&searchCoord=127.0276197;37.497942&boundary="
+    url = f"https://map.naver.com/p/api/search/allSearch?query={urllib.parse.quote(query)}&type=all&searchCoord=&boundary="
     req = urllib.request.Request(url, headers=HEADERS)
     try:
         with urllib.request.urlopen(req, timeout=5) as response:
@@ -255,9 +257,10 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
 
         for p in places[:8]:  # 상위 8개 정밀 검토
             raw_name = p.get("name", "").strip()
-            # 숙소/펜션/호텔/모텔 100% 필터링
+            # 데이트 스팟 카테고리 & 상호명 엄격 검증 (비데이트 업종·숙박·체인브랜드 차단)
             cat = str(p.get("category") or "")
-            if any(k in cat for k in ["숙박", "모텔", "호텔", "펜션", "게스트하우스", "리조트"]):
+            ok_cat, cat_reason = is_date_spot_category(cat, raw_name)
+            if not ok_cat:
                 continue
 
             road_addr = p.get("roadAddress") or p.get("address") or ""
