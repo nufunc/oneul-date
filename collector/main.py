@@ -25,6 +25,8 @@ from blog_miner import run_blog_mining
 from community_miner import run_community_mining
 from enrich_worker import run_social_enrichment
 from youtube_vlog_miner import run_youtube_vlog_mining
+from miners.catchtable_miner import run_catchtable_mining
+from miners.tourapi_miner import run_tourapi_mining
 from notifier import send_daily_digest
 
 if hasattr(sys.stdout, 'reconfigure'):
@@ -228,12 +230,30 @@ def run_cycle():
     except Exception as e:
         log(f"6단계 유튜브 브이로그 마이닝 오류: {e}", level="ERROR")
 
+    time.sleep(2)
+
+    log(f"▶ 7단계: 캐치테이블 & 블루리본 미식 예약 핫플 마이닝 시작 (한도: {DISCOVERY_LIMIT}개)")
+    try:
+        c_mined = run_catchtable_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, max_discoveries=DISCOVERY_LIMIT)
+        log(f"7단계 완료: 신규 예약 다이닝 스팟 {c_mined}개 등록")
+    except Exception as e:
+        log(f"7단계 캐치테이블 마이닝 오류: {e}", level="ERROR")
+
+    time.sleep(2)
+
+    log(f"▶ 8단계: 한국관광공사 TourAPI 4.0 공공 문화/관광/체험 마이닝 시작 (한도: {DISCOVERY_LIMIT}개)")
+    try:
+        t_mined = run_tourapi_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, max_discoveries=DISCOVERY_LIMIT)
+        log(f"8단계 완료: 신규 공공 문화/관광 스팟 {t_mined}개 등록")
+    except Exception as e:
+        log(f"8단계 TourAPI 마이닝 오류: {e}", level="ERROR")
+
     # 일일 서머리 검사
     check_and_generate_daily_summary()
 
 def main():
     log("========================================================")
-    log("🌟 오늘 데이트 (oneul-date) — 백엔드 데이터 엔진 가동 (v3.5)")
+    log("🌟 오늘 데이트 (oneul-date) — 백엔드 데이터 엔진 가동 (v4.0 8단계 통합)")
     log(f"🔗 Supabase: {SUPABASE_URL}")
     log(f"⏱️ 주기: {INTERVAL_DESC} | 1회 발굴 한도: {DISCOVERY_LIMIT}개 | 폐업 검증 한도: {BATCH_LIMIT}개")
     log(f"📁 로그 저장 경로: {LOG_DIR}")
