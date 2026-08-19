@@ -12,8 +12,9 @@
  *   - 프론트는 "재료"(스팟 목록 + 무드 키)만 보낸다. 프롬프트 문자열은 절대
  *     받지 않고 서버에서 조립한다. 임의 프롬프트를 받으면 이 엔드포인트가
  *     공짜 범용 LLM 프록시로 악용될 수 있기 때문이다.
- *   - 모델/프롬프트/파라미터는 src/main.ts의 fetchGroqAiStory와 1:1로 동일하다.
- *     (프론트 로컬 폴백 텍스트와 톤이 어긋나지 않게 하기 위함)
+ *   - Llama 3.3 (llama-3.3-70b-versatile) 기반의 고속·고감도 브리핑 생성:
+ *     8대 분위기(로맨틱, 힐링, 미식, 핫플, 뷰·전망, 럭셔리, 레트로, 액티비티)와
+ *     4개 시간 슬롯(낮/저녁/밤/숙박)을 고려하여 2~3줄의 감성 스토리 & 꿀팁 브리핑을 제공한다.
  *   - 실패는 조용히. 프론트가 로컬 템플릿(generateCourseStory)으로 폴백할 수
  *     있도록 에러 응답에도 CORS 헤더를 반드시 붙인다.
  *
@@ -24,9 +25,8 @@
  *     "spots": [ { "slot": "낮", "name": "...", "category": "...", "summary": "..." } ],
  *     "mood": "romantic"
  *   }
- *   - `slot`은 한글 라벨(낮/저녁/밤/숙박)로 온다. 영문 키(day/evening/night/stay)도
- *     호환을 위해 허용하며 서버에서 한글 라벨로 정규화한다.
- *   - `mood`는 raw 키(ALL/romantic/...)로 오고, 한글 라벨 변환은 서버 담당이다.
+ *   - `slot`은 한글 라벨(낮/저녁/밤/숙박) 또는 영문 키(day/evening/night/stay) 지원.
+ *   - `mood`는 raw 키(ALL/romantic/...) 또는 호환 키 지원.
  *
  * [응답]
  *   200 { "text": "..." }            브리핑 본문 (프론트는 trim 후 15자 이상일 때만 채택)
@@ -36,55 +36,25 @@
  *   429 { "error": "..." }           레이트리밋 초과
  *   502 { "error": "..." }           Groq 오류 또는 빈 응답
  *   504 { "error": "..." }           Groq 타임아웃(3초)
- *   프론트는 실패 상태코드·네트워크 오류를 모두 조용히 삼키고 로컬 템플릿으로
- *   폴백하므로, 에러 응답에도 CORS 헤더가 붙어야 브라우저 콘솔이 깨끗하다.
  *
  * [환경변수 / 시크릿]
  *   GROQ_API_KEY (필수) — Groq Console(https://console.groq.com/keys) 발급 키.
  *     등록: npx supabase secrets set GROQ_API_KEY=<새키> --project-ref uyhwhnnzzfhtxjernfit
+ *   GROQ_MODEL (선택) — 기본값 'llama-3.3-70b-versatile'
  *
  * [배포]
  *   npx supabase functions deploy ai-briefing --project-ref uyhwhnnzzfhtxjernfit --no-verify-jwt
- *   자세한 절차·키 회전·검증 curl은 docs/EDGE-FUNCTION.md 참고.
- *
- * 외부 의존성 없음 (Deno 표준 런타임 API만 사용).
  */
 
 // ---------------------------------------------------------------------------
-// 상수
+// 상수 및 환경 설정
 // ---------------------------------------------------------------------------
-
-/** CORS 허용 Origin 목록 (프로덕션 GitHub Pages + 로컬 Vite 개발 서버) */
-const ALLOWED_ORIGINS: ReadonlySet<string> = new Set([
-  'https://nufunc.github.io',
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-]);
 
 const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_MODEL = 'openai/gpt-oss-120b';
+const DEFAULT_GROQ_MODEL = 'llama-3.3-70b-versatile';
 const GROQ_TEMPERATURE = 0.72;
+const GROQ_MAX_TOKENS = 350;
 
-/**
- * ⚠️ `openai/gpt-oss-120b`는 **추론(reasoning) 모델**이다.
- *
- * max_tokens는 `추론 토큰 + 출력 토큰`을 합산해 제한하며, 추론이 예산을 다 쓰면
- * `finish_reason: "length"`와 함께 **`message.content`가 빈 문자열로** 돌아온다
- * (실제 답변은 응답의 `reasoning` 필드에 갇힌다).
- *
- * src/main.ts의 기존 설정(max_tokens 150, reasoning_effort 미지정)이 정확히 이
- * 상태였다 — 실측 결과 추론에만 145/150 토큰을 쓰고 content는 항상 비었다.
- * 즉 기존 AI 브리핑은 사실상 매번 로컬 템플릿으로 폴백하고 있었다.
- *
- * 그래서 이식하면서 두 가지를 바로잡았다 (프롬프트·모델·temperature는 그대로):
- *   1) reasoning_effort: 'low'  → 추론 토큰을 20~40개 수준으로 억제
- *   2) max_tokens: 400          → 추론이 조금 길어져도 본문이 잘리지 않을 여유
- * 이 조합에서 finish_reason은 'stop', 실제 소비는 90~100 토큰 안팎이다.
- *
- * 이 두 값을 되돌리면 브리핑이 조용히 전부 폴백하니 주의할 것.
- */
-const GROQ_MAX_TOKENS = 400;
-const GROQ_REASONING_EFFORT = 'low';
 /**
  * Groq 호출 타임아웃.
  * 프론트(src/main.ts)의 fetch 타임아웃이 3.5초이므로 반드시 그보다 짧아야 한다.
@@ -98,29 +68,24 @@ const MIN_TEXT_LENGTH = 15;
 
 /**
  * 허용 slot 값 → 프롬프트에 조립할 한글 라벨.
- *
- * 프론트(src/main.ts fetchAiBriefing)는 `SLOT_META[slot].label`, 즉 **한글 라벨**을
- * 그대로 보낸다. 기존 프롬프트의 스팟 줄이 한글 라벨을 쓰고 있어 서버가 추가
- * 매핑 없이 조립할 수 있게 맞춘 계약이다.
- * 다만 영문 키(day/evening/night/stay)로 보내는 클라이언트도 깨지지 않도록
- * 양쪽을 모두 허용하고 한글 라벨로 정규화한다.
- * '숙소'는 '숙박'의 동의 표기로 함께 받아준다(호출자마다 표기가 갈릴 수 있음).
+ * 프론트(src/main.ts fetchAiBriefing)는 `SLOT_META[slot].label` 값을 보내며,
+ * 영문 슬롯 키도 함께 허용하여 한글 라벨로 정규화한다.
  */
 const SLOT_LABELS: Readonly<Record<string, string>> = {
-  // 한글 라벨 (프론트가 실제로 보내는 형태)
+  // 한글 라벨
   '낮': '낮',
   '저녁': '저녁',
   '밤': '밤',
   '숙박': '숙박',
-  '숙소': '숙소',
-  // 영문 슬롯 키 → 한글 라벨 정규화
+  '숙소': '숙박',
+  // 영문 슬롯 키
   day: '낮',
   evening: '저녁',
   night: '밤',
   stay: '숙박',
 };
 
-/** 무드 키 → 한글 라벨 (src/main.ts MOODS). 이 목록에 없는 키는 400. */
+/** 무드 키 → 한글 라벨 (src/main.ts MOODS 및 호환 키) */
 const MOOD_LABELS: Readonly<Record<string, string>> = {
   ALL: '전체',
   romantic: '로맨틱',
@@ -128,6 +93,7 @@ const MOOD_LABELS: Readonly<Record<string, string>> = {
   gourmet: '미식',
   healing: '힐링',
   view: '뷰·전망',
+  scenic: '뷰·전망', // 호환성 보장
   luxury: '럭셔리',
   retro: '레트로·전통',
   active: '액티비티',
@@ -145,20 +111,11 @@ const MAX_BODY_BYTES = 8_192;
 // ---------------------------------------------------------------------------
 // 레이트리밋 (인메모리 슬라이딩 윈도우)
 // ---------------------------------------------------------------------------
-//
-// 주의: Edge Function은 요청량/리전에 따라 여러 인스턴스로 확장될 수 있고,
-// 유휴 인스턴스는 회수(cold start)되어 카운터가 초기화된다. 따라서 이 카운터는
-// 인스턴스 로컬이며 전역적으로 정확하지 않다 — 실제 허용량은 최악의 경우
-// (동시 인스턴스 수 × 아래 한도)까지 늘어날 수 있다.
-// 목적은 "완벽한 차단"이 아니라 "단일 클라이언트의 폭주로 Groq 무료 쿼터가
-// 순식간에 소진되는 것"을 막는 것이다. 엄격한 보장이 필요해지면 Postgres나
-// Upstash Redis 같은 공유 저장소 기반으로 옮겨야 한다.
 
-const RATE_LIMIT_PER_MINUTE = 20;
-const RATE_LIMIT_PER_HOUR = 200;
+const RATE_LIMIT_PER_MINUTE = 25;
+const RATE_LIMIT_PER_HOUR = 250;
 const MINUTE_MS = 60_000;
 const HOUR_MS = 3_600_000;
-/** 메모리 폭주 방지: 추적 중인 IP가 이 수를 넘으면 만료 항목을 청소한다. */
 const MAX_TRACKED_IPS = 10_000;
 
 /** IP → 최근 1시간 내 요청 타임스탬프(ms) 오름차순 목록 */
@@ -182,13 +139,10 @@ function checkRateLimit(ip: string): { retryAfter: number; scope: string } | nul
 
   if (requestLog.size > MAX_TRACKED_IPS) sweepRateLimiter(now);
 
-  // 1시간 윈도우 밖 기록은 버린다
   const stamps = (requestLog.get(ip) ?? []).filter((t) => now - t < HOUR_MS);
 
   const inLastMinute = stamps.filter((t) => now - t < MINUTE_MS);
   if (inLastMinute.length >= RATE_LIMIT_PER_MINUTE) {
-    // 정리된 목록은 반영하되, 차단된 이번 요청은 기록하지 않는다
-    // (차단 요청까지 세면 윈도우가 계속 밀려 영구 차단이 된다)
     requestLog.set(ip, stamps);
     const oldest = inLastMinute[0];
     return {
@@ -211,11 +165,7 @@ function checkRateLimit(ip: string): { retryAfter: number; scope: string } | nul
   return null;
 }
 
-/**
- * 클라이언트 IP 추출. Supabase Edge Runtime은 x-forwarded-for에
- * "client, proxy1, proxy2" 형태로 넣어주므로 첫 주소를 쓴다.
- * 헤더는 위조 가능하지만, 레이트리밋의 목적(폭주 차단)에는 충분하다.
- */
+/** 클라이언트 IP 추출 */
 function clientIp(req: Request): string {
   const xff = req.headers.get('x-forwarded-for');
   if (xff) {
@@ -226,25 +176,34 @@ function clientIp(req: Request): string {
 }
 
 // ---------------------------------------------------------------------------
-// CORS / 응답 헬퍼
+// CORS / Origin 검증 및 응답 헬퍼
 // ---------------------------------------------------------------------------
 
 /**
+ * CORS 허용 Origin 판별
+ * - 프로덕션: https://nufunc.github.io
+ * - 로컬 개발 / 프리뷰 환경: http://localhost:* 또는 http://127.0.0.1:*
+ */
+function isAllowedOrigin(origin: string | null): boolean {
+  if (!origin) return false;
+  if (origin === 'https://nufunc.github.io') return true;
+  if (/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) return true;
+  return false;
+}
+
+/**
  * CORS 헤더 생성.
- * 허용목록에 있는 Origin일 때만 Access-Control-Allow-Origin을 반환한다.
- * 403 응답에도 나머지 CORS 헤더는 붙여, 디버깅 시 "CORS 설정 누락"과
- * "의도적 차단"이 구분되도록 한다.
+ * 허용목록에 있는 Origin일 때 Access-Control-Allow-Origin을 반환한다.
  */
 function corsHeaders(origin: string | null): Record<string, string> {
   const headers: Record<string, string> = {
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
     'Access-Control-Max-Age': '86400',
-    // Origin에 따라 응답 헤더가 달라지므로 캐시 오염 방지
     'Vary': 'Origin',
   };
-  if (origin && ALLOWED_ORIGINS.has(origin)) {
-    headers['Access-Control-Allow-Origin'] = origin;
+  if (isAllowedOrigin(origin)) {
+    headers['Access-Control-Allow-Origin'] = origin!;
   }
   return headers;
 }
@@ -261,7 +220,6 @@ function jsonResponse(
       ...corsHeaders(origin),
       ...extraHeaders,
       'Content-Type': 'application/json; charset=utf-8',
-      // AI 브리핑은 개인화 결과 — 중간 캐시에 남기지 않는다.
       'Cache-Control': 'no-store',
     },
   });
@@ -284,14 +242,13 @@ interface BriefingRequest {
   mood: string;
 }
 
-/** 선택 필드용: 문자열이 아니면 빈 문자열 (src/main.ts의 `s.category || ''`와 동일 동작) */
+/** 선택 필드용 안전 변환 */
 function optionalString(value: unknown): string {
   return typeof value === 'string' ? value.trim() : '';
 }
 
 /**
- * 요청 바디를 검증한다.
- * @returns 성공 시 `{ data }`, 실패 시 `{ error }` (400으로 응답)
+ * 요청 바디 검증
  */
 function validate(raw: unknown): { data: BriefingRequest } | { error: string } {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
@@ -349,34 +306,49 @@ function validate(raw: unknown): { data: BriefingRequest } | { error: string } {
 }
 
 // ---------------------------------------------------------------------------
-// 프롬프트 조립 (src/main.ts fetchGroqAiStory에서 그대로 이식)
+// 프롬프트 조립 (Llama 3.3 감성 큐레이션 엔진)
 // ---------------------------------------------------------------------------
 
-const SYSTEM_PROMPT = `당신은 킨포크(Kinfolk)와 아이즈매거진(eyesmag)의 수석 데이트 큐레이터입니다.
-[절대 금지]
-1. 장소의 실제 카테고리와 다른 활동 묘사 금지 (예: 미술관에 "티타임", 카페에 "전시 관람" 등 ❌).
-2. 단순 동선 나열식 문형(~에서 시작해 ~를 거쳐 ~로 마무리하는 코스예요)은 '절대 금지'.
-3. "터져 나오는", "오감이 충만", "감각적인 코스" 같은 과장된 클리셰 금지.
-4. 장소명을 3개 이상 억지로 나열하지 마세요. 코스 전체 분위기를 1~2곳만 자연스럽게 언급하며 압축하세요.
+const SYSTEM_PROMPT = `당신은 감성 라이프스타일 매거진(킨포크, 아이즈매거진)의 수석 데이트 코스 큐레이터입니다.
+주어진 장소 목록(스팟명, 카테고리, 요약)과 분위기(무드 테마)를 바탕으로, 두 사람의 하루를 완성하는 감각적이고 세련된 2~3줄 코스 브리핑을 작성합니다.
 
-[필수 원칙]
-1. 각 장소의 카테고리(미술관, 식당, 카페, 바 등)에 정확히 부합하는 체험을 묘사하세요.
-2. 공간의 질감, 빛, 두 사람의 감정선이 자연스럽게 이어지는 에디토리얼 산문(1~2문장, 60~90자)으로 작성하세요.
-3. 불필요한 따옴표나 서두 없이 정제된 본문 텍스트만 출력하세요.
+[핵심 작성 원칙]
+1. 분량 및 구성 (2~3문장, 약 120~200자):
+   - 1~2문장: 시간의 자연스러운 흐름(낮의 따스한 햇살/커피/산책 → 저녁의 정갈한 미식/노을 → 밤의 은은한 조명/와인/야경 → 숙박의 아늑한 쉼)과 공간의 감각적 매력을 엮은 코스 스토리.
+   - 마지막 1문장: 해당 코스를 200% 만끽할 수 있는 짧고 다정한 데이트 팁 또는 감성 포인트.
 
-[톤앤매너 예시]
-- 나른한 오후, 러스트베이커리의 버터 풍미를 따라가다 양키통닭의 바삭한 온기를 지나 신흥상회에서 와인 한잔에 젖어드는 둘만의 깊은 밤.
-- 서울숲 산책로에 드리운 나른한 빛, 정갈한 다이닝의 여운, 그리고 루프탑에서 마주하는 도시의 밤.`;
+2. 8대 무드 테마별 톤앤매너 완벽 반영:
+   - 로맨틱 (romantic): 설렘, 은은한 조명, 다정한 시선과 둘만의 깊은 대화.
+   - 힐링 (healing): 숲과 자연의 여백, 고요한 숨고르기와 따스한 위로.
+   - 미식 (gourmet): 풍부한 아로마와 페어링, 정갈한 플레이팅과 미각의 즐거움.
+   - 핫플 (trendy): 트렌디한 감각, 감각적인 공간 미학과 위트 있는 에너지.
+   - 뷰·전망 (view): 탁 트인 시야, 아름다운 노을과 윤슬, 반짝이는 도시 야경.
+   - 럭셔리 (luxury): 격조 높은 우아함, 프라이빗하고 특별한 대접의 순간.
+   - 레트로·전통 (retro): 아날로그 감성, 시간의 결이 묻어나는 아늑한 골목 정취.
+   - 액티비티 (active): 생동감 넘치는 움직임, 함께 몰입하는 유쾌한 활력.
+
+3. 시간대별 슬롯(낮/저녁/밤/숙박) 흐름 반영:
+   - 낮: 햇살, 여유로운 오후, 커피/베이커리/전시/산책.
+   - 저녁: 그윽한 노을, 정갈한 식사와 테이블.
+   - 밤: 은은한 조명, 와인/바, 깊어지는 밤의 낭만.
+   - 숙박: 하루의 온전한 쉼, 아늑한 프라이빗 휴식.
+
+4. 절대 금지 사항:
+   - 장소의 실제 카테고리와 다른 활동 묘사 금지 (예: 미술관에 "식사", 카페에 "전시 관람" 등 실제 카테고리와 어긋나는 묘사 ❌).
+   - 단순 나열식 문형 금지 ("~에서 시작해 ~를 거쳐 ~로 끝나는 코스입니다" ❌).
+   - 과장된 클리셰 금지 ("오감이 충만", "터져 나오는", "환상적인 케미" ❌).
+   - 마크다운 볼드(**), 불릿 기호(-), 큰따옴표 없이 깔끔한 순수 한글 문장만 출력하세요.`;
 
 /** "낮: 러스트베이커리 (베이커리, 버터향 가득한 ...)" 형태의 줄 목록 */
 function buildSpotDescriptions(spots: SpotInput[]): string {
   return spots
-    .map((spot) => `${spot.slotLabel}: ${spot.name} (${spot.category}, ${spot.summary})`)
+    .map((spot) => `${spot.slotLabel}: ${spot.name} (${spot.category}${spot.summary ? `, ${spot.summary}` : ''})`)
     .join('\n');
 }
 
 function buildUserPrompt(spots: SpotInput[], mood: string): string {
-  return `[스팟 리스트 — 카테고리를 반드시 참고하세요]\n${buildSpotDescriptions(spots)}\n\n[무드 테마]: ${MOOD_LABELS[mood]}\n\n위 장소들의 실제 카테고리에 맞는 체험을 살려, 과장 없이 잡지 에디터 노트 스타일로 브리핑을 작성해줘.`;
+  const moodLabel = MOOD_LABELS[mood] || mood;
+  return `[스팟 리스트 — 슬롯과 카테고리를 반드시 참고하세요]\n${buildSpotDescriptions(spots)}\n\n[무드 테마]: ${moodLabel}\n\n위 장소들의 실제 카테고리와 무드 테마에 맞춰, 매거진 에디터가 추천하는 듯한 감각적인 2~3줄 코스 스토리와 데이트 팁을 작성해주세요.`;
 }
 
 // ---------------------------------------------------------------------------
@@ -391,6 +363,23 @@ async function callGroq(apiKey: string, spots: SpotInput[], mood: string): Promi
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), GROQ_TIMEOUT_MS);
 
+  const model = Deno.env.get('GROQ_MODEL') || DEFAULT_GROQ_MODEL;
+
+  const requestBody: Record<string, unknown> = {
+    model,
+    messages: [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: buildUserPrompt(spots, mood) },
+    ],
+    temperature: GROQ_TEMPERATURE,
+    max_tokens: GROQ_MAX_TOKENS,
+  };
+
+  // 추론 모델(gpt-oss-120b, deepseek-r1 등)일 경우 reasoning_effort 호환 지원
+  if (model.includes('gpt-oss') || model.includes('deepseek-r1') || model.includes('qwen-qwq')) {
+    requestBody.reasoning_effort = 'low';
+  }
+
   try {
     const res = await fetch(GROQ_ENDPOINT, {
       method: 'POST',
@@ -398,23 +387,11 @@ async function callGroq(apiKey: string, spots: SpotInput[], mood: string): Promi
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
       },
-      body: JSON.stringify({
-        model: GROQ_MODEL,
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: buildUserPrompt(spots, mood) },
-        ],
-        temperature: GROQ_TEMPERATURE,
-        max_tokens: GROQ_MAX_TOKENS,
-        // 추론 모델 전용 — 상단 GROQ_MAX_TOKENS 주석 참고
-        reasoning_effort: GROQ_REASONING_EFFORT,
-      }),
+      body: JSON.stringify(requestBody),
       signal: controller.signal,
     });
 
     if (!res.ok) {
-      // 업스트림 응답 본문은 계정/쿼터 정보를 담을 수 있으므로
-      // 클라이언트로 전달하지 않고 함수 로그에만 남긴다.
       const detail = await res.text().catch(() => '');
       console.error(`[ai-briefing] groq upstream ${res.status}: ${detail.slice(0, 500)}`);
       return { ok: false, status: 502, error: 'upstream error' };
@@ -427,8 +404,13 @@ async function callGroq(apiKey: string, spots: SpotInput[], mood: string): Promi
       return { ok: false, status: 502, error: 'empty completion' };
     }
 
-    // 앞뒤 따옴표 제거 (src/main.ts와 동일한 후처리)
-    const cleanText = rawText.replace(/^["'“”]/, '').replace(/["'“”]$/, '').trim();
+    // 앞뒤 따옴표 및 볼드 마크다운 등 불필요한 서식 정제
+    const cleanText = rawText
+      .replace(/^["'“”]/, '')
+      .replace(/["'“”]$/, '')
+      .replace(/\*\*/g, '')
+      .trim();
+
     return { ok: true, text: cleanText };
   } catch (err) {
     if (err instanceof DOMException && err.name === 'AbortError') {
@@ -451,7 +433,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
   // 1) CORS 프리플라이트 — 허용 Origin이면 204, 아니면 403
   if (req.method === 'OPTIONS') {
-    if (origin && ALLOWED_ORIGINS.has(origin)) {
+    if (isAllowedOrigin(origin)) {
       return new Response(null, { status: 204, headers: corsHeaders(origin) });
     }
     return jsonResponse({ error: 'origin not allowed' }, 403, origin);
@@ -461,11 +443,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
     return jsonResponse({ error: 'method not allowed' }, 405, origin, { Allow: 'POST, OPTIONS' });
   }
 
-  // 2) Origin 허용목록
-  //    Origin 헤더가 없는 요청(curl, 서버 간 호출)도 차단한다. 이 엔드포인트는
-  //    브라우저 전용이므로 비브라우저 호출을 허용할 이유가 없다.
-  //    (헤더 위조 자체는 막을 수 없지만, 웹에서 유입되는 대량 남용은 차단된다.)
-  if (!origin || !ALLOWED_ORIGINS.has(origin)) {
+  // 2) Origin 허용목록 검증
+  //    웹 브라우저의 무단 남용 방지
+  if (!isAllowedOrigin(origin)) {
     return jsonResponse({ error: 'origin not allowed' }, 403, origin);
   }
 
