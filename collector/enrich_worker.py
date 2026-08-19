@@ -75,13 +75,15 @@ def run_social_enrichment(supabase_url: str, service_key: str, batch_size: int =
             kakao_data = search_kakaomap_place(name, location)
             time.sleep(0.5)
 
-            # 3. 종합 스코어 및 JSONB 조립
-            hot_score, social_links, metrics = calculate_hot_score(yt_data, kakao_data, is_verified)
+            # 3. 종합 스코어 및 JSONB 조립 (기존 인스타/블로그 등 social_links 보존)
+            hot_score, new_social, metrics = calculate_hot_score(yt_data, kakao_data, is_verified)
+            existing_social = s.get("social_links") or {}
+            merged_social = {**existing_social, **new_social}
 
             # 4. Supabase DB PATCH 업데이트
             patch_url = f"{supabase_url}/rest/v1/spots?id=eq.{spot_id}"
             payload = json.dumps({
-                "social_links": social_links,
+                "social_links": merged_social,
                 "metrics": metrics,
                 "hot_score": hot_score,
                 "updated_at": datetime.now(timezone.utc).isoformat()

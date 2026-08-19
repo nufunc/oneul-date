@@ -2190,9 +2190,13 @@ function renderStepCard(
 
 function bindSwapButton(btn: HTMLButtonElement): void {
   btn.addEventListener('click', () => {
+    if (btn.classList.contains('is-spinning')) return;
     btn.classList.add('is-spinning');
+    btn.disabled = true;
     setTimeout(() => {
       swapStep(Number(btn.dataset.stepIndex));
+      btn.disabled = false;
+      btn.classList.remove('is-spinning');
     }, 150);
   });
 }
@@ -2266,21 +2270,26 @@ function swapStep(index: number): void {
     bindSwapButton(newSwapBtn);
   }
 
-  // 장소 변경 시 AI 브리핑 텍스트도 실시간 자동 갱신
+  // 장소 변경 시 AI 브리핑 텍스트도 실시간 자동 갱신 (Race condition 방지)
   const briefingEl = document.getElementById('ai-briefing-content');
-  if (briefingEl && state.courseConditions) {
+  if (briefingEl && state.courseConditions && state.course) {
     const mood = state.courseConditions.mood;
-    const cacheKey = `${mood}_${courseSpotIds().join('-')}`;
+    const currentSpotKey = courseSpotIds().join('-');
+    const cacheKey = `${mood}_${currentSpotKey}`;
+    const currentCourse = [...state.course];
+
     if (aiStoryCache.has(cacheKey)) {
       briefingEl.innerHTML = `“${aiStoryCache.get(cacheKey)!}”`;
       briefingEl.classList.remove('is-loading');
-    } else if (AI_BRIEFING_ENABLED && state.course) {
-      const currentCourse = state.course;
+    } else if (AI_BRIEFING_ENABLED) {
       briefingEl.classList.add('is-loading');
       briefingEl.innerHTML = `<span class="ai-loading-pulse">새로운 코스에 맞춰 브리핑을 작성하고 있어요...</span>`;
       fetchAiBriefing(currentCourse, spotById, mood).then((aiText) => {
         const el = document.getElementById('ai-briefing-content');
         if (!el) return;
+        // 응답 도착 시점의 코스가 요청 시점과 다르면 무시 (Race condition 방지)
+        if (courseSpotIds().join('-') !== currentSpotKey) return;
+
         const finalText = aiText || generateCourseStory(currentCourse, spotById, mood, false);
         el.style.opacity = '0';
         setTimeout(() => {
@@ -2289,8 +2298,8 @@ function swapStep(index: number): void {
           el.style.opacity = '1';
         }, 100);
       });
-    } else if (state.course) {
-      briefingEl.innerHTML = `“${generateCourseStory(state.course, spotById, mood, true)}”`;
+    } else {
+      briefingEl.innerHTML = `“${generateCourseStory(currentCourse, spotById, mood, true)}”`;
       briefingEl.classList.remove('is-loading');
     }
   }
