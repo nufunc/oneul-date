@@ -45,8 +45,11 @@ export interface BookingInfo {
 export interface CurationBadges {
   michelin?: string;
   blue_ribbon?: number;
+  tour_api?: string;
+  catchtable?: string;
   tv_shows?: string[];
   certified?: string[];
+  [key: string]: any;
 }
 
 export interface ProviderIds {

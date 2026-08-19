@@ -2296,6 +2296,39 @@ function renderStepCard(
   const targetImgUrl = getSpotImageUrl(spot, step.slot, opts.usedImages);
   const isHot = isSuperHotSpot(spot);
 
+  // v4.0 큐레이션 뱃지
+  const curationBadges: string[] = [];
+  if (spot.curation_badges?.blue_ribbon) {
+    curationBadges.push(`<span class="badge-curation badge-blueribbon" title="블루리본 서베이 인증 맛집">🎀 블루리본</span>`);
+  }
+  if (spot.curation_badges?.michelin) {
+    curationBadges.push(`<span class="badge-curation badge-michelin" title="미쉐린 가이드 선정">⭐ 미쉐린</span>`);
+  }
+  if (spot.curation_badges?.tour_api) {
+    curationBadges.push(`<span class="badge-curation badge-tourapi" title="한국관광공사 공인 명소">🏛️ 관광공사</span>`);
+  }
+  if (spot.curation_badges?.catchtable) {
+    curationBadges.push(`<span class="badge-curation badge-catchtable" title="캐치테이블 인기 예약 다이닝">🍷 캐치테이블</span>`);
+  }
+
+  // v4.0 주차 & 가격 메타 뱃지
+  const metaBadges: string[] = [];
+  const pType = spot.parking_info?.type || spot.parking_type;
+  if (pType === 'valet') {
+    metaBadges.push(`<span class="badge-meta badge-parking">🅿️ 발렛가능</span>`);
+  } else if (pType === 'free') {
+    metaBadges.push(`<span class="badge-meta badge-parking">🅿️ 무료주차</span>`);
+  } else if (pType === 'paid') {
+    metaBadges.push(`<span class="badge-meta badge-parking">🅿️ 주차가능</span>`);
+  }
+
+  if (spot.price_tier && spot.price_tier !== 'FREE') {
+    metaBadges.push(`<span class="badge-meta badge-price">${spot.price_tier}</span>`);
+  }
+
+  // v4.0 실시간 예약 링크
+  const bookingUrl = spot.reservation_url || spot.booking_info?.url;
+
   const thumbHtml = `
     <div class="step-thumb-col">
       ${isHot ? `<span class="badge-hot-floating" title="SNS와 플랫폼에서 검증된 화제의 핫플레이스예요 🔥">🔥 핫플</span>` : ''}
@@ -2316,8 +2349,10 @@ function renderStepCard(
             <span>${escapeHtml(spot.name)}</span>
             ${spot.verified ? `<span class="icon-verified-badge" title="에디터가 직접 검증한 데이트 장소예요 ✨" aria-label="검증된 데이트 장소">${ICON_VERIFIED_CHECK_SVG}</span>` : ''}
           </h3>
+          ${curationBadges.length > 0 ? `<div class="step-curation-row">${curationBadges.join('')}</div>` : ''}
           <p class="step-location">📍 ${escapeHtml(spot.location)}</p>
           ${spot.summary ? `<blockquote class="step-quote">“${escapeHtml(spot.summary)}”</blockquote>` : ''}
+          ${metaBadges.length > 0 ? `<div class="step-meta-row">${metaBadges.join('')}</div>` : ''}
           ${spot.price ? `<p class="step-price">${escapeHtml(spot.price)}</p>` : ''}
         </div>
       </div>
@@ -2345,10 +2380,13 @@ function renderStepCard(
             return `<a class="btn-action-icon btn-blog-icon" href="${escapeHtml(blog)}" target="_blank" rel="noopener noreferrer" aria-label="블로그" title="블로그">${ICON_BLOG_SVG}</a>`;
           })()}
         </div>
-        <a class="step-map-chip" href="${naverMapUrl(spot)}" target="_blank" rel="noopener noreferrer" title="네이버 지도">
-          ${ICON_NAVER_MAP_SVG}
-          <span>지도</span>
-        </a>
+        <div class="step-actions-right">
+          ${bookingUrl ? `<a class="step-book-chip" href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" title="캐치테이블/실시간 예약"><span>📅 예약</span></a>` : ''}
+          <a class="step-map-chip" href="${naverMapUrl(spot)}" target="_blank" rel="noopener noreferrer" title="네이버 지도">
+            ${ICON_NAVER_MAP_SVG}
+            <span>지도</span>
+          </a>
+        </div>
       </div>
     </article>
   `;
