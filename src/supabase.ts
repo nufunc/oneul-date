@@ -29,6 +29,33 @@ export interface SpotMetrics {
   last_synced_at?: string;
 }
 
+export interface ParkingInfo {
+  type?: 'free' | 'paid' | 'valet' | 'impossible' | 'unknown';
+  detail?: string;
+  valet_fee?: string;
+}
+
+export interface BookingInfo {
+  available?: boolean;
+  platform?: 'catchtable' | 'tabling' | 'naver' | 'phone' | 'none';
+  url?: string;
+  tips?: string;
+}
+
+export interface CurationBadges {
+  michelin?: string;
+  blue_ribbon?: number;
+  tv_shows?: string[];
+  certified?: string[];
+}
+
+export interface ProviderIds {
+  naver?: string;
+  kakao?: string;
+  catchtable?: string;
+  tour_api?: string;
+}
+
 export interface Spot {
   id: number;
   name: string;
@@ -48,9 +75,38 @@ export interface Spot {
   source: { type: string; url: string | null; note: string };
   verified: boolean;
   is_closed?: boolean;
+
+  // v4.0 메타 확장
+  parking_type?: string;
+  parking_info?: ParkingInfo;
+  parking_detail?: string;
+  subway_info?: string;
+
+  business_hours?: Record<string, string>;
+  break_time?: Record<string, string>;
+  closed_days?: string[];
+  is_24h?: boolean;
+
+  reservation_type?: string;
+  reservation_url?: string;
+  booking_tips?: string;
+  booking_info?: BookingInfo;
+
+  price_tier?: '₩' | '₩₩' | '₩₩₩' | '₩₩₩₩' | 'FREE' | null;
+  avg_price_per_person?: number | null;
+  signature_items?: string[];
+
+  mood_tags?: string[];
+  date_contexts?: string[];
+
+  curation_badges?: CurationBadges;
+  provider_ids?: ProviderIds;
+  ai_summary_editorial?: string;
+
   social_links?: SocialLinks;
   metrics?: SpotMetrics;
   hot_score?: number;
+  last_verified_at?: string;
   created_at?: string;
 }
 

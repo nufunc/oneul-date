@@ -29,9 +29,38 @@ interface Spot {
   source: { type: string; url: string | null; note: string };
   verified: boolean;
   is_closed?: boolean;
+
+  // v4.0 메타 확장
+  parking_type?: string;
+  parking_info?: import('./supabase').ParkingInfo;
+  parking_detail?: string;
+  subway_info?: string;
+
+  business_hours?: Record<string, string>;
+  break_time?: Record<string, string>;
+  closed_days?: string[];
+  is_24h?: boolean;
+
+  reservation_type?: string;
+  reservation_url?: string;
+  booking_tips?: string;
+  booking_info?: import('./supabase').BookingInfo;
+
+  price_tier?: '₩' | '₩₩' | '₩₩₩' | '₩₩₩₩' | 'FREE' | null;
+  avg_price_per_person?: number | null;
+  signature_items?: string[];
+
+  mood_tags?: string[];
+  date_contexts?: string[];
+
+  curation_badges?: import('./supabase').CurationBadges;
+  provider_ids?: import('./supabase').ProviderIds;
+  ai_summary_editorial?: string;
+
   social_links?: import('./supabase').SocialLinks;
   metrics?: import('./supabase').SpotMetrics;
   hot_score?: number;
+  last_verified_at?: string;
   created_at?: string;
 }
 

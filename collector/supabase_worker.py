@@ -441,8 +441,8 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
         "Prefer": "return=minimal"
     }
 
-    # 1. 검증 및 고도화 대상 스팟 가져오기 (좌표/이미지가 없거나 오래된 순)
-    query_url = f"{supabase_url}/rest/v1/spots?select=*&is_closed=eq.false&order=updated_at.asc&limit={limit}"
+    # 1. 검증 및 고도화 대상 스팟 가져오기 (last_verified_at이 없거나 오래된 순)
+    query_url = f"{supabase_url}/rest/v1/spots?select=*&is_closed=eq.false&order=last_verified_at.asc.nullsfirst,id.asc&limit={limit}"
     req = urllib.request.Request(query_url, headers=api_headers)
 
     try:
@@ -502,13 +502,24 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                 "category": str(category) if category else None
             }
 
+            now_iso = datetime.now(timezone.utc).isoformat()
             patch_data = {
                 "verified": True,
                 "is_closed": False,
                 "fail_count": 0,
                 "quality_score": calculate_quality_score(spot, place_meta),
-                "updated_at": datetime.now(timezone.utc).isoformat()
+                "last_verified_at": now_iso,
+                "updated_at": now_iso
             }
+
+            # [Provider ID 추적]
+            top_id = top.get("id") or top.get("placeId")
+            if top_id:
+                p_ids = spot.get("provider_ids") or {}
+                if not isinstance(p_ids, dict):
+                    p_ids = {}
+                p_ids["naver"] = str(top_id)
+                patch_data["provider_ids"] = p_ids
 
             # [Auto-Healing] 소제목으로 오염된 상호명을 네이버 공식 상호명으로 자동 치유
             if is_polluted_header_name(name):
@@ -579,18 +590,23 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
             verified_count += 1
         else:
             # 3단계 다단계 폐업 안전 판별
+            now_iso = datetime.now(timezone.utc).isoformat()
             new_fail = fail_count + 1
             if new_fail >= 3:
                 patch_data = {
                     "is_closed": True,
-                    "fail_count": new_fail
+                    "fail_count": new_fail,
+                    "last_verified_at": now_iso,
+                    "updated_at": now_iso
                 }
                 closed_count += 1
                 print(f"  ⚠️ [3회 연속 검색 실패 -> 폐업 격리] id: {s_id}, name: {name}")
             else:
                 patch_data = {
                     "verified": False,
-                    "fail_count": new_fail
+                    "fail_count": new_fail,
+                    "last_verified_at": now_iso,
+                    "updated_at": now_iso
                 }
                 fail_warn_count += 1
 
