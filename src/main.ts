@@ -2941,7 +2941,7 @@ function renderOverlay(): void {
               <div class="subzones-header">
                 <span class="subzones-title">${REGIONS.find((r) => r.key === activeReg)?.label} 인기 데이트존</span>
                 <button class="btn-toggle-all-zones" id="btn-toggle-all-zones">
-                  ${state.regions.includes(activeReg) && subZonesInTab.every((z) => !state.subZones.includes(z.key)) ? '권역 전체 해제' : '권역 전체 선택'}
+                  ${subZonesInTab.length > 0 && subZonesInTab.every((z) => state.subZones.includes(z.key)) ? '권역 전체 해제' : '권역 전체 선택'}
                 </button>
               </div>
               <div class="subzones-grid">
@@ -2987,23 +2987,26 @@ function renderOverlay(): void {
       closeOverlay();
     });
 
-    // 권역 전체 선택/해제 토글
+    // 권역 전체 선택/해제 토글 (모든 하위 세부존 일괄 체크/해제)
     root.querySelector('#btn-toggle-all-zones')?.addEventListener('click', () => {
-      const isFullRegion =
-        state.regions.includes(activeReg) && subZonesInTab.every((z) => !state.subZones.includes(z.key));
+      const areAllChecked =
+        subZonesInTab.length > 0 && subZonesInTab.every((z) => state.subZones.includes(z.key));
 
-      if (isFullRegion) {
+      const currentSubZones = new Set(state.subZones);
+
+      if (areAllChecked) {
+        // 1. 전체 해제: 해당 권역의 모든 세부존 일괄 제거 및 권역 제거
+        subZonesInTab.forEach((z) => currentSubZones.delete(z.key));
         state.regions = state.regions.filter((r) => r !== activeReg);
       } else {
+        // 2. 전체 선택: 해당 권역의 모든 세부존 일괄 추가 및 권역 포함
+        subZonesInTab.forEach((z) => currentSubZones.add(z.key));
         if (!state.regions.includes(activeReg)) {
           state.regions.push(activeReg);
         }
-        // 권역 전체 모드 시 해당 권역의 개별 세부존은 클리어 (권역 전체로 탐색)
-        state.subZones = state.subZones.filter((zk) => {
-          const z = POPULAR_ZONES.find((item) => item.key === zk);
-          return z ? z.regionKey !== activeReg : true;
-        });
       }
+
+      state.subZones = Array.from(currentSubZones);
       renderOverlay();
     });
 
@@ -3028,13 +3031,22 @@ function renderOverlay(): void {
         const cb = item.querySelector<HTMLInputElement>('.zone-checkbox');
         if (cb) cb.checked = willCheck;
 
-        // 서브존 선택 시 해당 권역 포함 보장
-        const hasAnyInReg = state.subZones.some((k) => {
-          const z = POPULAR_ZONES.find((item) => item.key === k);
-          return z ? z.regionKey === activeReg : false;
-        });
-        if (hasAnyInReg && !state.regions.includes(activeReg)) {
-          state.regions.push(activeReg);
+        // 해당 권역 내 체크된 항목이 1개라도 있으면 권역 포함, 0개면 권역 제외
+        const hasAnyInReg = subZonesInTab.some((z) => state.subZones.includes(z.key));
+        if (hasAnyInReg) {
+          if (!state.regions.includes(activeReg)) {
+            state.regions.push(activeReg);
+          }
+        } else {
+          state.regions = state.regions.filter((r) => r !== activeReg);
+        }
+
+        // 전체 선택/해제 버튼 라벨 실시간 갱신
+        const toggleBtn = root.querySelector<HTMLButtonElement>('#btn-toggle-all-zones');
+        if (toggleBtn) {
+          const allNowChecked =
+            subZonesInTab.length > 0 && subZonesInTab.every((z) => state.subZones.includes(z.key));
+          toggleBtn.textContent = allNowChecked ? '권역 전체 해제' : '권역 전체 선택';
         }
 
         // 좌측 탭 인디케이터 뱃지 동기화
