@@ -2870,3 +2870,26 @@ html:not([data-theme="light"]) .step-transit-navi-btn {
   background: #ff6b57;
   color: #0b0f19 !important;
 }
+
+.step-transit-divider.origin-start {
+  margin-top: 4px;
+  margin-bottom: 16px;
+}
+
+.step-transit-divider.origin-start .step-transit-badge {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.step-transit-divider.origin-start .step-transit-time {
+  color: #059669;
+}
+
+html:not([data-theme="light"]) .step-transit-divider.origin-start .step-transit-badge {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+html:not([data-theme="light"]) .step-transit-divider.origin-start .step-transit-time {
+  color: #34d399;
+}

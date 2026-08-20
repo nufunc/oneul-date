@@ -267,7 +267,7 @@ SENTENCE_ENDINGS = (
     "지요", "이죠", "하죠", "래요", "대요", "구요", "고요", "세요", "셨어", "습니다", "합니다",
     "입니다", "했다", "이다", "였다", "된다", "한다", "까지", "부터", "에서", "에게", "으로",
     "하는", "가는", "오는", "있는", "없는", "같은", "하러", "가서", "와서", "하고", "이랑",
-    "면서", "려고", "지만", "다면", "다가", "든지", "든가", "니까", "처럼", "보다", "마다",
+    "면서", "려고", "지만", "다면", "다가", "든지", "든가", "니까", "니까", "니까", "처럼", "보다", "마다",
     "못가", "못가는", "하기", "되는", "라고", "이나", "거나", "듯이", "조차", "밖에", "만큼",
 )
 
@@ -336,9 +336,40 @@ def _decode_short_description(raw_desc: str) -> str:
             return raw_desc.replace('\\n', '\n')
 
 
+def _parse_like_count(text: str) -> int:
+    """좋아요 텍스트(예: '좋아요 1.5천개', '좋아요 820개', '1.2K')를 정수로 파싱"""
+    if not text:
+        return 0
+    m_man = re.search(r'([\d,.]+)만', text)
+    if m_man:
+        try:
+            return int(float(m_man.group(1).replace(',', '')) * 10000)
+        except Exception:
+            pass
+    m_chun = re.search(r'([\d,.]+)천', text)
+    if m_chun:
+        try:
+            return int(float(m_chun.group(1).replace(',', '')) * 1000)
+        except Exception:
+            pass
+    m_k = re.search(r'([\d,.]+)[kK]', text)
+    if m_k:
+        try:
+            return int(float(m_k.group(1).replace(',', '')) * 1000)
+        except Exception:
+            pass
+    m_num = re.search(r'([\d,]+)', text)
+    if m_num:
+        try:
+            return int(m_num.group(1).replace(',', ''))
+        except Exception:
+            pass
+    return 0
+
+
 def _fetch_watch_html(video_id: str, verbose: bool = False) -> dict:
-    """watch 페이지 HTML 스크래핑 경로. {description, views, title, status, length} 반환"""
-    out = {"description": "", "views": 0, "title": "", "status": 0, "length": 0, "error": ""}
+    """watch 페이지 HTML 스크래핑 경로. {description, views, likes, title, status, length} 반환"""
+    out = {"description": "", "views": 0, "likes": 0, "title": "", "status": 0, "length": 0, "error": ""}
     video_url = f"https://www.youtube.com/watch?v={video_id}"
     try:
         req = urllib.request.Request(video_url, headers=WATCH_HEADERS)
@@ -357,6 +388,12 @@ def _fetch_watch_html(video_id: str, verbose: bool = False) -> dict:
             if view_match:
                 out["views"] = int(view_match.group(1))
 
+            like_match = re.search(r'\"accessibilityData\":\{\"label\":\"좋아요 ([^\"]+)\"\}', html)
+            if not like_match:
+                like_match = re.search(r'\"defaultText\":\{\"accessibility\":\{\"accessibilityData\":\{\"label\":\"좋아요 ([^\"]+)\"\}\}', html)
+            if like_match:
+                out["likes"] = _parse_like_count(like_match.group(1))
+
             t_match = re.search(r'\"title\":\{\"simpleText\":\"(.*?)\"\}', html)
             if t_match:
                 out["title"] = _decode_short_description(t_match.group(1))
@@ -367,7 +404,7 @@ def _fetch_watch_html(video_id: str, verbose: bool = False) -> dict:
 
 def _fetch_innertube(video_id: str, client: dict, verbose: bool = False) -> dict:
     """InnerTube player API 폴백 경로. videoDetails 기반 메타데이터 반환"""
-    out = {"description": "", "views": 0, "title": "", "author": "",
+    out = {"description": "", "views": 0, "likes": 0, "title": "", "author": "",
            "status": 0, "length": 0, "error": ""}
     payload = dict(client["context"])
     body = {"context": payload, "videoId": video_id,
@@ -423,7 +460,7 @@ def _find_key(node, key: str):
 
 def _fetch_innertube_next(video_id: str) -> dict:
     """InnerTube next 엔드포인트 폴백 — attributedDescription 에서 설명란 확보"""
-    out = {"description": "", "views": 0, "title": "", "status": 0, "length": 0, "error": ""}
+    out = {"description": "", "views": 0, "likes": 0, "title": "", "status": 0, "length": 0, "error": ""}
     body = {
         "context": {"client": {"clientName": "WEB", "clientVersion": "2.20250101.00.00",
                                "hl": "ko", "gl": "KR"}},
@@ -460,6 +497,13 @@ def _fetch_innertube_next(video_id: str) -> dict:
                     out["views"] = int(m.group(1).replace(",", ""))
                 except Exception:
                     pass
+        # 좋아요 수 추출 (segmentedLikeDislikeButtonViewModel / defaultText)
+        btn = _find_key(data, "segmentedLikeDislikeButtonViewModel")
+        if isinstance(btn, dict):
+            btn_txt = json.dumps(btn, ensure_ascii=False)
+            m_l = re.search(r'\"label\":\"좋아요 ([^\"]+)\"', btn_txt)
+            if m_l:
+                out["likes"] = _parse_like_count(m_l.group(1))
         t = _find_key(data, "videoPrimaryInfoRenderer")
         if isinstance(t, dict):
             title_obj = (t.get("title") or {}).get("runs") or []
@@ -520,11 +564,6 @@ def _fetch_pinned_comment_and_transcript(video_id: str) -> dict:
     except Exception:
         pass
 
-    # 2. InnerTube player 에서 자막(captionTracks) timedtext 조회
-    player_body = {
-        "context": {"client": {"clientName": "ANDROID", "clientVersion": "19.09.37", "hl": "ko", "gl": "KR"}},
-        "videoId": video_id,
-    }
     try:
         req_p = urllib.request.Request(INNERTUBE_URL, data=json.dumps(player_body).encode('utf-8'), headers=headers, method="POST")
         with urllib.request.urlopen(req_p, timeout=8) as resp_p:
@@ -636,6 +675,7 @@ def get_youtube_video_info(video_id: str, verbose: bool = False) -> dict | None:
         "author": author_name,
         "description": description,
         "views": views,
+        "likes": likes,
         "thumbnail": thum_url,
         "desc_source": desc_source,
         "meta_diag": diag,
@@ -1311,11 +1351,12 @@ def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
                     "url": vinfo["url"],
                     "title": vinfo["title"],
                     "views": vinfo["views"],
+                    "likes": vinfo.get("likes", 0),
                     "is_shorts": False
                 }
             },
-            # 조회수를 확보하지 못했으면(파싱 실패) 임의로 높은 점수를 주지 않고 기본값으로 둔다
-            "hot_score": (85.0 if vinfo["views"] >= 50000 else 75.0) if vinfo.get("views") else 60.0,
+            # 조회수 5만 이상 또는 좋아요 2,500개 이상 시 실시간 초인기 핫플(hot_score=85) 판정
+            "hot_score": (85.0 if (vinfo.get("views", 0) >= 50000 or vinfo.get("likes", 0) >= 2500) else 75.0) if (vinfo.get("views") or vinfo.get("likes")) else 60.0,
             "quality_score": 90
         }
 

@@ -4,6 +4,7 @@ export interface SocialPlatformLink {
   url: string;
   title?: string;
   views?: number;
+  likes?: number;
   rating?: number;
   review_count?: number;
   bookmark_count?: number;

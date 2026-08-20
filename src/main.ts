@@ -1467,8 +1467,9 @@ async function formatCourseTextAsync(
     lines.push(`• 위치: ${spot.address || spot.location}`);
     lines.push(`• 소개: ${summary}`);
     lines.push(`• 지도: ${shortMapUrl}`);
-    if (spot.social_links?.youtube?.url && (spot.social_links.youtube.views || 0) >= 10000) {
-      const shortYt = await shortenUrl(spot.social_links.youtube.url);
+    const ytObj = spot.social_links?.youtube;
+    if (ytObj?.url && ((ytObj.views || 0) >= 10000 || (ytObj.likes || 0) >= 500)) {
+      const shortYt = await shortenUrl(ytObj.url);
       lines.push(`• 영상: ${shortYt}`);
     }
     blocks.push(lines.join('\n'));
@@ -1511,13 +1512,59 @@ function buildNearbyCourse(coords: { lat: number; lng: number } | null): { label
       .filter((s): s is Spot => Boolean(s && s.lat != null && s.lng != null));
 
     if (courseSpots.length > 0) {
-      const maxDist = Math.max(...courseSpots.map((s) => getDistanceKm(coords.lat, coords.lng, s.lat!, s.lng!)));
-      const roundedMax = Math.round(maxDist * 10) / 10;
-      label = `📍 내 주변 생활권 코스 (반경 ${roundedMax}km 이내)`;
+      const minStartDist = Math.round(getDistanceKm(coords.lat, coords.lng, courseSpots[0].lat!, courseSpots[0].lng!) * 10) / 10;
+      label = `📍 내 위치 근처 데이트 코스 (1차 스팟까지 ${minStartDist}km)`;
     }
   }
 
   return { label, steps };
+}
+
+/** 현재 위치(GPS)에서 1차 스팟으로 출발하는 출발지 안내 디바이더 */
+function renderUserOriginTransitDivider(firstStep: CourseStep): string {
+  if (!userCoords || !firstStep || firstStep.spotId === null) return '';
+  const s = spotById.get(firstStep.spotId);
+  if (!s || !s.lat || !s.lng) return '';
+
+  const dist = getDistanceKm(userCoords.lat, userCoords.lng, s.lat, s.lng);
+  let distanceText = '';
+  let timeText = '';
+  let icon = '🚶‍♂️';
+
+  if (dist < 1.0) {
+    const meters = Math.round(dist * 1000);
+    const walkMin = Math.max(1, Math.round(dist * 15));
+    distanceText = `${meters}m`;
+    timeText = `도보 약 ${walkMin}분`;
+    icon = '🚶‍♂️';
+  } else if (dist < 30.0) {
+    const carMin = Math.max(3, Math.round((dist / 25) * 60 + 3));
+    distanceText = `${dist.toFixed(1)}km`;
+    timeText = `차량·이동 약 ${carMin}분`;
+    icon = '🚗';
+  } else {
+    const hours = (dist / 60).toFixed(1);
+    distanceText = `${dist.toFixed(0)}km`;
+    timeText = `차량 약 ${hours}시간`;
+    icon = '🚗';
+  }
+
+  const naviUrl = `https://map.kakao.com/link/to/${encodeURIComponent(s.name)},${s.lat},${s.lng}`;
+
+  return `
+    <div class="step-transit-divider origin-start">
+      <div class="step-transit-line"></div>
+      <div class="step-transit-badge">
+        <span class="step-transit-icon">🚩 ${icon}</span>
+        <span class="step-transit-time">내 위치 출발 · ${escapeHtml(timeText)}</span>
+        <span class="step-transit-dist">(${escapeHtml(distanceText)})</span>
+        <a class="step-transit-navi-btn" href="${escapeHtml(naviUrl)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(s.name)} 길찾기">
+          <span>🧭 길찾기</span>
+        </a>
+      </div>
+      <div class="step-transit-line"></div>
+    </div>
+  `;
 }
 
 // --- URL 링크 공유 (코스 = 스폿 ID 배열 → 해시 인코딩) -----------------------------
@@ -1630,7 +1677,7 @@ function activeSlots(): SlotKey[] {
 }
 
 declare const __APP_VERSION__: string;
-const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.9.1';
+const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.9.2';
 
 function courseSpotIds(): number[] {
   if (!state.course) return [];
@@ -2182,6 +2229,7 @@ function renderResults(): void {
       <p class="ai-briefing-text ${!hasCachedStory && AI_BRIEFING_ENABLED ? 'is-loading' : ''}" id="ai-briefing-content">${initialStoryHtml}</p>
     </div>
     <div class="step-list">
+      ${state.course.length > 0 && userCoords ? renderUserOriginTransitDivider(state.course[0]) : ''}
       ${state.course.map((step, i) => {
         const card = renderStepCard(step, i, { usedImages });
         let html = card;
@@ -2591,10 +2639,11 @@ function renderStepCard(
         <div class="step-actions-icons">
           ${swappable ? `<button class="btn-action-icon btn-swap-icon" data-step-index="${index}" aria-label="다시 추천" title="다시 추천">${ICON_SWAP_SVG}</button>` : ''}
           ${(() => {
-            const yt = spot.social_links?.youtube?.url;
-            const views = spot.social_links?.youtube?.views;
-            if (!yt || !views || views < 10000) return '';
-            return `<a class="btn-action-icon btn-yt-icon" href="${escapeHtml(yt)}" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube">${ICON_YOUTUBE_SVG}</a>`;
+            const yt = spot.social_links?.youtube;
+            if (!yt?.url) return '';
+            const meetsCriteria = (yt.views || 0) >= 10000 || (yt.likes || 0) >= 500;
+            if (!meetsCriteria) return '';
+            return `<a class="btn-action-icon btn-yt-icon" href="${escapeHtml(yt.url)}" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube">${ICON_YOUTUBE_SVG}</a>`;
           })()}
           ${(() => {
             const kakao = spot.social_links?.kakaomap?.url;
