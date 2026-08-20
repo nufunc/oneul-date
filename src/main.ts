@@ -184,13 +184,17 @@ export interface QuickTagItem {
 }
 
 export const POPULAR_QUICK_TAGS: QuickTagItem[] = [
-  { label: '#삼겹살', query: '삼겹살', synonyms: ['삼겹', '고기', '돼지', '육류', '목살', '구이'] },
-  { label: '#와인·위스키', query: '와인', synonyms: ['와인', '위스키', 'wine', 'whisky', '바', '칵테일', '다이닝'] },
-  { label: '#스파·마사지', query: '스파', synonyms: ['스파', '마사지', 'spa', '온천', '찜질', '사우나', '테르메덴', '아쿠아필드'] },
-  { label: '#오션뷰·루프탑', query: '오션뷰', synonyms: ['오션뷰', '루프탑', '바다', '전망', '뷰', '야경', '테라스'] },
-  { label: '#소품샵·쇼핑', query: '소품샵', synonyms: ['소품', '편집숍', '잡화', '문구', '쇼핑', '공예'] },
-  { label: '#공방·이색체험', query: '공방', synonyms: ['공방', '체험', '원데이', '클래스', '도자기', '향수', '드로잉', '베이킹'] },
-  { label: '#호캉스·독채', query: '호텔', synonyms: ['호텔', '리조트', '펜션', '독채', '스테이', '풀빌라', '글램핑'] },
+  { label: '#성수핫플', query: '성수', synonyms: ['성수', '성수동', '서울숲', '뚝섬', '연무장길'] },
+  { label: '#비오는날', query: '실내', synonyms: ['실내', '비', '비오는날', '전시', '아쿠아리움', '스파', '드로잉', '몰'] },
+  { label: '#루프탑·야경', query: '루프탑', synonyms: ['루프탑', '야경', '전망', '오션뷰', '뷰', '테라스', '스카이'] },
+  { label: '#오마카세', query: '오마카세', synonyms: ['오마카세', '파인다이닝', '스시', '한우', '코스'] },
+  { label: '#디저트카페', query: '카페', synonyms: ['카페', '디저트', '베이커리', '빵', '케이크', '커피', '브런치'] },
+  { label: '#와인', query: '와인', synonyms: ['와인', 'wine', '와인바', '내추럴와인', '글라스'] },
+  { label: '#위스키·칵테일', query: '위스키', synonyms: ['위스키', 'whisky', '칵테일', '바', '몰트', '하이볼', '스피크이지'] },
+  { label: '#가성비맛집', query: '맛집', synonyms: ['맛집', '가성비', '착한가격', '로컬', '노포', '삼겹살', '파스타'] },
+  { label: '#이색공방·체험', query: '공방', synonyms: ['공방', '체험', '원데이', '클래스', '도자기', '향수', '드로잉', '베이킹', '가죽'] },
+  { label: '#스파·힐링', query: '스파', synonyms: ['스파', '마사지', 'spa', '온천', '찜질', '사우나', '테르메덴', '아쿠아필드', '휴식'] },
+  { label: '#드라이브', query: '드라이브', synonyms: ['드라이브', '야경', '외곽', '호수', '전망대', '남한산성', '북악'] },
 ];
 
 let spots: Spot[] = rawSpotsData as unknown as Spot[];
@@ -1066,6 +1070,17 @@ function naverMapUrl(spot: Spot): string {
   return `https://map.naver.com/p/search/${encodeURIComponent(mapQuery(spot))}`;
 }
 
+/** 네이버 지도 원터치 길찾기 딥링크 생성 (내 위치 출발지 또는 목적지 단독 지원) */
+function naverDirectionsUrl(spot: Spot, origin?: { lat: number; lng: number } | null): string {
+  if (spot.lat && spot.lng) {
+    if (origin && origin.lat && origin.lng) {
+      return `https://map.naver.com/v5/directions/${origin.lng},${origin.lat},${encodeURIComponent('내위치')}/${spot.lng},${spot.lat},${encodeURIComponent(spot.name)}/-/transit`;
+    }
+    return `https://map.naver.com/v5/directions/-/-/${spot.lng},${spot.lat},${encodeURIComponent(spot.name)}/-/transit`;
+  }
+  return naverMapUrl(spot);
+}
+
 /** 복사 텍스트용 스팟 한 줄 소개 정제 (영문 날것 태그 방지 & 한국어 보강) */
 function getCleanSpotSummary(spot: Spot): string {
   if (spot.summary && spot.summary.trim().length > 0) {
@@ -1549,8 +1564,6 @@ function renderUserOriginTransitDivider(firstStep: CourseStep): string {
     icon = '🚗';
   }
 
-  const naviUrl = `https://map.kakao.com/link/to/${encodeURIComponent(s.name)},${s.lat},${s.lng}`;
-
   return `
     <div class="step-transit-divider origin-start">
       <div class="step-transit-line"></div>
@@ -1558,9 +1571,6 @@ function renderUserOriginTransitDivider(firstStep: CourseStep): string {
         <span class="step-transit-icon">🚩 ${icon}</span>
         <span class="step-transit-time">내 위치 출발 · ${escapeHtml(timeText)}</span>
         <span class="step-transit-dist">(${escapeHtml(distanceText)})</span>
-        <a class="step-transit-navi-btn" href="${escapeHtml(naviUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(s.name)} 길찾기">
-          <span>🧭 길찾기</span>
-        </a>
       </div>
       <div class="step-transit-line"></div>
     </div>
@@ -2512,11 +2522,6 @@ function renderStepTransitDivider(prevStep: CourseStep, nextStep: CourseStep): s
     icon = '📍';
   }
 
-  // 카카오맵 길찾기 딥링크 URL
-  const naviUrl = s2.lat && s2.lng 
-    ? `https://map.kakao.com/link/to/${encodeURIComponent(s2.name)},${s2.lat},${s2.lng}`
-    : naverMapUrl(s2);
-
   return `
     <div class="step-transit-divider">
       <div class="step-transit-line"></div>
@@ -2524,9 +2529,6 @@ function renderStepTransitDivider(prevStep: CourseStep, nextStep: CourseStep): s
         <span class="step-transit-icon">${icon}</span>
         <span class="step-transit-time">${escapeHtml(timeText)}</span>
         ${distanceText ? `<span class="step-transit-dist">(${escapeHtml(distanceText)})</span>` : ''}
-        <a class="step-transit-navi-btn" href="${escapeHtml(naviUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(s2.name)} 길찾기">
-          <span>🧭 길찾기</span>
-        </a>
       </div>
       <div class="step-transit-line"></div>
     </div>
@@ -2663,6 +2665,9 @@ function renderStepCard(
         </div>
         <div class="step-actions-right">
           ${bookingUrl ? `<a class="step-book-chip" href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" aria-label="캐치테이블 실시간 예약"><span>📅 예약</span></a>` : ''}
+          <a class="step-navi-chip" href="${naverDirectionsUrl(spot, userCoords)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(spot.name)} 길찾기">
+            <span>🧭 길찾기</span>
+          </a>
           <a class="step-map-chip" href="${naverMapUrl(spot)}" target="_blank" rel="noopener noreferrer" aria-label="네이버 지도">
             ${ICON_NAVER_MAP_SVG}
             <span>지도</span>
