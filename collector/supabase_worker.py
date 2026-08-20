@@ -74,7 +74,7 @@ def clean_keyword(name: str, location: str = "", address: str = "", region: str 
         if eng in lower:
             clean = re.sub(re.escape(eng), kor, clean, flags=re.IGNORECASE)
 
-    # 지역 결합 (주소나 location에서 시/군/구/동 추출)
+    # 지역 결합 (주소, location 또는 region에서 시/군/구/동 추출)
     area_hint = ""
     if address:
         m = re.search(r'([가-힣0-9]+(?:로|길|동|읍|면))', address)
@@ -84,6 +84,8 @@ def clean_keyword(name: str, location: str = "", address: str = "", region: str 
         m = re.search(r'([가-힣0-9]+(?:시|군|구|동|읍|면))', location)
         if m and m.group(1) not in ('전국', '수도권'):
             area_hint = m.group(1)
+    if not area_hint and region and region not in ('전국', '수도권'):
+        area_hint = region
 
     if area_hint and area_hint not in clean:
         return f"{clean} {area_hint}".strip()
@@ -484,8 +486,34 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
 
         patch_data = {}
         if places and len(places) > 0:
-            top = places[0]
+            # 1위 결과가 비스팟(주차장, 아파트, 은행 등)이면 2~3위 중 정상 데이트 장소 탐색
+            best_place = None
+            for p in places:
+                p_cat = p.get("category") or ""
+                if not isinstance(p_cat, str):
+                    p_cat = str(p_cat)
+                if not any(pat.search(p_cat) for pat in SLOT_NONSPOT_RE):
+                    best_place = p
+                    break
+            top = best_place if best_place else places[0]
             road_addr = top.get("roadAddress") or top.get("address")
+
+            # 권역 충돌 방지: 기존 reg가 명확한데 검색된 주소가 타 권역이면 권역 힌트로 재검색
+            if reg and reg not in ('전국', '수도권') and road_addr:
+                d_reg, _ = derive_region_area(road_addr)
+                if d_reg and d_reg != reg:
+                    retry_places = search_naver(f"{name} {reg}")
+                    time.sleep(0.1)
+                    if retry_places:
+                        for rp in retry_places:
+                            r_addr = rp.get("roadAddress") or rp.get("address")
+                            if r_addr:
+                                r_reg, _ = derive_region_area(r_addr)
+                                if r_reg == reg:
+                                    top = rp
+                                    road_addr = r_addr
+                                    break
+
             thum = top.get("thumUrl") or top.get("image") or top.get("imageUrl") or top.get("thumbUrl")
             category = top.get("category") or top.get("categoryPath", [""])[0] if isinstance(top.get("categoryPath"), list) else top.get("category")
             
@@ -555,17 +583,16 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                             f"({road_addr})"
                         )
 
-            # [Slot Healing] 이번 사이클에서 받은 네이버 공식 카테고리를 근거로
-            # slot 오염(특히 stay 오분류)을 교정한다. DB 의 낡은 category 는 폴백일 뿐이다.
+            # [Slot Healing] 네이버 공식 카테고리를 근거로 slot 오염 및 누락 교정
             heal_cat = place_meta.get("category") or spot.get("category")
             heal_name = patch_data.get("name") or name
             d_slot = derive_slot(heal_cat, heal_name)
             old_slot = spot.get("slot")
-            if d_slot and d_slot != old_slot and (slot_heal_all or "stay" in (d_slot, old_slot)):
+            if d_slot and (not old_slot or (d_slot != old_slot and (slot_heal_all or "stay" in (d_slot, old_slot)))):
                 slot_fixed_count += 1
                 print(
                     f"  🔧 [Slot Fix]{' [DRY-RUN]' if slot_heal_dryrun else ''} id={s_id} "
-                    f"{old_slot or '-'} → {d_slot} (네이버: {heal_cat})"
+                    f"{old_slot or '(누락)'} → {d_slot} (네이버: {heal_cat})"
                 )
                 if not slot_heal_dryrun:
                     patch_data["slot"] = d_slot

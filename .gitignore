@@ -55,6 +55,7 @@ src/data/spots.json
 scripts/validation_report.json
 scripts/generate_part*.py
 collector/.processed_videos.json
+collector/.groq_cache.json
 scripts/_deleted_youtube_junk.json
 
 # Supabase (CLI 로컬 상태·함수 시크릿 — 커밋 금지)

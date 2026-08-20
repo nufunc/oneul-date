@@ -46,6 +46,10 @@ from category_filter import (
     CATEGORY_BLACKLIST_LODGING,
     NAME_BLACKLIST_PATTERNS,
 )
+try:
+    from groq_helper import extract_spots_from_unstructured_text
+except ImportError:
+    extract_spots_from_unstructured_text = None
 
 UA_DESKTOP = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
               "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
@@ -468,6 +472,87 @@ def _fetch_innertube_next(video_id: str) -> dict:
     return out
 
 
+def _fetch_pinned_comment_and_transcript(video_id: str) -> dict:
+    """고정 댓글(Pinned Comment) 및 자막(Transcript) 텍스트 수집 (쇼츠/설명란 부재 영상 대응)"""
+    res = {"pinned_comment": "", "transcript": ""}
+    
+    # 1. InnerTube next 엔드포인트에서 itemSectionRenderer / commentThreadRenderer 파싱
+    body = {
+        "context": {"client": {"clientName": "WEB", "clientVersion": "2.20250101.00.00", "hl": "ko", "gl": "KR"}},
+        "videoId": video_id,
+    }
+    headers = {
+        "Content-Type": "application/json",
+        "Accept-Language": "ko-KR,ko;q=0.9",
+        "Origin": "https://www.youtube.com",
+        "Referer": f"https://www.youtube.com/watch?v={video_id}",
+        "Cookie": "CONSENT=YES+1; SOCS=CAI",
+        "User-Agent": UA_DESKTOP,
+    }
+    try:
+        req = urllib.request.Request(INNERTUBE_NEXT_URL, data=json.dumps(body).encode('utf-8'), headers=headers, method="POST")
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read().decode('utf-8', errors='ignore'))
+            
+            # 고정 댓글(pinned comment) 또는 상단 댓글 탐색
+            comments = []
+            def _find_comments(node):
+                if isinstance(node, dict):
+                    if "commentRenderer" in node:
+                        cr = node["commentRenderer"]
+                        ctext_runs = ((cr.get("contentText") or {}).get("runs")) or []
+                        ctext = "".join(r.get("text", "") for r in ctext_runs).strip()
+                        # 고정 뱃지(pinned) 확인
+                        is_pinned = bool(cr.get("pinnedCommentBadge"))
+                        if ctext:
+                            comments.append((is_pinned, ctext))
+                    for v in node.values():
+                        _find_comments(v)
+                elif isinstance(node, list):
+                    for v in node:
+                        _find_comments(v)
+            
+            _find_comments(data)
+            if comments:
+                # 고정 댓글 우선, 없으면 첫 번째 댓글
+                sorted_c = sorted(comments, key=lambda x: x[0], reverse=True)
+                res["pinned_comment"] = sorted_c[0][1]
+    except Exception:
+        pass
+
+    # 2. InnerTube player 에서 자막(captionTracks) timedtext 조회
+    player_body = {
+        "context": {"client": {"clientName": "ANDROID", "clientVersion": "19.09.37", "hl": "ko", "gl": "KR"}},
+        "videoId": video_id,
+    }
+    try:
+        req_p = urllib.request.Request(INNERTUBE_URL, data=json.dumps(player_body).encode('utf-8'), headers=headers, method="POST")
+        with urllib.request.urlopen(req_p, timeout=8) as resp_p:
+            pdata = json.loads(resp_p.read().decode('utf-8', errors='ignore'))
+            captions = (((pdata.get("captions") or {}).get("playerCaptionsTracklistRenderer") or {}).get("captionTracks")) or []
+            ko_track = next((c.get("baseUrl") for c in captions if c.get("languageCode") == "ko"), None)
+            if not ko_track and captions:
+                ko_track = captions[0].get("baseUrl")
+            
+            if ko_track:
+                # 자막 XML/JSON 페칭
+                req_t = urllib.request.Request(ko_track + "&fmt=json3", headers={"User-Agent": UA_DESKTOP})
+                with urllib.request.urlopen(req_t, timeout=8) as resp_t:
+                    t_json = json.loads(resp_t.read().decode('utf-8', errors='ignore'))
+                    events = t_json.get("events") or []
+                    transcript_lines = []
+                    for ev in events:
+                        segs = ev.get("segs") or []
+                        line = "".join(s.get("utf8", "") for s in segs).strip()
+                        if line:
+                            transcript_lines.append(line)
+                    res["transcript"] = " ".join(transcript_lines[:150])  # 앞 150줄 결합
+    except Exception:
+        pass
+
+    return res
+
+
 def get_youtube_video_info(video_id: str, verbose: bool = False) -> dict | None:
     """유튜브 영상 메타데이터 조회.
     경로: oEmbed(제목·채널) → watch HTML(설명·조회수) → InnerTube player API 폴백.
@@ -742,9 +827,9 @@ def _collect_title_candidates(title: str) -> list[str]:
     return raw
 
 
-def extract_spot_candidates_verbose(title: str, description: str) -> dict:
+def extract_spot_candidates_verbose(title: str, description: str, video_id: str = "") -> dict:
     """후보 추출 + 게이트 통과 결과를 상세 반환.
-    반환: {raw: int, passed: list[str], source: 'description'|'title'|'none', rejected: list[(원문, 사유)]}
+    반환: {raw: int, passed: list[str], source: 'description'|'pinned_comment'|'groq_semantic_extractor'|'title'|'none', rejected: list[(원문, 사유)]}
     """
     def _gate(raw_list: list[str]) -> tuple[list[str], list[tuple[str, str]]]:
         passed, rejected = [], []
@@ -757,6 +842,7 @@ def extract_spot_candidates_verbose(title: str, description: str) -> dict:
                 rejected.append((r.strip()[:30], reason))
         return passed, rejected
 
+    # 1. 설명란 정형 리스트/타임스탬프 추출
     desc_raw = _collect_description_candidates(description or "")
     desc_passed, desc_rejected = _gate(desc_raw)
     if desc_passed:
@@ -767,7 +853,40 @@ def extract_spot_candidates_verbose(title: str, description: str) -> dict:
             "rejected": desc_rejected,
         }
 
-    # 설명란 후보가 하나도 없을 때만 제목 파싱 폴백 (게이트 통과분만 채택)
+    # 2. 설명란 후보 부재/쇼츠 대응: 고정 댓글 및 자막 파싱 + Groq 지능형 추출
+    if video_id:
+        extra_data = _fetch_pinned_comment_and_transcript(video_id)
+        pinned = extra_data.get("pinned_comment", "")
+        transcript = extra_data.get("transcript", "")
+
+        # 2-A. 고정 댓글 정형 목록 룰베이스 추출
+        if pinned:
+            pin_raw = _collect_description_candidates(pinned)
+            pin_passed, pin_rejected = _gate(pin_raw)
+            if pin_passed:
+                return {
+                    "raw": len(desc_raw) + len(pin_raw),
+                    "passed": pin_passed,
+                    "source": "pinned_comment",
+                    "rejected": desc_rejected + pin_rejected,
+                }
+
+        # 2-B. Groq LLM 기반 비정형 텍스트 지능형 추출 (고정댓글, 자막, 설명란)
+        combined_text = f"{pinned}\n{transcript}\n{description or ''}".strip()
+        if extract_spots_from_unstructured_text and len(combined_text) >= 15:
+            groq_spots = extract_spots_from_unstructured_text(combined_text, video_title=title)
+            if groq_spots:
+                groq_raw = [s.get("name") for s in groq_spots if s.get("name")]
+                groq_passed, groq_rejected = _gate(groq_raw)
+                if groq_passed:
+                    return {
+                        "raw": len(desc_raw) + len(groq_raw),
+                        "passed": groq_passed,
+                        "source": "groq_semantic_extractor",
+                        "rejected": desc_rejected + groq_rejected,
+                    }
+
+    # 3. 설명란/댓글/자막/Groq 모두 실패 시 제목 파싱 폴백 (게이트 통과분만 채택)
     title_raw = _collect_title_candidates(title or "")
     title_passed, title_rejected = _gate(title_raw)
     return {
@@ -1034,7 +1153,7 @@ def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
     """이미 조회된 영상 메타데이터로 역방향 마이닝 수행. 통계 dict 반환."""
     stats = _new_stats()
 
-    ext = extract_spot_candidates_verbose(vinfo["title"], vinfo["description"])
+    ext = extract_spot_candidates_verbose(vinfo["title"], vinfo["description"], video_id=vinfo.get("videoId", ""))
     candidates = ext["passed"]
     stats["candidates_raw"] = ext["raw"]
     stats["candidates_gated"] = len(candidates)
@@ -1240,9 +1359,7 @@ def mine_youtube_vlog(url: str, supabase_url: str, supabase_key: str, dry_run: b
           f"설명란 {len(vinfo['description'])}자 [{vinfo.get('desc_source')}]")
 
     if not vinfo["description"]:
-        print(f"⏩ 설명란 확보 실패 — 제목 폴백으로 쓰레기를 만들지 않기 위해 스킵합니다.")
-        _print_video_line(vinfo, _new_stats(), skip_reason="스킵: 설명란 확보 실패")
-        return 0
+        print(f"  ℹ️ 설명란 부재 — 고정 댓글, 자막 및 Groq 지능형 추출 파이프라인으로 처리를 시도합니다.")
 
     print(f"\n🔍 [2/3] 영상 내 방문 장소 추출 및 지도 정밀 검증 중...{' [DRY-RUN]' if dry_run else ''}")
     stats = mine_video_info(vinfo, supabase_url, supabase_key, dry_run=dry_run)

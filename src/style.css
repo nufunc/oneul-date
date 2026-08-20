@@ -1824,7 +1824,7 @@ button {
   color: #FFFFFF;
   text-decoration: none;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 1px 4px rgba(255, 59, 48, 0.3);
+  box-shadow: 0 1px 3px rgba(255, 59, 48, 0.25);
   white-space: nowrap;
 }
 
@@ -2782,4 +2782,91 @@ button {
     transition-duration: 0.001ms !important;
     animation-delay: 0ms !important;
   }
+}
+
+/* ==========================================================================
+   스팟 간 이동 동선 & 길찾기 딥링크 디바이더 (.step-transit-divider)
+   ========================================================================== */
+.step-transit-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0;
+  padding: 0 4px;
+  position: relative;
+}
+
+.step-transit-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+}
+
+.step-transit-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: var(--color-surface-sub);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--color-text-sub);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+}
+
+.step-transit-icon {
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.step-transit-time {
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.step-transit-dist {
+  color: var(--color-text-faint);
+  font-weight: 500;
+  font-size: 0.72rem;
+}
+
+.step-transit-navi-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 4px;
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary, #E05A47);
+  color: #FFFFFF !important;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-decoration: none;
+  line-height: 1.4;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(224, 90, 71, 0.3);
+}
+
+.step-transit-navi-btn:hover {
+  background: #c74836;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(224, 90, 71, 0.4);
+}
+
+.step-transit-navi-btn:active {
+  transform: scale(0.95);
+}
+
+html:not([data-theme="light"]) .step-transit-badge {
+  background: rgba(30, 41, 59, 0.85);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+html:not([data-theme="light"]) .step-transit-navi-btn {
+  background: #ff6b57;
+  color: #0b0f19 !important;
 }

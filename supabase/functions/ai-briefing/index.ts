@@ -22,7 +22,19 @@
  *   POST /functions/v1/ai-briefing
  *   Content-Type: application/json   (Authorization 헤더 없음 → --no-verify-jwt 필요)
  *   {
- *     "spots": [ { "slot": "낮", "name": "...", "category": "...", "summary": "..." } ],
+ *     "spots": [
+ *       {
+ *         "slot": "낮",
+ *         "name": "...",
+ *         "category": "...",
+ *         "summary": "...",
+ *         "location": "...",
+ *         "parking_type": "...",
+ *         "price_tier": "...",
+ *         "signature_items": ["..."],
+ *         "curation_badges": { "blue_ribbon": 1, "michelin": "..." }
+ *       }
+ *     ],
  *     "mood": "romantic"
  *   }
  *   - `slot`은 한글 라벨(낮/저녁/밤/숙박) 또는 영문 키(day/evening/night/stay) 지원.
@@ -105,8 +117,11 @@ const MAX_SPOTS = 4;
 const MAX_NAME_LEN = 100;
 const MAX_CATEGORY_LEN = 60;
 const MAX_SUMMARY_LEN = 300;
-/** 바디 파싱 전 1차 방어 (스팟 4개 상한이면 수 KB로 충분) */
-const MAX_BODY_BYTES = 8_192;
+const MAX_LOCATION_LEN = 100;
+const MAX_PARKING_LEN = 50;
+const MAX_PRICE_TIER_LEN = 20;
+/** 바디 파싱 전 1차 방어 (스팟 4개 + v4.0 메타데이터 고려하여 16KB로 확장) */
+const MAX_BODY_BYTES = 16_384;
 
 // ---------------------------------------------------------------------------
 // 레이트리밋 (인메모리 슬라이딩 윈도우)
@@ -235,6 +250,17 @@ interface SpotInput {
   name: string;
   category: string;
   summary: string;
+  location?: string;
+  parking_type?: string;
+  price_tier?: string;
+  signature_items?: string[];
+  curation_badges?: {
+    michelin?: string;
+    blue_ribbon?: number | string;
+    tour_api?: string;
+    catchtable?: string;
+    [key: string]: unknown;
+  };
 }
 
 interface BriefingRequest {
@@ -299,25 +325,69 @@ function validate(raw: unknown): { data: BriefingRequest } | { error: string } {
       return { error: `spots[${i}].summary exceeds ${MAX_SUMMARY_LEN} characters` };
     }
 
-    spots.push({ slotLabel, name, category, summary });
+    const location = optionalString(spot.location);
+    const parking_type = optionalString(spot.parking_type);
+    const price_tier = optionalString(spot.price_tier);
+
+    let signature_items: string[] | undefined;
+    if (Array.isArray(spot.signature_items)) {
+      signature_items = spot.signature_items
+        .filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+        .map((item) => item.trim().slice(0, 50))
+        .slice(0, 5);
+      if (signature_items.length === 0) signature_items = undefined;
+    }
+
+    let curation_badges: SpotInput['curation_badges'] | undefined;
+    if (typeof spot.curation_badges === 'object' && spot.curation_badges !== null && !Array.isArray(spot.curation_badges)) {
+      const cb = spot.curation_badges as Record<string, unknown>;
+      curation_badges = {
+        michelin: typeof cb.michelin === 'string' ? cb.michelin.slice(0, 50) : undefined,
+        blue_ribbon: (typeof cb.blue_ribbon === 'number' || typeof cb.blue_ribbon === 'string') ? cb.blue_ribbon : undefined,
+        tour_api: typeof cb.tour_api === 'string' ? cb.tour_api.slice(0, 50) : undefined,
+        catchtable: typeof cb.catchtable === 'string' ? cb.catchtable.slice(0, 50) : undefined,
+      };
+      if (!curation_badges.michelin && !curation_badges.blue_ribbon && !curation_badges.tour_api && !curation_badges.catchtable) {
+        curation_badges = undefined;
+      }
+    }
+
+    spots.push({
+      slotLabel,
+      name,
+      category,
+      summary,
+      location: location.length > 0 ? location.slice(0, MAX_LOCATION_LEN) : undefined,
+      parking_type: parking_type.length > 0 ? parking_type.slice(0, MAX_PARKING_LEN) : undefined,
+      price_tier: price_tier.length > 0 ? price_tier.slice(0, MAX_PRICE_TIER_LEN) : undefined,
+      signature_items,
+      curation_badges,
+    });
   }
 
   return { data: { spots, mood } };
 }
 
 // ---------------------------------------------------------------------------
-// 프롬프트 조립 (Llama 3.3 감성 큐레이션 엔진)
+// 프롬프트 조립 (Llama 3.3 감성 큐레이션 엔진 + v4.0 메타데이터)
 // ---------------------------------------------------------------------------
 
 const SYSTEM_PROMPT = `당신은 감성 라이프스타일 매거진(킨포크, 아이즈매거진)의 수석 데이트 코스 큐레이터입니다.
-주어진 장소 목록(스팟명, 카테고리, 요약)과 분위기(무드 테마)를 바탕으로, 두 사람의 하루를 완성하는 감각적이고 세련된 2~3줄 코스 브리핑을 작성합니다.
+주어진 장소 목록(스팟명, 카테고리, 요약, 위치)과 v4.0 메타데이터(블루리본/미쉐린 인증, 시그니처 메뉴, 가격대, 주차/발렛 정보) 및 분위기(무드 테마)를 바탕으로, 두 사람의 하루를 완성하는 감각적이고 세련된 2~3줄 맞춤형 코스 브리핑을 작성합니다.
 
 [핵심 작성 원칙]
-1. 분량 및 구성 (2~3문장, 약 120~200자):
+1. 분량 및 구성 (2~3문장, 약 120~220자):
    - 1~2문장: 시간의 자연스러운 흐름(낮의 따스한 햇살/커피/산책 → 저녁의 정갈한 미식/노을 → 밤의 은은한 조명/와인/야경 → 숙박의 아늑한 쉼)과 공간의 감각적 매력을 엮은 코스 스토리.
-   - 마지막 1문장: 해당 코스를 200% 만끽할 수 있는 짧고 다정한 데이트 팁 또는 감성 포인트.
+   - 마지막 1문장: 해당 코스를 200% 만끽할 수 있는 실용적이고 다정한 데이트 팁 또는 감성 포인트 (예: 발렛/주차 편의, 대표 시그니처 메뉴 페어링, 프라이빗 뷰 포인트 등).
 
-2. 8대 무드 테마별 톤앤매너 완벽 반영:
+2. v4.0 메타데이터의 자연스럽고 감각적인 활용:
+   - 인증 배지: 블루리본 서베이나 미쉐린 가이드 인증이 있다면 "블루리본 인증을 받은 대표 파스타 맛집", "미쉐린이 인정한 정갈한 테이블"처럼 신뢰감을 주는 에디토리얼 표현으로 자연스럽게 녹여냅니다.
+   - 시그니처 메뉴: 장소의 대표 시그니처 메뉴가 제공되면 미식 스토리텔링이나 팁에 매력적인 포인트로 언급합니다.
+   - 주차/편의: 발렛 파킹이나 편리한 주차가 지원되는 장소라면 "발렛 주차가 편리한 야경 와인바", "주차 부담 없이 여유롭게 즐기는 드라이브 코스"처럼 운전자를 배려한 실용 팁으로 활용합니다.
+   - 가격대: 가성비 좋은 캐주얼 데이트(₩)부터 특별한 기념일을 위한 럭셔리 다이닝(₩₩₩₩)까지 분위기에 맞는 격조와 톤을 살립니다.
+   - ※ 모든 메타데이터를 나열식으로 억지로 채우지 말고, 코스에서 가장 돋보이는 1~2가지 매력 포인트를 세련되게 연결하세요.
+
+3. 8대 무드 테마별 톤앤매너 완벽 반영:
    - 로맨틱 (romantic): 설렘, 은은한 조명, 다정한 시선과 둘만의 깊은 대화.
    - 힐링 (healing): 숲과 자연의 여백, 고요한 숨고르기와 따스한 위로.
    - 미식 (gourmet): 풍부한 아로마와 페어링, 정갈한 플레이팅과 미각의 즐거움.
@@ -327,28 +397,61 @@ const SYSTEM_PROMPT = `당신은 감성 라이프스타일 매거진(킨포크, 
    - 레트로·전통 (retro): 아날로그 감성, 시간의 결이 묻어나는 아늑한 골목 정취.
    - 액티비티 (active): 생동감 넘치는 움직임, 함께 몰입하는 유쾌한 활력.
 
-3. 시간대별 슬롯(낮/저녁/밤/숙박) 흐름 반영:
+4. 시간대별 슬롯(낮/저녁/밤/숙박) 흐름 반영:
    - 낮: 햇살, 여유로운 오후, 커피/베이커리/전시/산책.
    - 저녁: 그윽한 노을, 정갈한 식사와 테이블.
    - 밤: 은은한 조명, 와인/바, 깊어지는 밤의 낭만.
    - 숙박: 하루의 온전한 쉼, 아늑한 프라이빗 휴식.
 
-4. 절대 금지 사항:
+5. 절대 금지 사항:
    - 장소의 실제 카테고리와 다른 활동 묘사 금지 (예: 미술관에 "식사", 카페에 "전시 관람" 등 실제 카테고리와 어긋나는 묘사 ❌).
    - 단순 나열식 문형 금지 ("~에서 시작해 ~를 거쳐 ~로 끝나는 코스입니다" ❌).
    - 과장된 클리셰 금지 ("오감이 충만", "터져 나오는", "환상적인 케미" ❌).
    - 마크다운 볼드(**), 불릿 기호(-), 큰따옴표 없이 깔끔한 순수 한글 문장만 출력하세요.`;
 
-/** "낮: 러스트베이커리 (베이커리, 버터향 가득한 ...)" 형태의 줄 목록 */
+/** v4.0 메타데이터를 포함한 스팟별 상세 설명 줄 목록 생성 */
 function buildSpotDescriptions(spots: SpotInput[]): string {
   return spots
-    .map((spot) => `${spot.slotLabel}: ${spot.name} (${spot.category}${spot.summary ? `, ${spot.summary}` : ''})`)
+    .map((spot) => {
+      const metaDetails: string[] = [];
+      if (spot.category) metaDetails.push(`카테고리: ${spot.category}`);
+      if (spot.location) metaDetails.push(`위치: ${spot.location}`);
+      if (spot.summary) metaDetails.push(`소개: ${spot.summary}`);
+
+      // 배지 인증 정보
+      if (spot.curation_badges) {
+        const badges: string[] = [];
+        const cb = spot.curation_badges;
+        if (cb.blue_ribbon) badges.push(`블루리본 서베이(${cb.blue_ribbon})`);
+        if (cb.michelin) badges.push(`미쉐린 가이드(${cb.michelin})`);
+        if (cb.tour_api) badges.push('한국관광공사 추천');
+        if (cb.catchtable) badges.push('캐치테이블 인기');
+        if (badges.length > 0) metaDetails.push(`인증: ${badges.join(', ')}`);
+      }
+
+      // 시그니처 메뉴
+      if (spot.signature_items && spot.signature_items.length > 0) {
+        metaDetails.push(`시그니처: ${spot.signature_items.join(', ')}`);
+      }
+
+      // 가격대
+      if (spot.price_tier) {
+        metaDetails.push(`가격대: ${spot.price_tier}`);
+      }
+
+      // 주차 정보
+      if (spot.parking_type) {
+        metaDetails.push(`주차: ${spot.parking_type}`);
+      }
+
+      return `- ${spot.slotLabel}: ${spot.name} (${metaDetails.join(' | ')})`;
+    })
     .join('\n');
 }
 
 function buildUserPrompt(spots: SpotInput[], mood: string): string {
   const moodLabel = MOOD_LABELS[mood] || mood;
-  return `[스팟 리스트 — 슬롯과 카테고리를 반드시 참고하세요]\n${buildSpotDescriptions(spots)}\n\n[무드 테마]: ${moodLabel}\n\n위 장소들의 실제 카테고리와 무드 테마에 맞춰, 매거진 에디터가 추천하는 듯한 감각적인 2~3줄 코스 스토리와 데이트 팁을 작성해주세요.`;
+  return `[스팟 리스트 — 슬롯, 카테고리 및 v4.0 메타데이터를 참고하세요]\n${buildSpotDescriptions(spots)}\n\n[무드 테마]: ${moodLabel}\n\n위 장소들의 실제 카테고리와 v4.0 메타데이터(블루리본/미쉐린, 시그니처 메뉴, 발렛/주차 팁 등)를 적절히 녹여내어, 매거진 에디터가 추천하는 듯한 실용적이고 감각적인 2~3줄 코스 스토리와 데이트 팁을 작성해주세요.`;
 }
 
 // ---------------------------------------------------------------------------

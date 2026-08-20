@@ -690,7 +690,26 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
   ];
   const targetText = targetParts.join(' ').toLowerCase();
 
-  // 3. 퀵 태그 동의어 풀 매칭 검사
+  // 3. 자연어 데이트 상황 및 퀵 태그 동의어 매칭 검사
+  const NATURAL_CONTEXT_MAP: Record<string, string[]> = {
+    '비': ['실내', '스파', '카페', '전시', '미술관', '아쿠아리움', '공방', '영화'],
+    '비오는날': ['실내', '스파', '카페', '전시', '미술관', '아쿠아리움', '공방', '영화'],
+    '비오는': ['실내', '스파', '카페', '전시', '미술관', '아쿠아리움', '공방', '영화'],
+    '실내': ['실내', '스파', '전시', '미술관', '아쿠아리움', '공방', '도자기', '향수'],
+    '기념일': ['럭셔리', '파인다이닝', '오마카세', '와인바', '야경', '호텔', '뷰'],
+    '소개팅': ['파스타', '이탈리안', '와인바', '조용한', '카페', '디저트'],
+    '드라이브': ['뷰', '오션뷰', '루프탑', '외곽', '호수', '전망대', '남양주', '가평', '양평'],
+    '가성비': ['₩', '₩₩', '무료', '공원', '산책'],
+  };
+
+  for (const [kw, syns] of Object.entries(NATURAL_CONTEXT_MAP)) {
+    if (cleanQ.includes(kw)) {
+      if (syns.some((syn) => targetText.includes(syn.toLowerCase()))) {
+        return true;
+      }
+    }
+  }
+
   const matchedQuickTag = POPULAR_QUICK_TAGS.find(
     (t) =>
       cleanQ.includes(t.query.toLowerCase()) ||
@@ -1118,12 +1137,18 @@ interface AiBriefingSpot {
   name: string;
   category: string;
   summary: string;
+  location?: string;
+  parking_type?: string;
+  price_tier?: string;
+  signature_items?: string[];
+  curation_badges?: import('./supabase').CurationBadges;
 }
 
 /**
- * Supabase Edge Function(ai-briefing) 프록시를 통해 AI 에디터 코스 브리핑 한 줄 생성
- * 프롬프트·모델·API 키는 전부 서버가 보유하며, 호출 실패 시 null을 반환하여
- * 로컬 템플릿(generateCourseStory) 폴백에 위임하고 기존 텍스트의 불필요한 깜빡임을 방지한다
+ * Supabase Edge Function(ai-briefing) 프록시를 통해 AI 에디터 코스 브리핑 생성
+ * 프롬프트·모델·API 키는 전부 서버가 보유하며, v4.0 메타데이터(주차, 가격대, 시그니처 메뉴, 블루리본/미쉐린 인증)를
+ * 서버로 안전하게 전달하여 고감도 에디토리얼 브리핑을 생성한다.
+ * 호출 실패 시 null을 반환하여 로컬 템플릿(generateCourseStory) 폴백에 위임한다.
  */
 async function fetchAiBriefing(
   steps: CourseStep[],
@@ -1146,11 +1171,23 @@ async function fetchAiBriefing(
   for (const st of filled) {
     const s = byId.get(st.spotId);
     if (!s) continue;
+
+    let parking = s.parking_type || '';
+    if (!parking && s.parking_info?.type) {
+      const pType = s.parking_info.type;
+      parking = pType === 'valet' ? '발렛' : pType === 'free' ? '무료주차' : pType === 'paid' ? '유료주차' : '';
+    }
+
     spots.push({
       slot: SLOT_META[st.slot].label,
       name: s.name,
       category: s.category || '',
       summary: s.summary || '',
+      location: s.area || s.location || '',
+      parking_type: parking || undefined,
+      price_tier: s.price_tier || undefined,
+      signature_items: Array.isArray(s.signature_items) && s.signature_items.length > 0 ? s.signature_items.slice(0, 3) : undefined,
+      curation_badges: s.curation_badges && Object.keys(s.curation_badges).length > 0 ? s.curation_badges : undefined,
     });
   }
   if (spots.length === 0) return null;
@@ -1187,7 +1224,7 @@ async function fetchAiBriefing(
 
 /**
  * 완성된 코스의 슬롯별 스팟들을 종합 분석하여 감성 매거진 에디토리얼 스타일의 10가지 다채로운 브리핑 생성
- * 단순 나열식 문형을 완전히 탈피하고, 공간의 질감, 빛의 흐름, 감정선 중심의 10대 고감도 스타일 템플릿 적용
+ * v4.0 메타데이터(블루리본/미쉐린 인증, 시그니처 메뉴, 발렛/주차 편의, 가격대)를 반영한 스마트 폴백 템플릿
  */
 function generateCourseStory(
   steps: CourseStep[],
@@ -1218,12 +1255,36 @@ function generateCourseStory(
   if (filled.length === 1) {
     const s = filled[0];
     const spot = byId.get(s.spotId)!;
+    const badge = spot.curation_badges?.blue_ribbon
+      ? '블루리본 서베이가 인정한 '
+      : spot.curation_badges?.michelin
+      ? '미쉐린 가이드에 선정된 '
+      : '';
+    const sig = spot.signature_items && spot.signature_items.length > 0
+      ? `대표 시그니처(${spot.signature_items[0]})와 함께 `
+      : '';
     const singleStyles = [
-      `남다른 감각과 무드가 돋보이는 ${wrap(spot.name)}에서 오롯이 둘만의 시간에 집중해보세요.`,
-      `공간 그 자체로 특별한 영감을 전하는 ${wrap(spot.name)}에서의 여유로운 순간이에요.`,
-      `취향을 섬세하게 어루만지는 ${wrap(spot.name)}에서 잊지 못할 여운을 만끽해보세요.`,
+      `${badge}남다른 감각과 무드가 돋보이는 ${wrap(spot.name)}에서 ${sig}오롯이 둘만의 시간에 집중해보세요.`,
+      `공간 그 자체로 특별한 영감을 전하는 ${wrap(spot.name)}에서의 여유롭고 감각적인 순간이에요.`,
+      `취향을 섬세하게 어루만지는 ${wrap(spot.name)}에서 잊지 못할 깊은 여운을 만끽해보세요.`,
     ];
     return singleStyles[idSum % singleStyles.length];
+  }
+
+  // v4.0 메타데이터 하이라이트 팁 (블루리본/미쉐린, 시그니처 메뉴, 발렛/주차)
+  const allSpots = [day, eve, night, stay].filter((sp): sp is Spot => Boolean(sp));
+  const gourmetSpot = allSpots.find((sp) => sp.curation_badges?.blue_ribbon || sp.curation_badges?.michelin);
+  const valetSpot = allSpots.find((sp) => sp.parking_type?.includes('발렛') || sp.parking_info?.type === 'valet');
+  const signatureSpot = allSpots.find((sp) => sp.signature_items && sp.signature_items.length > 0);
+
+  let metaTip = '';
+  if (gourmetSpot) {
+    const badgeLabel = gourmetSpot.curation_badges?.michelin ? '미쉐린 가이드' : '블루리본 서베이';
+    metaTip = ` ${badgeLabel} 인증을 받은 ${wrap(gourmetSpot.name)}의 정갈한 미식이 코스의 깊이를 더해줘요.`;
+  } else if (valetSpot) {
+    metaTip = ` ${wrap(valetSpot.name)}의 편리한 발렛 주차 지원으로 드라이브 데이트도 한결 여유로워요.`;
+  } else if (signatureSpot && signatureSpot.signature_items && signatureSpot.signature_items.length > 0) {
+    metaTip = ` ${wrap(signatureSpot.name)}에서는 대표 시그니처인 ${signatureSpot.signature_items[0]}을(를) 추천해요.`;
   }
 
   const moodClosing: Record<string, string> = {
@@ -1248,19 +1309,19 @@ function generateCourseStory(
       if (eve) parts.push(`${wrap(eve.name)}에서 마주하는 정갈한 미식`);
       if (night) parts.push(`${wrap(night.name)}의 은은한 조명 아래 낭만으로 물드는 밤`);
       if (stay) parts.push(`${wrap(stay.name)}에서 누리는 아늑한 여운`);
-      return `${parts.join(', ')} — 두 사람의 템포에 꼭 맞춘 특별한 하루예요.`;
+      return `${parts.join(', ')} — 두 사람의 템포에 꼭 맞춘 특별한 하루예요.${metaTip ? metaTip : ''}`;
     }
 
     // 1. 에디토리얼 스토리텔링형 (Sensory Narrative)
     case 1: {
       if (day && eve && night) {
-        return `${wrap(day.name)}에서 나누는 설레는 대화가 ${wrap(eve.name)}의 근사한 테이블로, 그리고 ${wrap(night.name)}의 감미로운 무드로 자연스레 젖어드는 완벽한 여정이에요.`;
+        return `${wrap(day.name)}에서 나누는 설레는 대화가 ${wrap(eve.name)}의 근사한 테이블로, 그리고 ${wrap(night.name)}의 감미로운 무드로 자연스레 젖어드는 완벽한 여정이에요.${metaTip}`;
       }
       if (day && eve) {
-        return `${wrap(day.name)}의 여유로운 감성에서 시작해 ${wrap(eve.name)}의 황홀한 맛으로 이어지는 감각적인 데이트예요.`;
+        return `${wrap(day.name)}의 여유로운 감성에서 시작해 ${wrap(eve.name)}의 황홀한 맛으로 이어지는 감각적인 데이트예요.${metaTip}`;
       }
       if (eve && night) {
-        return `${wrap(eve.name)}의 로맨틱한 식사 뒤에 ${wrap(night.name)}에서 깊어가는 밤의 정취를 온전히 누려보세요.`;
+        return `${wrap(eve.name)}의 로맨틱한 식사 뒤에 ${wrap(night.name)}에서 깊어가는 밤의 정취를 온전히 누려보세요.${metaTip}`;
       }
       break;
     }
@@ -1272,7 +1333,7 @@ function generateCourseStory(
       if (eve) segments.push(`${wrap(eve.name)}에서 나누는 특별한 한 끼`);
       if (night) segments.push(`${wrap(night.name)}에서 이어지는 둘만의 밀도 높은 대화`);
       if (stay) segments.push(`${wrap(stay.name)}에서의 온전한 쉼`);
-      return `${segments.join(', ')}. ${defaultClosing}`;
+      return `${segments.join(', ')}. ${metaTip ? metaTip.trim() : defaultClosing}`;
     }
 
     // 3. 시적 계절감 & 빛의 흐름형 (Lyrical Light & Shadow)
@@ -1282,7 +1343,7 @@ function generateCourseStory(
       if (eve) lights.push(`노을빛 아래 그윽해지는 ${wrap(eve.name)}`);
       if (night) lights.push(`달빛 아래 잔잔한 속삭임이 맴도는 ${wrap(night.name)}`);
       if (stay) lights.push(`별빛을 마주하는 ${wrap(stay.name)}`);
-      return `${lights.join('부터 ')}까지, 시간의 결을 따라 물드는 로맨틱한 하루예요.`;
+      return `${lights.join('부터 ')}까지, 시간의 결을 따라 물드는 로맨틱한 하루예요.${metaTip}`;
     }
 
     // 4. 취향 & 큐레이션 찬사형 (Curated Taste)
@@ -1292,7 +1353,7 @@ function generateCourseStory(
       if (eve) tastes.push(`${wrap(eve.name)}의 섬세한 요리`);
       if (night) tastes.push(`${wrap(night.name)}의 아늑한 온기`);
       if (stay) tastes.push(`${wrap(stay.name)}의 편안한 휴식`);
-      return `${tastes.join('와 ')}가 조화롭게 어우러져 두 사람의 취향을 온전히 만족시킬 셀렉션이에요.`;
+      return `${tastes.join('와 ')}가 조화롭게 어우러져 두 사람의 취향을 온전히 만족시킬 셀렉션이에요.${metaTip}`;
     }
 
     // 5. 일상 탈출 & 몰입형 (Urban Sanctuary)
@@ -1302,19 +1363,19 @@ function generateCourseStory(
       if (eve) escapes.push(`${wrap(eve.name)}의 깊은 풍미`);
       if (night) escapes.push(`${wrap(night.name)}의 은은한 밤공기`);
       if (stay) escapes.push(`${wrap(stay.name)}에서의 하룻밤`);
-      return `도심의 소음을 벗어나 ${escapes.join(', 그리고 ')}에 오롯이 빠져보는 낭만적인 시간이에요.`;
+      return `도심의 소음을 벗어나 ${escapes.join(', 그리고 ')}에 오롯이 빠져보는 낭만적인 시간이에요.${metaTip}`;
     }
 
     // 6. 시네마틱 모먼트형 (Cinematic Moments)
     case 6: {
       if (day && eve && night) {
-        return `${wrap(day.name)}의 기분 좋은 시작, ${wrap(eve.name)}에서 마주하는 설레는 순간, ${wrap(night.name)}의 감미로운 음악이 더해져 영화 속 한 장면처럼 기억될 코스예요.`;
+        return `${wrap(day.name)}의 기분 좋은 시작, ${wrap(eve.name)}에서 마주하는 설레는 순간, ${wrap(night.name)}의 감미로운 음악이 더해져 영화 속 한 장면처럼 기억될 코스예요.${metaTip}`;
       }
       if (day && eve) {
-        return `${wrap(day.name)}에서 빚어낸 미소와 ${wrap(eve.name)}에서의 로맨틱한 순간이 오래도록 마음에 남을 데이트예요.`;
+        return `${wrap(day.name)}에서 빚어낸 미소와 ${wrap(eve.name)}에서의 로맨틱한 순간이 오래도록 마음에 남을 데이트예요.${metaTip}`;
       }
       if (eve && night) {
-        return `${wrap(eve.name)}의 황홀한 테이블과 ${wrap(night.name)}의 반짝이는 밤 풍경이 한 편의 영화처럼 이어져요.`;
+        return `${wrap(eve.name)}의 황홀한 테이블과 ${wrap(night.name)}의 반짝이는 밤 풍경이 한 편의 영화처럼 이어져요.${metaTip}`;
       }
       break;
     }
@@ -1326,17 +1387,17 @@ function generateCourseStory(
       if (eve) spots.push(`정성 어린 요리가 있는 ${wrap(eve.name)}`);
       if (night) spots.push(`시간이 멈춘 듯 아늑한 ${wrap(night.name)}`);
       if (stay) spots.push(`프라이빗한 쉼터 ${wrap(stay.name)}`);
-      return `${spots.join(', ')}에서 다른 누구에게도 방해받지 않는 둘만의 온기를 느껴보세요.`;
+      return `${spots.join(', ')}에서 다른 누구에게도 방해받지 않는 둘만의 온기를 느껴보세요.${metaTip}`;
     }
 
     // 8. 오감 자극 미식 & 감성형 (Sensory Symphony)
     case 8: {
       const senses: string[] = [];
       if (day) senses.push(`${wrap(day.name)}의 향긋한 티타임`);
-      if (eve) senses.push(`${wrap(eve.name)}에서 터져 나오는 풍성한 미식`);
+      if (eve) senses.push(`${wrap(eve.name)}에서 느껴지는 정갈한 미식`);
       if (night) senses.push(`${wrap(night.name)}의 감미로운 한잔`);
       if (stay) senses.push(`${wrap(stay.name)}의 포근한 침구`);
-      return `${senses.join('과 ')}으로 오감이 충만해지는 감각적인 코스예요 ✨`;
+      return `${senses.join('과 ')}으로 두 사람의 하루를 기분 좋게 채워줄 감각적인 코스예요 ✨${metaTip}`;
     }
 
     // 9. 기억 & 영원성형 (Everlasting Memory)
@@ -1347,7 +1408,7 @@ function generateCourseStory(
       if (eve) memories.push(`${wrap(eve.name)}의 따뜻한 식탁`);
       if (night) memories.push(`${wrap(night.name)}의 깊은 밤하늘`);
       if (stay) memories.push(`${wrap(stay.name)}의 고요한 아침`);
-      return `${memories.join('가 ')} 하나로 이어져, 두 사람에게 가장 소중한 계절의 한 페이지로 기록될 여정이에요.`;
+      return `${memories.join('가 ')} 하나로 이어져, 두 사람에게 가장 소중한 계절의 한 페이지로 기록될 여정이에요.${metaTip}`;
     }
   }
 
@@ -1355,7 +1416,7 @@ function generateCourseStory(
   const firstSpot = byId.get(filled[0].spotId);
   const lastSpot = byId.get(filled[filled.length - 1].spotId);
   if (firstSpot && lastSpot) {
-    return `${wrap(firstSpot.name)}부터 ${wrap(lastSpot.name)}까지 감각적인 무드가 자연스럽게 흐르는 완벽한 데이트예요.`;
+    return `${wrap(firstSpot.name)}부터 ${wrap(lastSpot.name)}까지 감각적인 무드가 자연스럽게 흐르는 완벽한 데이트예요.${metaTip}`;
   }
   return '두 사람의 취향을 온전히 담아낸 프라이빗 데이트 코스예요.';
 }
@@ -1406,7 +1467,7 @@ async function formatCourseTextAsync(
     lines.push(`• 위치: ${spot.address || spot.location}`);
     lines.push(`• 소개: ${summary}`);
     lines.push(`• 지도: ${shortMapUrl}`);
-    if (spot.social_links?.youtube?.url) {
+    if (spot.social_links?.youtube?.url && (spot.social_links.youtube.views || 0) >= 10000) {
       const shortYt = await shortenUrl(spot.social_links.youtube.url);
       lines.push(`• 영상: ${shortYt}`);
     }
@@ -1569,7 +1630,7 @@ function activeSlots(): SlotKey[] {
 }
 
 declare const __APP_VERSION__: string;
-const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.9.0';
+const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.9.1';
 
 function courseSpotIds(): number[] {
   if (!state.course) return [];
@@ -2123,10 +2184,14 @@ function renderResults(): void {
     <div class="step-list">
       ${state.course.map((step, i) => {
         const card = renderStepCard(step, i, { usedImages });
+        let html = card;
         if (i === 1 && state.course && state.course.length >= 3) {
-          return card + renderNativeInfeedAdCard();
+          html += renderNativeInfeedAdCard();
         }
-        return card;
+        if (state.course && i < state.course.length - 1) {
+          html += renderStepTransitDivider(step, state.course[i + 1]);
+        }
+        return html;
       }).join('')}
     </div>
     <div class="result-actions result-actions-3">
@@ -2362,6 +2427,64 @@ function isSuperHotSpot(spot: Spot): boolean {
   return false;
 }
 
+/** 스팟 간 이동 동선 및 원터치 길찾기 딥링크 디바이더 렌더링 */
+function renderStepTransitDivider(prevStep: CourseStep, nextStep: CourseStep): string {
+  if (!prevStep || !nextStep || prevStep.spotId === null || nextStep.spotId === null) {
+    return '';
+  }
+  const s1 = spotById.get(prevStep.spotId);
+  const s2 = spotById.get(nextStep.spotId);
+  if (!s1 || !s2) return '';
+
+  let distanceText = '';
+  let timeText = '';
+  let icon = '🚶‍♂️';
+
+  if (s1.lat && s1.lng && s2.lat && s2.lng) {
+    const dist = getDistanceKm(s1.lat, s1.lng, s2.lat, s2.lng);
+    if (dist < 1.0) {
+      const meters = Math.round(dist * 1000);
+      const walkMin = Math.max(1, Math.round(dist * 15));
+      distanceText = `${meters}m`;
+      timeText = `도보 약 ${walkMin}분`;
+      icon = '🚶‍♂️';
+    } else if (dist < 30.0) {
+      const carMin = Math.max(3, Math.round((dist / 25) * 60 + 3));
+      distanceText = `${dist.toFixed(1)}km`;
+      timeText = `차량·이동 약 ${carMin}분`;
+      icon = '🚗';
+    } else {
+      const hours = (dist / 60).toFixed(1);
+      distanceText = `${dist.toFixed(0)}km`;
+      timeText = `차량 약 ${hours}시간`;
+      icon = '🚗';
+    }
+  } else {
+    timeText = '다음 코스로 이동';
+    icon = '📍';
+  }
+
+  // 카카오맵 길찾기 딥링크 URL
+  const naviUrl = s2.lat && s2.lng 
+    ? `https://map.kakao.com/link/to/${encodeURIComponent(s2.name)},${s2.lat},${s2.lng}`
+    : naverMapUrl(s2);
+
+  return `
+    <div class="step-transit-divider">
+      <div class="step-transit-line"></div>
+      <div class="step-transit-badge">
+        <span class="step-transit-icon">${icon}</span>
+        <span class="step-transit-time">${escapeHtml(timeText)}</span>
+        ${distanceText ? `<span class="step-transit-dist">(${escapeHtml(distanceText)})</span>` : ''}
+        <a class="step-transit-navi-btn" href="${escapeHtml(naviUrl)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(s2.name)} 길찾기">
+          <span>🧭 길찾기</span>
+        </a>
+      </div>
+      <div class="step-transit-line"></div>
+    </div>
+  `;
+}
+
 function renderStepCard(
   step: CourseStep,
   index: number,
@@ -2469,7 +2592,8 @@ function renderStepCard(
           ${swappable ? `<button class="btn-action-icon btn-swap-icon" data-step-index="${index}" aria-label="다시 추천" title="다시 추천">${ICON_SWAP_SVG}</button>` : ''}
           ${(() => {
             const yt = spot.social_links?.youtube?.url;
-            if (!yt) return '';
+            const views = spot.social_links?.youtube?.views;
+            if (!yt || !views || views < 10000) return '';
             return `<a class="btn-action-icon btn-yt-icon" href="${escapeHtml(yt)}" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube">${ICON_YOUTUBE_SVG}</a>`;
           })()}
           ${(() => {
