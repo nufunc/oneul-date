@@ -1558,7 +1558,7 @@ function renderUserOriginTransitDivider(firstStep: CourseStep): string {
         <span class="step-transit-icon">🚩 ${icon}</span>
         <span class="step-transit-time">내 위치 출발 · ${escapeHtml(timeText)}</span>
         <span class="step-transit-dist">(${escapeHtml(distanceText)})</span>
-        <a class="step-transit-navi-btn" href="${escapeHtml(naviUrl)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(s.name)} 길찾기">
+        <a class="step-transit-navi-btn" href="${escapeHtml(naviUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(s.name)} 길찾기">
           <span>🧭 길찾기</span>
         </a>
       </div>
@@ -1821,9 +1821,9 @@ function renderShell(): void {
 
   app.innerHTML = `
     <header class="topbar">
-      <h1 class="app-title"><a href="#" class="app-title-link" id="brand-home-link" title="홈으로 이동">오늘 데이트</a></h1>
+      <h1 class="app-title"><a href="#" class="app-title-link" id="brand-home-link" aria-label="오늘 데이트 홈으로 이동">오늘 데이트</a></h1>
       <div class="topbar-actions">
-        <button class="btn-theme-toggle" id="btn-theme-toggle" title="테마 변경 (낮/밤/시스템)">${getThemeModeLabel(state.themeMode)}</button>
+        <button class="btn-theme-toggle" id="btn-theme-toggle" aria-label="테마 변경">${getThemeModeLabel(state.themeMode)}</button>
         <button class="btn-saved" id="btn-open-saved">저장한 코스</button>
       </div>
     </header>
@@ -2524,7 +2524,7 @@ function renderStepTransitDivider(prevStep: CourseStep, nextStep: CourseStep): s
         <span class="step-transit-icon">${icon}</span>
         <span class="step-transit-time">${escapeHtml(timeText)}</span>
         ${distanceText ? `<span class="step-transit-dist">(${escapeHtml(distanceText)})</span>` : ''}
-        <a class="step-transit-navi-btn" href="${escapeHtml(naviUrl)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(s2.name)} 길찾기">
+        <a class="step-transit-navi-btn" href="${escapeHtml(naviUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(s2.name)} 길찾기">
           <span>🧭 길찾기</span>
         </a>
       </div>
@@ -2578,16 +2578,16 @@ function renderStepCard(
   // v4.0 큐레이션 뱃지
   const curationBadges: string[] = [];
   if (spot.curation_badges?.blue_ribbon) {
-    curationBadges.push(`<span class="badge-curation badge-blueribbon" title="블루리본 서베이 인증 맛집">🎀 블루리본</span>`);
+    curationBadges.push(`<span class="badge-curation badge-blueribbon">🎀 블루리본</span>`);
   }
   if (spot.curation_badges?.michelin) {
-    curationBadges.push(`<span class="badge-curation badge-michelin" title="미쉐린 가이드 선정">⭐ 미쉐린</span>`);
+    curationBadges.push(`<span class="badge-curation badge-michelin">⭐ 미쉐린</span>`);
   }
   if (spot.curation_badges?.tour_api) {
-    curationBadges.push(`<span class="badge-curation badge-tourapi" title="한국관광공사 공인 명소">🏛️ 관광공사</span>`);
+    curationBadges.push(`<span class="badge-curation badge-tourapi">🏛️ 관광공사</span>`);
   }
   if (spot.curation_badges?.catchtable) {
-    curationBadges.push(`<span class="badge-curation badge-catchtable" title="캐치테이블 인기 예약 다이닝">🍷 캐치테이블</span>`);
+    curationBadges.push(`<span class="badge-curation badge-catchtable">🍷 캐치테이블</span>`);
   }
 
   // v4.0 주차 & 가격 메타 뱃지
@@ -2610,7 +2610,7 @@ function renderStepCard(
 
   const thumbHtml = `
     <div class="step-thumb-col">
-      ${isHot ? `<span class="badge-hot-floating" title="SNS와 플랫폼에서 검증된 화제의 핫플레이스예요 🔥">🔥 핫플</span>` : ''}
+      ${isHot ? `<span class="badge-hot-floating">🔥 핫플</span>` : ''}
       <div class="step-fallback-box">${fallbackIcon}</div>
       <img class="step-thumb-img" src="${escapeHtml(targetImgUrl)}" alt="${escapeHtml(spot.name)}" loading="lazy" referrerpolicy="no-referrer" onload="this.classList.add('is-loaded');" onerror="this.classList.add('is-hidden'); this.previousElementSibling?.classList.add('is-active');" />
     </div>`;
@@ -2626,7 +2626,7 @@ function renderStepCard(
         <div class="step-content-col">
           <h3 class="step-name">
             <span>${escapeHtml(spot.name)}</span>
-            ${spot.verified ? `<span class="icon-verified-badge" title="에디터가 직접 검증한 데이트 장소예요 ✨" aria-label="검증된 데이트 장소">${ICON_VERIFIED_CHECK_SVG}</span>` : ''}
+            ${spot.verified ? `<span class="icon-verified-badge" aria-label="검증된 데이트 장소">${ICON_VERIFIED_CHECK_SVG}</span>` : ''}
           </h3>
           ${curationBadges.length > 0 ? `<div class="step-curation-row">${curationBadges.join('')}</div>` : ''}
           <p class="step-location">📍 ${escapeHtml(spot.location)}</p>
@@ -2637,33 +2637,33 @@ function renderStepCard(
       </div>
       <div class="step-actions-bar">
         <div class="step-actions-icons">
-          ${swappable ? `<button class="btn-action-icon btn-swap-icon" data-step-index="${index}" aria-label="다시 추천" title="다시 추천">${ICON_SWAP_SVG}</button>` : ''}
+          ${swappable ? `<button class="btn-action-icon btn-swap-icon" data-step-index="${index}" aria-label="다시 추천">${ICON_SWAP_SVG}</button>` : ''}
           ${(() => {
             const yt = spot.social_links?.youtube;
             if (!yt?.url) return '';
             const meetsCriteria = (yt.views || 0) >= 10000 || (yt.likes || 0) >= 500;
             if (!meetsCriteria) return '';
-            return `<a class="btn-action-icon btn-yt-icon" href="${escapeHtml(yt.url)}" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube">${ICON_YOUTUBE_SVG}</a>`;
+            return `<a class="btn-action-icon btn-yt-icon" href="${escapeHtml(yt.url)}" target="_blank" rel="noopener noreferrer" aria-label="YouTube">${ICON_YOUTUBE_SVG}</a>`;
           })()}
           ${(() => {
             const kakao = spot.social_links?.kakaomap?.url;
             if (!kakao) return '';
-            return `<a class="btn-action-icon btn-kakao-icon" href="${escapeHtml(kakao)}" target="_blank" rel="noopener noreferrer" aria-label="카카오맵" title="카카오맵">${ICON_KAKAO_SVG}</a>`;
+            return `<a class="btn-action-icon btn-kakao-icon" href="${escapeHtml(kakao)}" target="_blank" rel="noopener noreferrer" aria-label="카카오맵">${ICON_KAKAO_SVG}</a>`;
           })()}
           ${(() => {
             const insta = getRealInstagramUrl(spot);
             if (!insta) return '';
-            return `<a class="btn-action-icon btn-insta-icon" href="${escapeHtml(insta)}" target="_blank" rel="noopener noreferrer" aria-label="인스타그램" title="인스타그램">${ICON_INSTA_SVG}</a>`;
+            return `<a class="btn-action-icon btn-insta-icon" href="${escapeHtml(insta)}" target="_blank" rel="noopener noreferrer" aria-label="인스타그램">${ICON_INSTA_SVG}</a>`;
           })()}
           ${(() => {
             const blog = getRealBlogUrl(spot);
             if (!blog) return '';
-            return `<a class="btn-action-icon btn-blog-icon" href="${escapeHtml(blog)}" target="_blank" rel="noopener noreferrer" aria-label="블로그" title="블로그">${ICON_BLOG_SVG}</a>`;
+            return `<a class="btn-action-icon btn-blog-icon" href="${escapeHtml(blog)}" target="_blank" rel="noopener noreferrer" aria-label="블로그">${ICON_BLOG_SVG}</a>`;
           })()}
         </div>
         <div class="step-actions-right">
-          ${bookingUrl ? `<a class="step-book-chip" href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" title="캐치테이블/실시간 예약"><span>📅 예약</span></a>` : ''}
-          <a class="step-map-chip" href="${naverMapUrl(spot)}" target="_blank" rel="noopener noreferrer" title="네이버 지도">
+          ${bookingUrl ? `<a class="step-book-chip" href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" aria-label="캐치테이블 실시간 예약"><span>📅 예약</span></a>` : ''}
+          <a class="step-map-chip" href="${naverMapUrl(spot)}" target="_blank" rel="noopener noreferrer" aria-label="네이버 지도">
             ${ICON_NAVER_MAP_SVG}
             <span>지도</span>
           </a>
@@ -2900,7 +2900,7 @@ function renderReceiverView(steps: CourseStep[]): void {
 
   app.innerHTML = `
     <header class="topbar">
-      <h1 class="app-title"><a href="#" class="app-title-link" id="receiver-home-link" title="홈으로 이동">오늘 데이트</a></h1>
+      <h1 class="app-title"><a href="#" class="app-title-link" id="receiver-home-link" aria-label="오늘 데이트 홈으로 이동">오늘 데이트</a></h1>
     </header>
     <section class="receiver-view">
       <p class="receiver-title">✨ 친구가 보낸 데이트 코스</p>
