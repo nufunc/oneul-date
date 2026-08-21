@@ -734,6 +734,10 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
     '오마카세': ['스시', '한우', '오마카세', '일식', '다이닝', '코스요리'],
     '반려동물': ['반려', '애견', '펫', '동반', '야외', '테라스', '공원'],
     '애견': ['반려', '애견', '펫', '동반', '야외', '테라스', '공원'],
+    '호텔': ['호텔', '스테이', '호캉스', '리조트', '라운지', '스파', '다이닝', '오크우드', '하얏트', '메리어트', '시그니엘', '신라', '조선'],
+    '호캉스': ['호텔', '스테이', '호캉스', '리조트', '라운지', '수영장', '카바나', '스파', '하얏트', '메리어트', '시그니엘', '신라'],
+    '숙소': ['호텔', '스테이', '리조트', '펜션', '글램핑', '한옥', '게스트하우스', '숙박'],
+    '글램핑': ['글램핑', '캠핑', '캠크닉', '카라반', '야영'],
   };
 
   for (const [kw, syns] of Object.entries(NATURAL_CONTEXT_MAP)) {
@@ -792,14 +796,31 @@ function generateCourse(
   let anchorSlot: SlotKey | null = null;
   let anchorPool: Spot[] = [];
 
-  // 1. 검색어가 있는 경우: 검색어 매칭 스팟을 보유한 슬롯 중 앵커 후보 우선 탐색
+  // 1. 검색어가 있는 경우: 검색어 매칭 스팟을 보유한 슬롯 중 앵커 후보 최우선 탐색 (분위기 제약 완화)
   if (query) {
+    // 1-1. 현재 활성화된 슬롯 중에서 매칭 스팟 탐색
     for (const slot of slotsOn) {
-      const candidates = excludeRecent(getCandidates(all, slot, regionKeys, moodKey, [], zoneKeys), avoid);
+      // 검색어가 있을 때는 mood 제약 없이 해당 지역/존의 스팟 풀에서 폭넓게 검색
+      const candidates = excludeRecent(getCandidates(all, slot, regionKeys, 'ALL', [], zoneKeys), avoid);
       const matched = candidates.filter((s) => matchesSearchQuery(s, query));
       if (matched.length > 0 && (anchorSlot === null || matched.length < anchorPool.length)) {
         anchorSlot = slot;
         anchorPool = matched;
+      }
+    }
+
+    // 1-2. 현재 활성 슬롯에서 못 찾았으나 전체 슬롯(stay 포함) 중 매칭 스팟이 있는 경우
+    if (anchorPool.length === 0) {
+      for (const slot of SLOT_ORDER) {
+        const candidates = excludeRecent(getCandidates(all, slot, regionKeys, 'ALL', [], zoneKeys), avoid);
+        const matched = candidates.filter((s) => matchesSearchQuery(s, query));
+        if (matched.length > 0 && (anchorSlot === null || matched.length < anchorPool.length)) {
+          anchorSlot = slot;
+          anchorPool = matched;
+          if (!slotsOn.includes(slot)) {
+            slotsOn.push(slot);
+          }
+        }
       }
     }
   }
@@ -2311,6 +2332,14 @@ function bindConditionEvents(area: HTMLElement): void {
 }
 
 function triggerCourseGeneration(): void {
+  // 숙박 키워드(호텔, 숙소, 호캉스, 리조트, 펜션, 글램핑) 검색 시 stay 슬롯 자동 활성화
+  if (state.searchQuery && /호텔|숙소|숙박|호캉스|리조트|펜션|글램핑|스테이|모텔/.test(state.searchQuery)) {
+    if (!state.slots.stay) {
+      state.slots.stay = true;
+      renderConditions();
+    }
+  }
+
   const slotsOn = activeSlots();
   if (slotsOn.length === 0) {
     showToast('시간대를 하나 이상 선택해 주세요');
@@ -2880,6 +2909,13 @@ function renderStepCard(
     <article class="step-card has-image">
       <div class="step-card-head">
         <div class="step-slot">${meta.emoji} ${meta.label}</div>
+        ${(() => {
+          const currentQ = state.courseConditions?.searchQuery || state.searchQuery;
+          if (currentQ && matchesSearchQuery(spot, currentQ)) {
+            return `<span class="badge-search-match" style="display:inline-flex;align-items:center;gap:3px;font-size:0.72rem;font-weight:700;color:#0284c7;background:rgba(2,132,199,0.12);padding:2px 8px;border-radius:12px;border:1px solid rgba(2,132,199,0.25);">🔍 ${escapeHtml(currentQ)} 추천</span>`;
+          }
+          return '';
+        })()}
         ${themeText ? `<span class="step-slot-theme">${escapeHtml(themeText)}</span>` : ''}
       </div>
       <div class="step-card-split">
