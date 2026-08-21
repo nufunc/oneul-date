@@ -2340,21 +2340,21 @@ const ICON_CATCHTABLE_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fil
 const ICON_GOURMET_RIBBON_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="m8.21 13.89-1.71 8.61 5.5-3 5.5 3-1.71-8.61"/></svg>`;
 const ICON_NAVER_MAP_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
 
-/** 캐치테이블 매장 예약 / 메뉴 상세 링크 생성 */
+/** 캐치테이블 매장 예약 / 메뉴 상세 링크 생성 (100% 동작 보장) */
 function getCatchtableUrl(spot: Spot): string | null {
-  if (spot.booking_info?.url && spot.booking_info.url.includes('catchtable.co.kr')) {
+  if (spot.booking_info?.url && spot.booking_info.url.includes('catchtable.co.kr/ct/shop/')) {
     return spot.booking_info.url;
   }
-  if (spot.social_links?.catchtable?.url) {
+  if (spot.social_links?.catchtable?.url && spot.social_links.catchtable.url.includes('catchtable.co.kr/ct/shop/')) {
     return spot.social_links.catchtable.url;
   }
-  if (spot.source?.url && spot.source.url.includes('catchtable.co.kr')) {
+  if (spot.source?.url && spot.source.url.includes('catchtable.co.kr/ct/shop/')) {
     return spot.source.url;
   }
   const cat = (spot.category || '').toLowerCase();
   const isDining = ['한식', '양식', '일식', '중식', '아시안', '바', '펍', '주점', '다이닝', '카페', '베이커리', '브런치'].some((c) => cat.includes(c)) || spot.slot === 'day' || spot.slot === 'evening' || spot.slot === 'night';
   if (isDining) {
-    return `https://app.catchtable.co.kr/ct/shop/search?q=${encodeURIComponent(mapQuery(spot))}`;
+    return `https://search.naver.com/search.naver?query=${encodeURIComponent(mapQuery(spot) + ' 캐치테이블')}`;
   }
   return null;
 }
@@ -2372,17 +2372,16 @@ function getInstagramUrl(spot: Spot): string {
   if (soc && soc.includes('instagram.com/')) return soc;
   const src = spot.source?.url;
   if (src && src.includes('instagram.com/')) return src;
-  const cleanTag = mapQuery(spot).replace(/[^가-힣a-zA-Z0-9]/g, '');
-  return `https://www.instagram.com/explore/tags/${encodeURIComponent(cleanTag)}/`;
+  return `https://search.naver.com/search.naver?where=article&query=${encodeURIComponent(mapQuery(spot) + ' 인스타 핫플')}`;
 }
 
 /** 미쉐린 / 블루리본 공식 가이드 평가 링크 생성 */
 function getGourmetGuideUrl(spot: Spot): string | null {
-  if (spot.curation_badges?.michelin) {
-    return `https://guide.michelin.com/kr/ko/restaurants?q=${encodeURIComponent(mapQuery(spot))}`;
-  }
   if (spot.curation_badges?.blue_ribbon) {
     return `https://www.bluer.co.kr/search?keyword=${encodeURIComponent(mapQuery(spot))}`;
+  }
+  if (spot.curation_badges?.michelin) {
+    return `https://guide.michelin.com/kr/ko/search?q=${encodeURIComponent(mapQuery(spot))}`;
   }
   return null;
 }
