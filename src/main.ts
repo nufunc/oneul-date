@@ -1241,6 +1241,53 @@ interface AiBriefingSpot {
  * 서버로 안전하게 전달하여 고감도 에디토리얼 브리핑을 생성한다.
  * 호출 실패 시 null을 반환하여 로컬 템플릿(generateCourseStory) 폴백에 위임한다.
  */
+/**
+ * AI 브리핑 및 코스 스토리의 문어체/해라체 종결어미를 감각적이고 다정한 에디토리얼 어조로 자동 교정
+ */
+function normalizeEditorialTone(text: string): string {
+  if (!text) return '';
+
+  let normalized = text
+    .replace(/^["'“”]/, '')
+    .replace(/["'“”]$/, '')
+    .replace(/\*\*/g, '')
+    .trim();
+
+  // 문장 끝 및 문장 중간의 딱딱한 문어체/해라체 종결어미 교정 테이블
+  const replacements: [RegExp, string][] = [
+    [/마무리한다([.!?\s]|$)/g, '마무리하기 좋은 데이트 코스예요!$1'],
+    [/남긴다([.!?\s]|$)/g, '남길 수 있어요.$1'],
+    [/맞이한다([.!?\s]|$)/g, '맞이할 수 있어요.$1'],
+    [/이어간다([.!?\s]|$)/g, '이어져 추천해요!$1'],
+    [/선사한다([.!?\s]|$)/g, '선사해줘요.$1'],
+    [/채운다([.!?\s]|$)/g, '채워보세요.$1'],
+    [/즐긴다([.!?\s]|$)/g, '즐기기 제격이에요.$1'],
+    [/보낸다([.!?\s]|$)/g, '보내보세요.$1'],
+    [/만끽한다([.!?\s]|$)/g, '만끽해보세요.$1'],
+    [/어우러진다([.!?\s]|$)/g, '어우러질 수 있어요.$1'],
+    [/집중한다([.!?\s]|$)/g, '집중해보세요.$1'],
+    [/기억된다([.!?\s]|$)/g, '기억될 거예요.$1'],
+    [/도달한다([.!?\s]|$)/g, '도달할 수 있어요.$1'],
+    [/전달한다([.!?\s]|$)/g, '전해져요.$1'],
+    [/완성한다([.!?\s]|$)/g, '완성해보세요.$1'],
+    [/시작한다([.!?\s]|$)/g, '시작해보세요.$1'],
+    [/이끈다([.!?\s]|$)/g, '이끌어줘요.$1'],
+    [/돋보인다([.!?\s]|$)/g, '돋보여요.$1'],
+    [/느낀다([.!?\s]|$)/g, '느낄 수 있어요.$1'],
+    [/빠져든다([.!?\s]|$)/g, '빠져들 수 있어요.$1'],
+    [/머문다([.!?\s]|$)/g, '머물러보세요.$1'],
+  ];
+
+  for (const [pattern, target] of replacements) {
+    normalized = normalized.replace(pattern, target);
+  }
+
+  // 혹시라도 남아있는 일반 '~한다.' 패턴 처리
+  normalized = normalized.replace(/([가-힣]{2,})한다\./g, '$1해요.');
+
+  return normalized.trim();
+}
+
 async function fetchAiBriefing(
   steps: CourseStep[],
   byId: Map<number, Spot>,
@@ -1251,7 +1298,7 @@ async function fetchAiBriefing(
 
   const cacheKey = `${moodKey}_${filled.map((s) => s.spotId).join('-')}`;
   if (aiStoryCache.has(cacheKey)) {
-    return aiStoryCache.get(cacheKey)!;
+    return normalizeEditorialTone(aiStoryCache.get(cacheKey)!);
   }
 
   if (!AI_BRIEFING_ENABLED) {
@@ -1301,7 +1348,7 @@ async function fetchAiBriefing(
       const data = await res.json();
       const rawText = typeof data?.text === 'string' ? data.text.trim() : '';
       if (rawText.length >= 15) {
-        const cleanText = rawText.replace(/^["'“”]/, '').replace(/["'“”]$/, '').trim();
+        const cleanText = normalizeEditorialTone(rawText);
         aiStoryCache.set(cacheKey, cleanText);
         return cleanText;
       }
@@ -2324,11 +2371,11 @@ function renderResults(): void {
 
   let initialStoryHtml = '';
   if (hasCachedStory) {
-    initialStoryHtml = `“${aiStoryCache.get(cacheKey)!}”`;
+    initialStoryHtml = `“${escapeHtml(normalizeEditorialTone(aiStoryCache.get(cacheKey)!))}”`;
   } else if (AI_BRIEFING_ENABLED) {
     initialStoryHtml = `<span class="ai-loading-pulse">두 사람만을 위한 맞춤 코스 브리핑을 작성하고 있어요...</span>`;
   } else {
-    initialStoryHtml = `“${generateCourseStory(state.course, spotById, cond.mood, true)}”`;
+    initialStoryHtml = `“${normalizeEditorialTone(generateCourseStory(state.course, spotById, cond.mood, true))}”`;
   }
 
   const multiDirectionsUrl = multiCourseDirectionsUrl(state.course, spotById, userCoords);
@@ -2898,7 +2945,7 @@ function swapStep(index: number): void {
     const currentCourse = [...state.course];
 
     if (aiStoryCache.has(cacheKey)) {
-      briefingEl.innerHTML = `“${aiStoryCache.get(cacheKey)!}”`;
+      briefingEl.innerHTML = `“${escapeHtml(normalizeEditorialTone(aiStoryCache.get(cacheKey)!))}”`;
       briefingEl.classList.remove('is-loading');
     } else if (AI_BRIEFING_ENABLED) {
       briefingEl.classList.add('is-loading');
@@ -2909,7 +2956,7 @@ function swapStep(index: number): void {
         // 응답 도착 시점의 코스가 요청 시점과 다르면 무시 (Race condition 방지)
         if (courseSpotIds().join('-') !== currentSpotKey) return;
 
-        const finalText = aiText || generateCourseStory(currentCourse, spotById, mood, false);
+        const finalText = normalizeEditorialTone(aiText || generateCourseStory(currentCourse, spotById, mood, false));
         el.style.opacity = '0';
         setTimeout(() => {
           el.classList.remove('is-loading');
@@ -2918,7 +2965,7 @@ function swapStep(index: number): void {
         }, 100);
       });
     } else {
-      briefingEl.innerHTML = `“${generateCourseStory(currentCourse, spotById, mood, true)}”`;
+      briefingEl.innerHTML = `“${normalizeEditorialTone(generateCourseStory(currentCourse, spotById, mood, true))}”`;
       briefingEl.classList.remove('is-loading');
     }
   }
