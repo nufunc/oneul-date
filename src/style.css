@@ -2875,8 +2875,8 @@ button {
 .step-transit-divider {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin: 14px 0;
+  gap: 8px;
+  margin: -4px 0;
   padding: 0 4px;
   position: relative;
 }
@@ -2890,15 +2890,15 @@ button {
 .step-transit-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 12px;
+  gap: 4px;
+  padding: 3px 10px;
   background: var(--color-surface-sub);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-full);
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: var(--color-text-sub);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
   transition: all 0.2s ease;
 }
 
@@ -2957,8 +2957,8 @@ html:not([data-theme="light"]) .step-transit-navi-btn {
 }
 
 .step-transit-divider.origin-start {
-  margin-top: 4px;
-  margin-bottom: 16px;
+  margin-top: -2px;
+  margin-bottom: 2px;
 }
 
 .step-transit-divider.origin-start .step-transit-badge {
