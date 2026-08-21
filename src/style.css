@@ -72,8 +72,14 @@
    2) html[data-theme="auto"] 또는 설정 없을 때 시스템 다크모드 따름
    ========================================================================== */
 
+/* ==========================================================================
+   다크 모드 (밤 테마) — Linear / GitHub Dark High-Contrast (Midnight Jet Slate)
+   - data-theme="dark" 수동 선택 시 적용
+   - data-theme-resolved="dark" (시스템 다크모드 자동 감지 시) 적용
+   ========================================================================== */
+
 html[data-theme="dark"],
-html:not([data-theme="light"]):not([data-theme="dark"]) {
+html[data-theme-resolved="dark"] {
   --color-bg: #0b0f17;
   --color-surface: #151c28;
   --color-surface-sub: #1e2638;
@@ -103,7 +109,7 @@ html:not([data-theme="light"]):not([data-theme="dark"]) {
 
 /* 야간 전용 배경 앰비언트 */
 html[data-theme="dark"] body,
-html:not([data-theme="light"]):not([data-theme="dark"]) body {
+html[data-theme-resolved="dark"] body {
   background-image: 
     radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.04) 0%, transparent 40%),
     radial-gradient(circle at 85% 85%, rgba(56, 189, 248, 0.04) 0%, transparent 45%);
@@ -111,157 +117,157 @@ html:not([data-theme="light"]):not([data-theme="dark"]) body {
 
 /* 야간 사진 소프트 딤 */
 html[data-theme="dark"] .step-photo img,
-html:not([data-theme="light"]) .step-photo img,
+html[data-theme-resolved="dark"] .step-photo img,
 html[data-theme="dark"] .saved-thumb img,
-html:not([data-theme="light"]) .saved-thumb img {
+html[data-theme-resolved="dark"] .saved-thumb img {
   filter: brightness(0.92) contrast(1.02);
 }
 
 /* 다크모드 메인 CTA 코스 만들기 버튼 시인성 */
 html[data-theme="dark"] .btn-generate,
-html:not([data-theme="light"]) .btn-generate {
+html[data-theme-resolved="dark"] .btn-generate {
   background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
   color: #ffffff !important;
   box-shadow: 0 4px 18px rgba(2, 132, 199, 0.35);
 }
 
 html[data-theme="dark"] .btn-generate:hover,
-html:not([data-theme="light"]) .btn-generate:hover {
+html[data-theme-resolved="dark"] .btn-generate:hover {
   background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
   box-shadow: 0 6px 24px rgba(2, 132, 199, 0.45);
 }
 
 /* 타임라인 라인 */
 html[data-theme="dark"] .step-list::before,
-html:not([data-theme="light"]) .step-list::before {
+html[data-theme-resolved="dark"] .step-list::before {
   background: linear-gradient(to bottom, #38bdf8 0%, #28354b 100%);
 }
 
 /* AI 브리핑 카드 */
 html[data-theme="dark"] .ai-briefing-card,
-html:not([data-theme="light"]) .ai-briefing-card {
+html[data-theme-resolved="dark"] .ai-briefing-card {
   background: var(--color-surface);
   border-color: var(--color-border);
   border-left-color: var(--color-accent-text);
 }
 
 html[data-theme="dark"] .ai-briefing-badge,
-html:not([data-theme="light"]) .ai-briefing-badge {
+html[data-theme-resolved="dark"] .ai-briefing-badge {
   color: var(--color-accent-text);
 }
 
 /* 스텝 액션 바 */
 html[data-theme="dark"] .step-actions-bar,
-html:not([data-theme="light"]) .step-actions-bar {
+html[data-theme-resolved="dark"] .step-actions-bar {
   border-top-color: var(--color-border);
 }
 
 /* 액션 아이콘 버튼들 */
 html[data-theme="dark"] .btn-action-icon,
-html:not([data-theme="light"]) .btn-action-icon {
+html[data-theme-resolved="dark"] .btn-action-icon {
   background: var(--color-surface);
   border-color: var(--color-border);
   color: var(--color-text-sub);
 }
 
 html[data-theme="dark"] .btn-action-icon:hover,
-html:not([data-theme="light"]) .btn-action-icon:hover {
+html[data-theme-resolved="dark"] .btn-action-icon:hover {
   background: var(--color-surface-sub);
   border-color: var(--color-border-strong);
   color: var(--color-text);
 }
 
 html[data-theme="dark"] .btn-swap-icon,
-html:not([data-theme="light"]) .btn-swap-icon {
+html[data-theme-resolved="dark"] .btn-swap-icon {
   background: var(--color-surface-sub);
   border-color: var(--color-border);
   color: var(--color-text-sub);
 }
 
 html[data-theme="dark"] .btn-swap-icon:hover,
-html:not([data-theme="light"]) .btn-swap-icon:hover {
+html[data-theme-resolved="dark"] .btn-swap-icon:hover {
   background: var(--color-surface-tint);
   border-color: var(--color-border-strong);
   color: var(--color-accent);
 }
 
 html[data-theme="dark"] .btn-yt-icon,
-html:not([data-theme="light"]) .btn-yt-icon {
+html[data-theme-resolved="dark"] .btn-yt-icon {
   background: rgba(225, 29, 72, 0.15);
   border-color: rgba(225, 29, 72, 0.3);
   color: #fb7185;
 }
 
 html[data-theme="dark"] .btn-kakao-icon,
-html:not([data-theme="light"]) .btn-kakao-icon {
+html[data-theme-resolved="dark"] .btn-kakao-icon {
   background: rgba(234, 179, 8, 0.15);
   border-color: rgba(234, 179, 8, 0.3);
   color: #fde047;
 }
 
 html[data-theme="dark"] .btn-insta-icon,
-html:not([data-theme="light"]) .btn-insta-icon {
+html[data-theme-resolved="dark"] .btn-insta-icon {
   background: rgba(219, 39, 119, 0.15);
   border-color: rgba(219, 39, 119, 0.3);
   color: #f472b6;
 }
 
 html[data-theme="dark"] .btn-blog-icon,
-html:not([data-theme="light"]) .btn-blog-icon {
+html[data-theme-resolved="dark"] .btn-blog-icon {
   background: rgba(22, 163, 74, 0.15);
   border-color: rgba(22, 163, 74, 0.3);
   color: #4ade80;
 }
 
 html[data-theme="dark"] .badge-blueribbon,
-html:not([data-theme="light"]) .badge-blueribbon {
+html[data-theme-resolved="dark"] .badge-blueribbon {
   background: rgba(37, 99, 235, 0.18);
   border-color: rgba(96, 165, 250, 0.4);
   color: #93c5fd;
 }
 html[data-theme="dark"] .badge-michelin,
-html:not([data-theme="light"]) .badge-michelin {
+html[data-theme-resolved="dark"] .badge-michelin {
   background: rgba(220, 38, 38, 0.18);
   border-color: rgba(248, 113, 113, 0.4);
   color: #fca5a5;
 }
 html[data-theme="dark"] .badge-tourapi,
-html:not([data-theme="light"]) .badge-tourapi {
+html[data-theme-resolved="dark"] .badge-tourapi {
   background: rgba(22, 163, 74, 0.18);
   border-color: rgba(74, 222, 128, 0.4);
   color: #86efac;
 }
 html[data-theme="dark"] .badge-catchtable,
-html:not([data-theme="light"]) .badge-catchtable {
+html[data-theme-resolved="dark"] .badge-catchtable {
   background: rgba(225, 29, 72, 0.18);
   border-color: rgba(251, 113, 133, 0.4);
   color: #fda4af;
 }
 html[data-theme="dark"] .badge-parking,
-html:not([data-theme="light"]) .badge-parking {
+html[data-theme-resolved="dark"] .badge-parking {
   background: var(--color-surface-sub);
   border-color: var(--color-border);
   color: var(--color-text-sub);
 }
 html[data-theme="dark"] .badge-price,
-html:not([data-theme="light"]) .badge-price {
+html[data-theme-resolved="dark"] .badge-price {
   background: var(--color-surface-sub);
   border-color: var(--color-border);
   color: var(--color-text);
 }
 
 html[data-theme="dark"] .btn-swap-chip:hover,
-html:not([data-theme="light"]) .btn-swap-chip:hover {
+html[data-theme-resolved="dark"] .btn-swap-chip:hover {
   background: var(--color-surface-tint);
 }
 
 html[data-theme="dark"] .step-quote,
-html:not([data-theme="light"]) .step-quote {
+html[data-theme-resolved="dark"] .step-quote {
   color: #93c5fd;
 }
 
 html[data-theme="dark"] .toast-msg,
-html:not([data-theme="light"]) .toast-msg {
+html[data-theme-resolved="dark"] .toast-msg {
   background: rgba(15, 23, 42, 0.95);
   border: 1px solid var(--color-border-strong);
   color: var(--color-text);
@@ -269,77 +275,77 @@ html:not([data-theme="light"]) .toast-msg {
 }
 
 html[data-theme="dark"] .footer-version,
-html:not([data-theme="light"]) .footer-version {
+html[data-theme-resolved="dark"] .footer-version {
   color: var(--color-text-faint);
 }
 
 html[data-theme="dark"] .selector-bar,
-html:not([data-theme="light"]) .selector-bar {
+html[data-theme-resolved="dark"] .selector-bar {
   background: var(--color-surface-sub);
   border-color: var(--color-border);
 }
 
 html[data-theme="dark"] .selector-btn,
-html:not([data-theme="light"]) .selector-btn {
+html[data-theme-resolved="dark"] .selector-btn {
   color: var(--color-text-sub);
 }
 
 html[data-theme="dark"] .selector-btn:hover,
-html:not([data-theme="light"]) .selector-btn:hover {
+html[data-theme-resolved="dark"] .selector-btn:hover {
   color: var(--color-text);
   background: var(--color-surface);
 }
 
 html[data-theme="dark"] .selector-btn.is-active,
-html:not([data-theme="light"]) .selector-btn.is-active,
+html[data-theme-resolved="dark"] .selector-btn.is-active,
 html[data-theme="dark"] .selector-btn.is-selected,
-html:not([data-theme="light"]) .selector-btn.is-selected {
+html[data-theme-resolved="dark"] .selector-btn.is-selected {
   background: var(--color-surface);
   color: var(--color-accent-text);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
 html[data-theme="dark"] .search-input,
-html:not([data-theme="light"]) .search-input {
+html[data-theme-resolved="dark"] .search-input {
   background: var(--color-surface);
   border-color: var(--color-border);
   color: var(--color-text);
 }
 
 html[data-theme="dark"] .search-input:focus,
-html:not([data-theme="light"]) .search-input:focus {
+html[data-theme-resolved="dark"] .search-input:focus {
   border-color: var(--color-accent-text);
   box-shadow: 0 0 0 3px var(--color-accent-soft);
 }
 
 html[data-theme="dark"] .search-clear:hover,
-html:not([data-theme="light"]) .search-clear:hover {
+html[data-theme-resolved="dark"] .search-clear:hover {
   background: var(--color-surface-sub);
   color: var(--color-text);
 }
 
 html[data-theme="dark"] .search-tag-chip,
-html:not([data-theme="light"]) .search-tag-chip,
+html[data-theme-resolved="dark"] .search-tag-chip,
 html[data-theme="dark"] .search-chip,
-html:not([data-theme="light"]) .search-chip {
+html[data-theme-resolved="dark"] .search-chip {
   background: var(--color-surface);
   border-color: var(--color-border);
   color: var(--color-text-sub);
 }
 
 html[data-theme="dark"] .search-tag-chip:hover,
-html:not([data-theme="light"]) .search-tag-chip:hover,
+html[data-theme-resolved="dark"] .search-tag-chip:hover,
 html[data-theme="dark"] .search-chip:hover,
-html:not([data-theme="light"]) .search-chip:hover {
+html[data-theme-resolved="dark"] .search-chip:hover {
   background: var(--color-surface-sub);
   border-color: var(--color-border-strong);
   color: var(--color-text);
 }
 
 html[data-theme="dark"] .search-tag-chip.active,
-html:not([data-theme="light"]) .search-tag-chip.active,
+html[data-theme-resolved="dark"] .search-tag-chip.active,
 html[data-theme="dark"] .search-chip.active,
-html:not([data-theme="light"]) .search-chip.active {
+html[data-theme-resolved="dark"] .search-chip.active {
   background: var(--color-surface-tint);
   border-color: var(--color-accent-text);
   color: var(--color-accent-text);
@@ -347,79 +353,79 @@ html:not([data-theme="light"]) .search-chip.active {
 
 /* 지역 선택 시트 다크모드 */
 html[data-theme="dark"] .location-sheet-panel,
-html:not([data-theme="light"]) .location-sheet-panel {
+html[data-theme-resolved="dark"] .location-sheet-panel {
   background: var(--color-surface);
   border-color: var(--color-border);
 }
 
 html[data-theme="dark"] .location-sheet-head,
-html:not([data-theme="light"]) .location-sheet-head,
+html[data-theme-resolved="dark"] .location-sheet-head,
 html[data-theme="dark"] .location-sheet-footer,
-html:not([data-theme="light"]) .location-sheet-footer {
+html[data-theme-resolved="dark"] .location-sheet-footer {
   border-color: var(--color-border);
 }
 
 html[data-theme="dark"] .location-regions,
-html:not([data-theme="light"]) .location-regions {
+html[data-theme-resolved="dark"] .location-regions {
   background: var(--color-bg);
   border-right-color: var(--color-border);
 }
 
 html[data-theme="dark"] .region-tab-item,
-html:not([data-theme="light"]) .region-tab-item {
+html[data-theme-resolved="dark"] .region-tab-item {
   color: var(--color-text-sub);
 }
 
 html[data-theme="dark"] .region-tab-item:hover,
-html:not([data-theme="light"]) .region-tab-item:hover {
+html[data-theme-resolved="dark"] .region-tab-item:hover {
   background: var(--color-surface-sub);
   color: var(--color-text);
 }
 
 html[data-theme="dark"] .region-tab-item.active,
-html:not([data-theme="light"]) .region-tab-item.active {
+html[data-theme-resolved="dark"] .region-tab-item.active {
   background: var(--color-surface);
   color: var(--color-accent-text);
   border-left-color: var(--color-accent-text);
 }
 
 html[data-theme="dark"] .location-subzones,
-html:not([data-theme="light"]) .location-subzones {
+html[data-theme-resolved="dark"] .location-subzones {
   background: var(--color-surface);
 }
 
 html[data-theme="dark"] .zone-check-item,
-html:not([data-theme="light"]) .zone-check-item {
+html[data-theme-resolved="dark"] .zone-check-item {
   background: var(--color-surface);
   border-color: var(--color-border);
   color: var(--color-text);
 }
 
 html[data-theme="dark"] .zone-check-item:hover,
-html:not([data-theme="light"]) .zone-check-item:hover {
+html[data-theme-resolved="dark"] .zone-check-item:hover {
   background: var(--color-surface-sub);
   border-color: var(--color-border-strong);
 }
 
 html[data-theme="dark"] .zone-check-item.is-checked,
-html:not([data-theme="light"]) .zone-check-item.is-checked,
+html[data-theme-resolved="dark"] .zone-check-item.is-checked,
 html[data-theme="dark"] .zone-check-item:has(input:checked),
-html:not([data-theme="light"]) .zone-check-item:has(input:checked) {
+html[data-theme-resolved="dark"] .zone-check-item:has(input:checked) {
   background: var(--color-accent-soft);
   border-color: var(--color-accent-text);
   color: var(--color-accent-text);
 }
 
 html[data-theme="dark"] .zone-checkbox,
-html:not([data-theme="light"]) .zone-checkbox {
+html[data-theme-resolved="dark"] .zone-checkbox {
   background: var(--color-surface-sub);
   border-color: var(--color-border-strong);
 }
 
 html[data-theme="dark"] .zone-checkbox:checked,
-html:not([data-theme="light"]) .zone-checkbox:checked,
+html[data-theme-resolved="dark"] .zone-checkbox:checked,
 html[data-theme="dark"] .zone-check-item.is-checked .zone-checkbox,
-html:not([data-theme="light"]) .zone-check-item.is-checked .zone-checkbox {
+html[data-theme-resolved="dark"] .zone-check-item.is-checked .zone-checkbox {
   background: var(--color-accent-text);
   border-color: var(--color-accent-text);
 }

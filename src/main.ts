@@ -1908,7 +1908,12 @@ function getThemeModeLabel(mode: ThemeMode): string {
 function applyTheme(mode: ThemeMode, notify = false): void {
   state.themeMode = mode;
   localStorage.setItem(THEME_STORAGE_KEY, mode);
+
+  const isSysDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const resolved = mode === 'auto' ? (isSysDark ? 'dark' : 'light') : mode;
+
   document.documentElement.setAttribute('data-theme', mode);
+  document.documentElement.setAttribute('data-theme-resolved', resolved);
 
   const themeBtn = document.getElementById('btn-theme-toggle');
   if (themeBtn) {
@@ -1918,8 +1923,7 @@ function applyTheme(mode: ThemeMode, notify = false): void {
   // 모바일 브라우저 상단 상태바 테마 컬러 동기화
   const metaTheme = document.querySelector('meta[name="theme-color"]:not([media])');
   if (metaTheme) {
-    const isDark = mode === 'dark' || (mode === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    metaTheme.setAttribute('content', isDark ? '#0b0f19' : '#f5f6f8');
+    metaTheme.setAttribute('content', resolved === 'dark' ? '#0b0f17' : '#f5f6f8');
   }
 
   if (notify) {
@@ -1928,7 +1932,9 @@ function applyTheme(mode: ThemeMode, notify = false): void {
         ? '☀️ 산뜻한 낮 테마가 적용되었어요'
         : mode === 'dark'
         ? '🌙 은은한 밤 테마가 적용되었어요'
-        : '⚙️ 시스템 설정을 따라가는 자동 테마예요';
+        : isSysDark
+        ? '⚙️ 시스템 설정에 맞춰 밤 테마가 적용되었어요'
+        : '⚙️ 시스템 설정에 맞춰 낮 테마가 적용되었어요';
     showToast(msg);
   }
 }
@@ -3613,6 +3619,15 @@ async function init(): Promise<void> {
       },
       { timeout: 5000, maximumAge: 600000 },
     );
+  }
+
+  // 4. 시스템(OS) 다크모드 변경 실시간 감지
+  if (typeof window !== 'undefined' && window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+      if (state.themeMode === 'auto') {
+        applyTheme('auto', false);
+      }
+    });
   }
 }
 
