@@ -2340,23 +2340,31 @@ const ICON_CATCHTABLE_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fil
 const ICON_GOURMET_RIBBON_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="m8.21 13.89-1.71 8.61 5.5-3 5.5 3-1.71-8.61"/></svg>`;
 const ICON_NAVER_MAP_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
 
-/** 캐치테이블 매장 예약 / 메뉴 상세 링크 생성 (100% 동작 보장) */
+/** 캐치테이블 매장 예약 / 메뉴 상세 링크 생성 (음식점/카페/바 전용 — 비음식점 완전 차단) */
 function getCatchtableUrl(spot: Spot): string | null {
-  if (spot.booking_info?.url && spot.booking_info.url.includes('catchtable.co.kr/ct/shop/')) {
+  const cat = (spot.category || '').toLowerCase();
+
+  // 1. 비음식점(전시, 미술관, 박물관, 공원, 산책, 쇼핑, 숙박 등)은 캐치테이블 완전 배제
+  const isNonDining = ['전시', '미술관', '박물관', '공원', '산책', '자연', '문화', '체험', '액티비티', '서점', '쇼핑', '소품샵', '호텔', '숙소', '펜션', '리조트', '게스트하우스', '거리', '명소', '유적'].some((n) => cat.includes(n));
+  if (isNonDining) return null;
+
+  // 2. 명확한 식음료(음식점/다이닝/카페/베이커리/와인바/주점) 키워드 확인
+  const isDining = ['식당', '음식점', '한식', '양식', '일식', '중식', '아시안', '세계요리', '이탈리안', '프렌치', '바', '펍', '주점', '다이닝', '비스트로', '오마카세', '카페', '베이커리', '브런치', '디저트', '와인', '고기', '스테이크', '파스타', '스시', '이자카야', '베이글', '로스터리'].some((c) => cat.includes(c));
+  if (!isDining) return null;
+
+  // 3. 수집된 다이렉트 캐치테이블 URL 우선 연결
+  if (spot.booking_info?.url && spot.booking_info.url.includes('catchtable.co.kr')) {
     return spot.booking_info.url;
   }
-  if (spot.social_links?.catchtable?.url && spot.social_links.catchtable.url.includes('catchtable.co.kr/ct/shop/')) {
+  if (spot.social_links?.catchtable?.url && spot.social_links.catchtable.url.includes('catchtable.co.kr')) {
     return spot.social_links.catchtable.url;
   }
-  if (spot.source?.url && spot.source.url.includes('catchtable.co.kr/ct/shop/')) {
+  if (spot.source?.url && spot.source.url.includes('catchtable.co.kr')) {
     return spot.source.url;
   }
-  const cat = (spot.category || '').toLowerCase();
-  const isDining = ['한식', '양식', '일식', '중식', '아시안', '바', '펍', '주점', '다이닝', '카페', '베이커리', '브런치'].some((c) => cat.includes(c)) || spot.slot === 'day' || spot.slot === 'evening' || spot.slot === 'night';
-  if (isDining) {
-    return `https://search.naver.com/search.naver?query=${encodeURIComponent(mapQuery(spot) + ' 캐치테이블')}`;
-  }
-  return null;
+
+  // 4. 음식점인 경우에 한해 네이버 캐치테이블 예약 검색 연결
+  return `https://search.naver.com/search.naver?query=${encodeURIComponent(mapQuery(spot) + ' 캐치테이블')}`;
 }
 
 /** 카카오맵 매장 링크 생성 */
