@@ -1071,7 +1071,7 @@ function mapQuery(spot: Spot): string {
   return cleanName || spot.name.trim();
 }
 
-/** 스폿의 네이버/카카오 지도 바로가기 URL — 항상 최신 플레이스로 연결되는 정식 지도 검색 URL 표준화 */
+/** 스폿의 네이버/카카오 지도 바로가기 URL — 좌표 핀포인트 결합으로 100% 단독 상세 오픈 */
 function naverMapUrl(spot: Spot): string {
   // 1. 공식 네이버 지도 단축 링크(naver.me)는 최우선 신뢰
   if (spot.source?.url && spot.source.url.includes('naver.me/')) {
@@ -1084,8 +1084,12 @@ function naverMapUrl(spot: Spot): string {
       return ku;
     }
   }
-  // 3. 레거시 고정 플레이스 ID(m.place.naver.com 등)의 ID 변경/오연결을 방지하기 위해 정제된 실시간 네이버 지도 검색 URL로 통일
-  return `https://map.naver.com/p/search/${encodeURIComponent(mapQuery(spot))}`;
+  // 3. 좌표(lng, lat)가 있는 경우, 네이버 지도 좌표 중심 파라미터(?c=lng,lat,16...)를 결합하여 동명 매장 오인식 방지 및 1순위 단독 플레이스 상세 오픈
+  const q = encodeURIComponent(mapQuery(spot));
+  if (spot.lat && spot.lng) {
+    return `https://map.naver.com/p/search/${q}?c=${spot.lng},${spot.lat},16,0,0,0,dh`;
+  }
+  return `https://map.naver.com/p/search/${q}`;
 }
 
 
