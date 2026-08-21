@@ -448,8 +448,8 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
         "Prefer": "return=minimal"
     }
 
-    # 1. 검증 및 고도화 대상 스팟 가져오기 (last_verified_at이 없거나 오래된 순)
-    query_url = f"{supabase_url}/rest/v1/spots?select=*&is_closed=eq.false&order=last_verified_at.asc.nullsfirst,id.asc&limit={limit}"
+    # 1. 검증 및 고도화 대상 스팟 가져오기 (오래된 순)
+    query_url = f"{supabase_url}/rest/v1/spots?select=*&is_closed=eq.false&order=updated_at.asc.nullsfirst,id.asc&limit={limit}"
     req = urllib.request.Request(query_url, headers=api_headers)
 
     try:
@@ -541,7 +541,6 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                 "is_closed": False,
                 "fail_count": 0,
                 "quality_score": calculate_quality_score(spot, place_meta),
-                "last_verified_at": now_iso,
                 "updated_at": now_iso
             }
 
@@ -628,7 +627,6 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                 patch_data = {
                     "is_closed": True,
                     "fail_count": new_fail,
-                    "last_verified_at": now_iso,
                     "updated_at": now_iso
                 }
                 closed_count += 1
@@ -637,12 +635,11 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                 patch_data = {
                     "verified": False,
                     "fail_count": new_fail,
-                    "last_verified_at": now_iso,
                     "updated_at": now_iso
                 }
                 fail_warn_count += 1
 
-        # Supabase UPDATE
+        # Supabase UPDATE (컬럼 부재 시 자동 복구 재시도)
         if patch_data:
             patch_url = f"{supabase_url}/rest/v1/spots?id=eq.{s_id}"
             patch_bytes = json.dumps(patch_data).encode('utf-8')
@@ -651,7 +648,17 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                 urllib.request.urlopen(patch_req, timeout=6)
             except urllib.error.HTTPError as e:
                 err_msg = e.read().decode('utf-8', errors='replace')
-                print(f"  ❌ DB 업데이트 실패 (id: {s_id}, HTTP {e.code}): {err_msg}")
+                # 'column ... does not exist' 에러 시 미존재 컬럼(last_verified_at 등) 제거 후 1회 재시도
+                if "does not exist" in err_msg and "last_verified_at" in patch_data:
+                    safe_patch = {k: v for k, v in patch_data.items() if k != "last_verified_at"}
+                    try:
+                        safe_bytes = json.dumps(safe_patch).encode('utf-8')
+                        safe_req = urllib.request.Request(patch_url, data=safe_bytes, headers=api_headers, method='PATCH')
+                        urllib.request.urlopen(safe_req, timeout=6)
+                    except Exception as retry_err:
+                        print(f"  ❌ DB 업데이트 재시도 실패 (id: {s_id}): {retry_err}")
+                else:
+                    print(f"  ❌ DB 업데이트 실패 (id: {s_id}, HTTP {e.code}): {err_msg}")
             except Exception as e:
                 print(f"  ❌ DB 업데이트 실패 (id: {s_id}): {e}")
 

@@ -265,8 +265,8 @@ def main():
         log("오류: SUPABASE_URL 또는 SUPABASE_SERVICE_KEY가 없습니다.", level="ERROR")
         sys.exit(1)
 
-    # 최초 구동 시 1회 서머리 생성
-    check_and_generate_daily_summary(force=True)
+    # 최초 구동 시에는 메일을 보내지 않고, 지정된 KST 시각(DAILY_REPORT_HOUR)에만 발송
+    log(f"📅 일일 리포트는 매일 KST {DAILY_REPORT_HOUR:02d}:00에 지정된 시각에만 자동 발송됩니다.")
 
     interval_seconds = CHECK_INTERVAL_SECONDS
 

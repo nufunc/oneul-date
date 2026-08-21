@@ -215,7 +215,7 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                     },
                     "verified": True,
                     "is_closed": False,
-                    "last_verified_at": datetime.now(timezone.utc).isoformat()
+                    "updated_at": datetime.now(timezone.utc).isoformat()
                 }
 
                 discovered_spots.append(new_spot)

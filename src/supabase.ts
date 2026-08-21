@@ -137,11 +137,11 @@ export async function loadSpots(): Promise<Spot[]> {
     };
 
     // 1회차 조회 (0~999) + 전체 exact count 헤더 확인
-    const firstRes = await fetch(`${baseUrl}&limit=1000`, {
+    const firstRes = await fetch(`${baseUrl}&offset=0&limit=1000`, {
       headers: { ...headers, Prefer: 'count=exact' },
     });
 
-    if (firstRes.ok) {
+    if (firstRes.ok || firstRes.status === 206) {
       const firstBatch = await firstRes.json();
       if (Array.isArray(firstBatch) && firstBatch.length > 0) {
         const contentRange = firstRes.headers.get('Content-Range') || '';
@@ -153,19 +153,15 @@ export async function loadSpots(): Promise<Spot[]> {
           return firstBatch as Spot[];
         }
 
-        // 1,000개 초과 시 나머지 청크 병렬 페칭 (Range 헤더)
+        // 1,000개 초과 시 나머지 청크 병렬 페칭 (offset/limit 표준 쿼리)
         const allSpots: Spot[] = [...firstBatch];
         const fetchPromises: Promise<Spot[]>[] = [];
 
         for (let offset = 1000; offset < total; offset += 1000) {
-          const end = Math.min(offset + 999, total - 1);
-          const p = fetch(baseUrl, {
-            headers: {
-              ...headers,
-              Range: `${offset}-${end}`,
-            },
+          const p = fetch(`${baseUrl}&offset=${offset}&limit=1000`, {
+            headers,
           })
-            .then((r) => (r.ok ? r.json() : []))
+            .then((r) => (r.ok || r.status === 206 ? r.json() : []))
             .catch(() => []);
           fetchPromises.push(p);
         }
@@ -177,7 +173,7 @@ export async function loadSpots(): Promise<Spot[]> {
           }
         });
 
-        console.log(`⚡ [Supabase Live] 1,000개 제한 돌파: 총 ${allSpots.length}개 전체 스팟 로드 완료`);
+        console.log(`⚡ [Supabase Live] 총 ${allSpots.length}개 전체 스팟 로드 완료 (전체: ${total}개)`);
         return allSpots;
       }
     }

@@ -220,7 +220,7 @@ def run_catchtable_mining(supabase_url: str, service_key: str, max_discoveries: 
                 },
                 "verified": True,
                 "is_closed": False,
-                "last_verified_at": datetime.now(timezone.utc).isoformat()
+                "updated_at": datetime.now(timezone.utc).isoformat()
             }
 
             discovered_spots.append(new_spot)

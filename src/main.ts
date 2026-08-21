@@ -1306,10 +1306,16 @@ async function fetchAiBriefing(
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 3500); // 3.5초 타임아웃 (프록시 왕복 1단계 반영)
 
+    const anonKey =
+      import.meta.env.VITE_SUPABASE_ANON_KEY ||
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5aHdobm56emZodHhqZXJuZml0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5MjAyNzcsImV4cCI6MjEwMjQ5NjI3N30.RobNIWS0QWNu6clFQuBHwVmr9gqbgBEUeWf8jwPCkns';
+
     const res = await fetch(AI_BRIEFING_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        apikey: anonKey,
+        Authorization: `Bearer ${anonKey}`,
       },
       body: JSON.stringify({ spots, mood: moodKey }),
       signal: controller.signal,
