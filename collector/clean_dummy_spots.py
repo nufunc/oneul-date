@@ -179,7 +179,7 @@ def clean_dummy_spots():
             print(f"❌ 오류 ({ex})")
         time.sleep(0.05)
 
-    # 상호명 SEO 오염 정제
+    # 1. 상호명 SEO 오염 정제
     cleaned_count = 0
     valid_spots = [s for s in all_spots if not is_broad_region_dummy(s.get("name", ""))]
     for s in valid_spots:
@@ -199,7 +199,39 @@ def clean_dummy_spots():
                 pass
             time.sleep(0.05)
 
-    print(f"\n🎉 [정리 완료] {len(dummy_spots)}개 더미 비활성화, {cleaned_count}개 상호명 정제 완료!")
+    # 2. 오래되거나 신뢰도 낮은 유튜브 링크 자동 정화
+    stale_yt_count = 0
+    stale_keywords = [
+        "2018", "2019", "2020", "2021", "2022", "2023",
+        "3년 전", "4년 전", "5년 전", "6년 전", "7년 전", "8년 전", "9년 전", "10년 전",
+        "ytn", "kbs", "sbs", "mbc", "jtbc", "연합뉴스", "뉴스", "news", "사건", "사고", "체포", "경찰", "화재", "논란", "날씨", "속보", "단독"
+    ]
+    for s in valid_spots:
+        s_id = s.get("id")
+        social = s.get("social_links") or {}
+        if not isinstance(social, dict) or not social.get("youtube"):
+            continue
+        yt = social.get("youtube") or {}
+        views = int(yt.get("views") or 0)
+        title = (yt.get("title") or "").lower()
+        pub = str(yt.get("published_at") or "").lower()
+        
+        is_low_views = views < 10000
+        is_stale = any(kw in title or kw in pub for kw in stale_keywords)
+        if is_low_views or is_stale:
+            new_social = {k: v for k, v in social.items() if k != "youtube"}
+            patch_url = f"{supabase_url}/rest/v1/spots?id=eq.{s_id}"
+            payload = json.dumps({"social_links": new_social}).encode('utf-8')
+            try:
+                p_req = urllib.request.Request(patch_url, data=payload, headers=headers, method='PATCH')
+                with urllib.request.urlopen(p_req, timeout=5) as p_res:
+                    if p_res.status in (200, 204):
+                        stale_yt_count += 1
+            except Exception:
+                pass
+            time.sleep(0.05)
+
+    print(f"\n🎉 [정리 완료] {len(dummy_spots)}개 더미 비활성화, {cleaned_count}개 상호명 정제, {stale_yt_count}개 오래된 유튜브 링크 정화 완료!")
 
 if __name__ == "__main__":
     clean_dummy_spots()

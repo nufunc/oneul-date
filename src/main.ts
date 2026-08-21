@@ -1134,19 +1134,28 @@ const DISALLOWED_YOUTUBE_KEYWORDS = [
   '화재', '논란', '날씨', '속보', '단독', '현장출동', '특보', '취재', '고발'
 ];
 
-/** 검증된 고품질 유튜브 데이트 핫클립/쇼츠인지 엄격 판정 (1만 뷰 이상 & 뉴스/사건사고 배제) */
-function isValidYoutubeHotclip(yt?: { url?: string; title?: string; views?: number; likes?: number } | null): boolean {
+/** 검증된 고품질 최신 유튜브 데이트 핫클립/쇼츠인지 엄격 판정 (1만 뷰 이상 & 2년 이내 최신 & 뉴스/사건사고 배제) */
+function isValidYoutubeHotclip(yt?: { url?: string; title?: string; views?: number; likes?: number; published_at?: string } | null): boolean {
   if (!yt || !yt.url) return false;
   
-  // 1만 뷰 이상 또는 500 좋아요 이상 검증
+  // 1. 1만 뷰 이상 또는 500 좋아요 이상 검증
   const views = Number(yt.views) || 0;
   const likes = Number(yt.likes) || 0;
   if (views < 10000 && likes < 500) return false;
 
-  const combined = `${yt.title || ''} ${yt.url}`.toLowerCase();
+  const combined = `${yt.title || ''} ${yt.url} ${yt.published_at || ''}`.toLowerCase();
+
+  // 2. 뉴스/사건사고 영상 배제
   if (DISALLOWED_YOUTUBE_KEYWORDS.some((kw) => combined.includes(kw.toLowerCase()))) {
     return false;
   }
+
+  // 3. 2년 이상 지난 오래된 영상 배제 (2023년 이전 과거 영상 필터링)
+  const stalePatterns = ['2018', '2019', '2020', '2021', '2022', '2023', '3년 전', '4년 전', '5년 전', '6년 전', '7년 전', '8년 전', '9년 전', '10년 전'];
+  if (stalePatterns.some((sp) => combined.includes(sp))) {
+    return false;
+  }
+
   return true;
 }
 

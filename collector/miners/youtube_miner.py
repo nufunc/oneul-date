@@ -144,6 +144,15 @@ def search_youtube_hotclip(spot_name: str, region_or_area: str = "") -> dict | N
                 elif "shortBylineText" in video and "runs" in video["shortBylineText"]:
                     channel_name = "".join(r.get("text", "") for r in video["shortBylineText"]["runs"])
 
+                # 발행 시기 추출 및 너무 오래된 영상(2년 이상 / 2023년 이전) 철저 배제
+                published_text = ""
+                if "publishedTimeText" in video:
+                    published_text = video["publishedTimeText"].get("simpleText", "")
+
+                stale_patterns = ["3년 전", "4년 전", "5년 전", "6년 전", "7년 전", "8년 전", "9년 전", "10년 전", "2018", "2019", "2020", "2021", "2022", "2023"]
+                if any(sp in published_text for sp in stale_patterns) or any(sp in title for sp in stale_patterns):
+                    continue
+
                 # 뉴스/방송사 및 사건사고 영상 철저 배제
                 combined_meta = f"{title} {channel_name}".lower()
                 if any(dis in combined_meta for dis in DISALLOWED_KEYWORDS):
@@ -181,6 +190,7 @@ def search_youtube_hotclip(spot_name: str, region_or_area: str = "") -> dict | N
                     "title": title[:60],
                     "channel": channel_name[:40],
                     "views": views,
+                    "published_at": published_text,
                     "is_shorts": is_shorts,
                 }
     except Exception:
