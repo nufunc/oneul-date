@@ -1189,6 +1189,8 @@ button {
   to {
     transform: rotate(360deg);
   }
+}
+
 /* 전체 코스 통합 길찾기 & 동선 바 */
 .course-route-bar {
   display: flex;
