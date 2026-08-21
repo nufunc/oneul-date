@@ -1088,58 +1088,47 @@ function naverMapUrl(spot: Spot): string {
   return `https://map.naver.com/p/search/${encodeURIComponent(mapQuery(spot))}`;
 }
 
-/** 네이버 지도 원터치 길찾기 딥링크 생성 (내 위치 출발지 또는 목적지 단독 지원) */
-function naverDirectionsUrl(spot: Spot, origin?: { lat: number; lng: number } | null): string {
-  if (spot.lat && spot.lng) {
-    if (origin && origin.lat && origin.lng) {
-      return `https://map.naver.com/v5/directions/${origin.lng},${origin.lat},${encodeURIComponent('내위치')}/${spot.lng},${spot.lat},${encodeURIComponent(spot.name)}/-/transit`;
-    }
-    return `https://map.naver.com/v5/directions/-/-/${spot.lng},${spot.lat},${encodeURIComponent(spot.name)}/-/transit`;
-  }
-  return naverMapUrl(spot);
-}
 
-/** 전체 데이트 코스 다중 경유지(출발지 -> 1차 -> 2차 -> 3차) 카카오맵 통합 길찾기 딥링크 생성 */
+/** 전체 데이트 코스 다중 경유지(출발지 -> 1차 -> 2차 -> 3차) 네이버 지도 통합 길찾기 딥링크 생성 */
 function multiCourseDirectionsUrl(
   course: CourseStep[],
   spotMap: Map<number, Spot>,
   origin?: { lat: number; lng: number } | null,
 ): string {
-  const points: { name: string; lat?: number; lng?: number }[] = [];
+  const points: { lng: number; lat: number; name: string }[] = [];
 
+  // 1. 내 위치(GPS)가 있으면 출발지로 추가
   if (origin && origin.lat && origin.lng) {
-    points.push({ name: '내위치', lat: origin.lat, lng: origin.lng });
+    points.push({ lng: origin.lng, lat: origin.lat, name: '내위치' });
   }
 
+  // 2. 코스 내 스팟들의 좌표 및 이름 수집
   for (const step of course) {
     if (step.spotId != null) {
       const spot = spotMap.get(step.spotId);
-      if (spot) {
-        points.push({ name: spot.name, lat: spot.lat ?? undefined, lng: spot.lng ?? undefined });
+      if (spot && spot.lat && spot.lng) {
+        points.push({ lng: spot.lng, lat: spot.lat, name: spot.name });
       }
     }
   }
 
+  // 좌표가 있는 지점이 2개 미만인 경우 첫 번째 스팟 검색/상세로 폴백
   if (points.length < 2) {
     if (course.length > 0 && course[0].spotId != null) {
       const firstSpot = spotMap.get(course[0].spotId);
-      if (firstSpot) return naverDirectionsUrl(firstSpot, origin);
+      if (firstSpot) return naverMapUrl(firstSpot);
     }
-    return 'https://map.kakao.com';
+    return 'https://map.naver.com';
   }
 
-  const startPoint = points[0];
-  const endPoint = points[points.length - 1];
-  const viaPoints = points.slice(1, -1);
-
-  // 카카오맵 다중 경유지 URL 스킴 (출발지, 도착지, 다중 경유지 완벽 연동)
-  let url = `https://map.kakao.com/?sName=${encodeURIComponent(startPoint.name)}&eName=${encodeURIComponent(endPoint.name)}`;
-  if (viaPoints.length > 0) {
-    const viaNames = viaPoints.map((p) => p.name).join('|');
-    url += `&vName=${encodeURIComponent(viaNames)}`;
-  }
-
-  return url;
+  // 네이버 지도 최신 웹 다중 경유지 URL 포맷 (/p/directions/{lng,lat,name}/{lng,lat,name}/.../-/{mode})
+  const segments = points.map(
+    (p) => `${p.lng},${p.lat},${encodeURIComponent(p.name)}`
+  );
+  
+  // 3개 이상 다중 경유지는 네이버 지도 정책상 'car' 모드에서 전 코스 경유지 통합 라우팅 지원
+  const mode = points.length === 2 ? 'transit' : 'car';
+  return `https://map.naver.com/p/directions/${segments.join('/')}/-/${mode}`;
 }
 
 /** 뉴스/사건사고/방송사 채널 등 데이트에 부적합한 영상 필터링 블랙리스트 */
@@ -2427,7 +2416,7 @@ function renderResults(): void {
           ${escapeHtml(routeSummaryText)}
         </div>
       </div>
-      <a class="btn-route-navi" href="${escapeHtml(multiDirectionsUrl)}" target="_blank" rel="noopener noreferrer" aria-label="전체 코스 통합 길찾기 (카카오맵)">
+      <a class="btn-route-navi" href="${escapeHtml(multiDirectionsUrl)}" target="_blank" rel="noopener noreferrer" aria-label="네이버 지도로 전체 코스 다중 길찾기">
         <span>전체 길찾기</span>
         <span class="route-arrow">➔</span>
       </a>
