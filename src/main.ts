@@ -1615,44 +1615,63 @@ function buildNearbyCourse(coords: { lat: number; lng: number } | null): { label
   return { label, steps };
 }
 
-/** 현재 위치(GPS)에서 1차 스팟으로 출발하는 출발지 안내 디바이더 */
+/** 현재 위치(GPS) 또는 1차 스팟으로 출발하는 출발지 안내 디바이더 */
 function renderUserOriginTransitDivider(firstStep: CourseStep): string {
-  if (!userCoords || !firstStep || firstStep.spotId === null) return '';
+  if (!firstStep || firstStep.spotId === null) return '';
   const s = spotById.get(firstStep.spotId);
-  if (!s || !s.lat || !s.lng) return '';
+  if (!s) return '';
 
-  const dist = getDistanceKm(userCoords.lat, userCoords.lng, s.lat, s.lng);
-  let distanceText = '';
-  let timeText = '';
-  let icon = '🚶‍♂️';
+  if (userCoords && userCoords.lat && userCoords.lng && s.lat && s.lng) {
+    const dist = getDistanceKm(userCoords.lat, userCoords.lng, s.lat, s.lng);
+    let distanceText = '';
+    let timeText = '';
+    let icon = '🚶‍♂️';
 
-  if (dist < 1.0) {
-    const meters = Math.round(dist * 1000);
-    const walkMin = Math.max(1, Math.round(dist * 15));
-    distanceText = `${meters}m`;
-    timeText = `도보 약 ${walkMin}분`;
-    icon = '🚶‍♂️';
-  } else if (dist < 30.0) {
-    const carMin = Math.max(3, Math.round((dist / 25) * 60 + 3));
-    distanceText = `${dist.toFixed(1)}km`;
-    timeText = `차량·이동 약 ${carMin}분`;
-    icon = '🚗';
-  } else {
-    const hours = (dist / 60).toFixed(1);
-    distanceText = `${dist.toFixed(0)}km`;
-    timeText = `차량 약 ${hours}시간`;
-    icon = '🚗';
+    if (dist < 1.0) {
+      const meters = Math.round(dist * 1000);
+      const walkMin = Math.max(1, Math.round(dist * 15));
+      distanceText = `${meters}m`;
+      timeText = `도보 약 ${walkMin}분`;
+      icon = '🚶‍♂️';
+    } else if (dist < 30.0) {
+      const carMin = Math.max(3, Math.round((dist / 25) * 60 + 3));
+      distanceText = `${dist.toFixed(1)}km`;
+      timeText = `차량·이동 약 ${carMin}분`;
+      icon = '🚗';
+    } else {
+      const hours = (dist / 60).toFixed(1);
+      distanceText = `${dist.toFixed(0)}km`;
+      timeText = `차량 약 ${hours}시간`;
+      icon = '🚗';
+    }
+
+    const naviUrl = `https://map.naver.com/p/directions/${userCoords.lng},${userCoords.lat},${encodeURIComponent('내위치')}/${s.lng},${s.lat},${encodeURIComponent(s.name)}/-/${dist < 1.0 ? 'walk' : 'transit'}`;
+
+    return `
+      <div class="step-transit-divider origin-start">
+        <div class="step-transit-line"></div>
+        <a class="step-transit-badge" href="${escapeHtml(naviUrl)}" target="_blank" rel="noopener noreferrer" aria-label="내 위치에서 ${escapeHtml(s.name)} 길찾기">
+          <span class="step-transit-icon">🚩 ${icon}</span>
+          <span class="step-transit-time">내 위치 출발 · ${escapeHtml(timeText)}</span>
+          <span class="step-transit-dist">(${escapeHtml(distanceText)})</span>
+          <span class="step-transit-arrow" aria-hidden="true">↗</span>
+        </a>
+        <div class="step-transit-line"></div>
+      </div>
+    `;
   }
 
-  const naviUrl = `https://map.naver.com/p/directions/${userCoords.lng},${userCoords.lat},${encodeURIComponent('내위치')}/${s.lng},${s.lat},${encodeURIComponent(s.name)}/-/${dist < 1.0 ? 'walk' : 'transit'}`;
+  // GPS 좌표 취득 전이거나 미허용 시에도 1차 스팟 원터치 길찾기 딥링크 제공
+  const naviUrl = s.lat && s.lng
+    ? `https://map.naver.com/p/search/${encodeURIComponent(mapQuery(s))}`
+    : naverMapUrl(s);
 
   return `
     <div class="step-transit-divider origin-start">
       <div class="step-transit-line"></div>
-      <a class="step-transit-badge" href="${escapeHtml(naviUrl)}" target="_blank" rel="noopener noreferrer" aria-label="내 위치에서 ${escapeHtml(s.name)} 길찾기">
-        <span class="step-transit-icon">🚩 ${icon}</span>
-        <span class="step-transit-time">내 위치 출발 · ${escapeHtml(timeText)}</span>
-        <span class="step-transit-dist">(${escapeHtml(distanceText)})</span>
+      <a class="step-transit-badge" href="${escapeHtml(naviUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(s.name)} 길찾기 및 지도 보기">
+        <span class="step-transit-icon">🚩 📍</span>
+        <span class="step-transit-time">1차 데이트 시작 · ${escapeHtml(s.name)}</span>
         <span class="step-transit-arrow" aria-hidden="true">↗</span>
       </a>
       <div class="step-transit-line"></div>
@@ -2368,7 +2387,7 @@ function renderResults(): void {
       <p class="ai-briefing-text ${!hasCachedStory && AI_BRIEFING_ENABLED ? 'is-loading' : ''}" id="ai-briefing-content">${initialStoryHtml}</p>
     </div>
     <div class="step-list">
-      ${state.course.length > 0 && userCoords ? renderUserOriginTransitDivider(state.course[0]) : ''}
+      ${state.course.length > 0 ? renderUserOriginTransitDivider(state.course[0]) : ''}
       ${state.course.map((step, i) => {
         const card = renderStepCard(step, i, { usedImages });
         let html = card;
@@ -3573,12 +3592,16 @@ async function init(): Promise<void> {
   if (typeof navigator !== 'undefined' && 'geolocation' in navigator) {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        userCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         const detected = detectRegionFromCoords(pos.coords.latitude, pos.coords.longitude);
         // 사용자가 아직 수동으로 다른 지역을 선택하지 않았을 때만 자동 갱신
         if (state.regions.length === 1 && state.regions[0] === 'SEOUL' && detected !== 'SEOUL') {
           state.regions = [detected];
           renderConditions();
           console.log(`📍 [GPS] 현재 위치 기반 지역 자동 선택: ${detected}`);
+        }
+        if (state.course && state.course.length > 0) {
+          renderResults();
         }
       },
       () => {
