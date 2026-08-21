@@ -2808,16 +2808,30 @@ button {
 .step-transit-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 10px;
-  background: var(--color-surface-sub);
+  gap: 5px;
+  padding: 4px 12px;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-full);
-  font-size: 0.72rem;
+  font-size: 0.73rem;
   font-weight: 600;
-  color: var(--color-text-sub);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-  transition: all 0.2s ease;
+  color: var(--color-text);
+  text-decoration: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.step-transit-badge:hover {
+  background: var(--color-surface-sub);
+  border-color: var(--color-border-strong);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+  color: var(--color-accent-text);
+}
+
+.step-transit-badge:active {
+  transform: scale(0.97);
 }
 
 .step-transit-icon {
@@ -2836,42 +2850,31 @@ button {
   font-size: 0.72rem;
 }
 
-.step-transit-navi-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  margin-left: 4px;
-  padding: 3px 9px;
-  border-radius: var(--radius-full);
-  background: var(--color-primary, #E05A47);
-  color: #FFFFFF !important;
-  font-size: 0.7rem;
+.step-transit-arrow {
+  font-size: 0.76rem;
   font-weight: 700;
-  text-decoration: none;
-  line-height: 1.4;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 1px 3px rgba(224, 90, 71, 0.3);
+  color: var(--color-accent-text);
+  opacity: 0.7;
+  margin-left: 2px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
-.step-transit-navi-btn:hover {
-  background: #c74836;
-  transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(224, 90, 71, 0.4);
-}
-
-.step-transit-navi-btn:active {
-  transform: scale(0.95);
+.step-transit-badge:hover .step-transit-arrow {
+  transform: translate(1px, -1px);
+  opacity: 1;
 }
 
 html:not([data-theme="light"]) .step-transit-badge {
   background: rgba(30, 41, 59, 0.85);
   border-color: rgba(255, 255, 255, 0.1);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  color: var(--color-text);
 }
 
-html:not([data-theme="light"]) .step-transit-navi-btn {
-  background: #ff6b57;
-  color: #0b0f19 !important;
+html:not([data-theme="light"]) .step-transit-badge:hover {
+  background: rgba(45, 60, 85, 0.95);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
 }
 
 .step-transit-divider.origin-start {

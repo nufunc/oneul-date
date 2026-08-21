@@ -1649,12 +1649,12 @@ function renderUserOriginTransitDivider(firstStep: CourseStep): string {
   return `
     <div class="step-transit-divider origin-start">
       <div class="step-transit-line"></div>
-      <div class="step-transit-badge">
+      <a class="step-transit-badge" href="${escapeHtml(naviUrl)}" target="_blank" rel="noopener noreferrer" aria-label="내 위치에서 ${escapeHtml(s.name)} 길찾기">
         <span class="step-transit-icon">🚩 ${icon}</span>
         <span class="step-transit-time">내 위치 출발 · ${escapeHtml(timeText)}</span>
         <span class="step-transit-dist">(${escapeHtml(distanceText)})</span>
-        <a class="step-transit-navi-btn" href="${escapeHtml(naviUrl)}" target="_blank" rel="noopener noreferrer" aria-label="1차 스팟으로 길찾기">길찾기 ➔</a>
-      </div>
+        <span class="step-transit-arrow" aria-hidden="true">↗</span>
+      </a>
       <div class="step-transit-line"></div>
     </div>
   `;
@@ -2662,12 +2662,12 @@ function renderStepTransitDivider(prevStep: CourseStep, nextStep: CourseStep): s
   return `
     <div class="step-transit-divider">
       <div class="step-transit-line"></div>
-      <div class="step-transit-badge">
+      <a class="step-transit-badge" href="${escapeHtml(naviUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(s2.name)} 길찾기">
         <span class="step-transit-icon">${icon}</span>
         <span class="step-transit-time">${escapeHtml(timeText)}</span>
         ${distanceText ? `<span class="step-transit-dist">(${escapeHtml(distanceText)})</span>` : ''}
-        <a class="step-transit-navi-btn" href="${escapeHtml(naviUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(s2.name)} 길찾기">길찾기 ➔</a>
-      </div>
+        <span class="step-transit-arrow" aria-hidden="true">↗</span>
+      </a>
       <div class="step-transit-line"></div>
     </div>
   `;
