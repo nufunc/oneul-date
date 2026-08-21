@@ -2841,10 +2841,7 @@ function renderStepCard(
         </div>
         <div class="step-actions-right">
           ${bookingUrl ? `<a class="step-book-chip" href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" aria-label="캐치테이블 실시간 예약"><span>📅 예약</span></a>` : ''}
-          <a class="step-navi-chip" href="${naverDirectionsUrl(spot, userCoords)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(spot.name)} 길찾기">
-            <span>🧭 길찾기</span>
-          </a>
-          <a class="step-map-chip" href="${naverMapUrl(spot)}" target="_blank" rel="noopener noreferrer" aria-label="네이버 지도">
+          <a class="step-map-chip" href="${naverMapUrl(spot)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(spot.name)} 네이버 지도 열기">
             ${ICON_NAVER_MAP_SVG}
             <span>지도</span>
           </a>
