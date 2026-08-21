@@ -7,6 +7,17 @@
     <meta name="description" content="조건만 고르면 완성되는 시간대별 데이트 코스" />
     
     <!-- Theme & Status Bar Styling -->
+    <script>
+      (function() {
+        try {
+          var mode = localStorage.getItem('oneul_theme_mode') || 'light';
+          var isDark = mode === 'dark' || (mode === 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          var resolved = isDark ? 'dark' : 'light';
+          document.documentElement.setAttribute('data-theme', mode);
+          document.documentElement.setAttribute('data-theme-resolved', resolved);
+        } catch (e) {}
+      })();
+    </script>
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f5f6f8" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b0f19" />
     <meta name="theme-color" content="#f5f6f8" />
