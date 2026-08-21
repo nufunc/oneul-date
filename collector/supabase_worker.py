@@ -64,8 +64,10 @@ def clean_keyword(name: str, location: str = "", address: str = "", region: str 
     if re.search(r'&|\+|↔|&amp;|\s및\s|\s/\s', clean):
         clean = re.split(r'&|\+|↔|&amp;|\s및\s|\s/\s', clean)[0].strip()
 
-    descriptor_regex = r'\s+(VIP|VVIP|프리미엄|명품|수제|원데이클래스|원데이\s*클래스|클래스|아틀리에|갤러리|스튜디오|살롱|공방|옻칠|나전칠기|도자기|가죽공방|도예공방|체험장|체험관|투어|산책로|산책코스|야시장|먹거리|거리|골목|본점|직영점).*$'
+    descriptor_regex = r'\s+(VIP|VVIP|프리미엄|명품|수제|원데이클래스|원데이\s*클래스|클래스|아틀리에|갤러리|스튜디오|살롱|공방|옻칠|나전칠기|도자기|가죽공방|도예공방|체험장|체험관|투어|산책로|산책코스|야시장|먹거리|거리|골목|본점|직영점|요트|보트|샴페인|라운지|바베큐|바베큐장|테라스|그릴|다이닝|루프탑|루프탑가든|디너|런치|오마카세|코스요리|패키지|렌탈|이용권|피크닉|캠크닉|캠핑|글램핑|스파|사우나|감성|칵테일|와인|위스키|주점|호프|데이트|핫플|분위기좋은|분위기|추천|맛집|셀프사진관|놀거리|커피디저트).*$'
     clean = re.sub(descriptor_regex, '', clean, flags=re.IGNORECASE).strip()
+    clean = re.sub(r'\s+(서울|경기|인천|강원|충북|충남|전북|전남|경북|경남|제주|부산|대구|광주|대전|울산)\s+[가-힣0-9\s]+(?:구|동|읍|면|로|길)$', '', clean).strip()
+    clean = re.sub(r'\s+—\s+.*$', '', clean).strip()
     clean = re.sub(r'[^\w\s가-힣0-9.-]', ' ', clean)
     clean = re.sub(r'\s+', ' ', clean).strip()
 
