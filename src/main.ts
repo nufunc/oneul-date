@@ -478,9 +478,21 @@ function isBroadRegionDummy(spot: Spot): boolean {
   return false;
 }
 
+/** '풍자 또간집', '성시경 먹을텐데' 등 방송/유튜브 채널명이 상호명으로 오염된 더미 스팟인지 검사 */
+function isPollutedMediaChannelDummy(spot: Spot): boolean {
+  const name = (spot.name || '').trim();
+  if (name.length === 0) return true;
+  const indicators = [
+    '또간집', '풍자', '먹을텐데', '성시경', '줄서는식당', '줄 서는 식당', 
+    '맛있는녀석들', '맛있는 녀석들', '놀라운토요일', '수요미식회', '골목식당', '백종원',
+    '생활의달인', '전현무계획', '최자로드', '유튜브', '브이로그', 'vlog', 'shorts'
+  ];
+  return indicators.some((ind) => name.includes(ind));
+}
+
 /** 코스 후보로 올릴 수 있는 스폿인지 — 생성·공유복원·저장복원 전 경로가 공유하는 단일 관문 */
 function isCourseEligible(spot: Spot): boolean {
-  return isValidSlot(spot.slot) && !isListicleEntry(spot) && !isBroadRegionDummy(spot) && isRealStaySpot(spot);
+  return isValidSlot(spot.slot) && !isListicleEntry(spot) && !isBroadRegionDummy(spot) && !isPollutedMediaChannelDummy(spot) && isRealStaySpot(spot);
 }
 
 /**
