@@ -158,6 +158,12 @@ def call_groq_json(prompt: str, system_prompt: str = "", model: str = DEFAULT_MO
                 # Rate limit 걸린 경우 대기 후 재시도
                 time.sleep(3.0 * (attempt + 1))
                 continue
+            elif e.code == 404:
+                # 모델이 변경되었거나 폐기된 경우 안정적인 대체 모델로 자동 전환 재시도
+                fallback_model = "llama-3.3-70b-versatile" if model != "llama-3.3-70b-versatile" else "openai/gpt-oss-120b"
+                print(f"[Groq 404 Warning] Model '{payload['model']}' not found. Falling back to '{fallback_model}'")
+                payload["model"] = fallback_model
+                continue
             else:
                 try:
                     err_body = e.read().decode("utf-8")

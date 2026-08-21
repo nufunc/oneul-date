@@ -229,35 +229,51 @@ def enrich_spot_with_groq(raw_name: str, cat: str, region: str, area: str, groq_
   "price": "1~2만원대, 2~4만원대, 3~5만원대, 5만원이상 중 1개"
 }}"""
 
-    try:
-        req_data = json.dumps({
-            "model": "openai/gpt-oss-120b",
-            "messages": [
-                {"role": "system", "content": "You are an expert dating curator. Output only valid JSON."},
-                {"role": "user", "content": prompt}
-            ],
-            "temperature": 0.5,
-            "max_tokens": 150,
-            "response_format": {"type": "json_object"}
-        }).encode('utf-8')
+    models_to_try = ["openai/gpt-oss-120b", "llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
 
-        g_req = urllib.request.Request(
-            "https://api.groq.com/openai/v1/chat/completions",
-            data=req_data,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {groq_key}"
-            }
-        )
-        with urllib.request.urlopen(g_req, timeout=3.0) as g_res:
-            if g_res.status == 200:
-                resp_obj = json.loads(g_res.read().decode('utf-8'))
-                content = resp_obj.get("choices", [{}])[0].get("message", {}).get("content", "")
-                parsed = json.loads(content)
-                if parsed and parsed.get("summary"):
-                    return parsed
-    except Exception as e:
-        pass
+    for model_name in models_to_try:
+        try:
+            req_data = json.dumps({
+                "model": model_name,
+                "messages": [
+                    {"role": "system", "content": "You are an expert dating curator. Output only a single valid JSON object."},
+                    {"role": "user", "content": prompt}
+                ],
+                "temperature": 0.3,
+                "max_tokens": 400,
+                "response_format": {"type": "json_object"}
+            }).encode('utf-8')
+
+            g_req = urllib.request.Request(
+                "https://api.groq.com/openai/v1/chat/completions",
+                data=req_data,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {groq_key}"
+                }
+            )
+            with urllib.request.urlopen(g_req, timeout=3.5) as g_res:
+                if g_res.status == 200:
+                    resp_obj = json.loads(g_res.read().decode('utf-8'))
+                    content = resp_obj.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
+                    try:
+                        parsed = json.loads(content)
+                    except Exception:
+                        match = re.search(r"\{.*\}", content, re.DOTALL)
+                        if match:
+                            parsed = json.loads(match.group(0))
+                        else:
+                            parsed = None
+                    if parsed and parsed.get("summary"):
+                        return parsed
+        except urllib.error.HTTPError as he:
+            if he.code == 404:
+                # 모델이 없을 경우 다음 모델로 폴백
+                continue
+            break
+        except Exception:
+            continue
+
     return None
 
 def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_discoveries: int = 15):

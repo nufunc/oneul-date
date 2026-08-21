@@ -245,47 +245,60 @@ def enrich_spot_with_groq(raw_name: str, cat: str, region: str, area: str, groq_
     """Groq Llama 3.3 초고속 한줄요약/무드/슬롯 자동 큐레이션"""
     if not groq_key:
         return None
-    try:
-        g_url = "https://api.groq.com/openai/v1/chat/completions"
-        payload = {
-            "model": "openai/gpt-oss-120b",
-            "messages": [
-                {
-                    "role": "system",
-                    "content": (
-                        "당신은 2030 트렌디 데이트 매거진 수석 에디터입니다.\n"
-                        "주어진 장소 정보를 바탕으로 데이트 목적에 맞는 JSON 메타데이터를 작성하세요.\n"
-                        "반드시 유효한 JSON 형식만 응답하세요.\n"
-                        "출력 스키마: {\"summary\": \"감성적인 25자 내외 한줄 소개\", \"mood\": [\"romantic\", \"trendy\" 등 1~2개], \"slot\": \"day\"|\"evening\"|\"night\", \"price\": \"2~3만원대\" 등}"
-                    )
+    models_to_try = ["openai/gpt-oss-120b", "llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
+    for model_name in models_to_try:
+        try:
+            g_url = "https://api.groq.com/openai/v1/chat/completions"
+            payload = {
+                "model": model_name,
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": (
+                            "당신은 2030 트렌디 데이트 매거진 수석 에디터입니다.\n"
+                            "주어진 장소 정보를 바탕으로 데이트 목적에 맞는 JSON 메타데이터를 작성하세요.\n"
+                            "반드시 유효한 JSON 형식만 응답하세요.\n"
+                            "출력 스키마: {\"summary\": \"감성적인 25자 내외 한줄 소개\", \"mood\": [\"romantic\", \"trendy\" 등 1~2개], \"slot\": \"day\"|\"evening\"|\"night\", \"price\": \"2~3만원대\" 등}"
+                        )
+                    },
+                    {
+                        "role": "user",
+                        "content": f"장소명: {raw_name}, 카테고리: {cat}, 지역: {region} {area}"
+                    }
+                ],
+                "temperature": 0.3,
+                "max_tokens": 400,
+                "response_format": {"type": "json_object"}
+            }
+            g_req = urllib.request.Request(
+                g_url,
+                data=json.dumps(payload).encode('utf-8'),
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {groq_key}"
                 },
-                {
-                    "role": "user",
-                    "content": f"장소명: {raw_name}, 카테고리: {cat}, 지역: {region} {area}"
-                }
-            ],
-            "temperature": 0.6,
-            "max_tokens": 150,
-            "response_format": {"type": "json_object"}
-        }
-        g_req = urllib.request.Request(
-            g_url,
-            data=json.dumps(payload).encode('utf-8'),
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {groq_key}"
-            },
-            method='POST'
-        )
-        with urllib.request.urlopen(g_req, timeout=3.0) as g_res:
-            if g_res.status == 200:
-                resp_obj = json.loads(g_res.read().decode('utf-8'))
-                content = resp_obj.get("choices", [{}])[0].get("message", {}).get("content", "")
-                parsed = json.loads(content)
-                if parsed and parsed.get("summary"):
-                    return parsed
-    except Exception:
-        pass
+                method='POST'
+            )
+            with urllib.request.urlopen(g_req, timeout=3.5) as g_res:
+                if g_res.status == 200:
+                    resp_obj = json.loads(g_res.read().decode('utf-8'))
+                    content = resp_obj.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
+                    try:
+                        parsed = json.loads(content)
+                    except Exception:
+                        match = re.search(r"\{.*\}", content, re.DOTALL)
+                        if match:
+                            parsed = json.loads(match.group(0))
+                        else:
+                            parsed = None
+                    if parsed and parsed.get("summary"):
+                        return parsed
+        except urllib.error.HTTPError as he:
+            if he.code == 404:
+                continue
+            break
+        except Exception:
+            continue
     return None
 
 def get_max_spot_id(supabase_url: str, headers: dict) -> int:
