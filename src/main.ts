@@ -2340,31 +2340,21 @@ const ICON_CATCHTABLE_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fil
 const ICON_GOURMET_RIBBON_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="m8.21 13.89-1.71 8.61 5.5-3 5.5 3-1.71-8.61"/></svg>`;
 const ICON_NAVER_MAP_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
 
-/** 캐치테이블 매장 예약 / 메뉴 상세 링크 생성 (음식점/카페/바 전용 — 비음식점 완전 차단) */
+/** 캐치테이블 매장 다이렉트 예약 링크 (DB에 실제 매장 URL이 수집된 경우에만 노출) */
 function getCatchtableUrl(spot: Spot): string | null {
-  const cat = (spot.category || '').toLowerCase();
-
-  // 1. 비음식점(전시, 미술관, 박물관, 공원, 산책, 쇼핑, 숙박 등)은 캐치테이블 완전 배제
-  const isNonDining = ['전시', '미술관', '박물관', '공원', '산책', '자연', '문화', '체험', '액티비티', '서점', '쇼핑', '소품샵', '호텔', '숙소', '펜션', '리조트', '게스트하우스', '거리', '명소', '유적'].some((n) => cat.includes(n));
-  if (isNonDining) return null;
-
-  // 2. 명확한 식음료(음식점/다이닝/카페/베이커리/와인바/주점) 키워드 확인
-  const isDining = ['식당', '음식점', '한식', '양식', '일식', '중식', '아시안', '세계요리', '이탈리안', '프렌치', '바', '펍', '주점', '다이닝', '비스트로', '오마카세', '카페', '베이커리', '브런치', '디저트', '와인', '고기', '스테이크', '파스타', '스시', '이자카야', '베이글', '로스터리'].some((c) => cat.includes(c));
-  if (!isDining) return null;
-
-  // 3. 수집된 다이렉트 캐치테이블 URL 우선 연결
-  if (spot.booking_info?.url && spot.booking_info.url.includes('catchtable.co.kr')) {
-    return spot.booking_info.url;
+  const b = spot.booking_info?.url;
+  if (b && (b.includes('catchtable.co.kr/ct/shop/') || b.includes('catchtable.net/'))) {
+    return b;
   }
-  if (spot.social_links?.catchtable?.url && spot.social_links.catchtable.url.includes('catchtable.co.kr')) {
-    return spot.social_links.catchtable.url;
+  const soc = spot.social_links?.catchtable?.url;
+  if (soc && (soc.includes('catchtable.co.kr/ct/shop/') || soc.includes('catchtable.net/'))) {
+    return soc;
   }
-  if (spot.source?.url && spot.source.url.includes('catchtable.co.kr')) {
-    return spot.source.url;
+  const src = spot.source?.url;
+  if (src && (src.includes('catchtable.co.kr/ct/shop/') || src.includes('catchtable.net/'))) {
+    return src;
   }
-
-  // 4. 음식점인 경우에 한해 네이버 캐치테이블 예약 검색 연결
-  return `https://search.naver.com/search.naver?query=${encodeURIComponent(mapQuery(spot) + ' 캐치테이블')}`;
+  return null;
 }
 
 /** 카카오맵 매장 링크 생성 */
@@ -2374,22 +2364,23 @@ function getKakaomapUrl(spot: Spot): string {
   return `https://map.kakao.com/link/search/${encodeURIComponent(mapQuery(spot))}`;
 }
 
-/** 인스타그램 실시간 릴스 / 태그 / 공식 피드 링크 생성 */
-function getInstagramUrl(spot: Spot): string {
+/** 인스타그램 공식 프로필 링크 (수집된 실제 계정이 있을 때만 노출) */
+function getInstagramUrl(spot: Spot): string | null {
   const soc = spot.social_links?.instagram?.url;
   if (soc && soc.includes('instagram.com/')) return soc;
   const src = spot.source?.url;
   if (src && src.includes('instagram.com/')) return src;
-  return `https://search.naver.com/search.naver?where=article&query=${encodeURIComponent(mapQuery(spot) + ' 인스타 핫플')}`;
+  return null;
 }
 
 /** 미쉐린 / 블루리본 공식 가이드 평가 링크 생성 */
 function getGourmetGuideUrl(spot: Spot): string | null {
+  const name = mapQuery(spot);
   if (spot.curation_badges?.blue_ribbon) {
-    return `https://www.bluer.co.kr/search?keyword=${encodeURIComponent(mapQuery(spot))}`;
+    return `https://www.bluer.co.kr/search?keyword=${encodeURIComponent(name)}`;
   }
   if (spot.curation_badges?.michelin) {
-    return `https://guide.michelin.com/kr/ko/search?q=${encodeURIComponent(mapQuery(spot))}`;
+    return `https://guide.michelin.com/kr/ko/search?q=${encodeURIComponent(name)}`;
   }
   return null;
 }
@@ -2906,7 +2897,8 @@ function renderStepCard(
           <a class="btn-action-icon btn-kakao-icon" href="${escapeHtml(getKakaomapUrl(spot))}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(spot.name)} 카카오맵 열기">${ICON_KAKAO_SVG}</a>
           ${(() => {
             const insta = getInstagramUrl(spot);
-            return `<a class="btn-action-icon btn-insta-icon" href="${escapeHtml(insta)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(spot.name)} 인스타그램 릴스 및 포토존 피드">${ICON_INSTA_SVG}</a>`;
+            if (!insta) return '';
+            return `<a class="btn-action-icon btn-insta-icon" href="${escapeHtml(insta)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(spot.name)} 인스타그램 공식 피드">${ICON_INSTA_SVG}</a>`;
           })()}
           ${(() => {
             const guideUrl = getGourmetGuideUrl(spot);
