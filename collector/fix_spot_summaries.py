@@ -104,19 +104,29 @@ def fix_all_spot_summaries(supabase_url: str, service_key: str, limit: int = 50)
         "Prefer": "return=minimal"
     }
 
-    print("🔍 Supabase spots 테이블에서 설명(summary) 점검 대상 조회 중...")
-    fetch_url = f"{supabase_url}/rest/v1/spots?select=id,name,category,region,area,summary,signature_items&is_closed=eq.false&limit=1000"
+    print("🔍 Supabase spots 테이블 전체 전수 페이지네이션 스캔 시작...")
+    page_size = 1000
+    offset = 0
+    spots = []
 
-    try:
-        req = urllib.request.Request(fetch_url, headers=headers)
-        with urllib.request.urlopen(req, timeout=10) as res:
-            spots = json.loads(res.read().decode('utf-8'))
-    except Exception as e:
-        print(f"❌ DB 조회 실패: {e}")
-        return
+    while True:
+        fetch_url = f"{supabase_url}/rest/v1/spots?select=id,name,category,region,area,summary,signature_items&is_closed=eq.false&order=id.asc&offset={offset}&limit={page_size}"
+        try:
+            req = urllib.request.Request(fetch_url, headers=headers)
+            with urllib.request.urlopen(req, timeout=10) as res:
+                batch = json.loads(res.read().decode('utf-8'))
+                if not batch:
+                    break
+                spots.extend(batch)
+                if len(batch) < page_size:
+                    break
+                offset += page_size
+        except Exception as e:
+            print(f"❌ DB 조회 실패: {e}")
+            break
 
     bad_spots = [s for s in spots if is_bad_summary(s.get("summary", ""), s.get("name", ""))]
-    print(f"📊 총 {len(spots)}개 스팟 중 교정 대상 {len(bad_spots)}개 감지됨.\n")
+    print(f"📊 전체 {len(spots)}개 스팟 중 교정 대상 {len(bad_spots)}개 감지됨.\n")
 
     if not bad_spots:
         print("🎉 모든 스팟의 설명이 이미 완벽하게 정제되어 있습니다!")

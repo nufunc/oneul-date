@@ -442,10 +442,6 @@ function isListicleEntry(spot: Spot): boolean {
 
 /**
  * 숙박(stay) 슬롯 장소의 진위 여부 검증 — 화이트리스트 우선 구조.
- * ① 문서/목차 항목·지역 미상 항목 탈락 → ② 호텔 부대시설 탈락 → ③ 숙박 category면 즉시 통과
- * → ④ 1박 요금제면 통과 → ⑤ category가 있는데 숙박 계열이 아니면 즉시 탈락
- * → ⑥ category === null일 때만 이름 기반 보수적 판정.
- * summary는 통과 근거로 쓰지 않는다 (비대칭 판정이 오염 72건을 통과시키던 원인).
  */
 function isRealStaySpot(spot: Spot): boolean {
   if (spot.slot !== 'stay') return true;
@@ -453,7 +449,6 @@ function isRealStaySpot(spot: Spot): boolean {
   const cat = (spot.category || '').trim().toLowerCase();
 
   if (isListicleEntry(spot)) return false;
-  // 광역도 시·군·구도 특정되지 않은 항목은 실재 숙소가 아닌 문서 섹션이다
   if (spot.region === '전국' && !(typeof spot.area === 'string' && spot.area.trim().length > 0)) {
     return false;
   }
@@ -470,9 +465,22 @@ function isRealStaySpot(spot: Spot): boolean {
   return false;
 }
 
+/** '서촌 / 북촌 / 삼청' 등 단일 장소가 아닌 광역 묶음 및 지자체 더미 라벨인지 검사 */
+function isBroadRegionDummy(spot: Spot): boolean {
+  const name = (spot.name || '').trim();
+  if (name.length === 0) return true;
+  // 슬래시가 2개 이상 들어간 다중 지역 나열 (예: 서촌 / 북촌 / 삼청 / 안국 / 익선)
+  if (name.split('/').length >= 3) return true;
+  // 단순 권역/지자체명 나열 더미
+  if (/^(서울|경기|인천|강원|충청|호남|영남|제주|대전|광주|대구|부산|울산)\s*[\/&]\s*(충청|전라|경상|울산|경남|경북|전남|전북|강원)/.test(name)) return true;
+  if (/.*&.*&.*권$/.test(name)) return true;
+  if (/^(충북|충남|전북|전남|경북|경남|강원도?)\s+[가-힣]+(시|군|구)$/.test(name)) return true;
+  return false;
+}
+
 /** 코스 후보로 올릴 수 있는 스폿인지 — 생성·공유복원·저장복원 전 경로가 공유하는 단일 관문 */
 function isCourseEligible(spot: Spot): boolean {
-  return isValidSlot(spot.slot) && !isListicleEntry(spot) && isRealStaySpot(spot);
+  return isValidSlot(spot.slot) && !isListicleEntry(spot) && !isBroadRegionDummy(spot) && isRealStaySpot(spot);
 }
 
 /**
