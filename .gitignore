@@ -26,6 +26,21 @@ collector/logs/
 # Temporary files
 *.md.bak
 
+# Private Documentation & Rules (Excluded from Public Repo)
+docs/
+GEMINI.md
+android/
+
+# Mobile Signing & Keystores (Strictly Secret)
+*.keystore
+*.jks
+*.p12
+*.key
+*.mobileprovision
+android/build/
+*.apk
+*.aab
+
 # Editor & AI tool directories
 .vscode/*
 !.vscode/extensions.json
@@ -37,6 +52,8 @@ collector/logs/
 *.sln
 *.sw?
 .claude/
+.gemini/
+.antigravity/
 scratch/
 
 # Python & Temporary / Review Artifacts
