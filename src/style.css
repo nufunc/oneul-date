@@ -50,9 +50,9 @@
   --font-xl: 1.55rem;
 
   /* 타이포그래피 */
-  --font-sans: 'Pretendard', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  --font-sans: 'SUIT Variable', 'SUIT', 'Pretendard', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
   --font-serif: 'Libre Caslon Text', 'Noto Serif KR', serif;
-  --font-display: 'Pretendard', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-display: 'SUIT Variable', 'SUIT', 'Pretendard', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 
   /* 라벨 자간 */
   --label-tracking: 0.02em;
