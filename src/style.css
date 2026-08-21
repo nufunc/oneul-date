@@ -215,6 +215,19 @@ html[data-theme-resolved="dark"] .btn-ct-icon:hover {
   color: #ff8787;
 }
 
+html[data-theme="dark"] .btn-kakao-icon,
+html[data-theme-resolved="dark"] .btn-kakao-icon {
+  background: rgba(234, 179, 8, 0.15);
+  border-color: rgba(234, 179, 8, 0.3);
+  color: #fde047;
+}
+html[data-theme="dark"] .btn-kakao-icon:hover,
+html[data-theme-resolved="dark"] .btn-kakao-icon:hover {
+  background: rgba(234, 179, 8, 0.25);
+  border-color: rgba(234, 179, 8, 0.45);
+  color: #fef08a;
+}
+
 html[data-theme="dark"] .btn-insta-icon,
 html[data-theme-resolved="dark"] .btn-insta-icon {
   background: rgba(219, 39, 119, 0.15);
@@ -1785,6 +1798,19 @@ button {
   background: #FFE4E6;
   border-color: #FDA4AF;
   color: #BE123C;
+}
+
+/* 카카오맵 미니 아이콘 */
+.btn-kakao-icon {
+  background: #FDFCE8;
+  border-color: #FEF08A;
+  color: #854D0E;
+}
+
+.btn-kakao-icon:hover {
+  background: #FEF9C3;
+  border-color: #FDE047;
+  color: #713F12;
 }
 
 /* 인스타그램 미니 아이콘 */

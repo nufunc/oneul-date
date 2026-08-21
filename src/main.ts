@@ -2334,6 +2334,7 @@ function triggerCourseGeneration(): void {
 const ICON_REFRESH_SVG = `<svg class="icon-refresh" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>`;
 const ICON_SWAP_SVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>`;
 const ICON_YOUTUBE_SVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`;
+const ICON_KAKAO_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3c-5.523 0-10 3.582-10 8 0 2.828 1.838 5.308 4.622 6.726l-1.173 4.316c-.105.385.318.694.654.477l5.068-3.342c.271.015.548.023.829.023 5.523 0 10-3.582 10-8s-4.477-8-10-8z"/></svg>`;
 const ICON_INSTA_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>`;
 const ICON_CATCHTABLE_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>`;
 const ICON_GOURMET_RIBBON_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="m8.21 13.89-1.71 8.61 5.5-3 5.5 3-1.71-8.61"/></svg>`;
@@ -2356,6 +2357,13 @@ function getCatchtableUrl(spot: Spot): string | null {
     return `https://app.catchtable.co.kr/ct/shop/search?q=${encodeURIComponent(mapQuery(spot))}`;
   }
   return null;
+}
+
+/** 카카오맵 매장 링크 생성 */
+function getKakaomapUrl(spot: Spot): string {
+  const kakao = spot.social_links?.kakaomap?.url;
+  if (kakao) return kakao;
+  return `https://map.kakao.com/link/search/${encodeURIComponent(mapQuery(spot))}`;
 }
 
 /** 인스타그램 실시간 릴스 / 태그 / 공식 피드 링크 생성 */
@@ -2888,6 +2896,7 @@ function renderStepCard(
             if (!ctUrl) return '';
             return `<a class="btn-action-icon btn-ct-icon" href="${escapeHtml(ctUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(spot.name)} 캐치테이블 실시간 예약 및 메뉴">${ICON_CATCHTABLE_SVG}</a>`;
           })()}
+          <a class="btn-action-icon btn-kakao-icon" href="${escapeHtml(getKakaomapUrl(spot))}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(spot.name)} 카카오맵 열기">${ICON_KAKAO_SVG}</a>
           ${(() => {
             const insta = getInstagramUrl(spot);
             return `<a class="btn-action-icon btn-insta-icon" href="${escapeHtml(insta)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(spot.name)} 인스타그램 릴스 및 포토존 피드">${ICON_INSTA_SVG}</a>`;
