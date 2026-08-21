@@ -1089,47 +1089,6 @@ function naverMapUrl(spot: Spot): string {
 }
 
 
-/** 전체 데이트 코스 다중 경유지(출발지 -> 1차 -> 2차 -> 3차) 네이버 지도 통합 길찾기 딥링크 생성 */
-function multiCourseDirectionsUrl(
-  course: CourseStep[],
-  spotMap: Map<number, Spot>,
-  origin?: { lat: number; lng: number } | null,
-): string {
-  const points: { lng: number; lat: number; name: string }[] = [];
-
-  // 1. 내 위치(GPS)가 있으면 출발지로 추가
-  if (origin && origin.lat && origin.lng) {
-    points.push({ lng: origin.lng, lat: origin.lat, name: '내위치' });
-  }
-
-  // 2. 코스 내 스팟들의 좌표 및 이름 수집
-  for (const step of course) {
-    if (step.spotId != null) {
-      const spot = spotMap.get(step.spotId);
-      if (spot && spot.lat && spot.lng) {
-        points.push({ lng: spot.lng, lat: spot.lat, name: spot.name });
-      }
-    }
-  }
-
-  // 좌표가 있는 지점이 2개 미만인 경우 첫 번째 스팟 검색/상세로 폴백
-  if (points.length < 2) {
-    if (course.length > 0 && course[0].spotId != null) {
-      const firstSpot = spotMap.get(course[0].spotId);
-      if (firstSpot) return naverMapUrl(firstSpot);
-    }
-    return 'https://map.naver.com';
-  }
-
-  // 네이버 지도 최신 웹 다중 경유지 URL 포맷 (/p/directions/{lng,lat,name}/{lng,lat,name}/.../-/{mode})
-  const segments = points.map(
-    (p) => `${p.lng},${p.lat},${encodeURIComponent(p.name)}`
-  );
-  
-  // 3개 이상 다중 경유지는 네이버 지도 정책상 'car' 모드에서 전 코스 경유지 통합 라우팅 지원
-  const mode = points.length === 2 ? 'transit' : 'car';
-  return `https://map.naver.com/p/directions/${segments.join('/')}/-/${mode}`;
-}
 
 /** 뉴스/사건사고/방송사 채널 등 데이트에 부적합한 영상 필터링 블랙리스트 */
 const DISALLOWED_YOUTUBE_KEYWORDS = [
@@ -1685,6 +1644,8 @@ function renderUserOriginTransitDivider(firstStep: CourseStep): string {
     icon = '🚗';
   }
 
+  const naviUrl = `https://map.naver.com/p/directions/${userCoords.lng},${userCoords.lat},${encodeURIComponent('내위치')}/${s.lng},${s.lat},${encodeURIComponent(s.name)}/-/${dist < 1.0 ? 'walk' : 'transit'}`;
+
   return `
     <div class="step-transit-divider origin-start">
       <div class="step-transit-line"></div>
@@ -1692,6 +1653,7 @@ function renderUserOriginTransitDivider(firstStep: CourseStep): string {
         <span class="step-transit-icon">🚩 ${icon}</span>
         <span class="step-transit-time">내 위치 출발 · ${escapeHtml(timeText)}</span>
         <span class="step-transit-dist">(${escapeHtml(distanceText)})</span>
+        <a class="step-transit-navi-btn" href="${escapeHtml(naviUrl)}" target="_blank" rel="noopener noreferrer" aria-label="1차 스팟으로 길찾기">길찾기 ➔</a>
       </div>
       <div class="step-transit-line"></div>
     </div>
@@ -2390,15 +2352,6 @@ function renderResults(): void {
     initialStoryHtml = `“${normalizeEditorialTone(generateCourseStory(state.course, spotById, cond.mood, true))}”`;
   }
 
-  const multiDirectionsUrl = multiCourseDirectionsUrl(state.course, spotById, userCoords);
-  const routeSpotNames = state.course
-    .map((s) => (s.spotId != null ? spotById.get(s.spotId)?.name : null))
-    .filter((n): n is string => !!n);
-  const routeSummaryText = [
-    ...(userCoords ? ['내 위치'] : []),
-    ...routeSpotNames,
-  ].join(' ➔ ');
-
   area.innerHTML = `
     <div class="course-head">
       <span class="course-title">${escapeHtml(regionsLabel(cond.regions, cond.subZones))} · ${escapeHtml(moodLabel(cond.mood))}</span>
@@ -2406,20 +2359,6 @@ function renderResults(): void {
         ${ICON_REFRESH_SVG}
         <span class="btn-regenerate-text">전체 다시 추천</span>
       </button>
-    </div>
-    <div class="course-route-bar">
-      <div class="route-bar-main">
-        <div class="route-bar-badge">
-          <span>🗺️ 전체 코스 동선</span>
-        </div>
-        <div class="route-bar-path" aria-label="${escapeHtml(routeSummaryText)}">
-          ${escapeHtml(routeSummaryText)}
-        </div>
-      </div>
-      <a class="btn-route-navi" href="${escapeHtml(multiDirectionsUrl)}" target="_blank" rel="noopener noreferrer" aria-label="네이버 지도로 전체 코스 다중 길찾기">
-        <span>전체 길찾기</span>
-        <span class="route-arrow">➔</span>
-      </a>
     </div>
     <div class="ai-briefing-card" id="ai-briefing-box">
       <div class="ai-briefing-badge">
@@ -2712,6 +2651,14 @@ function renderStepTransitDivider(prevStep: CourseStep, nextStep: CourseStep): s
     icon = '📍';
   }
 
+  let naviUrl = '';
+  if (s1.lat && s1.lng && s2.lat && s2.lng) {
+    const mode = (getDistanceKm(s1.lat, s1.lng, s2.lat, s2.lng) < 1.0) ? 'walk' : 'transit';
+    naviUrl = `https://map.naver.com/p/directions/${s1.lng},${s1.lat},${encodeURIComponent(s1.name)}/${s2.lng},${s2.lat},${encodeURIComponent(s2.name)}/-/${mode}`;
+  } else {
+    naviUrl = naverMapUrl(s2);
+  }
+
   return `
     <div class="step-transit-divider">
       <div class="step-transit-line"></div>
@@ -2719,6 +2666,7 @@ function renderStepTransitDivider(prevStep: CourseStep, nextStep: CourseStep): s
         <span class="step-transit-icon">${icon}</span>
         <span class="step-transit-time">${escapeHtml(timeText)}</span>
         ${distanceText ? `<span class="step-transit-dist">(${escapeHtml(distanceText)})</span>` : ''}
+        <a class="step-transit-navi-btn" href="${escapeHtml(naviUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(s2.name)} 길찾기">길찾기 ➔</a>
       </div>
       <div class="step-transit-line"></div>
     </div>
