@@ -80,14 +80,28 @@ def run_social_enrichment(supabase_url: str, service_key: str, batch_size: int =
             existing_social = s.get("social_links") or {}
             merged_social = {**existing_social, **new_social}
 
-            # 4. Supabase DB PATCH 업데이트
-            patch_url = f"{supabase_url}/rest/v1/spots?id=eq.{spot_id}"
-            payload = json.dumps({
+            # 4. 스팟 설명(summary) 불량 감지 시 자동 교정
+            from fix_spot_summaries import is_bad_summary, generate_curated_summary
+            current_summary = s.get("summary", "")
+            patch_data = {
                 "social_links": merged_social,
                 "metrics": metrics,
                 "hot_score": hot_score,
                 "updated_at": datetime.now(timezone.utc).isoformat()
-            }).encode('utf-8')
+            }
+            if is_bad_summary(current_summary, name):
+                curated_sum = generate_curated_summary(
+                    name,
+                    s.get("category", ""),
+                    s.get("region", ""),
+                    s.get("area", "") or location,
+                    s.get("signature_items") or []
+                )
+                patch_data["summary"] = curated_sum
+
+            # 5. Supabase DB PATCH 업데이트
+            patch_url = f"{supabase_url}/rest/v1/spots?id=eq.{spot_id}"
+            payload = json.dumps(patch_data).encode('utf-8')
 
             patch_req = urllib.request.Request(patch_url, data=payload, headers=api_headers, method='PATCH')
             with urllib.request.urlopen(patch_req, timeout=5) as p_res:

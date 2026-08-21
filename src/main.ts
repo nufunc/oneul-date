@@ -2713,6 +2713,50 @@ function renderStepTransitDivider(prevStep: CourseStep, nextStep: CourseStep): s
   `;
 }
 
+/** 비정상적이거나 영문 태그 나열/스팟명 중복인 summary를 감지하여 고품질 한줄 소개로 교정 */
+function cleanSpotSummary(spot: Spot): string {
+  const raw = (spot.summary || '').trim();
+  const name = spot.name.trim();
+
+  // 비정상 케이스 판별 (영문 태그 나열, 스팟명과 동일, 너무 짧거나 무의미한 텍스트)
+  const isBad =
+    !raw ||
+    raw.length < 5 ||
+    raw.toLowerCase() === name.toLowerCase() ||
+    /^[a-zA-Z_\s,]+$/.test(raw) ||
+    raw.includes('trendy') ||
+    raw.includes('romantic') ||
+    raw.includes('healing') ||
+    raw.includes('scenic') ||
+    raw.includes('luxury') ||
+    raw.includes('gourmet') ||
+    raw.includes('active') ||
+    raw.includes('cost_effective') ||
+    raw === '정보 없음' ||
+    raw === '설명이 없습니다';
+
+  if (!isBad) {
+    return raw;
+  }
+
+  // 감각적인 대체 한줄 설명 생성
+  const area = spot.area || spot.location || '';
+  const cat = spot.category || '데이트 스팟';
+  const sig = spot.signature_items && spot.signature_items.length > 0 ? spot.signature_items[0] : '';
+
+  if (sig) {
+    return `${area ? `${area}에서 ` : ''}대표 메뉴 ${sig}와 함께 감각적인 분위기를 즐기기 좋은 ${cat}입니다.`;
+  }
+  if (spot.curation_badges?.blue_ribbon) {
+    return `블루리본 서베이가 인정한 ${area ? `${area}의 ` : ''}신뢰할 수 있는 대표 ${cat}입니다.`;
+  }
+  if (spot.curation_badges?.michelin) {
+    return `미쉐린 가이드에 선정된 ${area ? `${area}의 ` : ''}정갈한 미식 ${cat}입니다.`;
+  }
+
+  return `${area ? `${area} 골목의 ` : ''}남다른 감각과 무드가 돋보이는 ${cat}입니다.`;
+}
+
 function renderStepCard(
   step: CourseStep,
   index: number,
@@ -2810,7 +2854,10 @@ function renderStepCard(
           </h3>
           ${curationBadges.length > 0 ? `<div class="step-curation-row">${curationBadges.join('')}</div>` : ''}
           <p class="step-location">📍 ${escapeHtml(spot.location)}</p>
-          ${spot.summary ? `<blockquote class="step-quote">“${escapeHtml(spot.summary)}”</blockquote>` : ''}
+          ${(() => {
+            const sum = cleanSpotSummary(spot);
+            return sum ? `<blockquote class="step-quote">“${escapeHtml(sum)}”</blockquote>` : '';
+          })()}
           ${metaBadges.length > 0 ? `<div class="step-meta-row">${metaBadges.join('')}</div>` : ''}
           ${spot.price ? `<p class="step-price">${escapeHtml(spot.price)}</p>` : ''}
         </div>
