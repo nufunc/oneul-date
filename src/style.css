@@ -123,16 +123,20 @@ html[data-theme-resolved="dark"] .saved-thumb img {
   filter: brightness(0.92) contrast(1.02);
 }
 
-/* 다크모드 메인 CTA 코스 만들기 버튼 시인성 */
+/* 다크모드 메인 CTA 코스 만들기 및 저장(btn-primary) 버튼 시인성 동일화 */
 html[data-theme="dark"] .btn-generate,
-html[data-theme-resolved="dark"] .btn-generate {
+html[data-theme-resolved="dark"] .btn-generate,
+html[data-theme="dark"] .btn-primary,
+html[data-theme-resolved="dark"] .btn-primary {
   background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
   color: #ffffff !important;
   box-shadow: 0 4px 18px rgba(2, 132, 199, 0.35);
 }
 
 html[data-theme="dark"] .btn-generate:hover,
-html[data-theme-resolved="dark"] .btn-generate:hover {
+html[data-theme-resolved="dark"] .btn-generate:hover,
+html[data-theme="dark"] .btn-primary:hover,
+html[data-theme-resolved="dark"] .btn-primary:hover {
   background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
   box-shadow: 0 6px 24px rgba(2, 132, 199, 0.45);
 }
