@@ -699,14 +699,21 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
 
   // 3. 자연어 데이트 상황 및 퀵 태그 동의어 매칭 검사
   const NATURAL_CONTEXT_MAP: Record<string, string[]> = {
-    '비': ['실내', '스파', '카페', '전시', '미술관', '아쿠아리움', '공방', '영화'],
-    '비오는날': ['실내', '스파', '카페', '전시', '미술관', '아쿠아리움', '공방', '영화'],
-    '비오는': ['실내', '스파', '카페', '전시', '미술관', '아쿠아리움', '공방', '영화'],
-    '실내': ['실내', '스파', '전시', '미술관', '아쿠아리움', '공방', '도자기', '향수'],
-    '기념일': ['럭셔리', '파인다이닝', '오마카세', '와인바', '야경', '호텔', '뷰'],
-    '소개팅': ['파스타', '이탈리안', '와인바', '조용한', '카페', '디저트'],
-    '드라이브': ['뷰', '오션뷰', '루프탑', '외곽', '호수', '전망대', '남양주', '가평', '양평'],
-    '가성비': ['₩', '₩₩', '무료', '공원', '산책'],
+    '비': ['실내', '스파', '카페', '전시', '미술관', '아쿠아리움', '공방', '영화', '보드게임'],
+    '비오는날': ['실내', '스파', '카페', '전시', '미술관', '아쿠아리움', '공방', '영화', '보드게임'],
+    '비오는': ['실내', '스파', '카페', '전시', '미술관', '아쿠아리움', '공방', '영화', '보드게임'],
+    '실내': ['실내', '스파', '전시', '미술관', '아쿠아리움', '공방', '도자기', '향수', '식물원'],
+    '기념일': ['럭셔리', '파인다이닝', '오마카세', '와인바', '야경', '호텔', '뷰', '스테이크'],
+    '생일': ['파인다이닝', '오마카세', '레터링', '케이크', '와인바', '럭셔리', '호텔'],
+    '소개팅': ['파스타', '이탈리안', '와인바', '조용한', '카페', '디저트', '스테이크'],
+    '드라이브': ['뷰', '오션뷰', '루프탑', '외곽', '호수', '전망대', '남양주', '가평', '양평', '포천', '강화'],
+    '가성비': ['₩', '₩₩', '무료', '공원', '산책', '가성비맛집'],
+    '야경': ['루프탑', '야경', '전망', '스카이', '와인바', '칵테일', '타워', '한강'],
+    '루프탑': ['루프탑', '야경', '테라스', '라운지', '칵테일', '와인'],
+    '힐링': ['숲', '공원', '식물원', '스파', '온천', '자연', '힐링', '한옥', '정원'],
+    '오마카세': ['스시', '한우', '오마카세', '일식', '다이닝', '코스요리'],
+    '반려동물': ['반려', '애견', '펫', '동반', '야외', '테라스', '공원'],
+    '애견': ['반려', '애견', '펫', '동반', '야외', '테라스', '공원'],
   };
 
   for (const [kw, syns] of Object.entries(NATURAL_CONTEXT_MAP)) {
@@ -1084,6 +1091,67 @@ function naverDirectionsUrl(spot: Spot, origin?: { lat: number; lng: number } | 
   return naverMapUrl(spot);
 }
 
+/** 전체 데이트 코스 다중 경유지(출발지 -> 1차 -> 2차 -> 3차) 통합 길찾기 딥링크 생성 */
+function naverMultiDirectionsUrl(
+  course: CourseStep[],
+  spotMap: Map<number, Spot>,
+  origin?: { lat: number; lng: number } | null,
+): string {
+  const points: { lat: number; lng: number; name: string }[] = [];
+
+  if (origin && origin.lat && origin.lng) {
+    points.push({ lat: origin.lat, lng: origin.lng, name: '내위치' });
+  }
+
+  for (const step of course) {
+    if (step.spotId != null) {
+      const spot = spotMap.get(step.spotId);
+      if (spot && spot.lat && spot.lng) {
+        points.push({ lat: spot.lat, lng: spot.lng, name: spot.name });
+      }
+    }
+  }
+
+  if (points.length < 2) {
+    if (course.length > 0 && course[0].spotId != null) {
+      const firstSpot = spotMap.get(course[0].spotId);
+      if (firstSpot) return naverDirectionsUrl(firstSpot, origin);
+    }
+    return 'https://map.naver.com';
+  }
+
+  const pathSegments = points
+    .map((p) => `${p.lng},${p.lat},${encodeURIComponent(p.name)}`)
+    .join('/');
+
+  // 2개 지점은 대중교통(transit), 3개 이상 다중 경유지는 네이버 지도 정책에 따라 자동차(car)로 전 코스 일괄 라우팅
+  const mode = points.length === 2 ? 'transit' : 'car';
+  return `https://map.naver.com/v5/directions/${pathSegments}/-/${mode}`;
+}
+
+/** 뉴스/사건사고/방송사 채널 등 데이트에 부적합한 영상 필터링 블랙리스트 */
+const DISALLOWED_YOUTUBE_KEYWORDS = [
+  'ytn', 'kbs', 'sbs', 'mbc', 'jtbc', '연합뉴스', '뉴스', 'news',
+  'tv조선', '채널a', 'mbn', 'yonhap', '사건', '사고', '체포', '경찰',
+  '화재', '논란', '날씨', '속보', '단독', '현장출동', '특보', '취재', '고발'
+];
+
+/** 검증된 고품질 유튜브 데이트 핫클립/쇼츠인지 엄격 판정 (1만 뷰 이상 & 뉴스/사건사고 배제) */
+function isValidYoutubeHotclip(yt?: { url?: string; title?: string; views?: number; likes?: number } | null): boolean {
+  if (!yt || !yt.url) return false;
+  
+  // 1만 뷰 이상 또는 500 좋아요 이상 검증
+  const views = Number(yt.views) || 0;
+  const likes = Number(yt.likes) || 0;
+  if (views < 10000 && likes < 500) return false;
+
+  const combined = `${yt.title || ''} ${yt.url}`.toLowerCase();
+  if (DISALLOWED_YOUTUBE_KEYWORDS.some((kw) => combined.includes(kw.toLowerCase()))) {
+    return false;
+  }
+  return true;
+}
+
 /** 복사 텍스트용 스팟 한 줄 소개 정제 (영문 날것 태그 방지 & 한국어 보강) */
 function getCleanSpotSummary(spot: Spot): string {
   if (spot.summary && spot.summary.trim().length > 0) {
@@ -1316,109 +1384,109 @@ function generateCourseStory(
   };
   const defaultClosing = moodClosing[moodKey] || '일상 속에서 잊지 못할 설렘을 선물할 추천 코스예요 💖';
 
-  // 10가지 다채로운 에디토리얼 스타일 패턴 (0 ~ 9)
+  // 10가지 다채로운 에디토리얼 추천 스타일 패턴 (0 ~ 9)
   const pattern = idSum % 10;
 
   switch (pattern) {
-    // 0. 공간의 감각 & 템포 연결형 (Cinematic Rhythm)
+    // 0. 공간의 감각 & 템포 연결형
     case 0: {
       const parts: string[] = [];
-      if (day) parts.push(`${wrap(day.name)}의 나른하고 따스한 공기`);
+      if (day) parts.push(`${wrap(day.name)}의 여유로운 낮 햇살`);
       if (eve) parts.push(`${wrap(eve.name)}에서 마주하는 정갈한 미식`);
       if (night) parts.push(`${wrap(night.name)}의 은은한 조명 아래 낭만으로 물드는 밤`);
       if (stay) parts.push(`${wrap(stay.name)}에서 누리는 아늑한 여운`);
-      return `${parts.join(', ')} — 두 사람의 템포에 꼭 맞춘 특별한 하루예요.${metaTip ? metaTip : ''}`;
+      return `${parts.join(', ')}이 조화롭게 어우러져 두 사람의 특별한 하루를 완성하기 좋은 데이트 코스입니다.${metaTip ? metaTip : ''}`;
     }
 
-    // 1. 에디토리얼 스토리텔링형 (Sensory Narrative)
+    // 1. 에디토리얼 스토리텔링형
     case 1: {
       if (day && eve && night) {
-        return `${wrap(day.name)}에서 나누는 설레는 대화가 ${wrap(eve.name)}의 근사한 테이블로, 그리고 ${wrap(night.name)}의 감미로운 무드로 자연스레 젖어드는 완벽한 여정이에요.${metaTip}`;
+        return `${wrap(day.name)}에서 나누는 설레는 대화가 ${wrap(eve.name)}의 근사한 테이블로, 그리고 ${wrap(night.name)}의 감미로운 무드로 자연스레 이어져 적극 추천해요!${metaTip}`;
       }
       if (day && eve) {
-        return `${wrap(day.name)}의 여유로운 감성에서 시작해 ${wrap(eve.name)}의 황홀한 맛으로 이어지는 감각적인 데이트예요.${metaTip}`;
+        return `${wrap(day.name)}의 여유로운 감성에서 시작해 ${wrap(eve.name)}의 황홀한 맛으로 이어지는 감각적인 데이트 코스예요.${metaTip}`;
       }
       if (eve && night) {
-        return `${wrap(eve.name)}의 로맨틱한 식사 뒤에 ${wrap(night.name)}에서 깊어가는 밤의 정취를 온전히 누려보세요.${metaTip}`;
+        return `${wrap(eve.name)}의 로맨틱한 식사 뒤에 ${wrap(night.name)}에서 깊어가는 밤의 낭만을 오롯이 맞이할 수 있어요.${metaTip}`;
       }
       break;
     }
 
-    // 2. 공간 미학과 감정선 중심형 (Atmospheric Romance)
+    // 2. 공간 미학과 감정선 중심형
     case 2: {
       const segments: string[] = [];
       if (day) segments.push(`햇살이 머무는 ${wrap(day.name)}의 여유`);
       if (eve) segments.push(`${wrap(eve.name)}에서 나누는 특별한 한 끼`);
       if (night) segments.push(`${wrap(night.name)}에서 이어지는 둘만의 밀도 높은 대화`);
       if (stay) segments.push(`${wrap(stay.name)}에서의 온전한 쉼`);
-      return `${segments.join(', ')}. ${metaTip ? metaTip.trim() : defaultClosing}`;
+      return `${segments.join(', ')}으로 이어져 둘만의 깊은 교감을 나누기에 참 좋아요. ${metaTip ? metaTip.trim() : defaultClosing}`;
     }
 
-    // 3. 시적 계절감 & 빛의 흐름형 (Lyrical Light & Shadow)
+    // 3. 시적 계절감 & 빛의 흐름형
     case 3: {
       const lights: string[] = [];
       if (day) lights.push(`오후의 따스한 볕을 품은 ${wrap(day.name)}`);
       if (eve) lights.push(`노을빛 아래 그윽해지는 ${wrap(eve.name)}`);
       if (night) lights.push(`달빛 아래 잔잔한 속삭임이 맴도는 ${wrap(night.name)}`);
       if (stay) lights.push(`별빛을 마주하는 ${wrap(stay.name)}`);
-      return `${lights.join('부터 ')}까지, 시간의 결을 따라 물드는 로맨틱한 하루예요.${metaTip}`;
+      return `${lights.join('부터 ')}까지, 시간의 결을 따라 자연스럽게 어우러질 수 있는 로맨틱한 하루예요.${metaTip}`;
     }
 
-    // 4. 취향 & 큐레이션 찬사형 (Curated Taste)
+    // 4. 취향 & 큐레이션 찬사형
     case 4: {
       const tastes: string[] = [];
       if (day) tastes.push(`${wrap(day.name)}의 감각적인 무드`);
       if (eve) tastes.push(`${wrap(eve.name)}의 섬세한 요리`);
       if (night) tastes.push(`${wrap(night.name)}의 아늑한 온기`);
       if (stay) tastes.push(`${wrap(stay.name)}의 편안한 휴식`);
-      return `${tastes.join('와 ')}가 조화롭게 어우러져 두 사람의 취향을 온전히 만족시킬 셀렉션이에요.${metaTip}`;
+      return `${tastes.join('와 ')}가 섬세하게 어우러져 두 사람의 취향을 온전히 만족시킬 셀렉션이라 강력 추천해요!${metaTip}`;
     }
 
-    // 5. 일상 탈출 & 몰입형 (Urban Sanctuary)
+    // 5. 일상 탈출 & 몰입형
     case 5: {
       const escapes: string[] = [];
       if (day) escapes.push(`${wrap(day.name)}에서 찾는 작은 쉼`);
       if (eve) escapes.push(`${wrap(eve.name)}의 깊은 풍미`);
       if (night) escapes.push(`${wrap(night.name)}의 은은한 밤공기`);
       if (stay) escapes.push(`${wrap(stay.name)}에서의 하룻밤`);
-      return `도심의 소음을 벗어나 ${escapes.join(', 그리고 ')}에 오롯이 빠져보는 낭만적인 시간이에요.${metaTip}`;
+      return `도심의 번잡함을 벗어나 ${escapes.join(', 그리고 ')}에 오롯이 빠져보는 낭만적인 시간으로 맞이할 수 있어요.${metaTip}`;
     }
 
-    // 6. 시네마틱 모먼트형 (Cinematic Moments)
+    // 6. 시네마틱 모먼트형
     case 6: {
       if (day && eve && night) {
-        return `${wrap(day.name)}의 기분 좋은 시작, ${wrap(eve.name)}에서 마주하는 설레는 순간, ${wrap(night.name)}의 감미로운 음악이 더해져 영화 속 한 장면처럼 기억될 코스예요.${metaTip}`;
+        return `${wrap(day.name)}의 기분 좋은 시작, ${wrap(eve.name)}에서 마주하는 설레는 순간, ${wrap(night.name)}의 감미로운 음악이 더해져 영화 속 한 장면처럼 기억될 데이트 코스입니다.${metaTip}`;
       }
       if (day && eve) {
-        return `${wrap(day.name)}에서 빚어낸 미소와 ${wrap(eve.name)}에서의 로맨틱한 순간이 오래도록 마음에 남을 데이트예요.${metaTip}`;
+        return `${wrap(day.name)}에서 빚어낸 미소와 ${wrap(eve.name)}에서의 로맨틱한 순간이 오래도록 기분 좋은 여운으로 어우러질 수 있어요.${metaTip}`;
       }
       if (eve && night) {
-        return `${wrap(eve.name)}의 황홀한 테이블과 ${wrap(night.name)}의 반짝이는 밤 풍경이 한 편의 영화처럼 이어져요.${metaTip}`;
+        return `${wrap(eve.name)}의 황홀한 테이블과 ${wrap(night.name)}의 반짝이는 밤 풍경이 한 편의 영화처럼 이어져 추천해요!${metaTip}`;
       }
       break;
     }
 
-    // 7. 비밀스러운 아지트 & 낭만형 (Secret Hideout)
+    // 7. 비밀스러운 아지트 & 낭만형
     case 7: {
       const spots: string[] = [];
       if (day) spots.push(`둘만의 아지트 같은 ${wrap(day.name)}`);
       if (eve) spots.push(`정성 어린 요리가 있는 ${wrap(eve.name)}`);
       if (night) spots.push(`시간이 멈춘 듯 아늑한 ${wrap(night.name)}`);
       if (stay) spots.push(`프라이빗한 쉼터 ${wrap(stay.name)}`);
-      return `${spots.join(', ')}에서 다른 누구에게도 방해받지 않는 둘만의 온기를 느껴보세요.${metaTip}`;
+      return `${spots.join(', ')}에서 다른 누구에게도 방해받지 않는 둘만의 따스한 온기를 만끽해보세요.${metaTip}`;
     }
 
-    // 8. 오감 자극 미식 & 감성형 (Sensory Symphony)
+    // 8. 오감 자극 미식 & 감성형
     case 8: {
       const senses: string[] = [];
       if (day) senses.push(`${wrap(day.name)}의 향긋한 티타임`);
       if (eve) senses.push(`${wrap(eve.name)}에서 느껴지는 정갈한 미식`);
       if (night) senses.push(`${wrap(night.name)}의 감미로운 한잔`);
       if (stay) senses.push(`${wrap(stay.name)}의 포근한 침구`);
-      return `${senses.join('과 ')}으로 두 사람의 하루를 기분 좋게 채워줄 감각적인 코스예요 ✨${metaTip}`;
+      return `${senses.join('과 ')}으로 두 사람의 하루를 기분 좋게 채워줄 감각적인 코스라 더욱 추천해요 ✨${metaTip}`;
     }
 
-    // 9. 기억 & 영원성형 (Everlasting Memory)
+    // 9. 기억 & 영원성형
     case 9:
     default: {
       const memories: string[] = [];
@@ -1426,7 +1494,7 @@ function generateCourseStory(
       if (eve) memories.push(`${wrap(eve.name)}의 따뜻한 식탁`);
       if (night) memories.push(`${wrap(night.name)}의 깊은 밤하늘`);
       if (stay) memories.push(`${wrap(stay.name)}의 고요한 아침`);
-      return `${memories.join('가 ')} 하나로 이어져, 두 사람에게 가장 소중한 계절의 한 페이지로 기록될 여정이에요.${metaTip}`;
+      return `${memories.join('가 ')} 하나로 이어져, 두 사람에게 가장 소중한 계절의 한 페이지로 기록될 특별한 여정이에요.${metaTip}`;
     }
   }
 
@@ -1486,7 +1554,7 @@ async function formatCourseTextAsync(
     lines.push(`• 소개: ${summary}`);
     lines.push(`• 지도: ${shortMapUrl}`);
     const ytObj = spot.social_links?.youtube;
-    if (ytObj?.url && ((ytObj.views || 0) >= 10000 || (ytObj.likes || 0) >= 500)) {
+    if (isValidYoutubeHotclip(ytObj) && ytObj?.url) {
       const shortYt = await shortenUrl(ytObj.url);
       lines.push(`• 영상: ${shortYt}`);
     }
@@ -1690,7 +1758,7 @@ function activeSlots(): SlotKey[] {
 }
 
 declare const __APP_VERSION__: string;
-const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.9.3';
+const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.9.4';
 
 function courseSpotIds(): number[] {
   if (!state.course) return [];
@@ -1968,16 +2036,48 @@ function getRegionSelectorLabel(): { title: string; subtitle: string; isSelected
     .map((k) => REGIONS.find((r) => r.key === k)?.label || k)
     .join(', ');
 
-  if (state.subZones.length > 0) {
-    const firstZone = POPULAR_ZONES.find((z) => z.key === state.subZones[0])?.label || state.subZones[0];
-    const displayTitle =
-      state.subZones.length > 1 ? `${firstZone} 외 ${state.subZones.length - 1}곳` : firstZone;
-    return { title: displayTitle, subtitle: regionNames, isSelected: true };
+  // 선택된 지역별로 전체 선택 여부 또는 개별 데이트존 판정
+  const displayItems: string[] = [];
+  let isAllRegionsFull = true;
+
+  for (const regKey of state.regions) {
+    const regLabel = REGIONS.find((r) => r.key === regKey)?.label || regKey;
+    const subZonesInReg = POPULAR_ZONES.filter((z) => z.regionKey === regKey);
+    const selectedZonesInReg = subZonesInReg.filter((z) => state.subZones.includes(z.key));
+
+    // 해당 지역의 모든 데이트존이 선택되었거나, 세부존 지정 없이 지역만 선택된 경우 -> "XX 전체"
+    if (
+      (subZonesInReg.length > 0 && selectedZonesInReg.length === subZonesInReg.length) ||
+      selectedZonesInReg.length === 0
+    ) {
+      displayItems.push(`${regLabel} 전체`);
+    } else {
+      isAllRegionsFull = false;
+      selectedZonesInReg.forEach((z) => displayItems.push(z.label));
+    }
+  }
+
+  // 표시 타이틀 생성
+  let displayTitle = '';
+  if (displayItems.length === 0) {
+    displayTitle = regionNames;
+  } else if (displayItems.length === 1) {
+    displayTitle = displayItems[0];
+  } else if (displayItems.length === 2) {
+    displayTitle = displayItems.join(', ');
+  } else {
+    displayTitle = `${displayItems[0]} 외 ${displayItems.length - 1}곳`;
+  }
+
+  // 서브타이틀 생성
+  let subtitle = regionNames;
+  if (isAllRegionsFull) {
+    subtitle = state.regions.length === 1 ? '해당 지역 전체' : `${state.regions.length}개 지역`;
   }
 
   return {
-    title: regionNames,
-    subtitle: state.regions.length === 1 ? '해당 권역 전체' : `${state.regions.length}개 권역`,
+    title: displayTitle,
+    subtitle,
     isSelected: true,
   };
 }
@@ -2226,6 +2326,15 @@ function renderResults(): void {
     initialStoryHtml = `“${generateCourseStory(state.course, spotById, cond.mood, true)}”`;
   }
 
+  const multiDirectionsUrl = naverMultiDirectionsUrl(state.course, spotById, userCoords);
+  const routeSpotNames = state.course
+    .map((s) => (s.spotId != null ? spotById.get(s.spotId)?.name : null))
+    .filter((n): n is string => !!n);
+  const routeSummaryText = [
+    ...(userCoords ? ['내 위치'] : []),
+    ...routeSpotNames,
+  ].join(' ➔ ');
+
   area.innerHTML = `
     <div class="course-head">
       <span class="course-title">${escapeHtml(regionsLabel(cond.regions, cond.subZones))} · ${escapeHtml(moodLabel(cond.mood))}</span>
@@ -2233,6 +2342,20 @@ function renderResults(): void {
         ${ICON_REFRESH_SVG}
         <span class="btn-regenerate-text">전체 다시 추천</span>
       </button>
+    </div>
+    <div class="course-route-bar">
+      <div class="route-bar-main">
+        <div class="route-bar-badge">
+          <span>🗺️ 전체 코스 동선</span>
+        </div>
+        <div class="route-bar-path" aria-label="${escapeHtml(routeSummaryText)}">
+          ${escapeHtml(routeSummaryText)}
+        </div>
+      </div>
+      <a class="btn-route-navi" href="${escapeHtml(multiDirectionsUrl)}" target="_blank" rel="noopener noreferrer" aria-label="네이버 지도로 전체 코스 길찾기">
+        <span>전체 길찾기</span>
+        <span class="route-arrow">➔</span>
+      </a>
     </div>
     <div class="ai-briefing-card" id="ai-briefing-box">
       <div class="ai-briefing-badge">
@@ -2456,8 +2579,8 @@ function getSpotImageUrl(spot: Spot, slot: SlotKey, usedImages?: Set<string>): s
 function isSuperHotSpot(spot: Spot): boolean {
   if (!spot) return false;
 
-  // 1. 유튜브 대형 바이럴 영상 (5만 뷰 이상)
-  if (spot.social_links?.youtube?.views && spot.social_links.youtube.views >= 50000) {
+  // 1. 유튜브 대형 바이럴 영상 (5만 뷰 이상 & 뉴스/사건사고 제외)
+  if (isValidYoutubeHotclip(spot.social_links?.youtube) && (spot.social_links?.youtube?.views || 0) >= 50000) {
     return true;
   }
 
@@ -2645,10 +2768,8 @@ function renderStepCard(
           ${swappable ? `<button class="btn-action-icon btn-swap-icon" data-step-index="${index}" aria-label="다시 추천">${ICON_SWAP_SVG}</button>` : ''}
           ${(() => {
             const yt = spot.social_links?.youtube;
-            if (!yt?.url) return '';
-            const meetsCriteria = (yt.views || 0) >= 10000 || (yt.likes || 0) >= 500;
-            if (!meetsCriteria) return '';
-            return `<a class="btn-action-icon btn-yt-icon" href="${escapeHtml(yt.url)}" target="_blank" rel="noopener noreferrer" aria-label="YouTube">${ICON_YOUTUBE_SVG}</a>`;
+            if (!isValidYoutubeHotclip(yt) || !yt?.url) return '';
+            return `<a class="btn-action-icon btn-yt-icon" href="${escapeHtml(yt.url)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(spot.name)} 유튜브 핫클립">${ICON_YOUTUBE_SVG}</a>`;
           })()}
           ${(() => {
             const kakao = spot.social_links?.kakaomap?.url;
@@ -3089,7 +3210,7 @@ function renderOverlay(): void {
           <button class="overlay-close" id="overlay-close" aria-label="닫기">✕</button>
         </div>
         <div class="location-split">
-          <!-- 좌측 8대 권역 탭 -->
+          <!-- 좌측 8대 지역 탭 -->
           <div class="location-regions" role="tablist">
             ${REGIONS.map((r) => {
               const isSelectedTab = state.activeRegionTab === r.key;
@@ -3122,7 +3243,7 @@ function renderOverlay(): void {
               <div class="subzones-header">
                 <span class="subzones-title">${REGIONS.find((r) => r.key === activeReg)?.label} 인기 데이트존</span>
                 <button class="btn-toggle-all-zones" id="btn-toggle-all-zones">
-                  ${subZonesInTab.length > 0 && subZonesInTab.every((z) => state.subZones.includes(z.key)) ? '권역 전체 해제' : '권역 전체 선택'}
+                  ${subZonesInTab.length > 0 && subZonesInTab.every((z) => state.subZones.includes(z.key)) ? '지역 전체 해제' : '지역 전체 선택'}
                 </button>
               </div>
               <div class="subzones-grid">
@@ -3153,7 +3274,7 @@ function renderOverlay(): void {
     root.querySelector('#overlay-backdrop')!.addEventListener('click', () => closeOverlay());
     root.querySelector('#overlay-close')!.addEventListener('click', () => closeOverlay());
 
-    // 권역 탭 클릭
+    // 지역 탭 클릭
     root.querySelectorAll<HTMLButtonElement>('.region-tab-item').forEach((tabBtn) => {
       tabBtn.addEventListener('click', () => {
         state.activeRegionTab = tabBtn.dataset.regionTab || 'SEOUL';
@@ -3168,7 +3289,7 @@ function renderOverlay(): void {
       closeOverlay();
     });
 
-    // 권역 전체 선택/해제 토글 (모든 하위 세부존 일괄 체크/해제)
+    // 지역 전체 선택/해제 토글 (모든 하위 세부존 일괄 체크/해제)
     root.querySelector('#btn-toggle-all-zones')?.addEventListener('click', () => {
       const areAllChecked =
         subZonesInTab.length > 0 && subZonesInTab.every((z) => state.subZones.includes(z.key));
@@ -3176,11 +3297,11 @@ function renderOverlay(): void {
       const currentSubZones = new Set(state.subZones);
 
       if (areAllChecked) {
-        // 1. 전체 해제: 해당 권역의 모든 세부존 일괄 제거 및 권역 제거
+        // 1. 전체 해제: 해당 지역의 모든 세부존 일괄 제거 및 지역 제거
         subZonesInTab.forEach((z) => currentSubZones.delete(z.key));
         state.regions = state.regions.filter((r) => r !== activeReg);
       } else {
-        // 2. 전체 선택: 해당 권역의 모든 세부존 일괄 추가 및 권역 포함
+        // 2. 전체 선택: 해당 지역의 모든 세부존 일괄 추가 및 지역 포함
         subZonesInTab.forEach((z) => currentSubZones.add(z.key));
         if (!state.regions.includes(activeReg)) {
           state.regions.push(activeReg);
@@ -3212,7 +3333,7 @@ function renderOverlay(): void {
         const cb = item.querySelector<HTMLInputElement>('.zone-checkbox');
         if (cb) cb.checked = willCheck;
 
-        // 해당 권역 내 체크된 항목이 1개라도 있으면 권역 포함, 0개면 권역 제외
+        // 해당 지역 내 체크된 항목이 1개라도 있으면 지역 포함, 0개면 지역 제외
         const hasAnyInReg = subZonesInTab.some((z) => state.subZones.includes(z.key));
         if (hasAnyInReg) {
           if (!state.regions.includes(activeReg)) {
@@ -3227,7 +3348,7 @@ function renderOverlay(): void {
         if (toggleBtn) {
           const allNowChecked =
             subZonesInTab.length > 0 && subZonesInTab.every((z) => state.subZones.includes(z.key));
-          toggleBtn.textContent = allNowChecked ? '권역 전체 해제' : '권역 전체 선택';
+          toggleBtn.textContent = allNowChecked ? '지역 전체 해제' : '지역 전체 선택';
         }
 
         // 좌측 탭 인디케이터 뱃지 동기화

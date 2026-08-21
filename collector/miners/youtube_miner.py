@@ -65,10 +65,17 @@ def _extract_core_name(name: str) -> str:
             clean = clean[:-len(prefix)].strip()
     return clean or name
 
+DISALLOWED_KEYWORDS = [
+    "ytn", "kbs", "sbs", "mbc", "jtbc", "연합뉴스", "뉴스", "news",
+    "tv조선", "채널a", "mbn", "yonhap", "korea now", "한겨레", "조선일보",
+    "중앙일보", "동아일보", "사건", "사고", "체포", "경찰", "화재", "논란",
+    "날씨", "속보", "단독", "현장출동", "특보", "취재", "고발", "단속"
+]
+
 def search_youtube_hotclip(spot_name: str, region_or_area: str = "") -> dict | None:
     """
     장소명으로 유튜브 검색을 수행하여 가장 관련성 높은 쇼츠 또는 최신 핫영상을 추출합니다.
-    영상 제목에 실제 상호명이 명확히 포함된 경우에만 인정합니다.
+    영상 제목에 실제 상호명이 명확히 포함되고 뉴스/방송사가 아닌 경우에만 인정합니다.
     """
     clean_name = re.sub(r'\(.*?\)|\[.*?\]', '', spot_name).strip()
     core_name = _extract_core_name(spot_name)
@@ -130,6 +137,18 @@ def search_youtube_hotclip(spot_name: str, region_or_area: str = "") -> dict | N
                 if not title:
                     continue
 
+                # 채널명 추출
+                channel_name = ""
+                if "ownerText" in video and "runs" in video["ownerText"]:
+                    channel_name = "".join(r.get("text", "") for r in video["ownerText"]["runs"])
+                elif "shortBylineText" in video and "runs" in video["shortBylineText"]:
+                    channel_name = "".join(r.get("text", "") for r in video["shortBylineText"]["runs"])
+
+                # 뉴스/방송사 및 사건사고 영상 철저 배제
+                combined_meta = f"{title} {channel_name}".lower()
+                if any(dis in combined_meta for dis in DISALLOWED_KEYWORDS):
+                    continue
+
                 norm_title = _norm_name(title)
 
                 # 상호명 또는 핵심 상호명이 제목에 실제로 존재하는지 엄격히 검증
@@ -149,6 +168,10 @@ def search_youtube_hotclip(spot_name: str, region_or_area: str = "") -> dict | N
                         view_str = "".join(r.get("text", "") for r in video["viewCountText"]["runs"])
                 
                 views = parse_view_count(view_str)
+                # 신뢰할 수 있는 1만 뷰 이상만 채택
+                if views < 10000:
+                    continue
+
                 is_shorts = "reelItemRenderer" in video or "shorts" in title.lower()
                 
                 video_url = f"https://www.youtube.com/shorts/{video_id}" if is_shorts else f"https://www.youtube.com/watch?v={video_id}"
@@ -156,6 +179,7 @@ def search_youtube_hotclip(spot_name: str, region_or_area: str = "") -> dict | N
                 return {
                     "url": video_url,
                     "title": title[:60],
+                    "channel": channel_name[:40],
                     "views": views,
                     "is_shorts": is_shorts,
                 }
