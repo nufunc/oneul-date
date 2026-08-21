@@ -1641,7 +1641,8 @@ function buildNearbyCourse(coords: { lat: number; lng: number } | null): { label
     }
   }
 
-  const steps = generateCourse(pool, ['day', 'evening', 'night'], [], 'ALL');
+  const timeInfo = getTimeBasedSlots();
+  const steps = generateCourse(pool, timeInfo.slotKeys, [], 'ALL');
 
   // 코스에 포함된 실제 스팟들의 내 위치 기준 최대 이동 반경(Max Distance) 계산
   if (coords && coords.lat && coords.lng) {
@@ -1753,18 +1754,32 @@ function getInitialThemeMode(): ThemeMode {
   return 'light';
 }
 
-/** 현재 시각 기준 최적의 기본 시간대 슬롯 반환 (15시 기준 낮 자동 제외) */
+/** 기본 시간대 슬롯 반환 (낮 | 저녁 | 밤 기본 선택) */
 function getDefaultSlots(): Record<SlotKey, boolean> {
+  return { day: true, evening: true, night: true, stay: false };
+}
+
+/** 현시간 기준 실시간 맞춤 슬롯 계산 ('지금 가기 좋은 맞춤 코스' 전용) */
+function getTimeBasedSlots(): { slots: Record<SlotKey, boolean>; slotKeys: SlotKey[] } {
   const hour = new Date().getHours();
-  if (hour >= 5 && hour < 15) {
-    // 05:00 ~ 14:59: 낮 + 저녁
-    return { day: true, evening: true, night: false, stay: false };
-  } else if (hour >= 15 && hour < 20) {
-    // 15:00 ~ 19:59: 저녁 + 밤 (낮 제외)
-    return { day: false, evening: true, night: true, stay: false };
+  if (hour >= 5 && hour < 14) {
+    // 05:00 ~ 13:59: 낮 + 저녁
+    return {
+      slots: { day: true, evening: true, night: false, stay: false },
+      slotKeys: ['day', 'evening'],
+    };
+  } else if (hour >= 14 && hour < 20) {
+    // 14:00 ~ 19:59: 저녁 + 밤
+    return {
+      slots: { day: false, evening: true, night: true, stay: false },
+      slotKeys: ['evening', 'night'],
+    };
   } else {
-    // 20:00 ~ 04:59: 밤 + 숙박 (낮/저녁 제외)
-    return { day: false, evening: false, night: true, stay: true };
+    // 20:00 ~ 04:59: 밤 + 숙박 (또는 밤 단독)
+    return {
+      slots: { day: false, evening: false, night: true, stay: true },
+      slotKeys: ['night', 'stay'],
+    };
   }
 }
 
@@ -2011,7 +2026,7 @@ function renderTodayCourse(): void {
   if (!btn) return;
 
   function applyCourse(steps: CourseStep[], customLabel?: string) {
-    state.slots = { day: true, evening: true, night: true, stay: false };
+    state.slots = getTimeBasedSlots().slots;
     state.regions = [];
     state.subZones = [];
     state.mood = 'ALL';

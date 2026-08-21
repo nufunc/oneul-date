@@ -17,7 +17,33 @@ import json
 import time
 import urllib.request
 import urllib.parse
+
+# Windows 콘솔 인코딩 방어
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+    except Exception:
+        pass
+
 from groq_helper import get_groq_api_key, call_groq_json
+
+def _load_env_credentials():
+    search_paths = [
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"),
+        os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"),
+    ]
+    for env_path in search_paths:
+        if os.path.exists(env_path):
+            try:
+                with open(env_path, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if line.startswith("VITE_SUPABASE_URL=") or line.startswith("SUPABASE_URL="):
+                            os.environ["SUPABASE_URL"] = line.split("=", 1)[1].strip().strip('"').strip("'")
+                        elif line.startswith("SUPABASE_SERVICE_KEY=") or line.startswith("SUPABASE_KEY=") or line.startswith("VITE_SUPABASE_ANON_KEY="):
+                            os.environ["SUPABASE_SERVICE_KEY"] = line.split("=", 1)[1].strip().strip('"').strip("'")
+            except Exception:
+                pass
 
 def is_bad_summary(summary: str, name: str) -> bool:
     """비정상적인 스팟 설명인지 엄격 판정"""
@@ -133,6 +159,7 @@ def fix_all_spot_summaries(supabase_url: str, service_key: str, limit: int = 50)
     print(f"🎉 [완료] 총 {success_count}/{len(targets)}개 스팟 설명 교정 완료!")
 
 if __name__ == "__main__":
+    _load_env_credentials()
     sb_url = os.environ.get("SUPABASE_URL") or os.environ.get("VITE_SUPABASE_URL", "")
     sb_key = os.environ.get("SUPABASE_SERVICE_KEY") or os.environ.get("SUPABASE_KEY") or os.environ.get("VITE_SUPABASE_ANON_KEY", "")
     fix_all_spot_summaries(sb_url, sb_key, limit=30)
