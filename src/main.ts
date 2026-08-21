@@ -2334,24 +2334,48 @@ function triggerCourseGeneration(): void {
 const ICON_REFRESH_SVG = `<svg class="icon-refresh" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>`;
 const ICON_SWAP_SVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>`;
 const ICON_YOUTUBE_SVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`;
-const ICON_KAKAO_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3c-5.523 0-10 3.582-10 8 0 2.828 1.838 5.308 4.622 6.726l-1.173 4.316c-.105.385.318.694.654.477l5.068-3.342c.271.015.548.023.829.023 5.523 0 10-3.582 10-8s-4.477-8-10-8z"/></svg>`;
 const ICON_INSTA_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>`;
-const ICON_BLOG_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="13" y2="11"/></svg>`;
+const ICON_CATCHTABLE_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>`;
+const ICON_GOURMET_RIBBON_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="m8.21 13.89-1.71 8.61 5.5-3 5.5 3-1.71-8.61"/></svg>`;
 const ICON_NAVER_MAP_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
 
-function getRealInstagramUrl(spot: Spot): string | null {
+/** 캐치테이블 매장 예약 / 메뉴 상세 링크 생성 */
+function getCatchtableUrl(spot: Spot): string | null {
+  if (spot.booking_info?.url && spot.booking_info.url.includes('catchtable.co.kr')) {
+    return spot.booking_info.url;
+  }
+  if (spot.social_links?.catchtable?.url) {
+    return spot.social_links.catchtable.url;
+  }
+  if (spot.source?.url && spot.source.url.includes('catchtable.co.kr')) {
+    return spot.source.url;
+  }
+  const cat = (spot.category || '').toLowerCase();
+  const isDining = ['한식', '양식', '일식', '중식', '아시안', '바', '펍', '주점', '다이닝', '카페', '베이커리', '브런치'].some((c) => cat.includes(c)) || spot.slot === 'day' || spot.slot === 'evening' || spot.slot === 'night';
+  if (isDining) {
+    return `https://app.catchtable.co.kr/ct/shop/search?q=${encodeURIComponent(mapQuery(spot))}`;
+  }
+  return null;
+}
+
+/** 인스타그램 실시간 릴스 / 태그 / 공식 피드 링크 생성 */
+function getInstagramUrl(spot: Spot): string {
   const soc = spot.social_links?.instagram?.url;
   if (soc && soc.includes('instagram.com/')) return soc;
   const src = spot.source?.url;
   if (src && src.includes('instagram.com/')) return src;
-  return null;
+  const cleanTag = mapQuery(spot).replace(/[^가-힣a-zA-Z0-9]/g, '');
+  return `https://www.instagram.com/explore/tags/${encodeURIComponent(cleanTag)}/`;
 }
 
-function getRealBlogUrl(spot: Spot): string | null {
-  const soc = spot.social_links?.blog?.url;
-  if (soc && (soc.includes('blog.naver.com') || soc.includes('tistory.com') || soc.includes('brunch.co.kr'))) return soc;
-  const src = spot.source?.url;
-  if (src && (src.includes('blog.naver.com') || src.includes('tistory.com') || src.includes('brunch.co.kr'))) return src;
+/** 미쉐린 / 블루리본 공식 가이드 평가 링크 생성 */
+function getGourmetGuideUrl(spot: Spot): string | null {
+  if (spot.curation_badges?.michelin) {
+    return `https://guide.michelin.com/kr/ko/restaurants?q=${encodeURIComponent(mapQuery(spot))}`;
+  }
+  if (spot.curation_badges?.blue_ribbon) {
+    return `https://www.bluer.co.kr/search?keyword=${encodeURIComponent(mapQuery(spot))}`;
+  }
   return null;
 }
 
@@ -2860,19 +2884,19 @@ function renderStepCard(
             return `<a class="btn-action-icon btn-yt-icon" href="${escapeHtml(yt.url)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(spot.name)} 유튜브 핫클립">${ICON_YOUTUBE_SVG}</a>`;
           })()}
           ${(() => {
-            const kakao = spot.social_links?.kakaomap?.url;
-            if (!kakao) return '';
-            return `<a class="btn-action-icon btn-kakao-icon" href="${escapeHtml(kakao)}" target="_blank" rel="noopener noreferrer" aria-label="카카오맵">${ICON_KAKAO_SVG}</a>`;
+            const ctUrl = getCatchtableUrl(spot);
+            if (!ctUrl) return '';
+            return `<a class="btn-action-icon btn-ct-icon" href="${escapeHtml(ctUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(spot.name)} 캐치테이블 실시간 예약 및 메뉴">${ICON_CATCHTABLE_SVG}</a>`;
           })()}
           ${(() => {
-            const insta = getRealInstagramUrl(spot);
-            if (!insta) return '';
-            return `<a class="btn-action-icon btn-insta-icon" href="${escapeHtml(insta)}" target="_blank" rel="noopener noreferrer" aria-label="인스타그램">${ICON_INSTA_SVG}</a>`;
+            const insta = getInstagramUrl(spot);
+            return `<a class="btn-action-icon btn-insta-icon" href="${escapeHtml(insta)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(spot.name)} 인스타그램 릴스 및 포토존 피드">${ICON_INSTA_SVG}</a>`;
           })()}
           ${(() => {
-            const blog = getRealBlogUrl(spot);
-            if (!blog) return '';
-            return `<a class="btn-action-icon btn-blog-icon" href="${escapeHtml(blog)}" target="_blank" rel="noopener noreferrer" aria-label="블로그">${ICON_BLOG_SVG}</a>`;
+            const guideUrl = getGourmetGuideUrl(spot);
+            if (!guideUrl) return '';
+            const label = spot.curation_badges?.michelin ? '미쉐린 가이드 공식 평가' : '블루리본 서베이 공식 평가';
+            return `<a class="btn-action-icon btn-guide-icon" href="${escapeHtml(guideUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(spot.name)} ${label}">${ICON_GOURMET_RIBBON_SVG}</a>`;
           })()}
         </div>
         <div class="step-actions-right">

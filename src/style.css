@@ -202,11 +202,17 @@ html[data-theme-resolved="dark"] .btn-yt-icon {
   color: #fb7185;
 }
 
-html[data-theme="dark"] .btn-kakao-icon,
-html[data-theme-resolved="dark"] .btn-kakao-icon {
-  background: rgba(234, 179, 8, 0.15);
-  border-color: rgba(234, 179, 8, 0.3);
-  color: #fde047;
+html[data-theme="dark"] .btn-ct-icon,
+html[data-theme-resolved="dark"] .btn-ct-icon {
+  background: rgba(255, 62, 62, 0.15);
+  border-color: rgba(255, 62, 62, 0.3);
+  color: #ff6b6b;
+}
+html[data-theme="dark"] .btn-ct-icon:hover,
+html[data-theme-resolved="dark"] .btn-ct-icon:hover {
+  background: rgba(255, 62, 62, 0.25);
+  border-color: rgba(255, 62, 62, 0.45);
+  color: #ff8787;
 }
 
 html[data-theme="dark"] .btn-insta-icon,
@@ -215,12 +221,24 @@ html[data-theme-resolved="dark"] .btn-insta-icon {
   border-color: rgba(219, 39, 119, 0.3);
   color: #f472b6;
 }
+html[data-theme="dark"] .btn-insta-icon:hover,
+html[data-theme-resolved="dark"] .btn-insta-icon:hover {
+  background: rgba(219, 39, 119, 0.25);
+  border-color: rgba(219, 39, 119, 0.45);
+  color: #fbcfe8;
+}
 
-html[data-theme="dark"] .btn-blog-icon,
-html[data-theme-resolved="dark"] .btn-blog-icon {
-  background: rgba(22, 163, 74, 0.15);
-  border-color: rgba(22, 163, 74, 0.3);
-  color: #4ade80;
+html[data-theme="dark"] .btn-guide-icon,
+html[data-theme-resolved="dark"] .btn-guide-icon {
+  background: rgba(37, 99, 235, 0.18);
+  border-color: rgba(96, 165, 250, 0.4);
+  color: #93c5fd;
+}
+html[data-theme="dark"] .btn-guide-icon:hover,
+html[data-theme-resolved="dark"] .btn-guide-icon:hover {
+  background: rgba(37, 99, 235, 0.28);
+  border-color: rgba(96, 165, 250, 0.55);
+  color: #bfdbfe;
 }
 
 html[data-theme="dark"] .badge-blueribbon,
@@ -1756,17 +1774,17 @@ button {
   color: #BE123C;
 }
 
-/* 카카오맵 미니 아이콘 */
-.btn-kakao-icon {
-  background: #FDFCE8;
-  border-color: #FEF08A;
-  color: #854D0E;
+/* 캐치테이블 미니 아이콘 */
+.btn-ct-icon {
+  background: #FFF1F2;
+  border-color: #FECDD3;
+  color: #E11D48;
 }
 
-.btn-kakao-icon:hover {
-  background: #FEF9C3;
-  border-color: #FDE047;
-  color: #713F12;
+.btn-ct-icon:hover {
+  background: #FFE4E6;
+  border-color: #FDA4AF;
+  color: #BE123C;
 }
 
 /* 인스타그램 미니 아이콘 */
@@ -1782,17 +1800,17 @@ button {
   color: #BE185D;
 }
 
-/* 네이버 블로그 미니 아이콘 */
-.btn-blog-icon {
-  background: #F0FDF4;
-  border-color: #BBF7D0;
-  color: #16A34A;
+/* 미식 공식 가이드 리본 아이콘 */
+.btn-guide-icon {
+  background: #EFF6FF;
+  border-color: #BFDBFE;
+  color: #2563EB;
 }
 
-.btn-blog-icon:hover {
-  background: #DCFCE7;
-  border-color: #86EFAC;
-  color: #15803D;
+.btn-guide-icon:hover {
+  background: #DBEAFE;
+  border-color: #93C5FD;
+  color: #1D4ED8;
 }
 
 /* 네이버 지도 바로가기 단독 칩 (아이콘 + 텍스트) */
