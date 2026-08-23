@@ -150,15 +150,23 @@ def get_total_spot_stats():
     with_img = get_exact_count("&image_url=not.is.null")
     return {"total": total, "active": active, "closed": closed, "with_img": with_img}
 
+# 기동 시각 및 일일 리포트 상태 추적
+startup_time = None
+last_summary_date = None
+
 def check_and_generate_daily_summary(force: bool = False):
-    """지정된 KST 시각(기본: 오전 09시) 기준 일일 서머리 생성 및 이메일/구글챗 리포트 자동 발송"""
-    global last_summary_date
+    """지정된 KST 시각(기본: 22시) 기준 일일 서머리 생성 및 이메일/구글챗 리포트 자동 발송"""
+    global last_summary_date, startup_time
     now = get_kst_now()
     today_str = now.strftime("%Y-%m-%d")
 
-    # 매일 지정된 KST 시각 첫 사이클 또는 날짜 변경 시 동작
-    is_report_time = (now.hour == DAILY_REPORT_HOUR) or force
-    if is_report_time and (last_summary_date != today_str):
+    # 기동 직후 즉시 발송 방지 (컨테이너 재시작 시 중복 발송 차단)
+    send_on_startup = os.getenv("SEND_EMAIL_ON_STARTUP", "").strip().lower() in ("1", "true", "yes")
+    
+    # 정기 발송 조건: 현재 시각(KST)이 지정된 시각과 일치하고, 오늘 아직 발송하지 않은 경우
+    is_scheduled_hour = (now.hour == DAILY_REPORT_HOUR)
+    
+    if (is_scheduled_hour or force or send_on_startup) and (last_summary_date != today_str):
         stats = get_total_spot_stats()
         summary_text = (
             f"\n========================================================\n"
@@ -187,9 +195,10 @@ def check_and_generate_daily_summary(force: bool = False):
                 "new_spots": stats.get("total", 0),
                 "youtube_count": stats.get("with_img", 0)
             }
+            log(f"📧 [정기 리포트 발송 트리거] KST {now.hour:02d}:00 (설정 시각: {DAILY_REPORT_HOUR:02d}:00) 데일리 이메일 발송 실행")
             send_daily_digest(email_stats)
-        except Exception:
-            pass
+        except Exception as e:
+            log(f"데일리 리포트 발송 예외: {e}", level="ERROR")
 
         last_summary_date = today_str
 

@@ -613,7 +613,7 @@ def get_youtube_video_info(video_id: str, verbose: bool = False) -> dict | None:
     except Exception as e:
         diag.append(f"oEmbed:FAIL({str(e)[:40]})")
 
-    description, views, desc_source = "", 0, "none"
+    description, views, likes, desc_source = "", 0, 0, "none"
 
     # 2. watch 페이지 HTML 스크래핑 (동의 쿠키 포함)
     if not os.getenv("YT_FORCE_INNERTUBE"):
@@ -621,12 +621,15 @@ def get_youtube_video_info(video_id: str, verbose: bool = False) -> dict | None:
         if w["description"]:
             description, desc_source = w["description"], "watch_html"
             views = w["views"]
+            likes = w.get("likes", 0)
             diag.append(f"watchHTML:OK({w['length']:,}B, desc {len(description)}자, views {views:,})")
         else:
             diag.append(f"watchHTML:MISS(status={w['status']}, {w['length']:,}B"
                         f"{', ' + w['error'] if w['error'] else ''})")
             if w["views"]:
                 views = w["views"]
+            if w.get("likes"):
+                likes = w["likes"]
     else:
         diag.append("watchHTML:SKIPPED(YT_FORCE_INNERTUBE)")
 
@@ -637,6 +640,7 @@ def get_youtube_video_info(video_id: str, verbose: bool = False) -> dict | None:
             if it["description"]:
                 description, desc_source = it["description"], client["label"]
                 views = it["views"] or views
+                likes = it.get("likes", 0) or likes
                 title = title or it["title"]
                 author_name = author_name or it["author"]
                 diag.append(f"{client['label']}:OK({it['length']:,}B, desc {len(description)}자, views {views:,})")
@@ -645,6 +649,8 @@ def get_youtube_video_info(video_id: str, verbose: bool = False) -> dict | None:
                         f"{', ' + it['error'] if it['error'] else ''})")
             if it["views"] and not views:
                 views = it["views"]
+            if it.get("likes") and not likes:
+                likes = it["likes"]
             if it["title"] and not title:
                 title = it["title"]
 

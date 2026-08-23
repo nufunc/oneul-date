@@ -138,9 +138,10 @@ def run_catchtable_mining(supabase_url: str, service_key: str, max_discoveries: 
             search_res = search_naver(search_q)
             time.sleep(0.3)
 
-            top = search_res.get("top")
-            if not top:
+            if not search_res or not isinstance(search_res, list) or len(search_res) == 0:
                 continue
+
+            top = search_res[0]
 
             real_name = top.get("name", "").strip()
             category = top.get("category", "").strip()
