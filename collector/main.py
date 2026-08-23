@@ -75,11 +75,11 @@ COLLECTOR_LOG_FILE = os.path.join(LOG_DIR, "collector.log")
 DAILY_SUMMARY_LOG_FILE = os.path.join(LOG_DIR, "daily_summary.log")
 
 class _TeeStream:
-    """stdout/stderr를 콘솔과 collector.log 양쪽에 동시 기록.
-    하위 모듈(miner 등)이 print()만 사용해도 로그 파일에 순서대로 남도록 보장."""
-    def __init__(self, stream, path):
+    """stdout/stderr를 콘솔, 최신 collector.log, 일자별 collector-YYYY-MM-DD.log에 동시 기록.
+    하위 모듈(miner 등)이 print()만 사용해도 로그 파일에 순서대로 안전하게 남도록 보장."""
+    def __init__(self, stream, base_dir):
         self._stream = stream
-        self._path = path
+        self._base_dir = base_dir
 
     def write(self, data):
         try:
@@ -87,7 +87,16 @@ class _TeeStream:
         except Exception:
             pass
         try:
-            with open(self._path, "a", encoding="utf-8") as f:
+            today_str = datetime.now(KST).strftime("%Y-%m-%d")
+            daily_file = os.path.join(self._base_dir, f"collector-{today_str}.log")
+            latest_file = os.path.join(self._base_dir, "collector.log")
+
+            # 1. 최신 통합 로그 파일 기록
+            with open(latest_file, "a", encoding="utf-8") as f:
+                f.write(data)
+
+            # 2. 일자별 롤링 로그 파일 기록
+            with open(daily_file, "a", encoding="utf-8") as f:
                 f.write(data)
         except Exception:
             pass
@@ -98,8 +107,8 @@ class _TeeStream:
         except Exception:
             pass
 
-sys.stdout = _TeeStream(sys.stdout, COLLECTOR_LOG_FILE)
-sys.stderr = _TeeStream(sys.stderr, COLLECTOR_LOG_FILE)
+sys.stdout = _TeeStream(sys.stdout, LOG_DIR)
+sys.stderr = _TeeStream(sys.stderr, LOG_DIR)
 
 def get_kst_now():
     return datetime.now(KST)

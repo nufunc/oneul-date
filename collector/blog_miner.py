@@ -16,6 +16,7 @@ import re
 from supabase_worker import load_env, search_naver, calculate_quality_score
 from discovery_engine import infer_slot
 from category_filter import is_date_spot_category
+from area_seeds import generate_dynamic_queries, get_coverage_gap_areas
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -158,10 +159,23 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
         "Prefer": "return=minimal"
     }
 
-    # max_discoveries 수량에 맞춰 블로그 쿼리 수를 유연하게 비례 확장
+    # 1) DB 커버리지 갭 분석 (스팟 수가 적은 소외 자치구 감지, 예: 금천구 가산, 구로, 도봉 등)
+    gap_districts = []
+    try:
+        gap_districts = get_coverage_gap_areas(supabase_url, service_key, limit=6)
+    except Exception:
+        pass
+
+    # 2) 정적 핫플 쿼리 + 소외지역/역세권 동적 합성 쿼리 50:50 배합
     sample_count = min(len(BLOG_SEARCH_QUERIES), max(8, (max_discoveries + 4) // 4))
-    sampled = random.sample(BLOG_SEARCH_QUERIES, sample_count)
-    print(f"📝 [블로그 & 웹 마이닝 시작] 타깃 쿼리 ({len(sampled)}개): {[q[0] for q in sampled[:5]]} ...")
+    half_count = max(4, sample_count // 2)
+    static_sampled = random.sample(BLOG_SEARCH_QUERIES, min(half_count, len(BLOG_SEARCH_QUERIES)))
+    dynamic_sampled = generate_dynamic_queries(count=half_count, gap_districts=gap_districts)
+
+    sampled = static_sampled + dynamic_sampled
+    random.shuffle(sampled)
+
+    print(f"📝 [블로그 & 소외지역 마이닝 시작] 타깃 쿼리 ({len(sampled)}개): {[q[0] for q in sampled[:5]]} ...")
 
     discovered = []
 

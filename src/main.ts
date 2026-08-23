@@ -877,7 +877,7 @@ function regionsLabel(regionKeys: string[], zoneKeys: string[] = []): string {
       .filter((lbl): lbl is string => Boolean(lbl));
     if (zoneLabels.length > 0) return zoneLabels.join('·');
   }
-  if (regionKeys.length === 0) return '전국';
+  if (regionKeys.length === 0) return '전국 어디서나';
   return regionKeys
     .map((key) => REGIONS.find((r) => r.key === key)?.label ?? key)
     .join('·');
@@ -891,7 +891,7 @@ function normalizeRegionCond(value: string[] | string | undefined): string[] {
 }
 
 function moodLabel(moodKey: string): string {
-  if (moodKey === 'ALL') return '전체';
+  if (moodKey === 'ALL') return '모든 분위기';
   return MOODS.find((m) => m.key === moodKey)?.label ?? moodKey;
 }
 
@@ -1855,7 +1855,7 @@ function activeSlots(): SlotKey[] {
 }
 
 declare const __APP_VERSION__: string;
-const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.9.6';
+const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.9.7';
 
 function courseSpotIds(): number[] {
   if (!state.course) return [];
@@ -3413,10 +3413,44 @@ function renderOverlay(): void {
             ${
               isAllTab
                 ? `
-              <div class="all-regions-desc">
-                <p class="all-desc-title">🇰🇷 전국 어디서나 탐색</p>
-                <p class="all-desc-sub">특정 지역 제한 없이 대한민국 전역의 핫플레이스를 폭넓게 추천받을 수 있어요.</p>
-                <button class="btn-primary btn-select-all-korea" id="btn-select-all-korea">전국 모드로 선택</button>
+              <div class="all-regions-view">
+                <div class="all-regions-card">
+                  <div class="all-regions-badge">
+                    <span class="all-regions-badge-icon">🇰🇷</span>
+                    <span class="all-regions-badge-text">전국 어디서나</span>
+                  </div>
+                  <h3 class="all-regions-title">대한민국 전역 데이트 탐색</h3>
+                  <p class="all-regions-desc">
+                    특정 지역에 국한되지 않고, 전국 8대 권역의 감성 핫플레이스와 숨은 명소를 폭넓게 연결해 드려요.
+                  </p>
+                  <div class="all-regions-features">
+                    <div class="all-feature-item">
+                      <span class="feature-icon">✨</span>
+                      <div class="feature-body">
+                        <span class="feature-title">전국 핫플레이스 엄선</span>
+                        <span class="feature-desc">인기 명소부터 로컬 감성 스팟까지</span>
+                      </div>
+                    </div>
+                    <div class="all-feature-item">
+                      <span class="feature-icon">🚗</span>
+                      <div class="feature-body">
+                        <span class="feature-title">여행 & 드라이브 추천</span>
+                        <span class="feature-desc">주말 근교 및 색다른 데이트 코스</span>
+                      </div>
+                    </div>
+                    <div class="all-feature-item">
+                      <span class="feature-icon">🧭</span>
+                      <div class="feature-body">
+                        <span class="feature-title">자유로운 코스 연결</span>
+                        <span class="feature-desc">지역 제한 없는 폭넓은 큐레이션</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <button class="btn-select-all-korea" id="btn-select-all-korea">
+                  <span class="btn-korea-icon">🗺️</span>
+                  <span class="btn-korea-text">전국 모드로 선택하기</span>
+                </button>
               </div>
             `
                 : `

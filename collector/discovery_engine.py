@@ -15,6 +15,7 @@ import random
 import re
 
 from category_filter import is_date_spot_category
+from area_seeds import generate_dynamic_queries, get_coverage_gap_areas
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -288,10 +289,26 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
         "Prefer": "return=minimal"
     }
 
-    # max_discoveries 수량에 맞춰 탐색 쿼리 수를 유연하게 비례 확장 (기본 10개 ~ 전체 풀 순회)
+    # 1) DB 커버리지 갭 분석 (스팟 수가 적은 소외 자치구 감지, 예: 금천구 가산, 구로, 도봉 등)
+    gap_districts = []
+    try:
+        gap_districts = get_coverage_gap_areas(supabase_url, service_key, limit=6)
+        if gap_districts:
+            gap_names = [f"{d['area']}({d.get('current_count', 0)}개)" for d in gap_districts[:4]]
+            print(f"⚖️ [DB 커버리지 갭 감지] 스팟 부족 소외 지역 우선 발굴: {', '.join(gap_names)}")
+    except Exception:
+        pass
+
+    # 2) 정적 유명 핫플 쿼리 + 소외지역/역세권 동적 합성 쿼리 50:50 배합
     sample_count = min(len(DISCOVERY_QUERIES), max(10, (max_discoveries + 4) // 4))
-    sampled_queries = random.sample(DISCOVERY_QUERIES, sample_count)
-    print(f"🧭 [신규 핫플 자율 탐색] 선택된 쿼리 ({len(sampled_queries)}개): {[q[0] for q in sampled_queries[:5]]} ...")
+    half_count = max(5, sample_count // 2)
+    static_sampled = random.sample(DISCOVERY_QUERIES, min(half_count, len(DISCOVERY_QUERIES)))
+    dynamic_sampled = generate_dynamic_queries(count=half_count, gap_districts=gap_districts)
+
+    sampled_queries = static_sampled + dynamic_sampled
+    random.shuffle(sampled_queries)
+
+    print(f"🧭 [신규 핫플 & 소외지역 자율 탐색] 총 {len(sampled_queries)}개 쿼리 가동: {[q[0] for q in sampled_queries[:6]]} ...")
     if groq_key:
         print("🤖 [Groq AI 에디터 엔진 활성화] 신규 핫플 메타데이터(한줄요약, 무드, 슬롯) 자동 큐레이션 적용")
 

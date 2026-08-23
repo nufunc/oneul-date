@@ -47,7 +47,35 @@ docker compose logs -f
 
 ---
 
+## 📊 로그 저장 & 미비점 분석 도구 (`analyze_logs.py`)
+
+수집기의 실행 로그는 `/mnt/data/logs/collector.log` 및 일자별 `collector-YYYY-MM-DD.log`로 자동 분할 저장됩니다.  
+수집 실패 원인(429 한도, 카테고리 필터 탈락, 매칭 오류)이나 신규 발굴 현황을 즉시 진단할 수 있습니다:
+
+```bash
+# 기본 분석 실행 (최근 전체 로그 종합 진단)
+python analyze_logs.py
+
+# 특정 일자 로그 분석
+python analyze_logs.py --date 2026-08-23
+
+# 최근 500줄만 분석하고 마크다운 리포트 생성
+python analyze_logs.py -n 500 -m report.md
+```
+
+---
+
+## 🗺️ 소외 지역(가산/구로/비핫플) 자율 발굴 엔진 (`area_seeds.py`)
+
+- **전국 25개 구 + 수도권 300+개 전철역/생활권 전수 그리드**: 유명 핫플(성수/한남 등)뿐만 아니라 가산디지털단지, 독산, 구로, 노원, 수유 등 비(非)핫플 지역의 숨은 데이트 스팟을 자동 발굴합니다.
+- **DB 커버리지 갭 감지(Gap Detector)**: Supabase DB의 등록 스팟 수를 분석하여 데이터가 부족한 소외 지역을 최우선 탐색 큐에 자동 배치합니다.
+- **오피스 상권 노이즈 필터링**: 구내식당, 한식뷔페, 단체회식, 지식산업센터 등 직장인 회식 노이즈를 완벽히 차단하고 감성/소개팅/데이트 스팟만 선별합니다.
+
+---
+
 ## 🛠️ 유용한 관리 명령어
 - **컨테이너 상태 확인**: `docker compose ps`
+- **실시간 로그 스트리밍**: `docker compose logs -f`
+- **로그 미비점 정밀 진단**: `python analyze_logs.py`
 - **컨테이너 재시작**: `docker compose restart`
 - **컨테이너 중지**: `docker compose down`
