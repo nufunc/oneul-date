@@ -178,6 +178,7 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
     print(f"📝 [블로그 & 소외지역 마이닝 시작] 타깃 쿼리 ({len(sampled)}개): {[q[0] for q in sampled[:5]]} ...")
 
     discovered = []
+    batch_seen_names = set()
 
     for query_text, region, area, moods in sampled:
         raw_candidates = fetch_blog_candidates(query_text)
@@ -204,10 +205,14 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
             if "권역" in raw_name or " / " in raw_name or is_polluted_header_name(raw_name):
                 continue
 
+            # 2. 단일 배치(메모리) 내 중복 검사
+            if real_name in batch_seen_names:
+                continue
+
             cat = str(top.get("category") or "")
             road_addr = top.get("roadAddress") or top.get("address") or ""
 
-            # 2. 데이트 스팟 카테고리 & 상호명 엄격 검증 (비데이트 업종·숙박·체인브랜드 차단)
+            # 3. 데이트 스팟 카테고리 & 상호명 엄격 검증 (비데이트 업종·숙박·체인브랜드 차단)
             ok_cat, cat_reason = is_date_spot_category(cat, real_name)
             if not ok_cat:
                 continue
@@ -215,7 +220,7 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
             if not real_name or not road_addr or len(road_addr.strip()) < 5:
                 continue
 
-            # DB 중복 검사
+            # 4. DB 중복 검사
             check_url = f"{supabase_url}/rest/v1/spots?select=id&name=eq.{urllib.parse.quote(real_name)}"
             try:
                 check_req = urllib.request.Request(check_url, headers=api_headers)
@@ -225,6 +230,8 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
                         continue
             except Exception:
                 pass
+
+            batch_seen_names.add(real_name)
 
             slot = infer_slot(cat, real_name)
             thum = top.get("thumUrl") or top.get("image") or top.get("imageUrl") or top.get("thumbUrl")

@@ -23,6 +23,9 @@ pb_data/
 collector/pb_data/
 collector/logs/
 collector/data/
+collector/.verified_channels.json
+collector/.processed_videos.json
+collector/.groq_cache.json
 
 # Temporary files
 *.md.bak

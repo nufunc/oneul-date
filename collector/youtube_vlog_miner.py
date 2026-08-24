@@ -137,6 +137,82 @@ INNERTUBE_NEXT_URL = ("https://www.youtube.com/youtubei/v1/next"
 HISTORY_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".processed_videos.json")
 HISTORY_MAX = 500
 
+# ─────────────────────────────────────────────────────────────
+# [Channel Registry] 검증된 고품질 미식/여행 채널 레지스트리 & 자율 승격
+# ─────────────────────────────────────────────────────────────
+
+INITIAL_VERIFIED_CHANNELS = [
+    {"name": "더들리", "handle": "@dudely_", "category": "gourmet_travel"},
+    {"name": "성시경 SUNG SI KYUNG", "handle": "@sungsikyung", "category": "gourmet_nodae"},
+    {"name": "스튜디오 와플 - 또간집", "handle": "@studio_waffle", "category": "gourmet_travel"},
+    {"name": "수코 sookoh", "handle": "@sookoh", "category": "travel_vlog"},
+    {"name": "마리아주", "handle": "@mariage_food", "category": "fine_dining"},
+    {"name": "김사원세끼", "handle": "@kimsawon3kki", "category": "gourmet_nopo"},
+    {"name": "맛상무", "handle": "@mat_sang_moo", "category": "gourmet_nopo"},
+    {"name": "비밀이야", "handle": "@bimirya", "category": "fine_dining"},
+    {"name": "정육왕 Meat Creator", "handle": "@meatking", "category": "gourmet_bbq"},
+    {"name": "딤디 deemd", "handle": "@deemd", "category": "vlog_cafe"},
+    {"name": "혬복 hyembok", "handle": "@hyembok", "category": "vlog_date"},
+    {"name": "슛뚜 sueddu", "handle": "@sueddu", "category": "vlog_travel"},
+]
+
+VERIFIED_CHANNELS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".verified_channels.json")
+
+def load_verified_channels() -> dict:
+    if os.path.exists(VERIFIED_CHANNELS_PATH):
+        try:
+            with open(VERIFIED_CHANNELS_PATH, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    init_data = {
+        "verified": {c["handle"]: c for c in INITIAL_VERIFIED_CHANNELS},
+        "candidates": {}
+    }
+    save_verified_channels(init_data)
+    return init_data
+
+def save_verified_channels(data: dict):
+    try:
+        with open(VERIFIED_CHANNELS_PATH, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+
+def record_channel_success(author: str, video_title: str, spots_registered: int):
+    """
+    영상에서 스팟이 등록되면 채널 통계를 갱신하고,
+    누적 2회 이상 고품질 스팟 발굴 시 정식 검증 채널로 자동 승격(Auto-Promote).
+    """
+    if not author or spots_registered <= 0:
+        return
+    data = load_verified_channels()
+    verified = data.setdefault("verified", {})
+    candidates = data.setdefault("candidates", {})
+    
+    # 이미 검증된 채널이면 스킵
+    for k, v in verified.items():
+        if v.get("name") == author or k == author:
+            return
+            
+    c_info = candidates.setdefault(author, {"name": author, "success_count": 0, "total_spots": 0})
+    c_info["success_count"] += 1
+    c_info["total_spots"] += spots_registered
+    c_info["last_video"] = video_title[:40]
+    
+    # 2회 이상 성공 시 정식 검증 채널로 자동 승격!
+    if c_info["success_count"] >= 2:
+        verified[author] = {
+            "name": author,
+            "promoted_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "total_spots": c_info["total_spots"],
+            "auto_promoted": True
+        }
+        print(f"🎉 [크리에이터 채널 자동 승격] '{author}' 채널이 검증 채널 레지스트리에 등록되었습니다! (누적 {c_info['total_spots']}개 스팟 발굴)")
+        del candidates[author]
+        
+    save_verified_channels(data)
+
 # 해외 여행 영상 (국내 데이트 스팟 파이프라인 대상 아님) — 제목에 걸리면 영상 자체 스킵
 OVERSEAS_KEYWORDS = [
     "후쿠오카", "오사카", "도쿄", "동경", "교토", "삿포로", "오키나와", "나고야", "벳푸", "유후인",
@@ -167,6 +243,11 @@ SEARCH_KEYWORDS = [
     "경기도 여행 코스 추천 타임라인",
     "커플 여행 브이로그 방문 장소 정리",
     "주말 나들이 코스 장소 목록 브이로그",
+    "기차여행 당일치기 미식투어 타임라인",
+    "전통시장 맛집 투어 정리 브이로그",
+    "지역별 찐노포 코스 정리 더보기",
+    "서울 핫플 맛집 골목 투어 타임스탬프",
+    "전국 빵지순례 카페 투어 타임라인",
 ]
 
 # 설명란이 이보다 짧으면 파싱할 코스 목록이 없다고 보고 스킵
@@ -1472,13 +1553,46 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
     history_set = set(history)
     print(f"  • 처리 이력: {len(history)}개 (파일: {os.path.basename(HISTORY_PATH)})")
 
-    # 설명란 미달/쇼츠/해외 스킵 및 이력 중복을 감안해 넉넉한 풀을 확보 (키워드당 상위 20개까지 탐색)
+    # 1. 검증된 크리에이터 채널 풀 로드 및 채널별 최신 영상 우선 탐색
+    ch_data = load_verified_channels()
+    verified_channels = list(ch_data.get("verified", {}).values())
+    print(f"  • 검증된 미식/여행 채널 풀: {len(verified_channels)}개 채널 가동")
+
+    # 설명란 미달/쇼츠/해외 스킵 및 이력 중복을 감안해 넉넉한 풀을 확보
     pool_target = max(limit * 6, limit + 20)
+    found_ids = []
+    seen_in_history = 0
+
+    # 1-1. 검증된 채널 최신 영상 우선 소싱 (상위 3~4개 채널 샘플링)
+    sampled_channels = random.sample(verified_channels, min(4, len(verified_channels)))
+    for ch in sampled_channels:
+        ch_query = f"{ch.get('name', '')} 여행 맛집 코스"
+        encoded = urllib.parse.quote(ch_query)
+        search_url = f"https://www.youtube.com/results?search_query={encoded}&sp=EgIIAw%253D%253D"
+        req = urllib.request.Request(search_url, headers=HEADERS)
+        try:
+            with urllib.request.urlopen(req, timeout=10) as res:
+                html = res.read().decode('utf-8', errors='ignore')
+                raw_ids = re.findall(r'\"videoId\":\"([a-zA-Z0-9_-]{11})\"', html)
+                added = 0
+                for vid in raw_ids[:10]:
+                    if vid in history_set:
+                        seen_in_history += 1
+                        continue
+                    if vid not in found_ids:
+                        found_ids.append(vid)
+                        added += 1
+                    if added >= 2:
+                        break
+                if added > 0:
+                    print(f"  🌟 [검증 채널] '{ch.get('name')}' 최신 영상 {added}개 우선 확보")
+        except Exception:
+            pass
+
+    # 2. 일반 미식/데이트/여행 쿼리 풀 탐색
     per_kw_cap = max(3, -(-pool_target // len(SEARCH_KEYWORDS)))
     per_kw_scan = 20  # 검색 결과 상위 N개까지 훑어 이력에 없는 것을 고른다
 
-    found_ids = []
-    seen_in_history = 0
     for kw in SEARCH_KEYWORDS:
         if len(found_ids) >= pool_target:
             break
@@ -1612,6 +1726,10 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
         agg["insert_failed"] += stats["insert_failed"]
         agg["registered"] += stats["registered"]
         all_spots.extend(stats["spots"])
+
+        # 채널 성과 기록 및 자율 승격 검토
+        if stats["registered"] > 0 and not dry_run:
+            record_channel_success(vinfo.get("author", ""), vinfo.get("title", ""), stats["registered"])
 
         _print_video_line(vinfo, stats)
 

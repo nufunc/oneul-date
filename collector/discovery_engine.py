@@ -274,6 +274,7 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
         print("🤖 [Groq AI 에디터 엔진 활성화] 신규 핫플 메타데이터(한줄요약, 무드, 슬롯) 자동 큐레이션 적용")
 
     discovered_spots = []
+    batch_seen_names = set()
 
     for query_text, region, area, default_moods in sampled_queries:
         places = search_discovery(query_text)
@@ -288,7 +289,11 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
             if "권역" in raw_name or " / " in raw_name or is_polluted_header_name(raw_name):
                 continue
 
-            # 2. 데이트 스팟 카테고리 & 상호명 엄격 검증 (비데이트 업종·숙박·체인브랜드 차단)
+            # 2. 단일 배치(메모리) 내 중복 검사
+            if raw_name in batch_seen_names:
+                continue
+
+            # 3. 데이트 스팟 카테고리 & 상호명 엄격 검증 (비데이트 업종·숙박·체인브랜드 차단)
             cat = str(p.get("category") or "")
             ok_cat, cat_reason = is_date_spot_category(cat, raw_name)
             if not ok_cat:
@@ -298,7 +303,7 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
             if not raw_name or not road_addr or len(road_addr.strip()) < 5:
                 continue
 
-            # 3. DB 중복 검사 (이름으로 SELECT)
+            # 4. DB 중복 검사 (이름으로 SELECT)
             check_url = f"{supabase_url}/rest/v1/spots?select=id&name=eq.{urllib.parse.quote(raw_name)}"
             try:
                 check_req = urllib.request.Request(check_url, headers=api_headers)
@@ -308,6 +313,8 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
                         continue  # 이미 존재하는 스팟
             except Exception:
                 pass
+
+            batch_seen_names.add(raw_name)
 
             # 4. 규칙 기반 초고속 메타 생성 (Groq 429 원천 차단 & 0ms 처리)
             meta = generate_spot_metadata_rule_based(raw_name, cat, region, area, default_moods)

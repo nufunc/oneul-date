@@ -14,6 +14,7 @@ import urllib.parse
 import time
 import re
 from datetime import datetime, timezone
+from category_filter import CATEGORY_BLACKLIST_LODGING
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -588,8 +589,8 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                         )
 
             # [Slot Healing] 네이버 공식 카테고리를 근거로 slot 오염 및 누락 교정
-            heal_cat = place_meta.get("category") or spot.get("category")
-            heal_name = patch_data.get("name") or name
+            heal_cat = place_meta.get("category") or spot.get("category") or ""
+            heal_name = patch_data.get("name") or name or ""
             d_slot = derive_slot(heal_cat, heal_name)
             old_slot = spot.get("slot")
             if d_slot and (not old_slot or (d_slot != old_slot and (slot_heal_all or "stay" in (d_slot, old_slot)))):
@@ -600,6 +601,12 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                 )
                 if not slot_heal_dryrun:
                     patch_data["slot"] = d_slot
+
+            # [Lodging Quarantine] 당일치기 코스 대상이 아닌 숙박/펜션/호텔/글램핑 업소 자동 격리 (소셜 마이닝 API 낭비 차단)
+            is_lodging = (d_slot == "stay") or any(pat.search(heal_cat) for pat in SLOT_STAY_RE) or any(l_kw in heal_cat for l_kw in CATEGORY_BLACKLIST_LODGING)
+            if is_lodging and not any(pat.search(heal_name) for pat in SLOT_STAY_VETO_RE):
+                patch_data["is_closed"] = True
+                patch_data["slot"] = "stay"
 
             if thum and not spot.get("image_url"):
                 patch_data["image_url"] = thum
