@@ -22,6 +22,7 @@ coverage/
 pb_data/
 collector/pb_data/
 collector/logs/
+collector/data/
 
 # Temporary files
 *.md.bak

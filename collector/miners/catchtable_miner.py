@@ -183,9 +183,7 @@ def run_catchtable_mining(supabase_url: str, service_key: str, max_discoveries: 
                 "address": road_addr,
                 "location": f"{region} {area}".strip(),
                 "mood": moods,
-                "mood_tags": ["캐치테이블", "기념일", "분위기맛집"] + (["블루리본"] if is_blueribbon else []),
                 "price": f"1인 {price_tier} 코스/단품",
-                "price_tier": price_tier,
                 "summary": f"{real_name} — 캐치테이블 인기 예약 {'블루리본 인증 ' if is_blueribbon else ''}데이트 명소 ({area})",
                 "category": category or "와인바/다이닝",
                 "image_url": thum,
@@ -193,35 +191,17 @@ def run_catchtable_mining(supabase_url: str, service_key: str, max_discoveries: 
                 "lng": float(x_coord) if x_coord else None,
                 "quality_score": 95 if is_blueribbon else 90,
                 "fail_count": 0,
-                "reservation_type": "catchtable",
-                "reservation_url": catchtable_url,
-                "booking_tips": "주말 및 기념일 사전 예약 권장",
-                "booking_info": {
-                    "available": True,
-                    "platform": "catchtable",
-                    "url": catchtable_url,
-                    "tips": "캐치테이블 실시간 빈자리 예약 가능"
-                },
-                "curation_badges": {
-                    "catchtable": "캐치테이블 핫플",
-                    "blue_ribbon": 2026 if is_blueribbon else None
-                },
-                "provider_ids": {
-                    "naver": place_id,
-                    "catchtable": real_name
-                },
-                "parking_info": {
-                    "type": "valet" if region == "서울" and area in ("강남구", "용산구", "성동구") else "paid",
-                    "detail": "발렛파킹 가능" if region == "서울" and area in ("강남구", "용산구") else "인근 유료/공영주차장 이용"
-                },
                 "source": {
                     "type": "catchtable_miner",
                     "url": catchtable_url,
+                    "platform": "catchtable",
+                    "price_tier": price_tier,
+                    "is_blueribbon": is_blueribbon,
+                    "booking_tips": "주말 및 기념일 사전 예약 권장",
                     "note": f"Mined from query: {query_text}"
                 },
                 "verified": True,
-                "is_closed": False,
-                "updated_at": datetime.now(timezone.utc).isoformat()
+                "is_closed": False
             }
 
             discovered_spots.append(new_spot)

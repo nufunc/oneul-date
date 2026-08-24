@@ -31,7 +31,7 @@ services:
       - GOOGLE_CHAT_WEBHOOK_URL=${GOOGLE_CHAT_WEBHOOK_URL:-}
       - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL:-}
     volumes:
-      - /mnt/data:/mnt/data
+      - ${DATA_DIR:-./data}:/mnt/data
     logging:
       driver: "json-file"
       options:

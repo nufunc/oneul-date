@@ -172,77 +172,92 @@ GYEONGGI_INCHEON_AREAS = [
     {"region": "인천", "area": "부평/남동", "sub_areas": ["부평평리단길", "구월동로데오", "소래포구", "인천대공원"], "default_vibes": ["trendy", "romantic"]}
 ]
 
-# 지방 광역시 및 주요 여행/생활권
+# 지방 광역시 및 전국 주요 여행/생활권 (강원, 영남, 호남, 충청, 제주 전역)
 OTHER_REGIONAL_AREAS = [
-    {"region": "강원", "area": "강릉시", "sub_areas": ["강릉안목해변", "경포호수", "초당순두부마을", "교동택지", "주문진"], "default_vibes": ["view", "romantic"]},
-    {"region": "강원", "area": "속초시", "sub_areas": ["속초영랑호", "청초호수공원", "동명항", "속초해변대관람차", "설악동"], "default_vibes": ["view", "healing"]},
-    {"region": "강원", "area": "춘천시", "sub_areas": ["춘천의암호", "구봉산전망대카페거리", "소양강스카이워크", "공지천"], "default_vibes": ["view", "healing"]},
-    {"region": "강원", "area": "양양/고성", "sub_areas": ["양양인구해변", "서피비치", "고성아야진해변", "봉포해변"], "default_vibes": ["trendy", "active", "view"]},
-    {"region": "영남", "area": "부산", "sub_areas": ["해운대달맞이길", "광안리민락수변", "전포동카페거리", "영도흰여울마을", "기장오시리아", "송도암남공원", "남포동자갈치", "온천천카페거리"], "default_vibes": ["view", "romantic", "trendy"]},
-    {"region": "영남", "area": "대구", "sub_areas": ["동성로교동", "앞산카페거리", "수성못유원지", "김광석다시그리기길", "봉산문화거리", "칠곡3지구"], "default_vibes": ["retro", "romantic", "view"]},
-    {"region": "영남", "area": "경주/포항", "sub_areas": ["경주황리단길", "보문관광단지", "포항영일대스카이워크", "구룡포일본인가옥거리", "호미곶"], "default_vibes": ["retro", "view", "romantic"]},
-    {"region": "영남", "area": "울산/경남", "sub_areas": ["울산태화강국가정원", "일산지대왕암", "통영동피랑", "거제바람의언덕", "남해독일마을", "진주성촉석루"], "default_vibes": ["view", "healing"]},
-    {"region": "호남", "area": "전주/군산/익산", "sub_areas": ["전주한옥마을", "전주객리단길", "전주웨리단길", "군산월명동근대골목", "익산미륵사지"], "default_vibes": ["retro", "romantic", "healing"]},
-    {"region": "호남", "area": "여수/순천/담양", "sub_areas": ["여수돌산밤바다", "이순신광장낭만포차", "웅천친수공원", "순천만국가정원", "담양죽녹원메타세쿼이아", "보성녹차밭"], "default_vibes": ["romantic", "view", "healing"]},
-    {"region": "호남", "area": "광주/목포", "sub_areas": ["광주동명동카페거리", "양림동펭귄마을", "첨단시리단길보이저", "목포평화광장바다분수", "유달산"], "default_vibes": ["trendy", "retro", "view"]},
-    {"region": "충청", "area": "대전/세종", "sub_areas": ["대전소제동관사촌", "갈마동갈리단길", "유성봉명동온천", "대청호수드라이브", "세종금강보행교이응다리", "세종호수공원"], "default_vibes": ["retro", "trendy", "view"]},
-    {"region": "충청", "area": "천안/공주/부여/보령", "sub_areas": ["천안불당동", "신부동", "공주제민천원도심", "부여궁남지", "보령대천해수욕장", "태안안면도"], "default_vibes": ["trendy", "retro", "view"]},
-    {"region": "충청", "area": "청주/단양/제천", "sub_areas": ["청주수암골전망대", "율량동", "단양남한강패러글라이딩", "제천청풍호모노레일"], "default_vibes": ["view", "active", "healing"]},
-    {"region": "제주", "area": "제주/서귀포", "sub_areas": ["애월한담해변", "한림협재금능", "구좌세화월정리", "조천함덕", "성산광치기일출", "서귀포중문", "안덕사계해변", "표선"], "default_vibes": ["view", "healing", "romantic"]}
+    # 강원
+    {"region": "강원", "area": "강릉시", "sub_areas": ["강릉안목해변카페거리", "경포호수", "초당순두부마을", "교동택지", "주문진영진해변", "유천지구"], "default_vibes": ["view", "romantic", "gourmet"]},
+    {"region": "강원", "area": "속초시", "sub_areas": ["속초영랑호", "청초호수공원", "칠성조선소", "속초해변대관람차", "동명항", "설악동"], "default_vibes": ["view", "healing", "retro"]},
+    {"region": "강원", "area": "춘천시", "sub_areas": ["춘천구봉산전망대", "의암호스카이워크", "공지천조각공원", "효자동낭만골목", "소양강댐"], "default_vibes": ["view", "healing", "romantic"]},
+    {"region": "강원", "area": "양양/고성", "sub_areas": ["양양서피비치", "인구해변", "하조대전망대", "고성아야진해변", "봉포해변", "송지호"], "default_vibes": ["trendy", "active", "view"]},
+    {"region": "강원", "area": "원주/평창", "sub_areas": ["원주뮤지엄산", "출렁다리", "평창대관령양떼목장", "월정사전나무숲길"], "default_vibes": ["healing", "view", "luxury"]},
+
+    # 영남 (부산/대구/울산/경북/경남)
+    {"region": "영남", "area": "부산", "sub_areas": ["해운대달맞이길", "광안리민락수변공원", "전포동카페거리", "영도흰여울문화마을", "기장오시리아", "송도암남공원", "온천천카페거리", "남포동자갈치"], "default_vibes": ["view", "romantic", "trendy", "luxury"]},
+    {"region": "영남", "area": "대구", "sub_areas": ["동성로교동", "앞산카페거리", "수성못유원지", "김광석다시그리기길", "봉산문화거리", "삼덕동감성골목", "팔공산카페거리"], "default_vibes": ["retro", "romantic", "view", "trendy"]},
+    {"region": "영남", "area": "경주/포항", "sub_areas": ["경주황리단길", "보문관광단지", "교촌한옥마을", "포항스페이스워크", "영일대해수욕장", "구룡포일본인가옥거리", "호미곶"], "default_vibes": ["retro", "view", "romantic", "healing"]},
+    {"region": "영남", "area": "울산/경남", "sub_areas": ["울산태화강국가정원", "일산지대왕암공원", "간절곶", "통영동피랑벽화마을", "거제바람의언덕", "남해독일마을", "남해다랭이마을", "진주성촉석루"], "default_vibes": ["view", "healing", "romantic"]},
+    {"region": "영남", "area": "안동/문경", "sub_areas": ["안동월영교야경", "안동하회마을", "문경새재도립공원", "문경에코랄라"], "default_vibes": ["retro", "healing", "view"]},
+
+    # 호남 (광주/전남/전북)
+    {"region": "호남", "area": "전주/군산/익산", "sub_areas": ["전주한옥마을", "전주객리단길", "전주웨리단길", "덕진공원연화정", "군산월명동근대골목", "은파호수공원", "익산미륵사지", "익산아가페정원"], "default_vibes": ["retro", "romantic", "healing", "view"]},
+    {"region": "호남", "area": "여수/순천/담양", "sub_areas": ["여수돌산밤바다", "이순신광장낭만포차", "웅천친수공원", "고소동천사벽화마을", "순천만국가정원", "와온해변노을", "담양죽녹원", "관방제림", "메타프로방스"], "default_vibes": ["romantic", "view", "healing"]},
+    {"region": "호남", "area": "광주/목포", "sub_areas": ["광주동명동카페거리", "양림동펭귄마을", "첨단시리단길보이저", "무등산전망대", "목포평화광장바다분수", "목포해상케이블카", "근대역사관"], "default_vibes": ["trendy", "retro", "view", "romantic"]},
+    {"region": "호남", "area": "보성/구례/화순", "sub_areas": ["보성대한다원녹차밭", "구례산수유마을", "섬진강대나무숲길", "화순적벽", "남산공원"], "default_vibes": ["healing", "view"]},
+
+    # 충청 (대전/세종/충남/충북)
+    {"region": "충청", "area": "대전/세종", "sub_areas": ["대전소제동관사촌", "갈마동갈리단길", "유성봉명동온천", "대청호오백리길", "세종금강보행교이응다리", "세종국립수목원", "세종호수공원"], "default_vibes": ["retro", "trendy", "view", "healing"]},
+    {"region": "충청", "area": "천안/공주/부여/보령", "sub_areas": ["천안불당동카페거리", "신부동문화거리", "성성호수공원", "공주제민천원도심", "공산성야경", "부여궁남지포룡정", "보령대천해수욕장", "태안안면도꽃지해변", "파도리해식동굴"], "default_vibes": ["trendy", "retro", "view", "romantic"]},
+    {"region": "충청", "area": "청주/단양/제천", "sub_areas": ["청주수암골전망대", "율량동감성술집", "문의문화재단지", "단양남한강패러글라이딩", "만천하스카이워크", "제천청풍호케이블카", "의림지수변공원"], "default_vibes": ["view", "active", "healing", "romantic"]},
+
+    # 제주
+    {"region": "제주", "area": "제주/서귀포", "sub_areas": ["애월한담해변산책로", "한림협재금능해변", "구좌세화월정리", "조천함덕서우봉", "성산일출봉광치기", "서귀포중문관광단지", "안덕사계해변산방산", "표선해수욕장", "쇠소깍"], "default_vibes": ["view", "healing", "romantic", "luxury"]}
 ]
 
 # ─────────────────────────────────────────────────────────────
-# [2] 데이트 의도(Intent) 템플릿 키워드 조합
+# [2] 데이트 의도(Intent) 템플릿 키워드 조합 (신뢰도 & 큐레이션 품질 강화)
 # ─────────────────────────────────────────────────────────────
 
 INTENT_TEMPLATES = [
-    # 로맨틱 / 소개팅 / 다이닝
-    ("소개팅 분위기 좋은 맛집", ["romantic", "gourmet"]),
-    ("기념일 파스타 와인바", ["romantic", "luxury"]),
-    ("분위기 좋은 스테이크 레스토랑", ["romantic", "gourmet"]),
-    ("조용한 이자카야 감성 술집", ["romantic", "trendy"]),
-    ("내추럴와인 칵테일바", ["romantic", "trendy"]),
+    # 🏆 공인 인증 / 미식 큐레이션 (신뢰도 최우선)
+    ("블루리본 서베이 2026 추천 맛집", ["romantic", "gourmet", "luxury"]),
+    ("백년가게 전통 로컬 맛집", ["retro", "gourmet", "healing"]),
+    ("한국관광 100선 뷰 맛집 카페", ["view", "healing", "romantic"]),
+    ("미쉐린 가이드 빕구르망 다이닝", ["luxury", "gourmet", "romantic"]),
 
-    # 카페 / 브런치 / 힐링
-    ("감성 카페 디저트 핫플", ["trendy", "romantic"]),
-    ("대형 베이커리 브런치 카페", ["healing", "gourmet"]),
-    ("조용한 갤러리 찻집", ["healing", "retro"]),
-    ("루프탑 테라스 뷰 카페", ["view", "romantic"]),
-    ("예쁜 인테리어 신상 카페", ["trendy", "healing"]),
+    # 🍷 로맨틱 / 소개팅 / 파인다이닝 / 와인바
+    ("소개팅 분위기 좋은 감성 레스토랑", ["romantic", "gourmet"]),
+    ("기념일 코스요리 파인다이닝 와인바", ["romantic", "luxury", "gourmet"]),
+    ("분위기 좋은 테라스 스테이크 하우스", ["romantic", "view", "gourmet"]),
+    ("조용한 감성 내추럴와인 칵테일바", ["romantic", "trendy"]),
+    ("오션뷰 노을 뷰 감성 다이닝 펍", ["view", "romantic", "trendy"]),
 
-    # 이색 / 액티비티 / 공방
-    ("이색 데이트 공방 원데이클래스", ["trendy", "active"]),
-    ("실내 이색 데이트 놀거리", ["active", "trendy"]),
-    ("감성 소품샵 편집샵 복합문화공간", ["trendy", "healing"]),
+    # ☕ 카페 / 브런치 / 힐링 / 베이커리
+    ("스페셜티 로스터리 핸드드립 카페", ["trendy", "gourmet", "healing"]),
+    ("숲속 대형 베이커리 정원 카페", ["healing", "view", "gourmet"]),
+    ("오션뷰 테라스 루프탑 베이커리", ["view", "romantic", "healing"]),
+    ("한옥 감성 티하우스 전통 찻집", ["healing", "retro", "romantic"]),
+    ("호수뷰 리버뷰 브런치 카페", ["view", "healing", "romantic"]),
 
-    # 오피스/생활권 특화 (가산/구로/직장인 상권 등)
-    ("직장인 퇴근길 감성 펍 와인", ["trendy", "romantic"]),
-    ("숨은 골목 찐맛집 데이트", ["gourmet", "retro"]),
-    ("아울렛 쇼핑 근처 분위기 맛집", ["trendy", "gourmet"]),
-    ("공원 산책로 근처 카페", ["healing", "view"]),
+    # 🎨 문화 / 이색 / 갤러리 / 복합공간
+    ("복합문화공간 갤러리 전시 카페", ["trendy", "healing", "retro"]),
+    ("이색 데이트 감성 공방 원데이클래스", ["trendy", "active"]),
+    ("감성 소품샵 편집샵 쇼룸", ["trendy", "healing"]),
+
+    # 🌳 야경 / 드라이브 / 자연 산책
+    ("야경 드라이브 코스 뷰 맛집", ["view", "romantic"]),
+    ("수목원 산책로 근처 힐링 카페", ["healing", "view"]),
+    ("바다 앞 테라스 감성 비스트로", ["view", "romantic", "trendy"]),
+    ("숨은 골목 로컬 찐맛집 데이트", ["gourmet", "retro"])
 ]
 
 # ─────────────────────────────────────────────────────────────
 # [3] DB 커버리지 갭 분석 (Coverage Gap Detector)
 # ─────────────────────────────────────────────────────────────
 
-def get_coverage_gap_areas(supabase_url: str, supabase_service_key: str, limit: int = 8) -> list[dict]:
+def get_coverage_gap_areas(supabase_url: str, supabase_service_key: str, limit: int = 12) -> list[dict]:
     """
     Supabase DB의 spots 테이블을 쿼리하여
-    서울 25개 자치구 중 등록된 스팟 수가 가장 적은 자치구(Cold District)를 추출합니다.
+    전국 8개 권역(서울/경기/인천/강원/충청/영남/호남/제주) 중 등록된 스팟 수가 가장 적은 소외 지역(Cold Area)을 추출합니다.
     """
+    all_areas_pool = list(SEOUL_DISTRICTS.values()) + GYEONGGI_INCHEON_AREAS + OTHER_REGIONAL_AREAS
+
     if not supabase_url or not supabase_service_key:
-        return [
-            SEOUL_DISTRICTS["금천구"],
-            SEOUL_DISTRICTS["구로구"],
-            SEOUL_DISTRICTS["도봉구"],
-            SEOUL_DISTRICTS["중랑구"],
-            SEOUL_DISTRICTS["강북구"],
-        ]
+        return random.sample(all_areas_pool, min(limit, len(all_areas_pool)))
 
-    counts = {d_name: 0 for d_name in SEOUL_DISTRICTS}
+    counts = {f"{item['region']}_{item['area']}": 0 for item in all_areas_pool}
 
-    url = f"{supabase_url.rstrip('/')}/rest/v1/spots?select=area,address&region=eq.서울&limit=5000"
+    # 전체 활성 스팟의 region, area 조회
+    url = f"{supabase_url.rstrip('/')}/rest/v1/spots?select=region,area,address&is_closed=eq.false&limit=5000"
     headers = {
         "apikey": supabase_service_key,
         "Authorization": f"Bearer {supabase_service_key}",
@@ -254,24 +269,34 @@ def get_coverage_gap_areas(supabase_url: str, supabase_service_key: str, limit: 
             if res.status == 200:
                 rows = json.loads(res.read().decode('utf-8'))
                 for r in rows:
+                    reg = r.get("region") or ""
                     area = r.get("area") or ""
                     addr = r.get("address") or ""
-                    for d_name in SEOUL_DISTRICTS:
-                        if d_name in area or d_name in addr:
-                            counts[d_name] += 1
+                    for item in all_areas_pool:
+                        i_reg = item["region"]
+                        i_area = item["area"]
+                        key = f"{i_reg}_{i_area}"
+                        if i_reg == reg and (i_area in area or i_area in addr or any(sub in addr for sub in item.get("sub_areas", []))):
+                            counts[key] = counts.get(key, 0) + 1
                             break
     except Exception:
         pass
 
-    sorted_districts = sorted(counts.items(), key=lambda x: x[1])
+    # 등록 수가 적은 순서대로 정렬
+    sorted_items = sorted(counts.items(), key=lambda x: x[1])
     
     result = []
-    for d_name, count in sorted_districts[:limit]:
-        info = SEOUL_DISTRICTS.get(d_name)
-        if info:
-            item = dict(info)
-            item["current_count"] = count
-            result.append(item)
+    seen_keys = set()
+    for key_id, count in sorted_items:
+        for item in all_areas_pool:
+            if f"{item['region']}_{item['area']}" == key_id and key_id not in seen_keys:
+                seen_keys.add(key_id)
+                res_item = dict(item)
+                res_item["current_count"] = count
+                result.append(res_item)
+                break
+        if len(result) >= limit:
+            break
 
     return result
 

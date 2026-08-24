@@ -16,6 +16,7 @@ import re
 
 from category_filter import is_date_spot_category
 from area_seeds import generate_dynamic_queries, get_coverage_gap_areas
+from supabase_worker import is_polluted_header_name
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -320,17 +321,24 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
 
         for p in places[:8]:  # 상위 8개 정밀 검토
             raw_name = p.get("name", "").strip()
-            # 데이트 스팟 카테고리 & 상호명 엄격 검증 (비데이트 업종·숙박·체인브랜드 차단)
+
+            # 1. 단독 지명(광역 지자체명 단독) 또는 오염된 헤더명 필터
+            if len(raw_name) <= 2 or raw_name in ["서울", "경기", "인천", "강원", "충청", "충북", "충남", "영남", "경북", "경남", "호남", "전북", "전남", "제주", "부산", "대구", "울산", "광주", "대전", "세종"]:
+                continue
+            if "권역" in raw_name or " / " in raw_name or is_polluted_header_name(raw_name):
+                continue
+
+            # 2. 데이트 스팟 카테고리 & 상호명 엄격 검증 (비데이트 업종·숙박·체인브랜드 차단)
             cat = str(p.get("category") or "")
             ok_cat, cat_reason = is_date_spot_category(cat, raw_name)
             if not ok_cat:
                 continue
 
             road_addr = p.get("roadAddress") or p.get("address") or ""
-            if not raw_name or not road_addr:
+            if not raw_name or not road_addr or len(road_addr.strip()) < 5:
                 continue
 
-            # DB 중복 검사 (이름으로 SELECT)
+            # 3. DB 중복 검사 (이름으로 SELECT)
             check_url = f"{supabase_url}/rest/v1/spots?select=id&name=eq.{urllib.parse.quote(raw_name)}"
             try:
                 check_req = urllib.request.Request(check_url, headers=api_headers)

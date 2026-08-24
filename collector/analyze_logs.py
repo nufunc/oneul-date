@@ -33,6 +33,7 @@ def find_log_file(custom_path=None, date_str=None):
 
     candidates = [
         "/mnt/data/logs",
+        os.path.join(os.path.dirname(__file__), "data", "logs"),
         os.path.join(os.path.dirname(__file__), "logs"),
         os.path.join(os.path.dirname(__file__)),
         os.getcwd()

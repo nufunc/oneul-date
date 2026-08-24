@@ -13,7 +13,7 @@ import urllib.parse
 import time
 import random
 import re
-from supabase_worker import load_env, search_naver, calculate_quality_score
+from supabase_worker import load_env, search_naver, calculate_quality_score, is_polluted_header_name
 from discovery_engine import infer_slot
 from category_filter import is_date_spot_category
 from area_seeds import generate_dynamic_queries, get_coverage_gap_areas
@@ -197,15 +197,22 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
 
             top = places[0]
             real_name = top.get("name", "").strip()
+
+            # 1. 단독 지명(광역 지자체명 단독) 또는 오염된 헤더명 필터
+            if len(raw_name := real_name) <= 2 or raw_name in ["서울", "경기", "인천", "강원", "충청", "충북", "충남", "영남", "경북", "경남", "호남", "전북", "전남", "제주", "부산", "대구", "울산", "광주", "대전", "세종"]:
+                continue
+            if "권역" in raw_name or " / " in raw_name or is_polluted_header_name(raw_name):
+                continue
+
             cat = str(top.get("category") or "")
             road_addr = top.get("roadAddress") or top.get("address") or ""
 
-            # 데이트 스팟 카테고리 & 상호명 엄격 검증 (비데이트 업종·숙박·체인브랜드 차단)
+            # 2. 데이트 스팟 카테고리 & 상호명 엄격 검증 (비데이트 업종·숙박·체인브랜드 차단)
             ok_cat, cat_reason = is_date_spot_category(cat, real_name)
             if not ok_cat:
                 continue
 
-            if not real_name or not road_addr:
+            if not real_name or not road_addr or len(road_addr.strip()) < 5:
                 continue
 
             # DB 중복 검사

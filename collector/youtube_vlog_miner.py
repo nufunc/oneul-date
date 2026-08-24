@@ -712,17 +712,37 @@ def save_processed_history(video_ids: list[str]) -> None:
 
 
 # 일본어 가나 / 태국어 등 비(非)한국어 문자 — 해외 영상 판별 보조
-FOREIGN_SCRIPT_PATTERN = re.compile(r'[぀-ゟ゠-ヿ฀-๿]')
-
+# 해외/외국어 스크립트 (히라가나, 가타카나, 태국어, 아랍어, 키릴문자, 한자 등)
+FOREIGN_SCRIPT_PATTERN = re.compile(r'[぀-ゟ゠-ヿ฀-๿\u0600-\u06FF\u0400-\u04FF\u4e00-\u9fff]')
+FOREIGN_DRAMA_KEYWORDS = [
+    "drama", "yumi drama", "passion drama", "短剧", "电视剧", "总裁", "豪门",
+    "替嫁", "逆袭", "multi sub", "eng sub", "indo sub", "full episode", "ep.0", "ep.1", "ep.2"
+]
 
 def is_overseas_video(title: str, description: str = "") -> str:
-    """해외 여행 영상 여부 판별. 걸린 키워드를 반환(없으면 빈 문자열)"""
-    blob = f"{title or ''} {(description or '')[:300]}".lower()
+    """해외 여행/외국어/해외드라마 영상 여부 판별. 걸린 키워드를 반환(없으면 빈 문자열)"""
+    t = title or ""
+    blob = f"{t} {(description or '')[:300]}".lower()
+
+    # 1. 명시적 해외 여행 키워드
     for kw in OVERSEAS_KEYWORDS:
         if kw.lower() in blob:
             return kw
-    if FOREIGN_SCRIPT_PATTERN.search(title or ""):
+
+    # 2. 해외 드라마/웹소설 키워드
+    for dkw in FOREIGN_DRAMA_KEYWORDS:
+        if dkw.lower() in blob:
+            return f"해외드라마({dkw})"
+
+    # 3. 한자/외국어 문자 포함 여부
+    if FOREIGN_SCRIPT_PATTERN.search(t):
         return "외국어문자"
+
+    # 4. 제목에 한글이 최소 2글자 이상 없으면 국내 데이트 영상이 아님
+    hangul_chars = re.findall(r'[가-힣]', t)
+    if len(hangul_chars) < 2:
+        return "한글미포함"
+
     return ""
 
 
