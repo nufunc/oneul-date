@@ -241,65 +241,21 @@ def search_portal_places(query: str, limit: int = 15):
 
     return []
 
-def enrich_spot_with_groq(raw_name: str, cat: str, region: str, area: str, groq_key: str):
-    """Groq Llama 3.3 초고속 한줄요약/무드/슬롯 자동 큐레이션"""
-    if not groq_key:
-        return None
-    models_to_try = ["openai/gpt-oss-120b", "llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
-    for model_name in models_to_try:
-        try:
-            g_url = "https://api.groq.com/openai/v1/chat/completions"
-            payload = {
-                "model": model_name,
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": (
-                            "당신은 2030 트렌디 데이트 매거진 수석 에디터입니다.\n"
-                            "주어진 장소 정보를 바탕으로 데이트 목적에 맞는 JSON 메타데이터를 작성하세요.\n"
-                            "반드시 유효한 JSON 형식만 응답하세요.\n"
-                            "출력 스키마: {\"summary\": \"감성적인 25자 내외 한줄 소개\", \"mood\": [\"romantic\", \"trendy\" 등 1~2개], \"slot\": \"day\"|\"evening\"|\"night\", \"price\": \"2~3만원대\" 등}"
-                        )
-                    },
-                    {
-                        "role": "user",
-                        "content": f"장소명: {raw_name}, 카테고리: {cat}, 지역: {region} {area}"
-                    }
-                ],
-                "temperature": 0.3,
-                "max_tokens": 400,
-                "response_format": {"type": "json_object"}
-            }
-            g_req = urllib.request.Request(
-                g_url,
-                data=json.dumps(payload).encode('utf-8'),
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": f"Bearer {groq_key}"
-                },
-                method='POST'
-            )
-            with urllib.request.urlopen(g_req, timeout=3.5) as g_res:
-                if g_res.status == 200:
-                    resp_obj = json.loads(g_res.read().decode('utf-8'))
-                    content = resp_obj.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
-                    try:
-                        parsed = json.loads(content)
-                    except Exception:
-                        match = re.search(r"\{.*\}", content, re.DOTALL)
-                        if match:
-                            parsed = json.loads(match.group(0))
-                        else:
-                            parsed = None
-                    if parsed and parsed.get("summary"):
-                        return parsed
-        except urllib.error.HTTPError as he:
-            if he.code == 404:
-                continue
-            break
-        except Exception:
-            continue
-    return None
+def generate_spot_metadata_rule_based(raw_name: str, cat: str, region: str, area: str, default_moods: list[str] = None) -> dict:
+    """규칙 기반 초고속 메타데이터 생성 (Groq 429 원천 차단)"""
+    slot = infer_slot(cat, raw_name)
+    mood = default_moods or ["romantic", "trendy"]
+    clean_cat = cat.split(">")[-1].strip() if ">" in cat else (cat or "데이트 명소")
+    summary = f"{area}의 분위기 좋은 감성 {clean_cat} 데이트 코스"
+    if any(k in cat for k in ["오마카세", "파인다이닝", "호텔", "스테이크", "코스"]):
+        price = "5만원이상"
+    elif any(k in cat for k in ["와인", "칵테일", "다이닝", "이자카야", "바(bar)", "비스트로", "펍"]):
+        price = "3~5만원대"
+    elif any(k in cat for k in ["카페", "베이커리", "디저트", "찻집", "분식", "도넛"]):
+        price = "1~2만원대"
+    else:
+        price = "2~3만원대"
+    return {"slot": slot, "mood": mood, "summary": summary, "price": price}
 
 def get_max_spot_id(supabase_url: str, headers: dict) -> int:
     """Supabase spots 테이블에서 가장 큰 id 조회"""
@@ -386,13 +342,13 @@ def run_bulk_mining(target_count: int = 1000, enable_social: bool = True):
             except Exception:
                 pass
 
-            # 1. Groq AI 지능형 큐레이션
-            ai_data = enrich_spot_with_groq(raw_name, cat, region, area, groq_key)
+            # 1. 규칙 기반 초고속 메타데이터 큐레이션 (Groq 429 원천 차단)
+            ai_data = generate_spot_metadata_rule_based(raw_name, cat, region, area, default_moods)
             
-            slot = (ai_data.get("slot") if ai_data and ai_data.get("slot") in ("day", "evening", "night") else None) or infer_slot(cat, raw_name)
-            summary = (ai_data.get("summary") if ai_data else "") or f"{area}의 분위기 좋은 감성 {cat or '데이트 명소'}"
-            moods = (ai_data.get("mood") if ai_data and isinstance(ai_data.get("mood"), list) else None) or default_moods
-            price = (ai_data.get("price") if ai_data else "") or "2~3만원대"
+            slot = ai_data["slot"]
+            summary = ai_data["summary"]
+            moods = ai_data["mood"]
+            price = ai_data["price"]
 
             # 2. 멀티 소셜 데이터 마이닝 (유튜브 핫클립 & 카카오맵)
             yt_data = None

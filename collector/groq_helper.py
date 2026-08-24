@@ -23,12 +23,13 @@ import urllib.request
 import urllib.error
 
 GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions"
-DEFAULT_MODEL = "openai/gpt-oss-120b"  # Groq 초고성능 최신 오픈 모델 (500+ tok/s)
+DEFAULT_MODEL = "llama-3.1-8b-instant"  # 초경량 고속 모델 (30,000 TPM, 30 RPM 한도 내 최적)
 CACHE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".groq_cache.json")
 
-# 인메모리 레이트리미트 상태 관리
+# 인메모리 레이트리미트 및 429 쿨다운 상태 관리
 _last_request_time = 0.0
-_MIN_REQUEST_INTERVAL = 1.5  # 최소 1.5초 간격 (분당 최대 40회 이하 제한)
+_MIN_REQUEST_INTERVAL = 2.0  # 최소 2.0초 간격 (분당 최대 30회 엄격 방어)
+_cooldown_until = 0.0        # 429 발생 시 10분간 자동 쿨다운 (규칙 기반 무중단 폴백)
 
 def _load_cache():
     if os.path.exists(CACHE_FILE):
@@ -74,11 +75,18 @@ def get_groq_api_key():
                 pass
     return None
 
-def call_groq_json(prompt: str, system_prompt: str = "", model: str = DEFAULT_MODEL, max_tokens: int = 600) -> dict | None:
+def call_groq_json(prompt: str, system_prompt: str = "", model: str = DEFAULT_MODEL, max_tokens: int = 500) -> dict | None:
     """
     Groq API를 호출하여 JSON 응답을 안전하게 반환합니다.
     Rate Limit 방어, 디스크 캐시, 자동 재시도 및 무중단 폴백을 지원합니다.
     """
+    global _last_request_time, _cooldown_until
+
+    # 429 쿨다운 활성화 상태 검사 (10분간 Groq 호출 차단 후 규칙 기반 즉시 폴백)
+    now = time.time()
+    if now < _cooldown_until:
+        return None
+
     api_key = get_groq_api_key()
     if not api_key:
         return None
@@ -89,9 +97,7 @@ def call_groq_json(prompt: str, system_prompt: str = "", model: str = DEFAULT_MO
     if cache_key in cache:
         return cache[cache_key]
 
-    # 2. 레이트 리미트 방어 (최소 간격 보장)
-    global _last_request_time
-    now = time.time()
+    # 2. 레이트 리미트 방어 (최소 2.0초 간격 보장)
     elapsed = now - _last_request_time
     if elapsed < _MIN_REQUEST_INTERVAL:
         time.sleep(_MIN_REQUEST_INTERVAL - elapsed)
@@ -117,7 +123,7 @@ def call_groq_json(prompt: str, system_prompt: str = "", model: str = DEFAULT_MO
     import ssl
     ctx = ssl.create_default_context()
 
-    max_retries = 2
+    max_retries = 1
     for attempt in range(max_retries + 1):
         try:
             req = urllib.request.Request(
@@ -127,7 +133,7 @@ def call_groq_json(prompt: str, system_prompt: str = "", model: str = DEFAULT_MO
                 method="POST"
             )
             _last_request_time = time.time()
-            with urllib.request.urlopen(req, context=ctx, timeout=10) as res:
+            with urllib.request.urlopen(req, context=ctx, timeout=8) as res:
                 res_data = json.loads(res.read().decode("utf-8"))
                 content = res_data.get("choices", [{}])[0].get("message", {}).get("content", "")
                 
@@ -155,24 +161,18 @@ def call_groq_json(prompt: str, system_prompt: str = "", model: str = DEFAULT_MO
 
         except urllib.error.HTTPError as e:
             if e.code == 429:
-                # Rate limit 걸린 경우 대기 후 재시도
-                time.sleep(3.0 * (attempt + 1))
-                continue
+                # 429 Too Many Requests 감지 시 10분(600초) 쿨다운 설정 및 즉시 폴백
+                _cooldown_until = time.time() + 600
+                print(f"⚠️ [Groq 429 Rate Limit 감지] 10분간 Groq 호출 쿨다운 활성화 → 규칙 기반 엔진으로 자동 폴백")
+                return None
             elif e.code == 404:
-                # 모델이 변경되었거나 폐기된 경우 안정적인 대체 모델로 자동 전환 재시도
-                fallback_model = "llama-3.3-70b-versatile" if model != "llama-3.3-70b-versatile" else "openai/gpt-oss-120b"
-                print(f"[Groq 404 Warning] Model '{payload['model']}' not found. Falling back to '{fallback_model}'")
+                # 모델이 없을 경우 기본 경량 모델로 자동 폴백
+                fallback_model = "llama-3.1-8b-instant"
                 payload["model"] = fallback_model
                 continue
             else:
-                try:
-                    err_body = e.read().decode("utf-8")
-                    print(f"[Groq Error] HTTPError {e.code}: {err_body}")
-                except Exception:
-                    pass
                 return None
         except Exception as ex:
-            print(f"[Groq Error] Exception: {ex}")
             return None
 
     return None

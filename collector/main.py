@@ -211,7 +211,7 @@ def run_cycle():
 
     time.sleep(2)
 
-    log(f"▶ 2단계: 2026 신규 핫플레이스 포털 자율 발굴 시작 (Groq AI 큐레이션, 한도: {DISCOVERY_LIMIT}개)")
+    log(f"▶ 2단계: 2026 신규 핫플레이스 포털 자율 발굴 시작 (한도: {DISCOVERY_LIMIT}개)")
     try:
         run_discovery(SUPABASE_URL, SUPABASE_SERVICE_KEY, groq_key=GROQ_API_KEY, max_discoveries=DISCOVERY_LIMIT)
     except Exception as e:
