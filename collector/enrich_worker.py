@@ -55,13 +55,29 @@ def run_social_enrichment(supabase_url: str, service_key: str, batch_size: int =
     print(f"🔄 총 {len(spots_to_enrich)}개 스팟 소셜 메타데이터 보강 시작...\n")
 
     enriched_count = 0
+    seen_spot_ids = set()
+
     for s in spots_to_enrich:
         spot_id = s.get("id")
         name = s.get("name", "").strip()
         location = s.get("location", "") or s.get("area", "")
         is_verified = bool(s.get("verified", False))
 
-        if not name:
+        if not name or spot_id in seen_spot_ids:
+            continue
+
+        seen_spot_ids.add(spot_id)
+
+        # 단독 지명 및 오염된 일반명사는 소셜 API 조회 없이 자동 격리 처리
+        if len(name) <= 2 or name in ["서울", "경기", "인천", "강원", "충청", "영남", "호남", "제주", "부산", "대구", "울산", "광주", "대전", "세종", "한남", "압구정", "카페", "곱창전골"]:
+            try:
+                quarantine_url = f"{supabase_url}/rest/v1/spots?id=eq.{spot_id}"
+                patch_payload = json.dumps({"is_closed": True, "updated_at": datetime.now(timezone.utc).isoformat()}).encode('utf-8')
+                q_req = urllib.request.Request(quarantine_url, data=patch_payload, headers=api_headers, method='PATCH')
+                with urllib.request.urlopen(q_req, timeout=5):
+                    pass
+            except Exception:
+                pass
             continue
 
         print(f"  🔍 '{name}' ({location}) 소셜 마이닝 중...", end=" ", flush=True)

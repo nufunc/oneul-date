@@ -562,6 +562,11 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                     old_sum = spot.get("summary") or ""
                     patch_data["summary"] = f"{name} — {old_sum}"[:150] if old_sum and old_sum not in name else name
 
+            # [Noise Quarantine] 단독 지명, 2자 이하 일반명사, 오염 헤더명은 자동 격리
+            check_name = patch_data.get("name") or name
+            if len(check_name) <= 2 or check_name in ["서울", "경기", "인천", "강원", "충청", "영남", "호남", "제주", "부산", "대구", "울산", "광주", "대전", "세종", "한남", "압구정", "카페", "곱창전골", "맛집", "식당"]:
+                patch_data["is_closed"] = True
+
             if road_addr and not spot.get("address"):
                 patch_data["address"] = road_addr
 

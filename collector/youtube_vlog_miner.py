@@ -26,6 +26,7 @@ import sys
 import re
 import json
 import time
+import random
 import urllib.request
 import urllib.parse
 import argparse
@@ -248,6 +249,10 @@ SEARCH_KEYWORDS = [
     "지역별 찐노포 코스 정리 더보기",
     "서울 핫플 맛집 골목 투어 타임스탬프",
     "전국 빵지순례 카페 투어 타임라인",
+    "이색 데이트 코스 공방 체험 브이로그",
+    "국내 액티비티 여행 코스 정리 타임라인",
+    "실내 이색 데이트 방탈출 공방 추천 브이로그",
+    "커플 원데이클래스 데이트 코스 추천",
 ]
 
 # 설명란이 이보다 짧으면 파싱할 코스 목록이 없다고 보고 스킵
