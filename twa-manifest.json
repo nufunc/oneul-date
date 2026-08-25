@@ -11,8 +11,8 @@
   "startUrl": "/oneul-date/",
   "iconUrl": "https://nufunc.github.io/oneul-date/icon-512.png",
   "maskableIconUrl": "https://nufunc.github.io/oneul-date/icon-maskable-512.png",
-  "appVersionName": "0.9.10",
-  "appVersionCode": 14,
+  "appVersionName": "0.9.11",
+  "appVersionCode": 15,
   "signingKey": {
     "path": "./android.keystore",
     "alias": "oneuldate"

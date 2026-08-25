@@ -193,8 +193,9 @@ export const POPULAR_QUICK_TAGS: QuickTagItem[] = [
   { label: '#와인', query: '와인', synonyms: ['와인', 'wine', '와인바', '내추럴와인', '글라스'] },
   { label: '#위스키', query: '위스키', synonyms: ['위스키', 'whisky', '몰트', '하이볼', '바', '스피크이지'] },
   { label: '#칵테일', query: '칵테일', synonyms: ['칵테일', 'cocktail', '라운지', '바', '논알콜', '펍'] },
-  { label: '#공방', query: '공방', synonyms: ['공방', '원데이', '클래스', '도자기', '향수', '드로잉', '베이킹', '가죽'] },
-  { label: '#이색체험', query: '체험', synonyms: ['체험', '이색', '보드게임', '방탈출', '아쿠아리움', 'VR', '사격', '액티비티'] },
+  { label: '#공방', query: '공방', synonyms: ['공방', '원데이', '클래스', '도자기', '도예', '향수', '드로잉', '베이킹', '가죽', '유리', '반지', '목공'] },
+  { label: '#이색체험', query: '체험', synonyms: ['체험', '이색', '보드게임', '방탈출', '아쿠아리움', 'VR', '사격', '액티비티', '카트', '목장'] },
+  { label: '#액티비티', query: '액티비티', synonyms: ['액티비티', '루지', '서핑', '요트', '패러글라이딩', '케이블카', '짚라인', '클라이밍', '카약', '레일바이크', '모노레일', '수상레저', '스포츠'] },
   { label: '#스파', query: '스파', synonyms: ['스파', '마사지', 'spa', '온천', '찜질', '사우나', '테르메덴', '아쿠아필드'] },
   { label: '#맛집', query: '맛집', synonyms: ['맛집', '미식', '로컬', '노포', '삼겹살', '파스타', '스테이크', '고기'] },
   { label: '#드라이브', query: '드라이브', synonyms: ['드라이브', '외곽', '호수', '전망대', '남한산성', '북악', '코스'] },
@@ -1855,7 +1856,7 @@ function activeSlots(): SlotKey[] {
 }
 
 declare const __APP_VERSION__: string;
-const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.9.10';
+const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.9.11';
 
 function courseSpotIds(): number[] {
   if (!state.course) return [];
@@ -2531,6 +2532,7 @@ const LUCIDE_ICONS = {
   wine: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide-icon"><path d="M8 22h8"/><path d="M7 10h10"/><path d="M12 15v7"/><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z"/></svg>`,
   bed: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide-icon"><path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/><path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/><path d="M12 4v6"/><path d="M2 18h20"/></svg>`,
   palette: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide-icon"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>`,
+  compass: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide-icon"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>`,
   trees: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide-icon"><path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v6"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.4"/></svg>`,
   sparkles: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide-icon"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>`,
   sun: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide-icon"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`,
@@ -2545,6 +2547,9 @@ function getSpotFallbackIcon(spot: Spot, slot: SlotKey): string {
   const summary = (spot.summary || '').toLowerCase();
   const combined = `${cat} ${name} ${summary}`;
 
+  if (combined.includes('루지') || combined.includes('서핑') || combined.includes('요트') || combined.includes('패러글라이딩') || combined.includes('짚라인') || combined.includes('케이블카') || combined.includes('클라이밍') || combined.includes('카약') || combined.includes('방탈출') || combined.includes('보드게임') || combined.includes('액티비티') || combined.includes('레저') || combined.includes('스포츠') || combined.includes('카트')) {
+    return LUCIDE_ICONS.compass;
+  }
   if (combined.includes('카페') || combined.includes('커피') || combined.includes('디저트') || combined.includes('베이커리') || combined.includes('tea') || combined.includes('cafe')) {
     return LUCIDE_ICONS.coffee;
   }
@@ -2554,7 +2559,7 @@ function getSpotFallbackIcon(spot: Spot, slot: SlotKey): string {
   if (combined.includes('호텔') || combined.includes('숙박') || combined.includes('펜션') || combined.includes('리조트') || combined.includes('스테이') || slot === 'stay') {
     return LUCIDE_ICONS.bed;
   }
-  if (combined.includes('미술관') || combined.includes('전시') || combined.includes('박물관') || combined.includes('갤러리') || combined.includes('공연') || combined.includes('영화') || combined.includes('공방') || combined.includes('체험')) {
+  if (combined.includes('미술관') || combined.includes('전시') || combined.includes('박물관') || combined.includes('갤러리') || combined.includes('공연') || combined.includes('영화') || combined.includes('공방') || combined.includes('체험') || combined.includes('도예') || combined.includes('도자기')) {
     return LUCIDE_ICONS.palette;
   }
   if (combined.includes('공원') || combined.includes('산책') || combined.includes('자연') || combined.includes('전망') || combined.includes('뷰') || combined.includes('숲') || combined.includes('호수') || combined.includes('해변')) {
@@ -2574,6 +2579,14 @@ function getSpotFallbackIcon(spot: Spot, slot: SlotKey): string {
 
 // 카테고리별 고화질 감성 큐레이션 이미지 풀 (각 카테고리별 8~10장 엄선 Unsplash 에디토리얼)
 const CURATED_CATEGORY_IMAGES: Record<string, string[]> = {
+  activity: [
+    'https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=500&q=80&auto=format&fit=crop', // 서핑 & 파도
+    'https://images.unsplash.com/photo-1540946485063-a40da27545f8?w=500&q=80&auto=format&fit=crop', // 오션 요트 세일링
+    'https://images.unsplash.com/photo-1522163182402-834f871fd851?w=500&q=80&auto=format&fit=crop', // 볼더링 클라이밍
+    'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500&q=80&auto=format&fit=crop', // 에메랄드 카약 투어
+    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500&q=80&auto=format&fit=crop', // 패러글라이딩 스카이
+    'https://images.unsplash.com/photo-1517649763962-0c623266ddc0?w=500&q=80&auto=format&fit=crop', // 아웃도어 스포츠 레저
+  ],
   cafe: [
     'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=500&q=80&auto=format&fit=crop', // 브루잉 커피
     'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=500&q=80&auto=format&fit=crop', // 따뜻한 카페 인테리어
@@ -2663,11 +2676,13 @@ function getSpotImageUrl(spot: Spot, slot: SlotKey, usedImages?: Set<string>): s
   const combined = `${cat} ${name} ${summary}`;
 
   let pool = CURATED_CATEGORY_IMAGES.cafe;
-  if (combined.includes('바') || combined.includes('와인') || combined.includes('칵테일') || combined.includes('주점') || combined.includes('펍')) {
+  if (combined.includes('루지') || combined.includes('서핑') || combined.includes('요트') || combined.includes('패러글라이딩') || combined.includes('짚라인') || combined.includes('케이블카') || combined.includes('클라이밍') || combined.includes('카약') || combined.includes('방탈출') || combined.includes('보드게임') || combined.includes('액티비티') || combined.includes('레저') || combined.includes('스포츠') || combined.includes('카트')) {
+    pool = CURATED_CATEGORY_IMAGES.activity;
+  } else if (combined.includes('바') || combined.includes('와인') || combined.includes('칵테일') || combined.includes('주점') || combined.includes('펍')) {
     pool = CURATED_CATEGORY_IMAGES.bar;
   } else if (combined.includes('호텔') || combined.includes('숙박') || combined.includes('펜션') || combined.includes('리조트') || slot === 'stay') {
     pool = CURATED_CATEGORY_IMAGES.stay;
-  } else if (combined.includes('미술관') || combined.includes('전시') || combined.includes('박물관') || combined.includes('갤러리') || combined.includes('공방') || combined.includes('문화')) {
+  } else if (combined.includes('미술관') || combined.includes('전시') || combined.includes('박물관') || combined.includes('갤러리') || combined.includes('공방') || combined.includes('문화') || combined.includes('도예') || combined.includes('도자기')) {
     pool = CURATED_CATEGORY_IMAGES.culture;
   } else if (combined.includes('공원') || combined.includes('산책') || combined.includes('자연') || combined.includes('전망') || combined.includes('뷰') || combined.includes('숲')) {
     pool = CURATED_CATEGORY_IMAGES.nature;
