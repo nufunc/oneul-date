@@ -48,12 +48,12 @@ elif raw_hours:
     CHECK_INTERVAL_SECONDS = int(float(raw_hours) * 3600)
     INTERVAL_DESC = f"{raw_hours}시간"
 else:
-    CHECK_INTERVAL_MINUTES = 30
-    CHECK_INTERVAL_SECONDS = 30 * 60
-    INTERVAL_DESC = "30분"
+    CHECK_INTERVAL_MINUTES = 60
+    CHECK_INTERVAL_SECONDS = 60 * 60
+    INTERVAL_DESC = "60분 (1시간)"
 
-DISCOVERY_LIMIT = int(os.getenv("DISCOVERY_LIMIT") or env.get("DISCOVERY_LIMIT") or "300")      # 1회 신규 발굴 한도 (기본: 300개)
-BATCH_LIMIT = int(os.getenv("BATCH_LIMIT") or env.get("BATCH_LIMIT") or "500")                  # 1회 라이브 폐업 검증 한도 (기본: 500개)
+DISCOVERY_LIMIT = int(os.getenv("DISCOVERY_LIMIT") or env.get("DISCOVERY_LIMIT") or "150")      # 1회 신규 발굴 한도 (기본: 150개)
+BATCH_LIMIT = int(os.getenv("BATCH_LIMIT") or env.get("BATCH_LIMIT") or "200")                  # 1회 라이브 폐업 검증 한도 (기본: 200개)
 DAILY_REPORT_HOUR = int(os.getenv("DAILY_REPORT_HOUR") or env.get("DAILY_REPORT_HOUR") or "22")# 매일 리포트 발송 시각 (KST 0~23시, 기본: 22시)
 
 # KST (한국 표준시 UTC+9)

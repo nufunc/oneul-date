@@ -377,6 +377,8 @@ STOPWORDS = [
     # 이벤트/경품 보일러플레이트 — 설명란 하단 고정 문구에서 새어 나오는 후보
     "경품", "발표", "추첨", "응모", "당첨", "참여방법", "참여", "폼링크", "비밀링크",
     "행사기간", "이벤트", "신청", "공지", "안내", "혜택", "적립", "선착순", "기간",
+    # 유튜브 챕터 잡음 (잡담/사담/쿠키)
+    "사담", "잡담", "수다", "쿠키", "쿠키영상", "비하인드", "q&a", "qna", "질문답변", "소통",
 ]
 
 # 상호명에 절대 쓰이지 않는 토큰 (하나라도 어절로 등장하면 문장 조각)
@@ -979,9 +981,55 @@ def _collect_title_candidates(title: str) -> list[str]:
     return raw
 
 
+def _extract_shortlink_candidates(text: str) -> list[str]:
+    """설명란에 포함된 naver.me, map.naver.com, place.map.kakao.com, kko.to, catchtable 링크를 추적하여 상호명 추출"""
+    if not text:
+        return []
+    candidates = []
+    
+    # 1. 카카오맵 단축/플레이스 링크 (kko.to/xxx 또는 place.map.kakao.com/xxx)
+    for m in re.finditer(r'https?://(?:kko\.to|place\.map\.kakao\.com)/([a-zA-Z0-9_-]+)', text):
+        short_url = m.group(0)
+        try:
+            req = urllib.request.Request(short_url, headers=HEADERS)
+            with urllib.request.urlopen(req, timeout=5) as res:
+                html = res.read().decode('utf-8', errors='ignore')
+                og_m = re.search(r'<meta property=[\'\"]og:title[\'\"] content=[\'\"]([^\'\"]+)[\'\"]', html)
+                if og_m:
+                    kname = og_m.group(1).strip()
+                    if 2 <= len(kname) <= 25 and not any(w in kname for w in ["카카오맵", "지도"]):
+                        candidates.append(kname)
+                else:
+                    t_m = re.search(r'<title>([^<]+?)(?:\s*\|\s*카카오맵)?</title>', html)
+                    if t_m:
+                        kname = t_m.group(1).strip()
+                        if 2 <= len(kname) <= 25 and not any(w in kname for w in ["카카오맵", "지도"]):
+                            candidates.append(kname)
+        except Exception:
+            pass
+
+    # 2. 네이버 지도 단축 링크 (naver.me/xxx)
+    for m in re.finditer(r'https?://naver\.me/([a-zA-Z0-9_-]+)', text):
+        short_url = m.group(0)
+        try:
+            req = urllib.request.Request(short_url, headers=HEADERS)
+            with urllib.request.urlopen(req, timeout=5) as res:
+                final_url = res.geturl()
+                p_match = re.search(r'/place/(\d+)', final_url)
+                if p_match:
+                    pid = p_match.group(1)
+                    places = search_naver(pid)
+                    if places and places[0].get("name"):
+                        candidates.append(places[0]["name"])
+        except Exception:
+            pass
+
+    return candidates
+
+
 def extract_spot_candidates_verbose(title: str, description: str, video_id: str = "") -> dict:
     """후보 추출 + 게이트 통과 결과를 상세 반환.
-    반환: {raw: int, passed: list[str], source: 'description'|'pinned_comment'|'groq_semantic_extractor'|'title'|'none', rejected: list[(원문, 사유)]}
+    반환: {raw: int, passed: list[str], source: 'shortlink_resolver'|'description'|'pinned_comment'|'groq_semantic_extractor'|'title'|'none', rejected: list[(원문, 사유)]}
     """
     def _gate(raw_list: list[str]) -> tuple[list[str], list[tuple[str, str]]]:
         passed, rejected = [], []
@@ -993,6 +1041,18 @@ def extract_spot_candidates_verbose(title: str, description: str, video_id: str 
             else:
                 rejected.append((r.strip()[:30], reason))
         return passed, rejected
+
+    # 0. 설명란 단축/지도 링크 (Shortlink Resolver 우선 추출)
+    link_raw = _extract_shortlink_candidates(description or "")
+    if link_raw:
+        link_passed, link_rejected = _gate(link_raw)
+        if link_passed:
+            return {
+                "raw": len(link_raw),
+                "passed": link_passed,
+                "source": "shortlink_resolver",
+                "rejected": link_rejected,
+            }
 
     # 1. 설명란 정형 리스트/타임스탬프 추출
     desc_raw = _collect_description_candidates(description or "")

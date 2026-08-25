@@ -12,7 +12,7 @@ import json
 import time
 import sys
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from miners.youtube_miner import search_youtube_hotclip
 from miners.kakaomap_miner import search_kakaomap_place
@@ -79,6 +79,17 @@ def run_social_enrichment(supabase_url: str, service_key: str, batch_size: int =
             except Exception:
                 pass
             continue
+
+        # 최근 3일(72시간) 이내에 이미 동기화된 스팟은 스킵 (불필요한 소셜 API 쿼리 낭비 방지)
+        s_metrics = s.get("metrics") or {}
+        last_synced = s_metrics.get("last_synced_at")
+        if last_synced:
+            try:
+                sync_dt = datetime.fromisoformat(last_synced.replace('Z', '+00:00'))
+                if datetime.now(timezone.utc) - sync_dt < timedelta(days=3):
+                    continue
+            except Exception:
+                pass
 
         print(f"  🔍 '{name}' ({location}) 소셜 마이닝 중...", end=" ", flush=True)
 

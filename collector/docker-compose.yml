@@ -12,10 +12,10 @@ services:
       - PYTHONUNBUFFERED=1
       - TZ=Asia/Seoul
       - LOG_DIR=/mnt/data/logs
-      - CHECK_INTERVAL_MINUTES=${CHECK_INTERVAL_MINUTES:-30}
+      - CHECK_INTERVAL_MINUTES=${CHECK_INTERVAL_MINUTES:-60}
       - CHECK_INTERVAL_HOURS=${CHECK_INTERVAL_HOURS:-}
-      - DISCOVERY_LIMIT=${DISCOVERY_LIMIT:-300}
-      - BATCH_LIMIT=${BATCH_LIMIT:-500}
+      - DISCOVERY_LIMIT=${DISCOVERY_LIMIT:-150}
+      - BATCH_LIMIT=${BATCH_LIMIT:-200}
       # 슬롯 자동교정(Slot Healing) 안전장치
       #   SLOT_HEAL_DRYRUN=1 : 로그만 남기고 slot 을 DB 에 쓰지 않는다
       #   SLOT_HEAL_ALL=1    : day/evening/night 사이 재배치까지 교정 (기본은 stay 축만)

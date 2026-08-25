@@ -13,7 +13,7 @@ import urllib.request
 import urllib.parse
 import time
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from category_filter import CATEGORY_BLACKLIST_LODGING
 
 if hasattr(sys.stdout, 'reconfigure'):
@@ -449,8 +449,11 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
         "Prefer": "return=minimal"
     }
 
-    # 1. 검증 및 고도화 대상 스팟 가져오기 (오래된 순)
-    query_url = f"{supabase_url}/rest/v1/spots?select=*&is_closed=eq.false&order=updated_at.asc.nullsfirst,id.asc&limit={limit}"
+    # 1. 검증 및 고도화 대상 스팟 가져오기 (오래된 순, 최소 24시간 쿨다운)
+    # 이미 최근 24시간 이내에 검증된 스팟은 재검증하지 않고 스킵 (하루 1회 정밀 순환)
+    cutoff_24h = (datetime.now(timezone.utc) - timedelta(hours=24)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    or_clause = urllib.parse.quote(f"(updated_at.is.null,updated_at.lt.{cutoff_24h})")
+    query_url = f"{supabase_url}/rest/v1/spots?select=*&is_closed=eq.false&or={or_clause}&order=updated_at.asc.nullsfirst,id.asc&limit={limit}"
     req = urllib.request.Request(query_url, headers=api_headers)
 
     try:
@@ -458,6 +461,10 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
             spots = json.loads(res.read().decode('utf-8'))
     except Exception as e:
         print(f"❌ Supabase 조회 오류: {e}")
+        return
+
+    if not spots:
+        print("✅ [1단계 검증 스킵] 최근 24시간 이내에 모든 정상 스팟이 검증 완료되었습니다. (0건 처리)")
         return
 
     print(f"🔄 OCI VM 고도화 엔진 시작: {len(spots)}개 스팟 심층 분석 및 동기화...")
