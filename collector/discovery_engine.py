@@ -16,7 +16,7 @@ import re
 
 from category_filter import is_date_spot_category
 from area_seeds import generate_dynamic_queries, get_coverage_gap_areas
-from supabase_worker import is_polluted_header_name
+from supabase_worker import is_polluted_header_name, derive_region_area
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -340,16 +340,21 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
             x_coord = p.get("x") or p.get("lng")
             y_coord = p.get("y") or p.get("lat")
 
+            derived_reg, derived_area = derive_region_area(road_addr)
+            real_reg = derived_reg or region
+            real_area = derived_area or area
+            real_loc = f"{real_reg} {real_area}".strip()
+
             spot_id = int(time.time() * 1000) + random.randint(100, 999)
             new_spot = {
                 "id": spot_id,
                 "name": raw_name,
                 "slot": meta["slot"],
-                "region": region,
-                "area": area,
+                "region": real_reg,
+                "area": real_area,
                 "address": road_addr,
                 "mood": meta["mood"],
-                "location": f"{region} {area}",
+                "location": real_loc,
                 "price": meta["price"],
                 "summary": meta["summary"],
                 "category": cat,

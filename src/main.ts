@@ -2847,6 +2847,38 @@ function cleanSpotSummary(spot: Spot): string {
   return `${area ? `${area} 골목의 ` : ''}남다른 감각과 무드가 돋보이는 ${cat}입니다.`;
 }
 
+/** 카드에 표시될 위치 정보 정제 (address / area / region 기반 정합성 보장) */
+function getDisplayLocation(spot: Spot): string {
+  const addr = (spot.address || '').trim();
+  const reg = (spot.region || '').trim();
+  const area = (spot.area || '').trim();
+  const loc = (spot.location || '').trim();
+
+  // 1. 주소에서 추출 가능한 정확한 시/군/구 우선
+  if (addr) {
+    const parts = addr.split(/\s+/);
+    if (parts.length >= 2) {
+      const city = parts[0];
+      const dist = parts[1];
+      // 광역시/도 및 구/시 조합
+      if (['서울', '인천', '부산', '대구', '광주', '대전', '울산', '세종'].some(c => city.includes(c))) {
+        return `${city.slice(0, 2)} ${dist}`;
+      }
+      if (parts.length >= 3 && (dist.endsWith('시') || dist.endsWith('군'))) {
+        return `${city.slice(0, 2)} ${dist} ${parts[2].endsWith('구') ? parts[2] : ''}`.trim();
+      }
+      return `${city.slice(0, 2)} ${dist}`;
+    }
+  }
+
+  // 2. region / area 정합성 확인
+  if (reg && area && area !== '전체') {
+    return `${reg} ${area}`;
+  }
+
+  return loc || addr || '대한민국';
+}
+
 function renderStepCard(
   step: CourseStep,
   index: number,
@@ -2950,7 +2982,7 @@ function renderStepCard(
             ${spot.verified ? `<span class="icon-verified-badge" aria-label="검증된 데이트 장소">${ICON_VERIFIED_CHECK_SVG}</span>` : ''}
           </h3>
           ${curationBadges.length > 0 ? `<div class="step-curation-row">${curationBadges.join('')}</div>` : ''}
-          <p class="step-location">📍 ${escapeHtml(spot.location)}</p>
+          <p class="step-location">📍 ${escapeHtml(getDisplayLocation(spot))}</p>
           ${(() => {
             const sum = cleanSpotSummary(spot);
             return sum ? `<blockquote class="step-quote">“${escapeHtml(sum)}”</blockquote>` : '';

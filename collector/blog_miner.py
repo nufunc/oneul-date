@@ -244,6 +244,11 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
 
             batch_seen_names.add(real_name)
 
+            derived_reg, derived_area = derive_region_area(road_addr)
+            real_reg = derived_reg or region
+            real_area = derived_area or area
+            real_loc = f"{real_reg} {real_area}".strip()
+
             slot = infer_slot(cat, real_name)
             thum = top.get("thumUrl") or top.get("image") or top.get("imageUrl") or top.get("thumbUrl")
             x_coord = top.get("x") or top.get("lng")
@@ -254,13 +259,13 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
                 "id": spot_id,
                 "name": real_name,
                 "slot": slot,
-                "region": region,
-                "area": area,
+                "region": real_reg,
+                "area": real_area,
                 "address": road_addr,
                 "mood": moods,
-                "location": f"{region} {area}",
+                "location": real_loc,
                 "price": "2~4만원대",
-                "summary": f"블로그 인기 추천 {region} {area}의 감성 {cat or '데이트 핫플'}",
+                "summary": f"블로그 인기 추천 {real_reg} {real_area}의 감성 {cat or '데이트 핫플'}",
                 "category": cat,
                 "image_url": thum,
                 "lat": float(y_coord) if y_coord else None,

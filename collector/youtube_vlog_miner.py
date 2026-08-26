@@ -79,31 +79,6 @@ INNERTUBE_URL = ("https://www.youtube.com/youtubei/v1/player"
                  "?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8&prettyPrint=false")
 INNERTUBE_CLIENTS = [
     {
-        "label": "innertube_android",
-        "context": {"client": {
-            "clientName": "ANDROID", "clientVersion": "19.09.37",
-            "androidSdkVersion": 30, "hl": "ko", "gl": "KR",
-        }},
-        "headers": {
-            "User-Agent": "com.google.android.youtube/19.09.37 (Linux; U; Android 11) gzip",
-            "X-YouTube-Client-Name": "3",
-            "X-YouTube-Client-Version": "19.09.37",
-        },
-    },
-    {
-        "label": "innertube_embed",
-        "context": {"client": {
-            "clientName": "WEB_EMBEDDED_PLAYER", "clientVersion": "1.20250101.00.00",
-            "hl": "ko", "gl": "KR",
-        }},
-        "headers": {
-            "User-Agent": UA_DESKTOP,
-            "X-YouTube-Client-Name": "56",
-            "X-YouTube-Client-Version": "1.20250101.00.00",
-            "Referer": "https://www.youtube.com/",
-        },
-    },
-    {
         "label": "innertube_web",
         "context": {"client": {
             "clientName": "WEB", "clientVersion": "2.20250101.00.00",
@@ -126,6 +101,19 @@ INNERTUBE_CLIENTS = [
                            "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"),
             "X-YouTube-Client-Name": "2",
             "X-YouTube-Client-Version": "2.20250101.00.00",
+        },
+    },
+    {
+        "label": "innertube_embed",
+        "context": {"client": {
+            "clientName": "WEB_EMBEDDED_PLAYER", "clientVersion": "1.20250101.00.00",
+            "hl": "ko", "gl": "KR",
+        }},
+        "headers": {
+            "User-Agent": UA_DESKTOP,
+            "X-YouTube-Client-Name": "56",
+            "X-YouTube-Client-Version": "1.20250101.00.00",
+            "Referer": "https://www.youtube.com/",
         },
     },
 ]

@@ -577,13 +577,14 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
             if road_addr and not spot.get("address"):
                 patch_data["address"] = road_addr
 
-            # [Region Healing] 검증된 주소를 근거로 region/area 오염을 교정한다.
+            # [Region & Location Healing] 검증된 주소를 근거로 region/area/location 오염을 교정한다.
             # 기존 값이 이미 있어도 주소 근거가 있으면 덮어쓴다(도출 실패 시에만 보존).
             if road_addr:
                 d_region, d_area = derive_region_area(road_addr)
                 if d_region or d_area:
                     old_region = spot.get("region")
                     old_area = spot.get("area")
+                    old_loc = spot.get("location")
                     fixed = False
                     if d_region and d_region != old_region:
                         patch_data["region"] = d_region
@@ -591,12 +592,17 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                     if d_area and d_area != old_area:
                         patch_data["area"] = d_area
                         fixed = True
+                    
+                    calc_loc = f"{d_region or old_region or ''} {d_area or old_area or ''}".strip()
+                    if calc_loc and calc_loc != old_loc:
+                        patch_data["location"] = calc_loc
+                        fixed = True
+
                     if fixed:
                         region_fixed_count += 1
                         print(
-                            f"  🔧 [Region Fix] id={s_id} "
-                            f"{old_region or '-'}/{old_area or '-'} → "
-                            f"{d_region or old_region or '-'}/{d_area or old_area or '-'} "
+                            f"  🔧 [Region & Location Fix] id={s_id} "
+                            f"'{old_loc or '-'}' → '{calc_loc}' "
                             f"({road_addr})"
                         )
 
