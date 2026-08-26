@@ -13,7 +13,7 @@ import urllib.parse
 import time
 import random
 import re
-from supabase_worker import load_env, search_naver, calculate_quality_score, is_polluted_header_name
+from supabase_worker import load_env, search_naver, calculate_quality_score, is_polluted_header_name, derive_region_area
 from discovery_engine import infer_slot
 from category_filter import is_date_spot_category
 from area_seeds import generate_dynamic_queries, get_coverage_gap_areas

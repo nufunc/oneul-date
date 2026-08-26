@@ -20,8 +20,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from supabase_worker import load_env, derive_region_area
 from category_filter import is_date_spot_category
 
-# TourAPI 4.0 엔드포인트
-TOUR_API_BASE = "https://apis.data.go.kr/B551011/KorService1"
+# TourAPI 4.0 엔드포인트 (KorService2 국문 관광정보 서비스)
+TOUR_API_BASE = os.getenv("TOUR_API_BASE") or "https://apis.data.go.kr/B551011/KorService2"
 
 # 데이트 적합 콘텐츠 타입
 # 12: 관광지, 14: 문화시설, 15: 축제공연행사, 28: 레포츠, 38: 쇼핑, 39: 음식점
@@ -55,24 +55,28 @@ AREA_CODE_MAP = {
 }
 
 def fetch_tourapi_spots(api_key: str, area_code: str = "1", content_type_id: str = "14", num_of_rows: int = 30) -> list[dict]:
-    """TourAPI 4.0 areaBasedList1 호출하여 관광/문화 스팟 목록 수급"""
+    """TourAPI 4.0 areaBasedList2 / areaBasedList1 호출하여 관광/문화 스팟 목록 수급"""
     if not api_key:
         return []
 
+    # ServiceKey 인코딩 안전화 (이미 인코딩된 %3D 등 중복 인코딩 방지)
+    clean_key = urllib.parse.unquote(api_key.strip())
+
     params = {
-        "serviceKey": api_key,
+        "serviceKey": clean_key,
         "numOfRows": str(num_of_rows),
         "pageNo": "1",
         "MobileOS": "ETC",
         "MobileApp": "OneulDate",
         "_type": "json",
-        "listYN": "Y",
-        "arrange": "P",
+        "arrange": "A",
         "areaCode": area_code,
         "contentTypeId": content_type_id
     }
 
-    url = f"{TOUR_API_BASE}/areaBasedList1?{urllib.parse.urlencode(params)}"
+    # KorService2면 areaBasedList2, KorService1이면 areaBasedList1
+    op_name = "areaBasedList2" if "KorService2" in TOUR_API_BASE else "areaBasedList1"
+    url = f"{TOUR_API_BASE}/{op_name}?{urllib.parse.urlencode(params)}"
     req = urllib.request.Request(url, headers={"User-Agent": "OneulDate-DataEngine/4.0"})
 
     try:
@@ -92,19 +96,7 @@ def fetch_tourapi_spots(api_key: str, area_code: str = "1", content_type_id: str
     return []
 
 def check_spot_exists(supabase_url: str, headers: dict, content_id: str, name: str) -> bool:
-    """Provider ID 또는 상호명으로 이미 DB에 존재하는지 확인"""
-    # 1. Provider ID 체크
-    url = f"{supabase_url}/rest/v1/spots?select=id&provider_ids->>tour_api=eq.{content_id}"
-    req = urllib.request.Request(url, headers=headers)
-    try:
-        with urllib.request.urlopen(req, timeout=3) as res:
-            rows = json.loads(res.read().decode('utf-8'))
-            if rows:
-                return True
-    except Exception:
-        pass
-
-    # 2. 상호명 체크
+    """상호명으로 이미 DB에 존재하는지 확인"""
     clean_name = re.sub(r'\(.*?\)|\[.*?\]', '', name).strip()
     encoded = urllib.parse.quote(clean_name)
     url_name = f"{supabase_url}/rest/v1/spots?select=id&name=eq.{encoded}"
@@ -125,9 +117,19 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
         return 0
 
     env = load_env()
-    api_key = tour_api_key or os.getenv("TOUR_API_KEY") or env.get("TOUR_API_KEY")
+    api_key = (
+        tour_api_key
+        or os.getenv("TOUR_API_KEY")
+        or env.get("TOUR_API_KEY")
+        or os.getenv("PUBLIC_DATA_PORTAL_KEY")
+        or env.get("PUBLIC_DATA_PORTAL_KEY")
+        or os.getenv("KOREA_TOUR_API_KEY")
+        or env.get("KOREA_TOUR_API_KEY")
+        or os.getenv("DATA_GO_KR_API_KEY")
+        or env.get("DATA_GO_KR_API_KEY")
+    )
     if not api_key:
-        print("💡 [TourAPI Miner] TOUR_API_KEY가 설정되지 않아 공공데이터 수집을 스킵합니다.")
+        print("💡 [TourAPI Miner] TOUR_API_KEY(공공데이터포털 인증키)가 설정되지 않아 공공데이터 수집을 스킵합니다.")
         return 0
 
     supabase_url = supabase_url.rstrip("/")
@@ -187,9 +189,7 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                     "address": addr1,
                     "location": f"{region} {area}".strip(),
                     "mood": default_moods,
-                    "mood_tags": [ctype_name, "공공인증", "가볼만한곳"],
                     "price": "무료/입장권" if ctype_id in ("14", "12") else "현장결제",
-                    "price_tier": "FREE" if ctype_id in ("12", "14") else "₩",
                     "summary": f"{title} — 한국관광공사 인증 {ctype_name} 명소 ({area})",
                     "category": ctype_name,
                     "image_url": first_img,
@@ -197,13 +197,7 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                     "lng": lng_val,
                     "quality_score": 92,
                     "fail_count": 0,
-                    "curation_badges": {
-                        "tour_api": "한국관광공사 인증",
-                        "certified": ["한국관광 100선"] if ctype_id == "12" else []
-                    },
-                    "provider_ids": {
-                        "tour_api": content_id
-                    },
+                    "curation_badges": ["한국관광공사 인증"] + (["한국관광 100선"] if ctype_id == "12" else []),
                     "parking_info": {
                         "type": "free" if "주차" in addr1 else "unknown",
                         "detail": "공영/부설 주차장 완비" if "주차" in addr1 else "인근 공영주차장 이용"

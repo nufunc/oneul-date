@@ -167,6 +167,7 @@ INITIAL_VERIFIED_CHANNELS = [
     {"name": "데이트립 DayTrip", "handle": "@daytrip_official", "category": "vlog_date"},
     {"name": "제주에딧", "handle": "@jeju_edit", "category": "vlog_jeju"},
     {"name": "부산언니", "handle": "@busan_unnie", "category": "vlog_busan"},
+    {"name": "강지영의 동그라미", "handle": "@jiyoung_circle", "category": "vlog_date_hotplace"},
 ]
 
 VERIFIED_CHANNELS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".verified_channels.json")
@@ -992,21 +993,56 @@ def passes_spot_name_gate(raw: str) -> tuple[bool, str, str]:
     return True, name, ""
 
 
+PREFIX_PREFIX_RE = re.compile(
+    r'^(?:[✨💡📍📌🏠☕🍽️🏛️🌳🌿🎪▶✔·\s]*)(?:[가-힣a-zA-Z0-9_\s]+?(?:코스|스팟|추천|일차|방문|맛집|카페|명소|일정|투어|선정|MZ피디|피디|점심|저녁|아침|브이로그|성지순례))\s*(?:[①-⑳❶-❿⑴-⒇\[0-9\]\(\)\.\-:]+)\s*',
+    re.IGNORECASE
+)
+ORDINAL_PREFIX_RE = re.compile(
+    r'^(?:[✨💡📍📌🏠☕🍽️🏛️🌳🌿🎪▶✔·\s]*)(?:첫번째|두번째|세번째|네번째|다섯번째|여섯번째|일곱번째|여덟번째|아홉번째|열번째|[0-9]+번째)\s*(?:코스|스팟|장소|맛집|카페)?\s*[-~:·]?\s*',
+    re.IGNORECASE
+)
+NUM_PREFIX_RE = re.compile(
+    r'^(?:[✨💡📍📌🏠☕🍽️🏛️🌳🌿🎪▶✔·\s]*)(?:[①-⑳❶-❿⑴-⒇]|\d+[\.\)\-:]|[\[\(]\d+[\]\)])\s*',
+    re.IGNORECASE
+)
+
+def clean_vlog_spot_name(line: str) -> str:
+    """타임스탬프/번호 리스트 라인에서 원문자(①, ❶) 및 코스 수식어를 걷어내고 순수 상호명만 추출"""
+    if not line:
+        return ""
+    cleaned = line.strip()
+    # 1. 'MZ피디의 문래동 코스 ① 포토바이문래' or '1일차 점심 1. 성수다락'
+    cleaned = PREFIX_PREFIX_RE.sub('', cleaned).strip()
+    # 2. '✨ 첫번째 코스 - 런던베이글뮤지엄'
+    cleaned = ORDINAL_PREFIX_RE.sub('', cleaned).strip()
+    # 3. '📍 1. 어니언 안국' or '① 러스트베이커리'
+    cleaned = NUM_PREFIX_RE.sub('', cleaned).strip()
+    # 4. 앞뒤 장식 기호 정리
+    cleaned = cleaned.strip(' -~:•·📍📌🏠☕🍽️🏛️🌳🌿🎪▶✔*#')
+    return cleaned
+
+
 def _collect_description_candidates(description: str) -> list[str]:
-    """설명란에서 타임스탬프/번호목록/아이콘 라인 기반 후보 원문 수집"""
+    """설명란에서 타임스탬프/번호목록/아이콘 라인 기반 후보 원문 수집 (스마트 상호명 정제 적용)"""
     raw = []
 
-    # 1. 타임스탬프 라인 (예: "01:23 선샤인스튜디오")
+    # 1. 타임스탬프 라인 (예: "01:23 선샤인스튜디오", "02:32 MZ피디의 문래동 코스 ① 포토바이문래")
     for line in re.findall(r'(?:[0-9]{1,2}:[0-9]{2}(?::[0-9]{2})?)\s*[-~:•·]?\s*([^\n\r]+)', description):
-        raw.append(line)
+        cleaned = clean_vlog_spot_name(line)
+        if cleaned:
+            raw.append(cleaned)
 
-    # 2. 번호 리스트 (예: "1. 초막골생태공원", "3) 반월호수공원")
-    for line in re.findall(r'(?:^|\n)\s*[0-9]{1,2}[\.\)\-]\s*([^\n\r:—]+)', description):
-        raw.append(line)
+    # 2. 번호 리스트 (예: "1. 초막골생태공원", "3) 반월호수공원", "① 러스트베이커리")
+    for line in re.findall(r'(?:^|\n)\s*[0-9①-⑳❶-❿]{1,2}[\.\)\-:]?\s*([^\n\r:—]+)', description):
+        cleaned = clean_vlog_spot_name(line)
+        if cleaned:
+            raw.append(cleaned)
 
     # 4. 아이콘/헤더 기반 (예: "📍 선샤인스튜디오")
     for spot in re.findall(r'(?:📍|📌|🏠|☕|🍽️|🏛️|🌳|🌿|🎪|▶|✔|·)\s*([^\n\r:—]+)', description):
-        raw.append(spot)
+        cleaned = clean_vlog_spot_name(spot)
+        if cleaned:
+            raw.append(cleaned)
 
     return raw
 
