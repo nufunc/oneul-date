@@ -178,8 +178,8 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
         pass
 
     # 2) 정적 핫플 쿼리 + 소외지역/역세권 동적 합성 쿼리 50:50 배합
-    sample_count = min(len(BLOG_SEARCH_QUERIES), max(8, (max_discoveries + 4) // 4))
-    half_count = max(4, sample_count // 2)
+    sample_count = min(len(BLOG_SEARCH_QUERIES), max(25, (max_discoveries + 2) // 3))
+    half_count = max(12, sample_count // 2)
     static_sampled = random.sample(BLOG_SEARCH_QUERIES, min(half_count, len(BLOG_SEARCH_QUERIES)))
     dynamic_sampled = generate_dynamic_queries(count=half_count, gap_districts=gap_districts)
 

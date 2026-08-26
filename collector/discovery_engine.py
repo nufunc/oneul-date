@@ -278,8 +278,8 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
         pass
 
     # 2) 정적 유명 핫플 쿼리 + 소외지역/역세권 동적 합성 쿼리 50:50 배합
-    sample_count = min(len(DISCOVERY_QUERIES), max(10, (max_discoveries + 4) // 4))
-    half_count = max(5, sample_count // 2)
+    sample_count = min(len(DISCOVERY_QUERIES), max(30, (max_discoveries + 2) // 3))
+    half_count = max(15, sample_count // 2)
     static_sampled = random.sample(DISCOVERY_QUERIES, min(half_count, len(DISCOVERY_QUERIES)))
     dynamic_sampled = generate_dynamic_queries(count=half_count, gap_districts=gap_districts)
 

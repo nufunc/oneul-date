@@ -48,11 +48,11 @@ elif raw_hours:
     CHECK_INTERVAL_SECONDS = int(float(raw_hours) * 3600)
     INTERVAL_DESC = f"{raw_hours}시간"
 else:
-    CHECK_INTERVAL_MINUTES = 60
-    CHECK_INTERVAL_SECONDS = 60 * 60
-    INTERVAL_DESC = "60분 (1시간)"
+    CHECK_INTERVAL_MINUTES = 30
+    CHECK_INTERVAL_SECONDS = 30 * 60
+    INTERVAL_DESC = "30분"
 
-DISCOVERY_LIMIT = int(os.getenv("DISCOVERY_LIMIT") or env.get("DISCOVERY_LIMIT") or "150")      # 1회 신규 발굴 한도 (기본: 150개)
+DISCOVERY_LIMIT = int(os.getenv("DISCOVERY_LIMIT") or env.get("DISCOVERY_LIMIT") or "200")      # 1회 신규 발굴 한도 (기본: 200개)
 BATCH_LIMIT = int(os.getenv("BATCH_LIMIT") or env.get("BATCH_LIMIT") or "200")                  # 1회 라이브 폐업 검증 한도 (기본: 200개)
 DAILY_REPORT_HOUR = int(os.getenv("DAILY_REPORT_HOUR") or env.get("DAILY_REPORT_HOUR") or "22")# 매일 리포트 발송 시각 (KST 0~23시, 기본: 22시)
 
@@ -241,18 +241,18 @@ def run_cycle():
 
     time.sleep(2)
 
-    log(f"▶ 6단계: 최신 유튜브 여행/데이트 브이로그 역방향 장소 마이닝 시작")
+    log(f"▶ 6단계: 최신 유튜브 여행/데이트 브이로그 역방향 장소 마이닝 시작 (한도: 25개 영상)")
     try:
-        mined = run_youtube_vlog_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, limit=5)
+        mined = run_youtube_vlog_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, limit=25)
         log(f"6단계 완료: 신규 스팟 {mined}개 등록")
     except Exception as e:
         log(f"6단계 유튜브 브이로그 마이닝 오류: {e}", level="ERROR")
 
     time.sleep(2)
 
-    log(f"▶ 7단계: 캐치테이블 & 블루리본 미식 예약 핫플 마이닝 시작 (한도: {DISCOVERY_LIMIT}개)")
+    log(f"▶ 7단계: 캐치테이블 & 블루리본 미식 예약 핫플 마이닝 시작 (한도: 60개)")
     try:
-        c_mined = run_catchtable_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, max_discoveries=DISCOVERY_LIMIT)
+        c_mined = run_catchtable_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, max_discoveries=60)
         log(f"7단계 완료: 신규 예약 다이닝 스팟 {c_mined}개 등록")
     except Exception as e:
         log(f"7단계 캐치테이블 마이닝 오류: {e}", level="ERROR")

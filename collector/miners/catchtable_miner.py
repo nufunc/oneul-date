@@ -160,7 +160,7 @@ def check_spot_exists(supabase_url: str, headers: dict, name: str) -> bool:
     except Exception:
         return False
 
-def run_catchtable_mining(supabase_url: str, service_key: str, max_discoveries: int = 15) -> int:
+def run_catchtable_mining(supabase_url: str, service_key: str, max_discoveries: int = 60) -> int:
     """캐치테이블 & 블루리본 미식 큐레이션 마이닝 실행"""
     if not supabase_url or not service_key:
         print("⚠️ Supabase URL 또는 키가 없어 캐치테이블 마이닝을 건너뜁니다.")
@@ -174,15 +174,15 @@ def run_catchtable_mining(supabase_url: str, service_key: str, max_discoveries: 
         "Prefer": "return=minimal"
     }
 
-    print("🍷 [CatchTable Miner] 캐치테이블 & 블루리본 미식 큐레이션 마이닝 시작...")
+    print(f"🍷 [CatchTable Miner] 캐치테이블 & 블루리본 미식 큐레이션 마이닝 시작 (목표: 최대 {max_discoveries}개)...")
 
     queries = list(GOURMET_SEARCH_QUERIES)
     random.shuffle(queries)
 
     discovered_spots = []
 
-    # 매 사이클마다 6개 쿼리를 랜덤 샘플링하여 발굴
-    for query_text, default_region, default_area, moods, slot, price_tier in queries[:6]:
+    # 매 사이클마다 20개 쿼리를 적극 샘플링하여 대량 발굴
+    for query_text, default_region, default_area, moods, slot, price_tier in queries[:20]:
         candidates = extract_gourmet_candidates_from_web(query_text)
         time.sleep(0.3)
 

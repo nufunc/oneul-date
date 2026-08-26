@@ -131,18 +131,42 @@ HISTORY_MAX = 500
 # ─────────────────────────────────────────────────────────────
 
 INITIAL_VERIFIED_CHANNELS = [
+    # 1. 미식 / 파인다이닝 / 노포 전문
     {"name": "더들리", "handle": "@dudely_", "category": "gourmet_travel"},
     {"name": "성시경 SUNG SI KYUNG", "handle": "@sungsikyung", "category": "gourmet_nodae"},
     {"name": "스튜디오 와플 - 또간집", "handle": "@studio_waffle", "category": "gourmet_travel"},
-    {"name": "수코 sookoh", "handle": "@sookoh", "category": "travel_vlog"},
     {"name": "마리아주", "handle": "@mariage_food", "category": "fine_dining"},
+    {"name": "비밀이야", "handle": "@bimirya", "category": "fine_dining"},
     {"name": "김사원세끼", "handle": "@kimsawon3kki", "category": "gourmet_nopo"},
     {"name": "맛상무", "handle": "@mat_sang_moo", "category": "gourmet_nopo"},
-    {"name": "비밀이야", "handle": "@bimirya", "category": "fine_dining"},
     {"name": "정육왕 Meat Creator", "handle": "@meatking", "category": "gourmet_bbq"},
+    {"name": "오사사 오사카에사는사람들TV", "handle": "@matsuda_osasa", "category": "gourmet_dining"},
+    {"name": "빅페이스 BIGFACE", "handle": "@bigface_tv", "category": "gourmet_review"},
+    {"name": "윤호찌", "handle": "@yoonhottzy", "category": "gourmet_nopo"},
+    {"name": "먹보스 손석호", "handle": "@mukbossson", "category": "gourmet_dining"},
+    {"name": "맛객리우", "handle": "@matgaek_riu", "category": "gourmet_nopo"},
+    {"name": "츄릅켠", "handle": "@churupkyeon", "category": "gourmet_busan"},
+    {"name": "비디오머그 - 푸드", "handle": "@videomug", "category": "gourmet_story"},
+
+    # 2. 감성 여행 / 당일치기 / 데이트 브이로그
+    {"name": "수코 sookoh", "handle": "@sookoh", "category": "travel_vlog"},
     {"name": "딤디 deemd", "handle": "@deemd", "category": "vlog_cafe"},
     {"name": "혬복 hyembok", "handle": "@hyembok", "category": "vlog_date"},
     {"name": "슛뚜 sueddu", "handle": "@sueddu", "category": "vlog_travel"},
+    {"name": "여락이들", "handle": "@yeorakidul", "category": "travel_vlog"},
+    {"name": "제이림 JLim", "handle": "@jlim_vlog", "category": "vlog_travel"},
+    {"name": "나강 Nagang", "handle": "@nagang_vlog", "category": "travel_vlog"},
+    {"name": "트래블러조", "handle": "@traveler_joe", "category": "travel_vlog"},
+    {"name": "밍키 Mingky", "handle": "@mingky_vlog", "category": "vlog_date"},
+    {"name": "자몽부부", "handle": "@jamong_couple", "category": "vlog_couple"},
+    {"name": "소소한날", "handle": "@sosohannal", "category": "vlog_date"},
+    {"name": "가든스테이", "handle": "@gardenstay", "category": "vlog_stay"},
+    {"name": "또떠남", "handle": "@ddoddeonam", "category": "vlog_hotel_stay"},
+    {"name": "체크인", "handle": "@checkin_hotel", "category": "vlog_hotel"},
+    {"name": "여행에미치다", "handle": "@travelholic_korea", "category": "travel_curation"},
+    {"name": "데이트립 DayTrip", "handle": "@daytrip_official", "category": "vlog_date"},
+    {"name": "제주에딧", "handle": "@jeju_edit", "category": "vlog_jeju"},
+    {"name": "부산언니", "handle": "@busan_unnie", "category": "vlog_busan"},
 ]
 
 VERIFIED_CHANNELS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".verified_channels.json")
@@ -225,22 +249,53 @@ OVERSEAS_KEYWORDS = [
 
 # 설명란에 "코스 목록/타임라인/장소 정보"가 실릴 만한 롱폼을 노리는 검색 키워드
 SEARCH_KEYWORDS = [
+    # 1. 전국 핫플레이스 / 골목 데이트 브이로그
     "데이트 코스 타임라인 브이로그",
     "당일치기 코스 정리 브이로그",
     "데이트 코스 위치 정보 더보기",
     "서울 데이트 코스 추천 타임스탬프",
+    "성수동 한남동 데이트 코스 브이로그 타임라인",
+    "을지로 종로 노포 맛집 투어 타임스탬프",
+    "연남동 연희동 골목 카페 데이트 타임라인",
+    "잠실 송리단길 데이트 코스 브이로그",
+    "강남 신사 가로수길 와인바 다이닝 브이로그",
+    "여의도 더현대 데이트 코스 타임라인",
+
+    # 2. 수도권 / 경기 근교 드라이브 & 당일치기
     "경기도 여행 코스 추천 타임라인",
+    "수원 행궁동 데이트 코스 브이로그 타임스탬프",
+    "인천 송도 영종도 드라이브 데이트 코스",
+    "가평 양평 드라이브 카페 코스 타임라인",
+    "남양주 북한강 뷰 맛집 카페 브이로그",
+    "파주 일산 당일치기 데이트 코스 타임라인",
+    "시흥 안산 대부도 오션뷰 드라이브 브이로그",
+
+    # 3. 지방 광역 / 지방 대표 핫플
+    "부산 해운대 광안리 맛집 투어 타임스탬프",
+    "부산 전포동 영도 카페거리 데이트 브이로그",
+    "대구 동성로 교동 핫플 투어 타임라인",
+    "대전 성심당 소제동 빵지순례 데이트 코스",
+    "광주 동명동 양림동 카페 데이트 브이로그",
+    "경주 황리단길 당일치기 코스 정리 타임라인",
+    "강릉 속초 바다 드라이브 맛집 코스 타임스탬프",
+    "전주 한옥마을 객리단길 맛집 브이로그 타임라인",
+    "여수 밤바다 낭만포차 데이트 코스 타임스탬프",
+    "제주도 동쪽 서쪽 2박3일 여행 코스 타임라인",
+    "제주 애월 한림 감성카페 투어 브이로그",
+
+    # 4. 테마 / 액티비티 / 감성 숙소
     "커플 여행 브이로그 방문 장소 정리",
     "주말 나들이 코스 장소 목록 브이로그",
     "기차여행 당일치기 미식투어 타임라인",
     "전통시장 맛집 투어 정리 브이로그",
     "지역별 찐노포 코스 정리 더보기",
-    "서울 핫플 맛집 골목 투어 타임스탬프",
-    "전국 빵지순례 카페 투어 타임라인",
+    "전국 빵지순례 디저트 카페 투어 타임라인",
     "이색 데이트 코스 공방 체험 브이로그",
     "국내 액티비티 여행 코스 정리 타임라인",
     "실내 이색 데이트 방탈출 공방 추천 브이로그",
     "커플 원데이클래스 데이트 코스 추천",
+    "감성 숙소 호캉스 1박2일 브이로그 타임라인",
+    "스파 풀빌라 펜션 힐링 여행 브이로그",
 ]
 
 # 설명란이 이보다 짧으면 파싱할 코스 목록이 없다고 보고 스킵
