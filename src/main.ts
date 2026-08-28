@@ -2803,12 +2803,12 @@ function renderStepTransitDivider(prevStep: CourseStep, nextStep: CourseStep): s
   `;
 }
 
-/** 비정상적이거나 영문 태그 나열/스팟명 중복인 summary를 감지하여 고품질 한줄 소개로 교정 */
+/** 비정상적이거나 영문 태그 나열/판박이 템플릿인 summary를 감지하여 다채롭고 감각적인 에디토리얼 한줄 소개로 교정 */
 function cleanSpotSummary(spot: Spot): string {
   const raw = (spot.summary || '').trim();
   const name = spot.name.trim();
 
-  // 비정상 케이스 판별 (영문 태그 나열, 스팟명과 동일, 너무 짧거나 무의미한 텍스트)
+  // 비정상 케이스 판별 (영문 태그 나열, 스팟명과 동일, 너무 짧거나 무의미한 텍스트, 과거 판박이 템플릿)
   const isBad =
     !raw ||
     raw.length < 5 ||
@@ -2822,6 +2822,8 @@ function cleanSpotSummary(spot: Spot): string {
     raw.includes('gourmet') ||
     raw.includes('active') ||
     raw.includes('cost_effective') ||
+    raw.includes('골목의 남다른 감각과') ||
+    raw.includes('남다른 감각과 로맨틱한 무드가') ||
     raw === '정보 없음' ||
     raw === '설명이 없습니다';
 
@@ -2829,22 +2831,110 @@ function cleanSpotSummary(spot: Spot): string {
     return raw;
   }
 
-  // 감각적인 대체 한줄 설명 생성
-  const area = spot.area || spot.location || '';
-  const cat = spot.category || '데이트 스팟';
+  const area = spot.area && spot.area !== '전체' ? spot.area : (spot.location || '');
+  const locPrefix = area ? `${area}에서 ` : '';
+  const locIn = area ? `${area}의 ` : '';
+  const cat = (spot.category || '').toLowerCase();
+  const slot = spot.slot || 'day';
   const sig = spot.signature_items && spot.signature_items.length > 0 ? spot.signature_items[0] : '';
+  const idHash = Math.abs(spot.id || name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0));
 
+  // 1. 시그니처 메뉴가 있는 경우
   if (sig) {
-    return `${area ? `${area}에서 ` : ''}대표 메뉴 ${sig}와 함께 감각적인 분위기를 즐기기 좋은 ${cat}입니다.`;
+    const sigTemplates = [
+      `${locPrefix}대표 메뉴 '${sig}'와 함께 감각적인 분위기를 즐기기 좋은 곳이에요.`,
+      `${locIn}시그니처 '${sig}'의 특별한 풍미를 다정하게 만끽할 수 있는 명소예요.`,
+      `${locPrefix}정성 담긴 '${sig}'와 함께 잊지 못할 미식 데이트를 즐겨보세요.`,
+    ];
+    return sigTemplates[idHash % sigTemplates.length];
   }
+
+  // 2. 공인 뱃지(블루리본/미쉐린/관광공사)가 있는 경우
   if (spot.curation_badges?.blue_ribbon) {
-    return `블루리본 서베이가 인정한 ${area ? `${area}의 ` : ''}신뢰할 수 있는 대표 ${cat}입니다.`;
+    return `블루리본 서베이가 검증한 ${locIn}신뢰할 수 있는 대표 미식 스팟이에요.`;
   }
   if (spot.curation_badges?.michelin) {
-    return `미쉐린 가이드에 선정된 ${area ? `${area}의 ` : ''}정갈한 미식 ${cat}입니다.`;
+    return `미쉐린 가이드에 등재된 ${locIn}격조 높은 맛과 정갈한 분위기의 명소예요.`;
+  }
+  if (spot.curation_badges?.tour_api) {
+    return `한국관광공사가 인증한 ${locIn}사계절 언제 찾아도 매력적인 문화 관광지예요.`;
   }
 
-  return `${area ? `${area} 골목의 ` : ''}남다른 감각과 무드가 돋보이는 ${cat}입니다.`;
+  // 3. 업종(카테고리) 및 슬롯별 다채로운 에디토리얼 풀
+  if (cat.includes('카페') || cat.includes('커피') || cat.includes('베이커리') || cat.includes('디저트') || cat.includes('찻집')) {
+    const cafePool = [
+      `${locPrefix}향긋한 커피와 달콤한 디저트로 여유로운 대화를 나누기 좋은 감성 카페예요.`,
+      `${locIn}따스한 채광과 아늑한 인테리어 속에서 둘만의 힐링을 누릴 수 있는 곳이에요.`,
+      `${locPrefix}갓 구운 빵의 고소한 향기와 감각적인 무드가 매력적인 베이커리 명소예요.`,
+      `${locIn}감각적인 공간에서 특별한 티타임을 즐기며 쉬어가기 좋은 데이트 코스예요.`,
+    ];
+    return cafePool[idHash % cafePool.length];
+  }
+
+  if (cat.includes('주점') || cat.includes('와인') || cat.includes('칵테일') || cat.includes('이자카야') || cat.includes('포차') || cat.includes('펍') || cat.includes('호프') || cat.includes('바(bar)')) {
+    const barPool = [
+      `${locIn}은은한 조명 아래에서 로맨틱한 와인과 분위기를 만끽하기 좋은 다이닝 바예요.`,
+      `${locPrefix}맛깔스러운 안주와 함께 다정하게 술잔을 기울이기 좋은 감성 주점이에요.`,
+      `${locIn}감각적인 음악과 무드 속에서 둘만의 저녁 데이트를 완성하기 좋은 핫플레이스예요.`,
+      `${locPrefix}도란도란 이야기를 나누며 하루의 피로를 기분 좋게 풀 수 있는 곳이에요.`,
+    ];
+    return barPool[idHash % barPool.length];
+  }
+
+  if (cat.includes('음식점') || cat.includes('한식') || cat.includes('양식') || cat.includes('일식') || cat.includes('중식') || cat.includes('레스토랑') || cat.includes('다이닝') || cat.includes('파스타') || cat.includes('스테이크') || cat.includes('초밥')) {
+    const foodPool = [
+      `${locPrefix}정성 가득한 요리와 함께 소중한 사람과 미식의 즐거움을 나누기 좋은 곳이에요.`,
+      `${locIn}세련된 분위기 속에서 오붓하게 특별한 식사를 즐길 수 있는 추천 맛집이에요.`,
+      `${locPrefix}신선한 재료와 정갈한 플레이팅으로 눈과 입이 모두 즐거운 다이닝 스팟이에요.`,
+      `${locIn}아늑한 공간에서 둘만의 오붓한 데이트 디너를 만끽해보세요.`,
+    ];
+    return foodPool[idHash % foodPool.length];
+  }
+
+  if (cat.includes('미술관') || cat.includes('전시') || cat.includes('박물관') || cat.includes('갤러리') || cat.includes('문화') || cat.includes('공연') || cat.includes('서점')) {
+    const culturePool = [
+      `${locPrefix}감각적인 예술 작품과 영감을 함께 나누며 사색하기 좋은 문화 공간이에요.`,
+      `${locIn}다채로운 전시와 볼거리를 감상하며 색다른 추억을 남길 수 있는 데이트 코스예요.`,
+      `${locPrefix}조용히 거닐며 서로의 취향과 감상을 나누기 딱 좋은 힐링 명소예요.`,
+    ];
+    return culturePool[idHash % culturePool.length];
+  }
+
+  if (cat.includes('공원') || cat.includes('관광') || cat.includes('수목원') || cat.includes('식물원') || cat.includes('산책') || cat.includes('전망대') || cat.includes('야경') || cat.includes('호수') || cat.includes('해변')) {
+    const naturePool = [
+      `${locIn}탁 트인 풍경을 바라보며 손잡고 도란도란 산책하기 좋은 힐링 명소예요.`,
+      `${locPrefix}사계절 자연의 정취와 함께 계절의 아름다움을 오롯이 느낄 수 있는 곳이에요.`,
+      `${locIn}선선한 바람을 맞으며 낭만적인 풍경을 눈에 담기 좋은 감성 코스예요.`,
+    ];
+    return naturePool[idHash % naturePool.length];
+  }
+
+  if (cat.includes('공방') || cat.includes('체험') || cat.includes('원데이') || cat.includes('클래스') || cat.includes('스튜디오') || cat.includes('사진관') || cat.includes('액티비티') || cat.includes('클라이밍')) {
+    const activePool = [
+      `${locPrefix}둘만의 특별한 작품과 추억을 직접 만들며 웃음꽃을 피우기 좋은 이색 공방이에요.`,
+      `${locIn}활동적인 체험과 함께 유쾌한 에너지를 듬뿍 채울 수 있는 이색 데이트 스팟이에요.`,
+      `${locPrefix}소중한 순간을 예쁜 사진과 기념품으로 간직할 수 있는 명소예요.`,
+    ];
+    return activePool[idHash % activePool.length];
+  }
+
+  if (slot === 'stay' || cat.includes('호텔') || cat.includes('숙소') || cat.includes('펜션') || cat.includes('리조트') || cat.includes('스테이')) {
+    const stayPool = [
+      `${locIn}프라이빗하고 감각적인 인테리어 속에서 온전한 휴식을 누리기 좋은 감성 스테이예요.`,
+      `${locPrefix}아늑하고 포근한 분위기 속에서 하루의 피로를 녹이며 힐링하기 좋은 숙소예요.`,
+      `${locIn}로맨틱한 밤을 보내며 둘만의 소중한 시간을 간직할 수 있는 곳이에요.`,
+    ];
+    return stayPool[idHash % stayPool.length];
+  }
+
+  // 기본 폴백 (다양한 무드 풀)
+  const defaultPool = [
+    `${locIn}트렌디한 감성과 머무는 순간이 편안한 매력적인 데이트 장소예요.`,
+    `${locPrefix}소소하지만 확실한 행복을 만끽할 수 있는 다정한 분위기의 공간이에요.`,
+    `${locIn}남다른 개성과 아늑한 무드가 돋보이는 숨은 힐링 스팟이에요.`,
+    `${locPrefix}사랑하는 사람과 함께 특별한 하루를 완성하기 좋은 추천 장소예요.`,
+  ];
+  return defaultPool[idHash % defaultPool.length];
 }
 
 /** 카드에 표시될 위치 정보 정제 (address / area / region 기반 정합성 보장) */

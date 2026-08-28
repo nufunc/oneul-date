@@ -1741,12 +1741,15 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
         if len(found_ids) >= pool_target:
             break
         encoded = urllib.parse.quote(kw)
-        search_url = f"https://www.youtube.com/results?search_query={encoded}&sp=EgIIAw%253D%253D"
-        req = urllib.request.Request(search_url, headers=HEADERS)
         try:
+            req = urllib.request.Request(search_url, headers=HEADERS)
             with urllib.request.urlopen(req, timeout=10) as res:
                 html = res.read().decode('utf-8', errors='ignore')
                 raw_ids = re.findall(r'\"videoId\":\"([a-zA-Z0-9_-]{11})\"', html)
+                if not raw_ids:
+                    raw_ids = re.findall(r'/watch\?v=([a-zA-Z0-9_-]{11})', html)
+                if not raw_ids:
+                    raw_ids = re.findall(r'data-video-id=\"([a-zA-Z0-9_-]{11})\"', html)
                 if not raw_ids:
                     print(f"  ⚠️ 검색 결과에서 영상 ID 미검출 ('{kw}', 응답 {len(html):,}자)")
                     continue

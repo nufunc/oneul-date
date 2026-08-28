@@ -87,8 +87,10 @@ GOURMET_SEARCH_QUERIES = [
 ]
 
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+    "Referer": "https://m.search.naver.com/",
 }
 
 try:
@@ -97,9 +99,9 @@ except ImportError:
     extract_spots_from_unstructured_text = None
 
 def extract_gourmet_candidates_from_web(query_text: str) -> list[str]:
-    """네이버 웹 검색 및 블로그에서 캐치테이블/블루리본 스팟명 후보 마이닝"""
+    """네이버 모바일 웹 검색 및 블로그에서 캐치테이블/블루리본 스팟명 후보 마이닝"""
     encoded_query = urllib.parse.quote(query_text)
-    url = f"https://search.naver.com/search.naver?where=view&query={encoded_query}"
+    url = f"https://m.search.naver.com/search.naver?where=m_view&query={encoded_query}"
 
     req = urllib.request.Request(url, headers=HEADERS)
     candidates = []
@@ -108,22 +110,26 @@ def extract_gourmet_candidates_from_web(query_text: str) -> list[str]:
         with urllib.request.urlopen(req, timeout=6) as res:
             if res.status == 200:
                 html = res.read().decode('utf-8', errors='replace')
-                text_corpus = re.sub(r'<[^>]+>', ' ', html)
+                clean_html = re.sub(r'<script.*?</script>', ' ', html, flags=re.DOTALL | re.IGNORECASE)
+                clean_html = re.sub(r'<style.*?</style>', ' ', clean_html, flags=re.DOTALL | re.IGNORECASE)
+                clean_html = re.sub(r'<head.*?</head>', ' ', clean_html, flags=re.DOTALL | re.IGNORECASE)
+                text_corpus = re.sub(r'<[^>]+>', ' ', clean_html)
 
-                # 괄호나 따옴표로 감싸진 상호명 패턴 추출
-                matches = re.findall(r'[\'\"「『]([가-힣a-zA-Z0-9\s]{2,15})[\'\"」』]', html)
+                # 1. 따옴표/괄호로 감싸진 상호명 패턴 추출
+                matches = re.findall(r'[\'\"「『]([가-힣a-zA-Z0-9\s]{2,15})[\'\"」』]', clean_html)
                 for m in matches:
-                    c = m.strip()
-                    if 2 <= len(c) <= 15 and not any(stop in c for stop in ["추천", "데이트", "코스", "맛집", "예약", "블루리본", "캐치테이블", "후기", "리뷰"]):
+                    c = re.sub(r'의\s*이미지$', '', m.strip()).strip()
+                    if 2 <= len(c) <= 15 and re.search(r'[가-힣]', c) and not any(stop in c for stop in ["추천", "데이트", "코스", "맛집", "예약", "블루리본", "캐치테이블", "후기", "리뷰", "블로그", "포스팅", "메뉴", "가격"]):
                         candidates.append(c)
 
-                # 제목 패턴
-                titles = re.findall(r'class="title_link[^>]*>([^<]+)</a>', html)
+                # 2. 제목/본문 텍스트 패턴
+                titles = re.findall(r'class="[^"]*title[^"]*"[^>]*>([^<]+)<', clean_html)
                 for t in titles:
                     words = t.strip().split()
                     for w in words:
                         clean_w = re.sub(r'[^\w가-힣]', '', w)
-                        if 2 <= len(clean_w) <= 10 and not any(stop in clean_w for stop in ["데이트", "코스", "맛집", "예약", "와인바", "다이닝", "추천", "블루리본"]):
+                        clean_w = re.sub(r'의\s*이미지$', '', clean_w).strip()
+                        if 2 <= len(clean_w) <= 12 and re.search(r'[가-힣]', clean_w) and not any(stop in clean_w for stop in ["데이트", "코스", "맛집", "예약", "와인바", "다이닝", "추천", "블루리본", "캐치테이블", "파인다이닝", "성수동", "기념일", "후기"]):
                             candidates.append(clean_w)
     except Exception as e:
         print(f"  ⚠️ 캐치테이블 마이닝 검색 오류 ({query_text}): {e}")
@@ -287,7 +293,7 @@ def run_catchtable_mining(supabase_url: str, service_key: str, max_discoveries: 
                 if r.status in (200, 201):
                     print(f"✨ [CatchTable/블루리본 INSERT 성공] 총 {len(discovered_spots)}개 예약 다이닝 적재 완료:")
                     for s in discovered_spots:
-                        print(f"   + [{s['region']}/{s['slot']}] {s['name']} ({s['category']}) | {s['price_tier']}")
+                        print(f"   + [{s['region']}/{s['slot']}] {s['name']} ({s['category']}) | {s.get('price', '')}")
                     return len(discovered_spots)
         except Exception as e:
             print(f"❌ CatchTable 스팟 INSERT 실패: {e}")

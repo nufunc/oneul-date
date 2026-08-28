@@ -23,7 +23,7 @@ import urllib.request
 import urllib.error
 
 GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions"
-DEFAULT_MODEL = "llama-3.1-8b-instant"  # 초경량 고속 모델 (30,000 TPM, 30 RPM 한도 내 최적)
+DEFAULT_MODEL = "groq/compound-mini"  # 초고속 최신 모델 (30 RPM, 0.2초 초고속 레이턴시)
 CACHE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".groq_cache.json")
 
 # 인메모리 레이트리미트 및 429 쿨다운 상태 관리
@@ -118,6 +118,7 @@ def call_groq_json(prompt: str, system_prompt: str = "", model: str = DEFAULT_MO
         "messages": messages,
         "temperature": 0.2,
         "max_tokens": max_tokens,
+        "response_format": {"type": "json_object"},
     }
 
     import ssl
@@ -161,14 +162,12 @@ def call_groq_json(prompt: str, system_prompt: str = "", model: str = DEFAULT_MO
 
         except urllib.error.HTTPError as e:
             if e.code == 429:
-                # 429 Too Many Requests 감지 시 10분(600초) 쿨다운 설정 및 즉시 폴백
-                _cooldown_until = time.time() + 600
-                print(f"⚠️ [Groq 429 Rate Limit 감지] 10분간 Groq 호출 쿨다운 활성화 → 규칙 기반 엔진으로 자동 폴백")
-                return None
+                # 429 Too Many Requests 감지 시 3초 슬립 후 재시도
+                time.sleep(3.0)
+                continue
             elif e.code == 404:
                 # 모델이 없을 경우 기본 경량 모델로 자동 폴백
-                fallback_model = "llama-3.1-8b-instant"
-                payload["model"] = fallback_model
+                payload["model"] = DEFAULT_MODEL
                 continue
             else:
                 return None
