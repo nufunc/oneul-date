@@ -1687,93 +1687,114 @@ def _print_video_line(vinfo: dict, stats: dict, skip_reason: str = "") -> None:
           f"게이트통과 {stats.get('candidates_gated', 0)}개 | 등록 {stats.get('registered', 0)}건{note}")
 
 
+def _search_innertube_videos(query: str, max_results: int = 20) -> list[str]:
+    """InnerTube Search API (공식 JSON 프로토콜)로 최신 영상 ID를 안전하고 정확하게 수급"""
+    url = "https://www.youtube.com/youtubei/v1/search"
+    payload = {
+        "context": {
+            "client": {
+                "clientName": "WEB",
+                "clientVersion": "2.20240313.01.00",
+                "hl": "ko",
+                "gl": "KR"
+            }
+        },
+        "query": query,
+        "params": "EgIIAw%3D%3D"  # 20분 이상 롱폼 브이로그 필터
+    }
+    headers = {
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+        "Accept-Language": "ko-KR,ko;q=0.9",
+        "Origin": "https://www.youtube.com",
+        "Referer": "https://www.youtube.com/",
+        "Cookie": "CONSENT=YES+1; SOCS=CAI"
+    }
+    try:
+        req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST")
+        with urllib.request.urlopen(req, timeout=8) as res:
+            if res.status == 200:
+                data = json.loads(res.read().decode("utf-8"))
+                txt = json.dumps(data)
+                ids = []
+                for vid in re.findall(r'\"videoId\":\s*\"([a-zA-Z0-9_-]{11})\"', txt):
+                    if vid not in ids:
+                        ids.append(vid)
+                return ids[:max_results]
+    except Exception:
+        pass
+    return []
+
+
 def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5,
                             dry_run: bool = False) -> int:
-    """유튜브에서 최신 데이트/여행 브이로그 영상을 검색하여 자율 역방향 수집 수행.
-    limit 은 '실제로 마이닝한 영상 수' 기준. 등록된 신규 스팟 총 개수를 반환."""
+    """유튜브에서 최신 데이트/여행 브이로그 영상을 검색하여 자율 역방향 수집 수행."""
     print(f"🎬 [YouTube Vlog 자율 마이너] 최신 데이트/여행 롱폼 영상 탐색 시작...{' [DRY-RUN]' if dry_run else ''}")
 
+    # 1. 처리 이력 로드
     history = load_processed_history()
     history_set = set(history)
     print(f"  • 처리 이력: {len(history)}개 (파일: {os.path.basename(HISTORY_PATH)})")
 
-    # 1. 검증된 크리에이터 채널 풀 로드 및 채널별 최신 영상 우선 탐색
+    # 검증된 채널 목록 로드
     ch_data = load_verified_channels()
-    verified_channels = list(ch_data.get("verified", {}).values())
+    verified_channels = list(ch_data.get("verified", {}).values()) if isinstance(ch_data, dict) and "verified" in ch_data else INITIAL_VERIFIED_CHANNELS
     print(f"  • 검증된 미식/여행 채널 풀: {len(verified_channels)}개 채널 가동")
 
-    # 설명란 미달/쇼츠/해외 스킵 및 이력 중복을 감안해 넉넉한 풀을 확보
-    pool_target = max(limit * 6, limit + 20)
+    # 발굴 대상 영상 ID 수집
     found_ids = []
+    pool_target = max(limit * 3, 25)
     seen_in_history = 0
 
     # 1-1. 검증된 채널 최신 영상 우선 소싱 (상위 3~4개 채널 샘플링)
     sampled_channels = random.sample(verified_channels, min(4, len(verified_channels)))
     for ch in sampled_channels:
         ch_query = f"{ch.get('name', '')} 여행 맛집 코스"
-        encoded = urllib.parse.quote(ch_query)
-        search_url = f"https://www.youtube.com/results?search_query={encoded}&sp=EgIIAw%253D%253D"
-        req = urllib.request.Request(search_url, headers=HEADERS)
-        try:
-            with urllib.request.urlopen(req, timeout=10) as res:
-                html = res.read().decode('utf-8', errors='ignore')
-                raw_ids = re.findall(r'\"videoId\":\"([a-zA-Z0-9_-]{11})\"', html)
-                added = 0
-                for vid in raw_ids[:10]:
-                    if vid in history_set:
-                        seen_in_history += 1
-                        continue
-                    if vid not in found_ids:
-                        found_ids.append(vid)
-                        added += 1
-                    if added >= 2:
-                        break
-                if added > 0:
-                    print(f"  🌟 [검증 채널] '{ch.get('name')}' 최신 영상 {added}개 우선 확보")
-        except Exception:
-            pass
+        raw_ids = _search_innertube_videos(ch_query, max_results=10)
+        added = 0
+        for vid in raw_ids:
+            if vid in history_set:
+                seen_in_history += 1
+                continue
+            if vid not in found_ids:
+                found_ids.append(vid)
+                added += 1
+            if added >= 2:
+                break
+        if added > 0:
+            print(f"  🌟 [검증 채널] '{ch.get('name')}' 최신 영상 {added}개 우선 확보")
 
     # 2. 일반 미식/데이트/여행 쿼리 풀 탐색
     per_kw_cap = max(3, -(-pool_target // len(SEARCH_KEYWORDS)))
     per_kw_scan = 20  # 검색 결과 상위 N개까지 훑어 이력에 없는 것을 고른다
 
-    for kw in SEARCH_KEYWORDS:
+    # 쿼리 풀 랜덤 셔플
+    shuffled_kws = list(SEARCH_KEYWORDS)
+    random.shuffle(shuffled_kws)
+
+    for kw in shuffled_kws:
         if len(found_ids) >= pool_target:
             break
-        encoded = urllib.parse.quote(kw)
-        try:
-            req = urllib.request.Request(search_url, headers=HEADERS)
-            with urllib.request.urlopen(req, timeout=10) as res:
-                html = res.read().decode('utf-8', errors='ignore')
-                raw_ids = re.findall(r'\"videoId\":\"([a-zA-Z0-9_-]{11})\"', html)
-                if not raw_ids:
-                    raw_ids = re.findall(r'/watch\?v=([a-zA-Z0-9_-]{11})', html)
-                if not raw_ids:
-                    raw_ids = re.findall(r'data-video-id=\"([a-zA-Z0-9_-]{11})\"', html)
-                if not raw_ids:
-                    print(f"  ⚠️ 검색 결과에서 영상 ID 미검출 ('{kw}', 응답 {len(html):,}자)")
-                    continue
-                # 중복 제거하며 상위 per_kw_scan 개까지 스캔
-                scanned, added, skipped_hist = [], 0, 0
-                for vid in raw_ids:
-                    if vid in scanned:
-                        continue
-                    scanned.append(vid)
-                    if len(scanned) > per_kw_scan:
-                        break
-                    if vid in history_set:
-                        skipped_hist += 1
-                        continue
-                    if vid in found_ids:
-                        continue
-                    found_ids.append(vid)
-                    added += 1
-                    if added >= per_kw_cap or len(found_ids) >= pool_target:
-                        break
-                seen_in_history += skipped_hist
-                print(f"  • '{kw}' 검색: 스캔 {len(scanned)}개 → 신규 {added}개 확보 (이력 스킵 {skipped_hist}개)")
-        except Exception as e:
-            print(f"  ⚠️ 유튜브 검색 실패 ('{kw}'): {e}")
+        raw_ids = _search_innertube_videos(kw, max_results=per_kw_scan)
+        if not raw_ids:
+            continue
+        scanned, added, skipped_hist = [], 0, 0
+        for vid in raw_ids:
+            if vid in scanned:
+                continue
+            scanned.append(vid)
+            if vid in history_set:
+                skipped_hist += 1
+                continue
+            if vid in found_ids:
+                continue
+            found_ids.append(vid)
+            added += 1
+            if added >= per_kw_cap or len(found_ids) >= pool_target:
+                break
+        seen_in_history += skipped_hist
+        if added > 0:
+            print(f"  • '{kw}' 검색: 스캔 {len(scanned)}개 → 신규 {added}개 확보 (이력 스킵 {skipped_hist}개)")
 
     if not found_ids:
         print(f"  ⚠️ 발견된 신규 영상 0개 — 검색 실패/차단이거나 상위 결과가 모두 처리 이력에 있습니다. "
