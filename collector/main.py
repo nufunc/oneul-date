@@ -296,7 +296,7 @@ def main():
         sleep_time = max(30, interval_seconds - elapsed)
 
         next_time = (get_kst_now() + timedelta(seconds=sleep_time)).strftime("%Y-%m-%d %H:%M:%S")
-        log(f"💤 6단계 전체 사이클 완료 (소요: {elapsed/60:.1f}분). 다음 사이클 대기 ({next_time} KST 예정)...")
+        log(f"💤 8단계 전체 자율 수집 사이클 완료 (소요: {elapsed/60:.1f}분). 다음 사이클 대기 ({next_time} KST 예정)...")
         time.sleep(sleep_time)
 
 if __name__ == "__main__":
