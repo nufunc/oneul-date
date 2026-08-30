@@ -2952,6 +2952,39 @@ function isSuperHotSpot(spot: Spot): boolean {
   return false;
 }
 
+/** 스팟의 실시간 종합 인기도 점수 계산 (핫플/인기순 정렬용) */
+function getSpotPopularityScore(spot: Spot): number {
+  if (!spot) return 0;
+  let score = spot.hot_score || 50;
+
+  // 1. 카카오맵 평점 가산
+  const rating = spot.social_links?.kakaomap?.rating;
+  if (rating) {
+    if (rating >= 4.7) score += 35;
+    else if (rating >= 4.5) score += 25;
+    else if (rating >= 4.2) score += 15;
+    else if (rating >= 4.0) score += 5;
+  }
+
+  // 2. 큐레이션 뱃지
+  if (spot.curation_badges?.michelin) score += 40;
+  if (spot.curation_badges?.blue_ribbon) score += 30;
+  if (spot.curation_badges?.tour_api) score += 10;
+
+  // 3. 유튜브 바이럴 가산
+  if (isValidYoutubeHotclip(spot.social_links?.youtube)) {
+    const views = spot.social_links?.youtube?.views || 0;
+    if (views >= 100000) score += 35;
+    else if (views >= 30000) score += 20;
+    else if (views >= 10000) score += 10;
+  }
+
+  // 4. 검증된 스팟 가산
+  if (spot.verified) score += 10;
+
+  return score;
+}
+
 /** 스팟 간 이동 동선 및 원터치 길찾기 딥링크 디바이더 렌더링 */
 function renderStepTransitDivider(prevStep: CourseStep, nextStep: CourseStep): string {
   if (!prevStep || !nextStep || prevStep.spotId === null || nextStep.spotId === null) {
@@ -3629,30 +3662,38 @@ function renderSpotDiscovery(): void {
     }
   }
 
-  // 3. 거리 계산 (GPS 좌표 기반)
-  if (userCoords) {
-    matchedSpots = matchedSpots.map((s) => {
-      const dist = s.lat && s.lng ? getDistanceKm(userCoords!.lat, userCoords!.lng, s.lat, s.lng) : 9999;
-      return { ...s, _dist: dist };
-    });
+  // 3. 기준 좌표 결정 (GPS 획득 좌표 -> 검색된 스팟 중심 -> 서울 기본 중심 좌표)
+  let effectiveCoords = userCoords;
+  if (!effectiveCoords) {
+    if (q && matchedSpots.length > 0 && matchedSpots[0].lat && matchedSpots[0].lng) {
+      effectiveCoords = { lat: matchedSpots[0].lat, lng: matchedSpots[0].lng };
+    } else {
+      effectiveCoords = { lat: 37.5413, lng: 127.0564 }; // 성수·서울 중심 기본 좌표
+    }
   }
 
-  // 4. 정렬 적용 (기본값: 거리순 distance -> 가까운 곳부터)
-  if (state.spotSort === 'distance' && userCoords) {
+  // 모든 스팟의 기준점 대비 거리 계산
+  matchedSpots = matchedSpots.map((s) => {
+    const dist = s.lat && s.lng && effectiveCoords
+      ? getDistanceKm(effectiveCoords.lat, effectiveCoords.lng, s.lat, s.lng)
+      : 9999;
+    return { ...s, _dist: dist };
+  });
+
+  // 4. 정렬 적용 (거리순 / 핫플·인기순 / 블루리본·미쉐린순)
+  if (state.spotSort === 'distance') {
+    // 📍 가까운 거리순 (가까운 곳부터)
     matchedSpots.sort((a, b) => ((a as any)._dist ?? 9999) - ((b as any)._dist ?? 9999));
   } else if (state.spotSort === 'curation') {
+    // ⭐ 블루리본/미쉐린순 (공인 인증 뱃지 + 평점순)
     matchedSpots.sort((a, b) => {
-      const aScore = (a.curation_badges?.michelin ? 3 : 0) + (a.curation_badges?.blue_ribbon ? 2 : 0) + (a.curation_badges?.tour_api ? 1 : 0);
-      const bScore = (b.curation_badges?.michelin ? 3 : 0) + (b.curation_badges?.blue_ribbon ? 2 : 0) + (b.curation_badges?.tour_api ? 1 : 0);
+      const aScore = (a.curation_badges?.michelin ? 40 : 0) + (a.curation_badges?.blue_ribbon ? 30 : 0) + (a.curation_badges?.tour_api ? 10 : 0) + ((a.social_links?.kakaomap?.rating || 0) * 5);
+      const bScore = (b.curation_badges?.michelin ? 40 : 0) + (b.curation_badges?.blue_ribbon ? 30 : 0) + (b.curation_badges?.tour_api ? 10 : 0) + ((b.social_links?.kakaomap?.rating || 0) * 5);
       return bScore - aScore;
     });
   } else {
-    // popular (핫플/인기순)
-    matchedSpots.sort((a, b) => {
-      const aHot = isSuperHotSpot(a) ? 1 : 0;
-      const bHot = isSuperHotSpot(b) ? 1 : 0;
-      return bHot - aHot;
-    });
+    // 🔥 핫플/인기순 (종합 인기도 점수 기준 정렬)
+    matchedSpots.sort((a, b) => getSpotPopularityScore(b) - getSpotPopularityScore(a));
   }
 
   const totalCount = matchedSpots.length;
