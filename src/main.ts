@@ -720,6 +720,8 @@ interface GenerateOptions {
   avoidIds?: ReadonlySet<number>;
   /** 사용자 입력 키워드 또는 퀵 태그 (예: 삼겹살, 위스키, 성수다락 등) */
   searchQuery?: string;
+  /** 비주얼 카테고리 칩 선택 키 (예: CAFE, DINING, WINE 등) */
+  categoryKey?: string;
 }
 
 /** 검색어 및 퀵 태그 매칭 헬퍼 (특수문자 정제, 다중 토큰, 동의어 풀 매칭 지원) */
@@ -922,6 +924,8 @@ function generateCourse(
   const rng = opts.rng ?? Math.random;
   const avoid = opts.avoidIds ?? new Set<number>();
   const query = opts.searchQuery?.trim();
+  const catKey = opts.categoryKey && opts.categoryKey !== 'ALL' ? opts.categoryKey : null;
+  const categoryDef = catKey ? SPOT_EXPLORE_CATEGORIES.find((c) => c.key === catKey) : null;
 
   let anchorSlot: SlotKey | null = null;
   let anchorPool: Spot[] = [];
@@ -951,6 +955,19 @@ function generateCourse(
             slotsOn.push(slot);
           }
         }
+      }
+    }
+  } else if (categoryDef && categoryDef.keywords) {
+    // 1-3. 카테고리 칩이 선택된 경우: 카테고리 키워드 매칭 스팟을 보유한 슬롯 앵커 최우선 탐색
+    for (const slot of slotsOn) {
+      const candidates = excludeRecent(getCandidates(all, slot, regionKeys, moodKey, [], zoneKeys), avoid);
+      const matched = candidates.filter((s) => {
+        const text = [s.name, s.category, s.summary, ...(s.signature_items || []), ...(s.mood_tags || [])].join(' ').toLowerCase();
+        return categoryDef.keywords!.some((kw) => text.includes(kw.toLowerCase()));
+      });
+      if (matched.length > 0 && (anchorSlot === null || matched.length < anchorPool.length)) {
+        anchorSlot = slot;
+        anchorPool = matched;
       }
     }
   }
@@ -2411,7 +2428,7 @@ function renderConditions(): void {
   const moodLabelInfo = getMoodSelectorLabel();
 
   area.innerHTML = `
-    <!-- 1. 통합 검색창 & 퀵 태그 -->
+    <!-- 1. 통합 검색창 & 15종 퀵 태그 (스팟 탐색과 100% 동일) -->
     <div class="search-container">
       <div class="search-box">
         <span class="search-input-icon">🔍</span>
@@ -2419,9 +2436,10 @@ function renderConditions(): void {
           type="search" 
           class="search-input" 
           id="search-input" 
-          placeholder="어디로 갈까요? 지역·핫플·메뉴 검색 (예: 성수, 양평, 오션뷰, 와인)" 
+          placeholder="어디로 갈까요? 지역·핫플·분위기·메뉴 검색 (예: 성수, 해운대, 오션뷰, 와인)" 
           value="${escapeHtml(state.searchQuery)}"
           autocomplete="off"
+          aria-label="데이트 코스 키워드 검색"
         />
         <button class="search-clear ${state.searchQuery ? 'is-visible' : ''}" id="search-clear" aria-label="검색어 지우기">✕</button>
       </div>
@@ -2433,7 +2451,17 @@ function renderConditions(): void {
       </div>
     </div>
 
-    <!-- 2. 시간대 4종 토글 -->
+    <!-- 2. 비주얼 분위기/카테고리 칩 바 (스팟 탐색과 100% 동일) -->
+    <div class="spot-category-scroll" style="margin-bottom: var(--space-3);">
+      ${SPOT_EXPLORE_CATEGORIES.map((cat) => `
+        <button class="spot-category-chip ${state.spotCategory === cat.key ? 'is-active' : ''}" data-cat-key="${cat.key}">
+          <span class="chip-emoji">${cat.emoji}</span>
+          <span class="chip-label">${cat.label}</span>
+        </button>
+      `).join('')}
+    </div>
+
+    <!-- 3. 시간대 4종 토글 -->
     <div class="slot-toggles" role="group" aria-label="시간대 선택">
       ${SLOT_ORDER.map((k) => {
         const meta = SLOT_META[k];
@@ -2445,7 +2473,7 @@ function renderConditions(): void {
       }).join('')}
     </div>
 
-    <!-- 3. 에어비앤비 스타일 1줄 2버튼 셀렉터 바 -->
+    <!-- 4. 에어비앤비 스타일 1줄 2버튼 셀렉터 바 -->
     <div class="selector-bar">
       <button class="selector-btn ${regLabel.isSelected ? 'is-selected' : ''}" id="btn-trigger-region" aria-haspopup="dialog">
         <div class="selector-left">
@@ -2521,6 +2549,21 @@ function bindConditionEvents(area: HTMLElement): void {
     });
   });
 
+  // 비주얼 분위기/카테고리 칩 클릭 이벤트
+  area.querySelectorAll<HTMLButtonElement>('.spot-category-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const catKey = chip.dataset.catKey || 'ALL';
+      state.spotCategory = catKey;
+      
+      // 카테고리 칩 선택 시 해당 카테고리 대표 검색어로 연동하거나 무드 설정
+      if (catKey === 'ALL') {
+        state.mood = 'ALL';
+      }
+      renderConditions();
+      triggerCourseGeneration();
+    });
+  });
+
   // 슬롯 토글
   area.querySelectorAll<HTMLButtonElement>('.slot-toggle').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -2568,7 +2611,7 @@ function triggerCourseGeneration(): void {
     slotsOn,
     state.regions,
     state.mood,
-    { avoidIds: recentSpotIdSet(), searchQuery: state.searchQuery },
+    { avoidIds: recentSpotIdSet(), searchQuery: state.searchQuery, categoryKey: state.spotCategory },
     state.subZones,
   );
   state.courseConditions = {
