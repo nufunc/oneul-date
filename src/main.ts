@@ -88,7 +88,6 @@ const SLOT_META: Record<SlotKey, { emoji: string; label: string }> = {
 
 // 지역 필터: key → 매칭되는 데이터 region 값 목록 (matchesRegion 주석 참고)
 const REGIONS: { key: string; label: string; match: string[] }[] = [
-  { key: 'ALL', label: '전체', match: [] },
   { key: 'SEOUL', label: '서울', match: ['서울'] },
   { key: 'GYEONGGI', label: '경기·인천', match: ['경기', '인천'] },
   { key: 'GANGWON', label: '강원', match: ['강원'] },
@@ -3517,7 +3516,6 @@ function renderOverlay(): void {
   if (state.regionSheetOpen) {
     const activeReg = state.activeRegionTab || 'SEOUL';
     const subZonesInTab = POPULAR_ZONES.filter((z) => z.regionKey === activeReg);
-    const isAllTab = activeReg === 'ALL';
 
     root.innerHTML = `
       <div class="overlay-backdrop" id="overlay-backdrop"></div>
@@ -3527,15 +3525,15 @@ function renderOverlay(): void {
           <button class="overlay-close" id="overlay-close" aria-label="닫기">✕</button>
         </div>
         <div class="location-split">
-          <!-- 좌측 8대 지역 탭 -->
+          <!-- 좌측 7대 지역 탭 -->
           <div class="location-regions" role="tablist">
             ${REGIONS.map((r) => {
-              const isSelectedTab = state.activeRegionTab === r.key;
+              const isSelectedTab = (state.activeRegionTab || 'SEOUL') === r.key;
               const hasSelectedZones = state.subZones.some((zk) => {
                 const z = POPULAR_ZONES.find((item) => item.key === zk);
                 return z ? z.regionKey === r.key : false;
               });
-              const isRegSelected = r.key === 'ALL' ? state.regions.length === 0 : state.regions.includes(r.key);
+              const isRegSelected = state.regions.includes(r.key);
               return `
                 <button class="region-tab-item ${isSelectedTab ? 'active' : ''}" data-region-tab="${r.key}">
                   <span>${r.label}</span>
@@ -3547,71 +3545,25 @@ function renderOverlay(): void {
 
           <!-- 우측 세부 핫플존 리스트 -->
           <div class="location-subzones">
-            ${
-              isAllTab
-                ? `
-              <div class="all-regions-view">
-                <div class="all-regions-card">
-                  <div class="all-regions-badge">
-                    <span class="all-regions-badge-icon">🇰🇷</span>
-                    <span class="all-regions-badge-text">전국 어디서나</span>
-                  </div>
-                  <h3 class="all-regions-title">대한민국 전역 데이트 탐색</h3>
-                  <p class="all-regions-desc">
-                    특정 지역에 국한되지 않고, 전국 8대 권역의 감성 핫플레이스와 숨은 명소를 폭넓게 연결해 드려요.
-                  </p>
-                  <div class="all-regions-features">
-                    <div class="all-feature-item">
-                      <span class="feature-icon">✨</span>
-                      <div class="feature-body">
-                        <span class="feature-title">전국 핫플레이스 엄선</span>
-                        <span class="feature-desc">인기 명소부터 로컬 감성 스팟까지</span>
-                      </div>
-                    </div>
-                    <div class="all-feature-item">
-                      <span class="feature-icon">🚗</span>
-                      <div class="feature-body">
-                        <span class="feature-title">여행 & 드라이브 추천</span>
-                        <span class="feature-desc">주말 근교 및 색다른 데이트 코스</span>
-                      </div>
-                    </div>
-                    <div class="all-feature-item">
-                      <span class="feature-icon">🧭</span>
-                      <div class="feature-body">
-                        <span class="feature-title">자유로운 코스 연결</span>
-                        <span class="feature-desc">지역 제한 없는 폭넓은 큐레이션</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <button class="btn-select-all-korea" id="btn-select-all-korea">
-                  <span class="btn-korea-icon">🗺️</span>
-                  <span class="btn-korea-text">전국 모드로 선택하기</span>
-                </button>
-              </div>
-            `
-                : `
-              <div class="subzones-header">
-                <span class="subzones-title">${REGIONS.find((r) => r.key === activeReg)?.label} 인기 데이트존</span>
-                <button class="btn-toggle-all-zones" id="btn-toggle-all-zones">
-                  ${subZonesInTab.length > 0 && subZonesInTab.every((z) => state.subZones.includes(z.key)) ? '지역 전체 해제' : '지역 전체 선택'}
-                </button>
-              </div>
-              <div class="subzones-grid">
-                ${subZonesInTab
-                  .map((z) => {
-                    const isChecked = state.subZones.includes(z.key);
-                    return `
-                    <label class="zone-check-item ${isChecked ? 'is-checked' : ''}" data-zone-key="${z.key}">
-                      <input type="checkbox" class="zone-checkbox" value="${z.key}" ${isChecked ? 'checked' : ''} />
-                      <span class="zone-label">${escapeHtml(z.label)}</span>
-                    </label>
-                  `;
-                  })
-                  .join('')}
-              </div>
-            `
-            }
+            <div class="subzones-header">
+              <span class="subzones-title">${REGIONS.find((r) => r.key === activeReg)?.label || '서울'} 인기 데이트존</span>
+              <button class="btn-toggle-all-zones" id="btn-toggle-all-zones">
+                ${subZonesInTab.length > 0 && subZonesInTab.every((z) => state.subZones.includes(z.key)) ? '지역 전체 해제' : '지역 전체 선택'}
+              </button>
+            </div>
+            <div class="subzones-grid">
+              ${subZonesInTab
+                .map((z) => {
+                  const isChecked = state.subZones.includes(z.key);
+                  return `
+                  <label class="zone-check-item ${isChecked ? 'is-checked' : ''}" data-zone-key="${z.key}">
+                    <input type="checkbox" class="zone-checkbox" value="${z.key}" ${isChecked ? 'checked' : ''} />
+                    <span class="zone-label">${escapeHtml(z.label)}</span>
+                  </label>
+                `;
+                })
+                .join('')}
+            </div>
           </div>
         </div>
 
@@ -3631,13 +3583,6 @@ function renderOverlay(): void {
         state.activeRegionTab = tabBtn.dataset.regionTab || 'SEOUL';
         renderOverlay();
       });
-    });
-
-    // 전국 모드 선택 버튼
-    root.querySelector('#btn-select-all-korea')?.addEventListener('click', () => {
-      state.regions = [];
-      state.subZones = [];
-      closeOverlay();
     });
 
     // 지역 전체 선택/해제 토글 (모든 하위 세부존 일괄 체크/해제)
