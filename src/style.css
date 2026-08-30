@@ -1414,7 +1414,14 @@ button {
   margin-bottom: var(--space-3);
 }
 
-/* 슬롯 라벨 */
+/* 슬롯 라벨 & 검색 매칭 뱃지 그룹 */
+.step-slot-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
 .step-slot {
   font-size: var(--font-xs);
   font-weight: 700;
@@ -1426,6 +1433,28 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+}
+
+/* 검색/태그 매칭 스마트 감성 뱃지 */
+.badge-search-match {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #0284c7;
+  background: rgba(2, 132, 199, 0.08);
+  border: 1px solid rgba(2, 132, 199, 0.22);
+  padding: 2px 9px;
+  border-radius: var(--radius-full);
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+  box-shadow: 0 1px 2px rgba(2, 132, 199, 0.04);
+}
+
+.badge-search-match-icon {
+  font-size: 0.76rem;
+  line-height: 1;
 }
 
 .step-slot-theme {

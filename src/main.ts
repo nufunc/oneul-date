@@ -793,6 +793,60 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
 }
 
 /**
+ * 검색 매칭 시 슬롯 라벨 옆에 노출할 감성 스마트 뱃지 정보 반환
+ */
+function getSearchMatchBadge(query: string): { icon: string; label: string } {
+  const cleanQ = query.replace(/[#·,/\\]/g, ' ').trim().toLowerCase();
+
+  if (cleanQ.includes('오마카세') || cleanQ.includes('스시') || cleanQ.includes('초밥')) {
+    return { icon: '🍣', label: '오마카세' };
+  }
+  if (cleanQ.includes('성수')) {
+    return { icon: '✨', label: '성수 핫플' };
+  }
+  if (cleanQ.includes('비') || cleanQ.includes('실내')) {
+    return { icon: '🌧️', label: '비 오는 날' };
+  }
+  if (cleanQ.includes('루프탑') || cleanQ.includes('테라스')) {
+    return { icon: '🏙️', label: '루프탑' };
+  }
+  if (cleanQ.includes('야경') || cleanQ.includes('노을') || cleanQ.includes('일몰')) {
+    return { icon: '🌙', label: '야경 명소' };
+  }
+  if (cleanQ.includes('디저트') || cleanQ.includes('카페') || cleanQ.includes('베이커리') || cleanQ.includes('빵')) {
+    return { icon: '🍰', label: '디저트 카페' };
+  }
+  if (cleanQ.includes('와인') || cleanQ.includes('wine')) {
+    return { icon: '🍷', label: '와인 다이닝' };
+  }
+  if (cleanQ.includes('위스키') || cleanQ.includes('whisky')) {
+    return { icon: '🥃', label: '위스키' };
+  }
+  if (cleanQ.includes('칵테일') || cleanQ.includes('cocktail')) {
+    return { icon: '🍸', label: '칵테일' };
+  }
+  if (cleanQ.includes('공방') || cleanQ.includes('도자기') || cleanQ.includes('원데이')) {
+    return { icon: '🎨', label: '감성 공방' };
+  }
+  if (cleanQ.includes('체험') || cleanQ.includes('이색')) {
+    return { icon: '🎯', label: '이색 체험' };
+  }
+  if (cleanQ.includes('액티비티') || cleanQ.includes('서핑') || cleanQ.includes('요트')) {
+    return { icon: '🏄', label: '액티비티' };
+  }
+  if (cleanQ.includes('스파') || cleanQ.includes('온천') || cleanQ.includes('찜질') || cleanQ.includes('사우나')) {
+    return { icon: '♨️', label: '스파 & 힐링' };
+  }
+  if (cleanQ.includes('맛집') || cleanQ.includes('미식') || cleanQ.includes('고기') || cleanQ.includes('파스타')) {
+    return { icon: '🍴', label: '미식 맛집' };
+  }
+  if (cleanQ.includes('드라이브') || cleanQ.includes('외곽') || cleanQ.includes('전망대')) {
+    return { icon: '🚗', label: '드라이브' };
+  }
+  return { icon: '✨', label: cleanQ };
+}
+
+/**
  * 앵커 기반 근접 코스 생성 (물리적 거리 및 자치구 클러스터링).
  * 1) 검색어(searchQuery)가 있는 경우 해당 키워드 매칭 스팟을 앵커로 최우선 선정
  * 2) 켠 슬롯 중 후보 수가 가장 적은(단, 1개 이상) 슬롯을 앵커로 랜덤 선택
@@ -3070,14 +3124,17 @@ function renderStepCard(
   return `
     <article class="step-card has-image">
       <div class="step-card-head">
-        <div class="step-slot">${meta.emoji} ${meta.label}</div>
-        ${(() => {
-          const currentQ = state.courseConditions?.searchQuery || state.searchQuery;
-          if (currentQ && matchesSearchQuery(spot, currentQ)) {
-            return `<span class="badge-search-match" style="display:inline-flex;align-items:center;gap:3px;font-size:0.72rem;font-weight:700;color:#0284c7;background:rgba(2,132,199,0.12);padding:2px 8px;border-radius:12px;border:1px solid rgba(2,132,199,0.25);">🔍 ${escapeHtml(currentQ)} 추천</span>`;
-          }
-          return '';
-        })()}
+        <div class="step-slot-wrap">
+          <div class="step-slot">${meta.emoji} ${meta.label}</div>
+          ${(() => {
+            const currentQ = state.courseConditions?.searchQuery || state.searchQuery;
+            if (currentQ && matchesSearchQuery(spot, currentQ)) {
+              const badge = getSearchMatchBadge(currentQ);
+              return `<span class="badge-search-match"><span class="badge-search-match-icon">${badge.icon}</span> ${escapeHtml(badge.label)}</span>`;
+            }
+            return '';
+          })()}
+        </div>
         ${themeText ? `<span class="step-slot-theme">${escapeHtml(themeText)}</span>` : ''}
       </div>
       <div class="step-card-split">
