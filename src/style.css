@@ -49,10 +49,10 @@
   --font-lg: 1.22rem;
   --font-xl: 1.55rem;
 
-  /* 타이포그래피 */
-  --font-sans: 'SUIT Variable', 'SUIT', 'Pretendard', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-  --font-serif: 'Libre Caslon Text', 'Noto Serif KR', serif;
-  --font-display: 'SUIT Variable', 'SUIT', 'Pretendard', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  /* 타이포그래피 — Pretendard Variable 단일 일원화 (한글/영문/숫자 완전 일치) */
+  --font-sans: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+  --font-serif: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-display: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
 
   /* 라벨 자간 */
   --label-tracking: 0.02em;
@@ -483,6 +483,7 @@ html[data-theme-resolved="dark"] .zone-check-item.is-checked .zone-checkbox {
 
 html {
   -webkit-text-size-adjust: 100%;
+  font-family: var(--font-sans);
 }
 
 body {
@@ -494,14 +495,24 @@ body {
   color: var(--color-text);
   font-family: var(--font-sans);
   line-height: 1.6;
+  letter-spacing: -0.015em;
+  word-break: keep-all;
+  overflow-wrap: break-word;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
 }
 
-button {
-  font-family: inherit;
+button, input, select, textarea, optgroup, option {
+  font-family: var(--font-sans);
   font-size: inherit;
   color: inherit;
+  letter-spacing: -0.015em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button {
   cursor: pointer;
   border: none;
   background: none;
