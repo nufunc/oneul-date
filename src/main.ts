@@ -3603,11 +3603,10 @@ function renderOverlay(): void {
                   const areAllChecked =
                     subZonesInTab.length > 0 && subZonesInTab.every((z) => state.subZones.includes(z.key));
                   const currentRegLabel = REGIONS.find((r) => r.key === activeReg)?.label || '서울';
-                  const unitName = activeReg === 'SEOUL' ? '모든 자치구' : '모든 시·군';
                   return `
                     <label class="zone-check-item zone-check-all ${areAllChecked ? 'is-checked' : ''}" data-zone-all="${activeReg}">
                       <input type="checkbox" class="zone-checkbox" ${areAllChecked ? 'checked' : ''} />
-                      <span class="zone-label">🗺️ ${escapeHtml(currentRegLabel)} 전체 (${unitName})</span>
+                      <span class="zone-label">🗺️ ${escapeHtml(currentRegLabel)} 전체</span>
                     </label>
                   `;
                 })()}
