@@ -1893,12 +1893,16 @@ interface AppState {
   /** 선택된 세부 인기 데이트존 키 다중 선택 — 빈 배열이면 '제한 없음' */
   subZones: string[];
   mood: string;
-  /** 사용자 입력 키워드/상호명/카테고리 검색어 */
+  /** 사용자 입력 키워드/상호명/카테고리 검색어 (코스 모드용) */
   searchQuery: string;
+  /** 스팟 탐색 모드: 전용 검색어 */
+  spotSearchQuery: string;
   /** 스팟 탐색 모드: 선택된 카테고리 필터 (ALL, CAFE, DINING, WINE, EXPERIENCE, NIGHT, SPA, DRIVE) */
   spotCategory: string;
-  /** 스팟 탐색 모드: GPS 반경 거리 필터 (단위: km, 기본 3.0km) */
+  /** 스팟 탐색 모드: GPS 반경 거리 필터 (단위: km, 기본 3.0km, 0은 전체) */
   spotDistanceRadius: number;
+  /** 스팟 탐색 모드: 정렬 (distance: 거리순, popular: 인기/핫플순, curation: 블루리본/미쉐린순) */
+  spotSort: 'distance' | 'popular' | 'curation';
   /** 스팟 탐색 모드: 노출 페이지네이션 */
   spotPage: number;
   /** 테마 모드: light(낮, 기본값) | dark(밤) | auto(시스템) */
@@ -1977,8 +1981,10 @@ const state: AppState = {
   subZones: [],
   mood: 'ALL',
   searchQuery: '',
+  spotSearchQuery: '',
   spotCategory: 'ALL',
   spotDistanceRadius: 3.0,
+  spotSort: 'distance',
   spotPage: 1,
   themeMode: getInitialThemeMode(),
   course: null,
@@ -2218,20 +2224,22 @@ function renderMainModeNav(): void {
 function updateModeView(): void {
   renderMainModeNav();
   const todayArea = document.getElementById('today-area');
+  const conditionsArea = document.getElementById('conditions-area');
   const resultsArea = document.getElementById('results-area');
   const discoveryArea = document.getElementById('spot-discovery-area');
 
   if (state.mainMode === 'course') {
     if (todayArea) todayArea.style.display = '';
+    if (conditionsArea) conditionsArea.style.display = '';
     if (resultsArea) resultsArea.style.display = '';
     if (discoveryArea) discoveryArea.style.display = 'none';
     renderConditions();
     renderResults();
   } else {
     if (todayArea) todayArea.style.display = 'none';
+    if (conditionsArea) conditionsArea.style.display = 'none';
     if (resultsArea) resultsArea.style.display = 'none';
     if (discoveryArea) discoveryArea.style.display = '';
-    renderConditions();
     renderSpotDiscovery();
   }
 }
@@ -3589,9 +3597,10 @@ function renderSpotDiscovery(): void {
   if (state.subZones.length > 0) {
     matchedSpots = matchedSpots.filter((s) => matchesZone(s, state.subZones));
   }
-  // 검색어 필터 적용
-  if (state.searchQuery) {
-    matchedSpots = matchedSpots.filter((s) => matchesSearchQuery(s, state.searchQuery));
+  // 스팟 전용 검색어 필터 적용
+  const q = state.spotSearchQuery.trim();
+  if (q) {
+    matchedSpots = matchedSpots.filter((s) => matchesSearchQuery(s, q));
   }
   // 카테고리 필터 적용
   if (state.spotCategory !== 'ALL') {
@@ -3610,18 +3619,34 @@ function renderSpotDiscovery(): void {
     }
   }
 
-  // 2. 거리 계산 및 정렬
+  // 2. 거리 계산
   if (userCoords) {
     matchedSpots = matchedSpots.map((s) => {
       const dist = s.lat && s.lng ? getDistanceKm(userCoords!.lat, userCoords!.lng, s.lat, s.lng) : 9999;
       return { ...s, _dist: dist };
     });
-    // 거리 반경 필터
+    // 거리 반경 필터 (0 = 전체)
     if (state.spotDistanceRadius > 0) {
       matchedSpots = matchedSpots.filter((s) => (s as any)._dist <= state.spotDistanceRadius);
     }
-    // 거리순 정렬
-    matchedSpots.sort((a, b) => (a as any)._dist - (b as any)._dist);
+  }
+
+  // 3. 정렬 적용 (distance, popular, curation)
+  if (state.spotSort === 'distance' && userCoords) {
+    matchedSpots.sort((a, b) => ((a as any)._dist ?? 9999) - ((b as any)._dist ?? 9999));
+  } else if (state.spotSort === 'curation') {
+    matchedSpots.sort((a, b) => {
+      const aScore = (a.curation_badges?.michelin ? 3 : 0) + (a.curation_badges?.blue_ribbon ? 2 : 0) + (a.curation_badges?.tour_api ? 1 : 0);
+      const bScore = (b.curation_badges?.michelin ? 3 : 0) + (b.curation_badges?.blue_ribbon ? 2 : 0) + (b.curation_badges?.tour_api ? 1 : 0);
+      return bScore - aScore;
+    });
+  } else {
+    // popular (핫플/인기순)
+    matchedSpots.sort((a, b) => {
+      const aHot = isSuperHotSpot(a) ? 1 : 0;
+      const bHot = isSuperHotSpot(b) ? 1 : 0;
+      return bHot - aHot;
+    });
   }
 
   const totalCount = matchedSpots.length;
@@ -3629,78 +3654,113 @@ function renderSpotDiscovery(): void {
   const displaySpots = matchedSpots.slice(0, state.spotPage * pageSize);
   const hasMore = displaySpots.length < totalCount;
 
-  area.innerHTML = `
-    <div class="discovery-header-card">
-      <!-- GPS 거리 레이더 바 (GPS 좌표 있을 때) -->
-      ${
-        userCoords
-          ? `
-        <div class="distance-radar-bar">
-          <div class="radar-label-row">
-            <span class="radar-title">📍 내 주변 탐색 반경</span>
-            <span class="radar-count">${totalCount}개 스팟 발견</span>
-          </div>
-          <div class="distance-pill-list">
-            ${DISTANCE_RADIUS_OPTIONS.map(
-              (opt) => `
-              <button class="distance-pill ${state.spotDistanceRadius === opt.value ? 'is-active' : ''}" data-radius="${opt.value}">
-                ${opt.label}
-              </button>
-            `,
-            ).join('')}
-          </div>
-        </div>
-      `
-          : `
-        <div class="discovery-title-row">
-          <div class="discovery-title-info">
-            <span class="discovery-main-title">📍 ${state.regions.length === 0 ? '전국' : state.regions.map((k) => REGIONS.find((r) => r.key === k)?.label).join(', ')} 감성 스팟</span>
-            <span class="discovery-sub-desc">엄선된 데이트 핫플레이스 ${totalCount}곳</span>
-          </div>
-        </div>
-      `
-      }
+  // 지역 라벨 계산
+  const regionLabel = state.regions.length === 0
+    ? '전체 지역'
+    : state.regions.map((k) => REGIONS.find((r) => r.key === k)?.label || k).join(', ');
 
-      <!-- 카테고리 퀵 칩 -->
-      <div class="spot-category-scroll">
-        ${SPOT_EXPLORE_CATEGORIES.map(
-          (cat) => `
-          <button class="spot-category-chip ${state.spotCategory === cat.key ? 'is-active' : ''}" data-cat-key="${cat.key}">
-            <span class="chip-emoji">${cat.emoji}</span>
-            <span class="chip-label">${cat.label}</span>
+  const isFiltered = Boolean(state.spotSearchQuery || state.spotCategory !== 'ALL' || (userCoords && state.spotDistanceRadius < 10));
+
+  area.innerHTML = `
+    <!-- 1. 스팟 전용 독립 검색 헤더 -->
+    <div class="discovery-hero-panel">
+      <div class="discovery-search-wrap">
+        <span class="discovery-search-icon" aria-hidden="true">🔍</span>
+        <input
+          type="search"
+          class="discovery-search-input"
+          id="discovery-search-input"
+          placeholder="성수동 와인바, 오션뷰 카페, 공방, 오마카세..."
+          value="${escapeHtml(state.spotSearchQuery)}"
+          aria-label="데이트 스팟 검색"
+          autocomplete="off"
+        />
+        ${state.spotSearchQuery ? `<button class="discovery-search-clear" id="btn-clear-discovery-search" aria-label="검색어 지우기">✕</button>` : ''}
+      </div>
+
+      <!-- 2. 빠른 추천 키워드 칩 -->
+      <div class="discovery-quick-tags">
+        ${['성수핫플', '오션뷰카페', '오마카세', '와인바', '이색공방', '루프탑', '스파'].map((kw) => `
+          <button class="discovery-quick-tag-chip ${state.spotSearchQuery === kw ? 'is-active' : ''}" data-query="${kw}">
+            #${kw}
           </button>
-        `,
-        ).join('')}
+        `).join('')}
+      </div>
+
+      <!-- 3. 원터치 필터 툴바 (지역선택 / 거리반경 / 정렬) -->
+      <div class="discovery-toolbar-strip">
+        <button class="discovery-tool-btn" id="btn-discovery-region" aria-label="지역 선택 바텀시트 열기">
+          <span class="tool-icon">🗺️</span>
+          <span class="tool-text">${escapeHtml(regionLabel)}</span>
+          <span class="tool-arrow">▾</span>
+        </button>
+
+        ${userCoords ? `
+          <div class="discovery-radius-group">
+            <span class="radius-prefix">📍 반경</span>
+            <div class="radius-pill-box">
+              ${DISTANCE_RADIUS_OPTIONS.map((opt) => `
+                <button class="radius-pill ${state.spotDistanceRadius === opt.value ? 'is-active' : ''}" data-radius="${opt.value}">
+                  ${opt.label}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        <div class="discovery-sort-group">
+          <select class="discovery-sort-select" id="discovery-sort-select" aria-label="스팟 정렬">
+            <option value="distance" ${state.spotSort === 'distance' ? 'selected' : ''}>📍 거리순</option>
+            <option value="popular" ${state.spotSort === 'popular' ? 'selected' : ''}>🔥 핫플순</option>
+            <option value="curation" ${state.spotSort === 'curation' ? 'selected' : ''}>⭐ 블루리본/미쉐린</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 4. 비주얼 카테고리 스크롤 칩 -->
+      <div class="discovery-cat-scroll">
+        ${SPOT_EXPLORE_CATEGORIES.map((cat) => `
+          <button class="discovery-cat-btn ${state.spotCategory === cat.key ? 'is-active' : ''}" data-cat-key="${cat.key}">
+            <span class="cat-emoji">${cat.emoji}</span>
+            <span class="cat-label">${cat.label}</span>
+          </button>
+        `).join('')}
       </div>
     </div>
 
-    <!-- 2열 스팟 인스타 갤러리 그리드 -->
-    <div class="spot-discovery-grid">
-      ${
-        displaySpots.length > 0
-          ? displaySpots.map((spot) => renderDiscoverySpotCard(spot)).join('')
-          : `
-        <div class="spot-empty-state">
-          <span class="empty-icon">🧭</span>
-          <p class="empty-title">선택한 조건에 맞는 스팟이 없어요</p>
-          <p class="empty-desc">거리 반경을 넓히거나 다른 카테고리를 선택해 보세요!</p>
-          <button class="btn-empty-reset" id="btn-reset-discovery-filters">필터 초기화</button>
-        </div>
-      `
-      }
+    <!-- 5. 탐색 상태 & 카운트 헤더 -->
+    <div class="discovery-status-bar">
+      <div class="status-left">
+        <span class="status-count-badge">${totalCount}</span>
+        <span class="status-text">개의 매력적인 데이트 스팟</span>
+      </div>
+      ${isFiltered ? `
+        <button class="btn-discovery-filter-reset" id="btn-reset-discovery-filters">
+          <span class="reset-icon">↺</span> 조건 초기화
+        </button>
+      ` : ''}
     </div>
 
-    ${
-      hasMore
-        ? `
+    <!-- 6. 2열 인스타 감성 갤러리 그리드 피드 -->
+    <div class="spot-discovery-grid">
+      ${displaySpots.length > 0 ? displaySpots.map((spot) => renderDiscoverySpotCard(spot)).join('') : `
+        <div class="spot-empty-state">
+          <span class="empty-icon">🧭</span>
+          <p class="empty-title">검색 조건에 맞는 스팟을 찾지 못했어요</p>
+          <p class="empty-desc">검색어를 줄이거나 거리 반경 및 지역을 넓혀보세요!</p>
+          <button class="btn-empty-reset" id="btn-empty-reset-all">전체 스팟 다시 보기</button>
+        </div>
+      `}
+    </div>
+
+    <!-- 7. 페이지네이션 / 더보기 -->
+    ${hasMore ? `
       <div class="discovery-more-row">
         <button class="btn-discovery-more" id="btn-discovery-more">
           스팟 더보기 (${displaySpots.length} / ${totalCount}) ▾
         </button>
       </div>
-    `
-        : ''
-    }
+    ` : ''}
   `;
 
   bindDiscoveryEvents(area);
@@ -3719,11 +3779,20 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }): string {
       : `📍 ${spot.area || spot.region}`;
   const sum = cleanSpotSummary(spot) || `${spot.name}에서 특별한 데이트를 즐겨보세요.`;
 
+  // 큐레이션 뱃지
+  const curationPill = spot.curation_badges?.blue_ribbon
+    ? `<span class="badge-card-curation blueribbon">🎀 블루리본</span>`
+    : spot.curation_badges?.michelin
+    ? `<span class="badge-card-curation michelin">⭐ 미쉐린</span>`
+    : isHot
+    ? `<span class="badge-card-curation hot">🔥 핫플</span>`
+    : '';
+
   return `
     <article class="discovery-card" data-spot-id="${spot.id}">
       <div class="discovery-card-thumb">
         <span class="discovery-badge-dist">${distText}</span>
-        ${isHot ? `<span class="discovery-badge-hot">🔥 핫플</span>` : ''}
+        ${curationPill}
         <div class="thumb-fallback-box">${fallbackIcon}</div>
         <img class="discovery-img" src="${escapeHtml(targetImgUrl)}" alt="${escapeHtml(spot.name)}" loading="lazy" referrerpolicy="no-referrer" onload="this.classList.add('is-loaded');" onerror="this.classList.add('is-hidden'); this.previousElementSibling?.classList.add('is-active');" />
       </div>
@@ -3748,8 +3817,51 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }): string {
 }
 
 function bindDiscoveryEvents(area: HTMLElement): void {
-  // 거리 반경 칩 클릭
-  area.querySelectorAll<HTMLButtonElement>('.distance-pill').forEach((btn) => {
+  // 1. 스팟 전용 검색창 입력 (디바운스 실시간 검색)
+  const searchInput = area.querySelector<HTMLInputElement>('#discovery-search-input');
+  if (searchInput) {
+    let searchDebounce: number;
+    searchInput.addEventListener('input', (e) => {
+      window.clearTimeout(searchDebounce);
+      searchDebounce = window.setTimeout(() => {
+        state.spotSearchQuery = (e.target as HTMLInputElement).value;
+        state.spotPage = 1;
+        renderSpotDiscovery();
+        // 포커스 유지
+        const nextInput = document.querySelector<HTMLInputElement>('#discovery-search-input');
+        if (nextInput) {
+          nextInput.focus();
+          nextInput.setSelectionRange(nextInput.value.length, nextInput.value.length);
+        }
+      }, 300);
+    });
+  }
+
+  // 검색창 지우기
+  area.querySelector('#btn-clear-discovery-search')?.addEventListener('click', () => {
+    state.spotSearchQuery = '';
+    state.spotPage = 1;
+    renderSpotDiscovery();
+  });
+
+  // 2. 빠른 추천 키워드 칩
+  area.querySelectorAll<HTMLButtonElement>('.discovery-quick-tag-chip').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const q = btn.dataset.query || '';
+      state.spotSearchQuery = state.spotSearchQuery === q ? '' : q;
+      state.spotPage = 1;
+      renderSpotDiscovery();
+    });
+  });
+
+  // 3. 지역 선택 바텀시트 열기
+  area.querySelector('#btn-discovery-region')?.addEventListener('click', () => {
+    state.regionSheetOpen = true;
+    renderOverlay();
+  });
+
+  // 4. 거리 반경 칩 클릭
+  area.querySelectorAll<HTMLButtonElement>('.radius-pill').forEach((btn) => {
     btn.addEventListener('click', () => {
       state.spotDistanceRadius = Number(btn.dataset.radius) || 3.0;
       state.spotPage = 1;
@@ -3757,8 +3869,18 @@ function bindDiscoveryEvents(area: HTMLElement): void {
     });
   });
 
-  // 카테고리 칩 클릭
-  area.querySelectorAll<HTMLButtonElement>('.spot-category-chip').forEach((btn) => {
+  // 5. 정렬 셀렉트 박스
+  const sortSelect = area.querySelector<HTMLSelectElement>('#discovery-sort-select');
+  if (sortSelect) {
+    sortSelect.addEventListener('change', () => {
+      state.spotSort = (sortSelect.value as any) || 'distance';
+      state.spotPage = 1;
+      renderSpotDiscovery();
+    });
+  }
+
+  // 6. 카테고리 칩 클릭
+  area.querySelectorAll<HTMLButtonElement>('.discovery-cat-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       state.spotCategory = btn.dataset.catKey || 'ALL';
       state.spotPage = 1;
@@ -3766,21 +3888,33 @@ function bindDiscoveryEvents(area: HTMLElement): void {
     });
   });
 
-  // 필터 초기화 버튼
+  // 7. 필터 초기화 버튼
   area.querySelector('#btn-reset-discovery-filters')?.addEventListener('click', () => {
+    state.spotSearchQuery = '';
     state.spotCategory = 'ALL';
     state.spotDistanceRadius = 10.0;
+    state.spotSort = 'distance';
     state.spotPage = 1;
     renderSpotDiscovery();
   });
 
-  // 더보기 버튼
+  area.querySelector('#btn-empty-reset-all')?.addEventListener('click', () => {
+    state.spotSearchQuery = '';
+    state.spotCategory = 'ALL';
+    state.spotDistanceRadius = 10.0;
+    state.regions = [];
+    state.subZones = [];
+    state.spotPage = 1;
+    renderSpotDiscovery();
+  });
+
+  // 8. 더보기 버튼
   area.querySelector('#btn-discovery-more')?.addEventListener('click', () => {
     state.spotPage += 1;
     renderSpotDiscovery();
   });
 
-  // ✨ 이 장소로 코스 짜기 클릭 이벤트 (Killer Feature)
+  // 9. ✨ 이 장소로 코스 짜기 클릭 이벤트 (Killer Feature)
   area.querySelectorAll<HTMLButtonElement>('.btn-build-anchor-course').forEach((btn) => {
     btn.addEventListener('click', () => {
       const spotId = Number(btn.dataset.spotId);
@@ -3930,6 +4064,11 @@ function closeOverlay(callback?: () => void): void {
     state.regionSheetOpen = false;
     state.moodSheetOpen = false;
     renderOverlay();
+    if (state.mainMode === 'course') {
+      renderConditions();
+    } else {
+      renderSpotDiscovery();
+    }
     callback?.();
     return;
   }
@@ -3942,7 +4081,11 @@ function closeOverlay(callback?: () => void): void {
     state.moodSheetOpen = false;
     isClosingOverlay = false;
     renderOverlay();
-    renderConditions();
+    if (state.mainMode === 'course') {
+      renderConditions();
+    } else {
+      renderSpotDiscovery();
+    }
     callback?.();
   }, 220);
 }
