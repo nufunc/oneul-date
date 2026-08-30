@@ -1721,6 +1721,8 @@ function generateCourseStory(
   return '두 사람의 취향을 온전히 담아낸 프라이빗 데이트 코스예요.';
 }
 
+
+
 /**
  * 텍스트 복사 포맷 (시안 A: 모던 불릿 카드형 — Short URL & 표준 URL 인코딩 지원)
  * 전각 공백을 제거하고 네이버 공식 naver.me 또는 초단축 Short URL로 깔끔하게 출력
@@ -1808,16 +1810,44 @@ function getDynamicSearchPlaceholder(): string {
 }
 
 
-// --- 내 위치 중심 맞춤 추천 코스 ---------------------------------------------
+// --- 내 위치 중심 맞춤 추천 코스 & 실시간 앰비언트 티커 -------------------------
 
 let userCoords: { lat: number; lng: number } | null = null;
+
+export interface LiveAmbientInfo {
+  emoji: string;
+  title: string;
+  subtitle: string;
+}
+
+/**
+ * 실시간 시간대 및 앰비언트 감성 정보 산출
+ */
+function getLiveAmbientInfo(): LiveAmbientInfo {
+  const hour = new Date().getHours();
+  if (hour >= 6 && hour < 12) {
+    return { emoji: '🥐', title: '상쾌한 브런치 & 모닝 데이트', subtitle: '지금 가기 좋은 코스' };
+  } else if (hour >= 12 && hour < 17) {
+    return { emoji: '☀️', title: '데이트하기 딱 좋은 오후', subtitle: '실시간 감성 코스 추천' };
+  } else if (hour >= 17 && hour < 21) {
+    return { emoji: '🌇', title: '노을빛 로맨틱 디너 타임', subtitle: '분위기 맛집 & 야경 코스' };
+  } else {
+    return { emoji: '🌙', title: '둘만의 특별한 밤', subtitle: '와인바 & 심야 드라이브' };
+  }
+}
 
 /**
  * 내 위치 중심 / 실시간 추천 코스 생성 (실제 생활권 반경 기준)
  */
-function buildNearbyCourse(coords: { lat: number; lng: number } | null): { label: string; steps: CourseStep[] } {
+function buildNearbyCourse(coords: { lat: number; lng: number } | null): {
+  label: string;
+  steps: CourseStep[];
+  distKm?: number;
+  ambient: LiveAmbientInfo;
+} {
   let pool = spots;
-  let label = '✨ 지금 가기 좋은 맞춤 코스';
+  const ambient = getLiveAmbientInfo();
+  let distKm: number | undefined;
 
   if (coords && coords.lat && coords.lng) {
     const spotsWithDist = spots
@@ -1844,12 +1874,13 @@ function buildNearbyCourse(coords: { lat: number; lng: number } | null): { label
       .filter((s): s is Spot => Boolean(s && s.lat != null && s.lng != null));
 
     if (courseSpots.length > 0) {
-      const minStartDist = Math.round(getDistanceKm(coords.lat, coords.lng, courseSpots[0].lat!, courseSpots[0].lng!) * 10) / 10;
-      label = `📍 내 위치 근처 데이트 코스 (1차 스팟까지 ${minStartDist}km)`;
+      distKm = Math.round(getDistanceKm(coords.lat, coords.lng, courseSpots[0].lat!, courseSpots[0].lng!) * 10) / 10;
     }
   }
 
-  return { label, steps };
+  const label = distKm != null ? `${ambient.emoji} ${ambient.title} · 1차 스팟 ${distKm}km ➔` : `${ambient.emoji} ${ambient.title} · ${ambient.subtitle} ➔`;
+
+  return { label, steps, distKm, ambient };
 }
 
 /** 현재 위치(GPS) 또는 1차 스팟으로 출발하는 출발지 안내 디바이더 */
@@ -2292,16 +2323,20 @@ function renderTodayCourse(): void {
   }
 
   area.innerHTML = `
-    <button class="today-course" id="btn-today-course" aria-label="내 주변 맞춤 코스 불러오기">
-      <span class="today-course-label">${initial.label}</span>
-      <span class="today-course-arrow" aria-hidden="true">→</span>
+    <button class="live-ambient-ticker" id="btn-today-course" aria-label="실시간 맞춤 코스 불러오기">
+      <span class="ticker-pulse" aria-hidden="true"></span>
+      <span class="ticker-emoji">${initial.ambient.emoji}</span>
+      <span class="ticker-title">${initial.ambient.title}</span>
+      <span class="ticker-sep" aria-hidden="true">·</span>
+      <span class="ticker-subtitle">${initial.distKm != null ? `1차 스팟 <strong>${initial.distKm}km</strong>` : initial.ambient.subtitle}</span>
+      <span class="ticker-arrow" aria-hidden="true">➔</span>
     </button>
   `;
 
   const btn = document.getElementById('btn-today-course');
   if (!btn) return;
 
-  function applyCourse(steps: CourseStep[], customLabel?: string) {
+  function applyCourse(steps: CourseStep[]) {
     state.course = steps.map((st) => ({ ...st }));
     state.courseConditions = {
       regions: [...state.regions],
@@ -2310,20 +2345,14 @@ function renderTodayCourse(): void {
       searchQuery: state.searchQuery,
     };
 
-    // 버튼 라벨을 원래의 맞춤/주변 추천 문구로 복원
-    const labelSpan = btn?.querySelector('.today-course-label');
-    if (labelSpan) {
-      labelSpan.textContent = customLabel || buildNearbyCourse(userCoords).label;
-    }
-
     renderConditions();
     renderResults();
   }
 
   btn.addEventListener('click', () => {
     if (!userCoords && typeof navigator !== 'undefined' && 'geolocation' in navigator) {
-      const labelSpan = btn.querySelector('.today-course-label');
-      if (labelSpan) labelSpan.textContent = '📍 내 위치 찾는 중...';
+      const subSpan = btn.querySelector('.ticker-subtitle');
+      if (subSpan) subSpan.textContent = '📍 내 위치 찾는 중...';
 
       let resolved = false;
 
@@ -2332,7 +2361,7 @@ function renderTodayCourse(): void {
         if (!resolved) {
           resolved = true;
           const fallback = buildNearbyCourse(null);
-          applyCourse(fallback.steps, fallback.label);
+          applyCourse(fallback.steps);
         }
       }, 2500);
 
@@ -2344,14 +2373,16 @@ function renderTodayCourse(): void {
             window.clearTimeout(timer);
             userCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
             const nearby = buildNearbyCourse(userCoords);
-            applyCourse(nearby.steps, nearby.label);
+            renderTodayCourse(); // 티커 거리 정보 실시간 갱신
+            applyCourse(nearby.steps);
+            showToast('📍 내 주변 실시간 추천 코스를 불러왔어요');
           },
           () => {
             if (resolved) return;
             resolved = true;
             window.clearTimeout(timer);
             const fallback = buildNearbyCourse(null);
-            applyCourse(fallback.steps, fallback.label);
+            applyCourse(fallback.steps);
           },
           { timeout: 2500, maximumAge: 600000, enableHighAccuracy: false },
         );
@@ -2360,12 +2391,13 @@ function renderTodayCourse(): void {
           resolved = true;
           window.clearTimeout(timer);
           const fallback = buildNearbyCourse(null);
-          applyCourse(fallback.steps, fallback.label);
+          applyCourse(fallback.steps);
         }
       }
     } else {
       const res = buildNearbyCourse(userCoords);
-      applyCourse(res.steps, res.label);
+      applyCourse(res.steps);
+      showToast('✨ 실시간 추천 코스를 불러왔어요');
     }
   });
 }
