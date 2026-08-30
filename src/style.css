@@ -3486,19 +3486,73 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   flex: 1;
 }
 
+/* 비주얼 카테고리 스크롤 칩 바 */
+.spot-category-scroll {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 4px 0 2px;
+  -webkit-overflow-scrolling: touch;
+}
+.spot-category-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.spot-category-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 13px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-sub);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.spot-category-chip:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+.spot-category-chip.is-active {
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+.chip-emoji {
+  font-size: 0.95rem;
+}
+
+.chip-label {
+  font-size: var(--font-xs);
+}
+
 .discovery-card-actions {
   display: flex;
   gap: 6px;
   align-items: center;
+  width: 100%;
 }
 
 .btn-build-anchor-course {
   flex: 1;
+  min-width: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  padding: 7px 8px;
+  padding: 7px 6px;
   background: var(--color-accent-soft);
   border: 1px solid var(--color-accent-soft);
   color: var(--color-accent);
@@ -3508,6 +3562,8 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   cursor: pointer;
   transition: all var(--transition-fast);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .btn-build-anchor-course:hover {
@@ -3519,18 +3575,24 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  gap: 3px;
+  padding: 7px 10px;
   border-radius: var(--radius-sm);
   background: var(--color-surface-sub);
   border: 1px solid var(--color-border);
-  font-size: 0.8rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-text-sub);
   text-decoration: none;
-  transition: background var(--transition-fast);
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
 }
 
 .btn-discovery-map:hover {
   background: var(--color-surface-hover);
+  color: var(--color-text);
+  border-color: var(--color-border-strong);
 }
 
 /* 더보기 및 빈 화면 */

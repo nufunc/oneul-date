@@ -3654,91 +3654,109 @@ function renderSpotDiscovery(): void {
   const displaySpots = matchedSpots.slice(0, state.spotPage * pageSize);
   const hasMore = displaySpots.length < totalCount;
 
-  // 지역 라벨 계산
-  const regionLabel = state.regions.length === 0
-    ? '전체 지역'
-    : state.regions.map((k) => REGIONS.find((r) => r.key === k)?.label || k).join(', ');
+  // 맞춤 코스 디자인 일관성: 셀렉터 라벨
+  const regLabel = getRegionSelectorLabel();
+  const radiusLabel = userCoords
+    ? `반경 ${state.spotDistanceRadius >= 1.0 ? `${state.spotDistanceRadius}km` : `${state.spotDistanceRadius * 1000}m`} 이내`
+    : '거리 반경 설정';
 
-  const isFiltered = Boolean(state.spotSearchQuery || state.spotCategory !== 'ALL' || (userCoords && state.spotDistanceRadius < 10));
+  const isFiltered = Boolean(
+    state.spotSearchQuery ||
+      state.spotCategory !== 'ALL' ||
+      state.regions.length > 0 ||
+      (userCoords && state.spotDistanceRadius < 10),
+  );
+
+  const nearbyBannerLabel = userCoords
+    ? `📍 내 주변 스팟 탐색 중 (${state.spotDistanceRadius}km 이내)`
+    : '📍 지금 내 주변 스팟 탐색하기';
 
   area.innerHTML = `
-    <!-- 1. 스팟 전용 독립 검색 헤더 -->
-    <div class="discovery-hero-panel">
-      <div class="discovery-search-wrap">
-        <span class="discovery-search-icon" aria-hidden="true">🔍</span>
-        <input
-          type="search"
-          class="discovery-search-input"
-          id="discovery-search-input"
-          placeholder="성수동 와인바, 오션뷰 카페, 공방, 오마카세..."
+    <!-- 1. 맞춤 코스와 동일한 시그니처 상단 배너: 내 주변 스팟 탐색 버튼 -->
+    <div class="today-course-area" style="margin-bottom: var(--space-4);">
+      <button class="today-course" id="btn-nearby-spot-explore" aria-label="내 주변 스팟 탐색 실행">
+        <span class="today-course-label">${nearbyBannerLabel}</span>
+        <span class="today-course-arrow" aria-hidden="true">→</span>
+      </button>
+    </div>
+
+    <!-- 2. 맞춤 코스와 100% 동일한 통합 검색창 & 15종 퀵 태그 -->
+    <div class="search-container">
+      <div class="search-box">
+        <span class="search-input-icon">🔍</span>
+        <input 
+          type="search" 
+          class="search-input" 
+          id="discovery-search-input" 
+          placeholder="어디로 갈까요? 지역·핫플·메뉴 검색 (예: 성수, 양평, 오션뷰, 와인)" 
           value="${escapeHtml(state.spotSearchQuery)}"
-          aria-label="데이트 스팟 검색"
           autocomplete="off"
+          aria-label="스팟 키워드 검색"
         />
-        ${state.spotSearchQuery ? `<button class="discovery-search-clear" id="btn-clear-discovery-search" aria-label="검색어 지우기">✕</button>` : ''}
+        <button class="search-clear ${state.spotSearchQuery ? 'is-visible' : ''}" id="btn-clear-discovery-search" aria-label="검색어 지우기">✕</button>
       </div>
-
-      <!-- 2. 빠른 추천 키워드 칩 -->
-      <div class="discovery-quick-tags">
-        ${['성수핫플', '오션뷰카페', '오마카세', '와인바', '이색공방', '루프탑', '스파'].map((kw) => `
-          <button class="discovery-quick-tag-chip ${state.spotSearchQuery === kw ? 'is-active' : ''}" data-query="${kw}">
-            #${kw}
-          </button>
-        `).join('')}
-      </div>
-
-      <!-- 3. 원터치 필터 툴바 (지역선택 / 거리반경 / 정렬) -->
-      <div class="discovery-toolbar-strip">
-        <button class="discovery-tool-btn" id="btn-discovery-region" aria-label="지역 선택 바텀시트 열기">
-          <span class="tool-icon">🗺️</span>
-          <span class="tool-text">${escapeHtml(regionLabel)}</span>
-          <span class="tool-arrow">▾</span>
-        </button>
-
-        ${userCoords ? `
-          <div class="discovery-radius-group">
-            <span class="radius-prefix">📍 반경</span>
-            <div class="radius-pill-box">
-              ${DISTANCE_RADIUS_OPTIONS.map((opt) => `
-                <button class="radius-pill ${state.spotDistanceRadius === opt.value ? 'is-active' : ''}" data-radius="${opt.value}">
-                  ${opt.label}
-                </button>
-              `).join('')}
-            </div>
-          </div>
-        ` : ''}
-
-        <div class="discovery-sort-group">
-          <select class="discovery-sort-select" id="discovery-sort-select" aria-label="스팟 정렬">
-            <option value="distance" ${state.spotSort === 'distance' ? 'selected' : ''}>📍 거리순</option>
-            <option value="popular" ${state.spotSort === 'popular' ? 'selected' : ''}>🔥 핫플순</option>
-            <option value="curation" ${state.spotSort === 'curation' ? 'selected' : ''}>⭐ 블루리본/미쉐린</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- 4. 비주얼 카테고리 스크롤 칩 -->
-      <div class="discovery-cat-scroll">
-        ${SPOT_EXPLORE_CATEGORIES.map((cat) => `
-          <button class="discovery-cat-btn ${state.spotCategory === cat.key ? 'is-active' : ''}" data-cat-key="${cat.key}">
-            <span class="cat-emoji">${cat.emoji}</span>
-            <span class="cat-label">${cat.label}</span>
-          </button>
-        `).join('')}
+      <div class="search-tags">
+        ${POPULAR_QUICK_TAGS.map((tag) => {
+          const isActive = state.spotSearchQuery === tag.query || state.spotSearchQuery === tag.label;
+          return `<button class="search-tag-chip ${isActive ? 'active' : ''}" data-query="${escapeHtml(tag.query)}" data-label="${escapeHtml(tag.label)}">${escapeHtml(tag.label)}</button>`;
+        }).join('')}
       </div>
     </div>
 
-    <!-- 5. 탐색 상태 & 카운트 헤더 -->
+    <!-- 3. 맞춤 코스와 100% 동일한 1줄 2버튼 셀렉터 바 (지역선택 + 거리반경) -->
+    <div class="selector-bar" style="margin-bottom: var(--space-3);">
+      <button class="selector-btn ${regLabel.isSelected ? 'is-selected' : ''}" id="btn-discovery-region-trigger" aria-haspopup="dialog">
+        <div class="selector-left">
+          <span class="selector-icon">📍</span>
+          <div class="selector-text">
+            <span class="selector-title">${escapeHtml(regLabel.title)}</span>
+            <span class="selector-subtitle">${escapeHtml(regLabel.subtitle)}</span>
+          </div>
+        </div>
+        <span class="selector-arrow" aria-hidden="true">▾</span>
+      </button>
+
+      <button class="selector-btn ${userCoords ? 'is-selected' : ''}" id="btn-discovery-radius-trigger" aria-label="탐색 반경 변경">
+        <div class="selector-left">
+          <span class="selector-icon">🧭</span>
+          <div class="selector-text">
+            <span class="selector-title">${radiusLabel}</span>
+            <span class="selector-subtitle">${userCoords ? 'GPS 실시간 거리순' : '내 위치 탐색'}</span>
+          </div>
+        </div>
+        <span class="selector-arrow" aria-hidden="true">▾</span>
+      </button>
+    </div>
+
+    <!-- 4. 비주얼 카테고리 스크롤 칩 바 -->
+    <div class="spot-category-scroll" style="margin-bottom: var(--space-4);">
+      ${SPOT_EXPLORE_CATEGORIES.map((cat) => `
+        <button class="spot-category-chip ${state.spotCategory === cat.key ? 'is-active' : ''}" data-cat-key="${cat.key}">
+          <span class="chip-emoji">${cat.emoji}</span>
+          <span class="chip-label">${cat.label}</span>
+        </button>
+      `).join('')}
+    </div>
+
+    <!-- 5. 탐색 상태 & 정렬 툴바 -->
     <div class="discovery-status-bar">
       <div class="status-left">
         <span class="status-count-badge">${totalCount}</span>
-        <span class="status-text">개의 매력적인 데이트 스팟</span>
+        <span class="status-text">개의 데이트 스팟</span>
+        ${isFiltered ? `
+          <button class="btn-discovery-filter-reset" id="btn-reset-discovery-filters">
+            <span class="reset-icon">↺</span> 조건 초기화
+          </button>
+        ` : ''}
       </div>
-      ${isFiltered ? `
-        <button class="btn-discovery-filter-reset" id="btn-reset-discovery-filters">
-          <span class="reset-icon">↺</span> 조건 초기화
-        </button>
-      ` : ''}
+
+      <div class="discovery-sort-group">
+        <select class="discovery-sort-select" id="discovery-sort-select" aria-label="스팟 정렬">
+          <option value="distance" ${state.spotSort === 'distance' ? 'selected' : ''}>📍 거리순</option>
+          <option value="popular" ${state.spotSort === 'popular' ? 'selected' : ''}>🔥 핫플순</option>
+          <option value="curation" ${state.spotSort === 'curation' ? 'selected' : ''}>⭐ 블루리본/미쉐린</option>
+        </select>
+      </div>
     </div>
 
     <!-- 6. 2열 인스타 감성 갤러리 그리드 피드 -->
@@ -3805,10 +3823,10 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }): string {
         <p class="discovery-quote">“${escapeHtml(sum)}”</p>
         <div class="discovery-card-actions">
           <button class="btn-build-anchor-course" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심으로 코스 짜기">
-            <span class="btn-sparkle">✨</span> 이 장소로 코스 짜기
+            <span class="btn-sparkle">✨</span> 코스 짜기
           </button>
           <a class="btn-discovery-map" href="${naverMapUrl(spot)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(spot.name)} 지도 보기">
-            🗺️
+            🗺️ 지도
           </a>
         </div>
       </div>
