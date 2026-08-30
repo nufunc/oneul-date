@@ -210,13 +210,20 @@ export interface SpotCategoryItem {
 
 export const SPOT_EXPLORE_CATEGORIES: SpotCategoryItem[] = [
   { key: 'ALL', label: '전체', emoji: '✨' },
-  { key: 'CAFE', label: '카페·디저트', emoji: '☕', keywords: ['카페', '디저트', '베이커리', '빵집', '케이크', '커피', '브런치', '구움과자', '소금빵', '베이글', '찻집'] },
-  { key: 'DINING', label: '맛집·다이닝', emoji: '🍽️', keywords: ['맛집', '미식', '식당', '레스토랑', '파스타', '스테이크', '고기', '삼겹살', '한식', '일식', '양식', '초밥', '피자', '오마카세', '다이닝'] },
+  { key: 'CAFE', label: '감성카페', emoji: '☕', keywords: ['카페', '디저트', '베이커리', '빵집', '케이크', '커피', '구움과자', '소금빵', '베이글', '찻집'] },
+  { key: 'BRUNCH', label: '브런치·베이글', emoji: '🥐', keywords: ['브런치', '프렌치토스트', '팬케이크', '오믈렛', '베이글', '샌드위치', '샐러드', '에그베네딕트'] },
+  { key: 'DINING', label: '미식·다이닝', emoji: '🍽️', keywords: ['맛집', '미식', '식당', '레스토랑', '파스타', '스테이크', '고기', '삼겹살', '한식', '일식', '양식', '초밥', '피자', '오마카세', '다이닝'] },
+  { key: 'ROMANTIC', label: '기념일·로맨틱', emoji: '🕯️', keywords: ['기념일', '파인다이닝', '코스요리', '오마카세', '고급', '호텔다이닝', '분위기', '프로포즈', '데이트코스'] },
   { key: 'WINE', label: '와인·위스키', emoji: '🍷', keywords: ['와인', '와인바', '위스키', '하이볼', '바(bar)', '라운지', '칵테일', '비스트로', '주점', 'lp바'] },
-  { key: 'EXPERIENCE', label: '공방·놀거리', emoji: '🎨', keywords: ['공방', '원데이', '체험', '보드게임', '보드카페', '만화카페', '방탈출', '드로잉', '도자기', '도예', '향수', '가죽', '전시', '미술관', '아쿠아리움'] },
-  { key: 'NIGHT', label: '야경·루프탑', emoji: '🌙', keywords: ['야경', '루프탑', '전망', '스카이', '노을', '일몰', '한강', '남산', '타워', '테라스'] },
-  { key: 'SPA', label: '스파·힐링', emoji: '♨️', keywords: ['스파', '온천', '찜질', '사우나', '테르메덴', '아쿠아필드', '마사지', '피부관리', '헤드스파', '힐링', '숲', '식물원', '공원'] },
-  { key: 'DRIVE', label: '여행·드라이브', emoji: '🚗', keywords: ['드라이브', '해안도로', '외곽', '전망대', '호수', '가평', '양평', '남양주', '포천', '강화', '영종도', '대부도'] },
+  { key: 'PUB', label: '이자카야·펍', emoji: '🍺', keywords: ['이자카야', '맥주', '수제맥주', '펍', '재즈바', '야장', '포차', '꼬치', '하이볼', '심야식당'] },
+  { key: 'NIGHT', label: '야경·루프탑', emoji: '🌙', keywords: ['야경', '루프탑', '전망', '스카이', '노을', '일몰', '한강', '남산', '타워', '테라스', '뷰맛집'] },
+  { key: 'OCEAN', label: '오션뷰·물멍', emoji: '🌊', keywords: ['오션뷰', '리버뷰', '호수', '바다', '해변', '선셋', '물멍', '한강뷰', '해안'] },
+  { key: 'EXPERIENCE', label: '공방·원데이', emoji: '🎨', keywords: ['공방', '원데이', '체험', '드로잉', '도자기', '도예', '향수', '가죽', '반지', '베이킹', '플라워'] },
+  { key: 'CULTURE', label: '전시·놀거리', emoji: '🎭', keywords: ['전시', '미술관', '갤러리', '뮤지엄', '팝업', '팝업스토어', '보드게임', '방탈출', '아쿠아리움', '공연', '연극', '영화관'] },
+  { key: 'HEALING', label: '숲·산책힐링', emoji: '🌿', keywords: ['숲', '식물원', '수목원', '공원', '산책', '피크닉', '자연', '정원', '잔디', '둘레길'] },
+  { key: 'SPA', label: '스파·사우나', emoji: '♨️', keywords: ['스파', '온천', '찜질', '사우나', '테르메덴', '아쿠아필드', '마사지', '피부관리', '헤드스파', '힐링스파'] },
+  { key: 'DRIVE', label: '근교·드라이브', emoji: '🚗', keywords: ['드라이브', '해안도로', '외곽', '전망대', '호수', '가평', '양평', '남양주', '포천', '강화', '영종도', '대부도', '근교'] },
+  { key: 'STAY', label: '호캉스·감성숙소', emoji: '🏨', keywords: ['호텔', '호캉스', '감성숙소', '풀빌라', '글램핑', '카라반', '펜션', '리조트', '료칸'] },
 ];
 
 export const DISTANCE_RADIUS_OPTIONS = [
@@ -2987,7 +2994,7 @@ function getSpotPopularityScore(spot: Spot): number {
 }
 
 /**
- * 실시간 트렌드 및 시간대(낮/밤 하루 2회) 기반 핫한 분위기 테마 칩 자동 정렬
+ * 실시간 스팟 데이터 + 시간대(4단계) + 요일별(주말/평일) 트렌드 인텔리전스 핫랭킹 테마 칩 정렬
  */
 export function getCuratedThemeChips(): SpotCategoryItem[] {
   const allItem = SPOT_EXPLORE_CATEGORIES.find((c) => c.key === 'ALL') || { key: 'ALL', label: '전체', emoji: '✨' };
@@ -2995,13 +3002,13 @@ export function getCuratedThemeChips(): SpotCategoryItem[] {
 
   const now = new Date();
   const hour = now.getHours();
-  // 하루 2회 시간대 버킷: 낮 타임(05:00~16:59), 저녁/밤 타임(17:00~04:59)
-  const isEvening = hour >= 17 || hour < 5;
+  const dayOfWeek = now.getDay(); // 0: 일, 5: 금, 6: 토
+  const isWeekend = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6;
 
   const scoredThemes = themeItems.map((item) => {
     let score = 50;
 
-    // 1. 해당 테마 스팟들의 실시간 인기도 점수 집계
+    // 1. 실제 데이터 기반 인기도/신상 핫플 집계
     if (item.keywords && spots && spots.length > 0) {
       const matched = spots.filter((s) => {
         const text = [s.name, s.category, s.summary, ...(s.signature_items || []), ...(s.mood_tags || [])].join(' ').toLowerCase();
@@ -3016,27 +3023,68 @@ export function getCuratedThemeChips(): SpotCategoryItem[] {
           .slice(0, 10);
         const avgTop = topScores.reduce((sum, v) => sum + v, 0) / topScores.length;
         score += avgTop;
+
+        // 미쉐린 및 블루리본 스팟 보유 가중치
+        const michelinCount = matched.filter((s) => s.curation_badges?.michelin).length;
+        const blueRibbonCount = matched.filter((s) => s.curation_badges?.blue_ribbon).length;
+        score += michelinCount * 12 + blueRibbonCount * 6;
       }
     }
 
-    // 2. 시간대별(낮/밤) 트렌드 가중치 부여 (하루 2회 자동 최적화)
-    if (isEvening) {
-      if (item.key === 'WINE') score += 45;
-      else if (item.key === 'NIGHT') score += 40;
+    // 2. 시간대별(4단계) 라이프사이클 트렌드 가중치
+    if (hour >= 6 && hour < 14) {
+      // ☀️ 아침~점심 (06:00~13:59): 브런치, 카페, 숲산책, 문화, 드라이브
+      if (item.key === 'BRUNCH') score += 55;
+      else if (item.key === 'CAFE') score += 50;
+      else if (item.key === 'HEALING') score += 40;
+      else if (item.key === 'CULTURE') score += 35;
+      else if (item.key === 'DRIVE') score += 30;
+      else if (item.key === 'DINING') score += 25;
+    } else if (hour >= 14 && hour < 18) {
+      // 🌇 오후~노을 (14:00~17:59): 감성카페, 원데이공방, 오션뷰물멍, 문화, 드라이브
+      if (item.key === 'CAFE') score += 50;
+      else if (item.key === 'EXPERIENCE') score += 45;
+      else if (item.key === 'OCEAN') score += 45;
+      else if (item.key === 'CULTURE') score += 40;
+      else if (item.key === 'DRIVE') score += 35;
       else if (item.key === 'DINING') score += 30;
-      else if (item.key === 'CAFE') score += 10;
+    } else if (hour >= 18 && hour < 23) {
+      // 🌙 저녁~프라임나이트 (18:00~22:59): 와인위스키, 로맨틱기념일, 야경루프탑, 미식, 이자카야
+      if (item.key === 'WINE') score += 55;
+      else if (item.key === 'ROMANTIC') score += 50;
+      else if (item.key === 'NIGHT') score += 50;
+      else if (item.key === 'DINING') score += 45;
+      else if (item.key === 'PUB') score += 40;
+      else if (item.key === 'OCEAN') score += 30;
     } else {
-      if (item.key === 'CAFE') score += 45;
-      else if (item.key === 'DRIVE') score += 40;
-      else if (item.key === 'DINING') score += 35;
-      else if (item.key === 'EXPERIENCE') score += 30;
+      // 🌌 심야~새벽 (23:00~05:59): 이자카야/펍, 야경, 와인, 호캉스/숙소, 드라이브
+      if (item.key === 'PUB') score += 55;
+      else if (item.key === 'NIGHT') score += 50;
+      else if (item.key === 'WINE') score += 45;
+      else if (item.key === 'STAY') score += 40;
+      else if (item.key === 'DRIVE') score += 35;
+      else if (item.key === 'SPA') score += 30;
+    }
+
+    // 3. 주말/평일 라이프스타일 가중치
+    if (isWeekend) {
+      if (item.key === 'DRIVE') score += 30;
+      else if (item.key === 'STAY') score += 30;
+      else if (item.key === 'OCEAN') score += 25;
+      else if (item.key === 'EXPERIENCE') score += 25;
+      else if (item.key === 'CULTURE') score += 20;
+    } else {
+      if (item.key === 'DINING') score += 25;
+      else if (item.key === 'WINE') score += 25;
+      else if (item.key === 'CAFE') score += 20;
+      else if (item.key === 'PUB') score += 20;
       else if (item.key === 'SPA') score += 20;
     }
 
     return { item, score };
   });
 
-  // 핫니스 점수 높은 순으로 정렬
+  // 종합 핫니스 점수 내림차순 정렬
   scoredThemes.sort((a, b) => b.score - a.score);
 
   // '전체' 칩은 항상 맨 앞에 배치
