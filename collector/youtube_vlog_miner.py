@@ -124,7 +124,7 @@ INNERTUBE_NEXT_URL = ("https://www.youtube.com/youtubei/v1/next"
 
 # 처리 이력 (매 사이클 같은 영상 재처리 방지)
 HISTORY_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".processed_videos.json")
-HISTORY_MAX = 500
+HISTORY_MAX = 2000
 
 # ─────────────────────────────────────────────────────────────
 # [Channel Registry] 검증된 고품질 미식/여행 채널 레지스트리 & 자율 승격
@@ -1859,9 +1859,10 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
             _print_video_line(vinfo, _new_stats(), skip_reason=f"스킵: 해외({oversea_kw})")
             continue
 
-        # 설명란 확보 실패 → 제목 폴백 금지, 영상 스킵 (이력에는 남기지 않음: 다음에 재시도)
+        # 설명란 확보 실패/쇼츠 (설명란 0자) 스킵 및 이력 캐싱
         if desc_len == 0:
             agg["no_desc_skipped"] += 1
+            newly_processed.append(video_id)
             _print_video_line(vinfo, _new_stats(), skip_reason="스킵: 설명란 확보 실패(전 경로)")
             continue
 
