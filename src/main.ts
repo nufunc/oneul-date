@@ -2960,40 +2960,66 @@ function getSpotImageUrl(spot: Spot, slot: SlotKey, usedImages?: Set<string>): s
   return fallbackUrl;
 }
 
-/** 최근 기간 및 플랫폼 실시간 바이럴 기반 초인기 핫플레이스 판별 (상위 5% 이내 엄격 선별) */
+/** 
+ * 멀티 수집 채널(유튜브·미식큐레이션·지도평점·블로그·종합지표) 독립 평가 기반
+ * 어느 한쪽이라도 85점 이상인 독보적 핫플레이스 엄격 판정
+ */
 function isSuperHotSpot(spot: Spot): boolean {
   if (!spot) return false;
 
-  // 1. 유튜브 대형 바이럴 영상 (5만 뷰 이상 & 뉴스/사건사고 제외)
-  if (isValidYoutubeHotclip(spot.social_links?.youtube) && (spot.social_links?.youtube?.views || 0) >= 50000) {
-    return true;
+  // 1. 🎬 유튜브 바이럴 채널 점수 (0~100)
+  let ytScore = 0;
+  const yt = spot.social_links?.youtube;
+  if (isValidYoutubeHotclip(yt)) {
+    const views = Number(yt?.views) || 0;
+    const likes = Number(yt?.likes) || 0;
+    if (views >= 100000) ytScore = 100;
+    else if (views >= 50000) ytScore = 85;
+    else if (views >= 30000 && likes >= 500) ytScore = 85;
+    else if (views >= 30000) ytScore = 75;
+    else if (views >= 10000) ytScore = 60;
   }
 
-  // 2. 실시간 핫스코어 최상위권 (80점 이상)
-  if (spot.hot_score && spot.hot_score >= 80) {
-    return true;
+  // 2. 🍷 미식·큐레이션 채널 점수 (0~100)
+  let curationScore = 0;
+  const srcNote = spot.source?.note || '';
+  const badges = spot.curation_badges;
+  const isMichelin = srcNote.includes('미쉐린') || !!badges?.michelin || 
+    (Array.isArray(badges) && badges.includes('michelin'));
+  const isBlueRibbon = srcNote.includes('블루리본') || !!badges?.blue_ribbon || 
+    (Array.isArray(badges) && badges.includes('blue_ribbon'));
+  const isCatchtable = spot.source?.type === 'catchtable_miner' || 
+    spot.source?.url?.includes('catchtable') || !!badges?.catchtable ||
+    (Array.isArray(badges) && badges.includes('catchtable'));
+
+  if (isMichelin) curationScore = 100;
+  else if (isBlueRibbon) curationScore = 90;
+  else if (isCatchtable && (spot.verified || (spot.hot_score || 0) >= 60)) curationScore = 85;
+
+  // 3. 🗺️ 지도 평점 채널 점수 (0~100)
+  let mapScore = 0;
+  const rating = spot.social_links?.kakaomap?.rating;
+  if (rating) {
+    if (rating >= 4.8) mapScore = 100;
+    else if (rating >= 4.6) mapScore = 85;
+    else if (rating >= 4.3) mapScore = 70;
   }
 
-  // 3. 최근 7일 이내 자동 수집·발굴된 검증된 신상 핫플
-  if (spot.created_at) {
-    try {
-      const created = new Date(spot.created_at).getTime();
-      const now = Date.now();
-      const daysDiff = (now - created) / (1000 * 60 * 60 * 24);
-      if (daysDiff <= 7 && spot.verified) {
-        return true;
-      }
-    } catch {
-      // ignore
+  // 4. 📝 블로그 감성 데이트 채널 점수 (0~100)
+  let blogScore = 0;
+  if (spot.source?.type === 'blog_mining' && spot.verified) {
+    if (/(분위기|감성|소개팅|핫플|로스터리|와인|오마카세|루프탑)/.test(srcNote)) {
+      if (ytScore >= 75) blogScore = 85;
+      else blogScore = 65;
     }
   }
 
-  // 4. 카카오맵 평점 4.6 이상 (초고평점 극찬 명소)
-  if (spot.social_links?.kakaomap?.rating && spot.social_links.kakaomap.rating >= 4.6) {
-    return true;
-  }
+  // 5. 📊 플랫폼 종합 핫스코어 (0~100)
+  const dbHotScore = spot.hot_score || 0;
 
-  return false;
+  // 👉 어느 한 채널이라도 85점 이상이면 즉시 🔥 핫플 인정
+  const maxScore = Math.max(ytScore, curationScore, mapScore, blogScore, dbHotScore);
+  return maxScore >= 85;
 }
 
 /** 스팟의 실시간 종합 인기도 점수 계산 (핫플/인기순 정렬용) */
