@@ -2394,15 +2394,19 @@ button {
   font-weight: 800;
 }
 
-.ticker-arrow {
+.ticker-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: var(--color-accent-text);
-  font-size: 0.8rem;
   margin-left: 2px;
-  transition: transform var(--transition-fast);
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
+  opacity: 0.75;
 }
 
-.live-ambient-ticker:hover .ticker-arrow {
-  transform: translateX(3px);
+.live-ambient-ticker:hover .ticker-chevron {
+  transform: translateX(2.5px);
+  opacity: 1;
 }
 
 /* 분위기 pill '⋯ 더보기' / '접기' */

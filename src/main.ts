@@ -2329,7 +2329,11 @@ function renderTodayCourse(): void {
       <span class="ticker-title">${initial.ambient.title}</span>
       <span class="ticker-sep" aria-hidden="true">·</span>
       <span class="ticker-subtitle">${initial.distKm != null ? `1차 스팟 <strong>${initial.distKm}km</strong>` : initial.ambient.subtitle}</span>
-      <span class="ticker-arrow" aria-hidden="true">➔</span>
+      <span class="ticker-chevron" aria-hidden="true">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
     </button>
   `;
 
