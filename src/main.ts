@@ -3564,6 +3564,9 @@ function renderOverlay(): void {
               </div>
               <div class="all-regions-card" style="margin-top: var(--space-3);">
                 <h3 class="all-regions-title">대한민국 전역 데이트 탐색</h3>
+                <p class="all-regions-desc">
+                  전국 8대 권역의 감성 핫플레이스와 숨은 명소를 폭넓게 연결해 드려요.
+                </p>
                 <div class="all-regions-features">
                   <div class="all-feature-item">
                     <span class="feature-icon">✨</span>
