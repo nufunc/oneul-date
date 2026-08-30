@@ -3423,44 +3423,34 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   margin-left: auto;
 }
 
-/* COS 스타일 2열 / 3열 / 5열 그리드 밀도 스위처 */
-.grid-density-switcher {
-  display: inline-flex;
-  align-items: center;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: 2px 3px;
-  gap: 2px;
-  box-shadow: var(--shadow-sm);
-}
-
-.btn-density {
+/* 단일 아이콘 순환 토글 버튼 (Single Cycle Toggle Button) */
+.btn-density-cycle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 24px;
-  border-radius: 3px;
-  border: none;
-  background: transparent;
-  color: var(--color-text-faint);
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
   cursor: pointer;
   transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
   padding: 0;
 }
 
-.btn-density:hover {
-  color: var(--color-text);
+.btn-density-cycle:hover {
   background: var(--color-surface-hover);
-}
-
-.btn-density.is-active {
+  border-color: var(--color-border-strong);
   color: var(--color-accent);
-  background: var(--color-accent-soft);
 }
 
-.density-icon {
+.btn-density-cycle:active {
+  transform: scale(0.92);
+}
+
+.btn-density-cycle .density-icon {
   display: block;
   pointer-events: none;
 }

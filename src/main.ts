@@ -3737,22 +3737,14 @@ function renderSpotDiscovery(): void {
       </div>
 
       <div class="status-right">
-        <!-- COS 스타일 2열 / 3열 (기본값) / 5열 그리드 아이콘 스위처 -->
-        <div class="grid-density-switcher" role="group" aria-label="스팟 목록 보기 개수 설정">
-          <button class="btn-density ${state.spotGridCols === 2 ? 'is-active' : ''}" data-cols="2" aria-label="2열로 보기" title="2열로 보기">
+        <!-- 단일 아이콘 순환 토글 버튼 (3열 기본 -> 2열 -> 5열 -> 3열) -->
+        <button class="btn-density-cycle" id="btn-density-cycle" aria-label="보기 방식 전환 (${state.spotGridCols}열 보기)" title="보기 전환 (${state.spotGridCols}열 → ${state.spotGridCols === 3 ? '2열' : state.spotGridCols === 2 ? '5열' : '3열'})">
+          ${state.spotGridCols === 2 ? `
             <svg class="density-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <rect x="1" y="1" width="5.5" height="14" rx="0.75" fill="currentColor"/>
               <rect x="9.5" y="1" width="5.5" height="14" rx="0.75" fill="currentColor"/>
             </svg>
-          </button>
-          <button class="btn-density ${state.spotGridCols === 3 ? 'is-active' : ''}" data-cols="3" aria-label="3열로 보기 (기본값)" title="3열로 보기 (기본)">
-            <svg class="density-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <rect x="0.5" y="1" width="3.4" height="14" rx="0.75" fill="currentColor"/>
-              <rect x="6.3" y="1" width="3.4" height="14" rx="0.75" fill="currentColor"/>
-              <rect x="12.1" y="1" width="3.4" height="14" rx="0.75" fill="currentColor"/>
-            </svg>
-          </button>
-          <button class="btn-density ${state.spotGridCols === 5 ? 'is-active' : ''}" data-cols="5" aria-label="5열로 보기" title="5열로 보기">
+          ` : state.spotGridCols === 5 ? `
             <svg class="density-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <rect x="0.5" y="1" width="1.8" height="14" rx="0.5" fill="currentColor"/>
               <rect x="3.8" y="1" width="1.8" height="14" rx="0.5" fill="currentColor"/>
@@ -3760,8 +3752,14 @@ function renderSpotDiscovery(): void {
               <rect x="10.4" y="1" width="1.8" height="14" rx="0.5" fill="currentColor"/>
               <rect x="13.7" y="1" width="1.8" height="14" rx="0.5" fill="currentColor"/>
             </svg>
-          </button>
-        </div>
+          ` : `
+            <svg class="density-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect x="0.5" y="1" width="3.4" height="14" rx="0.75" fill="currentColor"/>
+              <rect x="6.3" y="1" width="3.4" height="14" rx="0.75" fill="currentColor"/>
+              <rect x="12.1" y="1" width="3.4" height="14" rx="0.75" fill="currentColor"/>
+            </svg>
+          `}
+        </button>
 
         <div class="discovery-sort-group">
           <select class="discovery-sort-select" id="discovery-sort-select" aria-label="스팟 정렬">
@@ -3912,16 +3910,14 @@ function bindDiscoveryEvents(area: HTMLElement): void {
     });
   });
 
-  // 4. COS 스타일 2열 / 3열 / 5열 밀도 전환 스위처 이벤트
-  area.querySelectorAll<HTMLButtonElement>('.btn-density').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const cols = Number(btn.dataset.cols) as 2 | 3 | 5;
-      if (cols === 2 || cols === 3 || cols === 5) {
-        state.spotGridCols = cols;
-        state.spotPage = 1;
-        renderSpotDiscovery();
-      }
-    });
+  // 3. 단일 아이콘 순환 토글 (3열 기본 -> 2열 -> 5열 -> 3열)
+  area.querySelector('#btn-density-cycle')?.addEventListener('click', () => {
+    const nextCols: 2 | 3 | 5 = state.spotGridCols === 3 ? 2 : state.spotGridCols === 2 ? 5 : 3;
+    state.spotGridCols = nextCols;
+    state.spotPage = 1;
+    renderSpotDiscovery();
+    const label = nextCols === 2 ? '2열 와이드 뷰' : nextCols === 5 ? '5열 미니 타일 뷰' : '3열 기본 갤러리 뷰';
+    showToast(`📐 ${label}로 전환했어요`);
   });
 
   // 5. 정렬 셀렉트 박스
