@@ -3157,6 +3157,398 @@ html[data-theme="dark"] .step-transit-divider.origin-start .step-transit-badge,
 html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transit-badge {
   background: rgba(16, 185, 129, 0.15);
   border-color: rgba(16, 185, 129, 0.35);
+  color: #34d399;
+}
+
+/* ==========================================================================
+   스팟 집중 탐색 모드 (Spot Discovery & Nearby Explorer) 스타일
+   ========================================================================== */
+
+/* 상단 메인 모드 이원화 탭 */
+.main-mode-nav {
+  margin-bottom: var(--space-4);
+}
+
+.main-tab-bar {
+  display: flex;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 4px;
+  box-shadow: var(--shadow-sm);
+  gap: 4px;
+}
+
+.main-tab-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: transparent;
+  color: var(--color-text-sub);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.main-tab-btn.is-active {
+  background: var(--color-accent);
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.25);
+}
+
+.main-tab-emoji {
+  font-size: 1rem;
+}
+
+.main-tab-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #ef4444;
+  background: #fee2e2;
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  letter-spacing: -0.02em;
+}
+
+.main-tab-btn.is-active .main-tab-badge {
+  color: var(--color-accent);
+  background: #ffffff;
+}
+
+/* 스팟 탐색 메인 컨테이너 */
+.spot-discovery-area {
+  animation: fadeIn 0.25s ease-out;
+}
+
+.discovery-header-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+  margin-bottom: var(--space-4);
+  box-shadow: var(--shadow-sm);
+}
+
+/* 거리 레이더 바 */
+.distance-radar-bar {
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border-sub);
+}
+
+.radar-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+
+.radar-title {
+  font-size: var(--font-xs);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.radar-count {
+  font-size: var(--font-xs);
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+.distance-pill-list {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.distance-pill-list::-webkit-scrollbar {
+  display: none;
+}
+
+.distance-pill {
+  flex: 1;
+  min-width: 52px;
+  padding: 6px 10px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-sub);
+  color: var(--color-text-sub);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: all var(--transition-fast);
+}
+
+.distance-pill.is-active {
+  background: var(--color-primary, #0284c7);
+  border-color: var(--color-primary, #0284c7);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* 카테고리 퀵 칩 스크롤 */
+.spot-category-scroll {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 2px 0;
+}
+.spot-category-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.spot-category-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-sub);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.spot-category-chip.is-active {
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+/* 2열 스팟 인스타 갤러리 그리드 */
+.spot-discovery-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+@media (max-width: 480px) {
+  .spot-discovery-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
+
+.discovery-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.discovery-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.discovery-card-thumb {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: var(--color-surface-sub);
+  overflow: hidden;
+}
+
+.discovery-badge-dist {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  background: rgba(15, 23, 42, 0.78);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  letter-spacing: -0.01em;
+}
+
+.discovery-badge-hot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  background: rgba(225, 29, 72, 0.88);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+}
+
+.discovery-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.discovery-card:hover .discovery-img {
+  transform: scale(1.04);
+}
+
+.discovery-card-body {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 10px 12px;
+  flex: 1;
+}
+
+.discovery-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.70rem;
+  font-weight: 600;
+  color: var(--color-text-faint);
+  margin-bottom: 4px;
+}
+
+.discovery-category {
+  color: var(--color-primary, #0284c7);
+  font-weight: 700;
+}
+
+.discovery-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.25;
+  margin: 0 0 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.discovery-quote {
+  font-size: 0.72rem;
+  color: var(--color-text-sub);
+  line-height: 1.35;
+  margin: 0 0 var(--space-3);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+
+.discovery-card-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.btn-build-anchor-course {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 7px 8px;
+  background: var(--color-accent-soft);
+  border: 1px solid var(--color-accent-soft);
+  color: var(--color-accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.btn-build-anchor-course:hover {
+  background: var(--color-accent);
+  color: #ffffff;
+}
+
+.btn-discovery-map {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sub);
+  border: 1px solid var(--color-border);
+  font-size: 0.8rem;
+  text-decoration: none;
+  transition: background var(--transition-fast);
+}
+
+.btn-discovery-map:hover {
+  background: var(--color-surface-hover);
+}
+
+/* 더보기 및 빈 화면 */
+.discovery-more-row {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-4);
+}
+
+.btn-discovery-more {
+  padding: 10px 24px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-size: var(--font-sm);
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.btn-discovery-more:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-text-sub);
+}
+
+.spot-empty-state {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px dashed var(--color-border);
+}
+
+.btn-empty-reset {
+  margin-top: var(--space-3);
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  color: #ffffff;
+  border: none;
+  font-size: var(--font-xs);
+  font-weight: 700;
+  cursor: pointer;
 }
 
 html[data-theme="dark"] .step-transit-divider.origin-start .step-transit-time,

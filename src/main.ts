@@ -201,6 +201,32 @@ export const POPULAR_QUICK_TAGS: QuickTagItem[] = [
   { label: '#드라이브', query: '드라이브', synonyms: ['드라이브', '외곽', '호수', '전망대', '남한산성', '북악', '해안도로', '해변', '강변', '국도', '고개', '전망', '가평', '양평', '남양주', '포천', '강화', '영종도', '대부도', '제부도'] },
 ];
 
+export interface SpotCategoryItem {
+  key: string;
+  label: string;
+  emoji: string;
+  keywords?: string[];
+}
+
+export const SPOT_EXPLORE_CATEGORIES: SpotCategoryItem[] = [
+  { key: 'ALL', label: '전체', emoji: '✨' },
+  { key: 'CAFE', label: '카페·디저트', emoji: '☕', keywords: ['카페', '디저트', '베이커리', '빵집', '케이크', '커피', '브런치', '구움과자', '소금빵', '베이글', '찻집'] },
+  { key: 'DINING', label: '맛집·다이닝', emoji: '🍽️', keywords: ['맛집', '미식', '식당', '레스토랑', '파스타', '스테이크', '고기', '삼겹살', '한식', '일식', '양식', '초밥', '피자', '오마카세', '다이닝'] },
+  { key: 'WINE', label: '와인·위스키', emoji: '🍷', keywords: ['와인', '와인바', '위스키', '하이볼', '바(bar)', '라운지', '칵테일', '비스트로', '주점', 'lp바'] },
+  { key: 'EXPERIENCE', label: '공방·놀거리', emoji: '🎨', keywords: ['공방', '원데이', '체험', '보드게임', '보드카페', '만화카페', '방탈출', '드로잉', '도자기', '도예', '향수', '가죽', '전시', '미술관', '아쿠아리움'] },
+  { key: 'NIGHT', label: '야경·루프탑', emoji: '🌙', keywords: ['야경', '루프탑', '전망', '스카이', '노을', '일몰', '한강', '남산', '타워', '테라스'] },
+  { key: 'SPA', label: '스파·힐링', emoji: '♨️', keywords: ['스파', '온천', '찜질', '사우나', '테르메덴', '아쿠아필드', '마사지', '피부관리', '헤드스파', '힐링', '숲', '식물원', '공원'] },
+  { key: 'DRIVE', label: '여행·드라이브', emoji: '🚗', keywords: ['드라이브', '해안도로', '외곽', '전망대', '호수', '가평', '양평', '남양주', '포천', '강화', '영종도', '대부도'] },
+];
+
+export const DISTANCE_RADIUS_OPTIONS = [
+  { value: 0.5, label: '500m' },
+  { value: 1.0, label: '1km' },
+  { value: 3.0, label: '3km' },
+  { value: 5.0, label: '5km' },
+  { value: 10.0, label: '10km' },
+];
+
 let spots: Spot[] = rawSpotsData as unknown as Spot[];
 
 // ---------------------------------------------------------------------------
@@ -1860,6 +1886,7 @@ export type ThemeMode = 'light' | 'dark' | 'auto';
 const THEME_STORAGE_KEY = 'oneul_theme_mode';
 
 interface AppState {
+  mainMode: 'course' | 'spots';
   slots: Record<SlotKey, boolean>;
   /** 선택된 지역 키 다중 선택 — 빈 배열이면 '전체' */
   regions: string[];
@@ -1868,6 +1895,12 @@ interface AppState {
   mood: string;
   /** 사용자 입력 키워드/상호명/카테고리 검색어 */
   searchQuery: string;
+  /** 스팟 탐색 모드: 선택된 카테고리 필터 (ALL, CAFE, DINING, WINE, EXPERIENCE, NIGHT, SPA, DRIVE) */
+  spotCategory: string;
+  /** 스팟 탐색 모드: GPS 반경 거리 필터 (단위: km, 기본 3.0km) */
+  spotDistanceRadius: number;
+  /** 스팟 탐색 모드: 노출 페이지네이션 */
+  spotPage: number;
   /** 테마 모드: light(낮, 기본값) | dark(밤) | auto(시스템) */
   themeMode: ThemeMode;
   course: CourseStep[] | null;
@@ -1938,11 +1971,15 @@ function detectRegionFromCoords(lat: number, lng: number): string {
 }
 
 const state: AppState = {
+  mainMode: 'course',
   slots: getDefaultSlots(),
   regions: ['SEOUL'],
   subZones: [],
   mood: 'ALL',
   searchQuery: '',
+  spotCategory: 'ALL',
+  spotDistanceRadius: 3.0,
+  spotPage: 1,
   themeMode: getInitialThemeMode(),
   course: null,
   courseConditions: null,
@@ -2115,9 +2152,11 @@ function renderShell(): void {
         <button class="btn-saved" id="btn-open-saved">저장한 코스</button>
       </div>
     </header>
+    <nav class="main-mode-nav" id="main-mode-nav"></nav>
     <section class="today-course-area" id="today-area"></section>
     <section class="conditions" id="conditions-area"></section>
     <section class="results" id="results-area"></section>
+    <section class="spot-discovery-area" id="spot-discovery-area" style="display: none;"></section>
     <footer class="app-footer">
       <p class="footer-copy">오늘 데이트 <span class="footer-version">${APP_VERSION}</span></p>
       <p class="footer-sub">검증된 스팟만 골라 담은 오늘의 데이트 코스</p>
@@ -2136,10 +2175,65 @@ function renderShell(): void {
     state.savedOpen = true;
     renderOverlay();
   });
+  renderMainModeNav();
   renderTodayCourse();
   renderConditions();
   renderResults();
   renderOverlay();
+}
+
+function renderMainModeNav(): void {
+  const nav = document.getElementById('main-mode-nav');
+  if (!nav) return;
+
+  nav.innerHTML = `
+    <div class="main-tab-bar" role="tablist">
+      <button class="main-tab-btn ${state.mainMode === 'course' ? 'is-active' : ''}" id="tab-mode-course" role="tab" aria-selected="${state.mainMode === 'course'}">
+        <span class="main-tab-emoji">✨</span>
+        <span class="main-tab-label">맞춤 코스</span>
+      </button>
+      <button class="main-tab-btn ${state.mainMode === 'spots' ? 'is-active' : ''}" id="tab-mode-spots" role="tab" aria-selected="${state.mainMode === 'spots'}">
+        <span class="main-tab-emoji">📍</span>
+        <span class="main-tab-label">스팟 탐색</span>
+        <span class="main-tab-badge">NEW</span>
+      </button>
+    </div>
+  `;
+
+  document.getElementById('tab-mode-course')?.addEventListener('click', () => {
+    if (state.mainMode !== 'course') {
+      state.mainMode = 'course';
+      updateModeView();
+    }
+  });
+
+  document.getElementById('tab-mode-spots')?.addEventListener('click', () => {
+    if (state.mainMode !== 'spots') {
+      state.mainMode = 'spots';
+      updateModeView();
+    }
+  });
+}
+
+function updateModeView(): void {
+  renderMainModeNav();
+  const todayArea = document.getElementById('today-area');
+  const resultsArea = document.getElementById('results-area');
+  const discoveryArea = document.getElementById('spot-discovery-area');
+
+  if (state.mainMode === 'course') {
+    if (todayArea) todayArea.style.display = '';
+    if (resultsArea) resultsArea.style.display = '';
+    if (discoveryArea) discoveryArea.style.display = 'none';
+    renderConditions();
+    renderResults();
+  } else {
+    if (todayArea) todayArea.style.display = 'none';
+    if (resultsArea) resultsArea.style.display = 'none';
+    if (discoveryArea) discoveryArea.style.display = '';
+    renderConditions();
+    renderSpotDiscovery();
+  }
 }
 
 // --- 오늘의 코스 (S1) -----------------------------------------------------------
@@ -3418,6 +3512,301 @@ function bindResultEvents(area: HTMLElement): void {
     list.unshift(item);
     persistSavedCourses(list);
     showToast('💾 코스를 저장했어요');
+  });
+}
+
+// --- 스팟 집중 탐색 모드 (Spot Discovery) -------------------------------------------
+
+function buildAnchorCourse(anchorSpot: Spot): CourseStep[] {
+  const targetSlot = (anchorSpot.slot as SlotKey) || 'day';
+  const slotsOn: SlotKey[] = ['day', 'evening', 'night'];
+  const steps: CourseStep[] = [];
+
+  for (const slot of slotsOn) {
+    if (slot === targetSlot) {
+      steps.push({ slot, spotId: anchorSpot.id });
+    } else {
+      const candidates = getCandidates(spots, slot, [], 'ALL', [], []);
+      const nearby = candidates
+        .filter((s) => s.id !== anchorSpot.id && isCourseEligible(s))
+        .map((s) => ({
+          spot: s,
+          dist:
+            anchorSpot.lat && anchorSpot.lng && s.lat && s.lng
+              ? getDistanceKm(anchorSpot.lat, anchorSpot.lng, s.lat, s.lng)
+              : 9999,
+        }))
+        .filter((item) => item.dist <= 8.0)
+        .sort((a, b) => a.dist - b.dist);
+
+      if (nearby.length > 0) {
+        const picked = nearby[Math.floor(Math.random() * Math.min(3, nearby.length))].spot;
+        steps.push({ slot, spotId: picked.id });
+      } else {
+        const fallback = candidates.filter((s) => s.id !== anchorSpot.id && isCourseEligible(s));
+        if (fallback.length > 0) {
+          steps.push({ slot, spotId: fallback[Math.floor(Math.random() * fallback.length)].id });
+        } else {
+          steps.push({ slot, spotId: null });
+        }
+      }
+    }
+  }
+
+  if (state.slots.stay) {
+    const stayCandidates = getCandidates(spots, 'stay', [], 'ALL', [], [])
+      .filter((s) => isRealStaySpot(s) && isCourseEligible(s))
+      .map((s) => ({
+        spot: s,
+        dist:
+          anchorSpot.lat && anchorSpot.lng && s.lat && s.lng
+            ? getDistanceKm(anchorSpot.lat, anchorSpot.lng, s.lat, s.lng)
+            : 9999,
+      }))
+      .filter((item) => item.dist <= 15.0)
+      .sort((a, b) => a.dist - b.dist);
+
+    if (stayCandidates.length > 0) {
+      steps.push({ slot: 'stay', spotId: stayCandidates[0].spot.id });
+    }
+  }
+
+  return steps;
+}
+
+function renderSpotDiscovery(): void {
+  const area = document.getElementById('spot-discovery-area');
+  if (!area) return;
+
+  // 1. 유효 스팟 필터링 (폐업 및 광역 더미 제외)
+  let matchedSpots = spots.filter((s) => !s.is_closed && isCourseEligible(s));
+
+  // 지역 필터 적용
+  if (state.regions.length > 0) {
+    matchedSpots = matchedSpots.filter((s) => matchesRegion(s, state.regions));
+  }
+  // 데이트존 필터 적용
+  if (state.subZones.length > 0) {
+    matchedSpots = matchedSpots.filter((s) => matchesZone(s, state.subZones));
+  }
+  // 검색어 필터 적용
+  if (state.searchQuery) {
+    matchedSpots = matchedSpots.filter((s) => matchesSearchQuery(s, state.searchQuery));
+  }
+  // 카테고리 필터 적용
+  if (state.spotCategory !== 'ALL') {
+    const cat = SPOT_EXPLORE_CATEGORIES.find((c) => c.key === state.spotCategory);
+    if (cat && cat.keywords) {
+      matchedSpots = matchedSpots.filter((s) => {
+        const targetText = [
+          s.name,
+          s.category,
+          s.summary,
+          ...(s.signature_items || []),
+          ...(s.mood_tags || []),
+        ].join(' ').toLowerCase();
+        return cat.keywords!.some((kw) => targetText.includes(kw.toLowerCase()));
+      });
+    }
+  }
+
+  // 2. 거리 계산 및 정렬
+  if (userCoords) {
+    matchedSpots = matchedSpots.map((s) => {
+      const dist = s.lat && s.lng ? getDistanceKm(userCoords!.lat, userCoords!.lng, s.lat, s.lng) : 9999;
+      return { ...s, _dist: dist };
+    });
+    // 거리 반경 필터
+    if (state.spotDistanceRadius > 0) {
+      matchedSpots = matchedSpots.filter((s) => (s as any)._dist <= state.spotDistanceRadius);
+    }
+    // 거리순 정렬
+    matchedSpots.sort((a, b) => (a as any)._dist - (b as any)._dist);
+  }
+
+  const totalCount = matchedSpots.length;
+  const pageSize = 12;
+  const displaySpots = matchedSpots.slice(0, state.spotPage * pageSize);
+  const hasMore = displaySpots.length < totalCount;
+
+  area.innerHTML = `
+    <div class="discovery-header-card">
+      <!-- GPS 거리 레이더 바 (GPS 좌표 있을 때) -->
+      ${
+        userCoords
+          ? `
+        <div class="distance-radar-bar">
+          <div class="radar-label-row">
+            <span class="radar-title">📍 내 주변 탐색 반경</span>
+            <span class="radar-count">${totalCount}개 스팟 발견</span>
+          </div>
+          <div class="distance-pill-list">
+            ${DISTANCE_RADIUS_OPTIONS.map(
+              (opt) => `
+              <button class="distance-pill ${state.spotDistanceRadius === opt.value ? 'is-active' : ''}" data-radius="${opt.value}">
+                ${opt.label}
+              </button>
+            `,
+            ).join('')}
+          </div>
+        </div>
+      `
+          : `
+        <div class="discovery-title-row">
+          <div class="discovery-title-info">
+            <span class="discovery-main-title">📍 ${state.regions.length === 0 ? '전국' : state.regions.map((k) => REGIONS.find((r) => r.key === k)?.label).join(', ')} 감성 스팟</span>
+            <span class="discovery-sub-desc">엄선된 데이트 핫플레이스 ${totalCount}곳</span>
+          </div>
+        </div>
+      `
+      }
+
+      <!-- 카테고리 퀵 칩 -->
+      <div class="spot-category-scroll">
+        ${SPOT_EXPLORE_CATEGORIES.map(
+          (cat) => `
+          <button class="spot-category-chip ${state.spotCategory === cat.key ? 'is-active' : ''}" data-cat-key="${cat.key}">
+            <span class="chip-emoji">${cat.emoji}</span>
+            <span class="chip-label">${cat.label}</span>
+          </button>
+        `,
+        ).join('')}
+      </div>
+    </div>
+
+    <!-- 2열 스팟 인스타 갤러리 그리드 -->
+    <div class="spot-discovery-grid">
+      ${
+        displaySpots.length > 0
+          ? displaySpots.map((spot) => renderDiscoverySpotCard(spot)).join('')
+          : `
+        <div class="spot-empty-state">
+          <span class="empty-icon">🧭</span>
+          <p class="empty-title">선택한 조건에 맞는 스팟이 없어요</p>
+          <p class="empty-desc">거리 반경을 넓히거나 다른 카테고리를 선택해 보세요!</p>
+          <button class="btn-empty-reset" id="btn-reset-discovery-filters">필터 초기화</button>
+        </div>
+      `
+      }
+    </div>
+
+    ${
+      hasMore
+        ? `
+      <div class="discovery-more-row">
+        <button class="btn-discovery-more" id="btn-discovery-more">
+          스팟 더보기 (${displaySpots.length} / ${totalCount}) ▾
+        </button>
+      </div>
+    `
+        : ''
+    }
+  `;
+
+  bindDiscoveryEvents(area);
+}
+
+function renderDiscoverySpotCard(spot: Spot & { _dist?: number }): string {
+  const isHot = isSuperHotSpot(spot);
+  const slotKey = (spot.slot as SlotKey) || 'day';
+  const targetImgUrl = getSpotImageUrl(spot, slotKey);
+  const fallbackIcon = getSpotFallbackIcon(spot, slotKey);
+  const distText =
+    spot._dist !== undefined && spot._dist < 9000
+      ? spot._dist < 1.0
+        ? `📍 ${(spot._dist * 1000).toFixed(0)}m`
+        : `📍 ${spot._dist.toFixed(1)}km`
+      : `📍 ${spot.area || spot.region}`;
+  const sum = cleanSpotSummary(spot) || `${spot.name}에서 특별한 데이트를 즐겨보세요.`;
+
+  return `
+    <article class="discovery-card" data-spot-id="${spot.id}">
+      <div class="discovery-card-thumb">
+        <span class="discovery-badge-dist">${distText}</span>
+        ${isHot ? `<span class="discovery-badge-hot">🔥 핫플</span>` : ''}
+        <div class="thumb-fallback-box">${fallbackIcon}</div>
+        <img class="discovery-img" src="${escapeHtml(targetImgUrl)}" alt="${escapeHtml(spot.name)}" loading="lazy" referrerpolicy="no-referrer" onload="this.classList.add('is-loaded');" onerror="this.classList.add('is-hidden'); this.previousElementSibling?.classList.add('is-active');" />
+      </div>
+      <div class="discovery-card-body">
+        <div class="discovery-card-meta">
+          <span class="discovery-category">${escapeHtml(spot.category || '명소')}</span>
+          <span class="discovery-area">${escapeHtml(spot.area || '')}</span>
+        </div>
+        <h4 class="discovery-name">${escapeHtml(spot.name)}</h4>
+        <p class="discovery-quote">“${escapeHtml(sum)}”</p>
+        <div class="discovery-card-actions">
+          <button class="btn-build-anchor-course" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심으로 코스 짜기">
+            <span class="btn-sparkle">✨</span> 이 장소로 코스 짜기
+          </button>
+          <a class="btn-discovery-map" href="${naverMapUrl(spot)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(spot.name)} 지도 보기">
+            🗺️
+          </a>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+function bindDiscoveryEvents(area: HTMLElement): void {
+  // 거리 반경 칩 클릭
+  area.querySelectorAll<HTMLButtonElement>('.distance-pill').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.spotDistanceRadius = Number(btn.dataset.radius) || 3.0;
+      state.spotPage = 1;
+      renderSpotDiscovery();
+    });
+  });
+
+  // 카테고리 칩 클릭
+  area.querySelectorAll<HTMLButtonElement>('.spot-category-chip').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.spotCategory = btn.dataset.catKey || 'ALL';
+      state.spotPage = 1;
+      renderSpotDiscovery();
+    });
+  });
+
+  // 필터 초기화 버튼
+  area.querySelector('#btn-reset-discovery-filters')?.addEventListener('click', () => {
+    state.spotCategory = 'ALL';
+    state.spotDistanceRadius = 10.0;
+    state.spotPage = 1;
+    renderSpotDiscovery();
+  });
+
+  // 더보기 버튼
+  area.querySelector('#btn-discovery-more')?.addEventListener('click', () => {
+    state.spotPage += 1;
+    renderSpotDiscovery();
+  });
+
+  // ✨ 이 장소로 코스 짜기 클릭 이벤트 (Killer Feature)
+  area.querySelectorAll<HTMLButtonElement>('.btn-build-anchor-course').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const spotId = Number(btn.dataset.spotId);
+      const anchorSpot = spotById.get(spotId);
+      if (!anchorSpot) return;
+
+      // 앵커 기반 코스 생성
+      const steps = buildAnchorCourse(anchorSpot);
+      state.course = steps;
+      state.courseConditions = {
+        regions: [...state.regions],
+        subZones: [...state.subZones],
+        mood: state.mood,
+        searchQuery: anchorSpot.name,
+      };
+
+      // 맞춤 코스 탭으로 전환
+      state.mainMode = 'course';
+      updateModeView();
+
+      showToast(`✨ '${anchorSpot.name}' 중심 맞춤 코스를 완성했어요! 🚀`);
+      const resultsEl = document.getElementById('results-area');
+      if (resultsEl) {
+        resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
   });
 }
 
