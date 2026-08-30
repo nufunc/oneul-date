@@ -3817,7 +3817,42 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }): string {
 }
 
 function bindDiscoveryEvents(area: HTMLElement): void {
-  // 1. 스팟 전용 검색창 입력 (디바운스 실시간 검색)
+  // 1. 내 주변 스팟 탐색 버튼 클릭
+  const nearbyBannerBtn = area.querySelector<HTMLButtonElement>('#btn-nearby-spot-explore');
+  if (nearbyBannerBtn) {
+    nearbyBannerBtn.addEventListener('click', () => {
+      const labelSpan = nearbyBannerBtn.querySelector('.today-course-label');
+      if (labelSpan) labelSpan.textContent = '📍 내 위치 찾는 중...';
+
+      if (typeof navigator !== 'undefined' && 'geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            userCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+            state.spotDistanceRadius = 3.0;
+            state.spotSort = 'distance';
+            state.spotSearchQuery = '';
+            state.spotCategory = 'ALL';
+            state.spotPage = 1;
+            renderSpotDiscovery();
+            showToast('📍 내 주변 3km 이내 스팟을 불러왔어요!');
+          },
+          () => {
+            state.spotDistanceRadius = 5.0;
+            state.spotSort = 'popular';
+            state.spotPage = 1;
+            renderSpotDiscovery();
+            showToast('위치 권한이 없어 인기 스팟을 추천해 드려요');
+          },
+          { timeout: 3000, maximumAge: 600000 },
+        );
+      } else {
+        state.spotPage = 1;
+        renderSpotDiscovery();
+      }
+    });
+  }
+
+  // 2. 통합 검색창 입력 (실시간 검색)
   const searchInput = area.querySelector<HTMLInputElement>('#discovery-search-input');
   if (searchInput) {
     let searchDebounce: number;
@@ -3844,8 +3879,8 @@ function bindDiscoveryEvents(area: HTMLElement): void {
     renderSpotDiscovery();
   });
 
-  // 2. 빠른 추천 키워드 칩
-  area.querySelectorAll<HTMLButtonElement>('.discovery-quick-tag-chip').forEach((btn) => {
+  // 3. 15종 퀵 태그 칩 클릭
+  area.querySelectorAll<HTMLButtonElement>('.search-tag-chip').forEach((btn) => {
     btn.addEventListener('click', () => {
       const q = btn.dataset.query || '';
       state.spotSearchQuery = state.spotSearchQuery === q ? '' : q;
@@ -3854,22 +3889,55 @@ function bindDiscoveryEvents(area: HTMLElement): void {
     });
   });
 
-  // 3. 지역 선택 바텀시트 열기
-  area.querySelector('#btn-discovery-region')?.addEventListener('click', () => {
+  // 4. 지역 선택 셀렉터 트리거 (바텀시트 오픈)
+  area.querySelector('#btn-discovery-region-trigger')?.addEventListener('click', () => {
     state.regionSheetOpen = true;
     renderOverlay();
   });
 
-  // 4. 거리 반경 칩 클릭
-  area.querySelectorAll<HTMLButtonElement>('.radius-pill').forEach((btn) => {
+  // 5. 반경 셀렉터 트리거 (반경 순환 변경 1km -> 3km -> 5km -> 10km -> 1km)
+  area.querySelector('#btn-discovery-radius-trigger')?.addEventListener('click', () => {
+    if (!userCoords) {
+      // GPS 미획득 시 즉시 위치 취득 시도
+      if (typeof navigator !== 'undefined' && 'geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            userCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+            state.spotDistanceRadius = 3.0;
+            state.spotSort = 'distance';
+            state.spotPage = 1;
+            renderSpotDiscovery();
+            showToast('📍 내 위치 기준 반경 탐색을 시작합니다');
+          },
+          () => {
+            showToast('브라우저 위치 권한을 허용해 주세요');
+          },
+          { timeout: 3000 },
+        );
+      }
+      return;
+    }
+
+    // 반경 순환
+    const radii = [0.5, 1.0, 3.0, 5.0, 10.0];
+    const currentIndex = radii.indexOf(state.spotDistanceRadius);
+    const nextRadius = radii[(currentIndex + 1) % radii.length];
+    state.spotDistanceRadius = nextRadius;
+    state.spotPage = 1;
+    renderSpotDiscovery();
+    showToast(`📍 탐색 반경을 ${nextRadius >= 1.0 ? `${nextRadius}km` : `${nextRadius * 1000}m`}로 변경했어요`);
+  });
+
+  // 6. 카테고리 칩 클릭
+  area.querySelectorAll<HTMLButtonElement>('.spot-category-chip').forEach((btn) => {
     btn.addEventListener('click', () => {
-      state.spotDistanceRadius = Number(btn.dataset.radius) || 3.0;
+      state.spotCategory = btn.dataset.catKey || 'ALL';
       state.spotPage = 1;
       renderSpotDiscovery();
     });
   });
 
-  // 5. 정렬 셀렉트 박스
+  // 7. 정렬 셀렉트 박스
   const sortSelect = area.querySelector<HTMLSelectElement>('#discovery-sort-select');
   if (sortSelect) {
     sortSelect.addEventListener('change', () => {
@@ -3879,20 +3947,13 @@ function bindDiscoveryEvents(area: HTMLElement): void {
     });
   }
 
-  // 6. 카테고리 칩 클릭
-  area.querySelectorAll<HTMLButtonElement>('.discovery-cat-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      state.spotCategory = btn.dataset.catKey || 'ALL';
-      state.spotPage = 1;
-      renderSpotDiscovery();
-    });
-  });
-
-  // 7. 필터 초기화 버튼
+  // 8. 필터 초기화 버튼
   area.querySelector('#btn-reset-discovery-filters')?.addEventListener('click', () => {
     state.spotSearchQuery = '';
     state.spotCategory = 'ALL';
     state.spotDistanceRadius = 10.0;
+    state.regions = [];
+    state.subZones = [];
     state.spotSort = 'distance';
     state.spotPage = 1;
     renderSpotDiscovery();
@@ -3908,13 +3969,13 @@ function bindDiscoveryEvents(area: HTMLElement): void {
     renderSpotDiscovery();
   });
 
-  // 8. 더보기 버튼
+  // 9. 더보기 버튼
   area.querySelector('#btn-discovery-more')?.addEventListener('click', () => {
     state.spotPage += 1;
     renderSpotDiscovery();
   });
 
-  // 9. ✨ 이 장소로 코스 짜기 클릭 이벤트 (Killer Feature)
+  // 10. ✨ 이 장소로 코스 짜기 클릭 이벤트 (Killer Feature)
   area.querySelectorAll<HTMLButtonElement>('.btn-build-anchor-course').forEach((btn) => {
     btn.addEventListener('click', () => {
       const spotId = Number(btn.dataset.spotId);
