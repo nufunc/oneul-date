@@ -1785,9 +1785,9 @@ function getInitialThemeMode(): ThemeMode {
   return 'light';
 }
 
-/** 기본 시간대 슬롯 반환 (낮 | 저녁 | 밤 기본 선택) */
+/** 기본 시간대 슬롯 반환 (낮 | 저녁 | 밤 | 숙박 항상 전체 기본 선택) */
 function getDefaultSlots(): Record<SlotKey, boolean> {
-  return { day: true, evening: true, night: true, stay: false };
+  return { day: true, evening: true, night: true, stay: true };
 }
 
 /** 현시간 기준 실시간 맞춤 슬롯 계산 ('지금 가기 좋은 맞춤 코스' 전용) */
