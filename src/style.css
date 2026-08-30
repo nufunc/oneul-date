@@ -3470,7 +3470,14 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   cursor: pointer;
   outline: none;
   box-shadow: var(--shadow-sm);
+  text-align: right;
+  text-align-last: right;
   transition: all var(--transition-fast);
+}
+
+.discovery-sort-select option {
+  text-align: right;
+  direction: ltr;
 }
 
 .discovery-sort-select:hover {
