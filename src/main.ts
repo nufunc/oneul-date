@@ -725,8 +725,11 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
     '비오는': ['실내', '스파', '온천', '찜질', '사우나', '카페', '전시', '미술관', '박물관', '아쿠아리움', '공방', '영화', '보드게임', '방탈출', '식물원'],
     '실내': ['실내', '스파', '전시', '미술관', '박물관', '아쿠아리움', '공방', '도자기', '향수', '식물원', '영화관', '보드게임'],
     '성수핫플': ['성수', '성수동', '서울숲', '뚝섬', '연무장길', '성동구'],
-    '디저트카페': ['카페', '디저트', '베이커리', '빵집', '케이크', '커피', '브런치', '구움과자', '소금빵', '베이글', '타르트', '도넛', '마카롱', '스콘', '크루아상', '빙수', '찻집', '다실'],
-    '이색체험': ['이색', '체험', '보드게임', '방탈출', '아쿠아리움', 'vr', '사격', '카트', '목장', '공방', '도예', '향수', '드로잉', '동물원', '미디어아트', '클라이밍', '스케이트', '짚라인', '양궁', '낚시', '서핑', '글램핑'],
+    '디저트카페': ['디저트', '베이커리', '빵집', '케이크', '커피', '브런치', '구움과자', '소금빵', '베이글', '타르트', '도넛', '마카롱', '스콘', '크루아상', '빙수', '찻집', '다실'],
+    '이색체험': ['이색', '체험', '보드게임', '보드카페', '만화카페', '방탈출', '아쿠아리움', 'vr', '사격', '카트', '목장', '공방', '도예', '향수', '드로잉', '동물원', '미디어아트', '클라이밍', '스케이트', '짚라인', '양궁', '낚시', '서핑', '글램핑'],
+    '보드카페': ['보드게임', '보드카페', '만화카페', '보드', '게임', '룸카페'],
+    '보드게임': ['보드게임', '보드카페', '만화카페', '보드', '게임', '룸카페'],
+    '만화카페': ['만화카페', '보드카페', '보드게임', '만화', '룸카페'],
     '기념일': ['럭셔리', '파인다이닝', '오마카세', '와인바', '야경', '호텔', '뷰', '스테이크'],
     '생일': ['파인다이닝', '오마카세', '레터링', '케이크', '와인바', '럭셔리', '호텔'],
     '소개팅': ['파스타', '이탈리안', '와인바', '조용한', '카페', '디저트', '스테이크'],
@@ -751,6 +754,9 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
   const cleanTargetForMatching = (kw: string, text: string): string => {
     if (kw === '스파') {
       return text.replace(/스파게티|인스파이어|에스파스|예스파크/g, '');
+    }
+    if (kw === '디저트카페' || kw === '카페') {
+      return text.replace(/만화카페|보드카페|보드게임|룸카페|키즈카페|애견카페|고양이카페|드로잉카페/g, '');
     }
     return text;
   };
@@ -794,56 +800,83 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
 
 /**
  * 검색 매칭 시 슬롯 라벨 옆에 노출할 감성 스마트 뱃지 정보 반환
+ * - 사용자가 직접 입력한 검색어를 온전히 보존하면서
+ * - 복합어 우선순위 계층(체험/놀거리 -> 공방 -> 반려동물 -> 음식 -> 주류 -> 카페 등)에 맞춰 찰떡 이모지 할당
  */
 function getSearchMatchBadge(query: string): { icon: string; label: string } {
-  const cleanQ = query.replace(/[#·,/\\]/g, ' ').trim().toLowerCase();
+  const rawQ = query.replace(/[#·,/\\]/g, ' ').trim();
+  const cleanQ = rawQ.toLowerCase();
 
-  if (cleanQ.includes('오마카세') || cleanQ.includes('스시') || cleanQ.includes('초밥')) {
-    return { icon: '🍣', label: '오마카세' };
+  // 1. 특수 복합어 / 체험 / 놀거리 (보드카페, 만화카페, 방탈출, VR 등)
+  if (['보드카페', '보드게임', '만화카페', '방탈출', '룸카페', 'vr', '사격', '카트', '목장', '이색체험', '이색'].some((k) => cleanQ.includes(k))) {
+    return { icon: '🎯', label: rawQ };
   }
-  if (cleanQ.includes('성수')) {
-    return { icon: '✨', label: '성수 핫플' };
+  // 2. 공방 / 아트 / 원데이 클래스 (드로잉카페, 도자기카페, 향수공방 등)
+  if (['드로잉카페', '도자기카페', '공방카페', '공방', '원데이', '도예', '향수', '가죽', '터프팅', '유리', '반지', '목공', '베이킹'].some((k) => cleanQ.includes(k))) {
+    return { icon: '🎨', label: rawQ };
   }
-  if (cleanQ.includes('비') || cleanQ.includes('실내')) {
-    return { icon: '🌧️', label: '비 오는 날' };
+  // 3. 반려동물 / 동물 체험
+  if (['애견카페', '고양이카페', '동물카페', '펫카페', '반려동물', '애견', '고양이', '펫'].some((k) => cleanQ.includes(k))) {
+    return { icon: '🐾', label: rawQ };
   }
-  if (cleanQ.includes('루프탑') || cleanQ.includes('테라스')) {
-    return { icon: '🏙️', label: '루프탑' };
+  // 4. 음식 / 미식 (스파게티, 파스타, 스테이크, 삼겹살, 맛집, 피자 등)
+  if (['스파게티', '파스타', '스테이크', '고기', '삼겹살', '맛집', '미식', '노포', '식당', '음식점', '피자', '버거', '초밥', '횟집', '갈비', '다이닝', '한식', '양식', '일식', '중식'].some((k) => cleanQ.includes(k))) {
+    return { icon: '🍴', label: rawQ };
   }
-  if (cleanQ.includes('야경') || cleanQ.includes('노을') || cleanQ.includes('일몰')) {
-    return { icon: '🌙', label: '야경 명소' };
+  // 5. 오마카세 / 스시 코스
+  if (['오마카세', '스시', '가이세키', '맡김차림', '코스요리'].some((k) => cleanQ.includes(k))) {
+    return { icon: '🍣', label: rawQ };
   }
-  if (cleanQ.includes('디저트') || cleanQ.includes('카페') || cleanQ.includes('베이커리') || cleanQ.includes('빵')) {
-    return { icon: '🍰', label: '디저트 카페' };
+  // 6. 와인 / 비스트로
+  if (['와인', 'wine', '와인바', '비스트로', '샤퀴테리'].some((k) => cleanQ.includes(k))) {
+    return { icon: '🍷', label: rawQ };
   }
-  if (cleanQ.includes('와인') || cleanQ.includes('wine')) {
-    return { icon: '🍷', label: '와인 다이닝' };
+  // 7. 위스키 / LP바
+  if (['위스키', 'whisky', '몰트', '하이볼', 'lp바', '스피크이지'].some((k) => cleanQ.includes(k))) {
+    return { icon: '🥃', label: rawQ };
   }
-  if (cleanQ.includes('위스키') || cleanQ.includes('whisky')) {
-    return { icon: '🥃', label: '위스키' };
+  // 8. 칵테일 / 라운지
+  if (['칵테일', 'cocktail', '라운지', '믹솔로지'].some((k) => cleanQ.includes(k))) {
+    return { icon: '🍸', label: rawQ };
   }
-  if (cleanQ.includes('칵테일') || cleanQ.includes('cocktail')) {
-    return { icon: '🍸', label: '칵테일' };
+  // 9. 순수 디저트 / 베이커리 / 카페
+  if (['디저트', '베이커리', '빵', '케이크', '소금빵', '베이글', '타르트', '도넛', '마카롱', '스콘', '크루아상', '빙수', '찻집', '다실', '카페', '커피', '브런치'].some((k) => cleanQ.includes(k))) {
+    return { icon: '🍰', label: rawQ };
   }
-  if (cleanQ.includes('공방') || cleanQ.includes('도자기') || cleanQ.includes('원데이')) {
-    return { icon: '🎨', label: '감성 공방' };
+  // 10. 비 / 실내 (오탐 가드)
+  if (['비오는', '비 오는', '실내데이트', '실내', '비'].some((k) => cleanQ.includes(k))) {
+    if (!['비비큐', '비스트로', '비빔밥', '비엔나'].some((k) => cleanQ.includes(k))) {
+      return { icon: '🌧️', label: rawQ };
+    }
   }
-  if (cleanQ.includes('체험') || cleanQ.includes('이색')) {
-    return { icon: '🎯', label: '이색 체험' };
+  // 11. 스파 / 온천 / 힐링 (오탐 가드)
+  if (['스파', '온천', '찜질', '사우나', '테르메덴', '아쿠아필드', '마사지', '족욕', '에스테틱', '피부관리', '헤드스파'].some((k) => cleanQ.includes(k))) {
+    if (!['스파게티', '인스파이어', '에스파스'].some((k) => cleanQ.includes(k))) {
+      return { icon: '♨️', label: rawQ };
+    }
   }
-  if (cleanQ.includes('액티비티') || cleanQ.includes('서핑') || cleanQ.includes('요트')) {
-    return { icon: '🏄', label: '액티비티' };
+  // 12. 루프탑 / 전망
+  if (['루프탑', '테라스', '스카이', '전망', '옥상', '뷰', '오션뷰', '리버뷰'].some((k) => cleanQ.includes(k))) {
+    return { icon: '🏙️', label: rawQ };
   }
-  if (cleanQ.includes('스파') || cleanQ.includes('온천') || cleanQ.includes('찜질') || cleanQ.includes('사우나')) {
-    return { icon: '♨️', label: '스파 & 힐링' };
+  // 13. 야경 / 노을
+  if (['야경', '노을', '일몰', '선셋', '달빛'].some((k) => cleanQ.includes(k))) {
+    return { icon: '🌙', label: rawQ };
   }
-  if (cleanQ.includes('맛집') || cleanQ.includes('미식') || cleanQ.includes('고기') || cleanQ.includes('파스타')) {
-    return { icon: '🍴', label: '미식 맛집' };
+  // 14. 액티비티 / 스포츠
+  if (['액티비티', '서핑', '요트', '루지', '클라이밍', '짚라인', '케이블카', '수상레저', '패러글라이딩', '트레킹'].some((k) => cleanQ.includes(k))) {
+    return { icon: '🏄', label: rawQ };
   }
-  if (cleanQ.includes('드라이브') || cleanQ.includes('외곽') || cleanQ.includes('전망대')) {
-    return { icon: '🚗', label: '드라이브' };
+  // 15. 드라이브
+  if (['드라이브', '해안도로', '외곽', '전망대'].some((k) => cleanQ.includes(k))) {
+    return { icon: '🚗', label: rawQ };
   }
-  return { icon: '✨', label: cleanQ };
+  // 16. 성수 및 로컬 핫플
+  if (['성수', '서울숲', '뚝섬', '연무장길'].some((k) => cleanQ.includes(k))) {
+    return { icon: '✨', label: rawQ };
+  }
+
+  return { icon: '✨', label: rawQ };
 }
 
 /**
