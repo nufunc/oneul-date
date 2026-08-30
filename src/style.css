@@ -2524,12 +2524,23 @@ button {
   background: var(--color-surface-sub);
 }
 
+.zone-check-item.zone-check-all {
+  grid-column: 1 / -1;
+  font-weight: 700;
+  border-style: dashed;
+  background: var(--color-surface-sub);
+}
+
 .zone-check-item.is-checked,
 .zone-check-item:has(input:checked) {
   border-color: var(--color-accent-text);
   background: var(--color-accent-soft);
   color: var(--color-accent-text);
   font-weight: 600;
+}
+
+.zone-check-item.zone-check-all.is-checked {
+  border-style: solid;
 }
 
 .zone-checkbox {

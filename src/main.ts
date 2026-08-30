@@ -2210,7 +2210,7 @@ function renderConditions(): void {
           type="search" 
           class="search-input" 
           id="search-input" 
-          placeholder="가고 싶은 곳이나 키워드 검색 (예: 삼겹살, 와인, 호텔, 스파)" 
+          placeholder="어디로 갈까요? 지역·핫플·메뉴 검색 (예: 성수, 양평, 오션뷰, 와인)" 
           value="${escapeHtml(state.searchQuery)}"
           autocomplete="off"
         />
@@ -3546,12 +3546,26 @@ function renderOverlay(): void {
           <!-- 우측 세부 핫플존 리스트 -->
           <div class="location-subzones">
             <div class="subzones-header">
-              <span class="subzones-title">${REGIONS.find((r) => r.key === activeReg)?.label || '서울'} 인기 데이트존</span>
+              <span class="subzones-title">${REGIONS.find((r) => r.key === activeReg)?.label || '서울'} 핫플레이스</span>
               <button class="btn-toggle-all-zones" id="btn-toggle-all-zones">
                 ${subZonesInTab.length > 0 && subZonesInTab.every((z) => state.subZones.includes(z.key)) ? '지역 전체 해제' : '지역 전체 선택'}
               </button>
             </div>
             <div class="subzones-grid">
+              <!-- 최상단: 해당 권역 전체(모든 시·군/구) 일괄 선택 칩 -->
+              ${(() => {
+                const areAllChecked =
+                  subZonesInTab.length > 0 && subZonesInTab.every((z) => state.subZones.includes(z.key));
+                const currentRegLabel = REGIONS.find((r) => r.key === activeReg)?.label || '서울';
+                const unitName = activeReg === 'SEOUL' ? '모든 자치구' : '모든 시·군';
+                return `
+                  <label class="zone-check-item zone-check-all ${areAllChecked ? 'is-checked' : ''}" data-zone-all="${activeReg}">
+                    <input type="checkbox" class="zone-checkbox" ${areAllChecked ? 'checked' : ''} />
+                    <span class="zone-label">🗺️ ${escapeHtml(currentRegLabel)} 전체 (${unitName})</span>
+                  </label>
+                `;
+              })()}
+
               ${subZonesInTab
                 .map((z) => {
                   const isChecked = state.subZones.includes(z.key);
@@ -3585,8 +3599,8 @@ function renderOverlay(): void {
       });
     });
 
-    // 지역 전체 선택/해제 토글 (모든 하위 세부존 일괄 체크/해제)
-    root.querySelector('#btn-toggle-all-zones')?.addEventListener('click', () => {
+    // 지역 전체 일괄 토글 공통 핸들러
+    const toggleAllZonesInActiveRegion = () => {
       const areAllChecked =
         subZonesInTab.length > 0 && subZonesInTab.every((z) => state.subZones.includes(z.key));
 
@@ -3606,6 +3620,13 @@ function renderOverlay(): void {
 
       state.subZones = Array.from(currentSubZones);
       renderOverlay();
+    };
+
+    // 지역 전체 선택/해제 상단 버튼 및 전체 선택 칩 이벤트 연동
+    root.querySelector('#btn-toggle-all-zones')?.addEventListener('click', toggleAllZonesInActiveRegion);
+    root.querySelector('.zone-check-all')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      toggleAllZonesInActiveRegion();
     });
 
     // 세부존 체크박스 토글 (스크롤 점프 방지: 국소 DOM 업데이트)
