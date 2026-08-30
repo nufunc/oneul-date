@@ -23,14 +23,22 @@ def calculate_hot_score(youtube_data: dict | None, kakaomap_data: dict | None, i
         total_views += views
         is_shorts = youtube_data.get("is_shorts", False)
         
-        # 조회수 구간별 점수
+        # 조회수 구간별 점수 (검증 채널/브이로그 우대)
+        channel = youtube_data.get("channel", "") or ""
+        title = youtube_data.get("title", "") or ""
+        is_creator_vlog = any(kw in f"{channel} {title}".lower() for kw in [
+            "vlog", "브이로그", "데이트", "여행", "맛집", "코스", "핫플", "더들리", "성시경", "또간집", "마리아주", "비밀이야", "수코", "딤디", "슛뚜", "김pd"
+        ])
+        
         if views >= 100000:
             yt_score = 40.0
         elif views >= 50000:
             yt_score = 35.0
         elif views >= 10000:
             yt_score = 28.0
-        elif views >= 3000:
+        elif views >= 3000 or (is_creator_vlog and views >= 1000):
+            yt_score = 25.0
+        elif is_creator_vlog or views >= 1000:
             yt_score = 20.0
         else:
             yt_score = 15.0

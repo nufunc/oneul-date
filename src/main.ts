@@ -1285,32 +1285,60 @@ function naverMapUrl(spot: Spot): string {
 const DISALLOWED_YOUTUBE_KEYWORDS = [
   'ytn', 'kbs', 'sbs', 'mbc', 'jtbc', '연합뉴스', '뉴스', 'news',
   'tv조선', '채널a', 'mbn', 'yonhap', '사건', '사고', '체포', '경찰',
-  '화재', '논란', '날씨', '속보', '단독', '현장출동', '특보', '취재', '고발'
+  '화재', '논란', '날씨', '속보', '단독', '현장출동', '특보', '취재', '고발',
+  '블랙박스', '한문철', '사망', '폭행', '살인', '음주운전', '재판', '구속'
 ];
 
-/** 검증된 고품질 최신 유튜브 데이트 핫클립/쇼츠인지 엄격 판정 (1만 뷰 이상 & 2년 이내 최신 & 뉴스/사건사고 배제) */
-function isValidYoutubeHotclip(yt?: { url?: string; title?: string; views?: number; likes?: number; published_at?: string } | null): boolean {
+/** 검증된 미식/여행/데이트 전문 크리에이터 및 브이로그 큐레이션 채널 키워드 */
+const VERIFIED_YOUTUBE_CREATORS = [
+  '더들리', '성시경', '또간집', '마리아주', '비밀이야', '김사원세끼', '맛상무', '정육왕', '오사사',
+  '빅페이스', '윤호찌', '먹보스', '맛객리우', '츄릅켠', '수코', '딤디', '혬복', '슛뚜', '여락이들',
+  '제이림', '나강', '트래블러조', '밍키', '자몽부부', '소소한날', '가든스테이', '또떠남', '체크인',
+  '여행에미치다', '데이트립', '제주에딧', '부산언니', '동그라미', 'vlog', '브이로그', '데이트', '여행',
+  '김pd', '산타윤', '게츠와', '유리소리', '봄비', '핫플', '카페', '맛집', '코스'
+];
+
+/** 검증된 고품질 최신 유튜브 데이트 핫클립/브이로그인지 엄격 판정 (검증 채널/브이로그 포용 & 뉴스/사건사고 철저 배제) */
+function isValidYoutubeHotclip(yt?: { url?: string; title?: string; views?: number; likes?: number; published_at?: string; channel?: string } | null): boolean {
   if (!yt || !yt.url) return false;
-  
-  // 1. 1만 뷰 이상 또는 500 좋아요 이상 검증
-  const views = Number(yt.views) || 0;
-  const likes = Number(yt.likes) || 0;
-  if (views < 10000 && likes < 500) return false;
 
-  const combined = `${yt.title || ''} ${yt.url} ${yt.published_at || ''}`.toLowerCase();
+  const title = (yt.title || '').toLowerCase();
+  const channel = (yt.channel || '').toLowerCase();
+  const published = (yt.published_at || '').toLowerCase();
+  const combined = `${title} ${channel} ${yt.url} ${published}`;
 
-  // 2. 뉴스/사건사고 영상 배제
+  // 1. 뉴스/사건사고/블랙박스 영상 철저 배제
   if (DISALLOWED_YOUTUBE_KEYWORDS.some((kw) => combined.includes(kw.toLowerCase()))) {
     return false;
   }
 
-  // 3. 2년 이상 지난 오래된 영상 배제 (2023년 이전 과거 영상 필터링)
+  // 2. 2년 이상 지난 오래된 영상 배제 (2023년 이전 과거 영상 필터링)
   const stalePatterns = ['2018', '2019', '2020', '2021', '2022', '2023', '3년 전', '4년 전', '5년 전', '6년 전', '7년 전', '8년 전', '9년 전', '10년 전'];
   if (stalePatterns.some((sp) => combined.includes(sp))) {
     return false;
   }
 
-  return true;
+  // 3. 조회수 및 채널 품질 검증
+  const views = Number(yt.views) || 0;
+  const likes = Number(yt.likes) || 0;
+
+  // 3-1. 대형 바이럴 영상 (1만 뷰 이상 또는 500 좋아요 이상)은 즉시 통과
+  if (views >= 10000 || likes >= 500) {
+    return true;
+  }
+
+  // 3-2. 검증된 크리에이터/채널이거나 여행·데이트 브이로그인 경우 (1,000 뷰 이상 또는 100 좋아요 이상 또는 스팟 직결 수집)
+  const isVerifiedCreator = VERIFIED_YOUTUBE_CREATORS.some((vc) => combined.includes(vc.toLowerCase()));
+  if (isVerifiedCreator && (views >= 500 || likes >= 50 || yt.url.includes('youtube.com'))) {
+    return true;
+  }
+
+  // 3-3. 기본 뷰 1,000회 이상
+  if (views >= 1000) {
+    return true;
+  }
+
+  return false;
 }
 
 /** 복사 텍스트용 스팟 한 줄 소개 정제 (영문 날것 태그 방지 & 한국어 보강) */

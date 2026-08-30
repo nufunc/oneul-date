@@ -177,8 +177,12 @@ def search_youtube_hotclip(spot_name: str, region_or_area: str = "") -> dict | N
                         view_str = "".join(r.get("text", "") for r in video["viewCountText"]["runs"])
                 
                 views = parse_view_count(view_str)
-                # 신뢰할 수 있는 1만 뷰 이상만 채택
-                if views < 10000:
+                # 검증 채널 또는 여행/데이트 브이로그는 1,000뷰+, 일반 영상은 3,000뷰+ 채택
+                is_vlog = any(kw in f"{title} {channel_name}".lower() for kw in [
+                    "vlog", "브이로그", "데이트", "여행", "맛집", "카페", "코스", "핫플", "더들리", "성시경", "또간집", "마리아주", "비밀이야", "수코", "딤디", "슛뚜"
+                ])
+                min_views_needed = 1000 if is_vlog else 3000
+                if views < min_views_needed:
                     continue
 
                 is_shorts = "reelItemRenderer" in video or "shorts" in title.lower()
