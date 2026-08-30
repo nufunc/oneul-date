@@ -88,7 +88,7 @@ const SLOT_META: Record<SlotKey, { emoji: string; label: string }> = {
 
 // 지역 필터: key → 매칭되는 데이터 region 값 목록 (matchesRegion 주석 참고)
 const REGIONS: { key: string; label: string; match: string[] }[] = [
-  { key: 'ALL', label: '전체', match: [] },
+  { key: 'ALL', label: '전국', match: [] },
   { key: 'SEOUL', label: '서울', match: ['서울'] },
   { key: 'GYEONGGI', label: '경기·인천', match: ['경기', '인천'] },
   { key: 'GANGWON', label: '강원', match: ['강원'] },
@@ -3550,44 +3550,50 @@ function renderOverlay(): void {
             ${
               isAllTab
                 ? `
-              <div class="all-regions-view">
-                <div class="all-regions-card">
-                  <div class="all-regions-badge">
-                    <span class="all-regions-badge-icon">🇰🇷</span>
-                    <span class="all-regions-badge-text">전국 어디서나</span>
+              <div class="subzones-header">
+                <span class="subzones-title">전국 어디서나</span>
+                <button class="btn-toggle-all-zones" id="btn-select-all-korea">
+                  ${state.regions.length === 0 ? '전국 선택됨' : '전국 모드 선택'}
+                </button>
+              </div>
+              <div class="subzones-grid">
+                <label class="zone-check-item zone-check-all ${state.regions.length === 0 ? 'is-checked' : ''}" id="btn-select-all-korea-chip" style="cursor: pointer;">
+                  <input type="checkbox" class="zone-checkbox" ${state.regions.length === 0 ? 'checked' : ''} />
+                  <span class="zone-label">🗺️ 전국 전체</span>
+                </label>
+              </div>
+              <div class="all-regions-card" style="margin-top: var(--space-3);">
+                <div class="all-regions-badge">
+                  <span class="all-regions-badge-icon">🇰🇷</span>
+                  <span class="all-regions-badge-text">전국 어디서나</span>
+                </div>
+                <h3 class="all-regions-title">대한민국 전역 데이트 탐색</h3>
+                <p class="all-regions-desc">
+                  특정 지역에 국한되지 않고, 전국 8대 권역의 감성 핫플레이스와 숨은 명소를 폭넓게 연결해 드려요.
+                </p>
+                <div class="all-regions-features">
+                  <div class="all-feature-item">
+                    <span class="feature-icon">✨</span>
+                    <div class="feature-body">
+                      <span class="feature-title">전국 핫플레이스 엄선</span>
+                      <span class="feature-desc">인기 명소부터 로컬 감성 스팟까지</span>
+                    </div>
                   </div>
-                  <h3 class="all-regions-title">대한민국 전역 데이트 탐색</h3>
-                  <p class="all-regions-desc">
-                    특정 지역에 국한되지 않고, 전국 8대 권역의 감성 핫플레이스와 숨은 명소를 폭넓게 연결해 드려요.
-                  </p>
-                  <div class="all-regions-features">
-                    <div class="all-feature-item">
-                      <span class="feature-icon">✨</span>
-                      <div class="feature-body">
-                        <span class="feature-title">전국 핫플레이스 엄선</span>
-                        <span class="feature-desc">인기 명소부터 로컬 감성 스팟까지</span>
-                      </div>
+                  <div class="all-feature-item">
+                    <span class="feature-icon">🚗</span>
+                    <div class="feature-body">
+                      <span class="feature-title">여행 & 드라이브 추천</span>
+                      <span class="feature-desc">주말 근교 및 색다른 데이트 코스</span>
                     </div>
-                    <div class="all-feature-item">
-                      <span class="feature-icon">🚗</span>
-                      <div class="feature-body">
-                        <span class="feature-title">여행 & 드라이브 추천</span>
-                        <span class="feature-desc">주말 근교 및 색다른 데이트 코스</span>
-                      </div>
-                    </div>
-                    <div class="all-feature-item">
-                      <span class="feature-icon">🧭</span>
-                      <div class="feature-body">
-                        <span class="feature-title">자유로운 코스 연결</span>
-                        <span class="feature-desc">지역 제한 없는 폭넓은 큐레이션</span>
-                      </div>
+                  </div>
+                  <div class="all-feature-item">
+                    <span class="feature-icon">🧭</span>
+                    <div class="feature-body">
+                      <span class="feature-title">자유로운 코스 연결</span>
+                      <span class="feature-desc">지역 제한 없는 폭넓은 큐레이션</span>
                     </div>
                   </div>
                 </div>
-                <button class="btn-select-all-korea" id="btn-select-all-korea">
-                  <span class="btn-korea-icon">🗺️</span>
-                  <span class="btn-korea-text">전국 모드로 선택하기</span>
-                </button>
               </div>
             `
                 : `
@@ -3646,11 +3652,16 @@ function renderOverlay(): void {
       });
     });
 
-    // 전국 모드 선택 버튼
-    root.querySelector('#btn-select-all-korea')?.addEventListener('click', () => {
+    // 전국 모드 선택 버튼 & 칩
+    const selectAllKorea = () => {
       state.regions = [];
       state.subZones = [];
-      closeOverlay();
+      renderOverlay();
+    };
+    root.querySelector('#btn-select-all-korea')?.addEventListener('click', selectAllKorea);
+    root.querySelector('#btn-select-all-korea-chip')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      selectAllKorea();
     });
 
     // 지역 전체 일괄 토글 공통 핸들러
