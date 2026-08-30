@@ -3754,11 +3754,30 @@ function renderSpotDiscovery(): void {
       </div>
 
       <div class="status-right">
-        <!-- 2개, 3개(기본값), 5개행 밀도 전환 스위처 -->
+        <!-- COS 스타일 2열 / 3열 (기본값) / 5열 그리드 아이콘 스위처 -->
         <div class="grid-density-switcher" role="group" aria-label="스팟 목록 보기 개수 설정">
-          <button class="btn-density ${state.spotGridCols === 2 ? 'is-active' : ''}" data-cols="2" aria-label="2개씩 보기" title="2개씩 보기">2개</button>
-          <button class="btn-density ${state.spotGridCols === 3 ? 'is-active' : ''}" data-cols="3" aria-label="3개씩 보기 (기본값)" title="3개씩 보기 (기본)">3개</button>
-          <button class="btn-density ${state.spotGridCols === 5 ? 'is-active' : ''}" data-cols="5" aria-label="5개씩 보기" title="5개씩 보기">5개</button>
+          <button class="btn-density ${state.spotGridCols === 2 ? 'is-active' : ''}" data-cols="2" aria-label="2열로 보기" title="2열로 보기">
+            <svg class="density-icon" width="16" height="14" viewBox="0 0 16 14" fill="currentColor" aria-hidden="true">
+              <rect x="1" y="1" width="6" height="12" rx="0.75" />
+              <rect x="9" y="1" width="6" height="12" rx="0.75" />
+            </svg>
+          </button>
+          <button class="btn-density ${state.spotGridCols === 3 ? 'is-active' : ''}" data-cols="3" aria-label="3열로 보기 (기본값)" title="3열로 보기 (기본)">
+            <svg class="density-icon" width="16" height="14" viewBox="0 0 16 14" fill="currentColor" aria-hidden="true">
+              <rect x="0.5" y="1" width="4" height="12" rx="0.75" />
+              <rect x="6" y="1" width="4" height="12" rx="0.75" />
+              <rect x="11.5" y="1" width="4" height="12" rx="0.75" />
+            </svg>
+          </button>
+          <button class="btn-density ${state.spotGridCols === 5 ? 'is-active' : ''}" data-cols="5" aria-label="5열로 보기" title="5열로 보기">
+            <svg class="density-icon" width="18" height="14" viewBox="0 0 18 14" fill="currentColor" aria-hidden="true">
+              <rect x="0.5" y="1" width="2.4" height="12" rx="0.5" />
+              <rect x="4.15" y="1" width="2.4" height="12" rx="0.5" />
+              <rect x="7.8" y="1" width="2.4" height="12" rx="0.5" />
+              <rect x="11.45" y="1" width="2.4" height="12" rx="0.5" />
+              <rect x="15.1" y="1" width="2.4" height="12" rx="0.5" />
+            </svg>
+          </button>
         </div>
 
         <div class="discovery-sort-group">
