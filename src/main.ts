@@ -2436,9 +2436,9 @@ function renderConditions(): void {
         </div>
       </div>
 
-      <!-- 2. 단일 큐레이션 테마 칩 바 (스팟 탐색과 100% 동일) -->
+      <!-- 2. 실시간 핫랭킹 큐레이션 테마 칩 바 (낮/밤 하루 2회 자동 최적화) -->
       <div class="spot-category-scroll" style="margin-bottom: var(--space-4);">
-        ${SPOT_EXPLORE_CATEGORIES.map((cat) => `
+        ${getCuratedThemeChips().map((cat) => `
           <button class="spot-category-chip ${state.spotCategory === cat.key ? 'is-active' : ''}" data-cat-key="${cat.key}">
             <span class="chip-emoji">${cat.emoji}</span>
             <span class="chip-label">${cat.label}</span>
@@ -2976,6 +2976,63 @@ function getSpotPopularityScore(spot: Spot): number {
   if (spot.verified) score += 10;
 
   return score;
+}
+
+/**
+ * 실시간 트렌드 및 시간대(낮/밤 하루 2회) 기반 핫한 분위기 테마 칩 자동 정렬
+ */
+export function getCuratedThemeChips(): SpotCategoryItem[] {
+  const allItem = SPOT_EXPLORE_CATEGORIES.find((c) => c.key === 'ALL') || { key: 'ALL', label: '전체', emoji: '✨' };
+  const themeItems = SPOT_EXPLORE_CATEGORIES.filter((c) => c.key !== 'ALL');
+
+  const now = new Date();
+  const hour = now.getHours();
+  // 하루 2회 시간대 버킷: 낮 타임(05:00~16:59), 저녁/밤 타임(17:00~04:59)
+  const isEvening = hour >= 17 || hour < 5;
+
+  const scoredThemes = themeItems.map((item) => {
+    let score = 50;
+
+    // 1. 해당 테마 스팟들의 실시간 인기도 점수 집계
+    if (item.keywords && spots && spots.length > 0) {
+      const matched = spots.filter((s) => {
+        const text = [s.name, s.category, s.summary, ...(s.signature_items || []), ...(s.mood_tags || [])].join(' ').toLowerCase();
+        return item.keywords!.some((kw) => text.includes(kw.toLowerCase()));
+      });
+
+      if (matched.length > 0) {
+        // 상위 10개 핫플 평균 점수
+        const topScores = matched
+          .map((s) => getSpotPopularityScore(s))
+          .sort((a, b) => b - a)
+          .slice(0, 10);
+        const avgTop = topScores.reduce((sum, v) => sum + v, 0) / topScores.length;
+        score += avgTop;
+      }
+    }
+
+    // 2. 시간대별(낮/밤) 트렌드 가중치 부여 (하루 2회 자동 최적화)
+    if (isEvening) {
+      if (item.key === 'WINE') score += 45;
+      else if (item.key === 'NIGHT') score += 40;
+      else if (item.key === 'DINING') score += 30;
+      else if (item.key === 'CAFE') score += 10;
+    } else {
+      if (item.key === 'CAFE') score += 45;
+      else if (item.key === 'DRIVE') score += 40;
+      else if (item.key === 'DINING') score += 35;
+      else if (item.key === 'EXPERIENCE') score += 30;
+      else if (item.key === 'SPA') score += 20;
+    }
+
+    return { item, score };
+  });
+
+  // 핫니스 점수 높은 순으로 정렬
+  scoredThemes.sort((a, b) => b.score - a.score);
+
+  // '전체' 칩은 항상 맨 앞에 배치
+  return [allItem, ...scoredThemes.map((st) => st.item)];
 }
 
 /** 스팟 간 이동 동선 및 원터치 길찾기 딥링크 디바이더 렌더링 */
@@ -3714,9 +3771,9 @@ function renderSpotDiscovery(): void {
       </div>
     </div>
 
-    <!-- 2. 단일 큐레이션 테마 칩 바 (맞춤 코스와 100% 동일) -->
+    <!-- 2. 실시간 핫랭킹 큐레이션 테마 칩 바 (낮/밤 하루 2회 자동 최적화) -->
     <div class="spot-category-scroll" style="margin-bottom: var(--space-4);">
-      ${SPOT_EXPLORE_CATEGORIES.map((cat) => `
+      ${getCuratedThemeChips().map((cat) => `
         <button class="spot-category-chip ${state.spotCategory === cat.key ? 'is-active' : ''}" data-cat-key="${cat.key}">
           <span class="chip-emoji">${cat.emoji}</span>
           <span class="chip-label">${cat.label}</span>
