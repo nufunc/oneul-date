@@ -3387,11 +3387,24 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   overflow: hidden;
 }
 
+.thumb-fallback-box {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  background: var(--color-surface-sub);
+  z-index: 1;
+  color: var(--color-text-faint);
+  opacity: 0.6;
+}
+
 .discovery-badge-dist {
   position: absolute;
   top: 8px;
   left: 8px;
-  z-index: 2;
+  z-index: 5;
   background: rgba(15, 23, 42, 0.78);
   backdrop-filter: blur(4px);
   color: #ffffff;
@@ -3400,18 +3413,20 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   padding: 2px 7px;
   border-radius: var(--radius-full);
   letter-spacing: -0.01em;
+  pointer-events: none;
 }
 
 .badge-card-curation {
   position: absolute;
   top: 8px;
   right: 8px;
-  z-index: 2;
+  z-index: 5;
   font-size: 0.65rem;
   font-weight: 800;
   padding: 2px 7px;
   border-radius: var(--radius-full);
   backdrop-filter: blur(4px);
+  pointer-events: none;
 }
 
 .badge-card-curation.hot {
@@ -3430,10 +3445,21 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
 }
 
 .discovery-img {
+  position: relative;
+  z-index: 2;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, opacity 0.2s ease;
+  opacity: 0;
+}
+
+.discovery-img.is-loaded {
+  opacity: 1;
+}
+
+.discovery-img.is-hidden {
+  display: none;
 }
 
 .discovery-card:hover .discovery-img {
