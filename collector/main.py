@@ -150,6 +150,63 @@ def get_total_spot_stats():
     with_img = get_exact_count("&image_url=not.is.null")
     return {"total": total, "active": active, "closed": closed, "with_img": with_img}
 
+def get_regional_stats() -> dict:
+    """전국 8대 권역별 정상 운영 스팟 수 집계"""
+    regions = ["서울", "경기", "인천", "영남", "호남", "충청", "강원", "제주"]
+    counts = {}
+    for r in regions:
+        enc_r = urllib.parse.quote(r)
+        counts[r] = get_exact_count(f"&region=eq.{enc_r}&is_closed=eq.false")
+    return counts
+
+def get_pipeline_stats(today_str: str) -> dict:
+    """당일 로그 파일에서 8대 마이너별 신규 발굴 및 동기화 실적 집계"""
+    import re
+    pipe = {"tourapi": 0, "catchtable": 0, "youtube": 0, "portal_blog": 0, "enrich": 0}
+    log_file = os.path.join(LOG_DIR, f"collector-{today_str}.log")
+    if not os.path.exists(log_file):
+        log_file = COLLECTOR_LOG_FILE
+    if os.path.exists(log_file):
+        try:
+            with open(log_file, "r", encoding="utf-8", errors="ignore") as f:
+                content = f.read()
+            # TourAPI
+            tourapi_m = re.findall(r'\[TourAPI 4\.0 INSERT 성공\] 총 (\d+)개', content)
+            pipe["tourapi"] = sum(int(m) for m in tourapi_m)
+            # CatchTable
+            ct_m = re.findall(r'\[CatchTable/블루리본 INSERT 성공\] 총 (\d+)개', content)
+            pipe["catchtable"] = sum(int(m) for m in ct_m)
+            # YouTube
+            yt_m = re.findall(r'📹 .*?등록 (\d+)건', content)
+            pipe["youtube"] = sum(int(m) for m in yt_m if m != '0')
+            # Portal & Blog
+            portal_m = re.findall(r'✨ \[신규 스팟 등록 성공!\]', content)
+            blog_m = re.findall(r'\[블로그 발굴 성공\] 총 (\d+)개', content)
+            pipe["portal_blog"] = len(portal_m) + sum(int(m) for m in blog_m)
+            # Social Enrich
+            enrich_m = re.findall(r'소셜 메타 동기화|동기화 완료', content)
+            pipe["enrich"] = len(enrich_m)
+        except Exception:
+            pass
+    return pipe
+
+def get_top_spots(limit: int = 5) -> list:
+    """최신 사진과 풍부한 메타를 보유한 주요 큐레이션 스팟 추출"""
+    if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
+        return []
+    url = f"{SUPABASE_URL.rstrip('/')}/rest/v1/spots?select=id,name,category,region,area,summary,image_url,signature_items,social_links,slot&is_closed=eq.false&image_url=not.is.null&order=id.desc&limit={limit}"
+    headers = {
+        "apikey": SUPABASE_SERVICE_KEY,
+        "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
+        "Content-Type": "application/json"
+    }
+    try:
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req, timeout=5) as res:
+            return json.loads(res.read().decode('utf-8'))
+    except Exception:
+        return []
+
 # 기동 시각 및 일일 리포트 상태 추적
 startup_time = None
 last_summary_date = None
@@ -168,6 +225,10 @@ def check_and_generate_daily_summary(force: bool = False):
     
     if (is_scheduled_hour or force or send_on_startup) and (last_summary_date != today_str):
         stats = get_total_spot_stats()
+        regional = get_regional_stats()
+        pipeline = get_pipeline_stats(today_str)
+        top_spots = get_top_spots(limit=5)
+        
         summary_text = (
             f"\n========================================================\n"
             f"📊 [KST {today_str} {DAILY_REPORT_HOUR:02d}:00] 오늘 데이트 전체 통합 데이터 서머리\n"
@@ -192,11 +253,12 @@ def check_and_generate_daily_summary(force: bool = False):
             email_stats = {
                 "total_spots": stats["total"],
                 "active_spots": stats["active"],
-                "new_spots": stats.get("total", 0),
-                "youtube_count": stats.get("with_img", 0)
+                "closed_spots": stats["closed"],
+                "with_img_count": stats["with_img"],
+                "new_spots_today": sum([pipeline.get("tourapi", 0), pipeline.get("catchtable", 0), pipeline.get("youtube", 0), pipeline.get("portal_blog", 0)])
             }
             log(f"📧 [정기 리포트 발송 트리거] KST {now.hour:02d}:00 (설정 시각: {DAILY_REPORT_HOUR:02d}:00) 데일리 이메일 발송 실행")
-            send_daily_digest(email_stats)
+            send_daily_digest(email_stats, top_spots=top_spots, regional_stats=regional, pipeline_stats=pipeline)
         except Exception as e:
             log(f"데일리 리포트 발송 예외: {e}", level="ERROR")
 
