@@ -314,6 +314,25 @@ html[data-theme-resolved="dark"] .footer-version {
   color: var(--color-text-faint);
 }
 
+html[data-theme="dark"] .conditions-card,
+html[data-theme-resolved="dark"] .conditions-card {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+html[data-theme="dark"] .btn-region-pill,
+html[data-theme-resolved="dark"] .btn-region-pill {
+  background: var(--color-surface-sub);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+html[data-theme="dark"] .slot-toggles-inline,
+html[data-theme-resolved="dark"] .slot-toggles-inline {
+  background: var(--color-surface-sub);
+  border-color: var(--color-border);
+}
+
 html[data-theme="dark"] .selector-bar,
 html[data-theme-resolved="dark"] .selector-bar {
   background: var(--color-surface-sub);
@@ -804,6 +823,110 @@ button {
 .search-tag-chip:active,
 .search-chip:active {
   transform: scale(0.96);
+}
+
+/* ==========================================================================
+   맞춤 코스 올인원 조건 카드 & 컴팩트 컨트롤 바
+   ========================================================================== */
+
+.conditions-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-card);
+  margin-bottom: var(--space-5);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.course-compact-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* 지역 선택 캡슐 버튼 */
+.btn-region-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 var(--space-3);
+  background: var(--color-surface-sub);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text);
+  font-size: var(--font-sm);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+.btn-region-pill:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-border-strong);
+}
+
+.btn-region-pill.is-selected {
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.btn-region-pill .pill-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.btn-region-pill .pill-arrow {
+  font-size: 0.75rem;
+  opacity: 0.6;
+}
+
+/* 인라인 시간대 슬롯 토글 그룹 */
+.slot-toggles-inline {
+  display: inline-flex;
+  align-items: center;
+  background: var(--color-surface-sub);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 3px;
+  gap: 2px;
+  margin-left: auto;
+}
+
+.slot-toggle-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 9px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: transparent;
+  color: var(--color-text-sub);
+  font-size: var(--font-xs);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.slot-toggle-inline:hover {
+  color: var(--color-text);
+  background: var(--color-surface-hover);
+}
+
+.slot-toggle-inline.on {
+  background: var(--color-accent);
+  color: #ffffff;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.2);
+}
+
+.slot-toggle-inline.on .slot-emoji {
+  filter: brightness(1.1);
 }
 
 /* ==========================================================================

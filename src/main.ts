@@ -2411,94 +2411,66 @@ function getRegionSelectorLabel(): { title: string; subtitle: string; isSelected
   };
 }
 
-function getMoodSelectorLabel(): { title: string; subtitle: string; isSelected: boolean } {
-  if (state.mood === 'ALL') {
-    return { title: '모든 분위기', subtitle: '취향 전체', isSelected: false };
-  }
-  const m = MOODS.find((item) => item.key === state.mood);
-  if (!m) return { title: '모든 분위기', subtitle: '전체', isSelected: false };
-  return { title: `${m.emoji ? `${m.emoji} ` : ''}${m.label}`, subtitle: '선택된 무드', isSelected: true };
-}
-
 function renderConditions(): void {
   const area = document.getElementById('conditions-area');
   if (!area) return;
 
   const regLabel = getRegionSelectorLabel();
-  const moodLabelInfo = getMoodSelectorLabel();
 
   area.innerHTML = `
-    <!-- 1. 통합 검색창 & 15종 퀵 태그 (스팟 탐색과 100% 동일) -->
-    <div class="search-container">
-      <div class="search-box">
-        <span class="search-input-icon">🔍</span>
-        <input 
-          type="search" 
-          class="search-input" 
-          id="search-input" 
-          placeholder="어디로 갈까요? 지역·핫플·분위기·메뉴 검색 (예: 성수, 해운대, 오션뷰, 와인)" 
-          value="${escapeHtml(state.searchQuery)}"
-          autocomplete="off"
-          aria-label="데이트 코스 키워드 검색"
-        />
-        <button class="search-clear ${state.searchQuery ? 'is-visible' : ''}" id="search-clear" aria-label="검색어 지우기">✕</button>
+    <div class="conditions-card">
+      <!-- 1. 통합 검색창 (스팟 탐색과 100% 동일) -->
+      <div class="search-container" style="margin-bottom: var(--space-3);">
+        <div class="search-box">
+          <span class="search-input-icon">🔍</span>
+          <input 
+            type="search" 
+            class="search-input" 
+            id="search-input" 
+            placeholder="어디로 갈까요? 지역·핫플·메뉴 검색 (예: 성수, 해운대, 오션뷰, 와인)" 
+            value="${escapeHtml(state.searchQuery)}"
+            autocomplete="off"
+            aria-label="데이트 코스 키워드 검색"
+          />
+          <button class="search-clear ${state.searchQuery ? 'is-visible' : ''}" id="search-clear" aria-label="검색어 지우기">✕</button>
+        </div>
       </div>
-      <div class="search-tags">
-        ${POPULAR_QUICK_TAGS.map((tag) => {
-          const isActive = state.searchQuery === tag.query || state.searchQuery === tag.label;
-          return `<button class="search-tag-chip ${isActive ? 'active' : ''}" data-query="${escapeHtml(tag.query)}" data-label="${escapeHtml(tag.label)}">${escapeHtml(tag.label)}</button>`;
-        }).join('')}
-      </div>
-    </div>
 
-    <!-- 2. 비주얼 분위기/카테고리 칩 바 (스팟 탐색과 100% 동일) -->
-    <div class="spot-category-scroll" style="margin-bottom: var(--space-3);">
-      ${SPOT_EXPLORE_CATEGORIES.map((cat) => `
-        <button class="spot-category-chip ${state.spotCategory === cat.key ? 'is-active' : ''}" data-cat-key="${cat.key}">
-          <span class="chip-emoji">${cat.emoji}</span>
-          <span class="chip-label">${cat.label}</span>
+      <!-- 2. 단일 큐레이션 테마 칩 바 (스팟 탐색과 100% 동일) -->
+      <div class="spot-category-scroll" style="margin-bottom: var(--space-4);">
+        ${SPOT_EXPLORE_CATEGORIES.map((cat) => `
+          <button class="spot-category-chip ${state.spotCategory === cat.key ? 'is-active' : ''}" data-cat-key="${cat.key}">
+            <span class="chip-emoji">${cat.emoji}</span>
+            <span class="chip-label">${cat.label}</span>
+          </button>
+        `).join('')}
+      </div>
+
+      <!-- 3. 컴팩트 1줄 컨트롤: [📍 지역 선택 캡슐] + [시간대 4종 토글] -->
+      <div class="course-compact-controls" style="margin-bottom: var(--space-4);">
+        <button class="btn-region-pill ${regLabel.isSelected ? 'is-selected' : ''}" id="btn-trigger-region" aria-haspopup="dialog">
+          <span class="pill-icon">📍</span>
+          <span class="pill-title">${escapeHtml(regLabel.title)}</span>
+          <span class="pill-arrow" aria-hidden="true">▾</span>
         </button>
-      `).join('')}
-    </div>
 
-    <!-- 3. 시간대 4종 토글 -->
-    <div class="slot-toggles" role="group" aria-label="시간대 선택">
-      ${SLOT_ORDER.map((k) => {
-        const meta = SLOT_META[k];
-        return `
-          <button class="slot-toggle ${state.slots[k] ? 'on' : ''}" data-slot="${k}" aria-pressed="${state.slots[k]}">
-            <span class="slot-emoji">${meta.emoji}</span>
-            <span class="slot-label">${meta.label}</span>
-          </button>`;
-      }).join('')}
-    </div>
-
-    <!-- 4. 에어비앤비 스타일 1줄 2버튼 셀렉터 바 -->
-    <div class="selector-bar">
-      <button class="selector-btn ${regLabel.isSelected ? 'is-selected' : ''}" id="btn-trigger-region" aria-haspopup="dialog">
-        <div class="selector-left">
-          <span class="selector-icon">📍</span>
-          <div class="selector-text">
-            <span class="selector-label">어디로 갈까요?</span>
-            <span class="selector-value">${escapeHtml(regLabel.title)}</span>
-          </div>
+        <div class="slot-toggles-inline" role="group" aria-label="시간대 선택">
+          ${SLOT_ORDER.map((k) => {
+            const meta = SLOT_META[k];
+            return `
+              <button class="slot-toggle-inline ${state.slots[k] ? 'on' : ''}" data-slot="${k}" aria-pressed="${state.slots[k]}" title="${meta.label}">
+                <span class="slot-emoji">${meta.emoji}</span>
+                <span class="slot-text">${meta.label}</span>
+              </button>`;
+          }).join('')}
         </div>
-        <span class="selector-arrow">▾</span>
-      </button>
+      </div>
 
-      <button class="selector-btn ${moodLabelInfo.isSelected ? 'is-selected' : ''}" id="btn-trigger-mood" aria-haspopup="dialog">
-        <div class="selector-left">
-          <span class="selector-icon">✨</span>
-          <div class="selector-text">
-            <span class="selector-label">어떤 분위기?</span>
-            <span class="selector-value">${escapeHtml(moodLabelInfo.title)}</span>
-          </div>
-        </div>
-        <span class="selector-arrow">▾</span>
+      <!-- 4. 코스 완성하기 버튼 -->
+      <button class="btn-primary btn-generate" id="btn-generate">
+        🚀 맞춤 데이트 코스 완성하기
       </button>
     </div>
-
-    <button class="btn-primary btn-generate" id="btn-generate">🚀 오늘 데이트 코스 만들기</button>
   `;
   bindConditionEvents(area);
 }
@@ -2535,27 +2507,11 @@ function bindConditionEvents(area: HTMLElement): void {
     });
   }
 
-  // 퀵 태그 클릭 이벤트 (순수 키워드 query 바인딩 및 토글)
-  area.querySelectorAll<HTMLButtonElement>('.search-tag-chip').forEach((chip) => {
-    chip.addEventListener('click', () => {
-      const q = chip.dataset.query || '';
-      if (state.searchQuery === q) {
-        state.searchQuery = '';
-      } else {
-        state.searchQuery = q;
-      }
-      renderConditions();
-      triggerCourseGeneration();
-    });
-  });
-
   // 비주얼 분위기/카테고리 칩 클릭 이벤트
   area.querySelectorAll<HTMLButtonElement>('.spot-category-chip').forEach((chip) => {
     chip.addEventListener('click', () => {
       const catKey = chip.dataset.catKey || 'ALL';
       state.spotCategory = catKey;
-      
-      // 카테고리 칩 선택 시 해당 카테고리 대표 검색어로 연동하거나 무드 설정
       if (catKey === 'ALL') {
         state.mood = 'ALL';
       }
@@ -2564,8 +2520,8 @@ function bindConditionEvents(area: HTMLElement): void {
     });
   });
 
-  // 슬롯 토글
-  area.querySelectorAll<HTMLButtonElement>('.slot-toggle').forEach((btn) => {
+  // 인라인 슬롯 토글
+  area.querySelectorAll<HTMLButtonElement>('.slot-toggle-inline').forEach((btn) => {
     btn.addEventListener('click', () => {
       const slot = btn.dataset.slot as SlotKey;
       state.slots[slot] = !state.slots[slot];
@@ -2577,12 +2533,6 @@ function bindConditionEvents(area: HTMLElement): void {
   area.querySelector('#btn-trigger-region')?.addEventListener('click', () => {
     state.regionSheetOpen = true;
     state.activeRegionTab = state.regions[0] || 'SEOUL';
-    renderOverlay();
-  });
-
-  // 분위기 바텀시트 트리거
-  area.querySelector('#btn-trigger-mood')?.addEventListener('click', () => {
-    state.moodSheetOpen = true;
     renderOverlay();
   });
 
@@ -3747,8 +3697,8 @@ function renderSpotDiscovery(): void {
   const isFiltered = Boolean(state.spotSearchQuery || state.spotCategory !== 'ALL');
 
   area.innerHTML = `
-    <!-- 1. 통합 검색창 & 15종 퀵 태그 (지역·핫플·분위기 검색) -->
-    <div class="search-container">
+    <!-- 1. 통합 검색창 (맞춤 코스와 100% 동일) -->
+    <div class="search-container" style="margin-bottom: var(--space-3);">
       <div class="search-box">
         <span class="search-input-icon">🔍</span>
         <input 
@@ -3762,15 +3712,9 @@ function renderSpotDiscovery(): void {
         />
         <button class="search-clear ${state.spotSearchQuery ? 'is-visible' : ''}" id="btn-clear-discovery-search" aria-label="검색어 지우기">✕</button>
       </div>
-      <div class="search-tags">
-        ${POPULAR_QUICK_TAGS.map((tag) => {
-          const isActive = state.spotSearchQuery === tag.query || state.spotSearchQuery === tag.label;
-          return `<button class="search-tag-chip ${isActive ? 'active' : ''}" data-query="${escapeHtml(tag.query)}" data-label="${escapeHtml(tag.label)}">${escapeHtml(tag.label)}</button>`;
-        }).join('')}
-      </div>
     </div>
 
-    <!-- 2. 비주얼 카테고리 스크롤 칩 바 -->
+    <!-- 2. 단일 큐레이션 테마 칩 바 (맞춤 코스와 100% 동일) -->
     <div class="spot-category-scroll" style="margin-bottom: var(--space-4);">
       ${SPOT_EXPLORE_CATEGORIES.map((cat) => `
         <button class="spot-category-chip ${state.spotCategory === cat.key ? 'is-active' : ''}" data-cat-key="${cat.key}">
@@ -3959,17 +3903,7 @@ function bindDiscoveryEvents(area: HTMLElement): void {
     renderSpotDiscovery();
   });
 
-  // 2. 15종 퀵 태그 칩 클릭
-  area.querySelectorAll<HTMLButtonElement>('.search-tag-chip').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const q = btn.dataset.query || '';
-      state.spotSearchQuery = state.spotSearchQuery === q ? '' : q;
-      state.spotPage = 1;
-      renderSpotDiscovery();
-    });
-  });
-
-  // 3. 카테고리 칩 클릭
+  // 2. 카테고리 칩 클릭
   area.querySelectorAll<HTMLButtonElement>('.spot-category-chip').forEach((btn) => {
     btn.addEventListener('click', () => {
       state.spotCategory = btn.dataset.catKey || 'ALL';
