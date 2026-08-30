@@ -1771,6 +1771,36 @@ async function formatCourseTextAsync(
   return blocks.join('\n\n');
 }
 
+/**
+ * 시간대(낮/밤) 및 세션별 다채로운 감성 서술형 검색 플레이스홀더 반환
+ */
+function getDynamicSearchPlaceholder(): string {
+  const hour = new Date().getHours();
+  const isNight = hour >= 18 || hour < 5;
+
+  const dayPlaceholders = [
+    '어디로 갈까요? 설레는 데이트 장소를 검색해보세요',
+    '어디로 갈까요? 원하는 지역과 분위기를 찾아보세요',
+    '어디로 갈까요? 취향에 꼭 맞는 스팟을 찾아보세요',
+    '어디로 갈까요? 가고 싶은 동네나 메뉴를 입력해보세요',
+    '어디로 갈까요? 따뜻한 커피와 감성 스팟을 찾아보세요',
+    '어디로 갈까요? 오늘 둘만의 특별한 공간을 찾아보세요',
+  ];
+
+  const nightPlaceholders = [
+    '어디로 갈까요? 설레는 데이트 장소를 검색해보세요',
+    '어디로 갈까요? 오늘 밤 로맨틱한 와인바나 야경을 찾아보세요',
+    '어디로 갈까요? 분위기 좋은 디너와 핫플을 검색해보세요',
+    '어디로 갈까요? 취향에 꼭 맞는 스팟을 찾아보세요',
+    '어디로 갈까요? 오늘 밤 둘만의 특별한 공간을 찾아보세요',
+  ];
+
+  const pool = isNight ? nightPlaceholders : dayPlaceholders;
+  const idx = Math.floor(Math.random() * pool.length);
+  return pool[idx];
+}
+
+
 // --- 내 위치 중심 맞춤 추천 코스 ---------------------------------------------
 
 let userCoords: { lat: number; lng: number } | null = null;
@@ -2405,7 +2435,7 @@ function renderConditions(): void {
             type="search" 
             class="search-input" 
             id="search-input" 
-            placeholder="어디로 갈까요? 지역·핫플·메뉴 검색 (예: 성수, 해운대, 오션뷰, 와인)" 
+            placeholder="${getDynamicSearchPlaceholder()}" 
             value="${escapeHtml(state.searchQuery)}"
             autocomplete="off"
             aria-label="데이트 코스 키워드 검색"
@@ -3740,7 +3770,7 @@ function renderSpotDiscovery(): void {
           type="search" 
           class="search-input" 
           id="discovery-search-input" 
-          placeholder="어디로 갈까요? 지역·핫플·분위기·메뉴 검색 (예: 성수, 해운대, 오션뷰, 와인)" 
+          placeholder="${getDynamicSearchPlaceholder()}" 
           value="${escapeHtml(state.spotSearchQuery)}"
           autocomplete="off"
           aria-label="스팟 키워드 검색"
