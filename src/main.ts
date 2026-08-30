@@ -1903,6 +1903,8 @@ interface AppState {
   spotDistanceRadius: number;
   /** 스팟 탐색 모드: 정렬 (distance: 거리순, popular: 인기/핫플순, curation: 블루리본/미쉐린순) */
   spotSort: 'distance' | 'popular' | 'curation';
+  /** 스팟 탐색 모드: 한 번에 표시할 열(행) 개수 (2, 3, 5개행, 기본값: 3) */
+  spotGridCols: 2 | 3 | 5;
   /** 스팟 탐색 모드: 노출 페이지네이션 */
   spotPage: number;
   /** 테마 모드: light(낮, 기본값) | dark(밤) | auto(시스템) */
@@ -1985,6 +1987,7 @@ const state: AppState = {
   spotCategory: 'ALL',
   spotDistanceRadius: 3.0,
   spotSort: 'distance',
+  spotGridCols: 3,
   spotPage: 1,
   themeMode: getInitialThemeMode(),
   course: null,
@@ -3650,7 +3653,7 @@ function renderSpotDiscovery(): void {
   }
 
   const totalCount = matchedSpots.length;
-  const pageSize = 12;
+  const pageSize = state.spotGridCols === 5 ? 25 : state.spotGridCols === 3 ? 18 : 12;
   const displaySpots = matchedSpots.slice(0, state.spotPage * pageSize);
   const hasMore = displaySpots.length < totalCount;
 
@@ -3738,7 +3741,7 @@ function renderSpotDiscovery(): void {
       `).join('')}
     </div>
 
-    <!-- 5. 탐색 상태 & 정렬 툴바 -->
+    <!-- 5. 탐색 상태, 2/3/5개행 뷰 전환 & 정렬 툴바 -->
     <div class="discovery-status-bar">
       <div class="status-left">
         <span class="status-count-badge">${totalCount}</span>
@@ -3750,18 +3753,27 @@ function renderSpotDiscovery(): void {
         ` : ''}
       </div>
 
-      <div class="discovery-sort-group">
-        <select class="discovery-sort-select" id="discovery-sort-select" aria-label="스팟 정렬">
-          <option value="distance" ${state.spotSort === 'distance' ? 'selected' : ''}>📍 거리순</option>
-          <option value="popular" ${state.spotSort === 'popular' ? 'selected' : ''}>🔥 핫플순</option>
-          <option value="curation" ${state.spotSort === 'curation' ? 'selected' : ''}>⭐ 블루리본/미쉐린</option>
-        </select>
+      <div class="status-right">
+        <!-- 2개, 3개(기본값), 5개행 밀도 전환 스위처 -->
+        <div class="grid-density-switcher" role="group" aria-label="스팟 목록 보기 개수 설정">
+          <button class="btn-density ${state.spotGridCols === 2 ? 'is-active' : ''}" data-cols="2" aria-label="2개씩 보기" title="2개씩 보기">2개</button>
+          <button class="btn-density ${state.spotGridCols === 3 ? 'is-active' : ''}" data-cols="3" aria-label="3개씩 보기 (기본값)" title="3개씩 보기 (기본)">3개</button>
+          <button class="btn-density ${state.spotGridCols === 5 ? 'is-active' : ''}" data-cols="5" aria-label="5개씩 보기" title="5개씩 보기">5개</button>
+        </div>
+
+        <div class="discovery-sort-group">
+          <select class="discovery-sort-select" id="discovery-sort-select" aria-label="스팟 정렬">
+            <option value="distance" ${state.spotSort === 'distance' ? 'selected' : ''}>📍 거리순</option>
+            <option value="popular" ${state.spotSort === 'popular' ? 'selected' : ''}>🔥 핫플순</option>
+            <option value="curation" ${state.spotSort === 'curation' ? 'selected' : ''}>⭐ 블루리본/미쉐린</option>
+          </select>
+        </div>
       </div>
     </div>
 
-    <!-- 6. 2열 인스타 감성 갤러리 그리드 피드 -->
-    <div class="spot-discovery-grid">
-      ${displaySpots.length > 0 ? displaySpots.map((spot) => renderDiscoverySpotCard(spot)).join('') : `
+    <!-- 6. 그리드 피드 (2개/3개/5개행 지원) -->
+    <div class="spot-discovery-grid cols-${state.spotGridCols}">
+      ${displaySpots.length > 0 ? displaySpots.map((spot) => renderDiscoverySpotCard(spot, state.spotGridCols)).join('') : `
         <div class="spot-empty-state">
           <span class="empty-icon">🧭</span>
           <p class="empty-title">검색 조건에 맞는 스팟을 찾지 못했어요</p>
@@ -3784,7 +3796,7 @@ function renderSpotDiscovery(): void {
   bindDiscoveryEvents(area);
 }
 
-function renderDiscoverySpotCard(spot: Spot & { _dist?: number }): string {
+function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 5 = 3): string {
   const isHot = isSuperHotSpot(spot);
   const slotKey = (spot.slot as SlotKey) || 'day';
   const targetImgUrl = getSpotImageUrl(spot, slotKey);
@@ -3799,15 +3811,42 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }): string {
 
   // 큐레이션 뱃지
   const curationPill = spot.curation_badges?.blue_ribbon
-    ? `<span class="badge-card-curation blueribbon">🎀 블루리본</span>`
+    ? `<span class="badge-card-curation blueribbon">${cols === 5 ? '🎀' : '🎀 블루리본'}</span>`
     : spot.curation_badges?.michelin
-    ? `<span class="badge-card-curation michelin">⭐ 미쉐린</span>`
+    ? `<span class="badge-card-curation michelin">${cols === 5 ? '⭐' : '⭐ 미쉐린'}</span>`
     : isHot
-    ? `<span class="badge-card-curation hot">🔥 핫플</span>`
+    ? `<span class="badge-card-curation hot">${cols === 5 ? '🔥' : '🔥 핫플'}</span>`
     : '';
 
+  // 5개행 모드: 미니 타일형 컴팩트 뷰
+  if (cols === 5) {
+    return `
+      <article class="discovery-card cols-5" data-spot-id="${spot.id}">
+        <div class="discovery-card-thumb">
+          <span class="discovery-badge-dist">${distText}</span>
+          ${curationPill}
+          <div class="thumb-fallback-box">${fallbackIcon}</div>
+          <img class="discovery-img" src="${escapeHtml(targetImgUrl)}" alt="${escapeHtml(spot.name)}" loading="lazy" referrerpolicy="no-referrer" onload="this.classList.add('is-loaded');" onerror="this.classList.add('is-hidden'); this.previousElementSibling?.classList.add('is-active');" />
+        </div>
+        <div class="discovery-card-body compact">
+          <h4 class="discovery-name compact" title="${escapeHtml(spot.name)}">${escapeHtml(spot.name)}</h4>
+          <span class="discovery-category compact">${escapeHtml(spot.category || '명소')}</span>
+          <div class="discovery-card-actions compact">
+            <button class="btn-build-anchor-course compact" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심으로 코스 짜기" title="이 장소로 코스 짜기">
+              <span class="btn-sparkle">✨</span> 코스
+            </button>
+            <a class="btn-discovery-map compact" href="${naverMapUrl(spot)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(spot.name)} 지도 보기" title="지도 보기">
+              🗺️
+            </a>
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  // 2개행, 3개행 모드: 표준 상세 뷰
   return `
-    <article class="discovery-card" data-spot-id="${spot.id}">
+    <article class="discovery-card cols-${cols}" data-spot-id="${spot.id}">
       <div class="discovery-card-thumb">
         <span class="discovery-badge-dist">${distText}</span>
         ${curationPill}
@@ -3819,7 +3858,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }): string {
           <span class="discovery-category">${escapeHtml(spot.category || '명소')}</span>
           <span class="discovery-area">${escapeHtml(spot.area || '')}</span>
         </div>
-        <h4 class="discovery-name">${escapeHtml(spot.name)}</h4>
+        <h4 class="discovery-name" title="${escapeHtml(spot.name)}">${escapeHtml(spot.name)}</h4>
         <p class="discovery-quote">“${escapeHtml(sum)}”</p>
         <div class="discovery-card-actions">
           <button class="btn-build-anchor-course" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심으로 코스 짜기">
@@ -3955,7 +3994,19 @@ function bindDiscoveryEvents(area: HTMLElement): void {
     });
   });
 
-  // 7. 정렬 셀렉트 박스
+  // 7. 2개 / 3개 / 5개행 밀도 전환 스위처 이벤트
+  area.querySelectorAll<HTMLButtonElement>('.btn-density').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const cols = Number(btn.dataset.cols) as 2 | 3 | 5;
+      if (cols === 2 || cols === 3 || cols === 5) {
+        state.spotGridCols = cols;
+        state.spotPage = 1;
+        renderSpotDiscovery();
+      }
+    });
+  });
+
+  // 8. 정렬 셀렉트 박스
   const sortSelect = area.querySelector<HTMLSelectElement>('#discovery-sort-select');
   if (sortSelect) {
     sortSelect.addEventListener('change', () => {
@@ -3965,7 +4016,7 @@ function bindDiscoveryEvents(area: HTMLElement): void {
     });
   }
 
-  // 8. 필터 초기화 버튼
+  // 9. 필터 초기화 버튼
   area.querySelector('#btn-reset-discovery-filters')?.addEventListener('click', () => {
     state.spotSearchQuery = '';
     state.spotCategory = 'ALL';
@@ -3987,13 +4038,13 @@ function bindDiscoveryEvents(area: HTMLElement): void {
     renderSpotDiscovery();
   });
 
-  // 9. 더보기 버튼
+  // 10. 더보기 버튼
   area.querySelector('#btn-discovery-more')?.addEventListener('click', () => {
     state.spotPage += 1;
     renderSpotDiscovery();
   });
 
-  // 10. ✨ 이 장소로 코스 짜기 클릭 이벤트 (Killer Feature)
+  // 11. ✨ 이 장소로 코스 짜기 클릭 이벤트 (Killer Feature)
   area.querySelectorAll<HTMLButtonElement>('.btn-build-anchor-course').forEach((btn) => {
     btn.addEventListener('click', () => {
       const spotId = Number(btn.dataset.spotId);
