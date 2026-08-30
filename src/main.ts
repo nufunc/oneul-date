@@ -1796,8 +1796,9 @@ function buildNearbyCourse(coords: { lat: number; lng: number } | null): { label
     }
   }
 
-  const timeInfo = getTimeBasedSlots();
-  const steps = generateCourse(pool, timeInfo.slotKeys, [], 'ALL');
+  // 사용자가 설정한 현재 활성 슬롯(기본: 낮/저녁/밤)을 그대로 적용
+  const slotsOn = activeSlots().length > 0 ? activeSlots() : (['day', 'evening', 'night'] as SlotKey[]);
+  const steps = generateCourse(pool, slotsOn, state.regions, state.mood, { searchQuery: state.searchQuery, categoryKey: state.spotCategory }, state.subZones);
 
   // 코스에 포함된 실제 스팟들의 내 위치 기준 최대 이동 반경(Max Distance) 계산
   if (coords && coords.lat && coords.lng) {
@@ -1947,30 +1948,6 @@ function getInitialThemeMode(): ThemeMode {
 /** 기본 시간대 슬롯 반환 (낮 | 저녁 | 밤 기본 선택, 숙박 제외) */
 function getDefaultSlots(): Record<SlotKey, boolean> {
   return { day: true, evening: true, night: true, stay: false };
-}
-
-/** 현시간 기준 실시간 맞춤 슬롯 계산 ('지금 가기 좋은 맞춤 코스' 전용) */
-function getTimeBasedSlots(): { slots: Record<SlotKey, boolean>; slotKeys: SlotKey[] } {
-  const hour = new Date().getHours();
-  if (hour >= 5 && hour < 14) {
-    // 05:00 ~ 13:59: 낮 + 저녁
-    return {
-      slots: { day: true, evening: true, night: false, stay: false },
-      slotKeys: ['day', 'evening'],
-    };
-  } else if (hour >= 14 && hour < 20) {
-    // 14:00 ~ 19:59: 저녁 + 밤
-    return {
-      slots: { day: false, evening: true, night: true, stay: false },
-      slotKeys: ['evening', 'night'],
-    };
-  } else {
-    // 20:00 ~ 04:59: 밤 + 숙박 (또는 밤 단독)
-    return {
-      slots: { day: false, evening: false, night: true, stay: true },
-      slotKeys: ['night', 'stay'],
-    };
-  }
 }
 
 /** GPS 위·경도 좌표 기반 대한민국 권역 자동 판정 */
@@ -2288,12 +2265,13 @@ function renderTodayCourse(): void {
   if (!btn) return;
 
   function applyCourse(steps: CourseStep[], customLabel?: string) {
-    state.slots = getTimeBasedSlots().slots;
-    state.regions = [];
-    state.subZones = [];
-    state.mood = 'ALL';
     state.course = steps.map((st) => ({ ...st }));
-    state.courseConditions = { regions: [], subZones: [], mood: 'ALL' };
+    state.courseConditions = {
+      regions: [...state.regions],
+      subZones: [...state.subZones],
+      mood: state.mood,
+      searchQuery: state.searchQuery,
+    };
 
     // 버튼 라벨을 원래의 맞춤/주변 추천 문구로 복원
     const labelSpan = btn?.querySelector('.today-course-label');
