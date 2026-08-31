@@ -1181,15 +1181,18 @@ function mapQuery(spot: Spot): string {
     }
   }
 
-  // 10-2. spot.address에서 시/군/구 또는 동/읍/면만 깔끔하게 추출 (번지수, 도로번호 배제)
+  // 10-2. spot.address에서 시/군/구 또는 동/읍/면만 깔끔하게 추출 (번지수, 도로명 배제)
   if (!candidateArea && spot.address && spot.address.trim().length > 0) {
     const addr = spot.address.trim();
-    const guMatch = addr.match(/([가-힣]+(?:시|군|구))/g);
-    const dongMatch = addr.match(/([가-힣]+(?:동|읍|면))/);
-    if (guMatch && guMatch.length > 0) {
-      candidateArea = guMatch[guMatch.length - 1];
-    } else if (dongMatch) {
-      candidateArea = dongMatch[1];
+    const guMatches = addr.match(/\b([가-힣]+(?:시|군|구))\b/g);
+    if (guMatches && guMatches.length > 0) {
+      candidateArea = guMatches[guMatches.length - 1].trim();
+    } else {
+      // 순수 행정동/읍/면만 추출 (목동동로, 신정로 등 도로명은 동으로 오인식 방지)
+      const dongMatch = addr.match(/\s([가-힣0-9]+(?:동|읍|면))(?=\s|\(|$)/);
+      if (dongMatch) {
+        candidateArea = dongMatch[1].trim();
+      }
     }
   }
 
@@ -1251,7 +1254,7 @@ function mapQuery(spot: Spot): string {
   const isGenericName = GENERIC_NOUNS.some((gn) => cleanName === gn || cleanName.includes(gn)) || cleanName.length <= 4;
 
   if (isGenericName && spot.address) {
-    const dongRoadMatch = spot.address.match(/([가-힣0-9]+(?:동|읍|면|로[0-9]*길|[0-9]+길))/);
+    const dongRoadMatch = spot.address.match(/\s([가-힣0-9]+(?:동|읍|면|로[0-9]*길|[0-9]+길))(?=\s|$)/);
     if (dongRoadMatch && !cleanName.includes(dongRoadMatch[1])) {
       cleanName = `${cleanName} ${dongRoadMatch[1]}`.trim();
     }
