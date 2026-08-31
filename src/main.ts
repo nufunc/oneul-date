@@ -2842,6 +2842,7 @@ const LUCIDE_ICONS = {
   wine: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide-icon"><path d="M8 22h8"/><path d="M7 10h10"/><path d="M12 15v7"/><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z"/></svg>`,
   bed: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide-icon"><path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/><path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/><path d="M12 4v6"/><path d="M2 18h20"/></svg>`,
   palette: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide-icon"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>`,
+  shoppingBag: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide-icon"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`,
   compass: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide-icon"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>`,
   trees: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide-icon"><path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v6"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.4"/></svg>`,
   sparkles: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide-icon"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>`,
@@ -2860,22 +2861,25 @@ function getSpotFallbackIcon(spot: Spot, slot: SlotKey): string {
   if (combined.includes('루지') || combined.includes('서핑') || combined.includes('요트') || combined.includes('패러글라이딩') || combined.includes('짚라인') || combined.includes('케이블카') || combined.includes('클라이밍') || combined.includes('카약') || combined.includes('방탈출') || combined.includes('보드게임') || combined.includes('액티비티') || combined.includes('레저') || combined.includes('스포츠') || combined.includes('카트')) {
     return LUCIDE_ICONS.compass;
   }
-  if (combined.includes('카페') || combined.includes('커피') || combined.includes('디저트') || combined.includes('베이커리') || combined.includes('tea') || combined.includes('cafe')) {
-    return LUCIDE_ICONS.coffee;
-  }
-  if (combined.includes('바') || combined.includes('와인') || combined.includes('칵테일') || combined.includes('주점') || combined.includes('펍') || combined.includes('beer') || combined.includes('wine')) {
+  if (combined.includes('바(bar)') || combined.includes('와인') || combined.includes('칵테일') || combined.includes('주점') || combined.includes('펍') || combined.includes('호프') || combined.includes('이자카야') || combined.includes('위스키') || combined.includes('포차')) {
     return LUCIDE_ICONS.wine;
   }
   if (combined.includes('호텔') || combined.includes('숙박') || combined.includes('펜션') || combined.includes('리조트') || combined.includes('스테이') || slot === 'stay') {
     return LUCIDE_ICONS.bed;
   }
-  if (combined.includes('미술관') || combined.includes('전시') || combined.includes('박물관') || combined.includes('갤러리') || combined.includes('공연') || combined.includes('영화') || combined.includes('공방') || combined.includes('체험') || combined.includes('도예') || combined.includes('도자기')) {
+  if (combined.includes('소품') || combined.includes('잡화') || combined.includes('패션') || combined.includes('편집숍') || combined.includes('편집샵') || combined.includes('쇼룸') || combined.includes('플래그십') || combined.includes('부티크') || combined.includes('라이프스타일')) {
+    return LUCIDE_ICONS.shoppingBag;
+  }
+  if (combined.includes('미술관') || combined.includes('전시') || combined.includes('박물관') || combined.includes('갤러리') || combined.includes('공연') || combined.includes('영화') || combined.includes('공방') || combined.includes('체험') || combined.includes('도예') || combined.includes('도자기') || combined.includes('골동품') || combined.includes('원데이') || combined.includes('클래스') || combined.includes('아틀리에')) {
     return LUCIDE_ICONS.palette;
   }
-  if (combined.includes('공원') || combined.includes('산책') || combined.includes('자연') || combined.includes('전망') || combined.includes('뷰') || combined.includes('숲') || combined.includes('호수') || combined.includes('해변')) {
+  if (combined.includes('공원') || combined.includes('산책') || combined.includes('자연') || combined.includes('전망') || combined.includes('뷰') || combined.includes('숲') || combined.includes('호수') || combined.includes('해변') || combined.includes('해수욕장') || combined.includes('수목원') || combined.includes('휴양림')) {
     return LUCIDE_ICONS.trees;
   }
-  if (combined.includes('식당') || combined.includes('맛집') || combined.includes('다이닝') || combined.includes('양식') || combined.includes('한식') || combined.includes('일식') || combined.includes('중식') || combined.includes('고기') || combined.includes('레스토랑') || combined.includes('파스타')) {
+  if (combined.includes('카페') || combined.includes('커피') || combined.includes('베이커리') || combined.includes('제과') || combined.includes('빵') || combined.includes('디저트') || combined.includes('빙수') || combined.includes('찻집') || combined.includes('티하우스') || combined.includes('로스터리') || combined.includes('에스프레소')) {
+    return LUCIDE_ICONS.coffee;
+  }
+  if (combined.includes('식당') || combined.includes('맛집') || combined.includes('다이닝') || combined.includes('비스트로') || combined.includes('양식') || combined.includes('한식') || combined.includes('일식') || combined.includes('중식') || combined.includes('고기') || combined.includes('육류') || combined.includes('레스토랑') || combined.includes('파스타') || combined.includes('스테이크') || combined.includes('국수') || combined.includes('면요리') || combined.includes('초밥') || combined.includes('스시') || combined.includes('오마카세') || combined.includes('샤브샤브') || combined.includes('돈까스') || combined.includes('피자') || combined.includes('버거') || combined.includes('치킨') || combined.includes('갈비') || combined.includes('삼겹살') || combined.includes('곱창') || combined.includes('바베큐') || combined.includes('찌개') || combined.includes('덮밥') || combined.includes('칼국수') || combined.includes('냉면')) {
     return LUCIDE_ICONS.utensils;
   }
   
