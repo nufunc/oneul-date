@@ -179,9 +179,13 @@ HEADERS = {
 def infer_slot(category: str, name: str) -> str:
     cat = (category or "").lower()
     nm = name.lower()
-    if any(k in cat or k in nm for k in ["바(bar)", "와인", "칵테일", "펍", "주점", "포차", "야시장", "이자카야"]):
+    if any(k in cat or k in nm for k in ["바(bar)", "와인", "칵테일", "펍", "주점", "포차", "야시장", "이자카야", "호프", "위스키", "심야"]):
         return "night"
-    if any(k in cat or k in nm for k in ["다이닝", "오마카세", "레스토랑", "스테이크", "파스타", "코스", "한정식"]):
+    if any(k in cat or k in nm for k in [
+        "다이닝", "오마카세", "레스토랑", "스테이크", "파스타", "코스", "한정식", "비스트로",
+        "양식", "한식", "일식", "중식", "음식점", "고기", "구이", "육류", "갈비", "삼겹살",
+        "곱창", "바베큐", "샤브샤브", "돈까스", "초밥", "스시", "국수", "면요리", "찌개", "덮밥"
+    ]):
         return "evening"
     return "day"
 
