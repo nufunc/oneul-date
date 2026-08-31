@@ -173,7 +173,7 @@ const POPULAR_ZONES: PopularZone[] = [
 
 const STORAGE_KEY = 'oneul_saved_courses';
 const RECENT_KEY = 'oneul_recent_spots';
-import { loadSpots } from './supabase';
+import { loadSpots, getCachedSpots, mergeSpots } from './supabase';
 
 const RECENT_MAX = 100;
 
@@ -2125,7 +2125,7 @@ function activeSlots(): SlotKey[] {
 }
 
 declare const __APP_VERSION__: string;
-const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.9.19';
+const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.9.20';
 
 function courseSpotIds(): number[] {
   if (!state.course) return [];
@@ -4659,6 +4659,9 @@ function renderOverlay(): void {
         if (tabKey === 'ALL') {
           state.regions = [];
           state.subZones = [];
+          ensureSpotsForRegions(['ALL']);
+        } else {
+          ensureSpotsForRegions([tabKey]);
         }
         renderOverlay();
       });
@@ -4668,6 +4671,7 @@ function renderOverlay(): void {
     const selectAllKorea = () => {
       state.regions = [];
       state.subZones = [];
+      ensureSpotsForRegions(['ALL']);
       renderOverlay();
     };
     root.querySelector('#btn-select-all-korea-chip')?.addEventListener('click', (e) => {
@@ -4881,6 +4885,38 @@ function handleRoute(): void {
   renderShell();
 }
 
+const loadedRegionKeys = new Set<string>();
+
+/**
+ * 지정된 지역 키 목록에 해당하는 스팟이 메모리에 로드되어 있는지 확인하고,
+ * 아직 없는 경우 해당 지역 스팟을 온디맨드로 페칭하여 병합합니다.
+ */
+async function ensureSpotsForRegions(regionKeys: string[]): Promise<void> {
+  const targets = regionKeys.length === 0 ? ['ALL'] : regionKeys;
+  const missingKeys = targets.filter((k) => !loadedRegionKeys.has(k) && !loadedRegionKeys.has('ALL'));
+  if (missingKeys.length === 0) return;
+
+  if (missingKeys.includes('ALL')) {
+    const allSpots = await loadSpots();
+    if (allSpots && allSpots.length > 0) {
+      spots = mergeSpots(spots, allSpots);
+      spotById = new Map(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
+      loadedRegionKeys.add('ALL');
+    }
+    return;
+  }
+
+  const matchesToFetch = REGIONS.filter((r) => missingKeys.includes(r.key)).flatMap((r) => r.match);
+  if (matchesToFetch.length === 0) return;
+
+  const newSpots = await loadSpots(matchesToFetch);
+  if (newSpots && newSpots.length > 0) {
+    spots = mergeSpots(spots, newSpots);
+    spotById = new Map(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
+    missingKeys.forEach((k) => loadedRegionKeys.add(k));
+  }
+}
+
 async function init(): Promise<void> {
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && state.savedOpen) {
@@ -4892,22 +4928,73 @@ async function init(): Promise<void> {
     handleRoute();
   });
 
-  // 1. Supabase 실시간 DB를 먼저 로드하여 공유 링크의 spot ID가 정상 매핑되도록 보장
-  try {
-    const liveSpots = await loadSpots();
-    if (liveSpots && liveSpots.length > 0) {
-      spots = liveSpots;
-      spotById = new Map(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
-      console.log(`⚡ [Supabase Live] ${spots.length}개 스팟 로드 완료`);
-    }
-  } catch (err) {
-    console.warn('초기 데이터 로드 오류:', err);
+  const isSharedLink = location.hash.startsWith('#c=');
+
+  // 1. 일반 홈 진입 시 0ms 즉시 셸 렌더링 (블로킹 제거)
+  if (!isSharedLink) {
+    handleRoute();
   }
 
-  // 2. 라우팅 처리 (공유 링크 수신자 뷰 또는 홈 셸)
-  handleRoute();
+  let hasCachedData = false;
 
-  // 3. 브라우저 위치(GPS) 기반 현재 지역 비동기 자동 선택 (기본값 'SEOUL'에서 실제 위치로 스마트 전환)
+  // 2. IndexedDB 캐시에서 즉시 복원 (10~20ms)
+  try {
+    const cachedSpots = await getCachedSpots();
+    if (cachedSpots && cachedSpots.length > 0) {
+      hasCachedData = true;
+      spots = cachedSpots;
+      spotById = new Map(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
+      loadedRegionKeys.add('ALL');
+      if (isSharedLink) {
+        handleRoute();
+      }
+    }
+  } catch {
+    // 캐시 로드 실패 시 무시
+  }
+
+  // 3. 백그라운드 비동기 최적화 로딩
+  if (!hasCachedData) {
+    // 캐시가 없는 첫 방문 시: 기본 서울 스팟을 초고속 우선 로드
+    loadSpots(['서울'])
+      .then((firstSpots) => {
+        if (firstSpots && firstSpots.length > 0) {
+          spots = mergeSpots(spots, firstSpots);
+          spotById = new Map(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
+          loadedRegionKeys.add('SEOUL');
+          if (isSharedLink && (!state.course || state.course.length === 0)) {
+            handleRoute();
+          }
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        // UI 안정화 후 전체 스팟 백그라운드 프리페치 및 캐시 저장
+        setTimeout(() => {
+          ensureSpotsForRegions(['ALL']);
+        }, 800);
+      });
+  } else {
+    // 이미 캐시가 있는 경우: 백그라운드에서 최신 전체 데이터 동기화
+    setTimeout(() => {
+      loadSpots()
+        .then((liveSpots) => {
+          if (liveSpots && liveSpots.length > 0) {
+            spots = liveSpots;
+            spotById = new Map(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
+            loadedRegionKeys.add('ALL');
+          }
+        })
+        .catch(() => {});
+    }, 1000);
+  }
+
+  // 공유 링크인데 캐시/라이브 전 초기 렌더링이 안 된 경우 폴백 렌더링
+  if (isSharedLink && (!state.course || state.course.length === 0)) {
+    handleRoute();
+  }
+
+  // 4. 브라우저 위치(GPS) 기반 현재 지역 비동기 자동 선택 (기본값 'SEOUL'에서 실제 위치로 스마트 전환)
   if (typeof navigator !== 'undefined' && 'geolocation' in navigator) {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -4916,8 +5003,8 @@ async function init(): Promise<void> {
         // 사용자가 아직 수동으로 다른 지역을 선택하지 않았을 때만 자동 갱신
         if (state.regions.length === 1 && state.regions[0] === 'SEOUL' && detected !== 'SEOUL') {
           state.regions = [detected];
+          ensureSpotsForRegions([detected]);
           renderConditions();
-          console.log(`📍 [GPS] 현재 위치 기반 지역 자동 선택: ${detected}`);
         }
         if (state.course && state.course.length > 0) {
           renderResults();
@@ -4930,7 +5017,7 @@ async function init(): Promise<void> {
     );
   }
 
-  // 4. 시스템(OS) 다크모드 변경 실시간 감지
+  // 5. 시스템(OS) 다크모드 변경 실시간 감지
   if (typeof window !== 'undefined' && window.matchMedia) {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
       if (state.themeMode === 'auto') {
@@ -4945,8 +5032,8 @@ init();
 // --- PWA Service Worker Registration ---------------------------------------
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch((err) => {
-      console.warn('[PWA] Service Worker registration failed:', err);
+    navigator.serviceWorker.register('./sw.js').catch(() => {
+      // SW 등록 오류 침묵
     });
   });
 }

@@ -134,7 +134,70 @@ def search_naver(query: str):
     except Exception:
         pass
 
-    return []
+ZONE_STREET_KEYWORDS = [
+    "골목", "거리", "먹자골목", "카페거리", "공방거리", "포차거리", "야시장", 
+    "전통시장", "시장", "길", "로드", "마을", "단지", "상권", "특화거리", "맛길"
+]
+
+def is_zone_street_spot(name: str) -> bool:
+    """골목/거리/시장/상권형 스팟 여부 판정"""
+    if not name:
+        return False
+    return any(kw in name for kw in ZONE_STREET_KEYWORDS)
+
+def search_address_or_landmark(query: str):
+    """주소 또는 랜드마크 지오코딩으로 좌표 및 정규 주소 획득 (골목/상권 스팟 폴백용)"""
+    if not query:
+        return None
+    # 1. 네이버 지도 주소/장소 검색
+    url = f"https://map.naver.com/p/api/search/allSearch?query={urllib.parse.quote(query)}&type=all&searchCoord=&boundary="
+    req = urllib.request.Request(url, headers=HEADERS)
+    try:
+        with urllib.request.urlopen(req, timeout=5) as response:
+            if response.status == 200:
+                data = json.loads(response.read().decode('utf-8'))
+                res_data = data.get("result") or {}
+                addr_list = res_data.get("address", {}).get("list", [])
+                if addr_list:
+                    top = addr_list[0]
+                    return {
+                        "roadAddress": top.get("roadAddress") or top.get("fullAddress") or top.get("jibunAddress"),
+                        "x": top.get("x") or top.get("lng"),
+                        "y": top.get("y") or top.get("lat"),
+                        "category": "골목/상권 명소"
+                    }
+                places = res_data.get("place", {}).get("list", []) or res_data.get("site", {}).get("list", [])
+                if places:
+                    top = places[0]
+                    return {
+                        "roadAddress": top.get("roadAddress") or top.get("address"),
+                        "x": top.get("x") or top.get("lng"),
+                        "y": top.get("y") or top.get("lat"),
+                        "category": top.get("category") or "골목/상권 명소"
+                    }
+    except Exception:
+        pass
+
+    # 2. 카카오맵 주소/장소 검색
+    try:
+        k_url = f"https://search.map.kakao.com/mapsearch/map.daum?q={urllib.parse.quote(query)}"
+        k_req = urllib.request.Request(k_url, headers={"User-Agent": HEADERS["User-Agent"], "Referer": "https://map.kakao.com/"})
+        with urllib.request.urlopen(k_req, timeout=5) as k_res:
+            if k_res.status == 200:
+                k_data = json.loads(k_res.read().decode('utf-8'))
+                k_places = k_data.get("place", [])
+                if k_places:
+                    kp = k_places[0]
+                    return {
+                        "roadAddress": kp.get("new_address") or kp.get("address"),
+                        "x": kp.get("lon"),
+                        "y": kp.get("lat"),
+                        "category": kp.get("last_cate_name") or "골목/상권 명소"
+                    }
+    except Exception:
+        pass
+
+    return None
 
 def is_polluted_header_name(name: str) -> bool:
     """소제목/헤더형 텍스트 또는 방송/채널명으로 오염된 상호명 여부 판별"""
@@ -497,6 +560,16 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
             places = search_naver(f"{clean_prefix} {sub_addr}")
             time.sleep(0.1)
 
+        # 3차 검색 (골목/거리/시장/상권 스팟: 지오코딩 및 랜드마크 폴백)
+        if not places and is_zone_street_spot(name):
+            geo_res = search_address_or_landmark(keyword) or search_address_or_landmark(name)
+            if not geo_res and addr:
+                geo_res = search_address_or_landmark(addr)
+            if not geo_res and loc:
+                geo_res = search_address_or_landmark(loc)
+            if geo_res:
+                places = [geo_res]
+
         patch_data = {}
         if places and len(places) > 0:
             # 1위 결과가 비스팟(주차장, 아파트, 은행 등)이면 2~3위 중 정상 데이트 장소 탐색
@@ -645,10 +718,10 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
 
             verified_count += 1
         else:
-            # 3단계 다단계 폐업 안전 판별
+            # 3단계 다단계 폐업 안전 판별 (골목/거리/상권 스팟은 폐업 격리에서 면제 보호)
             now_iso = datetime.now(timezone.utc).isoformat()
             new_fail = fail_count + 1
-            if new_fail >= 3:
+            if new_fail >= 3 and not is_zone_street_spot(name):
                 patch_data = {
                     "is_closed": True,
                     "fail_count": new_fail,
@@ -658,7 +731,7 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                 print(f"  ⚠️ [3회 연속 검색 실패 -> 폐업 격리] id: {s_id}, name: {name}")
             else:
                 patch_data = {
-                    "verified": False,
+                    "verified": True if is_zone_street_spot(name) else False,
                     "fail_count": new_fail,
                     "updated_at": now_iso
                 }

@@ -17,6 +17,7 @@ import re
 from category_filter import is_date_spot_category
 from area_seeds import generate_dynamic_queries, get_coverage_gap_areas
 from supabase_worker import is_polluted_header_name, derive_region_area
+from fix_spot_summaries import generate_curated_summary
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -233,14 +234,13 @@ def search_discovery(query: str):
 
 def generate_spot_metadata_rule_based(raw_name: str, cat: str, region: str, area: str, default_moods: list[str] = None) -> dict:
     """
-    카테고리 및 지역 정보를 바탕으로 0ms 만에 고품질 데이트 메타데이터를 규칙 기반으로 생성.
-    Groq API 호출을 제거하여 429 Rate Limit을 원천 차단하고 수집 속도를 100배 극대화합니다.
+    카테고리 및 지역 정보를 바탕으로 고품질 데이트 메타데이터를 에디토리얼 기반으로 생성.
     """
     slot = infer_slot(cat, raw_name)
     mood = default_moods or ["romantic", "trendy"]
     
     clean_cat = cat.split(">")[-1].strip() if ">" in cat else (cat or "데이트 명소")
-    summary = f"{region} {area}에서 즐기는 감성적인 {clean_cat} 데이트 코스"
+    summary = generate_curated_summary(raw_name, clean_cat, region, area)
     
     # 가격대 추론
     if any(k in cat for k in ["오마카세", "파인다이닝", "호텔", "스테이크", "코스"]):

@@ -52,19 +52,24 @@ def is_bad_summary(summary: str, name: str) -> bool:
     s = summary.strip()
     n = (name or "").strip()
     
-    if len(s) < 5:
+    if len(s) < 8:
         return True
     if s.lower() == n.lower():
         return True
     if re.match(r"^[a-zA-Z_\s,]+$", s):  # 순수 영문 태그 나열
         return True
     
+    # 판박이 더미 문구 패턴 블랙리스트
     bad_keywords = [
         "trendy", "romantic", "healing", "scenic", "luxury", "gourmet", "active", "cost_effective",
         "정보 없음", "설명이 없습니다", "골목의 남다른 감각", "남다른 감각과 로맨틱한 무드가",
-        "소소하지만 확실한 행복을 만끽할 수 있는 다정한 분위기의 공간이에요"
+        "소소하지만 확실한 행복을 만끽할 수 있는 다정한 분위기의 공간이에요",
+        "감성과 머무는 순간이", "머무는 순간이 편안한", "매력적인 데이트 장소예요",
+        "에서 즐기는 감성적인", "트렌디한 감성과 머무는", "로맨틱한 감성과 머무는",
+        "힐링 감성과 머무는", "미식 감성과 머무는", "뷰·전망 감성과 머무는",
+        "럭셔리 감성과 머무는", "레트로·전통 감성과 머무는", "액티비티 감성과 머무는"
     ]
-    if any(k in s.lower() for k in bad_keywords):
+    if any(k in s for k in bad_keywords):
         return True
     
     return False
@@ -104,7 +109,21 @@ def generate_curated_summary(name: str, cat: str, region: str, area: str, sig_it
         ]
         return sig_templates[id_hash % len(sig_templates)]
 
-    cat_lower = cat_label.lower()
+    cat_lower = (cat_label + " " + name).lower()
+
+    # 1. 골목 / 거리 / 시장 / 야장 / 포차형 스팟
+    if any(k in cat_lower for k in ["골목", "거리", "시장", "야시장", "포차", "야장", "로드", "단지"]):
+        street_pool = [
+            f"활기찬 골목 정취와 맛깔스러운 먹거리가 가득해 퇴근 후 둘만의 낭만을 만끽하기 좋아요.",
+            f"다채로운 먹거리와 북적이는 활기가 어우러져 발걸음 닿는 곳마다 즐거움이 넘치는 명소예요.",
+            f"정겨운 야외 테이블에 마주 앉아 시원한 술 한잔을 기울이며 하루의 피로를 날려보세요.",
+            f"골목 곳곳 숨은 맛집을 탐방하며 도란도란 정겨운 데이트를 즐기기 딱 좋은 곳이에요.",
+            f"소박하지만 깊은 내공의 맛과 사람 냄새 나는 따스한 분위기가 매력적인 거리예요.",
+            f"둘만의 소소하고 진솔한 대화를 나누며 정겨운 밤 정취를 느끼기 좋은 명소예요.",
+            f"맛있는 냄새와 활기찬 에너지가 가득해 언제 찾아도 기분 좋은 설렘을 선물해요.",
+        ]
+        return street_pool[id_hash % len(street_pool)]
+
     if any(k in cat_lower for k in ["카페", "커피", "베이커리", "디저트", "찻집"]):
         cafe_pool = [
             "차분하게 내려앉은 햇살 아래, 은은한 원두 향과 함께 둘만의 깊은 대화에 빠져들기 좋은 곳이에요.",
@@ -206,30 +225,18 @@ def generate_curated_summary(name: str, cat: str, region: str, area: str, sig_it
         return nature_pool[id_hash % len(nature_pool)]
 
     master_default_pool = [
-        "현지인과 여행자 모두에게 사랑받는 검증된 핫플레이스로 실패 없는 데이트를 약속해요.",
-        "남다른 개성과 트렌디한 감각으로 SNS에서 뜨겁게 주목받는 감성 스팟이에요.",
-        "정성 가득한 공간 연출과 따스한 온기로 방문객들의 호평이 이어지는 곳이에요.",
-        "세련된 감각과 아늑한 무드가 공존하여 머무는 내내 행복한 미소가 번지는 장소예요.",
-        "다정한 분위기 속에서 사랑하는 사람과 함께 특별한 추억을 아로새기기 좋아요.",
-        "특별한 날, 소중한 인연과 함께 오래도록 기억에 남을 하루를 완성해보세요.",
-        "한 번 발걸음하면 자꾸만 다시 찾고 싶어지는 매력적인 아지트예요.",
-        "기분 좋은 설렘과 편안함이 공존하여 둘만의 데이트를 더욱 풍성하게 만들어줘요.",
-        "감각적인 플레이팅과 정성스러운 분위기로 취향을 저격하는 핫플레이스예요.",
-        "도란도란 이야기를 나누며 서로에게 온전히 집중할 수 있는 따뜻한 쉼터예요.",
-        "트렌디한 감성과 편안한 무드가 어우러져 매 순간이 특별해지는 공간이에요.",
-        "사랑하는 사람의 미소를 바라보며 소중한 하루를 기록하기 좋은 추천 명소예요.",
-        "일상의 작은 쉼표가 되어주는 아늑하고 감성적인 데이트 코스예요.",
-        "정갈한 맛과 감각적인 분위기로 언제 찾아도 만족스러운 데이트 스팟이에요.",
-        "둘만의 특별한 날을 더욱 빛나고 근사하게 완성해주는 감성 명소예요.",
-        "소중한 사람과 함께 행복한 기억의 한 페이지를 채워가기 더없이 좋은 곳이에요.",
-        "머무는 것만으로도 기분 전환이 되는 매력 넘치는 데이트 장소예요.",
-        "둘만의 소소하고 따뜻한 온기를 나누며 잊지 못할 추억을 만들어보세요.",
-        "서로의 취향을 나누며 편안하게 쉬어갈 수 있는 감성 가득한 공간이에요.",
-        "사랑하는 사람과 손잡고 방문하기 딱 좋은 매력적인 추천 스팟이에요.",
+        f"감각적인 인테리어와 아늑한 분위기로 머무는 내내 기분 좋은 설렘을 채워주는 {loc or '도심 속'} 명소예요.",
+        f"소중한 사람과 함께 둘만의 소소하고 따뜻한 온기를 나누며 추억을 쌓기 좋은 공간이에요.",
+        f"정갈하고 세련된 무드가 공존하여 실패 없는 데이트를 약속하는 핫플레이스예요.",
+        f"도란도란 이야기를 나누며 온전히 서로에게 집중할 수 있는 다정한 분위기의 아지트예요.",
+        f"특별한 날, 소중한 인연과 함께 오래도록 기억에 남을 낭만적인 하루를 완성해보세요.",
+        f"한 번 발걸음하면 자꾸만 다시 찾고 싶어지는 매력 넘치는 추천 데이트 스팟이에요.",
+        f"사랑하는 사람의 미소를 바라보며 소중한 하루를 기록하기 더없이 좋은 곳이에요.",
+        f"일상의 작은 쉼표가 되어주는 아늑하고 감성 가득한 데이트 코스예요.",
     ]
     return master_default_pool[id_hash % len(master_default_pool)]
 
-def fix_all_spot_summaries(supabase_url: str, service_key: str, limit: int = 100):
+def fix_all_spot_summaries(supabase_url: str, service_key: str, limit: int = 5000):
     """DB 내 비정상 summary 스팟들을 조회하여 교정 수행"""
     if not supabase_url or not service_key:
         print("⚠️ Supabase 접속 정보가 없습니다.")
@@ -303,7 +310,7 @@ def fix_all_spot_summaries(supabase_url: str, service_key: str, limit: int = 100
         except Exception as ex:
             print(f"  ❌ 오류 발생 ({ex})\n")
 
-        time.sleep(0.5)
+        time.sleep(0.05)
 
     print(f"🎉 [완료] 총 {success_count}/{len(targets)}개 스팟 설명 교정 완료!")
 

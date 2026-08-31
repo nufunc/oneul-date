@@ -120,17 +120,105 @@ const SUPABASE_ANON_KEY =
   import.meta.env.VITE_SUPABASE_ANON_KEY ||
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5aHdobm56emZodHhqZXJuZml0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5MjAyNzcsImV4cCI6MjEwMjQ5NjI3N30.RobNIWS0QWNu6clFQuBHwVmr9gqbgBEUeWf8jwPCkns';
 
+const DB_NAME = 'oneul_date_cache';
+const STORE_NAME = 'spots_store';
+const CACHE_KEY = 'all_spots_v1';
+
+async function openCacheDB(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    if (typeof indexedDB === 'undefined') {
+      return reject(new Error('IndexedDB not supported'));
+    }
+    const request = indexedDB.open(DB_NAME, 1);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME);
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
 /**
- * Supabase DB에서 활성 스팟 목록을 실시간으로 가져옵니다.
- * 환경변수가 없거나 네트워크 오류 시 로컬 spots.json으로 안전하게 자동 폴백합니다.
+ * IndexedDB에 캐시된 스팟 목록을 반환합니다. (0ms에 가까운 속도로 즉시 로드)
  */
-export async function loadSpots(): Promise<Spot[]> {
+export async function getCachedSpots(): Promise<Spot[] | null> {
+  try {
+    const db = await openCacheDB();
+    return new Promise((resolve) => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.get(CACHE_KEY);
+      req.onsuccess = () => {
+        const val = req.result;
+        if (Array.isArray(val) && val.length > 0) {
+          resolve(val as Spot[]);
+        } else {
+          resolve(null);
+        }
+      };
+      req.onerror = () => resolve(null);
+    });
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 스팟 목록을 IndexedDB에 비동기 캐시 저장합니다.
+ */
+export async function saveSpotsToCache(spots: Spot[]): Promise<void> {
+  if (!Array.isArray(spots) || spots.length === 0) return;
+  try {
+    const db = await openCacheDB();
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    store.put(spots, CACHE_KEY);
+  } catch {
+    // 캐시 저장 실패 시 무시
+  }
+}
+
+/**
+ * 두 스팟 배열을 ID 기준으로 중복 없이 병합합니다.
+ */
+export function mergeSpots(base: Spot[], incoming: Spot[]): Spot[] {
+  const map = new Map<number, Spot>();
+  for (const s of base) {
+    if (s && typeof s.id === 'number') {
+      map.set(s.id, s);
+    }
+  }
+  for (const s of incoming) {
+    if (s && typeof s.id === 'number') {
+      map.set(s.id, s);
+    }
+  }
+  return Array.from(map.values());
+}
+
+/**
+ * Supabase DB에서 활성 스팟 목록을 가져옵니다.
+ * 특정 regionMatches(예: ['서울'] 또는 ['경기', '인천'])가 지정되면 해당 지역만 우선 경량 조회합니다.
+ */
+export async function loadSpots(regionMatches?: string[]): Promise<Spot[]> {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     return rawSpotsData as Spot[];
   }
 
   try {
-    const baseUrl = `${SUPABASE_URL.replace(/\/$/, '')}/rest/v1/spots?select=*&is_closed=eq.false&order=id.asc`;
+    let regionFilter = '';
+    if (regionMatches && regionMatches.length > 0) {
+      if (regionMatches.length === 1) {
+        regionFilter = `&region=eq.${encodeURIComponent(regionMatches[0])}`;
+      } else {
+        regionFilter = `&region=in.(${regionMatches.map((m) => `"${encodeURIComponent(m)}"`).join(',')})`;
+      }
+    }
+
+    const baseUrl = `${SUPABASE_URL.replace(/\/$/, '')}/rest/v1/spots?select=*&is_closed=eq.false${regionFilter}&order=id.asc`;
     const headers = {
       apikey: SUPABASE_ANON_KEY,
       Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
@@ -149,11 +237,13 @@ export async function loadSpots(): Promise<Spot[]> {
 
         // 전체가 1,000개 이하면 즉시 반환
         if (total <= firstBatch.length) {
-          console.log(`⚡ [Supabase Live] ${firstBatch.length}개 활성 스팟 로드 완료`);
+          if (!regionMatches || regionMatches.length === 0) {
+            saveSpotsToCache(firstBatch as Spot[]);
+          }
           return firstBatch as Spot[];
         }
 
-        // 1,000개 초과 시 나머지 청크 병렬 페칭 (offset/limit + order=id.asc 고정 쿼리)
+        // 1,000개 초과 시 나머지 청크 병렬 페칭
         const allSpots: Spot[] = [...firstBatch];
         const fetchPromises: Promise<Spot[]>[] = [];
 
@@ -173,7 +263,7 @@ export async function loadSpots(): Promise<Spot[]> {
           }
         });
 
-        // ⚡ ID 및 상호명 기준 중복 방어 필터링 (네트워크 청크 경계 중복 완벽 제거)
+        // ⚡ ID 기준 중복 방어 필터링
         const uniqueIdMap = new Map<number, Spot>();
         for (const s of allSpots) {
           if (s && s.id && !uniqueIdMap.has(s.id)) {
@@ -181,13 +271,14 @@ export async function loadSpots(): Promise<Spot[]> {
           }
         }
         const uniqueSpots = Array.from(uniqueIdMap.values());
-
-        console.log(`⚡ [Supabase Live] 총 ${uniqueSpots.length}개 전체 스팟 로드 완료 (전체: ${total}개, 중복 필터링 전: ${allSpots.length}개)`);
+        if (!regionMatches || regionMatches.length === 0) {
+          saveSpotsToCache(uniqueSpots);
+        }
         return uniqueSpots;
       }
     }
-  } catch (err) {
-    console.warn('⚠️ Supabase 연결 실패, 로컬 DB로 자동 폴백합니다:', err);
+  } catch {
+    // 조용히 폴백
   }
 
   return rawSpotsData as Spot[];

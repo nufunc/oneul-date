@@ -1,4 +1,4 @@
-const CACHE_NAME = 'oneul-date-v0.9.19';
+const CACHE_NAME = 'oneul-date-v0.9.20';
 const ASSETS = [
   './',
   './index.html',
@@ -10,9 +10,7 @@ const ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS).catch((err) => {
-        console.warn('[SW] Pre-caching warning:', err);
-      });
+      return cache.addAll(ASSETS).catch(() => {});
     })
   );
   self.skipWaiting();
