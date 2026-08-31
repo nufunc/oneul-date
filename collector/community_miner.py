@@ -13,8 +13,9 @@ import urllib.parse
 import time
 import random
 import re
-from supabase_worker import load_env, search_naver
-from discovery_engine import infer_slot
+from supabase_worker import (
+    load_env, search_naver, calculate_quality_score, is_polluted_header_name, derive_region_area
+)
 from category_filter import is_date_spot_category
 
 if hasattr(sys.stdout, 'reconfigure'):
@@ -179,6 +180,16 @@ def run_community_mining(supabase_url: str, service_key: str, max_discoveries: i
             except Exception:
                 pass
 
+            derived_reg, derived_area = derive_region_area(road_addr)
+            # 검색 쿼리의 목표 권역과 실제 검색된 주소의 권역이 완전히 다른 경우 (동명 상호 오탐) 스킵
+            if derived_reg and region and derived_reg != region:
+                if region not in ("전국", "전체"):
+                    continue
+
+            real_reg = derived_reg or region
+            real_area = derived_area or area
+            real_loc = f"{real_reg} {real_area}".strip()
+
             slot = infer_slot(cat, real_name)
             thum = top.get("thumUrl") or top.get("image") or top.get("imageUrl") or top.get("thumbUrl")
             x_coord = top.get("x") or top.get("lng")
@@ -189,13 +200,13 @@ def run_community_mining(supabase_url: str, service_key: str, max_discoveries: i
                 "id": spot_id,
                 "name": real_name,
                 "slot": slot,
-                "region": region,
-                "area": area,
+                "region": real_reg,
+                "area": real_area,
                 "address": road_addr,
                 "mood": moods,
-                "location": f"{region} {area}",
+                "location": real_loc,
                 "price": "2~4만원대",
-                "summary": f"커뮤니티 추천 {region} {area}의 찐 로컬 {cat or '데이트 명소'}",
+                "summary": f"커뮤니티 추천 {real_reg} {real_area}의 찐 로컬 {cat or '데이트 명소'}",
                 "category": cat,
                 "image_url": thum,
                 "lat": float(y_coord) if y_coord else None,

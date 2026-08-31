@@ -245,6 +245,11 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
             batch_seen_names.add(real_name)
 
             derived_reg, derived_area = derive_region_area(road_addr)
+            # 검색 쿼리의 목표 권역과 실제 검색된 주소의 권역이 완전히 다른 경우 (동명 상호 오탐) 스킵
+            if derived_reg and region and derived_reg != region:
+                if region not in ("전국", "전체"):
+                    continue
+
             real_reg = derived_reg or region
             real_area = derived_area or area
             real_loc = f"{real_reg} {real_area}".strip()
