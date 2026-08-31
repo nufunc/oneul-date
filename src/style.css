@@ -3920,14 +3920,18 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   flex: 1;
 }
 
-/* 비주얼 카테고리 스크롤 칩 바 */
+/* 2줄 콤팩트 가로 스크롤 비주얼 카테고리 칩 그리드 */
 .spot-category-scroll {
-  display: flex;
-  gap: 6px;
+  display: grid;
+  grid-template-rows: repeat(2, auto);
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
+  gap: 7px 8px;
   overflow-x: auto;
   scrollbar-width: none;
-  padding: 4px 0 2px;
+  padding: 4px 2px 6px;
   -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
 }
 .spot-category-scroll::-webkit-scrollbar {
   display: none;
@@ -3937,7 +3941,7 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 7px 13px;
+  padding: 6px 12px;
   border-radius: var(--radius-full);
   border: 1px solid var(--color-border);
   background: var(--color-surface);
@@ -3947,8 +3951,9 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   white-space: nowrap;
   cursor: pointer;
   transition: all var(--transition-fast);
-  flex-shrink: 0;
   box-shadow: var(--shadow-sm);
+  scroll-snap-align: start;
+  user-select: none;
 }
 
 .spot-category-chip:hover {
