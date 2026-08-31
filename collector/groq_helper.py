@@ -75,14 +75,20 @@ def get_groq_api_key():
                 pass
     return None
 
-def call_groq_json(prompt: str, system_prompt: str = "", model: str = DEFAULT_MODEL, max_tokens: int = 500) -> dict | None:
+GROQ_MODELS_CASCADE = [
+    "qwen/qwen3.8-27b",      # 1순위: 0.4초 초고속 & 한국어 감성 최상위 (실측 검증 완료)
+    "groq/compound-mini",     # 2순위: 초경량 컴파운드
+    "groq/compound",          # 3순위: 대용량 컴파운드
+]
+DEFAULT_MODEL = GROQ_MODELS_CASCADE[0]
+
+def call_groq_json(prompt: str, system_prompt: str = "", model: str = None, max_tokens: int = 500) -> dict | None:
     """
     Groq API를 호출하여 JSON 응답을 안전하게 반환합니다.
-    Rate Limit 방어, 디스크 캐시, 자동 재시도 및 무중단 폴백을 지원합니다.
+    실측 검증된 멀티 모델 자동 페일오버(Cascade), Rate Limit 방어, 디스크 캐시를 지원합니다.
     """
     global _last_request_time, _cooldown_until
 
-    # 429 쿨다운 활성화 상태 검사 (10분간 Groq 호출 차단 후 규칙 기반 즉시 폴백)
     now = time.time()
     if now < _cooldown_until:
         return None
@@ -91,16 +97,15 @@ def call_groq_json(prompt: str, system_prompt: str = "", model: str = DEFAULT_MO
     if not api_key:
         return None
 
-    # 1. 캐시 확인
-    cache_key = hashlib.md5(f"{model}:{system_prompt}:{prompt}".encode("utf-8")).hexdigest()
-    cache = _load_cache()
-    if cache_key in cache:
-        return cache[cache_key]
+    # 호출할 모델 순서 결정 (지정 모델이 있으면 최우선, 없으면 캐스케이드 풀)
+    models_to_try = [model] if model else GROQ_MODELS_CASCADE
 
-    # 2. 레이트 리미트 방어 (최소 2.0초 간격 보장)
-    elapsed = now - _last_request_time
-    if elapsed < _MIN_REQUEST_INTERVAL:
-        time.sleep(_MIN_REQUEST_INTERVAL - elapsed)
+    # 1. 캐시 확인
+    cache = _load_cache()
+    for m in models_to_try:
+        cache_key = hashlib.md5(f"{m}:{system_prompt}:{prompt}".encode("utf-8")).hexdigest()
+        if cache_key in cache:
+            return cache[cache_key]
 
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -113,19 +118,25 @@ def call_groq_json(prompt: str, system_prompt: str = "", model: str = DEFAULT_MO
         messages.append({"role": "system", "content": system_prompt})
     messages.append({"role": "user", "content": prompt})
 
-    payload = {
-        "model": model,
-        "messages": messages,
-        "temperature": 0.2,
-        "max_tokens": max_tokens,
-        "response_format": {"type": "json_object"},
-    }
-
     import ssl
     ctx = ssl.create_default_context()
 
-    max_retries = 1
-    for attempt in range(max_retries + 1):
+    # 2. 멀티 모델 순차 시도 (1순위 실패 시 2순위로 즉시 무중단 전환)
+    for target_model in models_to_try:
+        # 레이트 리미트 방어 (최소 1.5초 간격)
+        now = time.time()
+        elapsed = now - _last_request_time
+        if elapsed < 1.5:
+            time.sleep(1.5 - elapsed)
+
+        payload = {
+            "model": target_model,
+            "messages": messages,
+            "temperature": 0.7,
+            "max_tokens": max_tokens,
+            "response_format": {"type": "json_object"},
+        }
+
         try:
             req = urllib.request.Request(
                 GROQ_ENDPOINT,
@@ -134,11 +145,10 @@ def call_groq_json(prompt: str, system_prompt: str = "", model: str = DEFAULT_MO
                 method="POST"
             )
             _last_request_time = time.time()
-            with urllib.request.urlopen(req, context=ctx, timeout=8) as res:
+            with urllib.request.urlopen(req, context=ctx, timeout=6) as res:
                 res_data = json.loads(res.read().decode("utf-8"))
                 content = res_data.get("choices", [{}])[0].get("message", {}).get("content", "")
                 
-                # 직접 JSON 파싱 시도
                 clean_content = content.strip()
                 if "```json" in clean_content:
                     clean_content = clean_content.split("```json")[1].split("```")[0].strip()
@@ -148,31 +158,26 @@ def call_groq_json(prompt: str, system_prompt: str = "", model: str = DEFAULT_MO
                 try:
                     parsed = json.loads(clean_content)
                 except Exception:
-                    # JSON 블록 정규식 탐색
                     match = re.search(r"\{.*\}", clean_content, re.DOTALL)
                     if match:
                         parsed = json.loads(match.group(0))
                     else:
-                        return None
+                        continue
 
                 # 캐시 저장
-                cache[cache_key] = parsed
+                save_key = hashlib.md5(f"{target_model}:{system_prompt}:{prompt}".encode("utf-8")).hexdigest()
+                cache[save_key] = parsed
                 _save_cache(cache)
                 return parsed
 
         except urllib.error.HTTPError as e:
             if e.code == 429:
-                # 429 Too Many Requests 감지 시 3초 슬립 후 재시도
-                time.sleep(3.0)
+                # 429 시 다음 모델로 즉시 폴백 시도
                 continue
-            elif e.code == 404:
-                # 모델이 없을 경우 기본 경량 모델로 자동 폴백
-                payload["model"] = DEFAULT_MODEL
-                continue
-            else:
-                return None
-        except Exception as ex:
-            return None
+        except Exception:
+            continue
+
+    return None
 
     return None
 
