@@ -530,6 +530,31 @@ function isCourseEligible(spot: Spot): boolean {
 }
 
 /**
+ * ⚡ 스팟 목록 전수 중복 제거 (ID 및 정제 상호명+지역 기준 최고 품질 1개만 유지)
+ */
+function deduplicateSpotList(spots: Spot[]): Spot[] {
+  const seenIds = new Set<number>();
+  const seenKeys = new Set<string>();
+  const result: Spot[] = [];
+
+  for (const s of spots) {
+    if (!s || s.is_closed) continue;
+    if (seenIds.has(s.id)) continue;
+    seenIds.add(s.id);
+
+    // 상호명 정제: 괄호/특수문자/지점명 공통 처리
+    const cleanName = s.name.replace(/\([^)]*\)/g, '').replace(/\[[^\]]*\]/g, '').trim().toLowerCase();
+    const areaKey = `${cleanName}__${s.region || ''}__${s.area || ''}`;
+    if (seenKeys.has(areaKey)) continue;
+    seenKeys.add(areaKey);
+
+    result.push(s);
+  }
+
+  return result;
+}
+
+/**
  * 존 내 후보가 0건이라 광역 전체로 완화됐을 때 숙박에 허용하는 앵커 반경 (km).
  * 실측 기준: 성수·문래·한남은 3.6~8.8km 안에 숙소가 있어 그대로 채워지고,
  * 청주(최근접 33km)·광주(최근접 76km)는 후보 없음으로 떨어져 엉뚱한 숙소 대신 안내 카드가 뜬다.
@@ -3942,8 +3967,8 @@ function renderSpotDiscovery(): void {
     );
   }
 
-  // 2. 유효 스팟 필터링 (폐업 및 광역 더미 제외)
-  let matchedSpots = spots.filter((s) => !s.is_closed && isCourseEligible(s));
+  // 2. 유효 스팟 필터링 (폐업, 광역 더미 제외 및 상호명/ID 2중 중복 완벽 제거)
+  let matchedSpots = deduplicateSpotList(spots.filter((s) => !s.is_closed && isCourseEligible(s)));
 
   // 스팟 전용 검색어 필터 적용 (지역명, 핫플, 분위기, 메뉴 등)
   const q = state.spotSearchQuery.trim();

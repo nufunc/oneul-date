@@ -130,7 +130,7 @@ export async function loadSpots(): Promise<Spot[]> {
   }
 
   try {
-    const baseUrl = `${SUPABASE_URL.replace(/\/$/, '')}/rest/v1/spots?select=*&is_closed=eq.false`;
+    const baseUrl = `${SUPABASE_URL.replace(/\/$/, '')}/rest/v1/spots?select=*&is_closed=eq.false&order=id.asc`;
     const headers = {
       apikey: SUPABASE_ANON_KEY,
       Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
@@ -153,7 +153,7 @@ export async function loadSpots(): Promise<Spot[]> {
           return firstBatch as Spot[];
         }
 
-        // 1,000개 초과 시 나머지 청크 병렬 페칭 (offset/limit 표준 쿼리)
+        // 1,000개 초과 시 나머지 청크 병렬 페칭 (offset/limit + order=id.asc 고정 쿼리)
         const allSpots: Spot[] = [...firstBatch];
         const fetchPromises: Promise<Spot[]>[] = [];
 
@@ -173,8 +173,17 @@ export async function loadSpots(): Promise<Spot[]> {
           }
         });
 
-        console.log(`⚡ [Supabase Live] 총 ${allSpots.length}개 전체 스팟 로드 완료 (전체: ${total}개)`);
-        return allSpots;
+        // ⚡ ID 및 상호명 기준 중복 방어 필터링 (네트워크 청크 경계 중복 완벽 제거)
+        const uniqueIdMap = new Map<number, Spot>();
+        for (const s of allSpots) {
+          if (s && s.id && !uniqueIdMap.has(s.id)) {
+            uniqueIdMap.set(s.id, s);
+          }
+        }
+        const uniqueSpots = Array.from(uniqueIdMap.values());
+
+        console.log(`⚡ [Supabase Live] 총 ${uniqueSpots.length}개 전체 스팟 로드 완료 (전체: ${total}개, 중복 필터링 전: ${allSpots.length}개)`);
+        return uniqueSpots;
       }
     }
   } catch (err) {
