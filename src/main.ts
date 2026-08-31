@@ -4429,15 +4429,12 @@ function renderOverlay(): void {
               isAllTab
                 ? `
               <div class="subzones-header">
-                <span class="subzones-title">전체</span>
-                <button class="btn-toggle-all-zones" id="btn-select-all-korea">
-                  ${state.regions.length === 0 ? '전체 선택됨' : '전체 선택'}
-                </button>
+                <span class="subzones-title">🗺️ 대한민국 전역</span>
               </div>
               <div class="subzones-grid">
                 <label class="zone-check-item zone-check-all ${state.regions.length === 0 ? 'is-checked' : ''}" id="btn-select-all-korea-chip" style="cursor: pointer;">
                   <input type="checkbox" class="zone-checkbox" ${state.regions.length === 0 ? 'checked' : ''} />
-                  <span class="zone-label">🗺️ 전체</span>
+                  <span class="zone-label">🗺️ 전국 전체</span>
                 </label>
               </div>
               <div class="all-regions-card" style="margin-top: var(--space-3);">
@@ -4473,9 +4470,6 @@ function renderOverlay(): void {
                 : `
               <div class="subzones-header">
                 <span class="subzones-title">${REGIONS.find((r) => r.key === activeReg)?.label || '서울'} 핫플레이스</span>
-                <button class="btn-toggle-all-zones" id="btn-toggle-all-zones">
-                  ${subZonesInTab.length > 0 && subZonesInTab.every((z) => state.subZones.includes(z.key)) ? '지역 전체 해제' : '지역 전체 선택'}
-                </button>
               </div>
               <div class="subzones-grid">
                 <!-- 최상단: 해당 권역 전체(모든 시·군/구) 일괄 선택 칩 -->
@@ -4518,21 +4512,25 @@ function renderOverlay(): void {
     root.querySelector('#overlay-backdrop')!.addEventListener('click', () => closeOverlay());
     root.querySelector('#overlay-close')!.addEventListener('click', () => closeOverlay());
 
-    // 지역 탭 클릭
+    // 지역 탭 클릭 (전체 클릭 시 자동으로 전국 기본 선택)
     root.querySelectorAll<HTMLButtonElement>('.region-tab-item').forEach((tabBtn) => {
       tabBtn.addEventListener('click', () => {
-        state.activeRegionTab = tabBtn.dataset.regionTab || 'SEOUL';
+        const tabKey = tabBtn.dataset.regionTab || 'SEOUL';
+        state.activeRegionTab = tabKey;
+        if (tabKey === 'ALL') {
+          state.regions = [];
+          state.subZones = [];
+        }
         renderOverlay();
       });
     });
 
-    // 전국 모드 선택 버튼 & 칩
+    // 전국 모드 칩 클릭
     const selectAllKorea = () => {
       state.regions = [];
       state.subZones = [];
       renderOverlay();
     };
-    root.querySelector('#btn-select-all-korea')?.addEventListener('click', selectAllKorea);
     root.querySelector('#btn-select-all-korea-chip')?.addEventListener('click', (e) => {
       e.preventDefault();
       selectAllKorea();
@@ -4561,9 +4559,8 @@ function renderOverlay(): void {
       renderOverlay();
     };
 
-    // 지역 전체 선택/해제 상단 버튼 및 전체 선택 칩 이벤트 연동
-    root.querySelector('#btn-toggle-all-zones')?.addEventListener('click', toggleAllZonesInActiveRegion);
-    root.querySelector('.zone-check-all')?.addEventListener('click', (e) => {
+    // 해당 권역 전체 칩 클릭 이벤트 연동
+    root.querySelector('.zone-check-all[data-zone-all]')?.addEventListener('click', (e) => {
       e.preventDefault();
       toggleAllZonesInActiveRegion();
     });
@@ -4599,12 +4596,14 @@ function renderOverlay(): void {
           state.regions = state.regions.filter((r) => r !== activeReg);
         }
 
-        // 전체 선택/해제 버튼 라벨 실시간 갱신
-        const toggleBtn = root.querySelector<HTMLButtonElement>('#btn-toggle-all-zones');
-        if (toggleBtn) {
-          const allNowChecked =
-            subZonesInTab.length > 0 && subZonesInTab.every((z) => state.subZones.includes(z.key));
-          toggleBtn.textContent = allNowChecked ? '지역 전체 해제' : '지역 전체 선택';
+        // 해당 권역 전체 칩 체크 상태 실시간 동기화
+        const allNowChecked =
+          subZonesInTab.length > 0 && subZonesInTab.every((z) => state.subZones.includes(z.key));
+        const allCheckChip = root.querySelector<HTMLLabelElement>('.zone-check-all[data-zone-all]');
+        if (allCheckChip) {
+          allCheckChip.classList.toggle('is-checked', allNowChecked);
+          const allCb = allCheckChip.querySelector<HTMLInputElement>('.zone-checkbox');
+          if (allCb) allCb.checked = allNowChecked;
         }
 
         // 좌측 탭 인디케이터 뱃지 동기화
