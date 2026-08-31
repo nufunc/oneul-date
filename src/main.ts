@@ -1139,12 +1139,6 @@ function mapQuery(spot: Spot): string {
     }
   }
 
-  // 6-1. 3단어 이상의 복합 패키지명 상호의 경우 앞부분 핵심 상호 우선 추출 (예: '골든블루마리나 리치몬드 ...' -> '골든블루마리나')
-  const words = cleanName.split(/\s+/);
-  if (words.length >= 3 && words[0].length >= 3) {
-    cleanName = words.slice(0, 2).join(' ');
-  }
-
   // 7. 특수기호 제거 (알파벳, 한글, 숫자, 공백, 온점, 하이픈 외)
   cleanName = cleanName
     .replace(/[^\w\s가-힣0-9.-]/g, ' ')
@@ -1159,10 +1153,19 @@ function mapQuery(spot: Spot): string {
     }
   }
 
-  // 8. 스마트 지역 결합 로직 (시/군/구 또는 동/읍/면 단위로만 스마트 결합, 번지수 절대 배제)
+  // 9. 이미 충분히 유니크한 상호명(3단어 이상, 고유 지명/시설명 포함 등)은 지역명 덧붙임을 생략하여 네이버 검색 실패 방지
+  const words = cleanName.split(/\s+/);
+  const hasUniqueFacilitySuffix = /(착륙장|활공장|전망대|해수욕장|수목원|휴양림|생태공원|국립공원|도립공원|군립공원|미술관|박물관|케이블카|짚라인|모노레일|선착장|유원지|테마파크|글램핑|캠핑장|스타디움|경기장|천문대|동물원|식물원)$/.test(cleanName);
+  const isAlreadyUnique = words.length >= 3 || (words.length >= 2 && cleanName.length >= 7) || hasUniqueFacilitySuffix;
+
+  if (isAlreadyUnique) {
+    return cleanName || spot.name.trim();
+  }
+
+  // 10. 단일 단어/짧은 상호명(예: '올리바가든', '오비스트로', '스튜디오레이크')인 경우에만 스마트 지역 결합
   let candidateArea: string | null = null;
 
-  // 8-0. spot.location 내 주요 명소/핵심 지명 우선 추출 (예: '영종도', '성수', '한남', '해운대')
+  // 10-0. spot.location 내 주요 명소/핵심 지명 우선 추출 (예: '영종도', '성수', '한남', '해운대')
   if (spot.location) {
     const subLocMatch = spot.location.match(/(영종도|을왕리|월미도|송도|청라|행궁동|성수|한남|연남|서촌|북촌|익선|송리단|문래|대부도|제부도|안목|경포|초당|해운대|광안리|전포)/);
     if (subLocMatch) {
@@ -1170,7 +1173,7 @@ function mapQuery(spot: Spot): string {
     }
   }
 
-  // 8-1. spot.area (시·군·구 단위)
+  // 10-1. spot.area (시·군·구 단위)
   if (!candidateArea) {
     const spArea = spotArea(spot);
     if (spArea && spArea !== '전국' && spArea !== '수도권') {
@@ -1178,7 +1181,7 @@ function mapQuery(spot: Spot): string {
     }
   }
 
-  // 8-2. spot.address에서 시/군/구 또는 동/읍/면만 깔끔하게 추출 (번지수, 도로번호 배제)
+  // 10-2. spot.address에서 시/군/구 또는 동/읍/면만 깔끔하게 추출 (번지수, 도로번호 배제)
   if (!candidateArea && spot.address && spot.address.trim().length > 0) {
     const addr = spot.address.trim();
     const guMatch = addr.match(/([가-힣]+(?:시|군|구))/g);
@@ -1190,7 +1193,7 @@ function mapQuery(spot: Spot): string {
     }
   }
 
-  // 8-3. spot.location에서 유효 행정구역 추출 (시/군/구/동/읍/면)
+  // 10-3. spot.location에서 유효 행정구역 추출 (시/군/구/동/읍/면)
   if (!candidateArea && spot.location && spot.location !== '전국' && spot.location !== '수도권') {
     const locMatch = spot.location.match(/([가-힣0-9]+(?:시|군|구|동|읍|면))/);
     if (locMatch && !['전국', '수도권', '서울시', '경기도', '인천시', '강원도', '충청도', '전라도', '경상도', '제주도'].includes(locMatch[1])) {
@@ -1198,7 +1201,7 @@ function mapQuery(spot: Spot): string {
     }
   }
 
-  // 8-4. 괄호 힌트에서 영문 지명 매핑 (Hanam -> 하남, Icheon -> 이천 등)
+  // 10-4. 괄호 힌트에서 영문 지명 매핑 (Hanam -> 하남, Icheon -> 이천 등)
   if (!candidateArea && bracketHints.length > 0) {
     const hintText = bracketHints.join(' ');
     if (/hanam/i.test(hintText)) candidateArea = '하남';
@@ -1211,15 +1214,14 @@ function mapQuery(spot: Spot): string {
     else if (/jeju/i.test(hintText)) candidateArea = '제주';
   }
 
-  // 8-5. spot.region 폴백 (광역명 제외)
+  // 10-5. spot.region 폴백 (광역명 제외)
   if (!candidateArea && spot.region && !['전국', '수도권', '서울', '경기', '인천', '강원', '충청', '영남', '호남', '제주'].includes(spot.region)) {
     candidateArea = spot.region.trim();
   }
 
-  // 8-6. 모호한 전국 공통 구 이름('중구', '서구', '동구', '남구', '북구', '강서구') 방어 처리
+  // 10-6. 모호한 전국 공통 구 이름('중구', '서구', '동구', '남구', '북구', '강서구') 방어 처리
   const AMBIGUOUS_GU = ['중구', '서구', '동구', '남구', '북구', '강서구'];
   if (candidateArea && AMBIGUOUS_GU.includes(candidateArea)) {
-    // 상호명이 2단어 이상이거나 유니크한 경우 모호한 구 이름 단독 결합은 검색을 망치므로 생략하거나 시·도 접두사를 결합
     if (spot.region && ['서울', '인천', '부산', '대구', '대전', '광주', '울산'].includes(spot.region)) {
       candidateArea = `${spot.region} ${candidateArea}`;
     } else {
@@ -1227,7 +1229,7 @@ function mapQuery(spot: Spot): string {
     }
   }
 
-  // 8-7. 중복 결합 방지 검사 및 결합
+  // 10-7. 중복 결합 방지 검사 및 결합
   if (candidateArea) {
     const simpleArea = candidateArea.replace(/(시|군|구|동|읍|면)$/, '');
     const alreadyHasArea =
@@ -1244,7 +1246,7 @@ function mapQuery(spot: Spot): string {
     }
   }
 
-  // 8-8. 일반명사/업종명 형태의 상호명인 경우 동/도로명 정밀 결합 (검색 결과 수백 개 발산 방지)
+  // 10-8. 일반명사/업종명 형태의 상호명인 경우 동/도로명 정밀 결합 (검색 결과 수백 개 발산 방지)
   const GENERIC_NOUNS = ['요리', '다이닝', '식당', '카페', '커피', '베이커리', '바', '펍', '파스타', '스테이크', '브런치', '공방', '스튜디오', '글램핑', '펜션', '야장', '포차'];
   const isGenericName = GENERIC_NOUNS.some((gn) => cleanName === gn || cleanName.includes(gn)) || cleanName.length <= 4;
 
