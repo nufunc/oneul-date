@@ -95,16 +95,18 @@ def fetch_tourapi_spots(api_key: str, area_code: str = "1", content_type_id: str
 
     return []
 
-def check_spot_exists(supabase_url: str, headers: dict, content_id: str, name: str) -> bool:
-    """상호명으로 이미 DB에 존재하는지 확인"""
+def check_spot_exists(supabase_url: str, headers: dict, content_id: str, name: str, addr: str = "") -> bool:
+    """상호명 및 주소로 이미 DB에 존재하는지 확인 (중복 원천 차단)"""
     clean_name = re.sub(r'\(.*?\)|\[.*?\]', '', name).strip()
-    encoded = urllib.parse.quote(clean_name)
-    url_name = f"{supabase_url}/rest/v1/spots?select=id&name=eq.{encoded}"
+    encoded = urllib.parse.quote(name)
+    encoded_clean = urllib.parse.quote(clean_name)
+    url_name = f"{supabase_url}/rest/v1/spots?select=id,name,address&or=(name.eq.{encoded},name.eq.{encoded_clean})&limit=1"
     req_name = urllib.request.Request(url_name, headers=headers)
     try:
         with urllib.request.urlopen(req_name, timeout=3) as res:
             rows = json.loads(res.read().decode('utf-8'))
-            return len(rows) > 0
+            if rows and len(rows) > 0:
+                return True
     except Exception:
         pass
 
@@ -143,6 +145,7 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
     print("🏛️ [TourAPI Miner] 한국관광공사 공공데이터 4.0 순회 마이닝 시작...")
 
     discovered_spots = []
+    batch_seen_names = set()
     
     area_codes = list(AREA_CODE_MAP.keys())
     import random
@@ -164,12 +167,18 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                 if not title or not content_id:
                     continue
 
+                if title in batch_seen_names or re.sub(r'\(.*?\)|\[.*?\]', '', title).strip() in batch_seen_names:
+                    continue
+
                 is_valid, reason = is_date_spot_category(ctype_name, title)
                 if not is_valid and "블랙리스트" in reason:
                     continue
 
-                if check_spot_exists(supabase_url, api_headers, content_id, title):
+                if check_spot_exists(supabase_url, api_headers, content_id, title, addr1):
                     continue
+
+                batch_seen_names.add(title)
+                batch_seen_names.add(re.sub(r'\(.*?\)|\[.*?\]', '', title).strip())
 
                 derived_region, derived_area = derive_region_area(addr1)
                 region = derived_region or AREA_CODE_MAP.get(area_code, ("서울", ["서울"]))[1][0]
