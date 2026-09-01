@@ -118,7 +118,7 @@ const SUPABASE_URL =
   import.meta.env.VITE_SUPABASE_URL || 'https://uyhwhnnzzfhtxjernfit.supabase.co';
 const SUPABASE_ANON_KEY =
   import.meta.env.VITE_SUPABASE_ANON_KEY ||
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5aHdobm56emZodHhqZXJuZml0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5MjAyNzcsImV4cCI6MjEwMjQ5NjI3N30.RobNIWS0QWNu6clFQuBHwVmr9gqbgBEUeWf8jwPCkns';
+  'sb_publishable_WVe2QK8hjecachXgTqOsJA_GVfTzxba';
 
 const DB_NAME = 'oneul_date_cache';
 const STORE_NAME = 'spots_store';
