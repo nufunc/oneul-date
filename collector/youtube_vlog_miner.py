@@ -411,9 +411,14 @@ STOPWORDS = [
     "오늘", "이번", "여행", "브이로그", "영상", "더보기", "인스타그램", "협찬",
     "광고", "구독", "좋아요", "정보", "위치", "타임라인", "timestamp", "쇼핑", "시작",
     "아이스", "가격", "메뉴", "주문", "예약", "주소", "영업시간", "전화",
+    "입장료", "이용료", "관람료", "주차료", "체류시간", "동선", "소요시간", "환불", "취소",
     "데이트", "코스", "추천", "핫플", "숙소", "일정", "준비물", "경비", "총정리",
     "이동", "출발", "도착", "점심", "저녁", "아침", "야식", "간식", "휴식", "산책",
     "문의", "협업", "비즈니스", "메일", "이메일", "채널", "구독자", "댓글", "링크",
+    # 영상 목차/식물설명/소개 찌꺼기 방어
+    "특징", "꽃말", "생태환경", "생태", "이름유래", "유래", "뿌리", "꽃길", "내부", "카페내부",
+    "타임스탬프", "타임라인", "목차", "하이라이트", "꿀팁", "주의사항", "주차정보",
+    "영업안내", "메뉴판", "가격표", "커뮤니티센타", "커뮤니티센터",
     # 여행 보통명사 — "파주 놀거리", "대전 가볼만한곳" 류의 검색어형 후보 차단용
     "국내", "놀거리", "볼거리", "먹거리", "즐길거리", "가볼만한곳", "가볼만한", "가볼만",
     "총정리", "당일치기", "나들이", "근교", "여행지", "관광지", "나홀로", "명소",
@@ -434,6 +439,8 @@ NON_SPOT_TOKENS = {
     "더운", "추운", "따뜻한", "시원한", "예쁜", "이쁜", "힙한", "감성", "요즘", "새로",
     "실내", "야외", "근교", "시내", "전국", "국내", "여기", "거기", "저기", "이곳", "그곳",
     "최저가", "할인", "쿠폰", "증정", "특가", "구매", "판매", "링크", "이벤트", "기간",
+    # 비상호 목차/이슈 토큰
+    "특징", "꽃말", "생태", "유래", "뿌리", "내부", "타임스탬프", "타임라인", "저격", "폭로", "논란", "참교육",
 }
 
 # 상호명이 아니라 문장임을 드러내는 말미 명사
@@ -442,6 +449,7 @@ TAIL_NOUNS = {
     "방법", "느낌", "기분", "시간", "분위기", "추천", "정리", "모음", "리스트", "총정리",
     "코스", "일정", "계획", "준비", "이야기", "생각", "기록", "일상", "브이로그",
     "쇼핑", "구경", "투어", "나들이", "산책", "구성", "가격", "메뉴", "정보", "후기들",
+    "특징", "꽃말", "환경", "유래", "뿌리", "꽃길", "내부", "스탬프", "라인", "센타", "센터",
 }
 
 # 도로명 주소 패턴
@@ -1002,22 +1010,26 @@ ORDINAL_PREFIX_RE = re.compile(
     re.IGNORECASE
 )
 NUM_PREFIX_RE = re.compile(
-    r'^(?:[✨💡📍📌🏠☕🍽️🏛️🌳🌿🎪▶✔·\s]*)(?:[①-⑳❶-❿⑴-⒇]|\d+[\.\)\-:]|[\[\(]\d+[\]\)])\s*',
+    r'^(?:[✨💡📍📌🏠☕🍽️🏛️🌳🌿🎪▶✔·\s]*)(?:[①-⑳❶-❿⑴-⒇]|\d+[\.\)\-:\s]|[\[\(]\d+[\]\)])\s*',
     re.IGNORECASE
 )
 
 def clean_vlog_spot_name(line: str) -> str:
-    """타임스탬프/번호 리스트 라인에서 원문자(①, ❶) 및 코스 수식어를 걷어내고 순수 상호명만 추출"""
+    """타임스탬프/번호 리스트 라인에서 원문자(①, ❶), 잔여 타임스탬프 숫자 및 코스 수식어를 걷어내고 순수 상호명만 추출"""
     if not line:
         return ""
     cleaned = line.strip()
+    # 0. 잔여 타임스탬프 (예: '01:30 메타세콰이어길', '12:40 1. 서울숲')
+    cleaned = re.sub(r'^(?:[0-9]{1,2}:[0-9]{2}(?::[0-9]{2})?)\s*[-~:•·]?\s*', '', cleaned).strip()
     # 1. 'MZ피디의 문래동 코스 ① 포토바이문래' or '1일차 점심 1. 성수다락'
     cleaned = PREFIX_PREFIX_RE.sub('', cleaned).strip()
     # 2. '✨ 첫번째 코스 - 런던베이글뮤지엄'
     cleaned = ORDINAL_PREFIX_RE.sub('', cleaned).strip()
     # 3. '📍 1. 어니언 안국' or '① 러스트베이커리'
     cleaned = NUM_PREFIX_RE.sub('', cleaned).strip()
-    # 4. 앞뒤 장식 기호 정리
+    # 4. 잔여 숫자 접두사 (예: '30 메타세콰이어길', '00 인트로', '12 서울월드컵경기장', '49 커뮤니티센타')
+    cleaned = re.sub(r'^\d{1,3}[\s\.:\-_]+', '', cleaned).strip()
+    # 5. 앞뒤 장식 기호 정리
     cleaned = cleaned.strip(' -~:•·📍📌🏠☕🍽️🏛️🌳🌿🎪▶✔*#')
     return cleaned
 
@@ -1257,8 +1269,8 @@ def extract_region_hints(text: str) -> list[str]:
 
 
 
-# 지점/본점 접미 (상호명 비교 시 제거)
-BRANCH_SUFFIX_RE = re.compile(r'(본점|직영점|지점|[0-9]{1,2}호점|점포)$')
+# 지점/본점 접미 (상호명 비교 시 제거 — 예: 성수점, 강릉점, 본점, 2호점 등)
+BRANCH_SUFFIX_RE = re.compile(r'([가-힣a-zA-Z0-9]{1,6}점|본점|직영점|지점|[0-9]{1,2}호점|점포)$')
 
 # 후보 앞뒤에 흔히 붙는 업종 일반어 (핵심어 비교 시 제거)
 GENERIC_NAME_AFFIX = ("카페", "cafe", "맛집", "식당", "레스토랑", "베이커리", "브런치")
@@ -1281,13 +1293,7 @@ def _strip_generic(s: str) -> str:
 
 
 def _token_aligned(inner: str, outer_tokens: list[str]) -> bool:
-    """inner(공백제거)가 outer 의 앞 k어절 또는 뒤 k어절과 정확히 일치하는가.
-
-    '어절 경계 포함'만 인정한다. 이 규칙이 아래 오등록을 전부 걸러낸다.
-      경품 ⊂ 경품왕국 / 발표 ⊂ 편선생스피치발표 / 옥경이네 ⊂ 옥경이네건생선
-    반면 정상 매칭은 살린다.
-      블루보틀 ≡ '블루보틀 성수'[앞 1어절] / '구월의 유요' ≡ 책방 '구월의유요'[뒤 1어절]
-    """
+    """inner(공백제거)가 outer 의 앞 k어절 또는 뒤 k어절과 정확히 일치하는가."""
     for k in range(1, len(outer_tokens) + 1):
         if _norm_name("".join(outer_tokens[:k])) == inner:
             return True
@@ -1297,13 +1303,7 @@ def _token_aligned(inner: str, outer_tokens: list[str]) -> bool:
 
 
 def is_name_match(candidate: str, official_name: str) -> bool:
-    """지도 검색 결과 상호명이 후보 키워드와 실제로 연관되는지 검증.
-
-    v3.5 강화 — 기존 규칙은 '부분문자열이면 통과'라 지역 힌트가 없을 때
-    아래 오등록을 그대로 통과시켰다.
-      구움당 → 구움미(경기 군포) / 카페 오프 → 카페나드오프(경기 안산)
-      옥경이네 → 옥경이네건생선(서울 중구) / 경품 → 경품왕국
-    """
+    """지도 검색 결과 상호명이 후보 키워드와 실제로 연관되는지 검증."""
     cand_txt = (candidate or "").strip()
     name_txt = re.sub(r'<[^>]+>', '', official_name or "").strip()
     c = _norm_name(cand_txt)
@@ -1313,17 +1313,27 @@ def is_name_match(candidate: str, official_name: str) -> bool:
     if c == n:
         return True
 
-    # 지점 접미를 뗀 뒤 재비교 (성심당 ≡ 성심당본점)
+    # 지점 접미를 뗀 뒤 재비교 (성심당 ≡ 성심당본점, 다이닝원 ≡ 다이닝원강릉점)
     n_nb = _norm_name(BRANCH_SUFFIX_RE.sub("", name_txt))
     if c == n_nb:
         return True
 
-    # 어절 경계에 정렬된 포함만 인정
+    # 후보에서 앞단어(지역명/수식어, 예: '강릉 다이닝 원' -> '다이닝원')를 뗀 비교
     c_tokens = cand_txt.split()
+    if len(c_tokens) > 1:
+        c_rest = _norm_name("".join(c_tokens[1:]))
+        if c_rest and (c_rest == n or c_rest == n_nb):
+            return True
+
+    # 어절 경계에 정렬된 포함 인정
     n_tokens = BRANCH_SUFFIX_RE.sub("", name_txt).split()
     if len(n_tokens) > 1 and _token_aligned(c, n_tokens):
         return True
     if len(c_tokens) > 1 and _token_aligned(n_nb, c_tokens):
+        return True
+
+    # 어순 도치 일치 (예: '더킹 호텔' ≡ '호텔 더킹')
+    if set(c_tokens) and set(c_tokens) == set(n_tokens):
         return True
 
     # 마지막으로 핵심어 유사도 — 길이 균형과 높은 유사도를 동시에 요구한다
@@ -1439,10 +1449,32 @@ def _new_stats() -> dict:
     }
 
 
+# 비데이트 / 이슈 / 폭로 / 사건사고 / 어그로 영상 키워드 (원천 차단)
+NON_DATE_TITLE_KEYWORDS = [
+    "저격", "폭로", "논란", "사건", "사고", "참교육", "뉴스", "속보", "날씨", "체벌",
+    "싸움", "체포", "압수수색", "구속", "재판", "소송", "사기", "손절", "해명", "폭탄발언",
+    "극대노", "참사", "사망", "피해", "가해", "학폭", "경찰", "소방", "화재",
+]
+
+def is_non_date_video(title: str, description: str = "") -> tuple[bool, str]:
+    """데이트 코스 수집에 부적합한 이슈/사건/저격 영상 판별"""
+    t = (title or "").lower()
+    for kw in NON_DATE_TITLE_KEYWORDS:
+        if kw in t:
+            return True, f"비데이트 키워드({kw})"
+    return False, ""
+
 def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
                     dry_run: bool = False, verbose: bool = True) -> dict:
     """이미 조회된 영상 메타데이터로 역방향 마이닝 수행. 통계 dict 반환."""
     stats = _new_stats()
+
+    # 0. 비데이트 / 이슈 / 사건사고 영상 사전 차단
+    is_bad, bad_reason = is_non_date_video(vinfo.get("title", ""), vinfo.get("description", ""))
+    if is_bad:
+        if verbose:
+            print(f"  🚫 [비데이트 영상 스킵] {bad_reason}: '{vinfo.get('title', '')[:40]}'")
+        return stats
 
     ext = extract_spot_candidates_verbose(vinfo["title"], vinfo["description"], video_id=vinfo.get("videoId", ""))
     candidates = ext["passed"]
