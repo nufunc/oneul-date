@@ -100,7 +100,19 @@ HEADERS = {
     "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8",
 }
 
-_BLOG_STOP_WORDS = frozenset(["후기", "내돈내산", "추천", "데이트", "맛집", "카페", "일상", "서울", "경기", "부산", "제주", "코스", "분위기", "사진", "리뷰", "솔직", "주말", "존맛", "강추", "정리", "모음", "베스트", "best"])
+_BLOG_STOP_WORDS = frozenset([
+    "후기", "내돈내산", "추천", "데이트", "맛집", "카페", "일상", "서울", "경기", "부산", "제주",
+    "코스", "분위기", "사진", "리뷰", "솔직", "주말", "존맛", "강추", "정리", "모음", "베스트", "best",
+    "특징", "꽃말", "생태", "유래", "뿌리", "꽃길", "내부", "타임스탬프", "타임라인", "목차",
+    "입장료", "이용료", "관람료", "주차료", "체류시간", "동선", "소요시간", "인트로", "아웃트로", "총정리"
+])
+
+def _clean_blog_cand(s: str) -> str:
+    if not s:
+        return ""
+    c = s.strip()
+    c = re.sub(r'^\d{1,3}[\s\.:\-_]+', '', c).strip()
+    return c.strip(' -~:•·📍📌🏠☕🍽️🏛️🌳🌿🎪▶✔*#[]()\'"')
 
 def fetch_blog_candidates(query: str):
     """네이버 뷰/블로그 검색 피드에서 유망한 데이트 스팟 상호명 추출"""
@@ -122,21 +134,21 @@ def fetch_blog_candidates(query: str):
                     clean_t = re.sub(r'<[^>]+>', '', t).strip()
                     # '[성수] 상호명' 또는 '[상호명]'
                     for m in re.findall(r'\[([^\]]+)\]', clean_t):
-                        clean_m = m.strip()
+                        clean_m = _clean_blog_cand(m)
                         if 2 <= len(clean_m) <= 12 and not any(w in clean_m for w in _BLOG_STOP_WORDS):
                             candidates.add(clean_m)
                     
                     # 큰따옴표/작은따옴표/특수괄호
                     for q in re.findall(r'["\'「『]([가-힣a-zA-Z0-9\s]{2,12})["\'」』]', clean_t):
-                        clean_q = q.strip()
-                        if not any(w in clean_q for w in _BLOG_STOP_WORDS):
+                        clean_q = _clean_blog_cand(q)
+                        if len(clean_q) >= 2 and not any(w in clean_q for w in _BLOG_STOP_WORDS):
                             candidates.add(clean_q)
 
                     # 콜론/하이픈 앞 접두 상호명 (예: '성수다락 - 감성 파스타 맛집')
                     m_prefix = re.match(r'^([가-힣a-zA-Z0-9\s]{2,10})\s*[-:|·]\s*', clean_t)
                     if m_prefix:
-                        cand = m_prefix.group(1).strip()
-                        if not any(w in cand for w in _BLOG_STOP_WORDS):
+                        cand = _clean_blog_cand(m_prefix.group(1))
+                        if len(cand) >= 2 and not any(w in cand for w in _BLOG_STOP_WORDS):
                             candidates.add(cand)
     except Exception:
         pass
@@ -216,8 +228,9 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
             if "권역" in raw_name or " / " in raw_name or is_polluted_header_name(raw_name):
                 continue
 
-            # 2. 단일 배치(메모리) 내 중복 검사
-            if real_name in batch_seen_names:
+            # 2-b. 후보 키워드와 실제 상호명 유사도 검증
+            from youtube_vlog_miner import is_name_match
+            if not is_name_match(candidate_name, real_name):
                 continue
 
             cat = str(top.get("category") or "")
