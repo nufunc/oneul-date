@@ -45,7 +45,7 @@ def _load_env_credentials():
             except Exception:
                 pass
 
-def is_bad_summary(summary: str, name: str) -> bool:
+def is_bad_summary(summary: str, name: str = "") -> bool:
     """비정상적이거나 판박이 템플릿인 스팟 설명인지 엄격 판정"""
     if not summary:
         return True

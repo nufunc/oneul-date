@@ -204,53 +204,54 @@ OTHER_REGIONAL_AREAS = [
 ]
 
 # ─────────────────────────────────────────────────────────────
-# [2] 데이트 의도(Intent) 템플릿 키워드 조합 (신뢰도 & 큐레이션 품질 강화)
+# [2] 데이트 의도(Intent) 템플릿 키워드 조합 (낮/저녁/밤 3스팟 슬롯 밸런싱)
 # ─────────────────────────────────────────────────────────────
 
-INTENT_TEMPLATES = [
-    # 🏆 공인 인증 / 미식 큐레이션 (신뢰도 최우선)
-    ("블루리본 서베이 2026 추천 맛집", ["romantic", "gourmet", "luxury"]),
-    ("백년가게 전통 로컬 맛집", ["retro", "gourmet", "healing"]),
-    ("한국관광 100선 뷰 맛집 카페", ["view", "healing", "romantic"]),
-    ("미쉐린 가이드 빕구르망 다이닝", ["luxury", "gourmet", "romantic"]),
+SLOT_INTENT_TEMPLATES = {
+    "day": [
+        ("스페셜티 로스터리 핸드드립 카페", ["trendy", "gourmet", "healing"]),
+        ("숲속 대형 베이커리 정원 카페", ["healing", "view", "gourmet"]),
+        ("오션뷰 테라스 루프탑 베이커리", ["view", "romantic", "healing"]),
+        ("한옥 감성 티하우스 전통 찻집", ["healing", "retro", "romantic"]),
+        ("호수뷰 리버뷰 브런치 카페", ["view", "healing", "romantic"]),
+        ("복합문화공간 갤러리 전시 카페", ["trendy", "healing", "retro"]),
+        ("이색 데이트 감성 공방 원데이클래스", ["trendy", "active"]),
+        ("수목원 산책로 근처 힐링 카페", ["healing", "view"]),
+        ("루지 케이블카 짚라인 액티비티 체험", ["active", "view"]),
+        ("드로잉카페 미술체험 베이킹 쿠킹 클래스", ["healing", "trendy"]),
+        ("아쿠아리움 동물원 수족관 이색 데이트", ["romantic", "healing"]),
+        ("한국관광 100선 뷰 맛집 카페", ["view", "healing", "romantic"]),
+    ],
+    "evening": [
+        ("소개팅 분위기 좋은 감성 레스토랑", ["romantic", "gourmet"]),
+        ("기념일 코스요리 파인다이닝 와인바", ["romantic", "luxury", "gourmet"]),
+        ("분위기 좋은 테라스 스테이크 하우스", ["romantic", "view", "gourmet"]),
+        ("블루리본 서베이 2026 추천 맛집", ["romantic", "gourmet", "luxury"]),
+        ("미쉐린 가이드 빕구르망 다이닝", ["luxury", "gourmet", "romantic"]),
+        ("바다 앞 테라스 감성 비스트로", ["view", "romantic", "trendy"]),
+        ("숨은 골목 로컬 찐맛집 데이트", ["gourmet", "retro"]),
+        ("화덕피자 파스타 감성 이탈리안", ["romantic", "gourmet"]),
+        ("정갈한 솥밥 한정식 미식 데이트", ["healing", "gourmet"]),
+        ("백년가게 전통 로컬 맛집", ["retro", "gourmet", "healing"]),
+    ],
+    "night": [
+        ("조용한 감성 내추럴와인 칵테일바", ["romantic", "trendy"]),
+        ("오션뷰 노을 뷰 감성 다이닝 펍", ["view", "romantic", "trendy"]),
+        ("야경 드라이브 코스 뷰 맛집 펍", ["view", "romantic"]),
+        ("분위기 좋은 심야 이자카야 술집", ["romantic", "trendy", "retro"]),
+        ("루프탑 야경 와인바 라운지", ["luxury", "view", "romantic"]),
+        ("골목 숨은 LP바 감성 펍", ["retro", "trendy"]),
+        ("낭만 포차 야시장 먹거리 데이트", ["retro", "romantic"]),
+        ("야경 뷰 테라스 바 칵테일", ["view", "romantic", "luxury"]),
+    ]
+}
 
-    # 🍷 로맨틱 / 소개팅 / 파인다이닝 / 와인바
-    ("소개팅 분위기 좋은 감성 레스토랑", ["romantic", "gourmet"]),
-    ("기념일 코스요리 파인다이닝 와인바", ["romantic", "luxury", "gourmet"]),
-    ("분위기 좋은 테라스 스테이크 하우스", ["romantic", "view", "gourmet"]),
-    ("조용한 감성 내추럴와인 칵테일바", ["romantic", "trendy"]),
-    ("오션뷰 노을 뷰 감성 다이닝 펍", ["view", "romantic", "trendy"]),
-
-    # ☕ 카페 / 브런치 / 힐링 / 베이커리
-    ("스페셜티 로스터리 핸드드립 카페", ["trendy", "gourmet", "healing"]),
-    ("숲속 대형 베이커리 정원 카페", ["healing", "view", "gourmet"]),
-    ("오션뷰 테라스 루프탑 베이커리", ["view", "romantic", "healing"]),
-    ("한옥 감성 티하우스 전통 찻집", ["healing", "retro", "romantic"]),
-    ("호수뷰 리버뷰 브런치 카페", ["view", "healing", "romantic"]),
-
-    # 🎨 문화 / 이색 / 갤러리 / 복합공간
-    ("복합문화공간 갤러리 전시 카페", ["trendy", "healing", "retro"]),
-    ("이색 데이트 감성 공방 원데이클래스", ["trendy", "active"]),
-    ("감성 소품샵 편집샵 쇼룸", ["trendy", "healing"]),
-
-    # 🎯 놀이 / 액티비티 / 이색체험 / 레저 (액티비티 수집 강화)
-    ("이색 데이트 원데이클래스 도예 향수 가죽 공방", ["trendy", "active"]),
-    ("실내 이색 데이트 방탈출 보드게임 카페", ["active", "trendy"]),
-    ("드로잉카페 미술체험 베이킹 쿠킹 클래스", ["healing", "trendy"]),
-    ("실내 클라이밍 볼더링 실내양궁 사격 이색 데이트", ["active"]),
-    ("루지 케이블카 짚라인 액티비티 체험", ["active", "view"]),
-    ("해양 레저 서핑 카약 패들보드 SUP 요트투어", ["active", "view"]),
-    ("레일바이크 모노레일 알파인코스터 카트체험", ["active", "view"]),
-    ("패러글라이딩 스카이워크 출렁다리 익스트림", ["active", "view"]),
-    ("아쿠아리움 동물원 수족관 이색 데이트", ["romantic", "healing"]),
-    ("승마체험 목장체험 힐링 팜", ["healing", "active"]),
-
-    # 🌳 야경 / 드라이브 / 자연 산책
-    ("야경 드라이브 코스 뷰 맛집", ["view", "romantic"]),
-    ("수목원 산책로 근처 힐링 카페", ["healing", "view"]),
-    ("바다 앞 테라스 감성 비스트로", ["view", "romantic", "trendy"]),
-    ("숨은 골목 로컬 찐맛집 데이트", ["gourmet", "retro"])
-]
+# 기존 호환성 전체 풀
+INTENT_TEMPLATES = (
+    SLOT_INTENT_TEMPLATES["day"] + 
+    SLOT_INTENT_TEMPLATES["evening"] + 
+    SLOT_INTENT_TEMPLATES["night"]
+)
 
 # ─────────────────────────────────────────────────────────────
 # [3] DB 커버리지 갭 분석 (Coverage Gap Detector)
@@ -316,6 +317,16 @@ def get_coverage_gap_areas(supabase_url: str, supabase_service_key: str, limit: 
 # [4] 동적 쿼리 생성기 (Dynamic Query Generator)
 # ─────────────────────────────────────────────────────────────
 
+def _pick_balanced_intent() -> tuple[str, list[str]]:
+    """낮(40%), 저녁(35%), 밤(25%) 균형 슬롯 템플릿 선택"""
+    r = random.random()
+    if r < 0.40:
+        return random.choice(SLOT_INTENT_TEMPLATES["day"])
+    elif r < 0.75:
+        return random.choice(SLOT_INTENT_TEMPLATES["evening"])
+    else:
+        return random.choice(SLOT_INTENT_TEMPLATES["night"])
+
 def generate_dynamic_queries(
     target_region: str = None,
     count: int = 30,
@@ -324,6 +335,7 @@ def generate_dynamic_queries(
     """
     (검색어, region, area, vibes) 튜플 리스트를 동적으로 합성 생성합니다.
     - gap_districts가 주어지면 해당 소외 지역(예: 금천구 가산, 구로 등)에 가중치를 두어 쿼리를 생성합니다.
+    - 낮/저녁/밤 3스팟 풀코스 완성을 위해 슬롯 밸런싱(4:3.5:2.5)을 자동 적용합니다.
     """
     queries = []
     
@@ -335,7 +347,7 @@ def generate_dynamic_queries(
             reg = district_info["region"]
             area = district_info["area"]
             sub = random.choice(district_info["sub_areas"])
-            intent_phrase, intent_vibes = random.choice(INTENT_TEMPLATES)
+            intent_phrase, intent_vibes = _pick_balanced_intent()
             
             query = f"{reg} {sub} {intent_phrase}"
             combined_vibes = list(set(district_info.get("default_vibes", []) + intent_vibes))[:3]
@@ -355,7 +367,7 @@ def generate_dynamic_queries(
         reg = source["region"]
         area = source["area"]
         sub = random.choice(source["sub_areas"])
-        intent_phrase, intent_vibes = random.choice(INTENT_TEMPLATES)
+        intent_phrase, intent_vibes = _pick_balanced_intent()
         
         query = f"{reg} {sub} {intent_phrase}"
         combined_vibes = list(set(source.get("default_vibes", []) + intent_vibes))[:3]
@@ -367,6 +379,6 @@ def generate_dynamic_queries(
 if __name__ == "__main__":
     print("🧪 [Area Seeds & Dynamic Query Test]")
     sample_gaps = [SEOUL_DISTRICTS["금천구"], SEOUL_DISTRICTS["구로구"], SEOUL_DISTRICTS["도봉구"]]
-    dynamic_qs = generate_dynamic_queries(count=5, gap_districts=sample_gaps)
+    dynamic_qs = generate_dynamic_queries(count=6, gap_districts=sample_gaps)
     for idx, (q, reg, area, vibes) in enumerate(dynamic_qs, 1):
         print(f"{idx:02d}. [{reg} | {area}] '{q}' -> vibes: {vibes}")

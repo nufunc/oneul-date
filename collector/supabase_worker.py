@@ -15,6 +15,10 @@ import time
 import re
 from datetime import datetime, timezone, timedelta
 from category_filter import CATEGORY_BLACKLIST_LODGING
+try:
+    from fix_spot_summaries import is_bad_summary, generate_curated_summary
+except ImportError:
+    from .fix_spot_summaries import is_bad_summary, generate_curated_summary
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -536,6 +540,7 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
     verified_count = 0
     region_fixed_count = 0
     slot_fixed_count = 0
+    summary_fixed_count = 0
     fail_warn_count = 0
     closed_count = 0
 
@@ -716,6 +721,21 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                     if old_cat and new_cat_str != old_cat:
                         print(f"  🔧 [Category Fix] id={s_id} '{old_cat}' → '{new_cat_str}'")
 
+            # [Summary Healing] 판박이 더미 문구 발견 시 에디토리얼 자동 치유
+            current_summary = spot.get("summary") or ""
+            target_name = patch_data.get("name") or name
+            if is_bad_summary(current_summary, target_name) or not current_summary:
+                target_cat = patch_data.get("category") or spot.get("category") or ""
+                target_area = patch_data.get("area") or spot.get("area") or ""
+                target_reg = patch_data.get("region") or spot.get("region") or ""
+                target_sigs = spot.get("signature_items") or []
+                
+                curated_summary = generate_curated_summary(target_name, target_cat, target_area, target_reg, target_sigs)
+                if curated_summary and curated_summary != current_summary:
+                    patch_data["summary"] = curated_summary
+                    summary_fixed_count += 1
+                    print(f"  🔧 [Summary Fix] id={s_id} '{current_summary[:30]}' → '{curated_summary[:30]}'")
+
             verified_count += 1
         else:
             # 3단계 다단계 폐업 안전 판별 (골목/거리/상권 스팟은 폐업 격리에서 면제 보호)
@@ -761,7 +781,7 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                 print(f"  ❌ DB 업데이트 실패 (id: {s_id}): {e}")
 
     slot_note = " (DRY-RUN, 미반영)" if slot_heal_dryrun else ""
-    print(f"✅ OCI 엔진 완료: 정상검증 {verified_count}건, 신규메타보강 {enriched_count}건, 지역교정 {region_fixed_count}건, 슬롯교정 {slot_fixed_count}건{slot_note}, 주의플래그 {fail_warn_count}건, 폐업격리 {closed_count}건")
+    print(f"✅ OCI 엔진 완료: 정상검증 {verified_count}건, 신규메타보강 {enriched_count}건, 지역교정 {region_fixed_count}건, 슬롯교정 {slot_fixed_count}건{slot_note}, 설명교정 {summary_fixed_count}건, 주의플래그 {fail_warn_count}건, 폐업격리 {closed_count}건")
 
 if __name__ == "__main__":
     env = load_env()

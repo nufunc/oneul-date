@@ -63,7 +63,12 @@
 // ---------------------------------------------------------------------------
 
 const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
-const DEFAULT_GROQ_MODEL = 'llama-3.3-70b-versatile';
+const GROQ_MODELS_CASCADE = [
+  'qwen/qwen3.8-27b',     // 1순위: 0.44초 초고속 & 한국어 에디토리얼 품질 최상위
+  'groq/compound-mini',   // 2순위: 초경량 컴파운드
+  'groq/compound',        // 3순위: 대용량 컴파운드
+];
+const DEFAULT_GROQ_MODEL = GROQ_MODELS_CASCADE[0];
 const GROQ_TEMPERATURE = 0.72;
 const GROQ_MAX_TOKENS = 350;
 
@@ -482,55 +487,69 @@ async function callGroq(apiKey: string, spots: SpotInput[], mood: string): Promi
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), GROQ_TIMEOUT_MS);
 
-  const model = Deno.env.get('GROQ_MODEL') || DEFAULT_GROQ_MODEL;
-
-  const requestBody: Record<string, unknown> = {
-    model,
-    messages: [
-      { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: buildUserPrompt(spots, mood) },
-    ],
-    temperature: GROQ_TEMPERATURE,
-    max_tokens: GROQ_MAX_TOKENS,
-  };
-
-  // 추론 모델(gpt-oss-120b, deepseek-r1 등)일 경우 reasoning_effort 호환 지원
-  if (model.includes('gpt-oss') || model.includes('deepseek-r1') || model.includes('qwen-qwq')) {
-    requestBody.reasoning_effort = 'low';
-  }
+  const customModel = Deno.env.get('GROQ_MODEL');
+  const modelsToTry = customModel ? [customModel] : GROQ_MODELS_CASCADE;
+  const userPrompt = buildUserPrompt(spots, mood);
 
   try {
-    const res = await fetch(GROQ_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify(requestBody),
-      signal: controller.signal,
-    });
+    for (const targetModel of modelsToTry) {
+      if (controller.signal.aborted) break;
 
-    if (!res.ok) {
-      const detail = await res.text().catch(() => '');
-      console.error(`[ai-briefing] groq upstream ${res.status}: ${detail.slice(0, 500)}`);
-      return { ok: false, status: 502, error: 'upstream error' };
+      const requestBody: Record<string, unknown> = {
+        model: targetModel,
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: userPrompt },
+        ],
+        temperature: GROQ_TEMPERATURE,
+        max_tokens: GROQ_MAX_TOKENS,
+      };
+
+      if (targetModel.includes('gpt-oss') || targetModel.includes('deepseek-r1') || targetModel.includes('qwen-qwq')) {
+        requestBody.reasoning_effort = 'low';
+      }
+
+      try {
+        const res = await fetch(GROQ_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify(requestBody),
+          signal: controller.signal,
+        });
+
+        if (!res.ok) {
+          const detail = await res.text().catch(() => '');
+          console.warn(`[ai-briefing] model ${targetModel} upstream ${res.status}: ${detail.slice(0, 200)} → 다음 모델 시도`);
+          continue;
+        }
+
+        const data = await res.json().catch(() => null);
+        const rawText = data?.choices?.[0]?.message?.content?.trim();
+        if (typeof rawText !== 'string' || rawText.length < MIN_TEXT_LENGTH) {
+          console.warn(`[ai-briefing] model ${targetModel} returned empty completion → 다음 모델 시도`);
+          continue;
+        }
+
+        const cleanText = rawText
+          .replace(/^["'“”]/, '')
+          .replace(/["'“”]$/, '')
+          .replace(/\*\*/g, '')
+          .trim();
+
+        return { ok: true, text: cleanText };
+      } catch (innerErr) {
+        if (innerErr instanceof DOMException && innerErr.name === 'AbortError') {
+          break;
+        }
+        console.warn(`[ai-briefing] model ${targetModel} fetch error:`, innerErr);
+        continue;
+      }
     }
 
-    const data = await res.json().catch(() => null);
-    const rawText = data?.choices?.[0]?.message?.content?.trim();
-    if (typeof rawText !== 'string' || rawText.length < MIN_TEXT_LENGTH) {
-      console.error('[ai-briefing] groq returned an empty or too-short completion');
-      return { ok: false, status: 502, error: 'empty completion' };
-    }
-
-    // 앞뒤 따옴표 및 볼드 마크다운 등 불필요한 서식 정제
-    const cleanText = rawText
-      .replace(/^["'“”]/, '')
-      .replace(/["'“”]$/, '')
-      .replace(/\*\*/g, '')
-      .trim();
-
-    return { ok: true, text: cleanText };
+    return { ok: false, status: 502, error: 'all upstream models failed' };
   } catch (err) {
     if (err instanceof DOMException && err.name === 'AbortError') {
       console.error(`[ai-briefing] groq timed out after ${GROQ_TIMEOUT_MS}ms`);
