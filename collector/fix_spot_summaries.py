@@ -318,4 +318,4 @@ if __name__ == "__main__":
     _load_env_credentials()
     sb_url = os.environ.get("SUPABASE_URL") or os.environ.get("VITE_SUPABASE_URL", "")
     sb_key = os.environ.get("SUPABASE_SERVICE_KEY") or os.environ.get("SUPABASE_KEY") or os.environ.get("VITE_SUPABASE_ANON_KEY", "")
-    fix_all_spot_summaries(sb_url, sb_key, limit=300)
+    fix_all_spot_summaries(sb_url, sb_key, limit=5000)
