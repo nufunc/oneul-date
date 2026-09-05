@@ -229,6 +229,11 @@ export async function loadSpots(regionMatches?: string[]): Promise<Spot[]> {
     return loadStaticSpots();
   }
 
+  // 브라우저 Mixed Content 방어: 프로덕션(HTTPS)에서 비보안 HTTP API 호출 시 브라우저 차단 에러 방지 -> 정적 CDN 폴백
+  if (typeof window !== 'undefined' && window.location.protocol === 'https:' && SUPABASE_URL.startsWith('http://')) {
+    return loadStaticSpots();
+  }
+
   try {
     let regionFilter = '';
     if (regionMatches && regionMatches.length > 0) {
