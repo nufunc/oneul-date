@@ -254,10 +254,13 @@ def run_community_mining(supabase_url: str, service_key: str, max_discoveries: i
                     print(f"🔥 [커뮤니티 마이닝 INSERT 성공] 총 {len(discovered)}곳 발굴 및 DB 적재 완료:")
                     for s in discovered:
                         print(f"   + [{s['region']}/{s['slot']}] {s['name']} ({s['category']})")
+                    return len(discovered)
         except Exception as e:
             print(f"❌ 커뮤니티 마이닝 INSERT 실패: {e}")
     else:
         print("💡 [커뮤니티 마이닝] 신규 발굴 없음 (DB 최신 상태)")
+
+    return 0
 
 if __name__ == "__main__":
     env = load_env()

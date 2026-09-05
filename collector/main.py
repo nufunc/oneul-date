@@ -121,6 +121,19 @@ def log(message: str, level: str = "INFO"):
 # 마지막 일일 서머리 기록 날짜 추적 (YYYY-MM-DD)
 last_summary_date = None
 
+# 일자별 인메모리 파이프라인 수집 실적 추적 (프로세스 런타임 누적)
+daily_pipeline_counts = {}
+
+def record_pipeline_count(today_str: str, key: str, count: int):
+    """사이클별 수집 성공 건수를 인메모리에 누적 기록"""
+    global daily_pipeline_counts
+    if not count or count <= 0:
+        return
+    if today_str not in daily_pipeline_counts:
+        # 최근 2일치만 유지하여 메모리 누수 방지
+        daily_pipeline_counts = {today_str: {"tourapi": 0, "catchtable": 0, "youtube": 0, "portal_blog": 0, "enrich": 0}}
+    daily_pipeline_counts[today_str][key] = daily_pipeline_counts[today_str].get(key, 0) + count
+
 def get_exact_count(filter_query: str = "") -> int:
     """Supabase REST API exact count 헤더를 통해 1,000개 제한 없이 정확한 전체 수량 집계"""
     if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
@@ -142,6 +155,16 @@ def get_exact_count(filter_query: str = "") -> int:
         pass
     return 0
 
+def get_today_created_count() -> int:
+    """오늘(KST 00:00:00 기준) Supabase DB에 신규 INSERT된 스팟 수 실시간 조회"""
+    try:
+        now_kst = get_kst_now()
+        kst_midnight = datetime(now_kst.year, now_kst.month, now_kst.day, 0, 0, 0, tzinfo=KST)
+        utc_iso = kst_midnight.astimezone(timezone.utc).isoformat()
+        return get_exact_count(f"&created_at=gte.{urllib.parse.quote(utc_iso)}")
+    except Exception:
+        return 0
+
 def get_total_spot_stats():
     """Supabase에서 실시간 총 스팟 및 검증 상태 카운트 정확히 조회 (1,000개 페이징 한도 돌파)"""
     total = get_exact_count()
@@ -159,8 +182,8 @@ def get_regional_stats() -> dict:
         counts[r] = get_exact_count(f"&region=eq.{enc_r}&is_closed=eq.false")
     return counts
 
-def get_pipeline_stats(today_str: str) -> dict:
-    """당일 로그 파일에서 8대 마이너별 신규 발굴 및 동기화 실적 집계"""
+def get_pipeline_stats_from_log(today_str: str) -> dict:
+    """당일 로그 파일에서 8대 마이너별 신규 발굴 및 동기화 실적 집계 (보조/백업용 정규식 파싱)"""
     import re
     pipe = {"tourapi": 0, "catchtable": 0, "youtube": 0, "portal_blog": 0, "enrich": 0}
     log_file = os.path.join(LOG_DIR, f"collector-{today_str}.log")
@@ -170,24 +193,52 @@ def get_pipeline_stats(today_str: str) -> dict:
         try:
             with open(log_file, "r", encoding="utf-8", errors="ignore") as f:
                 content = f.read()
-            # TourAPI
+
+            # 1. TourAPI (✨ [TourAPI 4.0 INSERT 성공] 총 5개 ...)
             tourapi_m = re.findall(r'\[TourAPI 4\.0 INSERT 성공\] 총 (\d+)개', content)
             pipe["tourapi"] = sum(int(m) for m in tourapi_m)
-            # CatchTable
+
+            # 2. CatchTable (✨ [CatchTable/블루리본 INSERT 성공] 총 3개 ...)
             ct_m = re.findall(r'\[CatchTable/블루리본 INSERT 성공\] 총 (\d+)개', content)
             pipe["catchtable"] = sum(int(m) for m in ct_m)
-            # YouTube
-            yt_m = re.findall(r'📹 .*?등록 (\d+)건', content)
-            pipe["youtube"] = sum(int(m) for m in yt_m if m != '0')
-            # Portal & Blog
-            portal_m = re.findall(r'✨ \[신규 스팟 등록 성공!\]', content)
-            blog_m = re.findall(r'\[블로그 발굴 성공\] 총 (\d+)개', content)
-            pipe["portal_blog"] = len(portal_m) + sum(int(m) for m in blog_m)
-            # Social Enrich
-            enrich_m = re.findall(r'소셜 메타 동기화|동기화 완료', content)
-            pipe["enrich"] = len(enrich_m)
+
+            # 3. YouTube (📹 ... | 등록 2건 또는 ✨ [신규 스팟 등록 성공!])
+            yt_m1 = re.findall(r'📹 [^\n]*?등록 (\d+)건', content)
+            yt_m2 = re.findall(r'✨ \[신규 스팟 등록 성공!\]', content)
+            pipe["youtube"] = max(sum(int(m) for m in yt_m1 if m != '0'), len(yt_m2))
+
+            # 4. Portal & Blog & Community
+            # - 포털: ✨ [신규 핫플 자동 INSERT 성공] 총 10곳
+            portal_m = re.findall(r'\[신규 핫플 자동 INSERT 성공\] 총 (\d+)곳', content)
+            # - 블로그: 🎉 [블로그 마이닝 INSERT 성공] 총 5곳
+            blog_m = re.findall(r'\[블로그 마이닝 INSERT 성공\] 총 (\d+)곳', content)
+            # - 커뮤니티: 🔥 [커뮤니티 마이닝 INSERT 성공] 총 3곳
+            comm_m = re.findall(r'\[커뮤니티 마이닝 INSERT 성공\] 총 (\d+)곳', content)
+            pipe["portal_blog"] = (
+                sum(int(m) for m in portal_m) +
+                sum(int(m) for m in blog_m) +
+                sum(int(m) for m in comm_m)
+            )
+
+            # 5. Social Enrich (🎉 [소셜 메타데이터 동기화 완료] 총 15/20개 ...)
+            enrich_m = re.findall(r'\[소셜 메타데이터 동기화 완료\] 총 (\d+)/\d+개', content)
+            if enrich_m:
+                pipe["enrich"] = sum(int(m) for m in enrich_m)
+            else:
+                legacy_enrich = re.findall(r'소셜 메타 동기화|동기화 완료', content)
+                pipe["enrich"] = len(legacy_enrich)
         except Exception:
             pass
+    return pipe
+
+def get_pipeline_stats(today_str: str) -> dict:
+    """인메모리 누적 실적과 로그 파일 파싱 실적 중 최대값을 채택하여 프로세스 재시작·버퍼 누락 방어"""
+    mem = daily_pipeline_counts.get(today_str, {})
+    log_stats = get_pipeline_stats_from_log(today_str)
+    
+    pipe = {}
+    for k in ["tourapi", "catchtable", "youtube", "portal_blog", "enrich"]:
+        pipe[k] = max(mem.get(k, 0), log_stats.get(k, 0))
     return pipe
 
 def get_top_spots(limit: int = 5) -> list:
@@ -229,11 +280,17 @@ def check_and_generate_daily_summary(force: bool = False):
         pipeline = get_pipeline_stats(today_str)
         top_spots = get_top_spots(limit=5)
         
+        # 오늘 신규 생성 스팟: Supabase DB 실시간 타임스탬프 쿼리 및 파이프라인 실적 합산 중 최대값
+        db_today_new = get_today_created_count()
+        pipe_today_new = sum([pipeline.get("tourapi", 0), pipeline.get("catchtable", 0), pipeline.get("youtube", 0), pipeline.get("portal_blog", 0)])
+        actual_today_new = max(db_today_new, pipe_today_new)
+
         summary_text = (
             f"\n========================================================\n"
             f"📊 [KST {today_str} {DAILY_REPORT_HOUR:02d}:00] 오늘 데이트 전체 통합 데이터 서머리\n"
             f"========================================================\n"
             f"• 총 등록 스팟 수    : {stats['total']:,}개\n"
+            f"• 오늘 신규 등록     : {actual_today_new:,}개 (DB 실시간: {db_today_new:,}개, 수집 합계: {pipe_today_new:,}개)\n"
             f"• 정상 운영(Active)  : {stats['active']:,}개\n"
             f"• 폐업/휴업(Closed)  : {stats['closed']:,}개\n"
             f"• 고유 이미지 보유율 : {stats['with_img']:,}개 ({(stats['with_img']/max(1, stats['total'])*100):.1f}%)\n"
@@ -255,7 +312,7 @@ def check_and_generate_daily_summary(force: bool = False):
                 "active_spots": stats["active"],
                 "closed_spots": stats["closed"],
                 "with_img_count": stats["with_img"],
-                "new_spots_today": sum([pipeline.get("tourapi", 0), pipeline.get("catchtable", 0), pipeline.get("youtube", 0), pipeline.get("portal_blog", 0)])
+                "new_spots_today": actual_today_new
             }
             log(f"📧 [정기 리포트 발송 트리거] KST {now.hour:02d}:00 (설정 시각: {DAILY_REPORT_HOUR:02d}:00) 데일리 이메일 발송 실행")
             send_daily_digest(email_stats, top_spots=top_spots, regional_stats=regional, pipeline_stats=pipeline)
@@ -265,6 +322,8 @@ def check_and_generate_daily_summary(force: bool = False):
         last_summary_date = today_str
 
 def run_cycle():
+    today_str = get_kst_now().strftime("%Y-%m-%d")
+
     log(f"▶ 1단계: Supabase 스팟 심층 메타 보강 & 폐업 검증 시작 (한도: {BATCH_LIMIT}개)")
     try:
         run_worker(SUPABASE_URL, SUPABASE_SERVICE_KEY, limit=BATCH_LIMIT)
@@ -275,7 +334,9 @@ def run_cycle():
 
     log(f"▶ 2단계: 2026 신규 핫플레이스 포털 자율 발굴 시작 (한도: {DISCOVERY_LIMIT}개)")
     try:
-        run_discovery(SUPABASE_URL, SUPABASE_SERVICE_KEY, groq_key=GROQ_API_KEY, max_discoveries=DISCOVERY_LIMIT)
+        p_mined = run_discovery(SUPABASE_URL, SUPABASE_SERVICE_KEY, groq_key=GROQ_API_KEY, max_discoveries=DISCOVERY_LIMIT) or 0
+        record_pipeline_count(today_str, "portal_blog", p_mined)
+        log(f"2단계 완료: 신규 포털 스팟 {p_mined}개 등록")
     except Exception as e:
         log(f"2단계 포털 발굴 오류: {e}", level="ERROR")
 
@@ -283,13 +344,17 @@ def run_cycle():
 
     log(f"▶ 3단계: 블로그 & 구글 웹 검색 데이트 스팟 마이닝 시작 (한도: {DISCOVERY_LIMIT}개)")
     try:
-        run_blog_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, max_discoveries=DISCOVERY_LIMIT)
+        b_mined = run_blog_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, max_discoveries=DISCOVERY_LIMIT) or 0
+        record_pipeline_count(today_str, "portal_blog", b_mined)
+        log(f"3단계 완료: 신규 블로그 스팟 {b_mined}개 등록")
     except Exception as e:
         log(f"3단계 블로그 마이닝 오류: {e}", level="ERROR")
 
     log(f"▶ 4단계: 커뮤니티(더쿠/블라인드/인벤) 추천 리스트 마이닝 시작 (한도: {DISCOVERY_LIMIT}개)")
     try:
-        run_community_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, max_discoveries=DISCOVERY_LIMIT)
+        c_mined = run_community_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, max_discoveries=DISCOVERY_LIMIT) or 0
+        record_pipeline_count(today_str, "portal_blog", c_mined)
+        log(f"4단계 완료: 신규 커뮤니티 스팟 {c_mined}개 등록")
     except Exception as e:
         log(f"4단계 커뮤니티 마이닝 오류: {e}", level="ERROR")
 
@@ -297,7 +362,9 @@ def run_cycle():
 
     log(f"▶ 5단계: 유튜브 핫클립 & 카카오맵 평점 소셜 점진적 동기화 시작 (한도: {DISCOVERY_LIMIT}개)")
     try:
-        run_social_enrichment(SUPABASE_URL, SUPABASE_SERVICE_KEY, batch_size=DISCOVERY_LIMIT)
+        e_cnt = run_social_enrichment(SUPABASE_URL, SUPABASE_SERVICE_KEY, batch_size=DISCOVERY_LIMIT) or 0
+        record_pipeline_count(today_str, "enrich", e_cnt)
+        log(f"5단계 완료: 소셜 메타 {e_cnt}개 동기화")
     except Exception as e:
         log(f"5단계 소셜 동기화 오류: {e}", level="ERROR")
 
@@ -305,7 +372,8 @@ def run_cycle():
 
     log(f"▶ 6단계: 최신 유튜브 여행/데이트 브이로그 역방향 장소 마이닝 시작 (한도: 25개 영상)")
     try:
-        mined = run_youtube_vlog_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, limit=25)
+        mined = run_youtube_vlog_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, limit=25) or 0
+        record_pipeline_count(today_str, "youtube", mined)
         log(f"6단계 완료: 신규 스팟 {mined}개 등록")
     except Exception as e:
         log(f"6단계 유튜브 브이로그 마이닝 오류: {e}", level="ERROR")
@@ -314,8 +382,9 @@ def run_cycle():
 
     log(f"▶ 7단계: 캐치테이블 & 블루리본 미식 예약 핫플 마이닝 시작 (한도: 60개)")
     try:
-        c_mined = run_catchtable_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, max_discoveries=60)
-        log(f"7단계 완료: 신규 예약 다이닝 스팟 {c_mined}개 등록")
+        ct_mined = run_catchtable_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, max_discoveries=60) or 0
+        record_pipeline_count(today_str, "catchtable", ct_mined)
+        log(f"7단계 완료: 신규 예약 다이닝 스팟 {ct_mined}개 등록")
     except Exception as e:
         log(f"7단계 캐치테이블 마이닝 오류: {e}", level="ERROR")
 
@@ -323,7 +392,8 @@ def run_cycle():
 
     log(f"▶ 8단계: 한국관광공사 TourAPI 4.0 공공 문화/관광/체험 마이닝 시작 (한도: {DISCOVERY_LIMIT}개)")
     try:
-        t_mined = run_tourapi_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, max_discoveries=DISCOVERY_LIMIT)
+        t_mined = run_tourapi_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, max_discoveries=DISCOVERY_LIMIT) or 0
+        record_pipeline_count(today_str, "tourapi", t_mined)
         log(f"8단계 완료: 신규 공공 문화/관광 스팟 {t_mined}개 등록")
     except Exception as e:
         log(f"8단계 TourAPI 마이닝 오류: {e}", level="ERROR")

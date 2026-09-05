@@ -147,3 +147,4 @@ def run_social_enrichment(supabase_url: str, service_key: str, batch_size: int =
         time.sleep(1.2)
 
     print(f"🎉 [소셜 메타데이터 동기화 완료] 총 {enriched_count}/{len(spots_to_enrich)}개 스팟 업데이트 성공!")
+    return enriched_count

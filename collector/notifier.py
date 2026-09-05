@@ -175,7 +175,7 @@ def generate_report_html(stats: dict, top_spots: list = None, regional_stats: di
                         <div style="display: table-cell; width: 50%; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 12px; text-align: center;">
                             <div style="font-size: 10px; color: #64748B; font-weight: 700;">전체 등록 스팟</div>
                             <div style="font-size: 20px; font-weight: 900; color: #0F172A; margin-top: 2px;">{total:,}<span style="font-size: 11px; font-weight: 600; color: #64748B;">개</span></div>
-                            <div style="font-size: 10px; color: #059669; font-weight: 600; margin-top: 2px;">정상 운영 {active:,}개</div>
+                            <div style="font-size: 10px; color: #059669; font-weight: 600; margin-top: 2px;">정상 운영 {active:,}개 · 오늘 +{new_today:,}개</div>
                         </div>
                         <div style="display: table-cell; width: 50%; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 12px; text-align: center;">
                             <div style="font-size: 10px; color: #64748B; font-weight: 700;">고유 이미지 보유율</div>
@@ -303,6 +303,7 @@ def send_google_chat_report(stats: dict, top_spots: list = None, regional_stats:
     kst_now = datetime.now(timezone(timedelta(hours=9))).strftime("%Y-%m-%d %H:%M")
     total = stats.get("total_spots", 0)
     active = stats.get("active_spots", 0)
+    new_today = stats.get("new_spots_today", 0)
     with_img = stats.get("with_img_count", 0)
     img_pct = (with_img / max(1, total)) * 100
     
@@ -310,7 +311,7 @@ def send_google_chat_report(stats: dict, top_spots: list = None, regional_stats:
         {
             "decoratedText": {
                 "topLabel": "DAILY DATA INGESTION SUMMARY",
-                "text": f"📊 <b>총 등록:</b> {total:,}곳 (활성 {active:,}곳) | 🖼️ <b>이미지:</b> {img_pct:.1f}%",
+                "text": f"📊 <b>총 등록:</b> {total:,}곳 (오늘 +{new_today:,}곳) | 🖼️ <b>이미지:</b> {img_pct:.1f}%",
                 "startIcon": {"knownIcon": "DESCRIPTION"}
             }
         },

@@ -393,10 +393,13 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
                     print(f"✨ [신규 핫플 자동 INSERT 성공] 총 {len(discovered_spots)}곳 발굴 및 DB 증강 완료:")
                     for s in discovered_spots:
                         print(f"   + [{s['region']}/{s['slot']}] {s['name']} ({s['category']})")
+                    return len(discovered_spots)
         except Exception as e:
             print(f"❌ 신규 스팟 INSERT 실패: {e}")
     else:
         print("💡 [신규 핫플 탐색] 탐색된 신규 장소 없음 (기존 DB 최신 상태 유지)")
+
+    return 0
 
 if __name__ == "__main__":
     env = load_env()
