@@ -3568,6 +3568,18 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   gap: 6px;
 }
 
+.status-left .btn-region-pill {
+  min-height: 28px;
+  height: 28px;
+  padding: 0 10px;
+  font-size: var(--font-xs);
+  box-shadow: var(--shadow-sm);
+}
+
+.status-left .btn-region-pill .pill-title {
+  max-width: 96px;
+}
+
 .status-count-badge {
   font-size: var(--font-sm);
   font-weight: 800;
