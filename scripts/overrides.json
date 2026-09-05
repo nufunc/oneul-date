@@ -658,7 +658,8 @@
     "sourceUrl": "https://www.aquafield-ssg.co.kr/"
   },
   "고즈넉한 갤러리 산책: 부암동 ↔ 서촌": {
-    "verified": true,
+    "verified": false,
+    "is_closed": true,
     "sourceUrl": "https://brunch.co.kr/@aimho/12"
   },
   "시그니엘 서울 - STAY (스테이)": {

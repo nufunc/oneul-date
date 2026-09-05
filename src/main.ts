@@ -551,7 +551,7 @@ function isRealStaySpot(spot: Spot): boolean {
   return false;
 }
 
-/** '서촌 / 북촌 / 삼청' 등 단일 장소가 아닌 광역 묶음 및 지자체 더미 라벨인지 검사 */
+/** '서촌 / 북촌 / 삼청' 등 단일 장소가 아닌 광역 묶음, 코스/가이드 라벨, 비매장 더미인지 검사 */
 function isBroadRegionDummy(spot: Spot): boolean {
   const name = (spot.name || '').trim();
   if (name.length === 0) return true;
@@ -561,6 +561,15 @@ function isBroadRegionDummy(spot: Spot): boolean {
   if (/^(서울|경기|인천|강원|충청|호남|영남|제주|대전|광주|대구|부산|울산)\s*[\/&]\s*(충청|전라|경상|울산|경남|경북|전남|전북|강원)/.test(name)) return true;
   if (/.*&.*&.*권$/.test(name)) return true;
   if (/^(충북|충남|전북|전남|경북|경남|강원도?)\s+[가-힣]+(시|군|구)$/.test(name)) return true;
+  // 코스명, 산책로 이동 라벨 (↔, ->, →) 및 비매장 가이드 라벨
+  if (/[↔→~]/.test(name) && /(산책|코스|투어|길|동|촌|구)/.test(name)) return true;
+  if (/(산책|코스|투어|명소|핫플)\s*[:：]/.test(name)) return true;
+  const coursePatterns = [
+    '부암동 ↔ 서촌', '서촌 순라길', '서촌순라길', '순라길 서촌', '북촌 서촌',
+    '익선동 서순라길', '거리 산책', '갤러리 산책', '코스 모음', '추천 리스트',
+    '데이트 코스', '감성 핫플 모음', '로컬 데이트존'
+  ];
+  if (coursePatterns.some((pat) => name.includes(pat))) return true;
   return false;
 }
 
@@ -697,6 +706,58 @@ function getDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): 
     Math.sin(dLng / 2) * Math.sin(dLng / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
+}
+
+/**
+ * 스폿의 정확한 또는 추정 위경도 좌표 산출
+ * 1) spot.lat, spot.lng가 존재하면 실제 좌표 반환
+ * 2) 없으면 spot.area 및 spot.location 기반으로 매칭되는 세부 데이트존(POPULAR_ZONES) 중심 좌표 반환
+ * 3) 그래도 없으면 광역 지역(REGIONS) 중심 좌표 반환
+ * 4) spot.id 기반 미세 결정론적 분산(Jitter)을 주어 자연스러운 거리 분포 형성
+ */
+function getSpotCoordinates(spot: Spot): { lat: number; lng: number } {
+  if (
+    spot.lat != null &&
+    spot.lng != null &&
+    typeof spot.lat === 'number' &&
+    typeof spot.lng === 'number' &&
+    !isNaN(spot.lat) &&
+    !isNaN(spot.lng) &&
+    spot.lat > 30 &&
+    spot.lng > 120
+  ) {
+    return { lat: spot.lat, lng: spot.lng };
+  }
+
+  // 1. 세부 데이트존 매칭 추정
+  for (const zone of POPULAR_ZONES) {
+    if (matchesZone(spot, [zone.key])) {
+      const center = ZONE_CENTERS[zone.key];
+      if (center) {
+        const jitterLat = (((spot.id * 17) % 100) - 50) * 0.00012;
+        const jitterLng = (((spot.id * 31) % 100) - 50) * 0.00012;
+        return { lat: center.lat + jitterLat, lng: center.lng + jitterLng };
+      }
+    }
+  }
+
+  // 2. 광역 지역(Region) 매칭 추정
+  for (const reg of REGIONS) {
+    if (reg.match.includes(spot.region)) {
+      const center = REGION_CENTERS[reg.key];
+      if (center) {
+        const jitterLat = (((spot.id * 13) % 100) - 50) * 0.0006;
+        const jitterLng = (((spot.id * 29) % 100) - 50) * 0.0006;
+        return { lat: center.lat + jitterLat, lng: center.lng + jitterLng };
+      }
+    }
+  }
+
+  // 3. 기본 폴백 (서울 성수·서울숲 중심)
+  const defaultCenter = REGION_CENTERS.SEOUL || { lat: 37.5413, lng: 127.0564 };
+  const fallbackLat = (((spot.id * 11) % 100) - 50) * 0.0005;
+  const fallbackLng = (((spot.id * 23) % 100) - 50) * 0.0005;
+  return { lat: defaultCenter.lat + fallbackLat, lng: defaultCenter.lng + fallbackLng };
 }
 
 /** rng 주입 가능 랜덤 픽 — 오늘의 코스(시드 PRNG)와 일반 생성(Math.random)이 공유 */
@@ -2192,7 +2253,10 @@ function requestUserGeolocation(showFeedback = false): void {
       isRequestingGeo = false;
       geoRequestedOnce = true;
       if (showFeedback) {
-        showToast('위치 권한을 확인하지 못해 기본 지역 기준으로 보여드려요');
+        showToast('위치 권한을 확인하지 못해 선택된 지역 기준으로 보여드려요');
+      }
+      if (state.mainMode === 'spots') {
+        renderSpotDiscovery();
       }
     },
     { timeout: 4000, maximumAge: 600000, enableHighAccuracy: false },
@@ -2229,7 +2293,7 @@ function activeSlots(): SlotKey[] {
 }
 
 declare const __APP_VERSION__: string;
-const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.9.23';
+const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.9.24';
 
 function courseSpotIds(): number[] {
   if (!state.course) return [];
@@ -4093,41 +4157,7 @@ function renderSpotDiscovery(): void {
   const selStart = isSearchFocused ? activeEl.selectionStart : null;
   const selEnd = isSearchFocused ? activeEl.selectionEnd : null;
 
-  // 2. 유효 스팟 필터링 (폐업, 광역 더미 제외 및 상호명/ID 2중 중복 완벽 제거)
-  let matchedSpots = deduplicateSpotList(spots.filter((s) => !s.is_closed && isCourseEligible(s)));
-
-  // 지역/세부존 필터 적용 (선택된 지역이 있는 경우 해당 지역 스팟만 선별)
-  if (state.regions.length > 0) {
-    matchedSpots = matchedSpots.filter((s) => matchesRegion(s, state.regions));
-  }
-  if (state.subZones.length > 0) {
-    matchedSpots = matchedSpots.filter((s) => matchesZone(s, state.subZones));
-  }
-
-  // 스팟 전용 검색어 필터 적용 (지역명, 핫플, 분위기, 메뉴 등)
-  const q = state.spotSearchQuery.trim();
-  if (q) {
-    matchedSpots = matchedSpots.filter((s) => matchesSearchQuery(s, q));
-  }
-
-  // 카테고리 필터 적용
-  if (state.spotCategory !== 'ALL') {
-    const cat = SPOT_EXPLORE_CATEGORIES.find((c) => c.key === state.spotCategory);
-    if (cat && cat.keywords) {
-      matchedSpots = matchedSpots.filter((s) => {
-        const targetText = [
-          s.name,
-          s.category,
-          s.summary,
-          ...(s.signature_items || []),
-          ...(s.mood_tags || []),
-        ].join(' ').toLowerCase();
-        return cat.keywords!.some((kw) => targetText.includes(kw.toLowerCase()));
-      });
-    }
-  }
-
-  // 3. 기준 좌표 결정 (GPS 획득 좌표 -> 선택된 지역/세부존 중심 좌표 -> 서울 성수 기본 중심 좌표)
+  // 2. 기준 좌표 결정 (GPS 획득 좌표 -> 선택된 지역/세부존 중심 좌표 -> 서울 성수 기본 중심 좌표)
   let effectiveCoords = userCoords;
   if (!effectiveCoords) {
     if (state.subZones.length > 0 && ZONE_CENTERS[state.subZones[0]]) {
@@ -4139,20 +4169,77 @@ function renderSpotDiscovery(): void {
     }
   }
 
-  // 모든 스팟의 기준점 대비 거리 계산
-  matchedSpots = matchedSpots.map((s) => {
-    const dist = s.lat && s.lng && effectiveCoords
-      ? getDistanceKm(effectiveCoords.lat, effectiveCoords.lng, s.lat, s.lng)
-      : 9999;
-    return { ...s, _dist: dist };
-  });
+  // 3. 유효 스팟 필터링 (폐업, 광역 더미 제외 및 상호명/ID 2중 중복 완벽 제거, 좌표 보정 및 거리 주입)
+  const allCandidateSpots = deduplicateSpotList(spots.filter((s) => !s.is_closed && isCourseEligible(s)))
+    .map((s) => {
+      const coords = getSpotCoordinates(s);
+      const lat = s.lat || coords.lat;
+      const lng = s.lng || coords.lng;
+      const dist = effectiveCoords
+        ? getDistanceKm(effectiveCoords.lat, effectiveCoords.lng, lat, lng)
+        : 9999;
+      return { ...s, lat, lng, _dist: dist };
+    });
+
+  let matchedSpots = allCandidateSpots;
+
+  // 지역/세부존 필터 적용 (선택된 지역이 있는 경우 해당 지역 스팟만 선별)
+  if (state.regions.length > 0) {
+    matchedSpots = matchedSpots.filter((s) => matchesRegion(s, state.regions));
+  }
+  if (state.subZones.length > 0) {
+    matchedSpots = matchedSpots.filter((s) => matchesZone(s, state.subZones));
+  }
+
+  // 스팟 전용 검색어 필터 적용 (스마트 전국 확장 지원)
+  const q = state.spotSearchQuery.trim();
+  if (q) {
+    const inRegionMatched = matchedSpots.filter((s) => matchesSearchQuery(s, q));
+    if (inRegionMatched.length > 0) {
+      matchedSpots = inRegionMatched;
+    } else {
+      // 지역 필터 내 결과가 없으면 전체 스팟 대상 전국 확장 검색
+      const nationwideMatched = allCandidateSpots.filter((s) => matchesSearchQuery(s, q));
+      if (nationwideMatched.length > 0) {
+        matchedSpots = nationwideMatched;
+      } else {
+        matchedSpots = [];
+      }
+    }
+  }
+
+  // 카테고리 필터 적용 (슬롯, 키워드, 지역, 메뉴, 분위기 태그 종합 매칭)
+  if (state.spotCategory !== 'ALL') {
+    const cat = SPOT_EXPLORE_CATEGORIES.find((c) => c.key === state.spotCategory);
+    if (cat && cat.keywords) {
+      matchedSpots = matchedSpots.filter((s) => {
+        if (cat.key === 'CAFE' && s.slot === 'day') return true;
+        if (cat.key === 'DINING' && s.slot === 'evening') return true;
+        if ((cat.key === 'WINE' || cat.key === 'PUB') && s.slot === 'night') return true;
+        if (cat.key === 'STAY' && (s.slot === 'stay' || isRealStaySpot(s))) return true;
+
+        const targetText = [
+          s.name || '',
+          s.category || '',
+          s.summary || '',
+          s.location || '',
+          s.area || '',
+          s.address || '',
+          ...(s.signature_items || []),
+          ...(s.mood_tags || []),
+          ...(Array.isArray(s.mood) ? s.mood : [s.mood || '']),
+        ].join(' ').toLowerCase();
+        return cat.keywords!.some((kw) => targetText.includes(kw.toLowerCase()));
+      });
+    }
+  }
 
   // 4. 정렬 적용 (거리순 / 핫플·인기순 / 블루리본·미쉐린순)
   if (state.spotSort === 'distance') {
     // 📍 가까운 거리순 (가까운 곳부터, 동일 거리 시 인기 점수순)
     matchedSpots.sort((a, b) => {
-      const aDist = (a as any)._dist ?? 9999;
-      const bDist = (b as any)._dist ?? 9999;
+      const aDist = a._dist ?? 9999;
+      const bDist = b._dist ?? 9999;
       if (Math.abs(aDist - bDist) > 0.05) {
         return aDist - bDist;
       }
@@ -4323,15 +4410,15 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
           <div class="thumb-fallback-box">${fallbackIcon}</div>
           ${
             targetImgUrl
-              ? `<img src="${escapeHtml(targetImgUrl)}" alt="${escapeHtml(spot.name)}" class="discovery-card-img" loading="lazy" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" />`
+              ? `<img src="${escapeHtml(targetImgUrl)}" alt="${escapeHtml(spot.name)}" class="discovery-card-img discovery-img" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" />`
               : ''
           }
         </div>
-        <div class="discovery-card-body">
-          <h4 class="discovery-card-title">${escapeHtml(spot.name)}</h4>
-          <div class="discovery-card-actions">
-            <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.name)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-action-map" aria-label="${escapeHtml(spot.name)} 지도">🗺️</a>
-            <button class="btn-discovery-action-build btn-build-anchor-course" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기">✨ 코스</button>
+        <div class="discovery-card-body compact">
+          <h4 class="discovery-card-title discovery-name compact">${escapeHtml(spot.name)}</h4>
+          <div class="discovery-card-actions compact">
+            <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.name)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map compact" aria-label="${escapeHtml(spot.name)} 지도">🗺️</a>
+            <button class="btn-build-anchor-course btn-discovery-action-build compact" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기">✨ 코스</button>
           </div>
         </div>
       </article>
@@ -4347,19 +4434,19 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
           <div class="thumb-fallback-box">${fallbackIcon}</div>
           ${
             targetImgUrl
-              ? `<img src="${escapeHtml(targetImgUrl)}" alt="${escapeHtml(spot.name)}" class="discovery-card-img" loading="lazy" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" />`
+              ? `<img src="${escapeHtml(targetImgUrl)}" alt="${escapeHtml(spot.name)}" class="discovery-card-img discovery-img" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" />`
               : ''
           }
         </div>
         <div class="discovery-card-body">
           <div class="discovery-card-header">
-            <h4 class="discovery-card-title">${escapeHtml(spot.name)}</h4>
-            <span class="discovery-card-category">${escapeHtml(spot.category || '데이트 스팟')}</span>
+            <h4 class="discovery-card-title discovery-name">${escapeHtml(spot.name)}</h4>
+            <span class="discovery-card-category discovery-category">${escapeHtml(spot.category || '데이트 스팟')}</span>
           </div>
-          <p class="discovery-card-summary">${escapeHtml(sum)}</p>
+          <p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>
           <div class="discovery-card-actions">
-            <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.name)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-action-map">🗺️ 네이버 지도</a>
-            <button class="btn-discovery-action-build btn-build-anchor-course" data-spot-id="${spot.id}">✨ 이 장소로 코스 짜기</button>
+            <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.name)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map">🗺️ 지도</a>
+            <button class="btn-build-anchor-course btn-discovery-action-build" data-spot-id="${spot.id}">✨ 코스 짜기</button>
           </div>
         </div>
       </article>
@@ -4374,16 +4461,16 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
         <div class="thumb-fallback-box">${fallbackIcon}</div>
         ${
           targetImgUrl
-            ? `<img src="${escapeHtml(targetImgUrl)}" alt="${escapeHtml(spot.name)}" class="discovery-card-img" loading="lazy" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" />`
+            ? `<img src="${escapeHtml(targetImgUrl)}" alt="${escapeHtml(spot.name)}" class="discovery-card-img discovery-img" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" />`
             : ''
         }
       </div>
       <div class="discovery-card-body">
-        <h4 class="discovery-card-title">${escapeHtml(spot.name)}</h4>
-        <p class="discovery-card-summary">${escapeHtml(sum)}</p>
+        <h4 class="discovery-card-title discovery-name">${escapeHtml(spot.name)}</h4>
+        <p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>
         <div class="discovery-card-actions">
-          <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.name)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-action-map">🗺️ 지도</a>
-          <button class="btn-discovery-action-build btn-build-anchor-course" data-spot-id="${spot.id}">✨ 코스</button>
+          <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.name)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map">🗺️ 지도</a>
+          <button class="btn-build-anchor-course btn-discovery-action-build" data-spot-id="${spot.id}">✨ 코스</button>
         </div>
       </div>
     </article>
@@ -4412,7 +4499,8 @@ function bindDiscoveryEvents(area: HTMLElement): void {
 
   area.querySelectorAll<HTMLButtonElement>('.spot-category-chip').forEach((btn) => {
     btn.addEventListener('click', () => {
-      state.spotCategory = btn.dataset.catKey || 'ALL';
+      const clickedKey = btn.dataset.catKey || 'ALL';
+      state.spotCategory = state.spotCategory === clickedKey ? 'ALL' : clickedKey;
       state.spotPage = 1;
       renderSpotDiscovery();
     });
@@ -4439,10 +4527,9 @@ function bindDiscoveryEvents(area: HTMLElement): void {
       const nextSort = (sortSelect.value as any) || 'distance';
       state.spotSort = nextSort;
       state.spotPage = 1;
+      renderSpotDiscovery();
       if (nextSort === 'distance' && !userCoords) {
         requestUserGeolocation(true);
-      } else {
-        renderSpotDiscovery();
       }
     });
   }
@@ -4833,7 +4920,7 @@ function renderOverlay(): void {
     root.querySelector('#overlay-backdrop')!.addEventListener('click', () => closeOverlay());
     root.querySelector('#overlay-close')!.addEventListener('click', () => closeOverlay());
 
-    // 지역 탭 클릭 (전체 클릭 시 자동으로 전국 기본 선택)
+    // 지역 탭 클릭 (전체 클릭 시 자동으로 전국 기본 선택, 지역 전환 시 해당 지역 활성화)
     root.querySelectorAll<HTMLButtonElement>('.region-tab-item').forEach((tabBtn) => {
       tabBtn.addEventListener('click', () => {
         const tabKey = tabBtn.dataset.regionTab || 'SEOUL';
@@ -4843,6 +4930,12 @@ function renderOverlay(): void {
           state.subZones = [];
           ensureSpotsForRegions(['ALL']);
         } else {
+          state.regions = [tabKey];
+          // 타 지역 세부존 제거하고 현재 지역 세부존만 유지
+          state.subZones = state.subZones.filter((zk) => {
+            const z = POPULAR_ZONES.find((item) => item.key === zk);
+            return z ? z.regionKey === tabKey : false;
+          });
           ensureSpotsForRegions([tabKey]);
         }
         renderOverlay();
@@ -4911,14 +5004,12 @@ function renderOverlay(): void {
         const cb = item.querySelector<HTMLInputElement>('.zone-checkbox');
         if (cb) cb.checked = willCheck;
 
-        // 해당 지역 내 체크된 항목이 1개라도 있으면 지역 포함, 0개면 지역 제외
+        // 해당 지역 내 체크된 항목이 1개라도 있으면 지역 포함, 0개면 지역 기본 포함 유지
         const hasAnyInReg = subZonesInTab.some((z) => state.subZones.includes(z.key));
         if (hasAnyInReg) {
           if (!state.regions.includes(activeReg)) {
             state.regions.push(activeReg);
           }
-        } else {
-          state.regions = state.regions.filter((r) => r !== activeReg);
         }
 
         // 해당 권역 전체 칩 체크 상태 실시간 동기화
@@ -4959,8 +5050,14 @@ function renderOverlay(): void {
       renderOverlay();
     });
 
-    // 선택 완료 버튼
+    // 선택 완료 버튼 (선택 보정 및 적용)
     root.querySelector('#btn-location-submit')?.addEventListener('click', () => {
+      if (state.activeRegionTab === 'ALL') {
+        state.regions = [];
+        state.subZones = [];
+      } else if (state.regions.length === 0 && state.subZones.length === 0) {
+        state.regions = [state.activeRegionTab || 'SEOUL'];
+      }
       closeOverlay();
     });
 

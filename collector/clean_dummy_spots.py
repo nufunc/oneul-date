@@ -60,10 +60,14 @@ def is_broad_region_dummy(name: str) -> bool:
     # 2. 코스명, 거리명 묶음, 비매장 가이드 라벨
     course_and_guide_patterns = [
         "서촌 순라길", "서촌순라길", "순라길 서촌", "북촌 서촌", "익선동 서순라길",
-        "부암동 ↔ 서촌", "드론 비행", "촬영 수칙", "로컬 데이트존", "거리 산책",
+        "부암동 ↔ 서촌", "갤러리 산책", "거리 산책", "드론 비행", "촬영 수칙", "로컬 데이트존",
         "코스 모음", "추천 리스트", "데이트 코스", "감성 핫플 모음", "너무착한데?"
     ]
     if any(pat in n for pat in course_and_guide_patterns):
+        return True
+    if re.search(r"[↔→~].*(산책|코스|투어|길|동|촌|구)", n):
+        return True
+    if re.search(r"(산책|코스|투어|명소|핫플)\s*[:：]", n):
         return True
 
     # 3. 슬래시(/)가 2개 이상 들어간 다중 지역 나열 (예: 서촌 / 북촌 / 삼청 / 안국 / 익선)
