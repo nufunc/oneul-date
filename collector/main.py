@@ -321,82 +321,122 @@ def check_and_generate_daily_summary(force: bool = False):
 
         last_summary_date = today_str
 
+# 각 수집 단계별 마지막 실행 시각 추적 (스마트 스케줄링)
+last_step_run = {}
+
+def is_step_due(step_name: str, interval_hours: float) -> bool:
+    """지정된 주기(시간) 경과 여부를 판별하여 단계별 실행 제어 (최초 구동 시 즉시 실행)"""
+    global last_step_run
+    now_ts = time.time()
+    last_ts = last_step_run.get(step_name, 0)
+    if (now_ts - last_ts) >= (interval_hours * 3600):
+        last_step_run[step_name] = now_ts
+        return True
+    return False
+
 def run_cycle():
     today_str = get_kst_now().strftime("%Y-%m-%d")
 
-    log(f"▶ 1단계: Supabase 스팟 심층 메타 보강 & 폐업 검증 시작 (한도: {BATCH_LIMIT}개)")
-    try:
-        run_worker(SUPABASE_URL, SUPABASE_SERVICE_KEY, limit=BATCH_LIMIT)
-    except Exception as e:
-        log(f"1단계 검증 오류: {e}", level="ERROR")
+    # 1단계: Supabase 스팟 심층 메타 보강 & 폐업 검증 (4시간 주기)
+    if is_step_due("worker_verify", 4.0):
+        log(f"▶ 1단계: Supabase 스팟 심층 메타 보강 & 폐업 검증 시작 (한도: {BATCH_LIMIT}개)")
+        try:
+            run_worker(SUPABASE_URL, SUPABASE_SERVICE_KEY, limit=BATCH_LIMIT)
+        except Exception as e:
+            log(f"1단계 검증 오류: {e}", level="ERROR")
+        time.sleep(2)
+    else:
+        log("⏩ 1단계(폐업/메타 검증) 대기 중 (4시간 주기 보호)")
 
-    time.sleep(2)
+    # 2단계: 2026 신규 핫플레이스 포털 자율 발굴 (2시간 주기)
+    if is_step_due("portal_discovery", 2.0):
+        log(f"▶ 2단계: 2026 신규 핫플레이스 포털 자율 발굴 시작 (한도: {DISCOVERY_LIMIT}개)")
+        try:
+            p_mined = run_discovery(SUPABASE_URL, SUPABASE_SERVICE_KEY, groq_key=GROQ_API_KEY, max_discoveries=DISCOVERY_LIMIT) or 0
+            record_pipeline_count(today_str, "portal_blog", p_mined)
+            log(f"2단계 완료: 신규 포털 스팟 {p_mined}개 등록")
+        except Exception as e:
+            log(f"2단계 포털 발굴 오류: {e}", level="ERROR")
+        time.sleep(2)
+    else:
+        log("⏩ 2단계(포털 발굴) 대기 중 (2시간 주기 보호)")
 
-    log(f"▶ 2단계: 2026 신규 핫플레이스 포털 자율 발굴 시작 (한도: {DISCOVERY_LIMIT}개)")
-    try:
-        p_mined = run_discovery(SUPABASE_URL, SUPABASE_SERVICE_KEY, groq_key=GROQ_API_KEY, max_discoveries=DISCOVERY_LIMIT) or 0
-        record_pipeline_count(today_str, "portal_blog", p_mined)
-        log(f"2단계 완료: 신규 포털 스팟 {p_mined}개 등록")
-    except Exception as e:
-        log(f"2단계 포털 발굴 오류: {e}", level="ERROR")
+    # 3단계: 블로그 & 구글 웹 검색 데이트 스팟 마이닝 (2.5시간 주기)
+    if is_step_due("blog_miner", 2.5):
+        log(f"▶ 3단계: 블로그 & 구글 웹 검색 데이트 스팟 마이닝 시작 (한도: {DISCOVERY_LIMIT}개)")
+        try:
+            b_mined = run_blog_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, max_discoveries=DISCOVERY_LIMIT) or 0
+            record_pipeline_count(today_str, "portal_blog", b_mined)
+            log(f"3단계 완료: 신규 블로그 스팟 {b_mined}개 등록")
+        except Exception as e:
+            log(f"3단계 블로그 마이닝 오류: {e}", level="ERROR")
+        time.sleep(2)
+    else:
+        log("⏩ 3단계(블로그 마이닝) 대기 중 (2.5시간 주기 보호)")
 
-    time.sleep(2)
+    # 4단계: 커뮤니티(더쿠/블라인드/인벤) 추천 리스트 마이닝 (3시간 주기)
+    if is_step_due("community_miner", 3.0):
+        log(f"▶ 4단계: 커뮤니티(더쿠/블라인드/인벤) 추천 리스트 마이닝 시작 (한도: {DISCOVERY_LIMIT}개)")
+        try:
+            c_mined = run_community_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, max_discoveries=DISCOVERY_LIMIT) or 0
+            record_pipeline_count(today_str, "portal_blog", c_mined)
+            log(f"4단계 완료: 신규 커뮤니티 스팟 {c_mined}개 등록")
+        except Exception as e:
+            log(f"4단계 커뮤니티 마이닝 오류: {e}", level="ERROR")
+        time.sleep(2)
+    else:
+        log("⏩ 4단계(커뮤니티 마이닝) 대기 중 (3시간 주기 보호)")
 
-    log(f"▶ 3단계: 블로그 & 구글 웹 검색 데이트 스팟 마이닝 시작 (한도: {DISCOVERY_LIMIT}개)")
-    try:
-        b_mined = run_blog_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, max_discoveries=DISCOVERY_LIMIT) or 0
-        record_pipeline_count(today_str, "portal_blog", b_mined)
-        log(f"3단계 완료: 신규 블로그 스팟 {b_mined}개 등록")
-    except Exception as e:
-        log(f"3단계 블로그 마이닝 오류: {e}", level="ERROR")
+    # 5단계: 유튜브 핫클립 & 카카오맵 평점 소셜 점진적 동기화 (4시간 주기)
+    if is_step_due("social_enrich", 4.0):
+        log(f"▶ 5단계: 유튜브 핫클립 & 카카오맵 평점 소셜 점진적 동기화 시작 (한도: {DISCOVERY_LIMIT}개)")
+        try:
+            e_cnt = run_social_enrichment(SUPABASE_URL, SUPABASE_SERVICE_KEY, batch_size=DISCOVERY_LIMIT) or 0
+            record_pipeline_count(today_str, "enrich", e_cnt)
+            log(f"5단계 완료: 소셜 메타 {e_cnt}개 동기화")
+        except Exception as e:
+            log(f"5단계 소셜 동기화 오류: {e}", level="ERROR")
+        time.sleep(2)
+    else:
+        log("⏩ 5단계(소셜 동기화) 대기 중 (4시간 주기 보호)")
 
-    log(f"▶ 4단계: 커뮤니티(더쿠/블라인드/인벤) 추천 리스트 마이닝 시작 (한도: {DISCOVERY_LIMIT}개)")
-    try:
-        c_mined = run_community_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, max_discoveries=DISCOVERY_LIMIT) or 0
-        record_pipeline_count(today_str, "portal_blog", c_mined)
-        log(f"4단계 완료: 신규 커뮤니티 스팟 {c_mined}개 등록")
-    except Exception as e:
-        log(f"4단계 커뮤니티 마이닝 오류: {e}", level="ERROR")
+    # 6단계: 최신 유튜브 여행/데이트 브이로그 역방향 장소 마이닝 (2시간 주기)
+    if is_step_due("youtube_vlog", 2.0):
+        log(f"▶ 6단계: 최신 유튜브 여행/데이트 브이로그 역방향 장소 마이닝 시작 (한도: 25개 영상)")
+        try:
+            mined = run_youtube_vlog_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, limit=25) or 0
+            record_pipeline_count(today_str, "youtube", mined)
+            log(f"6단계 완료: 신규 스팟 {mined}개 등록")
+        except Exception as e:
+            log(f"6단계 유튜브 브이로그 마이닝 오류: {e}", level="ERROR")
+        time.sleep(2)
+    else:
+        log("⏩ 6단계(유튜브 브이로그) 대기 중 (2시간 주기 보호)")
 
-    time.sleep(2)
+    # 7단계: 캐치테이블 & 블루리본 미식 예약 핫플 마이닝 (3시간 주기)
+    if is_step_due("catchtable", 3.0):
+        log(f"▶ 7단계: 캐치테이블 & 블루리본 미식 예약 핫플 마이닝 시작 (한도: 60개)")
+        try:
+            ct_mined = run_catchtable_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, max_discoveries=60) or 0
+            record_pipeline_count(today_str, "catchtable", ct_mined)
+            log(f"7단계 완료: 신규 예약 다이닝 스팟 {ct_mined}개 등록")
+        except Exception as e:
+            log(f"7단계 캐치테이블 마이닝 오류: {e}", level="ERROR")
+        time.sleep(2)
+    else:
+        log("⏩ 7단계(캐치테이블) 대기 중 (3시간 주기 보호)")
 
-    log(f"▶ 5단계: 유튜브 핫클립 & 카카오맵 평점 소셜 점진적 동기화 시작 (한도: {DISCOVERY_LIMIT}개)")
-    try:
-        e_cnt = run_social_enrichment(SUPABASE_URL, SUPABASE_SERVICE_KEY, batch_size=DISCOVERY_LIMIT) or 0
-        record_pipeline_count(today_str, "enrich", e_cnt)
-        log(f"5단계 완료: 소셜 메타 {e_cnt}개 동기화")
-    except Exception as e:
-        log(f"5단계 소셜 동기화 오류: {e}", level="ERROR")
-
-    time.sleep(2)
-
-    log(f"▶ 6단계: 최신 유튜브 여행/데이트 브이로그 역방향 장소 마이닝 시작 (한도: 25개 영상)")
-    try:
-        mined = run_youtube_vlog_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, limit=25) or 0
-        record_pipeline_count(today_str, "youtube", mined)
-        log(f"6단계 완료: 신규 스팟 {mined}개 등록")
-    except Exception as e:
-        log(f"6단계 유튜브 브이로그 마이닝 오류: {e}", level="ERROR")
-
-    time.sleep(2)
-
-    log(f"▶ 7단계: 캐치테이블 & 블루리본 미식 예약 핫플 마이닝 시작 (한도: 60개)")
-    try:
-        ct_mined = run_catchtable_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, max_discoveries=60) or 0
-        record_pipeline_count(today_str, "catchtable", ct_mined)
-        log(f"7단계 완료: 신규 예약 다이닝 스팟 {ct_mined}개 등록")
-    except Exception as e:
-        log(f"7단계 캐치테이블 마이닝 오류: {e}", level="ERROR")
-
-    time.sleep(2)
-
-    log(f"▶ 8단계: 한국관광공사 TourAPI 4.0 공공 문화/관광/체험 마이닝 시작 (한도: {DISCOVERY_LIMIT}개)")
-    try:
-        t_mined = run_tourapi_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, max_discoveries=DISCOVERY_LIMIT) or 0
-        record_pipeline_count(today_str, "tourapi", t_mined)
-        log(f"8단계 완료: 신규 공공 문화/관광 스팟 {t_mined}개 등록")
-    except Exception as e:
-        log(f"8단계 TourAPI 마이닝 오류: {e}", level="ERROR")
+    # 8단계: 한국관광공사 TourAPI 4.0 공공 문화/관광/체험 마이닝 (4시간 주기)
+    if is_step_due("tourapi", 4.0):
+        log(f"▶ 8단계: 한국관광공사 TourAPI 4.0 공공 문화/관광/체험 마이닝 시작 (한도: {DISCOVERY_LIMIT}개)")
+        try:
+            t_mined = run_tourapi_mining(SUPABASE_URL, SUPABASE_SERVICE_KEY, max_discoveries=DISCOVERY_LIMIT) or 0
+            record_pipeline_count(today_str, "tourapi", t_mined)
+            log(f"8단계 완료: 신규 공공 문화/관광 스팟 {t_mined}개 등록")
+        except Exception as e:
+            log(f"8단계 TourAPI 마이닝 오류: {e}", level="ERROR")
+    else:
+        log("⏩ 8단계(TourAPI) 대기 중 (4시간 주기 보호)")
 
     # 일일 서머리 검사
     check_and_generate_daily_summary()

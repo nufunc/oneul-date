@@ -341,6 +341,10 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
             meta = generate_spot_metadata_rule_based(raw_name, cat, region, area, default_moods)
 
             thum = p.get("thumUrl") or p.get("image") or p.get("imageUrl") or p.get("thumbUrl")
+            # [품질 가드] 고유 대표 이미지가 없는 스팟은 DB 적재 거부
+            if not thum or not thum.strip():
+                continue
+
             x_coord = p.get("x") or p.get("lng")
             y_coord = p.get("y") or p.get("lat")
 

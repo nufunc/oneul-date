@@ -269,6 +269,10 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
 
             slot = infer_slot(cat, real_name)
             thum = top.get("thumUrl") or top.get("image") or top.get("imageUrl") or top.get("thumbUrl")
+            # [품질 가드] 고유 대표 이미지가 없는 스팟은 DB 적재 거부
+            if not thum or not thum.strip():
+                continue
+
             x_coord = top.get("x") or top.get("lng")
             y_coord = top.get("y") or top.get("lat")
 
