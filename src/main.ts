@@ -2175,6 +2175,7 @@ interface AppState {
   regionSheetOpen: boolean;
   moodSheetOpen: boolean;
   activeRegionTab: string;
+  spotDetailId: number | null;
 }
 
 /** 저장된 테마 모드 불러오기 (기본값: 'light' 낮 테마) */
@@ -2284,6 +2285,7 @@ const state: AppState = {
   regionSheetOpen: false,
   moodSheetOpen: false,
   activeRegionTab: 'ALL',
+  spotDetailId: null,
 };
 
 let spotById = new Map<number, Spot>(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
@@ -4503,6 +4505,10 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
       : `📍 ${spot.area || spot.region}`;
   const sum = cleanSpotSummary(spot) || `${spot.name}에서 특별한 데이트를 즐겨보세요.`;
 
+  const bookingUrl = spot.booking_info?.url || getCatchtableUrl(spot);
+  const yt = spot.social_links?.youtube;
+  const hasYt = isValidYoutubeHotclip(yt) && yt?.url;
+
   const curationPill = spot.curation_badges?.blue_ribbon
     ? `<span class="badge-card-curation blueribbon">${cols === 5 ? '🎀' : '🎀 블루리본'}</span>`
     : spot.curation_badges?.michelin
@@ -4513,7 +4519,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
 
   if (cols === 5) {
     return `
-      <article class="discovery-card cols-5" data-spot-id="${spot.id}">
+      <article class="discovery-card cols-5" data-spot-id="${spot.id}" title="${escapeHtml(spot.name)} 상세 보기">
         <div class="discovery-card-thumb">
           <span class="discovery-badge-dist">${distText}</span>
           ${curationPill}
@@ -4527,6 +4533,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
         <div class="discovery-card-body compact">
           <h4 class="discovery-card-title discovery-name compact">${escapeHtml(spot.name)}</h4>
           <div class="discovery-card-actions compact">
+            ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-book compact" aria-label="${escapeHtml(spot.name)} 실시간 예약" title="실시간 예약">📅</a>` : ''}
             <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.name)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map compact" aria-label="${escapeHtml(spot.name)} 지도">🗺️</a>
             <button class="btn-build-anchor-course btn-discovery-action-build compact" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기">✨ 코스</button>
           </div>
@@ -4537,7 +4544,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
 
   if (cols === 2) {
     return `
-      <article class="discovery-card cols-2" data-spot-id="${spot.id}">
+      <article class="discovery-card cols-2" data-spot-id="${spot.id}" title="${escapeHtml(spot.name)} 상세 보기">
         <div class="discovery-card-thumb">
           <span class="discovery-badge-dist">${distText}</span>
           ${curationPill}
@@ -4555,6 +4562,8 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
           </div>
           <p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>
           <div class="discovery-card-actions">
+            ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-book" aria-label="${escapeHtml(spot.name)} 실시간 예약">📅 예약</a>` : ''}
+            ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-yt" aria-label="${escapeHtml(spot.name)} 유튜브 핫클립">▶️ 영상</a>` : ''}
             <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.name)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map">🗺️ 지도</a>
             <button class="btn-build-anchor-course btn-discovery-action-build" data-spot-id="${spot.id}">✨ 코스 짜기</button>
           </div>
@@ -4564,7 +4573,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
   }
 
   return `
-    <article class="discovery-card cols-3" data-spot-id="${spot.id}">
+    <article class="discovery-card cols-3" data-spot-id="${spot.id}" title="${escapeHtml(spot.name)} 상세 보기">
       <div class="discovery-card-thumb">
         <span class="discovery-badge-dist">${distText}</span>
         ${curationPill}
@@ -4579,6 +4588,8 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
         <h4 class="discovery-card-title discovery-name">${escapeHtml(spot.name)}</h4>
         <p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>
         <div class="discovery-card-actions">
+          ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-book" aria-label="${escapeHtml(spot.name)} 실시간 예약">📅 예약</a>` : ''}
+          ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-yt" aria-label="${escapeHtml(spot.name)} 유튜브 핫클립">▶️ 영상</a>` : ''}
           <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.name)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map">🗺️ 지도</a>
           <button class="btn-build-anchor-course btn-discovery-action-build" data-spot-id="${spot.id}">✨ 코스</button>
         </div>
@@ -4588,6 +4599,18 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
 }
 
 function bindDiscoveryEvents(area: HTMLElement): void {
+  // 스팟 카드 본체 클릭 시 상세 모달 오픈
+  area.querySelectorAll<HTMLElement>('.discovery-card').forEach((card) => {
+    card.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).closest('a, button')) return;
+      const spotId = Number(card.dataset.spotId);
+      if (spotId) {
+        state.spotDetailId = spotId;
+        renderOverlay();
+      }
+    });
+  });
+
   const searchInput = area.querySelector<HTMLInputElement>('#discovery-search-input');
   if (searchInput) {
     let searchDebounce: number;
@@ -4821,15 +4844,16 @@ function getMoodDescription(key: string): string {
 let isClosingOverlay = false;
 
 function closeOverlay(callback?: () => void): void {
-  if (isClosingOverlay || (!state.savedOpen && !state.regionSheetOpen && !state.moodSheetOpen)) return;
+  if (isClosingOverlay || (!state.savedOpen && !state.regionSheetOpen && !state.moodSheetOpen && !state.spotDetailId)) return;
   const root = document.getElementById('overlay-root');
   if (!root) return;
   const backdrop = root.querySelector('.overlay-backdrop');
-  const panel = root.querySelector('.overlay-panel, .location-sheet-panel');
+  const panel = root.querySelector('.overlay-panel, .location-sheet-panel, .spot-detail-sheet-panel');
   if (!backdrop || !panel) {
     state.savedOpen = false;
     state.regionSheetOpen = false;
     state.moodSheetOpen = false;
+    state.spotDetailId = null;
     renderOverlay();
     if (state.mainMode === 'course') {
       renderConditions();
@@ -4846,6 +4870,7 @@ function closeOverlay(callback?: () => void): void {
     state.savedOpen = false;
     state.regionSheetOpen = false;
     state.moodSheetOpen = false;
+    state.spotDetailId = null;
     isClosingOverlay = false;
     renderOverlay();
     if (state.mainMode === 'course') {
@@ -5223,6 +5248,217 @@ function renderOverlay(): void {
     return;
   }
 
+  // 4. 스팟 상세 바텀시트 모달
+  if (state.spotDetailId) {
+    const spot = spotById.get(state.spotDetailId);
+    if (!spot) {
+      state.spotDetailId = null;
+      root.innerHTML = '';
+      return;
+    }
+
+    const slotKey = (spot.slot as SlotKey) || 'day';
+    const targetImgUrl = getSpotImageUrl(spot, slotKey);
+    const fallbackIcon = getSpotFallbackIcon(spot, slotKey);
+    const sum = cleanSpotSummary(spot) || spot.ai_summary_editorial || `${spot.name}에서 특별한 데이트를 즐겨보세요.`;
+    const bookingUrl = spot.booking_info?.url || getCatchtableUrl(spot);
+    const yt = spot.social_links?.youtube;
+    const hasYt = isValidYoutubeHotclip(yt) && yt?.url;
+    const instaUrl = getInstagramUrl(spot);
+    const kakaoUrl = getKakaomapUrl(spot);
+    const guideUrl = getGourmetGuideUrl(spot);
+
+    // 거리 계산
+    let distText = '';
+    if (userCoords && spot.lat && spot.lng) {
+      const dist = getDistanceKm(userCoords.lat, userCoords.lng, spot.lat, spot.lng);
+      distText = dist < 1.0 ? `📍 내 위치에서 ${(dist * 1000).toFixed(0)}m` : `📍 내 위치에서 ${dist.toFixed(1)}km`;
+    } else {
+      distText = `📍 ${spot.area || spot.region}`;
+    }
+
+    // 영업시간 포맷
+    let hoursText = '';
+    if (spot.business_hours && Object.keys(spot.business_hours).length > 0) {
+      const entries = Object.entries(spot.business_hours);
+      hoursText = entries.map(([day, time]) => `${day}: ${time}`).join(' / ');
+    } else if (spot.is_24h) {
+      hoursText = '24시간 영업';
+    }
+
+    // 휴무일
+    const closedText = spot.closed_days && spot.closed_days.length > 0 ? spot.closed_days.join(', ') : '';
+
+    // 주차
+    const parkingText = spot.parking_detail || spot.parking_info?.detail || (spot.parking_type === 'free' ? '무료 주차 가능' : spot.parking_type === 'paid' ? '유료 주차' : spot.parking_type === 'valet' ? '발렛 가능' : '');
+
+    // 가격
+    const priceText = spot.avg_price_per_person ? `1인 약 ${spot.avg_price_per_person.toLocaleString()}원` : spot.price || '';
+
+    // 대표메뉴
+    const signatureItems = spot.signature_items || [];
+
+    // 분위기 태그
+    const moodTags = [...(spot.mood_tags || []), ...(Array.isArray(spot.mood) ? spot.mood : [spot.mood || ''])].filter(Boolean);
+
+    // 뱃지
+    const isHot = isSuperHotSpot(spot);
+    const badgesHtml = [
+      spot.curation_badges?.blue_ribbon ? `<span class="badge-card-curation blueribbon">🎀 블루리본 서베이</span>` : '',
+      spot.curation_badges?.michelin ? `<span class="badge-card-curation michelin">⭐ 미쉐린 가이드</span>` : '',
+      isHot ? `<span class="badge-card-curation hot">🔥 핫플레이스</span>` : '',
+      spot.curation_badges?.tour_api ? `<span class="badge-card-curation tourapi">🏛️ 한국관광공사 인증</span>` : '',
+    ].filter(Boolean).join('');
+
+    root.innerHTML = `
+      <div class="overlay-backdrop" id="overlay-backdrop"></div>
+      <div class="spot-detail-sheet-panel" role="dialog" aria-label="${escapeHtml(spot.name)} 상세 정보">
+        <div class="spot-detail-head">
+          <span class="spot-detail-head-title">📍 데이트 스팟 상세 정보</span>
+          <button class="overlay-close" id="overlay-close" aria-label="닫기">✕</button>
+        </div>
+
+        <div class="spot-detail-body">
+          <!-- 1. 비주얼 히어로 배너 -->
+          <div class="spot-detail-hero">
+            ${badgesHtml ? `<div class="spot-detail-hero-badges">${badgesHtml}</div>` : ''}
+            <div class="spot-detail-hero-fallback">${fallbackIcon}</div>
+            ${targetImgUrl ? `<img src="${escapeHtml(targetImgUrl)}" alt="${escapeHtml(spot.name)}" class="spot-detail-hero-img" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" />` : ''}
+          </div>
+
+          <!-- 2. 기본 타이틀 및 카테고리/주소 -->
+          <div class="spot-detail-title-section">
+            <div class="spot-detail-category-row">
+              <span class="spot-detail-slot">${SLOT_META[slotKey]?.emoji || '✨'} ${SLOT_META[slotKey]?.label || ''} 추천</span>
+              <span class="spot-detail-cat-pill">${escapeHtml(spot.category || '데이트 명소')}</span>
+              <span class="spot-detail-dist">${escapeHtml(distText)}</span>
+            </div>
+            <h3 class="spot-detail-name">${escapeHtml(spot.name)}</h3>
+            <p class="spot-detail-address">
+              <span>📍 ${escapeHtml(spot.address || spot.location)}</span>
+              <button class="btn-copy-address" id="btn-copy-spot-address" data-address="${escapeHtml(spot.address || spot.location)}" title="주소 복사">복사</button>
+            </p>
+          </div>
+
+          <!-- 3. AI 에디토리얼 요약 -->
+          <div class="spot-detail-editorial-card">
+            <span class="editorial-sparkle">✨ 오늘 데이트 에디토리얼</span>
+            <blockquote class="editorial-text">“${escapeHtml(sum)}”</blockquote>
+          </div>
+
+          <!-- 4. 실용 정보 그리드 (영업시간, 주차, 가격, 메뉴 등) -->
+          <div class="spot-detail-meta-grid">
+            ${hoursText || closedText ? `
+              <div class="meta-grid-item">
+                <span class="meta-item-icon">🕒</span>
+                <div class="meta-item-body">
+                  <strong class="meta-item-title">영업시간</strong>
+                  <p class="meta-item-desc">${escapeHtml(hoursText || '정보 없음')}${closedText ? ` (휴무: ${escapeHtml(closedText)})` : ''}</p>
+                </div>
+              </div>
+            ` : ''}
+
+            ${parkingText ? `
+              <div class="meta-grid-item">
+                <span class="meta-item-icon">🚗</span>
+                <div class="meta-item-body">
+                  <strong class="meta-item-title">주차 안내</strong>
+                  <p class="meta-item-desc">${escapeHtml(parkingText)}</p>
+                </div>
+              </div>
+            ` : ''}
+
+            ${priceText ? `
+              <div class="meta-grid-item">
+                <span class="meta-item-icon">💳</span>
+                <div class="meta-item-body">
+                  <strong class="meta-item-title">가격대 / 예산</strong>
+                  <p class="meta-item-desc">${escapeHtml(priceText)}</p>
+                </div>
+              </div>
+            ` : ''}
+
+            ${signatureItems.length > 0 ? `
+              <div class="meta-grid-item full-width">
+                <span class="meta-item-icon">🍽️</span>
+                <div class="meta-item-body">
+                  <strong class="meta-item-title">대표 메뉴</strong>
+                  <div class="meta-tag-chips">
+                    ${signatureItems.map((item) => `<span class="meta-tag-chip menu">#${escapeHtml(item)}</span>`).join('')}
+                  </div>
+                </div>
+              </div>
+            ` : ''}
+
+            ${moodTags.length > 0 ? `
+              <div class="meta-grid-item full-width">
+                <span class="meta-item-icon">✨</span>
+                <div class="meta-item-body">
+                  <strong class="meta-item-title">분위기 & 키워드</strong>
+                  <div class="meta-tag-chips">
+                    ${moodTags.slice(0, 6).map((tag) => `<span class="meta-tag-chip mood">#${escapeHtml(tag)}</span>`).join('')}
+                  </div>
+                </div>
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- 5. 공식 채널 및 링크 바로가기 -->
+          <div class="spot-detail-links-row">
+            ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn book" aria-label="캐치테이블 실시간 예약"><span>📅 캐치테이블 예약</span></a>` : ''}
+            ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn yt" aria-label="유튜브 핫클립 시청"><span>▶️ 유튜브 영상</span></a>` : ''}
+            ${guideUrl ? `<a href="${escapeHtml(guideUrl)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn guide" aria-label="공식 가이드 평가"><span>🎀 공식 가이드</span></a>` : ''}
+            ${instaUrl ? `<a href="${escapeHtml(instaUrl)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn insta" aria-label="인스타그램 공식 피드"><span>📸 인스타그램</span></a>` : ''}
+            <a href="${escapeHtml(kakaoUrl)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn kakao" aria-label="카카오맵 상세"><span>💛 카카오맵</span></a>
+          </div>
+        </div>
+
+        <!-- 6. 하단 고정 액션 바 -->
+        <div class="spot-detail-footer">
+          <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.name)}" target="_blank" rel="noopener noreferrer" class="btn-detail-naver-map">
+            🗺️ 네이버 지도
+          </a>
+          <button class="btn-primary btn-detail-build-course" id="btn-detail-build-anchor" data-spot-id="${spot.id}">
+            ✨ 이 스팟 중심으로 코스 짜기
+          </button>
+        </div>
+      </div>
+    `;
+
+    root.querySelector('#overlay-backdrop')!.addEventListener('click', () => closeOverlay());
+    root.querySelector('#overlay-close')!.addEventListener('click', () => closeOverlay());
+
+    // 주소 복사
+    root.querySelector('#btn-copy-spot-address')?.addEventListener('click', () => {
+      const addr = (root.querySelector('#btn-copy-spot-address') as HTMLElement)?.dataset.address;
+      if (addr && navigator.clipboard) {
+        navigator.clipboard.writeText(addr).then(() => {
+          showToast('📋 주소가 복사되었어요');
+        });
+      }
+    });
+
+    // 코스 짜기 버튼
+    root.querySelector('#btn-detail-build-anchor')?.addEventListener('click', () => {
+      closeOverlay(() => {
+        const steps = buildAnchorCourse(spot);
+        state.course = steps;
+        state.searchQuery = spot.name;
+        state.courseConditions = {
+          regions: [...state.regions],
+          subZones: [...state.subZones],
+          mood: state.mood,
+          searchQuery: spot.name,
+        };
+        state.mainMode = 'course';
+        updateModeView();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        showToast(`✨ '${spot.name}' 중심 맞춤 코스를 완성했어요!`);
+      });
+    });
+
+    return;
+  }
 
   root.innerHTML = '';
 }
@@ -5325,7 +5561,7 @@ async function ensureSpotsForRegions(regionKeys: string[]): Promise<void> {
 
 async function init(): Promise<void> {
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && state.savedOpen) {
+    if (e.key === 'Escape' && (state.savedOpen || state.regionSheetOpen || state.moodSheetOpen || state.spotDetailId)) {
       closeOverlay();
     }
   });
