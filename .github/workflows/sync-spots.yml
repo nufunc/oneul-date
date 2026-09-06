@@ -1,0 +1,45 @@
+name: Auto Sync Spots from OCI DB
+
+on:
+  schedule:
+    # 매일 한국 시간(KST) 새벽 4시 (UTC 19:00)
+    - cron: '0 19 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install requests
+
+      - name: Run sync script
+        run: |
+          python collector/sync_live_spots.py
+
+      - name: Check for changes and commit
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git status
+          if [ -n "$(git status --porcelain public/data/spots.json)" ]; then
+            git add public/data/spots.json
+            git commit -m "chore(data): auto-sync latest spots from OCI PostgreSQL"
+            git push origin main
+          else
+            echo "No changes in spots data. Skipping commit."
+          fi

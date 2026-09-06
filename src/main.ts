@@ -728,6 +728,17 @@ function deduplicateSpotList(spots: Spot[]): Spot[] {
  */
 const STAY_ZONE_FALLBACK_RADIUS_KM = 20;
 
+const OUTDOOR_PATTERNS = /(?:공원|산책|둘레길|올레길|트레킹|피크닉|수목원|식물원\s*야외|유원지|해변|해수욕장|루프탑|카약|요트|패들|서핑|야외\s*전망대|야경산책|출렁다리)/i;
+const INDOOR_PATTERNS = /(?:실내|아쿠아리움|수족관|박물관|미술관|전시|갤러리|쇼핑몰|백화점|아케이드|공방|스파|온천|찜질|도서관|영화관)/i;
+
+/** 비 오는 날/폭염 등 실내 데이트 스팟 여부 판정 */
+function isIndoorSpot(spot: Spot): boolean {
+  const text = `${spot.name} ${spot.category || ''} ${spot.summary || ''}`;
+  if (INDOOR_PATTERNS.test(text)) return true;
+  if (OUTDOOR_PATTERNS.test(text)) return false;
+  return true;
+}
+
 interface CandidatePool {
   spots: Spot[];
   /** 세부존을 선택했지만 존 내 후보가 0건이라 광역 전체로 조건이 완화됐는지 */
@@ -745,6 +756,7 @@ function getCandidatePool(
   moodKey: string,
   excludeIds: number[],
   zoneKeys: string[] = [],
+  indoorOnly: boolean = false,
 ): CandidatePool {
   const base = all.filter(
     (s) =>
@@ -752,12 +764,28 @@ function getCandidatePool(
       s.slot === slot &&
       matchesRegion(s, regionKeys) &&
       matchesMood(s, moodKey) &&
+      (!indoorOnly || isIndoorSpot(s)) &&
       !excludeIds.includes(s.id),
   );
-  if (zoneKeys.length === 0) return { spots: base, relaxed: false };
-  const zoneFiltered = base.filter((s) => matchesZone(s, zoneKeys));
+  // indoorOnly 적용 시 후보가 0건이면 실내 조건 완화(Graceful Fallback)
+  const effectiveBase =
+    base.length > 0
+      ? base
+      : indoorOnly
+      ? all.filter(
+          (s) =>
+            isCourseEligible(s) &&
+            s.slot === slot &&
+            matchesRegion(s, regionKeys) &&
+            matchesMood(s, moodKey) &&
+            !excludeIds.includes(s.id),
+        )
+      : base;
+
+  if (zoneKeys.length === 0) return { spots: effectiveBase, relaxed: false };
+  const zoneFiltered = effectiveBase.filter((s) => matchesZone(s, zoneKeys));
   if (zoneFiltered.length > 0) return { spots: zoneFiltered, relaxed: false };
-  return { spots: base, relaxed: true };
+  return { spots: effectiveBase, relaxed: true };
 }
 
 /**
@@ -784,8 +812,9 @@ function getCandidates(
   excludeIds: number[],
   zoneKeys: string[] = [],
   anchor: Spot | null = null,
+  indoorOnly: boolean = false,
 ): Spot[] {
-  const pool = getCandidatePool(all, slot, regionKeys, moodKey, excludeIds, zoneKeys);
+  const pool = getCandidatePool(all, slot, regionKeys, moodKey, excludeIds, zoneKeys, indoorOnly);
   return applyStayZonePolicy(pool, slot, anchor);
 }
 
@@ -973,6 +1002,8 @@ interface GenerateOptions {
   searchQuery?: string;
   /** 비주얼 카테고리 칩 선택 키 (예: CAFE, DINING, WINE 등) */
   categoryKey?: string;
+  /** 실내 데이트 위주 필터 (비/폭염) */
+  indoorOnly?: boolean;
 }
 
 /** 검색어 및 퀵 태그 매칭 헬퍼 (특수문자 정제, 다중 토큰, 동의어 풀 매칭 지원) */
@@ -1177,6 +1208,7 @@ function generateCourse(
   const query = opts.searchQuery?.trim();
   const catKey = opts.categoryKey && opts.categoryKey !== 'ALL' ? opts.categoryKey : null;
   const categoryDef = catKey ? SPOT_EXPLORE_CATEGORIES.find((c) => c.key === catKey) : null;
+  const isIndoor = opts.indoorOnly ?? false;
 
   let anchorSlot: SlotKey | null = null;
   let anchorPool: Spot[] = [];
@@ -1186,7 +1218,7 @@ function generateCourse(
     // 1-1. 현재 활성화된 슬롯 중에서 매칭 스팟 탐색
     for (const slot of slotsOn) {
       // 검색어가 있을 때는 mood 제약 없이 해당 지역/존의 스팟 풀에서 폭넓게 검색
-      const candidates = excludeRecent(getCandidates(all, slot, regionKeys, 'ALL', [], zoneKeys), avoid);
+      const candidates = excludeRecent(getCandidates(all, slot, regionKeys, 'ALL', [], zoneKeys, null, isIndoor), avoid);
       const matched = candidates.filter((s) => matchesSearchQuery(s, query));
       if (matched.length > 0 && (anchorSlot === null || matched.length < anchorPool.length)) {
         anchorSlot = slot;
@@ -1197,7 +1229,7 @@ function generateCourse(
     // 1-2. 현재 활성 슬롯에서 못 찾았으나 전체 슬롯(stay 포함) 중 매칭 스팟이 있는 경우
     if (anchorPool.length === 0) {
       for (const slot of SLOT_ORDER) {
-        const candidates = excludeRecent(getCandidates(all, slot, regionKeys, 'ALL', [], zoneKeys), avoid);
+        const candidates = excludeRecent(getCandidates(all, slot, regionKeys, 'ALL', [], zoneKeys, null, isIndoor), avoid);
         const matched = candidates.filter((s) => matchesSearchQuery(s, query));
         if (matched.length > 0 && (anchorSlot === null || matched.length < anchorPool.length)) {
           anchorSlot = slot;
@@ -1211,7 +1243,7 @@ function generateCourse(
   } else if (categoryDef && categoryDef.keywords) {
     // 1-3. 카테고리 칩이 선택된 경우: 카테고리 키워드 매칭 스팟을 보유한 슬롯 앵커 최우선 탐색
     for (const slot of slotsOn) {
-      const candidates = excludeRecent(getCandidates(all, slot, regionKeys, moodKey, [], zoneKeys), avoid);
+      const candidates = excludeRecent(getCandidates(all, slot, regionKeys, moodKey, [], zoneKeys, null, isIndoor), avoid);
       const matched = candidates.filter((s) => {
         const text = [s.name, s.category, s.summary, ...(s.signature_items || []), ...(s.mood_tags || [])].join(' ').toLowerCase();
         return categoryDef.keywords!.some((kw) => text.includes(kw.toLowerCase()));
@@ -1226,7 +1258,7 @@ function generateCourse(
   // 2. 검색어 매칭이 없거나 검색어가 비어있는 경우: 기존 앵커 로직(최소 후보 슬롯) 적용
   if (anchorSlot === null || anchorPool.length === 0) {
     for (const slot of slotsOn) {
-      const candidates = excludeRecent(getCandidates(all, slot, regionKeys, moodKey, [], zoneKeys), avoid);
+      const candidates = excludeRecent(getCandidates(all, slot, regionKeys, moodKey, [], zoneKeys, null, isIndoor), avoid);
       if (candidates.length > 0 && (anchorSlot === null || candidates.length < anchorPool.length)) {
         anchorSlot = slot;
         anchorPool = candidates;
@@ -1255,7 +1287,7 @@ function generateCourse(
         ? anchorSpot
         : (pickedSpots.find((s) => s.lat != null && s.lng != null) ?? anchorSpot);
     const candidates = excludeRecent(
-      getCandidates(all, slot, regionKeys, moodKey, picked, zoneKeys, geoAnchor),
+      getCandidates(all, slot, regionKeys, moodKey, picked, zoneKeys, geoAnchor, isIndoor),
       avoid,
     );
     const chosen = pickNearRandom(candidates, anchorSpot, rng);
@@ -1265,6 +1297,39 @@ function generateCourse(
     }
     return { slot, spotId: chosen ? chosen.id : null };
   });
+}
+
+/**
+ * 오늘 날짜(YYYYMMDD) 기반 결정론적 시드 PRNG를 사용하여 에디터 추천 일일 코스 생성
+ */
+function buildDailyRecommendedCourse(all: Spot[]): { steps: CourseStep[]; regionKey: string; moodKey: string } | null {
+  if (!all || all.length === 0) return null;
+  const now = new Date();
+  const seedNum = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
+
+  // Mulberry32 결정론적 의사 난수 생성기
+  let s = seedNum;
+  const dailyRng = () => {
+    s |= 0;
+    s = (s + 0x6d2b79f5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+
+  const candidateRegions = ['SEOUL', 'GYEONGGI', 'YEONGNAM', 'JEJU', 'GANGWON'];
+  const pickedRegion = candidateRegions[Math.floor(dailyRng() * candidateRegions.length)];
+
+  const candidateMoods = ['romantic', 'hip', 'cozy', 'active'];
+  const pickedMood = candidateMoods[Math.floor(dailyRng() * candidateMoods.length)];
+
+  const slotsOn: SlotKey[] = ['day', 'evening', 'night'];
+  const steps = generateCourse(all, slotsOn, [pickedRegion], pickedMood, { rng: dailyRng });
+
+  const validSteps = steps.filter((st) => st.spotId !== null);
+  if (validSteps.length === 0) return null;
+
+  return { steps, regionKey: pickedRegion, moodKey: pickedMood };
 }
 
 /** 선택 지역 라벨을 '·'로 연결. 세부존이 있으면 세부존 라벨 표시 */
@@ -2018,16 +2083,15 @@ async function formatCourseTextAsync(
   // AI 프록시 실패/타임아웃 시 로컬 템플릿으로 폴백 (복사 텍스트에 null 노출 방지)
   const story = aiStory || generateCourseStory(steps, byId, moodKey, false);
 
-  blocks.push(`[ 오늘 데이트 코스 ]\n${regionText} · ${moodText}\n\n✨ AI 브리핑: "${story}"`);
+  blocks.push(`💖 [오늘 데이트 코스] ${regionText} · ${moodText}\n✨ "${story}"`);
 
   const filled = steps.filter((st): st is CourseStep & { spotId: number } => st.spotId !== null);
-  
+
   // 병렬로 단축 URL 생성
   const mapUrls = await Promise.all(
     filled.map(async (step) => {
       const spot = byId.get(step.spotId);
       if (!spot) return '';
-      // 네이버 공식 링크가 있으면 최우선, 없으면 인코딩 검색 URL 생성
       const rawUrl = naverMapUrl(spot);
       return await shortenUrl(rawUrl);
     })
@@ -2038,21 +2102,39 @@ async function formatCourseTextAsync(
     const spot = byId.get(step.spotId);
     if (!spot) continue;
     const meta = SLOT_META[step.slot];
-    const summary = getCleanSpotSummary(spot);
     const shortMapUrl = mapUrls[i] || naverMapUrl(spot);
+    const catText = spot.category ? ` (${spot.category})` : '';
 
     const lines: string[] = [];
-    lines.push(`${meta.emoji} ${meta.label} · ${spot.name}`);
-    lines.push(`• 위치: ${spot.address || spot.location}`);
-    lines.push(`• 소개: ${summary}`);
-    lines.push(`• 지도: ${shortMapUrl}`);
-    const ytObj = spot.social_links?.youtube;
-    if (isValidYoutubeHotclip(ytObj) && ytObj?.url) {
-      const shortYt = await shortenUrl(ytObj.url);
-      lines.push(`• 영상: ${shortYt}`);
+    lines.push(`${i + 1}차 ${meta.emoji} ${spot.name}${catText}`);
+    const summary = getCleanSpotSummary(spot);
+    if (summary) lines.push(`✨ ${summary}`);
+    lines.push(`📍 ${spot.address || spot.location}`);
+    lines.push(`🗺️ ${shortMapUrl}`);
+
+    // 다음 스팟으로의 이동 시간 계산
+    if (i < filled.length - 1) {
+      const nextSpot = byId.get(filled[i + 1].spotId);
+      if (spot.lat && spot.lng && nextSpot?.lat && nextSpot?.lng) {
+        const dist = getDistanceKm(spot.lat, spot.lng, nextSpot.lat, nextSpot.lng);
+        if (dist < 1.0) {
+          const walkMin = Math.max(1, Math.round(dist * 15));
+          lines.push(`\n   ↓ 🚶‍♂️ 도보 약 ${walkMin}분 (${Math.round(dist * 1000)}m)`);
+        } else {
+          const carMin = Math.max(3, Math.round((dist / 25) * 60 + 3));
+          lines.push(`\n   ↓ 🚗 이동 약 ${carMin}분 (${dist.toFixed(1)}km)`);
+        }
+      } else {
+        lines.push(`\n   ↓ 📍 다음 코스로 이동`);
+      }
     }
+
     blocks.push(lines.join('\n'));
   }
+
+  // 전체 코스 웹 바로가기 링크
+  const shareUrl = buildShareUrl(filled.map((s) => s.spotId));
+  blocks.push(`🔗 전체 코스 및 길찾기 열기:\n${shareUrl}`);
 
   return blocks.join('\n\n');
 }
@@ -2276,12 +2358,14 @@ interface AppState {
   themeMode: ThemeMode;
   course: CourseStep[] | null;
   /** 코스 생성 시점의 조건 스냅샷 — 교체 후보·저장·복사가 이 조건 기준으로 동작 */
-  courseConditions: { regions: string[]; subZones: string[]; mood: string; searchQuery?: string } | null;
+  courseConditions: { regions: string[]; subZones: string[]; mood: string; searchQuery?: string; indoorOnly?: boolean } | null;
   savedOpen: boolean;
   regionSheetOpen: boolean;
   moodSheetOpen: boolean;
   activeRegionTab: string;
   spotDetailId: number | null;
+  /** 비 오는 날/폭염 실내 데이트 필터 (true: 실내 위주 큐레이션) */
+  indoorOnly: boolean;
 }
 
 /** 저장된 테마 모드 불러오기 (기본값: 'light' 낮 테마) */
@@ -2392,6 +2476,7 @@ const state: AppState = {
   moodSheetOpen: false,
   activeRegionTab: 'ALL',
   spotDetailId: null,
+  indoorOnly: false,
 };
 
 let spotById = new Map<number, Spot>(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
@@ -2654,6 +2739,7 @@ function updateModeView(): void {
     if (conditionsArea) conditionsArea.style.display = '';
     if (resultsArea) resultsArea.style.display = '';
     if (discoveryArea) discoveryArea.style.display = 'none';
+    applyDailyCourseIfEmpty();
     renderConditions();
     renderResults();
   } else {
@@ -2860,6 +2946,9 @@ function renderQuickRegionChips(): string {
           : `<span class="chip-arrow" aria-hidden="true">▾</span>`
       }
     </button>
+    <button class="quick-region-chip chip-indoor ${state.indoorOnly ? 'is-active is-indoor-active' : ''}" data-action="toggle-indoor" type="button" aria-label="실내 데이트 필터" title="비 오는 날/폭염 실내 데이트 모드">
+      <span class="region-chip-text">${state.indoorOnly ? '☔ 실내 ON' : '☔ 실내'}</span>
+    </button>
   `;
 }
 
@@ -2905,6 +2994,16 @@ function bindQuickRegionEvents(container: HTMLElement, onRegionChange: () => voi
       state.regionSheetOpen = true;
       state.activeRegionTab = state.regions[0] || 'SEOUL';
       renderOverlay();
+    });
+  });
+
+  // 4. 실내 데이트 토글 버튼 클릭 (비/폭염 모드)
+  container.querySelectorAll<HTMLButtonElement>('[data-action="toggle-indoor"]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      state.indoorOnly = !state.indoorOnly;
+      showToast(state.indoorOnly ? '☔ 실내 데이트 장소들로 맞췄어요' : '☀️ 전체 데이트 장소로 전환되었어요');
+      onRegionChange();
     });
   });
 }
@@ -2969,16 +3068,42 @@ function renderConditions(): void {
         </div>
       </div>
 
-      <!-- 5. 코스 완성하기 버튼 -->
-      <button class="btn-primary btn-generate" id="btn-generate">
-        🚀 맞춤 데이트 코스 완성하기
-      </button>
+      <!-- 5. 코스 완성하기 버튼군: 맞춤 생성 + 오늘의 추천 -->
+      <div class="course-generate-btn-group">
+        <button class="btn-primary btn-generate" id="btn-generate">
+          🚀 맞춤 데이트 코스 완성하기
+        </button>
+        <button class="btn-daily-recommend" id="btn-daily-recommend" type="button" title="오늘 날짜 기반 에디터 추천 코스 바로 보기">
+          🎁 오늘의 코스
+        </button>
+      </div>
     </div>
   `;
   bindConditionEvents(area);
 }
 
 function bindConditionEvents(area: HTMLElement): void {
+  // 오늘 날짜 시드 에디터 추천 코스 바로 불러오기
+  area.querySelector('#btn-daily-recommend')?.addEventListener('click', () => {
+    const daily = buildDailyRecommendedCourse(spots);
+    if (daily) {
+      state.course = daily.steps;
+      state.courseConditions = {
+        regions: [daily.regionKey],
+        subZones: [],
+        mood: daily.moodKey,
+        searchQuery: '',
+        indoorOnly: state.indoorOnly,
+      };
+      state.regions = [daily.regionKey];
+      state.mood = daily.moodKey;
+      state.subZones = [];
+      showToast('🎁 오늘의 추천 데이트 코스를 완성했어요');
+      renderConditions();
+      renderResults();
+    }
+  });
+
   // 검색창 입력 이벤트
   const searchInput = area.querySelector<HTMLInputElement>('#search-input');
   const clearBtn = area.querySelector<HTMLButtonElement>('#search-clear');
@@ -3015,40 +3140,42 @@ function bindConditionEvents(area: HTMLElement): void {
   if (courseRegionBar) {
     bindQuickRegionEvents(courseRegionBar, () => {
       renderConditions();
-      triggerCourseGeneration();
     });
   }
 
-  // 비주얼 분위기/카테고리 칩 클릭 이벤트
+  // 테마 칩 클릭
   area.querySelectorAll<HTMLButtonElement>('.spot-category-chip').forEach((chip) => {
     chip.addEventListener('click', () => {
-      const catKey = chip.dataset.catKey || 'ALL';
-      state.courseCategory = catKey;
-      if (catKey === 'ALL') {
-        state.mood = 'ALL';
-      }
-      renderConditions();
-      triggerCourseGeneration();
-    });
-  });
-
-  // 인라인 슬롯 토글
-  area.querySelectorAll<HTMLButtonElement>('.slot-toggle-inline').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const slot = btn.dataset.slot as SlotKey;
-      state.slots[slot] = !state.slots[slot];
+      const catKey = chip.dataset.catKey;
+      if (!catKey) return;
+      state.courseCategory = state.courseCategory === catKey ? 'ALL' : catKey;
       renderConditions();
     });
   });
 
-  // 지역 바텀시트 트리거
+  // 지역 팝업 열기
   area.querySelector('#btn-trigger-region')?.addEventListener('click', () => {
     state.regionSheetOpen = true;
     state.activeRegionTab = state.regions[0] || 'SEOUL';
     renderOverlay();
   });
 
-  // 코스 만들기 버튼
+  // 슬롯 토글
+  area.querySelectorAll<HTMLButtonElement>('.slot-toggle-inline').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const slot = btn.dataset.slot as SlotKey | undefined;
+      if (!slot) return;
+      const count = activeSlots().length;
+      if (state.slots[slot] && count <= 1) {
+        showToast('최소 하나는 선택해야 해요');
+        return;
+      }
+      state.slots[slot] = !state.slots[slot];
+      renderConditions();
+    });
+  });
+
+  // 생성하기 버튼 클릭
   area.querySelector('#btn-generate')?.addEventListener('click', () => {
     triggerCourseGeneration();
   });
@@ -3073,7 +3200,7 @@ function triggerCourseGeneration(): void {
     slotsOn,
     state.regions,
     state.mood,
-    { avoidIds: recentSpotIdSet(), searchQuery: state.searchQuery, categoryKey: state.courseCategory },
+    { avoidIds: recentSpotIdSet(), searchQuery: state.searchQuery, categoryKey: state.courseCategory, indoorOnly: state.indoorOnly },
     state.subZones,
   );
   state.courseConditions = {
@@ -3081,6 +3208,7 @@ function triggerCourseGeneration(): void {
     subZones: [...state.subZones],
     mood: state.mood,
     searchQuery: state.searchQuery,
+    indoorOnly: state.indoorOnly,
   };
   addRecentSpotIds(courseSpotIds());
   renderResults();
@@ -3099,6 +3227,29 @@ function triggerCourseGeneration(): void {
     }
   }
 }
+
+/** 첫 화면 진입 시 오늘 날짜 추천 코스를 기본 제공 (공유 링크 및 검색 중이 아닐 때) */
+function applyDailyCourseIfEmpty(): void {
+  if (state.course || location.hash.startsWith('#c=') || spots.length === 0) return;
+  if (state.searchQuery || state.subZones.length > 0) return;
+  const daily = buildDailyRecommendedCourse(spots);
+  if (daily) {
+    state.course = daily.steps;
+    state.courseConditions = {
+      regions: [daily.regionKey],
+      subZones: [],
+      mood: daily.moodKey,
+      searchQuery: '',
+      indoorOnly: state.indoorOnly,
+    };
+    state.regions = [daily.regionKey];
+    state.mood = daily.moodKey;
+    state.subZones = [];
+    renderConditions();
+    renderResults();
+  }
+}
+
 
 
 const ICON_REFRESH_SVG = `<svg class="icon-refresh" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>`;
@@ -4227,7 +4378,7 @@ function regenerateCourse(): void {
     slotsOn,
     cond.regions,
     cond.mood,
-    { avoidIds: recentSpotIdSet() },
+    { avoidIds: recentSpotIdSet(), indoorOnly: cond.indoorOnly },
     cond.subZones,
   );
   addRecentSpotIds(courseSpotIds());
@@ -4444,6 +4595,11 @@ function renderSpotDiscovery(): void {
         return cat.keywords!.some((kw) => targetText.includes(kw.toLowerCase()));
       });
     }
+  }
+
+  // 실내 데이트 필터 적용 (비/폭염 모드)
+  if (state.indoorOnly) {
+    matchedSpots = matchedSpots.filter((s) => isIndoorSpot(s));
   }
 
   // 4. 정렬 적용 (거리순 / 핫플·인기순 / 블루리본·미쉐린순)
@@ -5695,6 +5851,8 @@ async function init(): Promise<void> {
       loadedRegionKeys.add('ALL');
       if (isSharedLink) {
         handleRoute();
+      } else if (state.mainMode === 'course') {
+        applyDailyCourseIfEmpty();
       }
     }
   } catch {
@@ -5714,6 +5872,8 @@ async function init(): Promise<void> {
             handleRoute();
           } else if (state.mainMode === 'spots') {
             renderSpotDiscovery();
+          } else if (state.mainMode === 'course') {
+            applyDailyCourseIfEmpty();
           }
         }
       })
