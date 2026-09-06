@@ -22,6 +22,11 @@ except ImportError:
     logger.error("requests 라이브러리가 필요합니다: pip install requests")
     sys.exit(1)
 
+try:
+    from heal_and_verify_spots import heal_all_spots
+except ImportError:
+    from collector.heal_and_verify_spots import heal_all_spots
+
 API_URL = os.environ.get("ONEUL_API_URL", "http://152.70.89.210:18088/rest/v1/spots")
 TARGET_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "public", "data", "spots.json"))
 MIN_EXPECTED_SPOTS = 9000  # 비정상 데이터 누락 방지 안전 가드
@@ -68,12 +73,16 @@ def main():
         logger.error(f"수신된 스팟 수({total})가 최소 기준({MIN_EXPECTED_SPOTS}) 미만입니다. 동기화를 중단합니다.")
         sys.exit(1)
 
+    logger.info("수집 데이터 정밀 검증 및 보정 파이프라인 가동...")
+    healed_spots, stats = heal_all_spots(spots)
+    logger.info(f"보정 완료: 더미비활성화 {stats['deactivated_dummies']}건, 상호정제 {stats['cleaned_names']}건, 카테고리보정 {stats['healed_categories']}건, 슬롯보정 {stats['healed_slots']}건 (최종 유효 활성: {stats['active_total']}건)")
+
     os.makedirs(os.path.dirname(TARGET_FILE), exist_ok=True)
 
     # 임시 파일 작성 후 원자적 교체
     tmp_file = f"{TARGET_FILE}.tmp"
     with open(tmp_file, "w", encoding="utf-8") as f:
-        json.dump(spots, f, ensure_ascii=False, indent=2)
+        json.dump(healed_spots, f, ensure_ascii=False, indent=2)
 
     if os.path.exists(TARGET_FILE):
         os.remove(TARGET_FILE)

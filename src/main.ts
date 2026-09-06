@@ -551,10 +551,18 @@ function isRealStaySpot(spot: Spot): boolean {
   return false;
 }
 
-/** '서촌 / 북촌 / 삼청' 등 단일 장소가 아닌 광역 묶음, 코스/가이드 라벨, 비매장 더미인지 검사 */
+/** '서촌 / 북촌 / 삼청' 등 단일 장소가 아닌 광역 묶음, 코스/가이드 라벨, 기사/더미/폐업 스팟인지 검사 */
 function isBroadRegionDummy(spot: Spot): boolean {
   const name = (spot.name || '').trim();
   if (name.length === 0) return true;
+  if (name.length > 40) return true;
+  // 마크다운 기사 제목, 분석 매트릭스, 코스 가이드 더미
+  if (/^(📊|🏛️|🍷|🏯|🌿|🎯|Part\s*\d|Course\s*[A-Z]|\[Course|Chapter\s*\d)/i.test(name)) return true;
+  if (/(매트릭스|비교\s*분석|\d+선\b|성지순례|가이드\s*라벨|촬영\s*수칙|비행\s*수칙|너무착한데\?)/.test(name)) return true;
+  // 폐업 확인 스팟
+  if (name.includes('비어바나 문래') || name.includes('문래 비어바나')) return true;
+  // 비데이트 시설 (병원, 약국, 부동산, 화장실, 세탁소 등)
+  if (/(소아과의원|치과의원|이비인후과|정형외과|약국|한의원|공인중개사|화장실|빨래방|코인워시|세탁소|정비소|카센터|주유소|철물점)/.test(name)) return true;
   // 슬래시가 2개 이상 들어간 다중 지역 나열 (예: 서촌 / 북촌 / 삼청 / 안국 / 익선)
   if (name.split('/').length >= 3) return true;
   // 단순 권역/지자체명 나열 더미
@@ -738,6 +746,64 @@ function isIndoorSpot(spot: Spot): boolean {
   if (OUTDOOR_PATTERNS.test(text)) return false;
   return true;
 }
+
+export type SpotGenre = 'CAFE' | 'MEAL' | 'BAR' | 'ACTIVITY' | 'STAY';
+
+/** 스팟의 이름/카테고리/요약/태그를 종합 분석하여 데이트 코스용 핵심 장르(종목) 판정 */
+function getSpotGenre(spot: Spot): SpotGenre {
+  if (spot.slot === 'stay' || isRealStaySpot(spot)) return 'STAY';
+
+  const text = [
+    spot.name || '',
+    spot.category || '',
+    spot.summary || '',
+    ...(spot.signature_items || []),
+    ...(spot.mood_tags || []),
+  ].join(' ').toLowerCase();
+
+  // 1. 카페 / 디저트 / 베이커리 / 찻집
+  if (
+    /(카페|디저트|베이커리|빵집|케이크|커피|구움과자|소금빵|베이글|타르트|도넛|마카롱|스콘|크루아상|빙수|찻집|다실|아인슈페너|cafe|bakery|coffee)/i.test(
+      text,
+    ) &&
+    !/(와인바|칵테일바|술집|호프|주점|이자카야|포차)/i.test(spot.name)
+  ) {
+    return 'CAFE';
+  }
+
+  // 2. 바 / 펍 / 와인 / 위스키 / 칵테일 / 심야주점
+  if (
+    /(와인|와인바|위스키|하이볼|칵테일|비스트로|주점|호프|이자카야|펍|재즈바|lp바|포차|맥주|술집|양조장|브루어리|바\(bar\))/i.test(
+      text,
+    )
+  ) {
+    return 'BAR';
+  }
+
+  // 3. 식사 / 다이닝 / 레스토랑 / 맛집
+  if (
+    /(식당|음식점|레스토랑|다이닝|파인다이닝|오마카세|파스타|스테이크|피자|버거|초밥|스시|한식|양식|일식|중식|고기|삼겹살|갈비|해물|횟집|국수|찌개|솥밥|미식|맛집)/i.test(
+      text,
+    )
+  ) {
+    return 'MEAL';
+  }
+
+  // 4. 전시 / 공방 / 체험 / 산책 / 힐링 / 액티비티
+  if (
+    /(전시|미술관|박물관|갤러리|공방|원데이|체험|드로잉|도예|도자기|향수|가죽|반지|공원|수목원|식물원|산책|숲|스파|온천|찜질|아쿠아리움|보드게임|방탈출|루지|서핑|요트|케이블카)/i.test(
+      text,
+    )
+  ) {
+    return 'ACTIVITY';
+  }
+
+  // 폴백: 슬롯 기준 추정
+  if (spot.slot === 'day') return 'CAFE';
+  if (spot.slot === 'night') return 'BAR';
+  return 'MEAL';
+}
+
 
 interface CandidatePool {
   spots: Spot[];
@@ -1049,7 +1115,11 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
     '루프탑': ['루프탑', '야경', '테라스', '라운지', '칵테일', '와인', '오션뷰', '전망', '스카이', '옥상'],
     '힐링': ['숲', '공원', '식물원', '스파', '온천', '자연', '힐링', '한옥', '정원', '산책'],
     '오마카세': ['스시', '한우', '오마카세', '일식', '다이닝', '코스요리', '초밥', '가이세키', '갓포', '맡김차림'],
-    '와인': ['와인', 'wine', '와인바', '내추럴와인', '글라스와인', '비스트로', '다이닝바', '양식', '이탈리안', '프렌치', '스테이크', '파스타', '샤퀴테리'],
+    '와인': ['와인', 'wine', '와인바', '내추럴와인', '글라스와인', '와인다이닝', '비스트로', '다이닝바', '샤퀴테리', '위스키', '칵테일', '바(bar)', 'vin'],
+    '위스키': ['위스키', 'whisky', '몰트', '싱글몰트', '하이볼', '스피크이지', '위스키바', 'lp바', '바(bar)'],
+    '칵테일': ['칵테일', 'cocktail', '라운지바', '스피크이지', '루프탑바', '칵테일바', '바(bar)'],
+    '맥주': ['맥주', '수제맥주', '브루어리', '양조장', '펍', '호프', '이자카야', '야장', '포차', '바이젠', 'ipa', '에일'],
+    '이자카야': ['이자카야', '야키토리', '꼬치', '오뎅바', '심야식당', '일본식주점'],
     '스파': ['스파', '온천', '마사지', '찜질방', '사우나', '테르메덴', '아쿠아필드', '피부관리', '헤드스파', '에스테틱', '노천탕', '족욕'],
     '공방': ['공방', '원데이', '원데이클래스', '도자기', '도예', '향수공방', '드로잉', '베이킹', '가죽공방', '유리공예', '반지공방', '목공'],
     '액티비티': ['액티비티', '루지', '서핑', '요트', '패러글라이딩', '케이블카', '짚라인', '클라이밍', '카약', '레일바이크', '모노레일', '수상레저', '스포츠'],
@@ -1268,12 +1338,14 @@ function generateCourse(
 
   const picked: number[] = [];
   const pickedSpots: Spot[] = [];
+  const pickedGenres = new Set<SpotGenre>();
   let anchorSpot: Spot | null = null;
   if (anchorSlot !== null) {
     const anchor = pickRandom(anchorPool, rng);
     if (anchor) {
       picked.push(anchor.id);
       pickedSpots.push(anchor);
+      pickedGenres.add(getSpotGenre(anchor));
       anchorSpot = anchor;
     }
   }
@@ -1290,10 +1362,16 @@ function generateCourse(
       getCandidates(all, slot, regionKeys, moodKey, picked, zoneKeys, geoAnchor, isIndoor),
       avoid,
     );
-    const chosen = pickNearRandom(candidates, anchorSpot, rng);
+
+    // 종목 중복 방지: 이미 선택된 차수와 동일한 장르(카페-카페, 식사-식사, 바-바) 배제
+    const diverseCandidates = candidates.filter((s) => !pickedGenres.has(getSpotGenre(s)));
+    const finalCandidates = diverseCandidates.length > 0 ? diverseCandidates : candidates;
+
+    const chosen = pickNearRandom(finalCandidates, anchorSpot, rng);
     if (chosen) {
       picked.push(chosen.id);
       pickedSpots.push(chosen);
+      pickedGenres.add(getSpotGenre(chosen));
     }
     return { slot, spotId: chosen ? chosen.id : null };
   });
@@ -1572,24 +1650,21 @@ function mapQuery(spot: Spot): string {
   return cleanName || spot.name.trim();
 }
 
-/** 스폿의 네이버/카카오 지도 바로가기 URL — 좌표 핀포인트 결합으로 100% 단독 상세 오픈 */
+/** 스폿의 네이버/카카오 지도 바로가기 URL — 정제된 상호명 및 플레이스 딥링크 결합 */
 function naverMapUrl(spot: Spot): string {
   // 1. 공식 네이버 지도 단축 링크(naver.me)는 최우선 신뢰
   if (spot.source?.url && spot.source.url.includes('naver.me/')) {
     return spot.source.url;
   }
-  // 2. 카카오맵 정식 플레이스 상세 링크인 경우
+  // 2. 카카오맵 정식 검증 플레이스 상세 링크인 경우 (100% 실존 매장 단독 상세)
   if (spot.social_links?.kakaomap?.url) {
     const ku = spot.social_links.kakaomap.url;
-    if (ku.includes('place.map.kakao.com/') || ku.includes('map.kakao.com/link/map/')) {
+    if (ku.includes('place.map.kakao.com/')) {
       return ku;
     }
   }
-  // 3. 좌표(lng, lat)가 있는 경우, 네이버 지도 좌표 중심 파라미터(?c=lng,lat,16...)를 결합하여 동명 매장 오인식 방지 및 1순위 단독 플레이스 상세 오픈
+  // 3. 네이버 지도 실시간 검색 URL (단독 매장 상세 오픈 최적화)
   const q = encodeURIComponent(mapQuery(spot));
-  if (spot.lat && spot.lng) {
-    return `https://map.naver.com/p/search/${q}?c=${spot.lng},${spot.lat},16,0,0,0,dh`;
-  }
   return `https://map.naver.com/p/search/${q}`;
 }
 
@@ -4280,7 +4355,17 @@ function swapStep(index: number): void {
     getCandidates(spots, step.slot, cond.regions, cond.mood, courseSpotIds(), cond.subZones, anchor),
     recentSpotIdSet(),
   );
-  const chosen = pickNearRandom(candidates, anchor);
+  // 다른 차수와 동일한 종목(장르) 중복 방지
+  const otherGenres = new Set<SpotGenre>();
+  state.course.forEach((st, idx) => {
+    if (idx !== index && st.spotId !== null) {
+      const otherSpot = spotById.get(st.spotId);
+      if (otherSpot) otherGenres.add(getSpotGenre(otherSpot));
+    }
+  });
+  const diverseCandidates = candidates.filter((s) => !otherGenres.has(getSpotGenre(s)));
+  const finalCandidates = diverseCandidates.length > 0 ? diverseCandidates : candidates;
+  const chosen = pickNearRandom(finalCandidates, anchor);
   if (!chosen) {
     showToast(
       step.slot === 'stay'
@@ -4576,9 +4661,6 @@ function renderSpotDiscovery(): void {
     const cat = SPOT_EXPLORE_CATEGORIES.find((c) => c.key === state.spotCategory);
     if (cat && cat.keywords) {
       matchedSpots = matchedSpots.filter((s) => {
-        if (cat.key === 'CAFE' && s.slot === 'day') return true;
-        if (cat.key === 'DINING' && s.slot === 'evening') return true;
-        if ((cat.key === 'WINE' || cat.key === 'PUB') && s.slot === 'night') return true;
         if (cat.key === 'STAY' && (s.slot === 'stay' || isRealStaySpot(s))) return true;
 
         const targetText = [
@@ -4797,7 +4879,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
             <button class="btn-build-anchor-course btn-discovery-action-build compact" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">✨</button>
             ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-yt compact" aria-label="${escapeHtml(spot.name)} 유튜브 핫클립" title="유튜브 핫클립 시청">▶️</a>` : ''}
             ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-book compact" aria-label="${escapeHtml(spot.name)} 실시간 예약" title="실시간 예약">📅</a>` : ''}
-            <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.name)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map compact" aria-label="${escapeHtml(spot.name)} 지도 열기" title="네이버 지도 열기">🗺️</a>
+            <a href="${escapeHtml(naverMapUrl(spot))}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map compact" aria-label="${escapeHtml(spot.name)} 지도 열기" title="지도 열기">🗺️</a>
           </div>
         </div>
       </article>
@@ -4827,7 +4909,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
             <button class="btn-build-anchor-course btn-discovery-action-build" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">✨</button>
             ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-yt" aria-label="${escapeHtml(spot.name)} 유튜브 핫클립" title="유튜브 핫클립 시청">▶️</a>` : ''}
             ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-book" aria-label="${escapeHtml(spot.name)} 실시간 예약" title="실시간 예약">📅</a>` : ''}
-            <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.name)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map" aria-label="${escapeHtml(spot.name)} 지도 열기" title="네이버 지도 열기">🗺️</a>
+            <a href="${escapeHtml(naverMapUrl(spot))}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map" aria-label="${escapeHtml(spot.name)} 지도 열기" title="지도 열기">🗺️</a>
           </div>
         </div>
       </article>
@@ -4853,7 +4935,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
           <button class="btn-build-anchor-course btn-discovery-action-build" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">✨</button>
           ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-yt" aria-label="${escapeHtml(spot.name)} 유튜브 핫클립" title="유튜브 핫클립 시청">▶️</a>` : ''}
           ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-book" aria-label="${escapeHtml(spot.name)} 실시간 예약" title="실시간 예약">📅</a>` : ''}
-          <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.name)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map" aria-label="${escapeHtml(spot.name)} 지도 열기" title="네이버 지도 열기">🗺️</a>
+          <a href="${escapeHtml(naverMapUrl(spot))}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map" aria-label="${escapeHtml(spot.name)} 지도 열기" title="지도 열기">🗺️</a>
         </div>
       </div>
     </article>
