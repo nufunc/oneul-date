@@ -12,6 +12,8 @@
 6) Markdown 리포트 자동 생성 및 docs/monitoring/ 자동 갱신
 """
 
+from __future__ import annotations
+
 import os
 import sys
 import re
