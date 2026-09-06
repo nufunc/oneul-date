@@ -4090,10 +4090,9 @@ function renderStepCard(
           })()}
         </div>
         <div class="step-actions-right">
-          ${bookingUrl ? `<a class="step-book-chip" href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" aria-label="캐치테이블 실시간 예약"><span>📅 예약</span></a>` : ''}
-          <a class="step-map-chip" href="${naverMapUrl(spot)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(spot.name)} 네이버 지도 열기">
+          ${bookingUrl ? `<a class="step-book-chip icon-only" href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" aria-label="실시간 예약" title="실시간 예약"><span>📅</span></a>` : ''}
+          <a class="step-map-chip icon-only" href="${naverMapUrl(spot)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(spot.name)} 네이버 지도 열기" title="네이버 지도 열기">
             ${ICON_NAVER_MAP_SVG}
-            <span>지도</span>
           </a>
         </div>
       </div>
@@ -4522,8 +4521,8 @@ function renderSpotDiscovery(): void {
         <span class="status-count-badge">${totalCount}</span>
         <span class="status-text">개 스팟</span>
         ${isFiltered ? `
-          <button class="btn-discovery-filter-reset" id="btn-reset-discovery-filters" title="필터 초기화">
-            <span class="reset-icon">↺</span> 검색 초기화
+          <button class="btn-discovery-filter-reset" id="btn-reset-discovery-filters" title="검색 및 필터 초기화" aria-label="검색 및 필터 초기화">
+            <span class="reset-icon">↺</span>
           </button>
         ` : ''}
       </div>
@@ -4640,8 +4639,9 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
           <h4 class="discovery-card-title discovery-name compact">${escapeHtml(spot.name)}</h4>
           <div class="discovery-card-actions compact">
             <button class="btn-build-anchor-course btn-discovery-action-build compact" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">✨</button>
+            ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-yt compact" aria-label="${escapeHtml(spot.name)} 유튜브 핫클립" title="유튜브 핫클립 시청">▶️</a>` : ''}
             ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-book compact" aria-label="${escapeHtml(spot.name)} 실시간 예약" title="실시간 예약">📅</a>` : ''}
-            <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.name)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map compact" aria-label="${escapeHtml(spot.name)} 지도">🗺️</a>
+            <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.name)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map compact" aria-label="${escapeHtml(spot.name)} 지도 열기" title="네이버 지도 열기">🗺️</a>
           </div>
         </div>
       </article>
@@ -4668,10 +4668,10 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
           </div>
           <p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>
           <div class="discovery-card-actions">
-            <button class="btn-build-anchor-course btn-discovery-action-build" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">✨ 코스</button>
-            ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-yt" aria-label="${escapeHtml(spot.name)} 유튜브 핫클립">▶️ 영상</a>` : ''}
-            ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-book" aria-label="${escapeHtml(spot.name)} 실시간 예약">📅 예약</a>` : ''}
-            <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.name)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map">🗺️ 지도</a>
+            <button class="btn-build-anchor-course btn-discovery-action-build" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">✨</button>
+            ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-yt" aria-label="${escapeHtml(spot.name)} 유튜브 핫클립" title="유튜브 핫클립 시청">▶️</a>` : ''}
+            ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-book" aria-label="${escapeHtml(spot.name)} 실시간 예약" title="실시간 예약">📅</a>` : ''}
+            <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.name)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map" aria-label="${escapeHtml(spot.name)} 지도 열기" title="네이버 지도 열기">🗺️</a>
           </div>
         </div>
       </article>
@@ -4694,10 +4694,10 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
         <h4 class="discovery-card-title discovery-name">${escapeHtml(spot.name)}</h4>
         <p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>
         <div class="discovery-card-actions">
-          <button class="btn-build-anchor-course btn-discovery-action-build" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">✨ 코스</button>
-          ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-yt" aria-label="${escapeHtml(spot.name)} 유튜브 핫클립">▶️ 영상</a>` : ''}
-          ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-book" aria-label="${escapeHtml(spot.name)} 실시간 예약">📅 예약</a>` : ''}
-          <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.name)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map">🗺️ 지도</a>
+          <button class="btn-build-anchor-course btn-discovery-action-build" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">✨</button>
+          ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-yt" aria-label="${escapeHtml(spot.name)} 유튜브 핫클립" title="유튜브 핫클립 시청">▶️</a>` : ''}
+          ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-book" aria-label="${escapeHtml(spot.name)} 실시간 예약" title="실시간 예약">📅</a>` : ''}
+          <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.name)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map" aria-label="${escapeHtml(spot.name)} 지도 열기" title="네이버 지도 열기">🗺️</a>
         </div>
       </div>
     </article>
@@ -5511,21 +5511,21 @@ function renderOverlay(): void {
 
           <!-- 5. 공식 채널 및 링크 바로가기 -->
           <div class="spot-detail-links-row">
-            ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn book" aria-label="캐치테이블 실시간 예약"><span>📅 캐치테이블 예약</span></a>` : ''}
-            ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn yt" aria-label="유튜브 핫클립 시청"><span>▶️ 유튜브 영상</span></a>` : ''}
-            ${guideUrl ? `<a href="${escapeHtml(guideUrl)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn guide" aria-label="공식 가이드 평가"><span>🎀 공식 가이드</span></a>` : ''}
-            ${instaUrl ? `<a href="${escapeHtml(instaUrl)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn insta" aria-label="인스타그램 공식 피드"><span>📸 인스타그램</span></a>` : ''}
-            <a href="${escapeHtml(kakaoUrl)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn kakao" aria-label="카카오맵 상세"><span>💛 카카오맵</span></a>
+            ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn book" aria-label="캐치테이블 실시간 예약" title="캐치테이블 실시간 예약"><span>📅 예약</span></a>` : ''}
+            ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn yt" aria-label="유튜브 핫클립 시청" title="유튜브 핫클립 시청"><span>▶️ 영상</span></a>` : ''}
+            ${guideUrl ? `<a href="${escapeHtml(guideUrl)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn guide" aria-label="공식 가이드 평가" title="공식 가이드 평가"><span>🎀 가이드</span></a>` : ''}
+            ${instaUrl ? `<a href="${escapeHtml(instaUrl)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn insta" aria-label="인스타그램 공식 피드" title="인스타그램 공식 피드"><span>📸 인스타</span></a>` : ''}
+            <a href="${escapeHtml(kakaoUrl)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn kakao" aria-label="카카오맵 상세" title="카카오맵 상세"><span>💛 카카오</span></a>
           </div>
         </div>
 
         <!-- 6. 하단 고정 액션 바 -->
         <div class="spot-detail-footer">
-          <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.name)}" target="_blank" rel="noopener noreferrer" class="btn-detail-naver-map">
+          <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.name)}" target="_blank" rel="noopener noreferrer" class="btn-detail-naver-map" title="네이버 지도 열기">
             🗺️ 네이버 지도
           </a>
-          <button class="btn-primary btn-detail-build-course" id="btn-detail-build-anchor" data-spot-id="${spot.id}">
-            ✨ 이 스팟 중심으로 코스 짜기
+          <button class="btn-primary btn-detail-build-course" id="btn-detail-build-anchor" data-spot-id="${spot.id}" title="이 스팟 중심으로 코스 짜기">
+            ✨ 맞춤 코스 짜기
           </button>
         </div>
       </div>

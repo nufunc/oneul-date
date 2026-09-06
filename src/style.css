@@ -2200,6 +2200,13 @@ button {
   transform: scale(0.95);
 }
 
+.step-map-chip.icon-only {
+  width: 32px;
+  min-width: 32px;
+  padding: 0;
+  justify-content: center;
+}
+
 /* --- v4.0 우측 액션 컨테이너 (예약 + 네이버 지도 바로가기) --- */
 .step-actions-right {
   display: inline-flex;
@@ -2226,6 +2233,14 @@ button {
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 1px 3px rgba(255, 59, 48, 0.25);
   white-space: nowrap;
+}
+
+.step-book-chip.icon-only {
+  width: 32px;
+  min-width: 32px;
+  padding: 0;
+  justify-content: center;
+  font-size: 0.95rem;
 }
 
 .step-book-chip:hover {
@@ -3626,21 +3641,24 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
 .btn-discovery-filter-reset {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
   border-radius: var(--radius-full);
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-text-sub);
-  font-size: 0.70rem;
-  font-weight: 600;
+  font-size: 0.82rem;
+  font-weight: 700;
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .btn-discovery-filter-reset:hover {
   background: var(--color-surface-hover);
-  color: var(--color-text);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
 }
 
 .status-right {
@@ -3779,14 +3797,25 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
 .discovery-card.cols-3 .btn-build-anchor-course,
 .discovery-card.cols-3 .btn-discovery-action-build {
   flex: 0 0 auto;
-  padding: 5px 6px;
-  font-size: 0.65rem;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  padding: 0;
+  font-size: 0.82rem;
+}
+.discovery-card.cols-3 .btn-discovery-chip-action {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  padding: 0;
+  font-size: 0.78rem;
 }
 .discovery-card.cols-3 .btn-discovery-map,
 .discovery-card.cols-3 .btn-discovery-action-map {
   flex: 1;
-  padding: 5px 8px;
-  font-size: 0.68rem;
+  height: 28px;
+  padding: 0;
+  font-size: 0.88rem;
 }
 
 /* 5개행 미니 타일형 컴팩트 카드 전용 스타일 */
@@ -3843,8 +3872,19 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
 .discovery-card.cols-5 .btn-build-anchor-course,
 .discovery-card.cols-5 .btn-discovery-action-build {
   flex: 0 0 auto;
-  padding: 4px 6px;
-  font-size: 0.62rem;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  padding: 0;
+  font-size: 0.72rem;
+  border-radius: 4px;
+}
+.discovery-card.cols-5 .btn-discovery-chip-action {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  padding: 0;
+  font-size: 0.68rem;
   border-radius: 4px;
 }
 .btn-discovery-map.compact,
@@ -3852,8 +3892,9 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
 .discovery-card.cols-5 .btn-discovery-map,
 .discovery-card.cols-5 .btn-discovery-action-map {
   flex: 1;
-  padding: 4px 6px;
-  font-size: 0.62rem;
+  height: 24px;
+  padding: 0;
+  font-size: 0.75rem;
   border-radius: 4px;
 }
 
@@ -4160,26 +4201,27 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   gap: 6px;
   align-items: center;
   width: 100%;
+  margin-top: auto;
 }
 
 .btn-build-anchor-course,
 .btn-discovery-action-build {
   flex: 0 0 auto;
-  min-width: 0;
+  width: 34px;
+  height: 32px;
+  min-width: 34px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  padding: 6px 9px;
+  padding: 0;
   background: var(--color-surface-sub);
   border: 1px solid var(--color-border);
   color: var(--color-text-sub);
-  font-size: 0.70rem;
+  font-size: 0.92rem;
   font-weight: 600;
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all var(--transition-fast);
-  white-space: nowrap;
 }
 
 .btn-build-anchor-course:hover,
@@ -4187,25 +4229,25 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   background: var(--color-accent-soft);
   color: var(--color-accent);
   border-color: var(--color-accent);
+  transform: translateY(-1px);
 }
 
 .btn-discovery-map,
 .btn-discovery-action-map {
   flex: 1;
-  min-width: 0;
+  min-width: 34px;
+  height: 32px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 6px 12px;
+  padding: 0;
   border-radius: var(--radius-sm);
   background: var(--color-surface);
   border: 1px solid var(--color-border-strong);
-  font-size: 0.74rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--color-text);
   text-decoration: none;
-  white-space: nowrap;
   transition: all var(--transition-fast);
 }
 
@@ -4214,6 +4256,7 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   background: var(--color-surface-hover);
   color: var(--color-accent);
   border-color: var(--color-accent);
+  transform: translateY(-1px);
 }
 
 /* 더보기 및 빈 화면 */
@@ -4293,18 +4336,25 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
 
 /* 조건부 액션 칩 (스팟 탐색 카드용: 예약, 영상) */
 .btn-discovery-chip-action {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 32px;
+  min-width: 34px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  padding: 6px 8px;
+  padding: 0;
   border-radius: var(--radius-sm);
-  font-size: 0.72rem;
+  font-size: 0.88rem;
   font-weight: 700;
   text-decoration: none;
   white-space: nowrap;
   flex-shrink: 0;
   transition: all var(--transition-fast);
+}
+
+.btn-discovery-chip-action:hover {
+  transform: translateY(-1px);
 }
 
 .btn-discovery-chip-action.btn-discovery-book {
