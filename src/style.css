@@ -4262,6 +4262,277 @@ html[data-theme-resolved="dark"] .quick-region-chip.chip-indoor.is-indoor-active
   box-shadow: 0 2px 10px rgba(59, 130, 246, 0.4);
 }
 
+/* ---------------------------------------------------------------------------
+   보관함(찜) & 무드 프리셋 칩 스타일
+--------------------------------------------------------------------------- */
+.quick-region-chip.chip-saved {
+  border-color: rgba(244, 63, 94, 0.4);
+  color: #e11d48;
+}
+
+.quick-region-chip.chip-saved:hover {
+  border-color: #f43f5e;
+  background: rgba(244, 63, 94, 0.08);
+}
+
+.quick-region-chip.chip-saved.is-saved-active {
+  background: #e11d48;
+  border-color: #e11d48;
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.35);
+}
+
+html[data-theme="dark"] .quick-region-chip.chip-saved.is-saved-active,
+html[data-theme-resolved="dark"] .quick-region-chip.chip-saved.is-saved-active {
+  background: #f43f5e;
+  border-color: #f43f5e;
+  color: #fff;
+}
+
+.quick-region-chip.chip-mood {
+  border-color: rgba(168, 85, 247, 0.35);
+  color: var(--color-text-sub);
+}
+
+.quick-region-chip.chip-mood:hover {
+  border-color: #a855f7;
+  color: #9333ea;
+  background: rgba(168, 85, 247, 0.08);
+}
+
+.quick-region-chip.chip-mood.is-mood-active {
+  background: #9333ea;
+  border-color: #9333ea;
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(147, 51, 234, 0.35);
+}
+
+html[data-theme="dark"] .quick-region-chip.chip-mood.is-mood-active,
+html[data-theme-resolved="dark"] .quick-region-chip.chip-mood.is-mood-active {
+  background: #a855f7;
+  border-color: #a855f7;
+  color: #fff;
+}
+
+/* ---------------------------------------------------------------------------
+   스팟 탐색 카드 하트 찜 버튼
+--------------------------------------------------------------------------- */
+.btn-discovery-save {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 32px;
+  min-width: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-sub);
+  font-size: 15px;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-discovery-save:hover {
+  transform: translateY(-1px);
+  border-color: rgba(244, 63, 94, 0.4);
+  background: rgba(244, 63, 94, 0.06);
+}
+
+.btn-discovery-save.is-saved {
+  border-color: rgba(244, 63, 94, 0.5);
+  background: rgba(244, 63, 94, 0.12);
+}
+
+.btn-discovery-save.compact {
+  width: 30px;
+  height: 28px;
+  min-width: 30px;
+  font-size: 14px;
+}
+
+/* ---------------------------------------------------------------------------
+   코스 카드 하트 찜 & 내비/택시 칩
+--------------------------------------------------------------------------- */
+.step-save-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  cursor: pointer;
+  font-size: 14px;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.step-save-chip:hover {
+  transform: translateY(-1px);
+  border-color: rgba(244, 63, 94, 0.4);
+  background: rgba(244, 63, 94, 0.08);
+}
+
+.step-save-chip.is-saved {
+  border-color: rgba(244, 63, 94, 0.5);
+  background: rgba(244, 63, 94, 0.12);
+}
+
+.step-navi-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-decoration: none;
+  font-size: 14px;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.step-navi-chip:hover {
+  transform: translateY(-1px);
+  border-color: var(--color-primary);
+  background: rgba(37, 99, 235, 0.06);
+}
+
+/* ---------------------------------------------------------------------------
+   동선 최적화 버튼
+--------------------------------------------------------------------------- */
+.course-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-optimize-route {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  border: 1px solid rgba(234, 179, 8, 0.4);
+  background: rgba(234, 179, 8, 0.1);
+  color: #ca8a04;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.btn-optimize-route:hover {
+  transform: translateY(-1px);
+  background: rgba(234, 179, 8, 0.2);
+  border-color: #eab308;
+}
+
+html[data-theme="dark"] .btn-optimize-route,
+html[data-theme-resolved="dark"] .btn-optimize-route {
+  color: #facc15;
+  background: rgba(234, 179, 8, 0.15);
+  border-color: rgba(234, 179, 8, 0.3);
+}
+
+/* ---------------------------------------------------------------------------
+   조건 영역 찜한 코스 버튼
+--------------------------------------------------------------------------- */
+.btn-saved-recommend {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 16px;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(244, 63, 94, 0.4);
+  background: rgba(244, 63, 94, 0.08);
+  color: #e11d48;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-saved-recommend:hover {
+  background: rgba(244, 63, 94, 0.16);
+  border-color: #f43f5e;
+  transform: translateY(-1px);
+}
+
+html[data-theme="dark"] .btn-saved-recommend,
+html[data-theme-resolved="dark"] .btn-saved-recommend {
+  color: #f43f5e;
+  background: rgba(244, 63, 94, 0.15);
+}
+
+/* ---------------------------------------------------------------------------
+   상세 모달 찜 버튼
+--------------------------------------------------------------------------- */
+.btn-detail-save {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-detail-save:hover {
+  border-color: rgba(244, 63, 94, 0.5);
+  color: #e11d48;
+  background: rgba(244, 63, 94, 0.06);
+}
+
+.btn-detail-save.is-saved {
+  border-color: rgba(244, 63, 94, 0.6);
+  background: rgba(244, 63, 94, 0.12);
+  color: #e11d48;
+  font-weight: 700;
+}
+
+/* ---------------------------------------------------------------------------
+   정기휴무 뱃지 스타일
+--------------------------------------------------------------------------- */
+.discovery-badge-closed,
+.badge-closed-floating {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 3;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  background: rgba(239, 68, 68, 0.9);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.spot-closed-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  font-size: 11px;
+  font-weight: 700;
+  vertical-align: middle;
+}
 
 .discovery-card-actions {
   display: flex;

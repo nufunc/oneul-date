@@ -831,22 +831,22 @@ function getCandidatePool(
       matchesRegion(s, regionKeys) &&
       matchesMood(s, moodKey) &&
       (!indoorOnly || isIndoorSpot(s)) &&
+      !isSpotClosedToday(s) &&
       !excludeIds.includes(s.id),
   );
-  // indoorOnly 적용 시 후보가 0건이면 실내 조건 완화(Graceful Fallback)
+  // indoorOnly 및 휴무일 적용 시 후보가 0건이면 조건 완화(Graceful Fallback)
   const effectiveBase =
     base.length > 0
       ? base
-      : indoorOnly
-      ? all.filter(
+      : all.filter(
           (s) =>
             isCourseEligible(s) &&
             s.slot === slot &&
             matchesRegion(s, regionKeys) &&
             matchesMood(s, moodKey) &&
+            (!indoorOnly || isIndoorSpot(s)) &&
             !excludeIds.includes(s.id),
-        )
-      : base;
+        );
 
   if (zoneKeys.length === 0) return { spots: effectiveBase, relaxed: false };
   const zoneFiltered = effectiveBase.filter((s) => matchesZone(s, zoneKeys));
@@ -1070,6 +1070,8 @@ interface GenerateOptions {
   categoryKey?: string;
   /** 실내 데이트 위주 필터 (비/폭염) */
   indoorOnly?: boolean;
+  /** 상황별 1-Tap 무드 프리셋 (소개팅, 기념일, 심야·야장) */
+  moodPreset?: MoodPresetKey | null;
 }
 
 /** 검색어 및 퀵 태그 매칭 헬퍼 (특수문자 정제, 다중 토큰, 동의어 풀 매칭 지원) */
@@ -1259,6 +1261,20 @@ function getSearchMatchBadge(query: string): { icon: string; label: string } {
   return { icon: '✨', label: rawQ };
 }
 
+/** 무드 프리셋(소개팅, 기념일, 심야)에 따른 후보군 필터링 및 Graceful Fallback */
+function filterByMoodPreset(candidates: Spot[], preset?: MoodPresetKey | null): Spot[] {
+  if (!preset) return candidates;
+  let filtered: Spot[] = [];
+  if (preset === 'BLIND_DATE') {
+    filtered = candidates.filter((s) => isBlindDateSpot(s));
+  } else if (preset === 'ANNIVERSARY') {
+    filtered = candidates.filter((s) => isAnniversarySpot(s));
+  } else if (preset === 'NIGHT_LIFE') {
+    filtered = candidates.filter((s) => isNightLifeSpot(s));
+  }
+  return filtered.length > 0 ? filtered : candidates;
+}
+
 /**
  * 앵커 기반 근접 코스 생성 (물리적 거리 및 자치구 클러스터링).
  * 1) 검색어(searchQuery)가 있는 경우 해당 키워드 매칭 스팟을 앵커로 최우선 선정
@@ -1279,6 +1295,7 @@ function generateCourse(
   const catKey = opts.categoryKey && opts.categoryKey !== 'ALL' ? opts.categoryKey : null;
   const categoryDef = catKey ? SPOT_EXPLORE_CATEGORIES.find((c) => c.key === catKey) : null;
   const isIndoor = opts.indoorOnly ?? false;
+  const moodPreset = opts.moodPreset ?? null;
 
   let anchorSlot: SlotKey | null = null;
   let anchorPool: Spot[] = [];
@@ -1328,7 +1345,10 @@ function generateCourse(
   // 2. 검색어 매칭이 없거나 검색어가 비어있는 경우: 기존 앵커 로직(최소 후보 슬롯) 적용
   if (anchorSlot === null || anchorPool.length === 0) {
     for (const slot of slotsOn) {
-      const candidates = excludeRecent(getCandidates(all, slot, regionKeys, moodKey, [], zoneKeys, null, isIndoor), avoid);
+      const candidates = filterByMoodPreset(
+        excludeRecent(getCandidates(all, slot, regionKeys, moodKey, [], zoneKeys, null, isIndoor), avoid),
+        moodPreset,
+      );
       if (candidates.length > 0 && (anchorSlot === null || candidates.length < anchorPool.length)) {
         anchorSlot = slot;
         anchorPool = candidates;
@@ -1358,9 +1378,12 @@ function generateCourse(
       anchorSpot && anchorSpot.lat != null && anchorSpot.lng != null
         ? anchorSpot
         : (pickedSpots.find((s) => s.lat != null && s.lng != null) ?? anchorSpot);
-    const candidates = excludeRecent(
-      getCandidates(all, slot, regionKeys, moodKey, picked, zoneKeys, geoAnchor, isIndoor),
-      avoid,
+    const candidates = filterByMoodPreset(
+      excludeRecent(
+        getCandidates(all, slot, regionKeys, moodKey, picked, zoneKeys, geoAnchor, isIndoor),
+        avoid,
+      ),
+      moodPreset,
     );
 
     // 종목 중복 방지: 이미 선택된 차수와 동일한 장르(카페-카페, 식사-식사, 바-바) 배제
@@ -2404,6 +2427,154 @@ function parseCourseHash(hash: string): number[] | null {
 
 export type ThemeMode = 'light' | 'dark' | 'auto';
 const THEME_STORAGE_KEY = 'oneul_theme_mode';
+const SAVED_SPOTS_STORAGE_KEY = 'oneul_saved_spot_ids';
+
+export type MoodPresetKey = 'BLIND_DATE' | 'ANNIVERSARY' | 'NIGHT_LIFE';
+
+const MOOD_PRESETS: { key: MoodPresetKey; label: string; icon: string; desc: string }[] = [
+  { key: 'BLIND_DATE', label: '소개팅', icon: '🤝', desc: '대화하기 좋은 분위기와 정갈한 코스' },
+  { key: 'ANNIVERSARY', label: '기념일', icon: '🎂', desc: '특별한 날의 파인다이닝·와인·루프탑' },
+  { key: 'NIGHT_LIFE', label: '심야·야장', icon: '🌙', desc: '늦은 밤 감성 테라스·바·이자카야' },
+];
+
+/** 오늘 요일 인덱스 (일, 월, 화, 수, 목, 금, 토) */
+const KOREAN_DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토'] as const;
+
+function getTodayDayOfWeek(date = new Date()): (typeof KOREAN_DAY_NAMES)[number] {
+  return KOREAN_DAY_NAMES[date.getDay()];
+}
+
+/** 스팟이 오늘 정기휴무인지 판별 (현장 헛걸음 방지) */
+function isSpotClosedToday(spot: Spot, date = new Date()): boolean {
+  const todayDay = getTodayDayOfWeek(date);
+
+  // 1. closed_days 배열 직접 매칭
+  if (spot.closed_days && Array.isArray(spot.closed_days)) {
+    for (const d of spot.closed_days) {
+      if (typeof d === 'string' && (d.includes(todayDay) || d.includes(`${todayDay}요일`))) {
+        return true;
+      }
+    }
+  }
+
+  // 2. business_hours 객체 확인
+  if (spot.business_hours && typeof spot.business_hours === 'object') {
+    const val = spot.business_hours[todayDay] || spot.business_hours[`${todayDay}요일`];
+    if (val && (val.includes('휴무') || val.includes('정기휴무') || val === 'closed')) {
+      return true;
+    }
+  }
+
+  // 3. summary 또는 location 내 텍스트 정규식 분석
+  const textToCheck = `${spot.summary || ''} ${spot.location || ''}`;
+  if (textToCheck) {
+    const regex = new RegExp(`(?:매주\\s*)?${todayDay}(?:요일)?\\s*(?:정기)?휴무`, 'i');
+    if (regex.test(textToCheck)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/** 로컬 저장된 찜 스팟 ID 목록 불러오기 (개인정보 수집 0, LocalStorage 활용) */
+function loadSavedSpotIds(): Set<number> {
+  try {
+    const raw = localStorage.getItem(SAVED_SPOTS_STORAGE_KEY);
+    if (!raw) return new Set();
+    const arr = JSON.parse(raw);
+    if (Array.isArray(arr)) {
+      return new Set(arr.filter((id) => typeof id === 'number'));
+    }
+  } catch {}
+  return new Set();
+}
+
+/** 찜 스팟 ID 목록 LocalStorage에 원자적 저장 */
+function saveSavedSpotIds(ids: Set<number>): void {
+  try {
+    localStorage.setItem(SAVED_SPOTS_STORAGE_KEY, JSON.stringify(Array.from(ids)));
+  } catch {}
+}
+
+/** 스팟 찜 여부 확인 */
+function isSpotSaved(spotId: number): boolean {
+  return state.savedSpotIds ? state.savedSpotIds.has(spotId) : false;
+}
+
+/** 스팟 찜 토글 및 실시간 피드백 */
+function toggleSaveSpot(spotId: number): boolean {
+  if (!state.savedSpotIds) {
+    state.savedSpotIds = new Set();
+  }
+  const isSaved = state.savedSpotIds.has(spotId);
+  if (isSaved) {
+    state.savedSpotIds.delete(spotId);
+    saveSavedSpotIds(state.savedSpotIds);
+    showToast('보관함에서 제외했어요');
+  } else {
+    state.savedSpotIds.add(spotId);
+    saveSavedSpotIds(state.savedSpotIds);
+    showToast('❤️ 보관함에 담았어요!');
+  }
+  return !isSaved;
+}
+
+/** 소개팅에 적합한 스팟 판별 */
+function isBlindDateSpot(spot: Spot): boolean {
+  const text = `${spot.name} ${spot.category || ''} ${spot.summary || ''} ${(spot.mood || []).join(' ')}`.toLowerCase();
+  const DISALLOWED_BLIND = ['포차', '야장', '노포', '회식', '고기집', '삼겹살', '소주', '닭발', '볼링', '클럽', '대포집', '주막', '국밥', '해장국', '감자탕'];
+  if (DISALLOWED_BLIND.some((bad) => text.includes(bad))) return false;
+
+  const RECOMMENDED_BLIND = ['소개팅', '조용', '아늑', '분위기', '파스타', '스테이크', '브런치', '카페', '디저트', '다이닝', '비스트로', '스시', '오마카세', '예약', '로맨틱'];
+  const hasGoodKeyword = RECOMMENDED_BLIND.some((kw) => text.includes(kw));
+  const hasReservation = Boolean(spot.reservation_url || (spot.source && spot.source.url && spot.source.url.includes('catchtable')));
+  const isGoodCategory = ['CAFE', 'DINING', 'WINE'].includes(spot.category || '');
+
+  return hasGoodKeyword || hasReservation || isGoodCategory;
+}
+
+/** 특별한 기념일에 적합한 스팟 판별 */
+function isAnniversarySpot(spot: Spot): boolean {
+  const text = `${spot.name} ${spot.category || ''} ${spot.summary || ''} ${(spot.mood || []).join(' ')}`.toLowerCase();
+  const ANNIVERSARY_KEYWORDS = [
+    '기념일', '파인다이닝', '오마카세', '코스', '코스요리', '와인바', '루프탑', '야경', '전망', '스카이라운지',
+    '스테이크', '샴페인', '블루리본', '미쉐린', '미슐랭', '호텔', '럭셔리', '로맨틱'
+  ];
+  return ANNIVERSARY_KEYWORDS.some((kw) => text.includes(kw)) || Boolean(spot.mood?.includes('luxury') || spot.mood?.includes('romantic') || spot.mood?.includes('view'));
+}
+
+/** 심야·야장·감성주점에 적합한 스팟 판별 */
+function isNightLifeSpot(spot: Spot): boolean {
+  if (spot.slot === 'night') return true;
+  const text = `${spot.name} ${spot.category || ''} ${spot.summary || ''} ${(spot.mood || []).join(' ')}`.toLowerCase();
+  const NIGHT_KEYWORDS = ['심야', '야장', '루프탑', '테라스', '펍', '바', '칵테일', '위스키', '와인', '이자카야', '맥주', '포차', '감성주점', '하이볼', '스피크이지'];
+  return NIGHT_KEYWORDS.some((kw) => text.includes(kw));
+}
+
+/** T맵 길안내 딥링크 */
+function tmapUrl(spot: Spot): string {
+  if (typeof spot.lat === 'number' && typeof spot.lng === 'number') {
+    return `tmap://route?goalname=${encodeURIComponent(spot.name)}&goallat=${spot.lat}&goallng=${spot.lng}`;
+  }
+  return `tmap://search?name=${encodeURIComponent(spot.name)}`;
+}
+
+/** 카카오내비 길안내 딥링크 */
+function kakaoNaviUrl(spot: Spot): string {
+  if (typeof spot.lat === 'number' && typeof spot.lng === 'number') {
+    return `kakaonavi://navigate?name=${encodeURIComponent(spot.name)}&x=${spot.lng}&y=${spot.lat}&coord_type=wgs84`;
+  }
+  return `https://map.kakao.com/link/to/${encodeURIComponent(spot.name)},${spot.lat || ''},${spot.lng || ''}`;
+}
+
+/** 카카오 T 택시 호출 딥링크 */
+function kakaoTaxiUrl(spot: Spot): string {
+  if (typeof spot.lat === 'number' && typeof spot.lng === 'number') {
+    return `kakaot://taxi/call?dest_lat=${spot.lat}&dest_lng=${spot.lng}&dest_name=${encodeURIComponent(spot.name)}`;
+  }
+  return `kakaot://`;
+}
 
 interface AppState {
   mainMode: 'course' | 'spots';
@@ -2441,6 +2612,12 @@ interface AppState {
   spotDetailId: number | null;
   /** 비 오는 날/폭염 실내 데이트 필터 (true: 실내 위주 큐레이션) */
   indoorOnly: boolean;
+  /** 로컬 찜한 스팟 ID 집합 (No Server, LocalStorage 전용) */
+  savedSpotIds: Set<number>;
+  /** 찜한 스팟만 모아보기 필터 토글 */
+  savedOnly: boolean;
+  /** 상황별 1-Tap 무드 프리셋 (소개팅, 기념일, 심야·야장) */
+  moodPreset: MoodPresetKey | null;
 }
 
 /** 저장된 테마 모드 불러오기 (기본값: 'light' 낮 테마) */
@@ -2552,6 +2729,9 @@ const state: AppState = {
   activeRegionTab: 'ALL',
   spotDetailId: null,
   indoorOnly: false,
+  savedSpotIds: loadSavedSpotIds(),
+  savedOnly: false,
+  moodPreset: null,
 };
 
 let spotById = new Map<number, Spot>(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
@@ -2981,11 +3161,12 @@ function getRegionSelectorLabel(): { title: string; subtitle: string; isSelected
 
 /**
  * 1-Tap 퀵 지역 칩 바 HTML 렌더러
- * 8대 권역 + 전국을 모달 없이 1-Tap으로 즉시 전환하고, 세부 동네 상태를 인라인으로 노출
+ * 8대 권역 + 전국을 모달 없이 1-Tap으로 즉시 전환하고, 세부 동네, 보관함(찜), 실내, 무드 프리셋을 인라인으로 노출
  */
 function renderQuickRegionChips(): string {
   const isAll = state.regions.length === 0 && state.subZones.length === 0;
   const hasSubZones = state.subZones.length > 0;
+  const savedCount = state.savedSpotIds ? state.savedSpotIds.size : 0;
 
   let subZoneLabel = '+ 세부 동네';
   if (hasSubZones) {
@@ -3021,9 +3202,20 @@ function renderQuickRegionChips(): string {
           : `<span class="chip-arrow" aria-hidden="true">▾</span>`
       }
     </button>
+    <button class="quick-region-chip chip-saved ${state.savedOnly ? 'is-active is-saved-active' : ''}" data-action="toggle-saved" type="button" aria-label="보관함 스팟 보기" title="내가 찜한 스팟 모아보기">
+      <span class="region-chip-text">${state.savedOnly ? '❤️ 보관함 ON' : (savedCount > 0 ? `❤️ ${savedCount}` : '🤍 찜')}</span>
+    </button>
     <button class="quick-region-chip chip-indoor ${state.indoorOnly ? 'is-active is-indoor-active' : ''}" data-action="toggle-indoor" type="button" aria-label="실내 데이트 필터" title="비 오는 날/폭염 실내 데이트 모드">
       <span class="region-chip-text">${state.indoorOnly ? '☔ 실내 ON' : '☔ 실내'}</span>
     </button>
+    ${MOOD_PRESETS.map((m) => {
+      const isMoodActive = state.moodPreset === m.key;
+      return `
+        <button class="quick-region-chip chip-mood ${isMoodActive ? 'is-active is-mood-active' : ''}" data-action="toggle-mood" data-mood-preset="${m.key}" type="button" aria-label="${m.label} 데이트 모드" title="${m.desc}">
+          <span class="region-chip-text">${m.icon} ${m.label}</span>
+        </button>
+      `;
+    }).join('')}
   `;
 }
 
@@ -3078,6 +3270,33 @@ function bindQuickRegionEvents(container: HTMLElement, onRegionChange: () => voi
       e.stopPropagation();
       state.indoorOnly = !state.indoorOnly;
       showToast(state.indoorOnly ? '☔ 실내 데이트 장소들로 맞췄어요' : '☀️ 전체 데이트 장소로 전환되었어요');
+      onRegionChange();
+    });
+  });
+
+  // 5. 보관함(찜) 토글 버튼 클릭
+  container.querySelectorAll<HTMLButtonElement>('[data-action="toggle-saved"]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      state.savedOnly = !state.savedOnly;
+      showToast(state.savedOnly ? '❤️ 보관함 스팟들을 모아봤어요' : '전체 스팟으로 전환되었어요');
+      onRegionChange();
+    });
+  });
+
+  // 6. 상황별 무드 프리셋 칩 클릭
+  container.querySelectorAll<HTMLButtonElement>('[data-action="toggle-mood"]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const presetKey = btn.dataset.moodPreset as MoodPresetKey;
+      if (state.moodPreset === presetKey) {
+        state.moodPreset = null;
+        showToast('테마 모드가 해제되었어요');
+      } else {
+        state.moodPreset = presetKey;
+        const matched = MOOD_PRESETS.find((p) => p.key === presetKey);
+        showToast(`${matched ? matched.icon + ' ' + matched.label : '테마'} 모드로 맞췄어요`);
+      }
       onRegionChange();
     });
   });
@@ -3143,7 +3362,7 @@ function renderConditions(): void {
         </div>
       </div>
 
-      <!-- 5. 코스 완성하기 버튼군: 맞춤 생성 + 오늘의 추천 -->
+      <!-- 5. 코스 완성하기 버튼군: 맞춤 생성 + 오늘의 추천 + 찜한 코스 -->
       <div class="course-generate-btn-group">
         <button class="btn-primary btn-generate" id="btn-generate">
           🚀 맞춤 데이트 코스 완성하기
@@ -3151,6 +3370,11 @@ function renderConditions(): void {
         <button class="btn-daily-recommend" id="btn-daily-recommend" type="button" title="오늘 날짜 기반 에디터 추천 코스 바로 보기">
           🎁 오늘의 코스
         </button>
+        ${state.savedSpotIds && state.savedSpotIds.size > 0 ? `
+          <button class="btn-saved-recommend" id="btn-saved-recommend" type="button" title="보관함에 담아둔 스팟으로 코스 완성하기">
+            ❤️ 찜한 코스 (${state.savedSpotIds.size})
+          </button>
+        ` : ''}
       </div>
     </div>
   `;
@@ -3177,6 +3401,11 @@ function bindConditionEvents(area: HTMLElement): void {
       renderConditions();
       renderResults();
     }
+  });
+
+  // 찜한 스팟 기반 코스 생성
+  area.querySelector('#btn-saved-recommend')?.addEventListener('click', () => {
+    buildCourseFromSavedSpots();
   });
 
   // 검색창 입력 이벤트
@@ -3275,7 +3504,7 @@ function triggerCourseGeneration(): void {
     slotsOn,
     state.regions,
     state.mood,
-    { avoidIds: recentSpotIdSet(), searchQuery: state.searchQuery, categoryKey: state.courseCategory, indoorOnly: state.indoorOnly },
+    { avoidIds: recentSpotIdSet(), searchQuery: state.searchQuery, categoryKey: state.courseCategory, indoorOnly: state.indoorOnly, moodPreset: state.moodPreset },
     state.subZones,
   );
   state.courseConditions = {
@@ -3410,10 +3639,17 @@ function renderResults(): void {
   area.innerHTML = `
     <div class="course-head">
       <span class="course-title">${escapeHtml(regionsLabel(cond.regions, cond.subZones))} · ${escapeHtml(moodLabel(cond.mood))}</span>
-      <button class="btn-regenerate" id="btn-regenerate" aria-label="전체 다시 추천받기">
-        ${ICON_REFRESH_SVG}
-        <span class="btn-regenerate-text">전체 다시 추천</span>
-      </button>
+      <div class="course-head-actions">
+        ${state.course.length >= 3 ? `
+          <button class="btn-optimize-route" id="btn-optimize-route" type="button" title="이동 거리가 가장 짧은 최적 동선으로 순서 자동 정렬" aria-label="최적 동선 정렬">
+            ⚡ 최적 동선
+          </button>
+        ` : ''}
+        <button class="btn-regenerate" id="btn-regenerate" aria-label="전체 다시 추천받기">
+          ${ICON_REFRESH_SVG}
+          <span class="btn-regenerate-text">다시 추천</span>
+        </button>
+      </div>
     </div>
     <div class="ai-briefing-card" id="ai-briefing-box">
       <div class="ai-briefing-badge">
@@ -4215,6 +4451,8 @@ function renderStepCard(
   const fallbackIcon = getSpotFallbackIcon(spot, step.slot);
   const targetImgUrl = getSpotImageUrl(spot, step.slot, opts.usedImages);
   const isHot = isSuperHotSpot(spot);
+  const isClosedToday = isSpotClosedToday(spot);
+  const isSaved = isSpotSaved(spot.id);
 
   // v4.0 큐레이션 뱃지
   const curationBadges: string[] = [];
@@ -4252,6 +4490,7 @@ function renderStepCard(
   const thumbHtml = `
     <div class="step-thumb-col">
       ${isHot ? `<span class="badge-hot-floating">🔥 핫플</span>` : ''}
+      ${isClosedToday ? `<span class="badge-closed-floating">⚠️ 오늘 휴무</span>` : ''}
       <div class="step-fallback-box">${fallbackIcon}</div>
       <img class="step-thumb-img" src="${escapeHtml(targetImgUrl)}" alt="${escapeHtml(spot.name)}" loading="lazy" referrerpolicy="no-referrer" onload="this.classList.add('is-loaded');" onerror="this.classList.add('is-hidden'); this.previousElementSibling?.classList.add('is-active');" />
     </div>`;
@@ -4316,6 +4555,15 @@ function renderStepCard(
           })()}
         </div>
         <div class="step-actions-right">
+          <button class="step-save-chip icon-only ${isSaved ? 'is-saved' : ''}" data-spot-id="${spot.id}" aria-label="${isSaved ? '보관함에서 제외' : '보관함에 담기'}" title="${isSaved ? '보관함에서 제외' : '보관함에 담기'}">
+            <span>${isSaved ? '❤️' : '🤍'}</span>
+          </button>
+          <a class="step-navi-chip icon-only" href="${escapeHtml(tmapUrl(spot))}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(spot.name)} T맵 길안내" title="T맵 길안내">
+            <span>🧭</span>
+          </a>
+          <a class="step-navi-chip icon-only" href="${escapeHtml(kakaoTaxiUrl(spot))}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(spot.name)} 카카오 T 택시 호출" title="카카오 T 택시 호출">
+            <span>🚕</span>
+          </a>
           ${bookingUrl ? `<a class="step-book-chip icon-only" href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" aria-label="실시간 예약" title="실시간 예약"><span>📅</span></a>` : ''}
           <a class="step-map-chip icon-only" href="${naverMapUrl(spot)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(spot.name)} 네이버 지도 열기" title="네이버 지도 열기">
             ${ICON_NAVER_MAP_SVG}
@@ -4463,7 +4711,7 @@ function regenerateCourse(): void {
     slotsOn,
     cond.regions,
     cond.mood,
-    { avoidIds: recentSpotIdSet(), indoorOnly: cond.indoorOnly },
+    { avoidIds: recentSpotIdSet(), indoorOnly: cond.indoorOnly, moodPreset: state.moodPreset },
     cond.subZones,
   );
   addRecentSpotIds(courseSpotIds());
@@ -4473,6 +4721,19 @@ function regenerateCourse(): void {
 function bindResultEvents(area: HTMLElement): void {
   area.querySelectorAll<HTMLButtonElement>('.btn-swap, .btn-swap-icon').forEach((btn) => {
     bindSwapButton(btn);
+  });
+  area.querySelector('#btn-optimize-route')?.addEventListener('click', () => {
+    optimizeCourseRoute();
+  });
+  area.querySelectorAll<HTMLButtonElement>('.step-save-chip').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const spotId = Number(btn.dataset.spotId);
+      if (!spotId) return;
+      const isSaved = toggleSaveSpot(spotId);
+      btn.innerHTML = `<span>${isSaved ? '❤️' : '🤍'}</span>`;
+      btn.classList.toggle('is-saved', isSaved);
+    });
   });
   area.querySelector('#btn-regenerate')?.addEventListener('click', function (this: HTMLButtonElement) {
     this.classList.add('is-spinning');
@@ -4530,6 +4791,167 @@ function bindResultEvents(area: HTMLElement): void {
     persistSavedCourses(list);
     showToast('💾 코스를 저장했어요');
   });
+}
+
+/** 두 지점 간 거리(km) 계산 */
+function getDistanceBetweenSpots(s1: Spot, s2: Spot): number | null {
+  if (typeof s1.lat !== 'number' || typeof s1.lng !== 'number' || typeof s2.lat !== 'number' || typeof s2.lng !== 'number') {
+    const c1 = getSpotCoordinates(s1);
+    const c2 = getSpotCoordinates(s2);
+    return getDistanceKm(c1.lat, c1.lng, c2.lat, c2.lng);
+  }
+  return getDistanceKm(s1.lat, s1.lng, s2.lat, s2.lng);
+}
+
+/** 코스 전체 총 이동거리 계산 (1->2 + 2->3) */
+function calculateCourseTotalDistance(steps: CourseStep[]): number {
+  const currentSpots = steps
+    .map((step) => (step.spotId ? spotById.get(step.spotId) || null : null))
+    .filter((s): s is Spot => Boolean(s));
+
+  if (currentSpots.length < 2) return 0;
+  let total = 0;
+  for (let i = 0; i < currentSpots.length - 1; i++) {
+    const d = getDistanceBetweenSpots(currentSpots[i], currentSpots[i + 1]);
+    if (d !== null) total += d;
+  }
+  return total;
+}
+
+/** 코스 최적 동선 자동 정렬: 3개 스팟의 최단 이동 거리 순열 탐색 */
+function optimizeCourseRoute(): boolean {
+  if (!state.course || state.course.length < 3) {
+    showToast('3개 차수 코스가 모두 완성되어야 동선을 최적화할 수 있어요');
+    return false;
+  }
+
+  const currentSpots = state.course
+    .map((step) => (step.spotId ? spotById.get(step.spotId) || null : null))
+    .filter((s): s is Spot => Boolean(s));
+
+  if (currentSpots.length < 3) {
+    showToast('유효한 스팟이 3개 이상이어야 해요');
+    return false;
+  }
+
+  const initialSteps = [...state.course];
+  const initialDistance = calculateCourseTotalDistance(initialSteps);
+
+  // 6가지 순열 중 장르 호환 가능한 것만 추출
+  const permutations = [
+    [0, 1, 2],
+    [1, 0, 2],
+    [0, 2, 1],
+    [2, 0, 1],
+    [1, 2, 0],
+    [2, 1, 0],
+  ];
+
+  let bestPerm = [0, 1, 2];
+  let minDistance = initialDistance;
+
+  for (const perm of permutations) {
+    const pSpots = [currentSpots[perm[0]], currentSpots[perm[1]], currentSpots[perm[2]]];
+    
+    // 장르 검사: 1차가 BAR이면 부적절, 3차가 순수 브런치/카페면 부적절
+    const g0 = getSpotGenre(pSpots[0]);
+    const g2 = getSpotGenre(pSpots[2]);
+    if (g0 === 'BAR') continue;
+    if (g2 === 'CAFE' && g0 === 'MEAL') continue;
+
+    const testSteps: CourseStep[] = [
+      { slot: initialSteps[0].slot, spotId: pSpots[0].id },
+      { slot: initialSteps[1].slot, spotId: pSpots[1].id },
+      { slot: initialSteps[2].slot, spotId: pSpots[2].id },
+    ];
+
+    const dist = calculateCourseTotalDistance(testSteps);
+    if (dist < minDistance - 0.1) {
+      minDistance = dist;
+      bestPerm = perm;
+    }
+  }
+
+  if (bestPerm[0] === 0 && bestPerm[1] === 1 && bestPerm[2] === 2) {
+    showToast(`✨ 이미 가장 이상적인 최적 동선이에요! (총 ${minDistance.toFixed(1)}km)`);
+    return false;
+  }
+
+  state.course = [
+    { slot: initialSteps[0].slot, spotId: currentSpots[bestPerm[0]].id },
+    { slot: initialSteps[1].slot, spotId: currentSpots[bestPerm[1]].id },
+    { slot: initialSteps[2].slot, spotId: currentSpots[bestPerm[2]].id },
+  ];
+
+  const savedKm = (initialDistance - minDistance).toFixed(1);
+  showToast(`⚡ 최적 동선으로 정렬 완료! 이동 거리가 ${savedKm}km 단축되었어요.`);
+  renderResults();
+  return true;
+}
+
+/** 찜한 스팟(보관함)을 활용한 나만의 데이트 코스 즉시 빌드 */
+function buildCourseFromSavedSpots(): boolean {
+  if (!state.savedSpotIds || state.savedSpotIds.size === 0) {
+    showToast('아직 보관함에 담은 스팟이 없어요. 마음에 드는 스팟의 하트(🤍)를 눌러보세요!');
+    return false;
+  }
+
+  const savedList = Array.from(state.savedSpotIds)
+    .map((id) => spotById.get(id))
+    .filter((s): s is Spot => typeof s !== 'undefined' && !s.is_closed);
+
+  if (savedList.length === 0) {
+    showToast('보관함의 스팟이 모두 비활성화되었어요');
+    return false;
+  }
+
+  const slotsOn: SlotKey[] = ['day', 'evening', 'night'];
+  const steps: CourseStep[] = [];
+  const usedSpotIds = new Set<number>();
+
+  for (const slot of slotsOn) {
+    let matched = savedList.find(
+      (s) =>
+        !usedSpotIds.has(s.id) &&
+        (s.slot === slot ||
+          (slot === 'day' && getSpotGenre(s) === 'CAFE') ||
+          (slot === 'evening' && getSpotGenre(s) === 'MEAL') ||
+          (slot === 'night' && getSpotGenre(s) === 'BAR')),
+    );
+    if (!matched) {
+      matched = savedList.find((s) => !usedSpotIds.has(s.id));
+    }
+
+    if (matched) {
+      steps.push({ slot, spotId: matched.id });
+      usedSpotIds.add(matched.id);
+    } else {
+      const anchor = steps.length > 0 && steps[0].spotId ? spotById.get(steps[0].spotId) || null : null;
+      const candidates = getCandidates(spots, slot, [], 'ALL', Array.from(usedSpotIds), [], anchor);
+      if (candidates.length > 0) {
+        const picked = candidates[0];
+        steps.push({ slot, spotId: picked.id });
+        usedSpotIds.add(picked.id);
+      } else {
+        steps.push({ slot, spotId: null });
+      }
+    }
+  }
+
+  state.course = steps;
+  state.courseConditions = {
+    regions: [...state.regions],
+    subZones: [...state.subZones],
+    mood: state.mood,
+    searchQuery: '',
+    indoorOnly: state.indoorOnly,
+  };
+  state.mainMode = 'course';
+  updateModeView();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  showToast(`❤️ 찜한 스팟으로 나만의 데이트 코스를 완성했어요!`);
+  renderResults();
+  return true;
 }
 
 // --- 스팟 집중 탐색 모드 (Spot Discovery) -------------------------------------------
@@ -4684,6 +5106,20 @@ function renderSpotDiscovery(): void {
     matchedSpots = matchedSpots.filter((s) => isIndoorSpot(s));
   }
 
+  // 보관함(찜) 필터 적용 (내가 담은 스팟만 모아보기)
+  if (state.savedOnly) {
+    matchedSpots = matchedSpots.filter((s) => state.savedSpotIds.has(s.id));
+  }
+
+  // 상황별 1-Tap 무드 프리셋 필터 적용 (소개팅, 기념일, 심야·야장)
+  if (state.moodPreset === 'BLIND_DATE') {
+    matchedSpots = matchedSpots.filter((s) => isBlindDateSpot(s));
+  } else if (state.moodPreset === 'ANNIVERSARY') {
+    matchedSpots = matchedSpots.filter((s) => isAnniversarySpot(s));
+  } else if (state.moodPreset === 'NIGHT_LIFE') {
+    matchedSpots = matchedSpots.filter((s) => isNightLifeSpot(s));
+  }
+
   // 4. 정렬 적용 (거리순 / 핫플·인기순 / 블루리본·미쉐린순)
   if (state.spotSort === 'distance') {
     // 📍 가까운 거리순 (가까운 곳부터, 동일 거리 시 인기 점수순)
@@ -4803,10 +5239,10 @@ function renderSpotDiscovery(): void {
     <div class="spot-discovery-grid cols-${state.spotGridCols}">
       ${displaySpots.length > 0 ? displaySpots.map((spot) => renderDiscoverySpotCard(spot, state.spotGridCols)).join('') : `
         <div class="spot-empty-state">
-          <span class="empty-icon">🧭</span>
-          <p class="empty-title">검색 조건에 맞는 스팟을 찾지 못했어요</p>
-          <p class="empty-desc">지역명이나 키워드를 변경해보세요!</p>
-          <button class="btn-empty-reset" id="btn-empty-reset-all">전체 스팟 다시 보기</button>
+          <span class="empty-icon">${state.savedOnly ? '❤️' : '🧭'}</span>
+          <p class="empty-title">${state.savedOnly ? '아직 보관함에 담은 스팟이 없어요' : '검색 조건에 맞는 스팟을 찾지 못했어요'}</p>
+          <p class="empty-desc">${state.savedOnly ? '마음에 드는 스팟 카드의 하트(🤍)를 눌러 나만의 데이트 리스트를 모아보세요!' : '지역명이나 키워드를 변경해보세요!'}</p>
+          <button class="btn-empty-reset" id="${state.savedOnly ? 'btn-empty-reset-saved' : 'btn-empty-reset-all'}">${state.savedOnly ? '전체 스팟 둘러보기' : '전체 스팟 다시 보기'}</button>
         </div>
       `}
     </div>
@@ -4837,6 +5273,8 @@ function renderSpotDiscovery(): void {
 
 function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 5 = 3): string {
   const isHot = isSuperHotSpot(spot);
+  const isClosedToday = isSpotClosedToday(spot);
+  const isSaved = isSpotSaved(spot.id);
   const slotKey = (spot.slot as SlotKey) || 'day';
   const targetImgUrl = getSpotImageUrl(spot, slotKey);
   const fallbackIcon = getSpotFallbackIcon(spot, slotKey);
@@ -4865,6 +5303,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
       <article class="discovery-card cols-5" data-spot-id="${spot.id}" title="${escapeHtml(spot.name)} 상세 보기">
         <div class="discovery-card-thumb">
           <span class="discovery-badge-dist">${distText}</span>
+          ${isClosedToday ? `<span class="discovery-badge-closed">⚠️ 오늘 휴무</span>` : ''}
           ${curationPill}
           <div class="thumb-fallback-box">${fallbackIcon}</div>
           ${
@@ -4876,6 +5315,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
         <div class="discovery-card-body compact">
           <h4 class="discovery-card-title discovery-name compact">${escapeHtml(spot.name)}</h4>
           <div class="discovery-card-actions compact">
+            <button class="btn-discovery-save ${isSaved ? 'is-saved' : ''} compact" data-spot-id="${spot.id}" aria-label="${isSaved ? '보관함에서 제외' : '보관함에 담기'}" title="${isSaved ? '보관함에서 제외' : '보관함에 담기'}">${isSaved ? '❤️' : '🤍'}</button>
             <button class="btn-build-anchor-course btn-discovery-action-build compact" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">✨</button>
             ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-yt compact" aria-label="${escapeHtml(spot.name)} 유튜브 핫클립" title="유튜브 핫클립 시청">▶️</a>` : ''}
             ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-book compact" aria-label="${escapeHtml(spot.name)} 실시간 예약" title="실시간 예약">📅</a>` : ''}
@@ -4891,6 +5331,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
       <article class="discovery-card cols-2" data-spot-id="${spot.id}" title="${escapeHtml(spot.name)} 상세 보기">
         <div class="discovery-card-thumb">
           <span class="discovery-badge-dist">${distText}</span>
+          ${isClosedToday ? `<span class="discovery-badge-closed">⚠️ 오늘 휴무</span>` : ''}
           ${curationPill}
           <div class="thumb-fallback-box">${fallbackIcon}</div>
           ${
@@ -4906,6 +5347,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
           </div>
           <p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>
           <div class="discovery-card-actions">
+            <button class="btn-discovery-save ${isSaved ? 'is-saved' : ''}" data-spot-id="${spot.id}" aria-label="${isSaved ? '보관함에서 제외' : '보관함에 담기'}" title="${isSaved ? '보관함에서 제외' : '보관함에 담기'}">${isSaved ? '❤️' : '🤍'}</button>
             <button class="btn-build-anchor-course btn-discovery-action-build" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">✨</button>
             ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-yt" aria-label="${escapeHtml(spot.name)} 유튜브 핫클립" title="유튜브 핫클립 시청">▶️</a>` : ''}
             ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-book" aria-label="${escapeHtml(spot.name)} 실시간 예약" title="실시간 예약">📅</a>` : ''}
@@ -4920,6 +5362,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
     <article class="discovery-card cols-3" data-spot-id="${spot.id}" title="${escapeHtml(spot.name)} 상세 보기">
       <div class="discovery-card-thumb">
         <span class="discovery-badge-dist">${distText}</span>
+        ${isClosedToday ? `<span class="discovery-badge-closed">⚠️ 오늘 휴무</span>` : ''}
         ${curationPill}
         <div class="thumb-fallback-box">${fallbackIcon}</div>
         ${
@@ -4932,6 +5375,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
         <h4 class="discovery-card-title discovery-name">${escapeHtml(spot.name)}</h4>
         <p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>
         <div class="discovery-card-actions">
+          <button class="btn-discovery-save ${isSaved ? 'is-saved' : ''}" data-spot-id="${spot.id}" aria-label="${isSaved ? '보관함에서 제외' : '보관함에 담기'}" title="${isSaved ? '보관함에서 제외' : '보관함에 담기'}">${isSaved ? '❤️' : '🤍'}</button>
           <button class="btn-build-anchor-course btn-discovery-action-build" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">✨</button>
           ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-yt" aria-label="${escapeHtml(spot.name)} 유튜브 핫클립" title="유튜브 핫클립 시청">▶️</a>` : ''}
           ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-book" aria-label="${escapeHtml(spot.name)} 실시간 예약" title="실시간 예약">📅</a>` : ''}
@@ -4953,6 +5397,34 @@ function bindDiscoveryEvents(area: HTMLElement): void {
         renderOverlay();
       }
     });
+  });
+
+  // 하트(❤️) 찜 버튼 클릭
+  area.querySelectorAll<HTMLButtonElement>('.btn-discovery-save').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const spotId = Number(btn.dataset.spotId);
+      if (!spotId) return;
+      const isSaved = toggleSaveSpot(spotId);
+      btn.textContent = isSaved ? '❤️' : '🤍';
+      btn.classList.toggle('is-saved', isSaved);
+      if (state.savedOnly) {
+        renderSpotDiscovery();
+      } else {
+        const savedChip = area.querySelector<HTMLElement>('[data-action="toggle-saved"] .region-chip-text');
+        if (savedChip) {
+          const count = state.savedSpotIds.size;
+          savedChip.textContent = count > 0 ? `❤️ ${count}` : '🤍 찜';
+        }
+      }
+    });
+  });
+
+  // 보관함 빈 화면에서 전체 스팟 둘러보기 클릭
+  area.querySelector('#btn-empty-reset-saved')?.addEventListener('click', () => {
+    state.savedOnly = false;
+    state.spotPage = 1;
+    renderSpotDiscovery();
   });
 
   const searchInput = area.querySelector<HTMLInputElement>('#discovery-search-input');
@@ -5601,6 +6073,8 @@ function renderOverlay(): void {
       return;
     }
 
+    const isClosedToday = isSpotClosedToday(spot);
+    const isSaved = isSpotSaved(spot.id);
     const slotKey = (spot.slot as SlotKey) || 'day';
     const targetImgUrl = getSpotImageUrl(spot, slotKey);
     const fallbackIcon = getSpotFallbackIcon(spot, slotKey);
@@ -5696,7 +6170,10 @@ function renderOverlay(): void {
               <div class="meta-grid-item">
                 <span class="meta-item-icon">🕒</span>
                 <div class="meta-item-body">
-                  <strong class="meta-item-title">영업시간</strong>
+                  <strong class="meta-item-title">
+                    영업시간
+                    ${isClosedToday ? '<span class="spot-closed-badge">⚠️ 오늘 정기휴무</span>' : ''}
+                  </strong>
                   <p class="meta-item-desc">${escapeHtml(hoursText || '정보 없음')}${closedText ? ` (휴무: ${escapeHtml(closedText)})` : ''}</p>
                 </div>
               </div>
@@ -5751,6 +6228,9 @@ function renderOverlay(): void {
           <div class="spot-detail-links-row">
             ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn book" aria-label="캐치테이블 실시간 예약" title="캐치테이블 실시간 예약"><span>📅 예약</span></a>` : ''}
             ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn yt" aria-label="유튜브 핫클립 시청" title="유튜브 핫클립 시청"><span>▶️ 영상</span></a>` : ''}
+            <a href="${escapeHtml(tmapUrl(spot))}" target="_blank" rel="noopener noreferrer" class="spot-link-btn tmap" aria-label="T맵 길안내" title="T맵 길안내"><span>🧭 T맵</span></a>
+            <a href="${escapeHtml(kakaoNaviUrl(spot))}" target="_blank" rel="noopener noreferrer" class="spot-link-btn navi" aria-label="카카오내비 길안내" title="카카오내비 길안내"><span>🧭 카카오내비</span></a>
+            <a href="${escapeHtml(kakaoTaxiUrl(spot))}" target="_blank" rel="noopener noreferrer" class="spot-link-btn taxi" aria-label="카카오 T 택시 호출" title="카카오 T 택시 호출"><span>🚕 카카오 T</span></a>
             ${guideUrl ? `<a href="${escapeHtml(guideUrl)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn guide" aria-label="공식 가이드 평가" title="공식 가이드 평가"><span>🎀 가이드</span></a>` : ''}
             ${instaUrl ? `<a href="${escapeHtml(instaUrl)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn insta" aria-label="인스타그램 공식 피드" title="인스타그램 공식 피드"><span>📸 인스타</span></a>` : ''}
             <a href="${escapeHtml(kakaoUrl)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn kakao" aria-label="카카오맵 상세" title="카카오맵 상세"><span>💛 카카오</span></a>
@@ -5759,7 +6239,10 @@ function renderOverlay(): void {
 
         <!-- 6. 하단 고정 액션 바 -->
         <div class="spot-detail-footer">
-          <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.name)}" target="_blank" rel="noopener noreferrer" class="btn-detail-naver-map" title="네이버 지도 열기">
+          <button class="btn-detail-save ${isSaved ? 'is-saved' : ''}" id="btn-detail-toggle-save" data-spot-id="${spot.id}" title="${isSaved ? '보관함에서 제외' : '보관함에 담기'}">
+            ${isSaved ? '❤️ 찜완료' : '🤍 찜하기'}
+          </button>
+          <a href="${escapeHtml(naverMapUrl(spot))}" target="_blank" rel="noopener noreferrer" class="btn-detail-naver-map" title="네이버 지도 열기">
             🗺️ 네이버 지도
           </a>
           <button class="btn-primary btn-detail-build-course" id="btn-detail-build-anchor" data-spot-id="${spot.id}" title="이 스팟 중심으로 코스 짜기">
@@ -5779,6 +6262,22 @@ function renderOverlay(): void {
         navigator.clipboard.writeText(addr).then(() => {
           showToast('📋 주소가 복사되었어요');
         });
+      }
+    });
+
+    // 하트 찜 토글 버튼
+    root.querySelector('#btn-detail-toggle-save')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const nowSaved = toggleSaveSpot(spot.id);
+      const saveBtn = root.querySelector<HTMLButtonElement>('#btn-detail-toggle-save');
+      if (saveBtn) {
+        saveBtn.textContent = nowSaved ? '❤️ 찜완료' : '🤍 찜하기';
+        saveBtn.classList.toggle('is-saved', nowSaved);
+      }
+      if (state.mainMode === 'spots') {
+        renderSpotDiscovery();
+      } else {
+        renderResults();
       }
     });
 
