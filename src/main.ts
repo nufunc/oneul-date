@@ -590,12 +590,96 @@ function isCourseEligible(spot: Spot): boolean {
   return isValidSlot(spot.slot) && !isListicleEntry(spot) && !isBroadRegionDummy(spot) && !isPollutedMediaChannelDummy(spot) && isRealStaySpot(spot);
 }
 
+const DEDUPE_REGION_TOKENS = new Set([
+  '서울', '경기', '인천', '부산', '대구', '대전', '광주', '울산', '세종', '강원', '충청', '충북', '충남', '전라', '전북', '전남', '경상', '경북', '경남', '제주',
+  '문래', '성수', '홍대', '연남', '연희', '서촌', '북촌', '삼청', '익선', '을지로', '한남', '이태원', '용산', '압구정', '신사', '청담', '도산', '가로수', '잠실', '송파',
+  '강남', '서초', '여의도', '영등포', '마포', '종로', '중구', '혜화', '대학로', '동대문', '판교', '분당', '수원', '일산', '파주', '송도', '해운대', '광안리', '서면', '전포',
+  '경주', '애월', '한림', '협재', '구좌', '성산', '서귀포', '중문'
+]);
+
+/** 도로명/지번 주소에서 정규화된 건물 키 추출 (예: '도림로129길 5-1' -> '도림로129길_5-1') */
+function extractRoadAddressKey(addrStr: string | null | undefined): string | null {
+  if (!addrStr) return null;
+  const clean = addrStr.replace(/\(.*?\)/g, '').trim();
+  const m = clean.match(/([가-힣0-9]+(?:로|길|대로))\s*([0-9]+(?:-[0-9]+)?)/);
+  if (m) return `${m[1]}_${m[2]}`;
+  const m2 = clean.match(/([가-힣0-9]+(?:동|리|가))\s*([0-9]+(?:-[0-9]+)?)/);
+  if (m2) return `${m2[1]}_${m2[2]}`;
+  return null;
+}
+
+/** 상호명에서 지역 태그 및 불필요한 나열 접미사를 제거한 순수 브랜드 어근 추출 */
+function extractCoreBrandName(name: string): string {
+  let clean = name.replace(/\(.*?\)|\[.*?\]/g, '').trim().toLowerCase();
+  clean = clean.replace(/(본점|직영점|지점|\d+호점)$/, '').trim();
+  const tokens = clean.split(/\s+/);
+  const filtered: string[] = [];
+  for (const t of tokens) {
+    const tClean = t.replace(/점$/, '');
+    if (DEDUPE_REGION_TOKENS.has(tClean) || DEDUPE_REGION_TOKENS.has(t)) continue;
+    filtered.push(tClean);
+  }
+  const core = filtered.join('');
+  return core.length >= 2 ? core : clean.replace(/\s+/g, '');
+}
+
+/** 두 중복 스팟 중 더 우수한 품질의 스팟을 병합하여 반환 */
+function mergeBestSpot(a: Spot, b: Spot): Spot {
+  // 이름 선택: 지명 다중 나열(예: '비어바나 문래 서울 문래') 대신 단정한 지점명('비어바나 문래점') 우선
+  const aHasDupToken = /[가-힣]+\s+(서울|경기|문래|성수|홍대)\s+[가-힣]+/.test(a.name);
+  const bHasDupToken = /[가-힣]+\s+(서울|경기|문래|성수|홍대)\s+[가-힣]+/.test(b.name);
+  const bestName = (aHasDupToken && !bHasDupToken) ? b.name : (!aHasDupToken && bHasDupToken) ? a.name : a.name;
+
+  // 요약문: 한국어가 더 길고 충실한 설명 우선
+  const aSummaryLen = (cleanSpotSummary(a) || a.summary || '').length;
+  const bSummaryLen = (cleanSpotSummary(b) || b.summary || '').length;
+  const bestSummary = bSummaryLen > aSummaryLen + 15 ? b.summary : a.summary;
+  const bestAiEditorial = b.ai_summary_editorial || a.ai_summary_editorial;
+
+  // 도로명 주소: 상세 주소가 있는 쪽 우선
+  const bestAddress = (b.address && (!a.address || b.address.length > a.address.length)) ? b.address : a.address;
+  const bestLocation = (b.location && (!a.location || b.location.length > a.location.length)) ? b.location : a.location;
+
+  // 이미지
+  const bestImageUrl = a.image_url || b.image_url;
+
+  // 점수
+  const bestQuality = Math.max(a.quality_score || 0, b.quality_score || 0);
+  const bestHotScore = Math.max(a.hot_score || 0, b.hot_score || 0);
+
+  // 소셜 및 메타데이터 상호 보완 병합
+  const bestSocialLinks = { ...(b.social_links || {}), ...(a.social_links || {}) };
+  const bestBadges = { ...(b.curation_badges || {}), ...(a.curation_badges || {}) };
+  const bestBooking = a.booking_info || b.booking_info;
+  const bestParking = a.parking_info || b.parking_info;
+  const bestParkingDetail = a.parking_detail || b.parking_detail;
+  const bestHours = a.business_hours || b.business_hours;
+
+  return {
+    ...a,
+    name: bestName,
+    summary: bestSummary,
+    ai_summary_editorial: bestAiEditorial,
+    address: bestAddress,
+    location: bestLocation,
+    image_url: bestImageUrl,
+    quality_score: bestQuality,
+    hot_score: bestHotScore,
+    social_links: Object.keys(bestSocialLinks).length > 0 ? bestSocialLinks : a.social_links,
+    curation_badges: Object.keys(bestBadges).length > 0 ? bestBadges : a.curation_badges,
+    booking_info: bestBooking,
+    parking_info: bestParking,
+    parking_detail: bestParkingDetail,
+    business_hours: bestHours,
+  };
+}
+
 /**
- * ⚡ 스팟 목록 전수 중복 제거 (ID 및 정제 상호명+지역 기준 최고 품질 1개만 유지)
+ * ⚡ 스팟 목록 전수 중복 제거 (ID, 도로명 주소, 정제 상호명 코어 기준 통합 및 품질 병합)
  */
 function deduplicateSpotList(spots: Spot[]): Spot[] {
   const seenIds = new Set<number>();
-  const seenKeys = new Set<string>();
+  const indexByKey = new Map<string, number>();
   const result: Spot[] = [];
 
   for (const s of spots) {
@@ -603,13 +687,35 @@ function deduplicateSpotList(spots: Spot[]): Spot[] {
     if (seenIds.has(s.id)) continue;
     seenIds.add(s.id);
 
-    // 상호명 정제: 괄호/특수문자/지점명 공통 처리
-    const cleanName = s.name.replace(/\([^)]*\)/g, '').replace(/\[[^\]]*\]/g, '').trim().toLowerCase();
-    const areaKey = `${cleanName}__${s.region || ''}__${s.area || ''}`;
-    if (seenKeys.has(areaKey)) continue;
-    seenKeys.add(areaKey);
+    const brandCore = extractCoreBrandName(s.name);
+    const addrKey = extractRoadAddressKey(s.address || s.location);
+    const areaKey = `${s.region || ''}__${s.area || ''}__${brandCore}`;
 
-    result.push(s);
+    let matchedIndex: number | undefined = undefined;
+
+    // 1순위: 도로명 주소 + 브랜드 코어 일치
+    if (addrKey && brandCore.length >= 2) {
+      const fullAddrKey = `ADDR_${addrKey}__${brandCore}`;
+      matchedIndex = indexByKey.get(fullAddrKey);
+      if (matchedIndex === undefined) {
+        indexByKey.set(fullAddrKey, result.length);
+      }
+    }
+
+    // 2순위: 동일 권역/시·구 + 브랜드 코어 일치 (3글자 이상)
+    if (matchedIndex === undefined && brandCore.length >= 3) {
+      matchedIndex = indexByKey.get(areaKey);
+      if (matchedIndex === undefined) {
+        indexByKey.set(areaKey, result.length);
+      }
+    }
+
+    if (matchedIndex !== undefined) {
+      // 이미 존재하는 스팟과 병합하여 최고 품질 데이터로 업데이트
+      result[matchedIndex] = mergeBestSpot(result[matchedIndex], s);
+    } else {
+      result.push({ ...s });
+    }
   }
 
   return result;
@@ -4533,9 +4639,9 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
         <div class="discovery-card-body compact">
           <h4 class="discovery-card-title discovery-name compact">${escapeHtml(spot.name)}</h4>
           <div class="discovery-card-actions compact">
+            <button class="btn-build-anchor-course btn-discovery-action-build compact" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">✨</button>
             ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-book compact" aria-label="${escapeHtml(spot.name)} 실시간 예약" title="실시간 예약">📅</a>` : ''}
             <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.name)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map compact" aria-label="${escapeHtml(spot.name)} 지도">🗺️</a>
-            <button class="btn-build-anchor-course btn-discovery-action-build compact" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기">✨ 코스</button>
           </div>
         </div>
       </article>
@@ -4562,10 +4668,10 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
           </div>
           <p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>
           <div class="discovery-card-actions">
-            ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-book" aria-label="${escapeHtml(spot.name)} 실시간 예약">📅 예약</a>` : ''}
+            <button class="btn-build-anchor-course btn-discovery-action-build" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">✨ 코스</button>
             ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-yt" aria-label="${escapeHtml(spot.name)} 유튜브 핫클립">▶️ 영상</a>` : ''}
+            ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-book" aria-label="${escapeHtml(spot.name)} 실시간 예약">📅 예약</a>` : ''}
             <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.name)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map">🗺️ 지도</a>
-            <button class="btn-build-anchor-course btn-discovery-action-build" data-spot-id="${spot.id}">✨ 코스 짜기</button>
           </div>
         </div>
       </article>
@@ -4588,10 +4694,10 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
         <h4 class="discovery-card-title discovery-name">${escapeHtml(spot.name)}</h4>
         <p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>
         <div class="discovery-card-actions">
-          ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-book" aria-label="${escapeHtml(spot.name)} 실시간 예약">📅 예약</a>` : ''}
+          <button class="btn-build-anchor-course btn-discovery-action-build" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">✨ 코스</button>
           ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-yt" aria-label="${escapeHtml(spot.name)} 유튜브 핫클립">▶️ 영상</a>` : ''}
+          ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-book" aria-label="${escapeHtml(spot.name)} 실시간 예약">📅 예약</a>` : ''}
           <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.name)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map">🗺️ 지도</a>
-          <button class="btn-build-anchor-course btn-discovery-action-build" data-spot-id="${spot.id}">✨ 코스</button>
         </div>
       </div>
     </article>
