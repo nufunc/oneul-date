@@ -19,6 +19,11 @@ import argparse
 from datetime import datetime
 from collections import defaultdict, Counter
 
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+
 def parse_args():
     parser = argparse.ArgumentParser(description="오늘 데이트 수집기 로그 미비점 분석 도구")
     parser.add_argument("--file", "-f", help="분석할 로그 파일 경로 (기본: /mnt/data/logs/collector.log 또는 ./logs/collector.log)")
