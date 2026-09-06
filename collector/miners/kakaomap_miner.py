@@ -13,43 +13,43 @@ import json
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
     "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+    "Referer": "https://map.kakao.com/",
 }
 
 def search_kakaomap_place(spot_name: str, address_or_area: str = "") -> dict | None:
     """
-    카카오맵 검색을 통해 장소 ID와 실평점을 수집합니다.
+    카카오맵 검색(mapsearch/map.daum)을 통해 장소 ID와 실평점, 리뷰 수를 수집합니다.
     """
     clean_name = re.sub(r'\(.*?\)|\[.*?\]', '', spot_name).strip()
     query = f"{address_or_area} {clean_name}" if address_or_area else clean_name
     encoded_query = urllib.parse.quote(query)
-    url = f"https://search.map.kakao.com/lookup/place?q={encoded_query}"
+    url = f"https://search.map.kakao.com/mapsearch/map.daum?q={encoded_query}"
 
     req = urllib.request.Request(url, headers=HEADERS)
     try:
         with urllib.request.urlopen(req, timeout=3.5) as res:
             if res.status == 200:
                 data = json.loads(res.read().decode('utf-8'))
-                places = data.get("places", []) or data.get("items", [])
+                places = data.get("place", []) or data.get("places", []) or []
                 if places and len(places) > 0:
                     best = places[0]
-                    place_id = best.get("id") or best.get("confirmid")
-                    rating = float(best.get("score") or best.get("rating") or 0.0)
-                    review_count = int(best.get("review_count") or best.get("comment_count") or 0)
+                    place_id = best.get("confirmid") or best.get("id")
+                    raw_rating = best.get("rating_average") or best.get("score") or best.get("rating")
+                    rating = float(raw_rating) if raw_rating else 0.0
+                    raw_reviews = best.get("reviewCount") or best.get("review_count") or best.get("comment_count")
+                    review_count = int(raw_reviews) if raw_reviews else 0
+                    bookmark_count = int(best.get("rating_count") or 0)
                     
                     if place_id:
-                        # 평점은 '실제로 받아낸 경우에만' 싣는다.
-                        # 예전에는 실패 시 4.2를 채워 넣었는데, lookup 엔드포인트가
-                        # {"code":-40400}로 응답하는 현재 상태에서는 전 스팟이 예외 없이
-                        # 4.2가 되어 (a) 점수 축의 변별력이 0이 되고
-                        # (b) 이메일 리포트에 존재하지 않는 ★4.2 배지가 찍혔다.
-                        # 모르면 비워 두는 편이 낫다.
                         place = {
                             "url": f"https://place.map.kakao.com/{place_id}",
                         }
                         if rating > 0:
-                            place["rating"] = rating
+                            place["rating"] = round(rating, 2)
                         if review_count > 0:
                             place["review_count"] = review_count
+                        if bookmark_count > 0:
+                            place["bookmark_count"] = bookmark_count
                         return place
     except Exception:
         pass
@@ -58,3 +58,4 @@ def search_kakaomap_place(spot_name: str, address_or_area: str = "") -> dict | N
     return {
         "url": f"https://map.kakao.com/link/search/{urllib.parse.quote(clean_name)}",
     }
+

@@ -134,7 +134,12 @@ def run_social_enrichment(supabase_url: str, service_key: str, batch_size: int =
             with urllib.request.urlopen(patch_req, timeout=5) as p_res:
                 if p_res.status in (200, 204):
                     views_info = f"유튜브 {yt_data.get('views', 0):,}회" if yt_data else "유튜브 없음"
-                    kakao_info = f"카카오 {kakao_data.get('rating', 0)}점" if kakao_data else "카카오 없음"
+                    k_rating = kakao_data.get('rating') if kakao_data else None
+                    k_rev = kakao_data.get('review_count', 0) if kakao_data else 0
+                    if k_rating and k_rating > 0:
+                        kakao_info = f"카카오 ★{k_rating}점({k_rev:,}리뷰)"
+                    else:
+                        kakao_info = "카카오 평점없음"
                     print(f"✅ 완료! (Score: {hot_score} | {views_info} | {kakao_info})")
                     enriched_count += 1
                 else:
