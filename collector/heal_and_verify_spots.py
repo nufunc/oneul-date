@@ -28,6 +28,8 @@ KNOWN_CLOSED_KEYWORDS = [
     '비어바나 문래',
     '문래 비어바나',
     '비어바나 문래점',
+    'VR스퀘어 홍대본점',
+    '콰트로박스',
 ]
 
 NON_DATE_FACILITY_PATTERNS = [
@@ -37,7 +39,61 @@ NON_DATE_FACILITY_PATTERNS = [
     r'(빨래방|코인워시|세탁소)',
     r'(정비소|카센터|주유소|폐차장)',
     r'(철물점|인력파견|직업소개|시공업체)',
+    r'웰빙스파',
 ]
+
+# 1-1. AI 가공 상호명 판별 패턴 (실존 매장이 아닌 마케팅 문구/가공 이름 감지)
+AI_FABRICATED_PATTERNS = [
+    # 숫자+단위를 포함한 과장 수식 (80m 단애, 35m 인피니티, 해발 850m 등)
+    r'\d+m\s+(단애|인피니티|절벽|암벽)',
+    # 럭셔리/프라이빗 + 시설 조합의 가공 상호
+    r'(프라이빗|럭셔리|인피니티|온수)\s+(아쿠아|풀빌라|빌라|온실|파빌리온|카바나)',
+    # 머드/생태/숲골/숲속 + 롯지/샬레/글램핑 조합
+    r'(머드|생태|숲골|숲속)\s+(롯지|샬레|글램핑|스테이)',
+    # 실존 지명 + 6개 이상 단어의 과도한 수식 구문
+    r'^.+\s+(릿지|캐즘|델리지아|파빌리온|인피니티)\s+',
+    # 해안/절벽/암벽 + 풀빌라/스테이 조합
+    r'(해안|절벽|암벽)\s+\d+m\s+(인피니티|온수|풀빌라)',
+    # '점박이물범' 같은 동물 이름 + 시설 조합
+    r'(점박이물범|수달|두루미|백로)\s+(머드|생태|체험|롯지)',
+    # 블로그/마케팅 식단 및 코스형 제목 (예: 24첩 등)
+    r'\d+첩\b',
+]
+
+def is_dummy_or_closed_spot(spot: Dict[str, Any]) -> Tuple[bool, str]:
+    name = (spot.get("name") or "").strip()
+    if not name:
+        return True, "빈 상호명"
+    
+    # 1. 폐업 매장
+    for kw in KNOWN_CLOSED_KEYWORDS:
+        if kw in name:
+            return True, f"폐업 매장 감지: {kw}"
+            
+    # 2. 비데이트 시설
+    for pat in NON_DATE_FACILITY_PATTERNS:
+        if re.search(pat, name):
+            return True, f"비데이트 시설 감지: {name}"
+
+    # 3. 마크다운 기사/더미 패턴
+    for pat in DUMMY_NAME_PATTERNS:
+        if re.search(pat, name):
+            return True, f"기사/더미 패턴 감지: {name}"
+
+    # 4. 3개 이상의 광역 지자체가 · 나 / 로 연결된 코스 모음 라벨
+    if len(re.findall(r'[·/]', name)) >= 3 and any(w in name for w in ['코스', '스테이', '투어', '모음', '스파']):
+        return True, f"광역 지자체 나열 라벨: {name}"
+
+    # 5. 지나치게 긴 텍스트 (40자 초과 상호명은 매장명이 아닌 마케팅 문장)
+    if len(name) > 40:
+        return True, f"비정상적으로 긴 이름(40자 초과): {name[:30]}..."
+
+    # 6. AI 가공 상호명 판별
+    for pat in AI_FABRICATED_PATTERNS:
+        if re.search(pat, name, re.I):
+            return True, f"AI 가공 상호명 감지: {name}"
+
+    return False, ""
 
 # 2. 오염된 카테고리(주변 상가 오인식) 목록
 POLLUTED_CATEGORIES = {
@@ -82,41 +138,27 @@ KEYWORD_RULES = [
     ('호텔·감성숙소', r'(호텔|리조트|펜션|글램핑|카라반|풀빌라|스테이|료칸)'),
 ]
 
-def is_dummy_or_closed_spot(spot: Dict[str, Any]) -> Tuple[bool, str]:
-    name = (spot.get("name") or "").strip()
-    if not name:
-        return True, "빈 상호명"
-    
-    # 1. 폐업 매장
-    for kw in KNOWN_CLOSED_KEYWORDS:
-        if kw in name:
-            return True, f"폐업 매장 감지: {kw}"
-            
-    # 2. 비데이트 시설
-    for pat in NON_DATE_FACILITY_PATTERNS:
-        if re.search(pat, name):
-            return True, f"비데이트 시설 감지: {name}"
 
-    # 3. 마크다운 기사/더미 패턴
-    for pat in DUMMY_NAME_PATTERNS:
-        if re.search(pat, name):
-            return True, f"기사/더미 패턴 감지: {name}"
-
-    # 4. 3개 이상의 광역 지자체가 · 나 / 로 연결된 코스 모음 라벨
-    if len(re.findall(r'[·/]', name)) >= 3 and any(w in name for w in ['코스', '스테이', '투어', '모음', '스파']):
-        return True, f"광역 지자체 나열 라벨: {name}"
-
-    # 5. 지나치게 긴 텍스트 (40자 초과 상호명은 매장명이 아닌 마케팅 문장)
-    if len(name) > 40:
-        return True, f"비정상적으로 긴 이름(40자 초과): {name[:30]}..."
-
-    return False, ""
 
 def clean_spot_name(name: str) -> str:
-    """복합 & 기호 및 중복 지명 노이즈를 제거하여 네이버 지도 검색 100% 매칭 상호명으로 정제"""
+    """복합 & 기호, 마케팅 패키지명, 중복 지명 노이즈를 제거하여 지도 검색 100% 매칭 상호명으로 정제"""
     clean = (name or "").strip()
     
-    # 기호 및 괄호 분리 (첫 번째 주 상호명 유지)
+    # 1. 괄호 제거
+    clean = re.sub(r'\[[^\]]*\]|\([^)]*\)|（[^）]*）|【[^】]*】', '', clean).strip()
+
+    # 2. 화살표/경로 표기 분리 (➔, →, ~)
+    if re.search(r'[➔→~]', clean):
+        arr_parts = re.split(r'[➔→~]', clean)
+        if len(arr_parts[0].strip()) >= 2:
+            clean = arr_parts[0].strip()
+
+    # 3. em-dash / en-dash 분리 ( — , – )
+    if re.search(r'\s+[—–]\s+', clean):
+        dash_parts = re.split(r'\s+[—–]\s+', clean)
+        clean = dash_parts[0].strip()
+
+    # 4. 기호 분리 (&, /, -)
     if ' & ' in clean:
         parts = clean.split(' & ')
         if len(parts[0].strip()) >= 2:
@@ -128,6 +170,17 @@ def clean_spot_name(name: str) -> str:
     elif ' - ' in clean:
         parts = clean.split(' - ')
         clean = parts[0].strip()
+
+    # 5. 마케팅 수식어 및 패키지명 다이어트
+    desc_pat = (
+        r'\s+(글래스하우스|프라이빗|온실|파빌리온|럭셔리\s*카바나|카바나|정상\s*전망길|전망길|한옥스테이|'
+        r'솔숲\s*테라스|피제리아|야장\s*골목|두피\s*라운지|심레이싱\s*라운지|분재\s*갤러리|티하우스|파인다이닝|'
+        r'도예\s*스튜디오|아쿠아\s*빌라|샬레|롯지|원데이클래스|원데이\s*클래스|본점|직영점).*$'
+    )
+    clean = re.sub(desc_pat, '', clean, flags=re.I).strip()
+
+    # 6. 후미 지점/지역 중복 제거
+    clean = re.sub(r'\s+(서촌|북촌|홍대본점|일산본점|산본|청담본점)$', '', clean).strip()
         
     # '비어바나 문래 서울 문래' 같은 지명 중복 제거
     clean = re.sub(r'\s+서울\s+문래$', '', clean)
@@ -237,9 +290,96 @@ def heal_all_spots(spots: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], D
         
     return healed_list, stats
 
+
+def verify_spot_existence_kakao(name: str, address: str = "") -> bool:
+    """카카오맵 검색으로 스팟 실존 여부를 확인 (True=실존, False=미발견)"""
+    import urllib.request
+    import urllib.parse
+    import time
+
+    # 상호명 정제 (괄호/특수기호 제거)
+    clean = re.sub(r'\[[^\]]*\]|\([^)]*\)|（[^）]*）|【[^】]*】', '', name).strip()
+    clean = re.sub(r'[^\w\s가-힣0-9.-]', ' ', clean)
+    clean = re.sub(r'\s+', ' ', clean).strip()
+
+    # 마케팅 수식어 제거
+    clean = re.sub(
+        r'\s+(프라이빗|럭셔리|인피니티|VIP|VVIP|파인다이닝|한옥스테이|풀빌라|'
+        r'아쿠아\s*빌라|샬레|롯지|온실|파빌리온|카바나|글래스하우스|피제리아|'
+        r'아틀리에|라운지|테라스|갤러리|본점|직영점|다이닝|루프탑|전망길|야장\s*골목).*$',
+        '', clean, flags=re.I
+    ).strip()
+
+    if not clean or len(clean) < 2:
+        return False
+
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Referer': 'https://map.kakao.com/',
+    }
+    url = f"https://search.map.kakao.com/mapsearch/map.daum?q={urllib.parse.quote(clean)}"
+    req = urllib.request.Request(url, headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=4) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+            places = data.get('place', []) or []
+            return len(places) > 0
+    except Exception:
+        return True  # 네트워크 에러 시 안전하게 실존으로 간주
+
+def verify_and_deactivate(spots: List[Dict[str, Any]], batch_size: int = 500) -> Tuple[List[Dict[str, Any]], int]:
+    """활성 스팟 전수를 카카오맵으로 실존 검증하여 미발견 스팟을 is_closed=True 처리"""
+    import time
+    deactivated = 0
+    active = [(i, s) for i, s in enumerate(spots) if not s.get('is_closed')]
+    total = len(active)
+    logger.info(f"카카오맵 실존 검증 시작: {total}개 활성 스팟 대상")
+
+    for idx, (orig_idx, s) in enumerate(active):
+        if idx >= batch_size:
+            logger.info(f"배치 한도({batch_size}개) 도달, 중단")
+            break
+
+        name = s.get('name', '')
+        addr = s.get('address') or s.get('location') or ''
+        exists = verify_spot_existence_kakao(name, addr)
+
+        if not exists:
+            spots[orig_idx]['is_closed'] = True
+            deactivated += 1
+            if deactivated % 10 == 0:
+                logger.info(f"  [{idx+1}/{min(total, batch_size)}] 비활성화 누적: {deactivated}개")
+
+        if idx % 50 == 0 and idx > 0:
+            logger.info(f"  진행: {idx}/{min(total, batch_size)}")
+        time.sleep(0.05)
+
+    logger.info(f"실존 검증 완료: {deactivated}개 비활성화")
+    return spots, deactivated
+
+
 if __name__ == "__main__":
     import os
+    import sys
+
     target_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "public", "data", "spots.json"))
+
+    # --verify 모드: 카카오맵 실존 검증 + 비활성화
+    if '--verify' in sys.argv:
+        batch_arg = 500
+        for arg in sys.argv:
+            if arg.startswith('--batch='):
+                batch_arg = int(arg.split('=')[1])
+        logger.info(f"실존 검증 모드 실행 (batch={batch_arg}): {target_path}")
+        with open(target_path, "r", encoding="utf-8") as f:
+            spots_data = json.load(f)
+        spots_data, deact_count = verify_and_deactivate(spots_data, batch_size=batch_arg)
+        with open(target_path, "w", encoding="utf-8") as f:
+            json.dump(spots_data, f, ensure_ascii=False, indent=2)
+        logger.info(f"실존 검증 완료: {deact_count}개 비활성화, spots.json 저장 완료")
+        sys.exit(0)
+
+    # 기본 모드: 보정 파이프라인
     logger.info(f"스팟 데이터 보정 시작: {target_path}")
     with open(target_path, "r", encoding="utf-8") as f:
         spots_data = json.load(f)
@@ -252,3 +392,4 @@ if __name__ == "__main__":
     with open(target_path, "w", encoding="utf-8") as f:
         json.dump(healed, f, ensure_ascii=False, indent=2)
     logger.info("public/data/spots.json 갱신 완료!")
+

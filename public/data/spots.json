@@ -163,7 +163,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -228,7 +228,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -1012,7 +1012,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -1604,7 +1604,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -2381,7 +2381,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -2633,7 +2633,7 @@
       "type": "youtube"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -2886,7 +2886,7 @@
       "type": "youtube"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -2949,7 +2949,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -3075,7 +3075,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -3137,7 +3137,7 @@
       "type": "youtube"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -3199,7 +3199,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -3262,7 +3262,7 @@
       "type": "youtube"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -3388,7 +3388,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -3579,7 +3579,7 @@
       "type": "youtube"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -3642,7 +3642,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -4179,7 +4179,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -4242,7 +4242,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -4369,7 +4369,7 @@
       "type": "youtube"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -4432,7 +4432,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -4621,7 +4621,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -4936,7 +4936,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -5125,7 +5125,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -5187,7 +5187,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -5249,7 +5249,7 @@
       "type": "youtube"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -5499,7 +5499,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -5827,7 +5827,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -5889,7 +5889,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -6014,7 +6014,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -6077,7 +6077,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -6202,7 +6202,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -6265,7 +6265,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -6391,7 +6391,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -6454,7 +6454,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -6643,7 +6643,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -6961,7 +6961,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -7158,7 +7158,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -7935,7 +7935,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -9795,7 +9795,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -10828,7 +10828,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -11678,7 +11678,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -11805,7 +11805,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -11939,7 +11939,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -12129,7 +12129,7 @@
       "type": "youtube"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -12263,7 +12263,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -12326,7 +12326,7 @@
       "type": "youtube"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -12460,7 +12460,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -12956,7 +12956,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -13150,7 +13150,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -14088,7 +14088,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -14724,7 +14724,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -14786,7 +14786,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -14972,7 +14972,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -15034,7 +15034,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -15220,7 +15220,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -15858,7 +15858,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -16252,7 +16252,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -16315,7 +16315,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -16505,7 +16505,7 @@
       "type": "youtube"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -16629,7 +16629,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -18309,7 +18309,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -18703,7 +18703,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -19153,7 +19153,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -19216,7 +19216,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -19549,7 +19549,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -20124,7 +20124,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -20806,7 +20806,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -20930,7 +20930,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -20992,7 +20992,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -21186,7 +21186,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -21248,7 +21248,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -21310,7 +21310,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -21636,7 +21636,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -22280,7 +22280,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -22404,7 +22404,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -22466,7 +22466,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -22528,7 +22528,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -23520,7 +23520,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -23846,7 +23846,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -24415,7 +24415,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -24478,7 +24478,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -25250,7 +25250,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -25569,7 +25569,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -25698,7 +25698,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -26525,7 +26525,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -26589,7 +26589,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -27676,7 +27676,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -27804,7 +27804,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -28117,7 +28117,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -28177,7 +28177,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -28503,7 +28503,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -28630,7 +28630,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -30376,7 +30376,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -31006,7 +31006,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -31324,7 +31324,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -31709,7 +31709,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -31773,7 +31773,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -31836,7 +31836,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -32224,7 +32224,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -32664,7 +32664,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -33296,7 +33296,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -33486,7 +33486,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -33614,7 +33614,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -34448,7 +34448,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -34700,7 +34700,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -35145,7 +35145,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -35723,7 +35723,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -35914,7 +35914,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -36041,7 +36041,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -36803,7 +36803,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -37190,7 +37190,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -37444,7 +37444,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -37714,7 +37714,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -37841,7 +37841,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -38175,7 +38175,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -38301,7 +38301,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -38498,7 +38498,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -38627,7 +38627,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -38825,7 +38825,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -40487,7 +40487,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -40552,7 +40552,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -41015,7 +41015,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -42113,7 +42113,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -42626,7 +42626,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -42753,7 +42753,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -42879,7 +42879,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -42942,7 +42942,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -43397,7 +43397,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -43648,7 +43648,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -43773,7 +43773,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -44864,7 +44864,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -44992,7 +44992,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -45307,7 +45307,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -45370,7 +45370,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -45808,7 +45808,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -45998,7 +45998,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -46061,7 +46061,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -46124,7 +46124,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -46448,7 +46448,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -46637,7 +46637,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -47139,7 +47139,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -47202,7 +47202,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -48292,7 +48292,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -48544,7 +48544,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -48672,7 +48672,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -48735,7 +48735,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -48860,7 +48860,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -49368,7 +49368,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -49431,7 +49431,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -49496,7 +49496,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -49624,7 +49624,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -49760,7 +49760,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -49887,7 +49887,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -50013,7 +50013,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -50140,7 +50140,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -50266,7 +50266,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -50329,7 +50329,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -50393,7 +50393,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -50456,7 +50456,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -50582,7 +50582,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -51357,7 +51357,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -51546,7 +51546,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -51610,7 +51610,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -51674,7 +51674,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -51865,7 +51865,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -51992,7 +51992,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -52245,7 +52245,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -52372,7 +52372,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -52436,7 +52436,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -52562,7 +52562,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -52815,7 +52815,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -52878,7 +52878,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -52949,7 +52949,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -53136,7 +53136,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -53262,7 +53262,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -53387,7 +53387,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -53451,7 +53451,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -53515,7 +53515,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -53705,7 +53705,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -53960,7 +53960,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -54024,7 +54024,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -54087,7 +54087,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -54150,7 +54150,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -54340,7 +54340,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -54404,7 +54404,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -54468,7 +54468,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -54533,7 +54533,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -54596,7 +54596,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -54658,7 +54658,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -54722,7 +54722,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -54785,7 +54785,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -54848,7 +54848,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -55047,7 +55047,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -55804,7 +55804,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -55867,7 +55867,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -56114,7 +56114,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -56177,7 +56177,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -56239,7 +56239,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -56552,7 +56552,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -56746,7 +56746,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -56870,7 +56870,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -56995,7 +56995,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -57306,7 +57306,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -57368,7 +57368,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -57745,7 +57745,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -57809,7 +57809,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -57934,7 +57934,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -58247,7 +58247,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -58435,7 +58435,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -58748,7 +58748,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -58876,7 +58876,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -59123,7 +59123,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -59249,7 +59249,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -59374,7 +59374,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -59436,7 +59436,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -59563,7 +59563,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -59623,7 +59623,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -60007,7 +60007,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -60141,7 +60141,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -60274,7 +60274,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -60336,7 +60336,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -60470,7 +60470,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -61364,7 +61364,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -61552,7 +61552,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -62067,7 +62067,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -62460,7 +62460,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -62650,7 +62650,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -62840,7 +62840,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -62974,7 +62974,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -63352,7 +63352,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -63480,7 +63480,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -63544,7 +63544,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -63608,7 +63608,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -63795,7 +63795,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -64048,7 +64048,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -64111,7 +64111,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -64489,7 +64489,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -64549,7 +64549,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -64612,7 +64612,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -64675,7 +64675,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -64865,7 +64865,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -65314,7 +65314,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -65442,7 +65442,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -65882,7 +65882,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -66518,7 +66518,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -66643,7 +66643,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -66706,7 +66706,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -66978,7 +66978,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -67803,7 +67803,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -67865,7 +67865,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -67990,7 +67990,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -68765,7 +68765,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -69283,7 +69283,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -69731,7 +69731,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -69793,7 +69793,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -70195,7 +70195,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -70643,7 +70643,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -71831,7 +71831,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -72277,7 +72277,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -72931,7 +72931,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -73054,7 +73054,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -73571,7 +73571,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -73833,7 +73833,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -73896,7 +73896,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -74148,7 +74148,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -74541,7 +74541,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -74729,7 +74729,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -74933,7 +74933,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -75782,7 +75782,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -75907,7 +75907,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -76040,7 +76040,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -76355,7 +76355,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -76605,7 +76605,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -76668,7 +76668,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -76731,7 +76731,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -76793,7 +76793,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -77669,7 +77669,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -80191,7 +80191,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -80458,7 +80458,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -82324,7 +82324,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -83283,7 +83283,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -83877,7 +83877,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -84259,7 +84259,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -84978,7 +84978,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -85575,7 +85575,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -87196,7 +87196,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -87581,7 +87581,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -88610,7 +88610,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -88859,7 +88859,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -89175,7 +89175,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -89372,7 +89372,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -92444,7 +92444,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -92506,7 +92506,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -93675,7 +93675,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -93941,7 +93941,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -94324,7 +94324,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -95422,7 +95422,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -95547,7 +95547,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -96891,7 +96891,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -97649,7 +97649,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -98097,7 +98097,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -98160,7 +98160,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -98286,7 +98286,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -98608,7 +98608,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -98733,7 +98733,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -99481,7 +99481,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -99930,7 +99930,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -99993,7 +99993,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -100569,7 +100569,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -100767,7 +100767,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -101534,7 +101534,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -101786,7 +101786,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -101975,7 +101975,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -102037,7 +102037,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -102807,7 +102807,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -102871,7 +102871,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -103329,7 +103329,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -103452,7 +103452,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -103516,7 +103516,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -104855,7 +104855,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -104920,7 +104920,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -104984,7 +104984,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -105295,7 +105295,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -105420,7 +105420,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -105670,7 +105670,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -105732,7 +105732,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -105859,7 +105859,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -105984,7 +105984,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -106554,7 +106554,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -106866,7 +106866,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -106994,7 +106994,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -107054,7 +107054,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -107572,7 +107572,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -107757,7 +107757,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -108133,7 +108133,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -108259,7 +108259,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -108579,7 +108579,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -108961,7 +108961,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -109215,7 +109215,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -109278,7 +109278,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -109805,7 +109805,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -109931,7 +109931,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -109993,7 +109993,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -110055,7 +110055,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -110444,7 +110444,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -110571,7 +110571,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -111017,7 +111017,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -111080,7 +111080,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -111528,7 +111528,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -112097,7 +112097,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -112159,7 +112159,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -112223,7 +112223,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -112287,7 +112287,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -112350,7 +112350,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -112414,7 +112414,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -112542,7 +112542,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -112606,7 +112606,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -112796,7 +112796,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -112860,7 +112860,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -112987,7 +112987,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -113051,7 +113051,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -113114,7 +113114,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -113179,7 +113179,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -113243,7 +113243,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -113307,7 +113307,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -113371,7 +113371,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -113436,7 +113436,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -113500,7 +113500,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -113627,7 +113627,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -113691,7 +113691,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -113753,7 +113753,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -113815,7 +113815,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -113877,7 +113877,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -113941,7 +113941,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -114005,7 +114005,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -114069,7 +114069,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -114133,7 +114133,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -114195,7 +114195,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -114258,7 +114258,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -114387,7 +114387,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -114450,7 +114450,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -114513,7 +114513,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -114640,7 +114640,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -114703,7 +114703,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -114891,7 +114891,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -114953,7 +114953,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -115013,7 +115013,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -115076,7 +115076,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -115196,7 +115196,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -115321,7 +115321,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -115381,7 +115381,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -115443,7 +115443,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -115505,7 +115505,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -115568,7 +115568,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -115631,7 +115631,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -115694,7 +115694,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -115756,7 +115756,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -115880,7 +115880,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -115940,7 +115940,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -116065,7 +116065,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -116251,7 +116251,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -116377,7 +116377,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -116683,7 +116683,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -116807,7 +116807,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -116867,7 +116867,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -116930,7 +116930,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -116990,7 +116990,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -117050,7 +117050,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -117566,7 +117566,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -118213,7 +118213,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -118275,7 +118275,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -119969,7 +119969,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -120094,7 +120094,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -120216,7 +120216,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -120729,7 +120729,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -121125,7 +121125,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -121323,7 +121323,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -121386,7 +121386,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -123170,7 +123170,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -123893,7 +123893,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -123956,7 +123956,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -124266,7 +124266,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -125775,7 +125775,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -125903,7 +125903,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -125967,7 +125967,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -126102,7 +126102,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -126418,7 +126418,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -126481,7 +126481,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -126796,7 +126796,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -126861,7 +126861,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -126995,7 +126995,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -127256,7 +127256,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -127321,7 +127321,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -127641,7 +127641,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -127767,7 +127767,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -127829,7 +127829,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -128080,7 +128080,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -128143,7 +128143,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -128271,7 +128271,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -129112,7 +129112,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -129239,7 +129239,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -129679,7 +129679,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -129804,7 +129804,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -129993,7 +129993,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -130121,7 +130121,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -130249,7 +130249,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -130312,7 +130312,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -130505,7 +130505,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -130567,7 +130567,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -130630,7 +130630,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -130755,7 +130755,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -130818,7 +130818,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -130883,7 +130883,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -131009,7 +131009,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -131073,7 +131073,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -132240,7 +132240,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -132374,7 +132374,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -132498,7 +132498,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -132558,7 +132558,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -132621,7 +132621,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -132683,7 +132683,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -132745,7 +132745,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -132807,7 +132807,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -132869,7 +132869,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -132931,7 +132931,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -133057,7 +133057,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -133119,7 +133119,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -133182,7 +133182,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -133245,7 +133245,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -133307,7 +133307,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -133369,7 +133369,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -133431,7 +133431,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -133494,7 +133494,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -133554,7 +133554,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -133617,7 +133617,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -133681,7 +133681,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -133744,7 +133744,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -133806,7 +133806,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -133868,7 +133868,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -133930,7 +133930,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -133992,7 +133992,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -134055,7 +134055,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -134115,7 +134115,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -134178,7 +134178,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -134240,7 +134240,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -134300,7 +134300,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -134363,7 +134363,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -134423,7 +134423,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -134486,7 +134486,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -141714,7 +141714,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -253300,7 +253300,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -255926,7 +255926,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -272505,7 +272505,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -273153,7 +273153,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -336537,7 +336537,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -356838,7 +356838,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -363538,7 +363538,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -384627,7 +384627,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -401740,7 +401740,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -407268,7 +407268,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -407323,7 +407323,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -407487,7 +407487,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -407597,7 +407597,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -407763,7 +407763,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -407927,7 +407927,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -407983,7 +407983,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -413623,7 +413623,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -422730,7 +422730,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -422783,7 +422783,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -423325,7 +423325,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -424367,7 +424367,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -427710,7 +427710,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -435018,7 +435018,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -438963,7 +438963,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -443079,7 +443079,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -444185,7 +444185,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -444242,7 +444242,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -444463,7 +444463,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -444687,7 +444687,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -444799,7 +444799,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -445023,7 +445023,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -447015,7 +447015,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -448904,7 +448904,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -450459,7 +450459,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -452470,7 +452470,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -452803,7 +452803,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -452915,7 +452915,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -466858,7 +466858,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -467195,7 +467195,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -467417,7 +467417,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -467586,7 +467586,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -467642,7 +467642,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -471195,7 +471195,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -471631,7 +471631,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -471952,7 +471952,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -472164,7 +472164,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -491546,7 +491546,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -491877,7 +491877,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -492258,7 +492258,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -501979,7 +501979,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -502034,7 +502034,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -502090,7 +502090,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -502145,7 +502145,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -502200,7 +502200,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -502312,7 +502312,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -502366,7 +502366,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -502420,7 +502420,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -502475,7 +502475,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -502531,7 +502531,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -502586,7 +502586,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -502641,7 +502641,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -502696,7 +502696,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -502751,7 +502751,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -502807,7 +502807,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -502863,7 +502863,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -502919,7 +502919,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -503030,7 +503030,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -503252,7 +503252,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -503306,7 +503306,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -503522,7 +503522,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -503578,7 +503578,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -503688,7 +503688,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -503742,7 +503742,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -503905,7 +503905,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -504012,7 +504012,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -504120,7 +504120,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -504229,7 +504229,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -504284,7 +504284,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -504566,7 +504566,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -504735,7 +504735,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -504902,7 +504902,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -505015,7 +505015,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -505128,7 +505128,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -505241,7 +505241,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -505408,7 +505408,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -505575,7 +505575,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -510592,7 +510592,7 @@
       "type": "web"
     },
     "verified": true,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -514487,7 +514487,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -516205,7 +516205,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -521400,7 +521400,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -521902,7 +521902,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -525432,7 +525432,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -525544,7 +525544,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -535296,7 +535296,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -536312,7 +536312,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -536367,7 +536367,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -536424,7 +536424,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -536480,7 +536480,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -536645,7 +536645,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -536756,7 +536756,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -536814,7 +536814,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -536868,7 +536868,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -536922,7 +536922,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -536976,7 +536976,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -537031,7 +537031,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -537086,7 +537086,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -537141,7 +537141,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -537196,7 +537196,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -537253,7 +537253,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -537309,7 +537309,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -537365,7 +537365,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -541061,7 +541061,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -541282,7 +541282,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -541392,7 +541392,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -541502,7 +541502,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -541557,7 +541557,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -541666,7 +541666,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -541721,7 +541721,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -541777,7 +541777,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -541943,7 +541943,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -542053,7 +542053,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -542109,7 +542109,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -543775,7 +543775,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -549319,7 +549319,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -549431,7 +549431,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -549543,7 +549543,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -549598,7 +549598,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -549707,7 +549707,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -549872,7 +549872,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -549927,7 +549927,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -550093,7 +550093,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -550149,7 +550149,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -550203,7 +550203,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -562136,7 +562136,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -562528,7 +562528,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],
@@ -567207,7 +567207,7 @@
       "type": "web"
     },
     "verified": false,
-    "is_closed": false,
+    "is_closed": true,
     "business_hours": {},
     "break_time": {},
     "closed_days": [],

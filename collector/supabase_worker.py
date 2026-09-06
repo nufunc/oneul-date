@@ -60,6 +60,18 @@ HEADERS = {
 
 def clean_keyword(name: str, location: str = "", address: str = "", region: str = "") -> str:
     clean = re.sub(r'\(.*?\)|\[.*?\]|（.*?）|【.*?】', '', name)
+    
+    # 화살표/경로 분리 (➔, →, ~)
+    if re.search(r'[➔→~]', clean):
+        arr_parts = re.split(r'[➔→~]', clean)
+        if len(arr_parts[0].strip()) >= 2:
+            clean = arr_parts[0].strip()
+
+    # em-dash / en-dash 분리 ( — , – )
+    if re.search(r'\s+[—–]\s+', clean):
+        dash_parts = re.split(r'\s+[—–]\s+', clean)
+        clean = dash_parts[0].strip()
+
     if ':' in clean:
         parts = clean.split(':')
         clean = parts[1].strip() if len(parts) > 1 and parts[1].strip() else parts[0].strip()
@@ -69,10 +81,19 @@ def clean_keyword(name: str, location: str = "", address: str = "", region: str 
     if re.search(r'&|\+|↔|&amp;|\s및\s|\s/\s', clean):
         clean = re.split(r'&|\+|↔|&amp;|\s및\s|\s/\s', clean)[0].strip()
 
-    descriptor_regex = r'\s+(VIP|VVIP|프리미엄|명품|수제|원데이클래스|원데이\s*클래스|클래스|아틀리에|갤러리|스튜디오|살롱|공방|옻칠|나전칠기|도자기|가죽공방|도예공방|체험장|체험관|투어|산책로|산책코스|야시장|먹거리|거리|골목|본점|직영점|요트|보트|샴페인|라운지|바베큐|바베큐장|테라스|그릴|다이닝|루프탑|루프탑가든|디너|런치|오마카세|코스요리|패키지|렌탈|이용권|피크닉|캠크닉|캠핑|글램핑|스파|사우나|감성|칵테일|와인|위스키|주점|호프|데이트|핫플|분위기좋은|분위기|추천|맛집|셀프사진관|놀거리|커피디저트).*$'
+    descriptor_regex = (
+        r'\s+(VIP|VVIP|프리미엄|명품|수제|원데이클래스|원데이\s*클래스|클래스|아틀리에|가죽\s*아틀리에|도예\s*아틀리에|'
+        r'갤러리|스튜디오|살롱|공방|옻칠|나전칠기|도자기|가죽공방|도예공방|체험장|체험관|투어|산책로|산책코스|'
+        r'야시장|먹거리|거리|골목|본점|직영점|요트|보트|샴페인|라운지|바베큐|바베큐장|테라스|그릴|다이닝|'
+        r'루프탑|루프탑가든|디너|런치|오마카세|코스요리|패키지|렌탈|이용권|피크닉|캠크닉|캠핑|글램핑|스파|'
+        r'사우나|감성|칵테일|와인|위스키|주점|호프|데이트|핫플|분위기좋은|분위기|추천|맛집|셀프사진관|'
+        r'놀거리|커피디저트|글래스하우스|프라이빗|온실|파빌리온|럭셔리\s*카바나|카바나|한옥스테이|피제리아|'
+        r'파인다이닝|두피\s*라운지|심레이싱\s*라운지|분재\s*갤러리|티하우스|도예\s*스튜디오|인피니티|풀빌라|'
+        r'아쿠아\s*빌라|샬레|롯지|전망길|야장\s*골목).*$'
+    )
     clean = re.sub(descriptor_regex, '', clean, flags=re.IGNORECASE).strip()
+    clean = re.sub(r'\s+(서촌|북촌|홍대본점|일산본점|산본|청담본점)$', '', clean).strip()
     clean = re.sub(r'\s+(서울|경기|인천|강원|충북|충남|전북|전남|경북|경남|제주|부산|대구|광주|대전|울산)\s+[가-힣0-9\s]+(?:구|동|읍|면|로|길)$', '', clean).strip()
-    clean = re.sub(r'\s+—\s+.*$', '', clean).strip()
     clean = re.sub(r'[^\w\s가-힣0-9.-]', ' ', clean)
     clean = re.sub(r'\s+', ' ', clean).strip()
 

@@ -1510,6 +1510,20 @@ function mapQuery(spot: Spot): string {
   }
   if (!cleanName) cleanName = rawName;
 
+  // 3-1. 화살표/경로 표기 분리 (➔, →, ~) — 코스 나열형에서 첫 목적지만 추출
+  if (/[➔→~]/.test(cleanName)) {
+    const arrParts = cleanName.split(/[➔→~]/);
+    if (arrParts[0].trim().length >= 2) {
+      cleanName = arrParts[0].trim();
+    }
+  }
+
+  // 3-2. em-dash / en-dash 분리 ( — , – )
+  if (/\s+[—–]\s+/.test(cleanName)) {
+    const dashParts = cleanName.split(/\s+[—–]\s+/);
+    cleanName = dashParts[0].trim();
+  }
+
   if (cleanName.includes(':')) {
     const parts = cleanName.split(':');
     const prefix = parts[0].trim();
@@ -1539,9 +1553,9 @@ function mapQuery(spot: Spot): string {
     }
   }
 
-  // 6. 긴 업종/체험/패키지/상품/SEO 키워드 다이어트
+  // 6. 긴 업종/체험/패키지/상품/SEO/마케팅 수식어 다이어트
   const descriptorRegex =
-    /\s+(VIP|VVIP|프리미엄|명품|수제|원데이클래스|원데이\s*클래스|클래스|아틀리에|갤러리|스튜디오|살롱|공방|옻칠|나전칠기|도자기|가죽공방|도예공방|체험장|체험관|투어|산책로|산책코스|야시장|먹거리|거리|골목|본점|직영점|요트|보트|샴페인|라운지|바베큐|바베큐장|테라스|그릴|다이닝|루프탑|루프탑가든|디너|런치|오마카세|코스요리|패키지|렌탈|이용권|피크닉|캠크닉|캠핑|글램핑|스파|사우나|감성|칵테일|와인|위스키|주점|호프|데이트|핫플|분위기좋은|분위기|추천|맛집|셀프사진관|놀거리|커피디저트).*$/i;
+    /\s+(VIP|VVIP|프리미엄|명품|수제|원데이클래스|원데이\s*클래스|클래스|아틀리에|가죽\s*아틀리에|도예\s*아틀리에|갤러리|스튜디오|살롱|공방|옻칠|나전칠기|도자기|가죽공방|도예공방|체험장|체험관|투어|산책로|산책코스|야시장|먹거리|거리|골목|본점|직영점|요트|보트|샴페인|라운지|바베큐|바베큐장|테라스|그릴|다이닝|루프탑|루프탑가든|디너|런치|오마카세|코스요리|패키지|렌탈|이용권|피크닉|캠크닉|캠핑|글램핑|스파|사우나|감성|칵테일|와인|위스키|주점|호프|데이트|핫플|분위기좋은|분위기|추천|맛집|셀프사진관|놀거리|커피디저트|글래스하우스|프라이빗|온실|파빌리온|럭셔리\s*카바나|카바나|한옥스테이|피제리아|파인다이닝|두피\s*라운지|심레이싱\s*라운지|분재\s*갤러리|티하우스|도예\s*스튜디오|인피니티|풀빌라|아쿠아\s*빌라|샬레|롯지|전망길|야장\s*골목).*$/i;
   if (descriptorRegex.test(cleanName)) {
     const trimmed = cleanName.replace(descriptorRegex, '').trim();
     if (trimmed.length >= 2) {
@@ -1553,6 +1567,11 @@ function mapQuery(spot: Spot): string {
   cleanName = cleanName
     .replace(/[^\w\s가-힣0-9.-]/g, ' ')
     .replace(/\s+/g, ' ')
+    .trim();
+
+  // 7-1. 후미 지점/지역명 중복 제거 (예: '에디션드제주 서촌' → '에디션드제주', '아로마인드 북촌' → '아로마인드')
+  cleanName = cleanName
+    .replace(/\s+(서촌|북촌|홍대본점|일산본점|산본|청담본점)$/, '')
     .trim();
 
   // 8. 영문 상호 한글화 사전 매핑
@@ -1659,9 +1678,9 @@ function mapQuery(spot: Spot): string {
     }
   }
 
-  // 10-8. 일반명사/업종명 형태의 상호명인 경우 동/도로명 정밀 결합 (검색 결과 수백 개 발산 방지)
-  const GENERIC_NOUNS = ['요리', '다이닝', '식당', '카페', '커피', '베이커리', '바', '펍', '파스타', '스테이크', '브런치', '공방', '스튜디오', '글램핑', '펜션', '야장', '포차'];
-  const isGenericName = GENERIC_NOUNS.some((gn) => cleanName === gn || cleanName.includes(gn)) || cleanName.length <= 4;
+  // 10-8. 순수 일반명사/업종명 형태의 상호명인 경우에만 동/도로명 정밀 결합 (검색 결과 수백 개 발산 방지)
+  const PURE_GENERIC_NOUNS = ['요리', '다이닝', '식당', '카페', '커피', '베이커리', '바', '펍', '파스타', '스테이크', '브런치', '공방', '스튜디오', '글램핑', '펜션', '야장', '포차'];
+  const isGenericName = PURE_GENERIC_NOUNS.some((gn) => cleanName === gn) || (cleanName.length <= 2 && PURE_GENERIC_NOUNS.some((gn) => cleanName.includes(gn)));
 
   if (isGenericName && spot.address) {
     const dongRoadMatch = spot.address.match(/\s([가-힣0-9]+(?:동|읍|면|로[0-9]*길|[0-9]+길))(?=\s|$)/);

@@ -18,6 +18,7 @@ from category_filter import is_date_spot_category
 from area_seeds import generate_dynamic_queries, get_coverage_gap_areas
 from supabase_worker import is_polluted_header_name, derive_region_area
 from fix_spot_summaries import generate_curated_summary
+from heal_and_verify_spots import is_dummy_or_closed_spot
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -308,6 +309,10 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
             if len(raw_name) <= 2 or raw_name in ["서울", "경기", "인천", "강원", "충청", "충북", "충남", "영남", "경북", "경남", "호남", "전북", "전남", "제주", "부산", "대구", "울산", "광주", "대전", "세종"]:
                 continue
             if "권역" in raw_name or " / " in raw_name or is_polluted_header_name(raw_name):
+                continue
+            # AI 가공 상호명 / 더미 상호명 유입 원천 차단
+            is_dummy, dummy_reason = is_dummy_or_closed_spot({"name": raw_name})
+            if is_dummy:
                 continue
 
             # 2. 단일 배치(메모리) 내 중복 검사
