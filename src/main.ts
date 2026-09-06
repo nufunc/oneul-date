@@ -2266,7 +2266,7 @@ function requestUserGeolocation(showFeedback = false): void {
 const state: AppState = {
   mainMode: 'course',
   slots: getDefaultSlots(),
-  regions: ['SEOUL'],
+  regions: [],
   subZones: [],
   mood: 'ALL',
   searchQuery: '',
@@ -2283,7 +2283,7 @@ const state: AppState = {
   savedOpen: false,
   regionSheetOpen: false,
   moodSheetOpen: false,
-  activeRegionTab: 'SEOUL',
+  activeRegionTab: 'ALL',
 };
 
 let spotById = new Map<number, Spot>(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
@@ -2293,7 +2293,7 @@ function activeSlots(): SlotKey[] {
 }
 
 declare const __APP_VERSION__: string;
-const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.9.24';
+const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.9.25';
 
 function courseSpotIds(): number[] {
   if (!state.course) return [];
@@ -2710,6 +2710,97 @@ function getRegionSelectorLabel(): { title: string; subtitle: string; isSelected
   };
 }
 
+/**
+ * 1-Tap 퀵 지역 칩 바 HTML 렌더러
+ * 8대 권역 + 전국을 모달 없이 1-Tap으로 즉시 전환하고, 세부 동네 상태를 인라인으로 노출
+ */
+function renderQuickRegionChips(): string {
+  const isAll = state.regions.length === 0 && state.subZones.length === 0;
+  const hasSubZones = state.subZones.length > 0;
+
+  let subZoneLabel = '+ 세부 동네';
+  if (hasSubZones) {
+    const firstZone = POPULAR_ZONES.find((z) => z.key === state.subZones[0]);
+    if (firstZone) {
+      subZoneLabel =
+        state.subZones.length === 1
+          ? `📍 ${firstZone.label}`
+          : `📍 ${firstZone.label} 외 ${state.subZones.length - 1}`;
+    }
+  }
+
+  return `
+    <button class="quick-region-chip ${isAll ? 'is-active' : ''}" data-region-key="ALL" type="button" aria-label="전국 스팟 보기">
+      <span class="region-chip-emoji">🗺️</span>
+      <span class="region-chip-text">전국</span>
+    </button>
+    ${REGIONS.filter((r) => r.key !== 'ALL')
+      .map((r) => {
+        const isActive = !hasSubZones && state.regions.length === 1 && state.regions[0] === r.key;
+        return `
+          <button class="quick-region-chip ${isActive ? 'is-active' : ''}" data-region-key="${r.key}" type="button" aria-label="${escapeHtml(r.label)} 스팟 보기">
+            <span class="region-chip-text">${escapeHtml(r.label)}</span>
+          </button>
+        `;
+      })
+      .join('')}
+    <button class="quick-region-chip chip-subzone ${hasSubZones ? 'is-active is-subzone-selected' : ''}" data-action="open-detail-sheet" type="button" aria-haspopup="dialog" aria-label="세부 데이트존 선택">
+      <span class="region-chip-text">${escapeHtml(subZoneLabel)}</span>
+      ${
+        hasSubZones
+          ? `<span class="chip-clear-subzone" data-action="clear-subzone" title="세부 동네 해제" aria-label="세부 동네 해제">✕</span>`
+          : `<span class="chip-arrow" aria-hidden="true">▾</span>`
+      }
+    </button>
+  `;
+}
+
+/**
+ * 1-Tap 퀵 지역 칩 바 이벤트 바인딩
+ */
+function bindQuickRegionEvents(container: HTMLElement, onRegionChange: () => void): void {
+  // 1. 권역 칩 클릭 (ALL 또는 특정 권역 1-Tap 전환)
+  container.querySelectorAll<HTMLButtonElement>('.quick-region-chip[data-region-key]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const regKey = btn.dataset.regionKey || 'ALL';
+      if (regKey === 'ALL') {
+        state.regions = [];
+        state.subZones = [];
+        state.activeRegionTab = 'ALL';
+        ensureSpotsForRegions(['ALL']);
+      } else {
+        state.regions = [regKey];
+        state.subZones = [];
+        state.activeRegionTab = regKey;
+        ensureSpotsForRegions([regKey]);
+      }
+      onRegionChange();
+    });
+  });
+
+  // 2. 세부 동네 해제 (✕) 클릭
+  container.querySelectorAll<HTMLElement>('[data-action="clear-subzone"]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      state.subZones = [];
+      onRegionChange();
+    });
+  });
+
+  // 3. 세부 동네 바텀시트 열기 버튼 클릭
+  container.querySelectorAll<HTMLButtonElement>('.quick-region-chip[data-action="open-detail-sheet"]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).closest('[data-action="clear-subzone"]')) {
+        return;
+      }
+      state.regionSheetOpen = true;
+      state.activeRegionTab = state.regions[0] || 'SEOUL';
+      renderOverlay();
+    });
+  });
+}
+
 function renderConditions(): void {
   const area = document.getElementById('conditions-area');
   if (!area) return;
@@ -2719,7 +2810,7 @@ function renderConditions(): void {
   area.innerHTML = `
     <div class="conditions-card">
       <!-- 1. 통합 검색창 (스팟 탐색과 100% 동일) -->
-      <div class="search-container" style="margin-bottom: var(--space-3);">
+      <div class="search-container" style="margin-bottom: var(--space-2);">
         <div class="search-box">
           <span class="search-input-icon">🔍</span>
           <input 
@@ -2735,7 +2826,12 @@ function renderConditions(): void {
         </div>
       </div>
 
-      <!-- 2. 실시간 핫랭킹 큐레이션 테마 칩 바 (낮/밤 하루 2회 자동 최적화) -->
+      <!-- 2. 1-Tap 퀵 지역 칩 바 (모달 없이 전국 및 8대 권역 즉시 전환) -->
+      <div class="quick-region-scroll" id="course-quick-region-bar" style="margin-bottom: var(--space-3);" role="group" aria-label="지역 빠른 선택">
+        ${renderQuickRegionChips()}
+      </div>
+
+      <!-- 3. 실시간 핫랭킹 큐레이션 테마 칩 바 (낮/밤 하루 2회 자동 최적화) -->
       <div class="spot-category-scroll" style="margin-bottom: var(--space-4);">
         ${getCuratedThemeChips().map((cat) => `
           <button class="spot-category-chip ${state.courseCategory === cat.key ? 'is-active' : ''}" data-cat-key="${cat.key}">
@@ -2745,7 +2841,7 @@ function renderConditions(): void {
         `).join('')}
       </div>
 
-      <!-- 3. 컴팩트 1줄 컨트롤: [📍 지역 선택 캡슐] + [시간대 4종 토글] -->
+      <!-- 4. 컴팩트 1줄 컨트롤: [📍 지역 선택 캡슐] + [시간대 4종 토글] -->
       <div class="course-compact-controls" style="margin-bottom: var(--space-4);">
         <button class="btn-region-pill ${regLabel.isSelected ? 'is-selected' : ''}" id="btn-trigger-region" aria-haspopup="dialog">
           <span class="pill-icon">📍</span>
@@ -2765,7 +2861,7 @@ function renderConditions(): void {
         </div>
       </div>
 
-      <!-- 4. 코스 완성하기 버튼 -->
+      <!-- 5. 코스 완성하기 버튼 -->
       <button class="btn-primary btn-generate" id="btn-generate">
         🚀 맞춤 데이트 코스 완성하기
       </button>
@@ -2803,6 +2899,15 @@ function bindConditionEvents(area: HTMLElement): void {
       }
       clearBtn.classList.remove('is-visible');
       renderConditions();
+    });
+  }
+
+  // 1-Tap 퀵 지역 칩 바 이벤트 연동
+  const courseRegionBar = area.querySelector<HTMLElement>('#course-quick-region-bar');
+  if (courseRegionBar) {
+    bindQuickRegionEvents(courseRegionBar, () => {
+      renderConditions();
+      triggerCourseGeneration();
     });
   }
 
@@ -4267,7 +4372,7 @@ function renderSpotDiscovery(): void {
 
   area.innerHTML = `
     <!-- 1. 통합 검색창 -->
-    <div class="search-container" style="margin-bottom: var(--space-3);">
+    <div class="search-container" style="margin-bottom: var(--space-2);">
       <div class="search-box">
         <span class="search-input-icon">🔍</span>
         <input 
@@ -4283,7 +4388,12 @@ function renderSpotDiscovery(): void {
       </div>
     </div>
 
-    <!-- 2. 실시간 핫랭킹 큐레이션 테마 칩 -->
+    <!-- 2. 1-Tap 퀵 지역 칩 바 (모달 없이 전국 및 8대 권역 즉시 전환) -->
+    <div class="quick-region-scroll" id="spot-quick-region-bar" style="margin-bottom: var(--space-3);" role="group" aria-label="지역 빠른 선택">
+      ${renderQuickRegionChips()}
+    </div>
+
+    <!-- 3. 실시간 핫랭킹 큐레이션 테마 칩 -->
     <div class="spot-category-scroll" style="margin-bottom: var(--space-4);">
       ${getCuratedThemeChips().map((cat) => `
         <button class="spot-category-chip ${state.spotCategory === cat.key ? 'is-active' : ''}" data-cat-key="${cat.key}">
@@ -4496,6 +4606,15 @@ function bindDiscoveryEvents(area: HTMLElement): void {
     state.spotPage = 1;
     renderSpotDiscovery();
   });
+
+  // 1-Tap 퀵 지역 칩 바 이벤트 연동
+  const spotRegionBar = area.querySelector<HTMLElement>('#spot-quick-region-bar');
+  if (spotRegionBar) {
+    bindQuickRegionEvents(spotRegionBar, () => {
+      state.spotPage = 1;
+      renderSpotDiscovery();
+    });
+  }
 
   area.querySelectorAll<HTMLButtonElement>('.spot-category-chip').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -5045,8 +5164,10 @@ function renderOverlay(): void {
 
     // 초기화 버튼
     root.querySelector('#btn-location-reset')?.addEventListener('click', () => {
-      state.regions = ['SEOUL'];
+      state.regions = [];
       state.subZones = [];
+      state.activeRegionTab = 'ALL';
+      ensureSpotsForRegions(['ALL']);
       renderOverlay();
     });
 
@@ -5240,25 +5361,21 @@ async function init(): Promise<void> {
 
   // 3. 백그라운드 비동기 최적화 로딩
   if (!hasCachedData) {
-    // 캐시가 없는 첫 방문 시: 기본 서울 스팟을 초고속 우선 로드
-    loadSpots(['서울'])
+    // 캐시가 없는 첫 방문 시: 전국 전체 스팟 로드
+    loadSpots()
       .then((firstSpots) => {
         if (firstSpots && firstSpots.length > 0) {
           spots = mergeSpots(spots, firstSpots);
           spotById = new Map(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
-          loadedRegionKeys.add('SEOUL');
+          loadedRegionKeys.add('ALL');
           if (isSharedLink && (!state.course || state.course.length === 0)) {
             handleRoute();
+          } else if (state.mainMode === 'spots') {
+            renderSpotDiscovery();
           }
         }
       })
-      .catch(() => {})
-      .finally(() => {
-        // UI 안정화 후 전체 스팟 백그라운드 프리페치 및 캐시 저장
-        setTimeout(() => {
-          ensureSpotsForRegions(['ALL']);
-        }, 800);
-      });
+      .catch(() => {});
   } else {
     // 이미 캐시가 있는 경우: 백그라운드에서 최신 전체 데이터 동기화
     setTimeout(() => {

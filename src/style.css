@@ -4054,6 +4054,100 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   font-size: var(--font-xs);
 }
 
+/* 1-Tap 퀵 지역 칩 가로 스크롤 바 */
+.quick-region-scroll {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 2px 2px 6px;
+  -webkit-overflow-scrolling: touch;
+}
+.quick-region-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.quick-region-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-sub);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.quick-region-chip:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+.quick-region-chip.is-active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.25);
+}
+
+.quick-region-chip .region-chip-emoji {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.quick-region-chip .region-chip-text {
+  font-size: var(--font-xs);
+  line-height: 1.2;
+}
+
+.quick-region-chip.chip-subzone {
+  border-style: dashed;
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+.quick-region-chip.chip-subzone.is-active {
+  background: var(--color-accent);
+  border-style: solid;
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+.quick-region-chip .chip-clear-subzone {
+  margin-left: 3px;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  line-height: 1;
+  transition: background var(--transition-fast);
+}
+
+.quick-region-chip .chip-clear-subzone:hover {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.quick-region-chip .chip-arrow {
+  margin-left: 2px;
+  font-size: 10px;
+  opacity: 0.7;
+}
+
 .discovery-card-actions {
   display: flex;
   gap: 6px;
