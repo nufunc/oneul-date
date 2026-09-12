@@ -2760,7 +2760,7 @@ function activeSlots(): SlotKey[] {
 }
 
 declare const __APP_VERSION__: string;
-const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.9.27';
+const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.9.30';
 
 function courseSpotIds(): number[] {
   if (!state.course) return [];
@@ -5593,17 +5593,33 @@ function clearCourseHash(): void {
   history.replaceState(null, '', location.pathname + location.search);
 }
 
-/** 조건 영역·오늘의코스·교체 없이 코스 카드만 + [나도 코스 만들기] CTA 하나 */
+/** 조건 영역·오늘의코스·교체 없이 코스 카드만 + [나만의 코스 만들기] CTA + 실전 공유/저장/길찾기 액션 */
 function renderReceiverView(steps: CourseStep[]): void {
   const usedImages = new Set<string>();
   const storyHtml = generateCourseStory(steps, spotById, 'ALL', true);
+  const sharedSpotIds = steps.map((s) => s.spotId).filter((id): id is number => id !== null);
+
+  // 3개 스팟 다중 경유지 네이버 길찾기 URL 생성
+  let naverCourseDirectionsUrl = '';
+  const validSpots = sharedSpotIds.map((id) => spotById.get(id)).filter((s): s is Spot => Boolean(s));
+  if (validSpots.length >= 2) {
+    const coords = validSpots.map((s) => `${s.lng},${s.lat},${encodeURIComponent(s.name)}`).join('/');
+    naverCourseDirectionsUrl = `https://map.naver.com/p/directions/${coords}/-/car`;
+  } else if (validSpots.length === 1) {
+    naverCourseDirectionsUrl = naverMapUrl(validSpots[0]);
+  }
 
   app.innerHTML = `
     <header class="topbar">
       <h1 class="app-title"><a href="#" class="app-title-link" id="receiver-home-link" aria-label="오늘 데이트 홈으로 이동">오늘 데이트</a></h1>
     </header>
     <section class="receiver-view">
-      <p class="receiver-title">✨ 친구가 보낸 데이트 코스</p>
+      <div class="receiver-hero-card">
+        <span class="receiver-hero-badge">✨ 공유받은 데이트 코스</span>
+        <h2 class="receiver-hero-title">친구가 보낸 특별한 데이트 코스예요</h2>
+        <p class="receiver-hero-desc">엄선된 스팟과 최적 동선으로 완성된 추천 일정이에요. 함께 즐거운 시간 보내세요!</p>
+      </div>
+
       <div class="ai-briefing-card">
         <div class="ai-briefing-badge">
           <span class="ai-sparkle-icon">✨</span>
@@ -5611,9 +5627,34 @@ function renderReceiverView(steps: CourseStep[]): void {
         </div>
         <p class="ai-briefing-text">“${storyHtml}”</p>
       </div>
+
       <div class="step-list">
-        ${steps.map((step, i) => renderStepCard(step, i, { swappable: false, usedImages })).join('')}
+        ${steps.length > 0 ? renderUserOriginTransitDivider(steps[0]) : ''}
+        ${steps.map((step, i) => {
+          let html = renderStepCard(step, i, { swappable: false, usedImages });
+          if (i < steps.length - 1) {
+            html += renderStepTransitDivider(step, steps[i + 1]);
+          }
+          return html;
+        }).join('')}
       </div>
+
+      ${naverCourseDirectionsUrl ? `
+        <div class="receiver-directions-box">
+          <a class="btn-receiver-directions" href="${escapeHtml(naverCourseDirectionsUrl)}" target="_blank" rel="noopener noreferrer">
+            <span class="receiver-directions-icon">🗺️</span>
+            <span class="receiver-directions-text">전체 코스 한눈에 길찾기 (네이버 지도)</span>
+            <span class="receiver-directions-arrow" aria-hidden="true">↗</span>
+          </a>
+        </div>
+      ` : ''}
+
+      <div class="receiver-actions-bar">
+        <button class="btn-secondary btn-receiver-action" id="btn-receiver-copy" type="button">📋 코스 복사</button>
+        <button class="btn-secondary btn-receiver-action" id="btn-receiver-save" type="button">💾 보관함 저장</button>
+        <button class="btn-secondary btn-receiver-action" id="btn-receiver-share" type="button">🔗 링크 복사</button>
+      </div>
+
       <button class="btn-primary btn-make-own" id="btn-make-own">나만의 코스 만들기 →</button>
     </section>
     <footer class="app-footer">
@@ -5621,6 +5662,7 @@ function renderReceiverView(steps: CourseStep[]): void {
       <p class="footer-sub">검증된 스팟만 골라 담은 오늘의 데이트 코스</p>
     </footer>
   `;
+
   const goHome = (e: Event) => {
     e.preventDefault();
     clearCourseHash();
@@ -5628,6 +5670,50 @@ function renderReceiverView(steps: CourseStep[]): void {
   };
   document.getElementById('receiver-home-link')?.addEventListener('click', goHome);
   document.getElementById('btn-make-own')?.addEventListener('click', goHome);
+
+  // 수신자 뷰 액션 이벤트 바인딩
+  document.getElementById('btn-receiver-copy')?.addEventListener('click', async () => {
+    try {
+      const text = await formatCourseTextAsync(steps, spotById, [], 'ALL', []);
+      await navigator.clipboard.writeText(text);
+      showToast('📋 코스가 복사되었어요');
+    } catch {
+      showToast('복사하지 못했어요');
+    }
+  });
+
+  document.getElementById('btn-receiver-save')?.addEventListener('click', () => {
+    if (sharedSpotIds.length === 0) {
+      showToast('저장할 장소가 없어요');
+      return;
+    }
+    const list = loadSavedCourses();
+    const item: SavedCourse = {
+      id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+      createdAt: new Date().toISOString(),
+      conditions: {
+        region: [],
+        subZones: [],
+        mood: 'ALL',
+        slots: steps.map((st) => st.slot),
+      },
+      spotIds: sharedSpotIds,
+    };
+    list.unshift(item);
+    persistSavedCourses(list);
+    showToast('💾 내 보관함에 저장했어요');
+  });
+
+  document.getElementById('btn-receiver-share')?.addEventListener('click', () => {
+    if (sharedSpotIds.length === 0) {
+      showToast('공유할 장소가 없어요');
+      return;
+    }
+    navigator.clipboard
+      .writeText(buildShareUrl(sharedSpotIds))
+      .then(() => showToast('🔗 공유 링크가 복사되었어요'))
+      .catch(() => showToast('복사하지 못했어요'));
+  });
 }
 
 // --- 저장한 코스 오버레이 ------------------------------------------------------
@@ -5732,6 +5818,10 @@ function renderOverlay(): void {
           <button class="overlay-close" id="overlay-close" aria-label="닫기">✕</button>
         </div>
         <div class="overlay-body">
+          <div class="overlay-tip-banner">
+            <span class="overlay-tip-icon">💡</span>
+            <span class="overlay-tip-text">카톡이나 메모장에 코스를 복사해두면 기기를 변경해도 안전하게 보관돼요.</span>
+          </div>
           ${
             list.length === 0
               ? `<div class="overlay-empty">아직 저장한 코스가 없어요</div>`
@@ -5745,7 +5835,11 @@ function renderOverlay(): void {
                     <span class="saved-item-meta">${dateStr} · ${escapeHtml(regionsLabel(normalizeRegionCond(item.conditions.region)))} · ${escapeHtml(moodLabel(item.conditions.mood))}</span>
                     <div class="saved-item-spots">${savedCourseSpotsHtml(item)}</div>
                   </button>
-                  <button class="saved-item-delete" data-delete-id="${escapeHtml(item.id)}" aria-label="삭제">🗑</button>
+                  <div class="saved-item-actions">
+                    <button class="saved-action-btn saved-item-copy" data-copy-id="${escapeHtml(item.id)}" aria-label="카톡 복사" title="카톡 포맷 복사">📋</button>
+                    <button class="saved-action-btn saved-item-share" data-share-id="${escapeHtml(item.id)}" aria-label="링크 복사" title="공유 링크 복사">🔗</button>
+                    <button class="saved-action-btn saved-item-delete" data-delete-id="${escapeHtml(item.id)}" aria-label="삭제" title="삭제">🗑</button>
+                  </div>
                 </div>`;
                   })
                   .join('')
@@ -5767,8 +5861,50 @@ function renderOverlay(): void {
         });
       });
     });
+
+    root.querySelectorAll<HTMLButtonElement>('.saved-item-copy').forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const item = loadSavedCourses().find((c) => c.id === btn.dataset.copyId);
+        if (!item) return;
+        const steps: CourseStep[] = [];
+        for (const id of item.spotIds) {
+          const spot = spotById.get(id);
+          if (spot && spot.slot) {
+            steps.push({ slot: spot.slot as SlotKey, spotId: id });
+          }
+        }
+        try {
+          const text = await formatCourseTextAsync(
+            steps,
+            spotById,
+            normalizeRegionCond(item.conditions.region),
+            item.conditions.mood,
+            item.conditions.subZones || [],
+          );
+          await navigator.clipboard.writeText(text);
+          showToast('📋 코스가 복사되었어요');
+        } catch {
+          showToast('복사하지 못했어요');
+        }
+      });
+    });
+
+    root.querySelectorAll<HTMLButtonElement>('.saved-item-share').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const item = loadSavedCourses().find((c) => c.id === btn.dataset.shareId);
+        if (!item || item.spotIds.length === 0) return;
+        navigator.clipboard
+          .writeText(buildShareUrl(item.spotIds))
+          .then(() => showToast('🔗 공유 링크가 복사되었어요'))
+          .catch(() => showToast('복사하지 못했어요'));
+      });
+    });
+
     root.querySelectorAll<HTMLButtonElement>('.saved-item-delete').forEach((btn) => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
         const next = loadSavedCourses().filter((c) => c.id !== btn.dataset.deleteId);
         persistSavedCourses(next);
         renderOverlay();
