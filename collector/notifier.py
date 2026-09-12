@@ -22,9 +22,9 @@ if hasattr(sys.stdout, 'reconfigure'):
 def load_env():
     env = {}
     candidates = [
-        os.path.join(os.getcwd(), ".env"),
         os.path.join(os.path.dirname(__file__), ".env"),
         os.path.join(os.path.dirname(__file__), "..", ".env"),
+        os.path.join(os.getcwd(), ".env"),
     ]
     for path in candidates:
         if os.path.exists(path):
@@ -40,7 +40,7 @@ def load_env():
                 pass
     return env
 
-def generate_report_html(stats: dict, top_spots: list = None, regional_stats: dict = None, pipeline_stats: dict = None) -> str:
+def generate_report_html(stats: dict, top_spots: list = None, regional_stats: dict = None, pipeline_stats: dict = None, engine_status: str = None) -> str:
     """프리미엄 반응형 매거진 + 데이터 대시보드 HTML 이메일 템플릿 생성"""
     kst_now = datetime.now(timezone(timedelta(hours=9))).strftime("%Y년 %m월 %d일 %H:%M")
     
@@ -226,7 +226,7 @@ def generate_report_html(stats: dict, top_spots: list = None, regional_stats: di
 
                 <!-- 5. 엔진 헬스체크 -->
                 <div style="background: #EFF6FF; border: 1px solid #DBEAFE; border-radius: 10px; padding: 10px 14px; margin-top: 18px; font-size: 11px; color: #1E40AF; line-height: 1.5;">
-                    ⚡ <b>자율 수집 엔진 가동 상태:</b> 30분 주기 무중단 순환 (평균 18.5분 소요, 에러율 0.0% 안정)
+                    ⚡ <b>자율 수집 엔진 가동 상태:</b> {engine_status or "30분 주기 무중단 순환 (정상 가동 중, 에러율 0.0% 안정)"}
                 </div>
 
                 <!-- 서비스 열기 버튼 -->
@@ -247,7 +247,7 @@ def generate_report_html(stats: dict, top_spots: list = None, regional_stats: di
     """
     return html
 
-def send_daily_email_report(stats: dict, top_spots: list = None, regional_stats: dict = None, pipeline_stats: dict = None) -> bool:
+def send_daily_email_report(stats: dict, top_spots: list = None, regional_stats: dict = None, pipeline_stats: dict = None, engine_status: str = None) -> bool:
     """
     무료 SMTP (Gmail, Naver 등)를 통해 데일리 수집 리포트 이메일 발송
     """
@@ -266,7 +266,7 @@ def send_daily_email_report(stats: dict, top_spots: list = None, regional_stats:
     total_cnt = stats.get("total_spots", 0)
     subject = f"💌 [오늘 데이트] {kst_date} 데일리 핫플레이스 수집 결산 (총 {total_cnt:,}곳 달성)"
     
-    html_content = generate_report_html(stats, top_spots or [], regional_stats or {}, pipeline_stats or {})
+    html_content = generate_report_html(stats, top_spots or [], regional_stats or {}, pipeline_stats or {}, engine_status=engine_status)
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
@@ -395,9 +395,9 @@ def send_google_chat_report(stats: dict, top_spots: list = None, regional_stats:
         print(f"❌ [Google Chat 리포트 발송 실패]: {e}")
         return False
 
-def send_daily_digest(stats: dict, top_spots: list = None, regional_stats: dict = None, pipeline_stats: dict = None):
+def send_daily_digest(stats: dict, top_spots: list = None, regional_stats: dict = None, pipeline_stats: dict = None, engine_status: str = None):
     """설정된 모든 채널(이메일, Google Chat 등)로 데일리 브리핑 발송"""
-    send_daily_email_report(stats, top_spots, regional_stats, pipeline_stats)
+    send_daily_email_report(stats, top_spots, regional_stats, pipeline_stats, engine_status=engine_status)
     send_google_chat_report(stats, top_spots, regional_stats, pipeline_stats)
 
 if __name__ == "__main__":

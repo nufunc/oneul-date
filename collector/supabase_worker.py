@@ -26,9 +26,9 @@ if hasattr(sys.stdout, 'reconfigure'):
 def load_env():
     env = {}
     candidates = [
-        os.path.join(os.getcwd(), ".env"),
         os.path.join(os.path.dirname(__file__), ".env"),
         os.path.join(os.path.dirname(__file__), "..", ".env"),
+        os.path.join(os.getcwd(), ".env"),
     ]
     for path in candidates:
         if os.path.exists(path):

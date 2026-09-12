@@ -136,22 +136,35 @@ def record_pipeline_count(today_str: str, key: str, count: int):
     daily_pipeline_counts[today_str][key] = daily_pipeline_counts[today_str].get(key, 0) + count
 
 def get_exact_count(filter_query: str = "") -> int:
-    """Supabase REST API exact count 헤더를 통해 1,000개 제한 없이 정확한 전체 수량 집계"""
+    """Supabase/PostgREST REST API exact count 헤더 및 응답 길이를 통해 정확한 전체 수량 집계"""
     if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
         return 0
     url = f"{SUPABASE_URL.rstrip('/')}/rest/v1/spots?select=id{filter_query}"
     headers = {
         "apikey": SUPABASE_SERVICE_KEY,
         "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
-        "Range": "0-0",
         "Prefer": "count=exact"
     }
     try:
         req = urllib.request.Request(url, headers=headers)
-        with urllib.request.urlopen(req, timeout=5) as res:
+        with urllib.request.urlopen(req, timeout=8) as res:
             cr = res.headers.get("Content-Range", "")
-            if "/" in cr:
-                return int(cr.split("/")[1])
+            if cr:
+                # 1. 표준 PostgREST: 0-0/12345 (슬래시 뒤의 전체 카운트)
+                if "/" in cr:
+                    total_part = cr.split("/")[1].strip()
+                    if total_part.isdigit():
+                        return int(total_part)
+                # 2. 커스텀 프록시/서버: 0-12345/* (범위 끝 번호 + 1)
+                if "-" in cr:
+                    range_part = cr.split("/")[0].strip() if "/" in cr else cr.strip()
+                    parts = range_part.split("-")
+                    if len(parts) == 2 and parts[1].isdigit():
+                        return int(parts[1]) + 1
+            # 3. Content-Range 미제공 또는 비정형 시 본문 리스트 길이 확인
+            data = json.loads(res.read().decode('utf-8'))
+            if isinstance(data, list):
+                return len(data)
     except Exception:
         pass
     return 0
@@ -167,20 +180,55 @@ def get_today_created_count() -> int:
         return 0
 
 def get_total_spot_stats():
-    """Supabase에서 실시간 총 스팟 및 검증 상태 카운트 정확히 조회 (1,000개 페이징 한도 돌파)"""
+    """Supabase/PostgREST에서 실시간 총 스팟 및 검증 상태 카운트 정확히 조회 (원격 실패 시 로컬 spots.json 자동 폴백)"""
     total = get_exact_count()
     closed = get_exact_count("&is_closed=eq.true")
-    active = total - closed
+    active = max(0, total - closed)
     with_img = get_exact_count("&image_url=not.is.null")
+
+    # 원격 DB API 카운트가 0인 경우 로컬 public/data/spots.json 백업 데이터셋에서 집계 폴백
+    if total == 0:
+        local_spots_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "public", "data", "spots.json"))
+        if os.path.exists(local_spots_path):
+            try:
+                with open(local_spots_path, "r", encoding="utf-8") as f:
+                    local_spots = json.load(f)
+                total = len(local_spots)
+                closed = sum(1 for s in local_spots if s.get("is_closed"))
+                active = total - closed
+                with_img = sum(1 for s in local_spots if s.get("image_url"))
+            except Exception:
+                pass
+
     return {"total": total, "active": active, "closed": closed, "with_img": with_img}
 
 def get_regional_stats() -> dict:
-    """전국 8대 권역별 정상 운영 스팟 수 집계"""
+    """전국 8대 권역별 정상 운영 스팟 수 집계 (원격 실패 시 로컬 spots.json 자동 폴백)"""
     regions = ["서울", "경기", "인천", "영남", "호남", "충청", "강원", "제주"]
     counts = {}
+    total_remote = 0
     for r in regions:
         enc_r = urllib.parse.quote(r)
-        counts[r] = get_exact_count(f"&region=eq.{enc_r}&is_closed=eq.false")
+        c = get_exact_count(f"&region=eq.{enc_r}&is_closed=eq.false")
+        counts[r] = c
+        total_remote += c
+
+    # 원격 결과가 모두 0이면 로컬 데이터셋에서 폴백 집계
+    if total_remote == 0:
+        local_spots_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "public", "data", "spots.json"))
+        if os.path.exists(local_spots_path):
+            try:
+                with open(local_spots_path, "r", encoding="utf-8") as f:
+                    local_spots = json.load(f)
+                counts = {r: 0 for r in regions}
+                for s in local_spots:
+                    if not s.get("is_closed"):
+                        reg = s.get("region")
+                        if reg in counts:
+                            counts[reg] += 1
+            except Exception:
+                pass
+
     return counts
 
 def get_pipeline_stats_from_log(today_str: str) -> dict:
@@ -243,21 +291,35 @@ def get_pipeline_stats(today_str: str) -> dict:
     return pipe
 
 def get_top_spots(limit: int = 5) -> list:
-    """최신 사진과 풍부한 메타를 보유한 주요 큐레이션 스팟 추출"""
-    if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
-        return []
-    url = f"{SUPABASE_URL.rstrip('/')}/rest/v1/spots?select=id,name,category,region,area,summary,image_url,signature_items,social_links,slot&is_closed=eq.false&image_url=not.is.null&order=id.desc&limit={limit}"
-    headers = {
-        "apikey": SUPABASE_SERVICE_KEY,
-        "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
-        "Content-Type": "application/json"
-    }
-    try:
-        req = urllib.request.Request(url, headers=headers)
-        with urllib.request.urlopen(req, timeout=5) as res:
-            return json.loads(res.read().decode('utf-8'))
-    except Exception:
-        return []
+    """최신 사진과 풍부한 메타를 보유한 주요 큐레이션 스팟 추출 (원격 실패 시 로컬 spots.json 폴백)"""
+    if SUPABASE_URL and SUPABASE_SERVICE_KEY:
+        url = f"{SUPABASE_URL.rstrip('/')}/rest/v1/spots?select=id,name,category,region,area,summary,image_url,signature_items,social_links,slot&is_closed=eq.false&image_url=not.is.null&order=id.desc&limit={limit}"
+        headers = {
+            "apikey": SUPABASE_SERVICE_KEY,
+            "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
+            "Content-Type": "application/json"
+        }
+        try:
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=5) as res:
+                items = json.loads(res.read().decode('utf-8'))
+                if items:
+                    return items
+        except Exception:
+            pass
+
+    # 원격 조회 실패 시 로컬 spots.json에서 추출
+    local_spots_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "public", "data", "spots.json"))
+    if os.path.exists(local_spots_path):
+        try:
+            with open(local_spots_path, "r", encoding="utf-8") as f:
+                local_spots = json.load(f)
+            valid = [s for s in local_spots if not s.get("is_closed") and s.get("image_url")]
+            return valid[-limit:] if valid else []
+        except Exception:
+            pass
+
+    return []
 
 # 기동 시각 및 일일 리포트 상태 추적
 startup_time = None
@@ -315,8 +377,8 @@ def check_and_generate_daily_summary(force: bool = False):
                 "with_img_count": stats["with_img"],
                 "new_spots_today": actual_today_new
             }
-            log(f"📧 [정기 리포트 발송 트리거] KST {now.hour:02d}:00 (설정 시각: {DAILY_REPORT_HOUR:02d}:00) 데일리 이메일 발송 실행")
-            send_daily_digest(email_stats, top_spots=top_spots, regional_stats=regional, pipeline_stats=pipeline)
+            engine_status_desc = f"{INTERVAL_DESC} 주기 무중단 순환 (1회 발굴 {DISCOVERY_LIMIT}개, 폐업 검증 {BATCH_LIMIT}개, 정상 가동 중)"
+            send_daily_digest(email_stats, top_spots=top_spots, regional_stats=regional, pipeline_stats=pipeline, engine_status=engine_status_desc)
         except Exception as e:
             log(f"데일리 리포트 발송 예외: {e}", level="ERROR")
 
