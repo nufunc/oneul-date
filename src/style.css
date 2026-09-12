@@ -1681,11 +1681,17 @@ button {
 @keyframes swap-in {
   0% {
     opacity: 0;
-    transform: scale(0.97);
+    transform: scale(0.96) translateY(6px);
+    box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.25);
+  }
+  60% {
+    transform: scale(1.01) translateY(-1px);
+    box-shadow: 0 0 0 1px rgba(225, 29, 72, 0.15);
   }
   100% {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1) translateY(0);
+    box-shadow: var(--shadow-card);
   }
 }
 
@@ -1696,22 +1702,23 @@ button {
   border-radius: var(--radius-lg);
   padding: var(--space-4) var(--space-5);
   box-shadow: var(--shadow-card);
-  animation: card-appear 0.34s cubic-bezier(0.16, 1, 0.3, 1) both;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  animation: card-appear 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .step-card:hover {
   box-shadow: 0 4px 16px rgba(15, 23, 42, 0.07);
 }
 
-.step-card:nth-child(1) { animation-delay: 0ms; }
-.step-card:nth-child(2) { animation-delay: 60ms; }
-.step-card:nth-child(3) { animation-delay: 120ms; }
-.step-card:nth-child(4) { animation-delay: 180ms; }
-.step-card:nth-child(5) { animation-delay: 240ms; }
+.step-card:nth-of-type(1) { animation-delay: 0ms; }
+.step-card:nth-of-type(2) { animation-delay: 50ms; }
+.step-card:nth-of-type(3) { animation-delay: 100ms; }
+.step-card:nth-of-type(4) { animation-delay: 150ms; }
+.step-card:nth-of-type(5) { animation-delay: 200ms; }
+.step-card:nth-of-type(6) { animation-delay: 250ms; }
 
 .step-card.swap-in {
-  animation: swap-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: swap-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* 넘버 칩 — 모던 슬레이트 넘버 뱃지 */
@@ -3590,6 +3597,17 @@ button {
 /* ==========================================================================
    스팟 간 이동 동선 & 길찾기 딥링크 디바이더 (.step-transit-divider)
    ========================================================================== */
+@keyframes divider-appear {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .step-transit-divider {
   display: flex;
   align-items: center;
@@ -3597,6 +3615,7 @@ button {
   margin: -4px 0;
   padding: 0 4px;
   position: relative;
+  animation: divider-appear 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .step-transit-line {
@@ -4317,6 +4336,11 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   color: var(--color-text);
 }
 
+.quick-region-chip:active {
+  transform: scale(0.95);
+  transition: transform 0.08s ease;
+}
+
 .quick-region-chip.is-active {
   background: var(--color-accent);
   border-color: var(--color-accent);
@@ -4450,6 +4474,43 @@ html[data-theme-resolved="dark"] .quick-region-chip.chip-mood.is-mood-active {
   background: #a855f7;
   border-color: #a855f7;
   color: #fff;
+}
+
+/* 1-Tap 스마트 예산 필터 칩 (.chip-budget) */
+.quick-region-chip.chip-budget {
+  color: var(--color-text-sub);
+}
+
+.quick-region-chip.chip-budget.is-budget-active {
+  background: #10b981;
+  border-color: #10b981;
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.28);
+}
+
+html[data-theme="dark"] .quick-region-chip.chip-budget.is-budget-active,
+html[data-theme-resolved="dark"] .quick-region-chip.chip-budget.is-budget-active {
+  background: #059669;
+  border-color: #059669;
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.38);
+}
+
+.quick-region-chip.chip-budget.is-luxury-active {
+  background: #8b5cf6;
+  border-color: #8b5cf6;
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.28);
+}
+
+html[data-theme="dark"] .quick-region-chip.chip-budget.is-luxury-active,
+html[data-theme-resolved="dark"] .quick-region-chip.chip-budget.is-luxury-active {
+  background: #7c3aed;
+  border-color: #7c3aed;
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(139, 92, 246, 0.38);
 }
 
 /* ---------------------------------------------------------------------------

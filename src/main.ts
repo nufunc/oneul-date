@@ -1072,6 +1072,8 @@ interface GenerateOptions {
   indoorOnly?: boolean;
   /** 상황별 1-Tap 무드 프리셋 (소개팅, 기념일, 심야·야장) */
   moodPreset?: MoodPresetKey | null;
+  /** 1-Tap 스마트 예산 필터 (ALL: 전체, BUDGET: 가성비/캐주얼, LUXURY: 스페셜/파인다이닝) */
+  budgetFilter?: 'ALL' | 'BUDGET' | 'LUXURY';
 }
 
 /** 검색어 및 퀵 태그 매칭 헬퍼 (특수문자 정제, 다중 토큰, 동의어 풀 매칭 지원) */
@@ -1275,6 +1277,74 @@ function filterByMoodPreset(candidates: Spot[], preset?: MoodPresetKey | null): 
   return filtered.length > 0 ? filtered : candidates;
 }
 
+/** 가성비/캐주얼 데이트에 적합한 스팟 판별 (1인 2만원 이하 또는 가성비/산책/캐주얼 명소) */
+function isBudgetSpot(spot: Spot): boolean {
+  // 1. 명시적 가격 티어 (₩ 또는 FREE)
+  if (spot.price_tier === 'FREE' || spot.price_tier === '₩') return true;
+  if (spot.price_tier === '₩₩₩' || spot.price_tier === '₩₩₩₩') return false;
+
+  // 2. 1인당 평균 가격 (20,000원 이하)
+  if (typeof spot.avg_price_per_person === 'number' && spot.avg_price_per_person > 0) {
+    if (spot.avg_price_per_person <= 22000) return true;
+    if (spot.avg_price_per_person > 35000) return false;
+  }
+
+  // 3. price 문자열 검사
+  const pStr = spot.price || '';
+  if (pStr.includes('무료') || pStr.includes('0원')) return true;
+  if (/^[1-9],000|1[0-9],000|20,000/.test(pStr)) return true;
+
+  // 4. 카테고리/태그/소개 텍스트 검사
+  const text = `${spot.name} ${spot.category || ''} ${spot.summary || ''} ${(spot.mood_tags || []).join(' ')}`.toLowerCase();
+  const BUDGET_KEYWORDS = [
+    '가성비', '착한가격', '분식', '국수', '산책', '공원', '시장', '길거리', '노포', '포차',
+    '떡볶이', '김밥', '호수공원', '둘레길', '전망대', '야경', '숲길', '광장'
+  ];
+  return BUDGET_KEYWORDS.some((kw) => text.includes(kw));
+}
+
+/** 스페셜/파인다이닝 데이트에 적합한 스팟 판별 (오마카세, 파인다이닝, 와인바, 럭셔리) */
+function isSpecialDiningSpot(spot: Spot): boolean {
+  // 1. 명시적 가격 티어 (₩₩₩ 또는 ₩₩₩₩)
+  if (spot.price_tier === '₩₩₩' || spot.price_tier === '₩₩₩₩') return true;
+  if (spot.price_tier === 'FREE' || spot.price_tier === '₩') return false;
+
+  // 2. 1인당 평균 가격 (45,000원 이상)
+  if (typeof spot.avg_price_per_person === 'number' && spot.avg_price_per_person >= 45000) {
+    return true;
+  }
+
+  // 3. 큐레이션 인증 뱃지 (미쉐린, 캐치테이블 파인다이닝)
+  if (spot.curation_badges?.michelin || spot.curation_badges?.catchtable) {
+    return true;
+  }
+
+  // 4. 분위기 태그
+  if (spot.mood && spot.mood.includes('luxury')) {
+    return true;
+  }
+
+  // 5. 키워드 검사
+  const text = `${spot.name} ${spot.category || ''} ${spot.summary || ''} ${(spot.signature_items || []).join(' ')}`.toLowerCase();
+  const LUXURY_KEYWORDS = [
+    '오마카세', '파인다이닝', '코스요리', '미쉐린', '미슐랭', '호텔', '스테이크', '와인바',
+    '위스키', '기념일', '비스트로', '샴페인', '스카이라운지', '한우코스', '캐비어', '트러플'
+  ];
+  return LUXURY_KEYWORDS.some((kw) => text.includes(kw));
+}
+
+/** 예산 필터(가성비, 스페셜)에 따른 후보군 필터링 및 Graceful Fallback */
+function filterByBudget(candidates: Spot[], budget?: 'ALL' | 'BUDGET' | 'LUXURY' | null): Spot[] {
+  if (!budget || budget === 'ALL') return candidates;
+  let filtered: Spot[] = [];
+  if (budget === 'BUDGET') {
+    filtered = candidates.filter((s) => isBudgetSpot(s));
+  } else if (budget === 'LUXURY') {
+    filtered = candidates.filter((s) => isSpecialDiningSpot(s));
+  }
+  return filtered.length > 0 ? filtered : candidates;
+}
+
 /**
  * 앵커 기반 근접 코스 생성 (물리적 거리 및 자치구 클러스터링).
  * 1) 검색어(searchQuery)가 있는 경우 해당 키워드 매칭 스팟을 앵커로 최우선 선정
@@ -1296,6 +1366,7 @@ function generateCourse(
   const categoryDef = catKey ? SPOT_EXPLORE_CATEGORIES.find((c) => c.key === catKey) : null;
   const isIndoor = opts.indoorOnly ?? false;
   const moodPreset = opts.moodPreset ?? null;
+  const budgetFilter = opts.budgetFilter ?? null;
 
   let anchorSlot: SlotKey | null = null;
   let anchorPool: Spot[] = [];
@@ -1345,9 +1416,12 @@ function generateCourse(
   // 2. 검색어 매칭이 없거나 검색어가 비어있는 경우: 기존 앵커 로직(최소 후보 슬롯) 적용
   if (anchorSlot === null || anchorPool.length === 0) {
     for (const slot of slotsOn) {
-      const candidates = filterByMoodPreset(
-        excludeRecent(getCandidates(all, slot, regionKeys, moodKey, [], zoneKeys, null, isIndoor), avoid),
-        moodPreset,
+      const candidates = filterByBudget(
+        filterByMoodPreset(
+          excludeRecent(getCandidates(all, slot, regionKeys, moodKey, [], zoneKeys, null, isIndoor), avoid),
+          moodPreset,
+        ),
+        budgetFilter,
       );
       if (candidates.length > 0 && (anchorSlot === null || candidates.length < anchorPool.length)) {
         anchorSlot = slot;
@@ -1378,12 +1452,15 @@ function generateCourse(
       anchorSpot && anchorSpot.lat != null && anchorSpot.lng != null
         ? anchorSpot
         : (pickedSpots.find((s) => s.lat != null && s.lng != null) ?? anchorSpot);
-    const candidates = filterByMoodPreset(
-      excludeRecent(
-        getCandidates(all, slot, regionKeys, moodKey, picked, zoneKeys, geoAnchor, isIndoor),
-        avoid,
+    const candidates = filterByBudget(
+      filterByMoodPreset(
+        excludeRecent(
+          getCandidates(all, slot, regionKeys, moodKey, picked, zoneKeys, geoAnchor, isIndoor),
+          avoid,
+        ),
+        moodPreset,
       ),
-      moodPreset,
+      budgetFilter,
     );
 
     // 종목 중복 방지: 이미 선택된 차수와 동일한 장르(카페-카페, 식사-식사, 바-바) 배제
@@ -2623,7 +2700,14 @@ interface AppState {
   themeMode: ThemeMode;
   course: CourseStep[] | null;
   /** 코스 생성 시점의 조건 스냅샷 — 교체 후보·저장·복사가 이 조건 기준으로 동작 */
-  courseConditions: { regions: string[]; subZones: string[]; mood: string; searchQuery?: string; indoorOnly?: boolean } | null;
+  courseConditions: {
+    regions: string[];
+    subZones: string[];
+    mood: string;
+    searchQuery?: string;
+    indoorOnly?: boolean;
+    budgetFilter?: 'ALL' | 'BUDGET' | 'LUXURY';
+  } | null;
   savedOpen: boolean;
   regionSheetOpen: boolean;
   moodSheetOpen: boolean;
@@ -2637,6 +2721,8 @@ interface AppState {
   savedOnly: boolean;
   /** 상황별 1-Tap 무드 프리셋 (소개팅, 기념일, 심야·야장) */
   moodPreset: MoodPresetKey | null;
+  /** 1-Tap 스마트 예산 필터 (ALL: 전체, BUDGET: 가성비/캐주얼, LUXURY: 스페셜/파인다이닝) */
+  budgetFilter: 'ALL' | 'BUDGET' | 'LUXURY';
 }
 
 /** 저장된 테마 모드 불러오기 (기본값: 'light' 낮 테마) */
@@ -2751,6 +2837,7 @@ const state: AppState = {
   savedSpotIds: loadSavedSpotIds(),
   savedOnly: false,
   moodPreset: null,
+  budgetFilter: 'ALL',
 };
 
 let spotById = new Map<number, Spot>(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
@@ -2760,7 +2847,7 @@ function activeSlots(): SlotKey[] {
 }
 
 declare const __APP_VERSION__: string;
-const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.9.30';
+const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.9.31';
 
 function courseSpotIds(): number[] {
   if (!state.course) return [];
@@ -3227,6 +3314,12 @@ function renderQuickRegionChips(): string {
     <button class="quick-region-chip chip-indoor ${state.indoorOnly ? 'is-active is-indoor-active' : ''}" data-action="toggle-indoor" type="button" aria-label="실내 데이트 필터" title="비 오는 날/폭염 실내 데이트 모드">
       <span class="region-chip-text">${state.indoorOnly ? '☔ 실내 ON' : '☔ 실내'}</span>
     </button>
+    <button class="quick-region-chip chip-budget ${state.budgetFilter === 'BUDGET' ? 'is-active is-budget-active' : ''}" data-action="toggle-budget" data-budget="BUDGET" type="button" aria-label="가성비 데이트 필터" title="1인 2만원 이하 가성비/캐주얼 명소">
+      <span class="region-chip-text">${state.budgetFilter === 'BUDGET' ? '💸 가성비 ON' : '💸 가성비'}</span>
+    </button>
+    <button class="quick-region-chip chip-budget ${state.budgetFilter === 'LUXURY' ? 'is-active is-luxury-active' : ''}" data-action="toggle-budget" data-budget="LUXURY" type="button" aria-label="스페셜 다이닝 필터" title="오마카세/파인다이닝/럭셔리 명소">
+      <span class="region-chip-text">${state.budgetFilter === 'LUXURY' ? '🍷 스페셜 ON' : '🍷 스페셜'}</span>
+    </button>
     ${MOOD_PRESETS.map((m) => {
       const isMoodActive = state.moodPreset === m.key;
       return `
@@ -3315,6 +3408,22 @@ function bindQuickRegionEvents(container: HTMLElement, onRegionChange: () => voi
         state.moodPreset = presetKey;
         const matched = MOOD_PRESETS.find((p) => p.key === presetKey);
         showToast(`${matched ? matched.icon + ' ' + matched.label : '테마'} 모드로 맞췄어요`);
+      }
+      onRegionChange();
+    });
+  });
+
+  // 7. 스마트 예산 필터 칩 클릭 (가성비 / 스페셜 토글)
+  container.querySelectorAll<HTMLButtonElement>('[data-action="toggle-budget"]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const targetBudget = (btn.dataset.budget || 'ALL') as 'BUDGET' | 'LUXURY';
+      if (state.budgetFilter === targetBudget) {
+        state.budgetFilter = 'ALL';
+        showToast('예산 필터가 해제되었어요');
+      } else {
+        state.budgetFilter = targetBudget;
+        showToast(targetBudget === 'BUDGET' ? '💸 가성비/캐주얼 모드로 맞췄어요' : '🍷 스페셜 다이닝 모드로 맞췄어요');
       }
       onRegionChange();
     });
@@ -3523,7 +3632,14 @@ function triggerCourseGeneration(): void {
     slotsOn,
     state.regions,
     state.mood,
-    { avoidIds: recentSpotIdSet(), searchQuery: state.searchQuery, categoryKey: state.courseCategory, indoorOnly: state.indoorOnly, moodPreset: state.moodPreset },
+    {
+      avoidIds: recentSpotIdSet(),
+      searchQuery: state.searchQuery,
+      categoryKey: state.courseCategory,
+      indoorOnly: state.indoorOnly,
+      moodPreset: state.moodPreset,
+      budgetFilter: state.budgetFilter,
+    },
     state.subZones,
   );
   state.courseConditions = {
@@ -3532,6 +3648,7 @@ function triggerCourseGeneration(): void {
     mood: state.mood,
     searchQuery: state.searchQuery,
     indoorOnly: state.indoorOnly,
+    budgetFilter: state.budgetFilter,
   };
   addRecentSpotIds(courseSpotIds());
   renderResults();
@@ -4618,10 +4735,11 @@ function swapStep(index: number): void {
   if (!step) return;
   const cond = state.courseConditions;
   const anchor = dominantAnchorSpot(state.course, spotById, index);
-  const candidates = excludeRecent(
+  const rawCandidates = excludeRecent(
     getCandidates(spots, step.slot, cond.regions, cond.mood, courseSpotIds(), cond.subZones, anchor),
     recentSpotIdSet(),
   );
+  const candidates = filterByBudget(rawCandidates, cond.budgetFilter);
   // 다른 차수와 동일한 종목(장르) 중복 방지
   const otherGenres = new Set<SpotGenre>();
   state.course.forEach((st, idx) => {
@@ -4730,7 +4848,12 @@ function regenerateCourse(): void {
     slotsOn,
     cond.regions,
     cond.mood,
-    { avoidIds: recentSpotIdSet(), indoorOnly: cond.indoorOnly, moodPreset: state.moodPreset },
+    {
+      avoidIds: recentSpotIdSet(),
+      indoorOnly: cond.indoorOnly,
+      moodPreset: state.moodPreset,
+      budgetFilter: cond.budgetFilter,
+    },
     cond.subZones,
   );
   addRecentSpotIds(courseSpotIds());
@@ -5137,6 +5260,13 @@ function renderSpotDiscovery(): void {
     matchedSpots = matchedSpots.filter((s) => isAnniversarySpot(s));
   } else if (state.moodPreset === 'NIGHT_LIFE') {
     matchedSpots = matchedSpots.filter((s) => isNightLifeSpot(s));
+  }
+
+  // 스마트 예산 필터 적용 (가성비 / 스페셜 다이닝)
+  if (state.budgetFilter === 'BUDGET') {
+    matchedSpots = matchedSpots.filter((s) => isBudgetSpot(s));
+  } else if (state.budgetFilter === 'LUXURY') {
+    matchedSpots = matchedSpots.filter((s) => isSpecialDiningSpot(s));
   }
 
   // 4. 정렬 적용 (거리순 / 핫플·인기순 / 블루리본·미쉐린순)
