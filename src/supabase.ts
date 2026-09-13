@@ -142,6 +142,33 @@ async function openCacheDB(): Promise<IDBDatabase> {
 }
 
 /**
+ * 이상 스팟 또는 오탐지된 상호명을 정상화하는 필터
+ * (예: '광명전통시장 야간 클로렐라버거' -> 실제 매장 '클로렐라베이커리'로 자동 교정)
+ */
+export function normalizeSpot(spot: Spot): Spot {
+  if (!spot) return spot;
+  if (spot.id === 4833 || (spot.name && (spot.name.includes('클로렐라버거') || spot.name.includes('광명전통시장 야간')))) {
+    return {
+      ...spot,
+      name: '클로렐라베이커리',
+      category: '제과,베이커리',
+      slot: 'day',
+      address: '경기 광명시 오리로976번길 18-1',
+      location: '경기 광명시',
+      summary: '신선한 클로렐라 반죽으로 갓 구워낸 수제 햄버거와 빵이 가득한 전통시장 속 명물 베이커리예요!',
+      price: '클로렐라 햄버거 3,500원',
+      lat: 37.48081214,
+      lng: 126.85572328,
+    };
+  }
+  return spot;
+}
+
+export function normalizeSpots(spots: Spot[]): Spot[] {
+  return spots.map(normalizeSpot);
+}
+
+/**
  * IndexedDB에 캐시된 스팟 목록을 반환합니다. (0ms에 가까운 속도로 즉시 로드)
  */
 export async function getCachedSpots(): Promise<Spot[] | null> {
@@ -154,7 +181,7 @@ export async function getCachedSpots(): Promise<Spot[] | null> {
       req.onsuccess = () => {
         const val = req.result;
         if (Array.isArray(val) && val.length > 0) {
-          resolve(val as Spot[]);
+          resolve(normalizeSpots(val as Spot[]));
         } else {
           resolve(null);
         }
@@ -175,7 +202,7 @@ export async function saveSpotsToCache(spots: Spot[]): Promise<void> {
     const db = await openCacheDB();
     const tx = db.transaction(STORE_NAME, 'readwrite');
     const store = tx.objectStore(STORE_NAME);
-    store.put(spots, CACHE_KEY);
+    store.put(normalizeSpots(spots), CACHE_KEY);
   } catch {
     // 캐시 저장 실패 시 무시
   }
@@ -209,14 +236,15 @@ export async function loadStaticSpots(): Promise<Spot[]> {
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
-        saveSpotsToCache(data as Spot[]);
-        return data as Spot[];
+        const normalized = normalizeSpots(data as Spot[]);
+        saveSpotsToCache(normalized);
+        return normalized;
       }
     }
   } catch {
     // CDN 로드 실패 시 빌드 번들 내장 샘플로 최종 폴백
   }
-  return rawSpotsData as Spot[];
+  return normalizeSpots(rawSpotsData as Spot[]);
 }
 
 /**
@@ -266,10 +294,11 @@ export async function loadSpots(regionMatches?: string[]): Promise<Spot[]> {
 
         // 전체가 1,000개 이하면 즉시 반환
         if (total <= firstBatch.length) {
+          const normFirst = normalizeSpots(firstBatch as Spot[]);
           if (!regionMatches || regionMatches.length === 0) {
-            saveSpotsToCache(firstBatch as Spot[]);
+            saveSpotsToCache(normFirst);
           }
-          return firstBatch as Spot[];
+          return normFirst;
         }
 
         // 1,000개 초과 시 나머지 청크 병렬 페칭
@@ -299,7 +328,7 @@ export async function loadSpots(regionMatches?: string[]): Promise<Spot[]> {
             uniqueIdMap.set(s.id, s);
           }
         }
-        const uniqueSpots = Array.from(uniqueIdMap.values());
+        const uniqueSpots = normalizeSpots(Array.from(uniqueIdMap.values()));
         if (!regionMatches || regionMatches.length === 0) {
           saveSpotsToCache(uniqueSpots);
         }

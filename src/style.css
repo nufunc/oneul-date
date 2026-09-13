@@ -3989,14 +3989,31 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   line-height: 1.35;
   margin-bottom: var(--space-2);
 }
+.discovery-card.cols-3 .discovery-card-actions {
+  gap: 4px;
+}
+.discovery-card.cols-3 .btn-discovery-save {
+  flex: 1;
+  height: 28px;
+  min-width: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  border-radius: var(--radius-sm);
+}
 .discovery-card.cols-3 .btn-build-anchor-course,
 .discovery-card.cols-3 .btn-discovery-action-build {
-  flex: 0 0 auto;
-  width: 28px;
+  flex: 1;
   height: 28px;
-  min-width: 28px;
+  min-width: 0;
   padding: 0;
-  font-size: 0.82rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  border-radius: var(--radius-sm);
 }
 .discovery-card.cols-3 .btn-discovery-chip-action {
   width: 28px;
@@ -4009,8 +4026,25 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
 .discovery-card.cols-3 .btn-discovery-action-map {
   flex: 1;
   height: 28px;
+  min-width: 0;
   padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 0.88rem;
+  border-radius: var(--radius-sm);
+}
+
+/* 2열 모드 텍스트 포함 버튼 스타일 */
+.discovery-card.cols-2 .btn-discovery-action-build.with-label,
+.discovery-card.cols-2 .btn-discovery-action-map.with-label {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  padding: 0 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  gap: 4px;
 }
 
 /* 5개행 미니 타일형 컴팩트 카드 전용 스타일 */
@@ -4066,20 +4100,14 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
 .btn-discovery-action-build.compact,
 .discovery-card.cols-5 .btn-build-anchor-course,
 .discovery-card.cols-5 .btn-discovery-action-build {
-  flex: 0 0 auto;
-  width: 24px;
-  height: 24px;
-  min-width: 24px;
+  flex: 1;
+  height: 26px;
+  min-width: 0;
   padding: 0;
-  font-size: 0.72rem;
-  border-radius: 4px;
-}
-.discovery-card.cols-5 .btn-discovery-chip-action {
-  width: 24px;
-  height: 24px;
-  min-width: 24px;
-  padding: 0;
-  font-size: 0.68rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
   border-radius: 4px;
 }
 .btn-discovery-map.compact,
@@ -4087,9 +4115,13 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
 .discovery-card.cols-5 .btn-discovery-map,
 .discovery-card.cols-5 .btn-discovery-action-map {
   flex: 1;
-  height: 24px;
+  height: 26px;
+  min-width: 0;
   padding: 0;
-  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
   border-radius: 4px;
 }
 

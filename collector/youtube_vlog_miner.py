@@ -37,7 +37,7 @@ if hasattr(sys.stdout, 'reconfigure'):
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from supabase_worker import (search_naver, calculate_quality_score, load_env,
-                             derive_region_area)
+                             derive_region_area, is_zone_street_spot)
 from category_filter import (
     is_date_spot_category,
     CATEGORY_WHITELIST,
@@ -1302,6 +1302,27 @@ def _token_aligned(inner: str, outer_tokens: list[str]) -> bool:
     return False
 
 
+ZONE_MENU_TIME_KEYWORDS = {
+    "야간", "야시장", "새벽", "아침", "점심", "저녁", "심야",
+    "버거", "햄버거", "베이커리", "빵", "국밥", "칼국수", "수제비", "빈대떡", "전",
+    "치킨", "통닭", "만두", "떡볶이", "순대", "튀김", "호떡", "꽈배기", "도넛", "와플",
+    "국수", "냉면", "짜장면", "짬뽕", "우동", "라면", "김밥", "육회", "갈비", "삼겹살",
+    "커피", "카페", "디저트", "빙수", "아이스크림", "포차", "분식", "식당", "맛집", "코스"
+}
+
+
+def is_zone_composite_cand(cand: str) -> bool:
+    """시장/골목/거리 등 광역 상권명 뒤에 세부 메뉴·시간대(야간, 버거 등)가 덧붙은 비정상 결합 텍스트 판정."""
+    if not cand:
+        return False
+    tokens = cand.split()
+    if len(tokens) < 2:
+        return False
+    has_zone = is_zone_street_spot(cand) or any(is_zone_street_spot(t) for t in tokens)
+    has_menu_or_time = any(kw in cand for kw in ZONE_MENU_TIME_KEYWORDS)
+    return has_zone and has_menu_or_time
+
+
 def is_name_match(candidate: str, official_name: str) -> bool:
     """지도 검색 결과 상호명이 후보 키워드와 실제로 연관되는지 검증."""
     cand_txt = (candidate or "").strip()
@@ -1312,6 +1333,12 @@ def is_name_match(candidate: str, official_name: str) -> bool:
         return False
     if c == n:
         return True
+
+    name_is_zone = is_zone_street_spot(name_txt)
+    cand_is_zone_comp = is_zone_composite_cand(cand_txt)
+    # 광역 상권 공식 상호(예: '광명전통시장')에 비정상 결합 후보(예: '광명전통시장 야간 클로렐라버거')가 매칭되는 것 원천 차단
+    if name_is_zone and cand_is_zone_comp:
+        return False
 
     # 지점 접미를 뗀 뒤 재비교 (성심당 ≡ 성심당본점, 다이닝원 ≡ 다이닝원강릉점)
     n_nb = _norm_name(BRANCH_SUFFIX_RE.sub("", name_txt))
@@ -1330,6 +1357,9 @@ def is_name_match(candidate: str, official_name: str) -> bool:
     if len(n_tokens) > 1 and _token_aligned(c, n_tokens):
         return True
     if len(c_tokens) > 1 and _token_aligned(n_nb, c_tokens):
+        # 상권/시장/골목명에 메뉴·시간대 수식어가 덧붙은 경우(예: '광명전통시장 야간 클로렐라버거') 오탐 차단
+        if name_is_zone and len(c_tokens) > len(n_tokens):
+            return False
         return True
 
     # 어순 도치 일치 (예: '더킹 호텔' ≡ '호텔 더킹')

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'oneul-date-v0.9.31';
+const CACHE_NAME = 'oneul-date-v0.9.32';
 const ASSETS = [
   './',
   './index.html',

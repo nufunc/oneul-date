@@ -526,6 +526,15 @@ function isListicleEntry(spot: Spot): boolean {
   return LISTICLE_NAME_PATTERNS.some((re) => re.test(name));
 }
 
+/** '광명전통시장 야간 클로렐라버거' 등 상권/시장명 뒤에 세부 메뉴·시간대 수식어가 결합된 유령 스팟인지 검사 */
+function isZoneCompositeDummy(spot: Spot): boolean {
+  const name = (spot.name || '').trim();
+  if (name.length === 0) return true;
+  if (/전통시장\s+(야간|야시장|새벽|점심|저녁|맛집|코스|클로렐라)/.test(name)) return true;
+  if (name.includes('클로렐라버거')) return true;
+  return false;
+}
+
 /**
  * 숙박(stay) 슬롯 장소의 진위 여부 검증 — 화이트리스트 우선 구조.
  */
@@ -595,7 +604,7 @@ function isPollutedMediaChannelDummy(spot: Spot): boolean {
 
 /** 코스 후보로 올릴 수 있는 스폿인지 — 생성·공유복원·저장복원 전 경로가 공유하는 단일 관문 */
 function isCourseEligible(spot: Spot): boolean {
-  return isValidSlot(spot.slot) && !isListicleEntry(spot) && !isBroadRegionDummy(spot) && !isPollutedMediaChannelDummy(spot) && isRealStaySpot(spot);
+  return isValidSlot(spot.slot) && !isListicleEntry(spot) && !isBroadRegionDummy(spot) && !isPollutedMediaChannelDummy(spot) && !isZoneCompositeDummy(spot) && isRealStaySpot(spot);
 }
 
 const DEDUPE_REGION_TOKENS = new Set([
@@ -1769,21 +1778,17 @@ function mapQuery(spot: Spot): string {
   return cleanName || spot.name.trim();
 }
 
-/** 스폿의 네이버/카카오 지도 바로가기 URL — 정제된 상호명 및 플레이스 딥링크 결합 */
+/** 스폿의 네이버 지도 바로가기 URL — 정제된 상호명 및 좌표 핀포인트 앵커 결합 */
 function naverMapUrl(spot: Spot): string {
   // 1. 공식 네이버 지도 단축 링크(naver.me)는 최우선 신뢰
   if (spot.source?.url && spot.source.url.includes('naver.me/')) {
     return spot.source.url;
   }
-  // 2. 카카오맵 정식 검증 플레이스 상세 링크인 경우 (100% 실존 매장 단독 상세)
-  if (spot.social_links?.kakaomap?.url) {
-    const ku = spot.social_links.kakaomap.url;
-    if (ku.includes('place.map.kakao.com/')) {
-      return ku;
-    }
-  }
-  // 3. 네이버 지도 실시간 검색 URL (단독 매장 상세 오픈 최적화)
+  // 2. 네이버 지도 실시간 검색 URL (단독 매장 상세 오픈 및 좌표 핀포인트 최적화)
   const q = encodeURIComponent(mapQuery(spot));
+  if (spot.lat && spot.lng) {
+    return `https://map.naver.com/p/search/${q}?c=${spot.lng},${spot.lat},16,0,0,0,dh`;
+  }
   return `https://map.naver.com/p/search/${q}`;
 }
 
@@ -2847,7 +2852,7 @@ function activeSlots(): SlotKey[] {
 }
 
 declare const __APP_VERSION__: string;
-const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.9.31';
+const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.9.32';
 
 function courseSpotIds(): number[] {
   if (!state.course) return [];
@@ -5464,10 +5469,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
         <div class="discovery-card-body compact">
           <h4 class="discovery-card-title discovery-name compact">${escapeHtml(spot.name)}</h4>
           <div class="discovery-card-actions compact">
-            <button class="btn-discovery-save ${isSaved ? 'is-saved' : ''} compact" data-spot-id="${spot.id}" aria-label="${isSaved ? '보관함에서 제외' : '보관함에 담기'}" title="${isSaved ? '보관함에서 제외' : '보관함에 담기'}">${isSaved ? '❤️' : '🤍'}</button>
-            <button class="btn-build-anchor-course btn-discovery-action-build compact" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">✨</button>
-            ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-yt compact" aria-label="${escapeHtml(spot.name)} 유튜브 핫클립" title="유튜브 핫클립 시청">▶️</a>` : ''}
-            ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-book compact" aria-label="${escapeHtml(spot.name)} 실시간 예약" title="실시간 예약">📅</a>` : ''}
+            <button class="btn-build-anchor-course btn-discovery-action-build compact" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">🚀</button>
             <a href="${escapeHtml(naverMapUrl(spot))}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map compact" aria-label="${escapeHtml(spot.name)} 지도 열기" title="지도 열기">🗺️</a>
           </div>
         </div>
@@ -5497,10 +5499,10 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
           <p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>
           <div class="discovery-card-actions">
             <button class="btn-discovery-save ${isSaved ? 'is-saved' : ''}" data-spot-id="${spot.id}" aria-label="${isSaved ? '보관함에서 제외' : '보관함에 담기'}" title="${isSaved ? '보관함에서 제외' : '보관함에 담기'}">${isSaved ? '❤️' : '🤍'}</button>
-            <button class="btn-build-anchor-course btn-discovery-action-build" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">✨</button>
+            <button class="btn-build-anchor-course btn-discovery-action-build with-label" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">🚀 코스</button>
+            <a href="${escapeHtml(naverMapUrl(spot))}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map with-label" aria-label="${escapeHtml(spot.name)} 지도 열기" title="지도 열기">🗺️ 지도</a>
             ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-yt" aria-label="${escapeHtml(spot.name)} 유튜브 핫클립" title="유튜브 핫클립 시청">▶️</a>` : ''}
             ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-book" aria-label="${escapeHtml(spot.name)} 실시간 예약" title="실시간 예약">📅</a>` : ''}
-            <a href="${escapeHtml(naverMapUrl(spot))}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map" aria-label="${escapeHtml(spot.name)} 지도 열기" title="지도 열기">🗺️</a>
           </div>
         </div>
       </article>
@@ -5525,9 +5527,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
         <p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>
         <div class="discovery-card-actions">
           <button class="btn-discovery-save ${isSaved ? 'is-saved' : ''}" data-spot-id="${spot.id}" aria-label="${isSaved ? '보관함에서 제외' : '보관함에 담기'}" title="${isSaved ? '보관함에서 제외' : '보관함에 담기'}">${isSaved ? '❤️' : '🤍'}</button>
-          <button class="btn-build-anchor-course btn-discovery-action-build" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">✨</button>
-          ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-yt" aria-label="${escapeHtml(spot.name)} 유튜브 핫클립" title="유튜브 핫클립 시청">▶️</a>` : ''}
-          ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-book" aria-label="${escapeHtml(spot.name)} 실시간 예약" title="실시간 예약">📅</a>` : ''}
+          <button class="btn-build-anchor-course btn-discovery-action-build" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">🚀</button>
           <a href="${escapeHtml(naverMapUrl(spot))}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map" aria-label="${escapeHtml(spot.name)} 지도 열기" title="지도 열기">🗺️</a>
         </div>
       </div>
@@ -5785,7 +5785,7 @@ function renderReceiverView(steps: CourseStep[]): void {
         <button class="btn-secondary btn-receiver-action" id="btn-receiver-share" type="button">🔗 링크 복사</button>
       </div>
 
-      <button class="btn-primary btn-make-own" id="btn-make-own">나만의 코스 만들기 →</button>
+      <button class="btn-primary btn-make-own" id="btn-make-own">🚀 나만의 코스 만들기 →</button>
     </section>
     <footer class="app-footer">
       <p class="footer-copy">오늘 데이트 <span class="footer-version">${APP_VERSION}</span></p>
@@ -6531,7 +6531,7 @@ function renderOverlay(): void {
             🗺️ 네이버 지도
           </a>
           <button class="btn-primary btn-detail-build-course" id="btn-detail-build-anchor" data-spot-id="${spot.id}" title="이 스팟 중심으로 코스 짜기">
-            ✨ 맞춤 코스 짜기
+            🚀 맞춤 코스 짜기
           </button>
         </div>
       </div>

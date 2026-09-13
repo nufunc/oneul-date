@@ -13,7 +13,8 @@ import urllib.parse
 import time
 import random
 import re
-from supabase_worker import load_env, search_naver, calculate_quality_score, is_polluted_header_name, derive_region_area
+from supabase_worker import (load_env, search_naver, calculate_quality_score,
+                             is_polluted_header_name, derive_region_area, is_zone_street_spot)
 from discovery_engine import infer_slot
 from category_filter import is_date_spot_category
 from area_seeds import generate_dynamic_queries, get_coverage_gap_areas
@@ -229,7 +230,9 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
                 continue
 
             # 2-b. 후보 키워드와 실제 상호명 유사도 검증
-            from youtube_vlog_miner import is_name_match
+            from youtube_vlog_miner import is_name_match, is_zone_composite_cand
+            if is_zone_composite_cand(candidate_name) and is_zone_street_spot(real_name):
+                continue
             if not is_name_match(candidate_name, real_name):
                 continue
 
