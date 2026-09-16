@@ -362,13 +362,14 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
             # 4. 규칙 기반 초고속 메타 생성 (Groq 429 원천 차단 & 0ms 처리)
             meta = generate_spot_metadata_rule_based(raw_name, cat, region, area, default_moods)
 
-            thum = p.get("thumUrl") or p.get("image") or p.get("imageUrl") or p.get("thumbUrl")
-            # [품질 가드] 고유 대표 이미지가 없는 스팟은 DB 적재 거부
-            if not thum or not thum.strip():
-                continue
-
             x_coord = p.get("x") or p.get("lng")
             y_coord = p.get("y") or p.get("lat")
+            # [품질 가드] 주소나 좌표가 없는 불완전 장소는 거부
+            if not road_addr or not x_coord or not y_coord:
+                continue
+
+            thum = p.get("thumUrl") or p.get("image") or p.get("imageUrl") or p.get("thumbUrl")
+            thum_str = (thum or "").strip()
 
             derived_reg, derived_area = derive_region_area(road_addr)
             # 검색 쿼리의 목표 권역과 실제 검색된 주소의 권역이 완전히 다른 경우 (동명 상호 오탐) 스킵
@@ -393,7 +394,7 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
                 "price": meta["price"],
                 "summary": meta["summary"],
                 "category": cat,
-                "image_url": thum,
+                "image_url": thum_str or None,
                 "lat": float(y_coord) if y_coord else None,
                 "lng": float(x_coord) if x_coord else None,
                 "quality_score": 88,
