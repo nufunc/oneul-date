@@ -38,7 +38,22 @@ DOCS_MONITORING_DIR = PROJECT_ROOT / "docs" / "monitoring"
 KST = timezone(timedelta(hours=9))
 
 # OCI VM SSH 기본 정보
-DEFAULT_SSH_KEY = os.getenv("OCI_SSH_KEY", r"C:\Users\Administrator\.ssh\oci-sshkey-2022-03-06.key")
+def _resolve_default_ssh_key() -> str:
+    env_key = os.getenv("OCI_SSH_KEY")
+    if env_key and os.path.exists(env_key):
+        return env_key
+    candidates = [
+        os.path.expanduser("~/.ssh/oci-sshkey-2022-03-06.key"),
+        os.path.expanduser("~/.ssh/ssh-key-2022-03-06.key"),
+        os.path.expanduser("~/Documents/ssh-key-2022-03-06.key"),
+        r"C:\Users\Administrator\.ssh\oci-sshkey-2022-03-06.key",
+    ]
+    for c in candidates:
+        if os.path.exists(c):
+            return c
+    return env_key or candidates[0]
+
+DEFAULT_SSH_KEY = _resolve_default_ssh_key()
 DEFAULT_SSH_HOST = os.getenv("OCI_SSH_HOST", "opc@152.70.89.210")
 REMOTE_LOG_DIR = "/mnt/data/git/oneul-date/collector/data/logs"
 
