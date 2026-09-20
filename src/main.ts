@@ -1188,7 +1188,9 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
   }
 
   // 다중 토큰이면 모든 토큰이 포함되거나 첫 번째 주요 토큰이 포함되면 통과
-  return tokens.every((t) => targetText.includes(t)) || tokens.some((t) => t.length >= 2 && targetText.includes(t));
+  if (tokens.every((t) => targetText.includes(t))) return true;
+  const firstToken = tokens[0];
+  return firstToken.length >= 2 && targetText.includes(firstToken);
 }
 
 /**
