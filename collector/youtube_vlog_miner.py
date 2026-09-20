@@ -42,6 +42,8 @@ from supabase_worker import (search_naver, calculate_quality_score, load_env,
                              derive_region_area, is_zone_street_spot, find_duplicate_spot)
 from category_filter import (
     is_date_spot_category,
+    SLOT_STAY_CAT_RE,
+    SLOT_STAY_VETO_RE,
     CATEGORY_WHITELIST,
     CATEGORY_WHITELIST_EXACT,
     CATEGORY_BLACKLIST,
@@ -1387,22 +1389,6 @@ def is_name_match(candidate: str, official_name: str) -> bool:
 #   '호텔'·'숙소' 가 스치기만 해도 stay 가 되던 오염 경로를 끊기 위함이다.
 # ─────────────────────────────────────────────────────────────
 
-SLOT_STAY_CAT_RE = re.compile(
-    r"(숙박|숙소|펜션|호텔|모텔|여관|콘도|리조트|게스트하우스|호스텔|민박|글램핑|"
-    r"야영|캠핑|카라반|풀\s*빌라|료칸|산장|스테이(?!크)|"
-    r"\bhotel\b|\bresort\b|pension|glamping|hostel)",
-    re.IGNORECASE,
-)
-
-# 카테고리는 숙박인데 상호명이 명백한 비(非)숙박 업종이면 stay 로 보지 않는다.
-# (예: 카테고리 '한옥숙소' + 상호명 '전주한옥마을 도예공방' → stay 아님)
-SLOT_STAY_VETO_RE = re.compile(
-    r"(카페|커피|베이커리|제과|디저트|찻집|공방|공예|체험관|박물관|미술관|갤러리|전시|"
-    r"식당|맛집|레스토랑|다이닝|횟집|고깃집|라운지|펍|주점|포차|공원|해수욕장|해변|"
-    r"전망대|수목원|식물원|시장|서점|도서관|바$|\bbar\b|\bcafe\b)",
-    re.IGNORECASE,
-)
-
 SLOT_NIGHT_RE = re.compile(
     r"((와인|칵테일|루프탑|재즈|몰트|위스키|하이볼|오뎅|스탠딩|스피크이지|라운지)\s*바(?!다)|"
     r"바\(bar\)|\bbar\b|\bpub\b|펍|호프|주점|술집|포차|포장마차|이자카야|"
@@ -1602,7 +1588,7 @@ def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
             continue
 
         # [C] 카테고리 화이트리스트 + 상호명 패턴 검증
-        ok_cat, cat_reason = is_date_spot_category(category, official_name)
+        ok_cat, cat_reason = is_date_spot_category(category, official_name, allow_lodging=True)
         if not ok_cat:
             stats["category_rejected"] += 1
             if verbose:

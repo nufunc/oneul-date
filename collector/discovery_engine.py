@@ -338,7 +338,7 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
 
             # 3. 데이트 스팟 카테고리 & 상호명 엄격 검증 (비데이트 업종·숙박·체인브랜드 차단)
             cat = str(p.get("category") or "")
-            ok_cat, cat_reason = is_date_spot_category(cat, raw_name)
+            ok_cat, cat_reason = is_date_spot_category(cat, raw_name, allow_lodging=True)
             if not ok_cat:
                 continue
 

@@ -243,7 +243,7 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
             road_addr = top.get("roadAddress") or top.get("address") or ""
 
             # 3. 데이트 스팟 카테고리 & 상호명 엄격 검증 (비데이트 업종·숙박·체인브랜드 차단)
-            ok_cat, cat_reason = is_date_spot_category(cat, real_name)
+            ok_cat, cat_reason = is_date_spot_category(cat, real_name, allow_lodging=True)
             if not ok_cat:
                 continue
 

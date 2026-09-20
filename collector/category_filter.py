@@ -144,6 +144,23 @@ CATEGORY_BLACKLIST_LODGING = [
     "풀빌라", "료칸", "산장", "롯지", "별장", "독채",
 ]
 
+# stay 의도로 검색했을 때만 숙박 카테고리를 예외 허용하기 위한 판정 패턴.
+# CATEGORY_BLACKLIST_LODGING과 같은 대상을 가리키되, 정규식이라 "스테이"처럼
+# 부분일치로는 잡기 애매한 표기까지 포함하고 VETO로 카페/식당 등 오탐을 걸러낸다.
+SLOT_STAY_CAT_RE = re.compile(
+    r"(숙박|숙소|펜션|호텔|모텔|여관|콘도|리조트|게스트하우스|호스텔|민박|글램핑|"
+    r"야영|캠핑|카라반|풀\s*빌라|료칸|산장|스테이(?!크)|"
+    r"\bhotel\b|\bresort\b|pension|glamping|hostel)",
+    re.IGNORECASE,
+)
+
+SLOT_STAY_VETO_RE = re.compile(
+    r"(카페|커피|베이커리|제과|디저트|찻집|공방|공예|체험관|박물관|미술관|갤러리|전시|"
+    r"식당|맛집|레스토랑|다이닝|횟집|고깃집|라운지|펍|주점|포차|공원|해수욕장|해변|"
+    r"전망대|수목원|식물원|시장|서점|도서관|바$|\bbar\b|\bcafe\b)",
+    re.IGNORECASE,
+)
+
 # 상호명 자체가 명백히 비(非)스팟인 패턴
 NAME_BLACKLIST_PATTERNS = [
     re.compile(r'일보$'), re.compile(r'신문(사)?$'), re.compile(r'방송(국)?$'),
@@ -161,9 +178,15 @@ NAME_BLACKLIST_PATTERNS = [
 # [2] 핵심 검증 함수
 # ─────────────────────────────────────────────────────────────
 
-def is_date_spot_category(category: str, name: str) -> tuple[bool, str]:
+def is_date_spot_category(category: str, name: str, allow_lodging: bool = False) -> tuple[bool, str]:
     """네이버/카카오 카테고리와 상호명이 데이트 스팟다운지 검증.
-    (통과여부, 탈락사유) 반환. 애매하면 보수적으로 거부한다."""
+    (통과여부, 탈락사유) 반환. 애매하면 보수적으로 거부한다.
+
+    allow_lodging: stay(숙박) 슬롯을 의도한 검색 결과에서만 True로 넘긴다.
+    일반 검색에서는 숙박 카테고리 전체를 차단하지만, stay 의도 검색에서는
+    SLOT_STAY_CAT_RE(진짜 숙박 카테고리)이면서 SLOT_STAY_VETO_RE(카페/식당
+    등 오탐)에 안 걸리는 경우만 예외로 통과시킨다.
+    """
     cat = (category or "").strip()
     cat_low = cat.lower()
     name_low = (name or "").lower()
@@ -172,6 +195,10 @@ def is_date_spot_category(category: str, name: str) -> tuple[bool, str]:
     for pat in NAME_BLACKLIST_PATTERNS:
         if pat.search(name or ""):
             return False, "상호명패턴"
+
+    # 1-a. stay 의도 검색: 진짜 숙박 카테고리면 여기서 바로 허용
+    if allow_lodging and SLOT_STAY_CAT_RE.search(cat) and not SLOT_STAY_VETO_RE.search(cat_low) and not SLOT_STAY_VETO_RE.search(name_low):
+        return True, ""
 
     # 2. 블랙리스트 (카테고리 또는 상호명)
     for bl in CATEGORY_BLACKLIST:

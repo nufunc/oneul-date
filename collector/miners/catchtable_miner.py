@@ -217,7 +217,7 @@ def run_catchtable_mining(supabase_url: str, service_key: str, max_discoveries: 
                 continue
 
             # 데이트 스팟 카테고리 검증
-            is_valid, reason = is_date_spot_category(category, real_name)
+            is_valid, reason = is_date_spot_category(category, real_name, allow_lodging=True)
             if not is_valid:
                 continue
 

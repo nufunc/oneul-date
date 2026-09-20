@@ -13,6 +13,7 @@ from collections import defaultdict
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from supabase_worker import normalize_spot_address, load_env
+from category_filter import CHAIN_BRAND_BLACKLIST
 
 _env = load_env()
 SUPABASE_URL = os.environ.get("SUPABASE_URL") or _env.get("SUPABASE_URL") or "http://152.70.89.210:18088"
@@ -125,10 +126,32 @@ def main():
     print("▶ 대표 부적합 스팟 샘플 10선:")
     for d in disallowed_details[:10]:
         print(f"  - [{d[1]}] (카테고리: {d[2]}) | 주소: {d[3]} | 사유: [{d[4]}]")
-        
+
+    # 1-b. 체인 브랜드 블랙리스트 소급 재검증 (수집 이후 블랙리스트에 추가된 브랜드가
+    # 기존 적재분에는 반영 안 된 것만 잡는다. is_date_spot_category 전체를 재적용하면
+    # CATEGORY_WHITELIST 누락 때문에 축제/행사·천문대 같은 정상 스팟까지 대량으로
+    # 걸리는 것을 실측으로 확인해 범위를 체인 브랜드로 좁혔다.)
+    reverify_ids = set()
+    reverify_details = []
+    for s in spots:
+        if s["id"] in disallowed_ids:
+            continue
+        combined = f"{s.get('name', '')} {s.get('category', '')}".lower()
+        for br in CHAIN_BRAND_BLACKLIST:
+            if br in combined:
+                reverify_ids.add(s["id"])
+                reverify_details.append((s["id"], s.get("name", ""), s.get("category", ""), s.get("address", ""), br))
+                break
+
+    print(f"\n🔁 [1-b. 체인 브랜드 소급 격리 대상] 총 {len(reverify_ids):,}개 스팟 선별")
+    print("▶ 대표 체인 브랜드 스팟 샘플 10선:")
+    for d in reverify_details[:10]:
+        print(f"  - [{d[1]}] (카테고리: {d[2]}) | 주소: {d[3]} | 사유: [체인브랜드({d[4]})]")
+
     # 2. 중복 스팟 선별 (동일 상호명 + 동일 주소/좌표)
-    # 부적합 업종으로 이미 제외된 스팟은 제외하고 남은 스팟 중에서 중복 검사
-    valid_spots = [s for s in spots if s["id"] not in disallowed_ids]
+    # 부적합 업종/재검증 탈락으로 이미 제외된 스팟은 제외하고 남은 스팟 중에서 중복 검사
+    excluded_ids = disallowed_ids | reverify_ids
+    valid_spots = [s for s in spots if s["id"] not in excluded_ids]
     
     group_map = defaultdict(list)
     for s in valid_spots:
@@ -163,8 +186,8 @@ def main():
     print(f"\n👥 [2. 중복 스팟 격리 대상] 총 {dup_group_count:,}개 그룹에서 잉여 중복 {len(duplicate_to_close_ids):,}개 스팟 선별 (대표 1개씩 총 {kept_count:,}개 유지)")
     
     # 3. 일괄 비활성화(is_closed=true) 실행
-    all_to_close = list(disallowed_ids | duplicate_to_close_ids)
-    print(f"\n⚡ [클린업 실행] 총 {len(all_to_close):,}개 스팟(부적합 {len(disallowed_ids)} + 중복 {len(duplicate_to_close_ids)}) 일괄 비활성화(is_closed=true) 시작...")
+    all_to_close = list(disallowed_ids | reverify_ids | duplicate_to_close_ids)
+    print(f"\n⚡ [클린업 실행] 총 {len(all_to_close):,}개 스팟(부적합 {len(disallowed_ids)} + 재검증탈락 {len(reverify_ids)} + 중복 {len(duplicate_to_close_ids)}) 일괄 비활성화(is_closed=true) 시작...")
     
     if close_spots_batch(all_to_close):
         print(f"🎉 [클린업 완료] 총 {len(all_to_close):,}개 스팟 비활성화 및 DB 정제 완료!")

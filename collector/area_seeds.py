@@ -168,8 +168,17 @@ GYEONGGI_INCHEON_AREAS = [
     {"region": "경기", "area": "평택시", "sub_areas": ["평택역", "고덕국제신도시", "소사벌카페거리", "평택호관광단지"], "default_vibes": ["trendy", "view"]},
     {"region": "경기", "area": "가평/양평", "sub_areas": ["가평청평북한강", "자라섬", "양평두물머리", "용문산", "서종면문호리"], "default_vibes": ["view", "healing"]},
     {"region": "인천", "area": "연수구", "sub_areas": ["송도센트럴파크", "트리플스트리트", "송도커낼워크", "청량산", "동춘동"], "default_vibes": ["view", "luxury"]},
-    {"region": "인천", "area": "중구/영종", "sub_areas": ["영종도구읍뱃터", "을왕리해수욕장", "인천개항장거리", "차이나타운", "월미도", "신포동"], "default_vibes": ["view", "retro", "romantic"]},
-    {"region": "인천", "area": "부평/남동", "sub_areas": ["부평평리단길", "구월동로데오", "소래포구", "인천대공원"], "default_vibes": ["trendy", "romantic"]}
+    {"region": "인천", "area": "중구", "sub_areas": ["인천개항장거리", "차이나타운", "월미도", "신포동", "송월동동화마을"], "default_vibes": ["view", "retro", "romantic"]},
+    {"region": "인천", "area": "영종구", "sub_areas": ["영종도구읍뱃터", "을왕리해수욕장", "인천공항", "왕산해수욕장"], "default_vibes": ["view", "healing"]},
+    {"region": "인천", "area": "부평구", "sub_areas": ["부평평리단길", "부평문화의거리", "부평역", "굴포천"], "default_vibes": ["trendy", "gourmet"]},
+    {"region": "인천", "area": "남동구", "sub_areas": ["구월동로데오", "소래포구", "인천대공원", "논현동"], "default_vibes": ["trendy", "romantic"]},
+    {"region": "인천", "area": "미추홀구", "sub_areas": ["숭의동", "인하대역", "문학경기장", "용현동"], "default_vibes": ["gourmet", "trendy"]},
+    {"region": "인천", "area": "계양구", "sub_areas": ["계양산", "아라뱃길", "작전역", "계산동"], "default_vibes": ["healing", "view"]},
+    {"region": "인천", "area": "강화군", "sub_areas": ["강화도마니산", "강화읍성공회성당", "조양방직카페", "강화풍물시장"], "default_vibes": ["healing", "retro"]},
+    {"region": "인천", "area": "검단구", "sub_areas": ["검단신도시", "검단호수공원", "원당동"], "default_vibes": ["trendy", "healing"]},
+    {"region": "인천", "area": "서해구", "sub_areas": ["청라국제도시", "청라호수공원", "루원시티"], "default_vibes": ["view", "trendy"]},
+    {"region": "인천", "area": "제물포구", "sub_areas": ["제물포역", "배다리헌책방거리", "동인천"], "default_vibes": ["retro", "gourmet"]},
+    {"region": "인천", "area": "옹진군", "sub_areas": ["백령도", "연평도", "덕적도"], "default_vibes": ["healing", "view"]},
 ]
 
 # 지방 광역시 및 전국 주요 여행/생활권 (강원, 영남, 호남, 충청, 제주 전역)
@@ -243,7 +252,16 @@ SLOT_INTENT_TEMPLATES = {
         ("골목 숨은 LP바 감성 펍", ["retro", "trendy"]),
         ("낭만 포차 야시장 먹거리 데이트", ["retro", "romantic"]),
         ("야경 뷰 테라스 바 칵테일", ["view", "romantic", "luxury"]),
-    ]
+    ],
+    "stay": [
+        ("오션뷰 프라이빗 독채 풀빌라", ["view", "luxury", "romantic"]),
+        ("전통 한옥스테이 감성 숙소", ["healing", "retro", "romantic"]),
+        ("무드등 파티룸 감성 풀빌라", ["romantic", "trendy"]),
+        ("리버뷰 시티뷰 호텔 스위트룸", ["view", "luxury"]),
+        ("숲속 프라이빗 글램핑 캠핑", ["healing", "view"]),
+        ("반려동물 동반 애견 풀빌라 펜션", ["healing", "romantic"]),
+        ("워터파크 아쿠아 리조트 스테이", ["active", "view"]),
+    ],
 }
 
 # 기존 호환성 전체 풀
@@ -269,29 +287,38 @@ def get_coverage_gap_areas(supabase_url: str, supabase_service_key: str, limit: 
 
     counts = {f"{item['region']}_{item['area']}": 0 for item in all_areas_pool}
 
-    # 전체 활성 스팟의 region, area 조회
-    url = f"{supabase_url.rstrip('/')}/rest/v1/spots?select=region,area,address&is_closed=eq.false&limit=5000"
+    # 전체 활성 스팟의 region, area 조회 (건수가 한 페이지를 넘길 수 있어 끝까지 페이지네이션)
     headers = {
         "apikey": supabase_service_key,
         "Authorization": f"Bearer {supabase_service_key}",
     }
-
+    page_size = 1000
+    offset = 0
     try:
-        req = urllib.request.Request(url, headers=headers)
-        with urllib.request.urlopen(req, timeout=5) as res:
-            if res.status == 200:
+        while True:
+            url = (f"{supabase_url.rstrip('/')}/rest/v1/spots?select=region,area,address"
+                   f"&is_closed=eq.false&limit={page_size}&offset={offset}")
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=10) as res:
+                if res.status != 200:
+                    break
                 rows = json.loads(res.read().decode('utf-8'))
-                for r in rows:
-                    reg = r.get("region") or ""
-                    area = r.get("area") or ""
-                    addr = r.get("address") or ""
-                    for item in all_areas_pool:
-                        i_reg = item["region"]
-                        i_area = item["area"]
-                        key = f"{i_reg}_{i_area}"
-                        if i_reg == reg and (i_area in area or i_area in addr or any(sub in addr for sub in item.get("sub_areas", []))):
-                            counts[key] = counts.get(key, 0) + 1
-                            break
+            if not rows:
+                break
+            for r in rows:
+                reg = r.get("region") or ""
+                area = r.get("area") or ""
+                addr = r.get("address") or ""
+                for item in all_areas_pool:
+                    i_reg = item["region"]
+                    i_area = item["area"]
+                    key = f"{i_reg}_{i_area}"
+                    if i_reg == reg and (i_area in area or i_area in addr or any(sub in addr for sub in item.get("sub_areas", []))):
+                        counts[key] = counts.get(key, 0) + 1
+                        break
+            offset += len(rows)
+            if len(rows) < page_size:
+                break
     except Exception:
         pass
 
@@ -318,14 +345,21 @@ def get_coverage_gap_areas(supabase_url: str, supabase_service_key: str, limit: 
 # ─────────────────────────────────────────────────────────────
 
 def _pick_balanced_intent() -> tuple[str, list[str]]:
-    """낮(40%), 저녁(35%), 밤(25%) 균형 슬롯 템플릿 선택"""
+    """낮(35%), 저녁(30%), 밤(20%), 숙박(15%) 균형 슬롯 템플릿 선택.
+
+    stay는 실측 기준 활성 스팟의 0.77%뿐이라 구조적으로 방치돼 있었다.
+    is_date_spot_category(allow_lodging=True)와 짝을 이뤄야 실제로
+    stay 스팟이 늘어난다(템플릿만 추가해선 카테고리 필터에서 걸러짐).
+    """
     r = random.random()
-    if r < 0.40:
+    if r < 0.35:
         return random.choice(SLOT_INTENT_TEMPLATES["day"])
-    elif r < 0.75:
+    elif r < 0.65:
         return random.choice(SLOT_INTENT_TEMPLATES["evening"])
-    else:
+    elif r < 0.85:
         return random.choice(SLOT_INTENT_TEMPLATES["night"])
+    else:
+        return random.choice(SLOT_INTENT_TEMPLATES["stay"])
 
 def generate_dynamic_queries(
     target_region: str = None,

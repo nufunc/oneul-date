@@ -153,7 +153,7 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                 if title in batch_seen_names or re.sub(r'\(.*?\)|\[.*?\]', '', title).strip() in batch_seen_names:
                     continue
 
-                is_valid, reason = is_date_spot_category(ctype_name, title)
+                is_valid, reason = is_date_spot_category(ctype_name, title, allow_lodging=True)
                 if not is_valid and "블랙리스트" in reason:
                     continue
 
