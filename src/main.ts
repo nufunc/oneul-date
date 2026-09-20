@@ -4064,13 +4064,14 @@ function isSuperHotSpot(spot: Spot): boolean {
   }
 
   // 2. 🍷 미식·큐레이션 채널 점수 (0~100)
+  // source.note는 마이닝에 쓰인 검색 쿼리 텍스트라("... 블루리본 서베이 2026 추천
+  // 맛집" 같은 쿼리 그대로) "미쉐린"/"블루리본"이 들어있어도 실제 인증과 무관하다.
+  // curation_badges(실제 인증 데이터)만 근거로 삼는다.
   let curationScore = 0;
   const srcNote = spot.source?.note || '';
   const badges = spot.curation_badges;
-  const isMichelin = srcNote.includes('미쉐린') || !!badges?.michelin || 
-    (Array.isArray(badges) && badges.includes('michelin'));
-  const isBlueRibbon = srcNote.includes('블루리본') || !!badges?.blue_ribbon || 
-    (Array.isArray(badges) && badges.includes('blue_ribbon'));
+  const isMichelin = !!badges?.michelin || (Array.isArray(badges) && badges.includes('michelin'));
+  const isBlueRibbon = !!badges?.blue_ribbon || (Array.isArray(badges) && badges.includes('blue_ribbon'));
   const isCatchtable = spot.source?.type === 'catchtable_miner' || 
     spot.source?.url?.includes('catchtable') || !!badges?.catchtable ||
     (Array.isArray(badges) && badges.includes('catchtable'));
@@ -5287,10 +5288,11 @@ function renderSpotDiscovery(): void {
       return getSpotPopularityScore(b) - getSpotPopularityScore(a);
     });
   } else if (state.spotSort === 'curation') {
-    // ⭐ 블루리본/미쉐린순 (공인 인증 뱃지 + 평점순)
+    // ⭐ 인증·평점순 (관광공사 인증 + 카카오맵 평점). michelin/blue_ribbon은
+    // 실제로 채우는 수집 경로가 없어 항상 0이라 점수식에서 제외했다.
     matchedSpots.sort((a, b) => {
-      const aScore = (a.curation_badges?.michelin ? 40 : 0) + (a.curation_badges?.blue_ribbon ? 30 : 0) + (a.curation_badges?.tour_api ? 10 : 0) + ((a.social_links?.kakaomap?.rating || 0) * 5);
-      const bScore = (b.curation_badges?.michelin ? 40 : 0) + (b.curation_badges?.blue_ribbon ? 30 : 0) + (b.curation_badges?.tour_api ? 10 : 0) + ((b.social_links?.kakaomap?.rating || 0) * 5);
+      const aScore = (a.curation_badges?.tour_api ? 10 : 0) + ((a.social_links?.kakaomap?.rating || 0) * 5);
+      const bScore = (b.curation_badges?.tour_api ? 10 : 0) + ((b.social_links?.kakaomap?.rating || 0) * 5);
       return bScore - aScore;
     });
   } else {
