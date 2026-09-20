@@ -5,6 +5,8 @@
 장소명과 지역 키워드로 유튜브 쇼츠/리뷰 영상을 탐색하고 조회수와 영상 메타데이터를 수집합니다.
 """
 
+from __future__ import annotations
+
 import urllib.request
 import urllib.parse
 import re

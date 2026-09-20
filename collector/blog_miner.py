@@ -5,6 +5,8 @@
 네이버/티스토리 블로그 및 구글 웹 검색의 최신 데이트 포스팅에서 핫플레이스 상호명을 마이닝하고 실시간 검증 후 Supabase에 자동 적재합니다.
 """
 
+from __future__ import annotations
+
 import os
 import sys
 import json

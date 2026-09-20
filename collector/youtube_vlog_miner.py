@@ -21,6 +21,8 @@ v3.5 개선 사항
   I. 소품샵·편집숍 업종 허용 + 체인 SPA/대형유통 브랜드 차단
 """
 
+from __future__ import annotations
+
 import os
 import sys
 import re

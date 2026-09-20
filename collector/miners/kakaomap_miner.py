@@ -5,6 +5,8 @@
 장소명과 주소로 카카오맵 장소를 매칭하여 실평점, 리뷰 수, 링크를 수집합니다.
 """
 
+from __future__ import annotations
+
 import urllib.request
 import urllib.parse
 import re

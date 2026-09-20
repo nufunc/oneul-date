@@ -6,6 +6,8 @@
 표준화된 social_links, metrics JSONB 및 hot_score (0~100)를 산출합니다.
 """
 
+from __future__ import annotations
+
 from datetime import datetime, timezone
 
 def calculate_hot_score(youtube_data: dict | None, kakaomap_data: dict | None, is_verified: bool = False) -> tuple[float, dict, dict]:

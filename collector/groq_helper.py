@@ -13,6 +13,8 @@ Groq Llama 3.1 8B Instant / Llama 3.3 70B Versatile 모델을 활용하여
 4. 토큰 절약을 위해 최소한의 시스템 프롬프트 및 응답 길이(max_tokens=600) 제한.
 """
 
+from __future__ import annotations
+
 import os
 import sys
 import re
