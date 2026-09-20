@@ -1325,6 +1325,8 @@ function isSpecialDiningSpot(spot: Spot): boolean {
   }
 
   // 3. 큐레이션 인증 뱃지 (미쉐린, 캐치테이블 파인다이닝)
+  // 2026-09-20 기준 michelin/catchtable을 채우는 수집 경로가 없어 매칭 0건.
+  // 공식 명단 대조 수집기를 새로 만들기 전까지는 이 분기가 항상 통과 안 됨.
   if (spot.curation_badges?.michelin || spot.curation_badges?.catchtable) {
     return true;
   }
