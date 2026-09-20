@@ -6665,7 +6665,7 @@ async function ensureSpotsForRegions(regionKeys: string[]): Promise<void> {
   if (missingKeys.includes('ALL')) {
     const allSpots = await loadSpots();
     if (allSpots && allSpots.length > 0) {
-      spots = mergeSpots(spots, allSpots);
+      spots = deduplicateSpotList(mergeSpots(spots, allSpots));
       spotById = new Map(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
       loadedRegionKeys.add('ALL');
       if (state.mainMode === 'spots') {
@@ -6680,7 +6680,7 @@ async function ensureSpotsForRegions(regionKeys: string[]): Promise<void> {
 
   const newSpots = await loadSpots(matchesToFetch);
   if (newSpots && newSpots.length > 0) {
-    spots = mergeSpots(spots, newSpots);
+    spots = deduplicateSpotList(mergeSpots(spots, newSpots));
     spotById = new Map(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
     missingKeys.forEach((k) => loadedRegionKeys.add(k));
     if (state.mainMode === 'spots') {
@@ -6714,7 +6714,7 @@ async function init(): Promise<void> {
     const cachedSpots = await getCachedSpots();
     if (cachedSpots && cachedSpots.length > 0) {
       hasCachedData = true;
-      spots = cachedSpots;
+      spots = deduplicateSpotList(cachedSpots);
       spotById = new Map(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
       loadedRegionKeys.add('ALL');
       if (isSharedLink) {
@@ -6733,7 +6733,7 @@ async function init(): Promise<void> {
     loadSpots()
       .then((firstSpots) => {
         if (firstSpots && firstSpots.length > 0) {
-          spots = mergeSpots(spots, firstSpots);
+          spots = deduplicateSpotList(mergeSpots(spots, firstSpots));
           spotById = new Map(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
           loadedRegionKeys.add('ALL');
           if (isSharedLink && (!state.course || state.course.length === 0)) {
@@ -6752,7 +6752,7 @@ async function init(): Promise<void> {
       loadSpots()
         .then((liveSpots) => {
           if (liveSpots && liveSpots.length > 0) {
-            spots = liveSpots;
+            spots = deduplicateSpotList(liveSpots);
             spotById = new Map(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
             loadedRegionKeys.add('ALL');
           }
