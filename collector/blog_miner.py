@@ -125,7 +125,7 @@ def fetch_blog_candidates(query: str):
 
     # 1. 네이버 뷰/블로그 피드
     try:
-        url = f"https://search.naver.com/search.naver?where=view&sm=tab_jum&query={encoded}"
+        url = f"https://search.naver.com/search.naver?where=view&sm=tab_jum&query={encoded}&sort=1"
         req = urllib.request.Request(url, headers=HEADERS)
         with urllib.request.urlopen(req, timeout=5) as res:
             if res.status == 200:
