@@ -2641,8 +2641,10 @@ function isBlindDateSpot(spot: Spot): boolean {
 /** 특별한 기념일에 적합한 스팟 판별 */
 function isAnniversarySpot(spot: Spot): boolean {
   const text = `${spot.name} ${spot.category || ''} ${spot.summary || ''} ${(spot.mood || []).join(' ')}`.toLowerCase();
+  // '코스'/'코스요리'는 빼뒀다. 실측 결과 매칭 606건 중 84.2%가 "~데이트 코스예요"
+  // 상투구일 뿐이고 실제 파인다이닝 맥락(프러포즈 코스 등) 정탐은 0건이었다.
   const ANNIVERSARY_KEYWORDS = [
-    '기념일', '파인다이닝', '오마카세', '코스', '코스요리', '와인바', '루프탑', '야경', '전망', '스카이라운지',
+    '기념일', '파인다이닝', '오마카세', '와인바', '루프탑', '야경', '전망', '스카이라운지',
     '스테이크', '샴페인', '블루리본', '미쉐린', '미슐랭', '호텔', '럭셔리', '로맨틱'
   ];
   // romantic/view는 대부분의 스팟에 붙는 흔한 무드라 변별력이 없어 luxury만 본다
