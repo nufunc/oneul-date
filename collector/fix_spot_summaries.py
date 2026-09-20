@@ -29,22 +29,28 @@ if sys.platform == "win32":
 from groq_helper import get_groq_api_key, call_groq_json
 
 def _load_env_credentials():
+    """collector/.env를 먼저 찾고 있으면 거기서 멈춘다. 예전엔 두 경로를 전부 읽어
+    나중에 읽은 파일(레포 루트 .env)이 먼저 읽은 collector/.env 값을 덮어써서,
+    collector/.env를 최신 자체 DB 주소로 갱신해도 루트 .env가 낡아 있으면
+    그 낡은 값으로 되돌아가는 문제가 있었다."""
     search_paths = [
         os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"),
         os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"),
     ]
     for env_path in search_paths:
-        if os.path.exists(env_path):
-            try:
-                with open(env_path, "r", encoding="utf-8") as f:
-                    for line in f:
-                        line = line.strip()
-                        if line.startswith("VITE_SUPABASE_URL=") or line.startswith("SUPABASE_URL="):
-                            os.environ["SUPABASE_URL"] = line.split("=", 1)[1].strip().strip('"').strip("'")
-                        elif line.startswith("SUPABASE_SERVICE_KEY=") or line.startswith("SUPABASE_KEY=") or line.startswith("VITE_SUPABASE_ANON_KEY="):
-                            os.environ["SUPABASE_SERVICE_KEY"] = line.split("=", 1)[1].strip().strip('"').strip("'")
-            except Exception:
-                pass
+        if not os.path.exists(env_path):
+            continue
+        try:
+            with open(env_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line.startswith("SUPABASE_URL=") or line.startswith("VITE_SUPABASE_URL="):
+                        os.environ["SUPABASE_URL"] = line.split("=", 1)[1].strip().strip('"').strip("'")
+                    elif line.startswith("SUPABASE_SERVICE_KEY=") or line.startswith("SUPABASE_KEY=") or line.startswith("VITE_SUPABASE_ANON_KEY="):
+                        os.environ["SUPABASE_SERVICE_KEY"] = line.split("=", 1)[1].strip().strip('"').strip("'")
+        except Exception:
+            pass
+        break
 
 def is_bad_summary(summary: str, name: str = "") -> bool:
     """비정상적이거나 판박이 템플릿인 스팟 설명인지 엄격 판정"""
