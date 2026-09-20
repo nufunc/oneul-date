@@ -12,10 +12,11 @@ import urllib.request
 from collections import defaultdict
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from supabase_worker import normalize_spot_address
+from supabase_worker import normalize_spot_address, load_env
 
-SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://uyhwhnnzzfhtxjernfit.supabase.co")
-SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5aHdobm56emZodHhqZXJuZml0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NjkyMDI3NywiZXhwIjoyMTAyNDk2Mjc3fQ.xHrjNL8KkcewQcHHKBB6KuMDepXwosZcpABh2s3a-40")
+_env = load_env()
+SUPABASE_URL = os.environ.get("SUPABASE_URL") or _env.get("SUPABASE_URL") or "http://152.70.89.210:18088"
+SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY") or _env.get("SUPABASE_SERVICE_KEY") or ""
 
 DISALLOWED_CATEGORIES = [
     # 1. 유흥주점 / 성인 / 가요방
@@ -44,12 +45,17 @@ def normalize_name(name):
 def normalize_addr(addr):
     return normalize_spot_address(addr)
 
+def build_headers(extra=None):
+    """SUPABASE_KEY가 없으면(자체 호스팅 PostgREST가 인증을 요구하지 않는 경우)
+    apikey/Authorization 헤더 자체를 보내지 않는다."""
+    headers = dict(extra or {})
+    if SUPABASE_KEY:
+        headers["apikey"] = SUPABASE_KEY
+        headers["Authorization"] = f"Bearer {SUPABASE_KEY}"
+    return headers
+
 def fetch_all_active_spots():
-    headers = {
-        "apikey": SUPABASE_KEY,
-        "Authorization": f"Bearer {SUPABASE_KEY}",
-        "Prefer": "count=exact"
-    }
+    headers = build_headers({"Prefer": "count=exact"})
     
     url = f"{SUPABASE_URL}/rest/v1/spots?select=id,name,region,area,category,address,summary,image_url,lat,lng,quality_score,source,is_closed&is_closed=eq.false&limit=1000&offset=0"
     req = urllib.request.Request(url, headers=headers)
@@ -70,12 +76,7 @@ def fetch_all_active_spots():
 def close_spots_batch(spot_ids):
     if not spot_ids:
         return True
-    headers = {
-        "apikey": SUPABASE_KEY,
-        "Authorization": f"Bearer {SUPABASE_KEY}",
-        "Content-Type": "application/json",
-        "Prefer": "return=minimal"
-    }
+    headers = build_headers({"Content-Type": "application/json", "Prefer": "return=minimal"})
     # 50개씩 나눠서 PATCH 실행
     chunk_size = 50
     success = True
