@@ -55,22 +55,29 @@ def build_headers(extra=None):
     return headers
 
 def fetch_all_active_spots():
-    headers = build_headers({"Prefer": "count=exact"})
-    
-    url = f"{SUPABASE_URL}/rest/v1/spots?select=id,name,region,area,category,address,summary,image_url,lat,lng,quality_score,source,is_closed&is_closed=eq.false&limit=1000&offset=0"
-    req = urllib.request.Request(url, headers=headers)
-    with urllib.request.urlopen(req) as res:
-        cr = res.headers.get("Content-Range")
-        total = int(cr.split("/")[1]) if cr else 1000
-        spots = json.loads(res.read().decode("utf-8"))
-        
-    for offset in range(1000, total, 1000):
-        url = f"{SUPABASE_URL}/rest/v1/spots?select=id,name,region,area,category,address,summary,image_url,lat,lng,quality_score,source,is_closed&is_closed=eq.false&limit=1000&offset={offset}"
+    """전체 active 스팟을 페이지 단위로 끝까지 조회한다.
+
+    Content-Range 헤더의 총건수(count=exact)는 자체 호스팅 PostgREST 설정에
+    따라 '*'(미상)로 올 수 있어 신뢰하지 않는다. 대신 매 페이지가 limit보다
+    적게 오면 그걸로 종료를 판단한다(sync_live_spots.py와 동일한 방식).
+    """
+    headers = build_headers()
+    limit = 1000
+    offset = 0
+    spots = []
+    while True:
+        url = (f"{SUPABASE_URL}/rest/v1/spots?select=id,name,region,area,category,address,"
+               f"summary,image_url,lat,lng,quality_score,source,is_closed&is_closed=eq.false"
+               f"&limit={limit}&offset={offset}")
         req = urllib.request.Request(url, headers=headers)
         with urllib.request.urlopen(req) as res:
             chunk = json.loads(res.read().decode("utf-8"))
-            spots.extend(chunk)
-            
+        if not chunk:
+            break
+        spots.extend(chunk)
+        offset += len(chunk)
+        if len(chunk) < limit:
+            break
     return spots
 
 def close_spots_batch(spot_ids):
