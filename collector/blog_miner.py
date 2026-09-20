@@ -14,7 +14,8 @@ import time
 import random
 import re
 from supabase_worker import (load_env, search_naver, calculate_quality_score,
-                             is_polluted_header_name, derive_region_area, is_zone_street_spot)
+                             is_polluted_header_name, derive_region_area, is_zone_street_spot,
+                             find_duplicate_spot)
 from discovery_engine import infer_slot
 from category_filter import is_date_spot_category
 from area_seeds import generate_dynamic_queries, get_coverage_gap_areas
@@ -247,16 +248,9 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
             if not real_name or not road_addr or len(road_addr.strip()) < 5:
                 continue
 
-            # 4. DB 중복 검사
-            check_url = f"{supabase_url}/rest/v1/spots?select=id&name=eq.{urllib.parse.quote(real_name)}"
-            try:
-                check_req = urllib.request.Request(check_url, headers=api_headers)
-                with urllib.request.urlopen(check_req, timeout=5) as res:
-                    existing = json.loads(res.read().decode('utf-8'))
-                    if existing and len(existing) > 0:
-                        continue
-            except Exception:
-                pass
+            # 4. DB 중복 검사 (이름 + 정규화 주소)
+            if find_duplicate_spot(supabase_url, api_headers, real_name, road_addr):
+                continue
 
             batch_seen_names.add(real_name)
 

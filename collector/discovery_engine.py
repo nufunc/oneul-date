@@ -16,7 +16,7 @@ import re
 
 from category_filter import is_date_spot_category
 from area_seeds import generate_dynamic_queries, get_coverage_gap_areas
-from supabase_worker import is_polluted_header_name, derive_region_area
+from supabase_worker import is_polluted_header_name, derive_region_area, find_duplicate_spot
 from fix_spot_summaries import generate_curated_summary
 from heal_and_verify_spots import is_dummy_or_closed_spot
 
@@ -346,16 +346,9 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
             if not raw_name or not road_addr or len(road_addr.strip()) < 5:
                 continue
 
-            # 4. DB 중복 검사 (이름으로 SELECT)
-            check_url = f"{supabase_url}/rest/v1/spots?select=id&name=eq.{urllib.parse.quote(raw_name)}"
-            try:
-                check_req = urllib.request.Request(check_url, headers=api_headers)
-                with urllib.request.urlopen(check_req, timeout=5) as res:
-                    existing = json.loads(res.read().decode('utf-8'))
-                    if existing and len(existing) > 0:
-                        continue  # 이미 존재하는 스팟
-            except Exception:
-                pass
+            # 4. DB 중복 검사 (이름 + 정규화 주소)
+            if find_duplicate_spot(supabase_url, api_headers, raw_name, road_addr):
+                continue  # 이미 존재하는 스팟
 
             batch_seen_names.add(raw_name)
 

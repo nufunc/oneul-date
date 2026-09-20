@@ -11,6 +11,9 @@ import re
 import urllib.request
 from collections import defaultdict
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from supabase_worker import normalize_spot_address
+
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://uyhwhnnzzfhtxjernfit.supabase.co")
 SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5aHdobm56emZodHhqZXJuZml0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NjkyMDI3NywiZXhwIjoyMTAyNDk2Mjc3fQ.xHrjNL8KkcewQcHHKBB6KuMDepXwosZcpABh2s3a-40")
 
@@ -39,9 +42,7 @@ def normalize_name(name):
     return re.sub(r'[^a-zA-Z0-9가-힣]', '', name).lower()
 
 def normalize_addr(addr):
-    if not addr:
-        return ""
-    return re.sub(r'\s+', '', addr)
+    return normalize_spot_address(addr)
 
 def fetch_all_active_spots():
     headers = {

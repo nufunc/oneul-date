@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from supabase_worker import load_env, search_naver, calculate_quality_score, derive_region_area
+from supabase_worker import load_env, search_naver, calculate_quality_score, derive_region_area, find_duplicate_spot
 from category_filter import is_date_spot_category
 
 # 캐치테이블 / 블루리본 큐레이션 마이닝 쿼리 풀 (전국 8개 권역 × 미식 테마 60개+)
@@ -154,18 +154,6 @@ def extract_gourmet_candidates_from_web(query_text: str) -> list[str]:
 
     return unique_candidates[:15]
 
-def check_spot_exists(supabase_url: str, headers: dict, name: str) -> bool:
-    clean_name = re.sub(r'\(.*?\)|\[.*?\]', '', name).strip()
-    encoded = urllib.parse.quote(clean_name)
-    url = f"{supabase_url}/rest/v1/spots?select=id&name=eq.{encoded}"
-    req = urllib.request.Request(url, headers=headers)
-    try:
-        with urllib.request.urlopen(req, timeout=3) as res:
-            rows = json.loads(res.read().decode('utf-8'))
-            return len(rows) > 0
-    except Exception:
-        return False
-
 def run_catchtable_mining(supabase_url: str, service_key: str, max_discoveries: int = 60) -> int:
     """캐치테이블 & 블루리본 미식 큐레이션 마이닝 실행"""
     if not supabase_url or not service_key:
@@ -234,7 +222,7 @@ def run_catchtable_mining(supabase_url: str, service_key: str, max_discoveries: 
                 continue
 
             # 중복 검사
-            if check_spot_exists(supabase_url, api_headers, real_name):
+            if find_duplicate_spot(supabase_url, api_headers, real_name, road_addr):
                 continue
 
             derived_region, derived_area = derive_region_area(road_addr)

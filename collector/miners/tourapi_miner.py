@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from supabase_worker import load_env, derive_region_area
+from supabase_worker import load_env, derive_region_area, find_duplicate_spot
 from category_filter import is_date_spot_category
 
 # TourAPI 4.0 엔드포인트 (KorService2 국문 관광정보 서비스)
@@ -95,23 +95,6 @@ def fetch_tourapi_spots(api_key: str, area_code: str = "1", content_type_id: str
 
     return []
 
-def check_spot_exists(supabase_url: str, headers: dict, content_id: str, name: str, addr: str = "") -> bool:
-    """상호명 및 주소로 이미 DB에 존재하는지 확인 (중복 원천 차단)"""
-    clean_name = re.sub(r'\(.*?\)|\[.*?\]', '', name).strip()
-    encoded = urllib.parse.quote(name)
-    encoded_clean = urllib.parse.quote(clean_name)
-    url_name = f"{supabase_url}/rest/v1/spots?select=id,name,address&or=(name.eq.{encoded},name.eq.{encoded_clean})&limit=1"
-    req_name = urllib.request.Request(url_name, headers=headers)
-    try:
-        with urllib.request.urlopen(req_name, timeout=3) as res:
-            rows = json.loads(res.read().decode('utf-8'))
-            if rows and len(rows) > 0:
-                return True
-    except Exception:
-        pass
-
-    return False
-
 def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = None, max_discoveries: int = 15) -> int:
     """한국관광공사 TourAPI 순회 마이닝 실행"""
     if not supabase_url or not service_key:
@@ -174,7 +157,7 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                 if not is_valid and "블랙리스트" in reason:
                     continue
 
-                if check_spot_exists(supabase_url, api_headers, content_id, title, addr1):
+                if find_duplicate_spot(supabase_url, api_headers, title, addr1):
                     continue
 
                 batch_seen_names.add(title)

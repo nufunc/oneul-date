@@ -37,7 +37,7 @@ if hasattr(sys.stdout, 'reconfigure'):
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from supabase_worker import (search_naver, calculate_quality_score, load_env,
-                             derive_region_area, is_zone_street_spot)
+                             derive_region_area, is_zone_street_spot, find_duplicate_spot)
 from category_filter import (
     is_date_spot_category,
     CATEGORY_WHITELIST,
@@ -1618,21 +1618,13 @@ def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
 
         slot, moods = detect_slot_and_mood(category, official_name, extra_text=cand)
 
-        # 중복 검사 (동일 상호명이 이미 있는지 확인 — 읽기 전용)
+        # 중복 검사 (이름 + 정규화 주소, 읽기 전용)
         if supabase_url and supabase_key:
-            check_q = urllib.parse.quote(official_name)
-            check_url = f"{supabase_url}/rest/v1/spots?name=eq.{check_q}&select=id"
-            check_req = urllib.request.Request(check_url, headers=headers)
-            try:
-                with urllib.request.urlopen(check_req, timeout=5) as c_res:
-                    existing = json.loads(c_res.read().decode('utf-8'))
-                    if existing:
-                        stats["duplicated"] += 1
-                        if verbose:
-                            print(f"    ⏩ [이미 존재하는 스팟 건너뜀] {official_name} (ID: {existing[0]['id']})")
-                        continue
-            except Exception:
-                pass
+            if find_duplicate_spot(supabase_url, headers, official_name, road_addr):
+                stats["duplicated"] += 1
+                if verbose:
+                    print(f"    ⏩ [이미 존재하는 스팟 건너뜀] {official_name}")
+                continue
 
         # 고유 ID 생성 (Timestamp ms)
         spot_id = int(time.time() * 1000)

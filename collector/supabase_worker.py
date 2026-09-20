@@ -318,6 +318,65 @@ def derive_region_area(address):
     return (region, None)
 
 
+_ADDR_TAIL_TOKEN_RE = re.compile(
+    r'^(지하)?\d+층$|^B\d+.*$|^\d+호$|^\d+동$|'
+    r'^.*(빌딩|타워|센터|플라자|프라자|스퀘어|하우스|맨션|파크|몰|상가)$'
+)
+
+
+def normalize_spot_address(address):
+    """주소 비교용 정규화: 건물명·층·호 등 뒤쪽 꼬리 토큰을 반복 제거한 뒤 공백 없이 이어붙인다.
+
+    "서울 강남구 도산대로67길 19"와 "서울 강남구 도산대로67길 19 힐탑빌딩 2층"이
+    같은 곳을 가리키는데도 문자열이 달라 중복 검사를 통과하는 문제를 막는다.
+    원래 주소에 있던 공백 경계로만 꼬리를 잘라내므로 도로명의 숫자(번지)까지
+    잘못 지우지 않는다.
+    """
+    if not address:
+        return ""
+    tokens = address.strip().split()
+    while tokens and _ADDR_TAIL_TOKEN_RE.match(tokens[-1]):
+        tokens.pop()
+    return "".join(tokens)
+
+
+def find_duplicate_spot(supabase_url, headers, name, address=""):
+    """상호명(+주소)으로 DB에 이미 있는 스팟인지 확인한다.
+
+    이름은 원형과 괄호 제거본 둘 다로 조회하고, 주소가 주어지면
+    normalize_spot_address로 건물명/층 꼬리를 제거한 뒤 비교해 같은 곳을
+    가리키는 표기 차이(건물명 유무 등)를 흡수한다. 주소가 없으면 이름
+    일치만으로 중복 처리한다(과거 마이너들의 동작과 동일).
+    이름이 같아도 주소가 명백히 다르면(동명 다른 지점) 중복으로 보지 않는다.
+    조회 자체가 실패하면 수집 파이프라인을 막지 않기 위해 중복 아님으로 간주한다.
+    """
+    if not name:
+        return False
+    clean_name = re.sub(r'\(.*?\)|\[.*?\]', '', name).strip()
+    if not clean_name:
+        return False
+    encoded = urllib.parse.quote(name)
+    encoded_clean = urllib.parse.quote(clean_name)
+    names_clause = f"name.eq.{encoded}" if encoded == encoded_clean else f"name.eq.{encoded},name.eq.{encoded_clean}"
+    url = f"{supabase_url}/rest/v1/spots?select=id,name,address&or=({names_clause})&limit=20"
+    req = urllib.request.Request(url, headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=5) as res:
+            rows = json.loads(res.read().decode('utf-8'))
+    except Exception:
+        return False
+
+    if not rows:
+        return False
+    if not address:
+        return True
+
+    target_addr = normalize_spot_address(address)
+    if not target_addr:
+        return True
+    return any(normalize_spot_address(row.get("address", "")) == target_addr for row in rows)
+
+
 # ---------------------------------------------------------------------------
 # 슬롯 자동교정 (Slot Healing)
 #   네이버/카카오 지도가 실제로 내려주는 "공식 카테고리" 표기를 유일한 판정 근거로

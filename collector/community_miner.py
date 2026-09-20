@@ -14,7 +14,8 @@ import time
 import random
 import re
 from supabase_worker import (
-    load_env, search_naver, calculate_quality_score, is_polluted_header_name, derive_region_area
+    load_env, search_naver, calculate_quality_score, is_polluted_header_name, derive_region_area,
+    find_duplicate_spot
 )
 from category_filter import is_date_spot_category
 
@@ -185,16 +186,9 @@ def run_community_mining(supabase_url: str, service_key: str, max_discoveries: i
             if not real_name or not road_addr:
                 continue
 
-            # DB 중복 검사
-            check_url = f"{supabase_url}/rest/v1/spots?select=id&name=eq.{urllib.parse.quote(real_name)}"
-            try:
-                check_req = urllib.request.Request(check_url, headers=api_headers)
-                with urllib.request.urlopen(check_req, timeout=5) as res:
-                    existing = json.loads(res.read().decode('utf-8'))
-                    if existing and len(existing) > 0:
-                        continue
-            except Exception:
-                pass
+            # DB 중복 검사 (이름 + 정규화 주소)
+            if find_duplicate_spot(supabase_url, api_headers, real_name, road_addr):
+                continue
 
             derived_reg, derived_area = derive_region_area(road_addr)
             # 검색 쿼리의 목표 권역과 실제 검색된 주소의 권역이 완전히 다른 경우 (동명 상호 오탐) 스킵

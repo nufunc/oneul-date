@@ -23,6 +23,7 @@ from miners.youtube_miner import search_youtube_hotclip
 from miners.kakaomap_miner import search_kakaomap_place
 from score_engine import calculate_hot_score
 from category_filter import is_date_spot_category
+from supabase_worker import find_duplicate_spot
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -331,16 +332,9 @@ def run_bulk_mining(target_count: int = 1000, enable_social: bool = True):
             if not raw_name or not road_addr:
                 continue
 
-            # DB 중복 검사
-            check_url = f"{supabase_url}/rest/v1/spots?select=id&name=eq.{urllib.parse.quote(raw_name)}"
-            try:
-                check_req = urllib.request.Request(check_url, headers=api_headers)
-                with urllib.request.urlopen(check_req, timeout=4) as res:
-                    existing = json.loads(res.read().decode('utf-8'))
-                    if existing and len(existing) > 0:
-                        continue  # 중복 스킵
-            except Exception:
-                pass
+            # DB 중복 검사 (이름 + 정규화 주소)
+            if find_duplicate_spot(supabase_url, api_headers, raw_name, road_addr):
+                continue  # 중복 스킵
 
             # 1. 규칙 기반 초고속 메타데이터 큐레이션 (Groq 429 원천 차단)
             ai_data = generate_spot_metadata_rule_based(raw_name, cat, region, area, default_moods)
