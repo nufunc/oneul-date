@@ -17,6 +17,7 @@ import json
 import time
 import urllib.request
 import urllib.parse
+from collections import Counter
 
 # Windows 콘솔 인코딩 방어
 if sys.platform == "win32":
@@ -398,8 +399,20 @@ def fix_all_spot_summaries(supabase_url: str, service_key: str, limit: int = 500
             print(f"❌ DB 조회 실패: {e}")
             break
 
-    bad_spots = [s for s in spots if is_bad_summary(s.get("summary", ""), s.get("name", ""))]
-    print(f"📊 전체 {len(spots)}개 스팟 중 교정 대상 {len(bad_spots)}개 감지됨.\n")
+    # is_bad_summary는 깨진/더미 텍스트만 잡고 "잘 쓰였지만 대량으로 겹치는" 것은
+    # 못 잡는다. 같은 summary가 임계치보다 많이 반복되면 그것도 교정 대상에 넣는다.
+    DUPLICATE_THRESHOLD = 5
+    summary_counts = Counter(s.get("summary", "") for s in spots if s.get("summary"))
+
+    def _is_duplicated(summary: str) -> bool:
+        return bool(summary) and summary_counts.get(summary, 0) > DUPLICATE_THRESHOLD
+
+    bad_spots = [
+        s for s in spots
+        if is_bad_summary(s.get("summary", ""), s.get("name", "")) or _is_duplicated(s.get("summary", ""))
+    ]
+    print(f"📊 전체 {len(spots)}개 스팟 중 교정 대상 {len(bad_spots)}개 감지됨"
+          f"(깨진 텍스트 + {DUPLICATE_THRESHOLD}회 초과 중복).\n")
 
     if not bad_spots:
         print("🎉 모든 스팟의 설명이 이미 완벽하게 정제되어 있습니다!")
