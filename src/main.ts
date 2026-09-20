@@ -2699,7 +2699,7 @@ interface AppState {
   spotCategory: string;
   /** 스팟 탐색 모드: GPS 반경 거리 필터 (단위: km, 기본 3.0km, 0은 전체) */
   spotDistanceRadius: number;
-  /** 스팟 탐색 모드: 정렬 (distance: 거리순, popular: 인기/핫플순, curation: 블루리본/미쉐린순) */
+  /** 스팟 탐색 모드: 정렬 (distance: 거리순, popular: 인기/핫플순, curation: 인증·평점순) */
   spotSort: 'distance' | 'popular' | 'curation';
   /** 스팟 탐색 모드: 한 번에 표시할 열(행) 개수 (2, 3, 5개행, 기본값: 3) */
   spotGridCols: 2 | 3 | 5;
@@ -5278,7 +5278,7 @@ function renderSpotDiscovery(): void {
     matchedSpots = matchedSpots.filter((s) => isSpecialDiningSpot(s));
   }
 
-  // 4. 정렬 적용 (거리순 / 핫플·인기순 / 블루리본·미쉐린순)
+  // 4. 정렬 적용 (거리순 / 핫플·인기순 / 인증·평점순)
   if (state.spotSort === 'distance') {
     // 📍 가까운 거리순 (가까운 곳부터, 동일 거리 시 인기 점수순)
     matchedSpots.sort((a, b) => {
