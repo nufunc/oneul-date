@@ -142,13 +142,37 @@ async function openCacheDB(): Promise<IDBDatabase> {
 }
 
 /**
+ * TourAPI 마이너가 curation_badges를 문자열 배열(예: ["한국관광공사 인증"])로
+ * 적재한 레코드를 CurationBadges 객체 형태로 변환한다. 배열 그대로 두면
+ * spot.curation_badges?.tour_api 같은 프로퍼티 접근이 전부 undefined가 되어
+ * 배지 표시·인기도 점수 계산에서 조용히 빠진다.
+ */
+function normalizeCurationBadges(raw: unknown): CurationBadges | undefined {
+  if (!raw) return undefined;
+  if (!Array.isArray(raw)) return raw as CurationBadges;
+  const badges: CurationBadges = {};
+  const certified: string[] = [];
+  for (const item of raw) {
+    if (typeof item !== 'string') continue;
+    if (item.includes('관광공사')) badges.tour_api = item;
+    else if (item.includes('미쉐린') || item.toLowerCase().includes('michelin')) badges.michelin = item;
+    else if (item.includes('블루리본')) badges.blue_ribbon = 1;
+    else if (item.includes('캐치테이블') || item.toLowerCase().includes('catchtable')) badges.catchtable = item;
+    else certified.push(item);
+  }
+  if (certified.length > 0) badges.certified = certified;
+  return Object.keys(badges).length > 0 ? badges : undefined;
+}
+
+/**
  * 이상 스팟 또는 오탐지된 상호명을 정상화하는 필터
  * (예: '광명전통시장 야간 클로렐라버거' -> 실제 매장 '클로렐라베이커리'로 자동 교정)
  */
 export function normalizeSpot(spot: Spot): Spot {
   if (!spot) return spot;
+  let next = spot;
   if (spot.id === 4833 || (spot.name && (spot.name.includes('클로렐라버거') || spot.name.includes('광명전통시장 야간')))) {
-    return {
+    next = {
       ...spot,
       name: '클로렐라베이커리',
       category: '제과,베이커리',
@@ -161,7 +185,10 @@ export function normalizeSpot(spot: Spot): Spot {
       lng: 126.85572328,
     };
   }
-  return spot;
+  if (Array.isArray(next.curation_badges)) {
+    next = { ...next, curation_badges: normalizeCurationBadges(next.curation_badges) };
+  }
+  return next;
 }
 
 export function normalizeSpots(spots: Spot[]): Spot[] {

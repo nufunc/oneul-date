@@ -189,7 +189,13 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                     "lng": lng_val,
                     "quality_score": 92,
                     "fail_count": 0,
-                    "curation_badges": ["한국관광공사 인증"] + (["한국관광 100선"] if ctype_id == "12" else []),
+                    # curation_badges는 프론트가 {tour_api, michelin, ...} 객체로 읽는다.
+                    # 배열로 넣으면 spot.curation_badges?.tour_api 같은 접근이 전부
+                    # undefined가 돼 배지 표시·인기도 점수 계산에서 조용히 빠진다.
+                    "curation_badges": {
+                        "tour_api": "한국관광공사 인증",
+                        **({"certified": ["한국관광 100선"]} if ctype_id == "12" else {}),
+                    },
                     "parking_info": {
                         "type": "free" if "주차" in addr1 else "unknown",
                         "detail": "공영/부설 주차장 완비" if "주차" in addr1 else "인근 공영주차장 이용"
