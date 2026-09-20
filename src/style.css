@@ -5368,3 +5368,54 @@ html[data-theme-resolved="dark"] .spot-link-btn.kakao {
     font-size: var(--font-xs);
   }
 }
+
+/* SEO 랜딩 페이지(지역×시간대 정적 페이지)의 크롤링용 콘텐츠 영역 */
+#seo-landing {
+  max-width: var(--layout-max);
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-5) calc(80px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--color-border);
+  font-family: var(--font-sans);
+  color: var(--color-text);
+}
+#seo-landing h1 {
+  font-size: var(--font-lg);
+  margin: 0 0 var(--space-2);
+}
+#seo-landing > p {
+  color: var(--color-text-sub);
+  font-size: var(--font-sm);
+  margin: 0 0 var(--space-4);
+}
+#seo-landing ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--space-4);
+  display: grid;
+  gap: var(--space-3);
+}
+.seo-spot-item {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.seo-spot-item a {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--color-text);
+  text-decoration: none;
+}
+.seo-spot-item a strong {
+  font-size: var(--font-md);
+}
+.seo-spot-item a span {
+  font-size: var(--font-xs);
+  color: var(--color-text-faint);
+}
+.seo-spot-item p {
+  margin: var(--space-2) 0 0;
+  font-size: var(--font-sm);
+  color: var(--color-text-sub);
+}

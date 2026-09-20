@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://nufunc.github.io/oneul-date/sitemap.xml
