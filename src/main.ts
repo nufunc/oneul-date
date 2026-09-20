@@ -5748,6 +5748,7 @@ function renderReceiverView(steps: CourseStep[]): void {
         <span class="receiver-hero-badge">✨ 공유받은 데이트 코스</span>
         <h2 class="receiver-hero-title">친구가 보낸 특별한 데이트 코스예요</h2>
         <p class="receiver-hero-desc">엄선된 스팟과 최적 동선으로 완성된 추천 일정이에요. 함께 즐거운 시간 보내세요!</p>
+        <button class="btn-primary btn-make-own-hero" id="btn-make-own-hero" type="button">🚀 나도 이런 코스 만들기 →</button>
       </div>
 
       <div class="ai-briefing-card">
@@ -5800,6 +5801,7 @@ function renderReceiverView(steps: CourseStep[]): void {
   };
   document.getElementById('receiver-home-link')?.addEventListener('click', goHome);
   document.getElementById('btn-make-own')?.addEventListener('click', goHome);
+  document.getElementById('btn-make-own-hero')?.addEventListener('click', goHome);
 
   // 수신자 뷰 액션 이벤트 바인딩
   document.getElementById('btn-receiver-copy')?.addEventListener('click', async () => {
