@@ -263,7 +263,6 @@ export interface SpotCategoryItem {
 export const SPOT_EXPLORE_CATEGORIES: SpotCategoryItem[] = [
   { key: 'ALL', label: '전체', emoji: '✨' },
   { key: 'CAFE', label: '감성카페', emoji: '☕', keywords: ['카페', '디저트', '베이커리', '빵집', '케이크', '커피', '구움과자', '소금빵', '베이글', '찻집'] },
-  { key: 'BRUNCH', label: '브런치·베이글', emoji: '🥐', keywords: ['브런치', '프렌치토스트', '팬케이크', '오믈렛', '베이글', '샌드위치', '샐러드', '에그베네딕트'] },
   { key: 'DINING', label: '미식·다이닝', emoji: '🍽️', keywords: ['맛집', '미식', '식당', '레스토랑', '파스타', '스테이크', '고기', '삼겹살', '한식', '일식', '양식', '초밥', '피자', '오마카세', '다이닝'] },
   { key: 'ROMANTIC', label: '기념일·로맨틱', emoji: '🕯️', keywords: ['기념일', '파인다이닝', '코스요리', '오마카세', '고급', '호텔다이닝', '분위기', '프로포즈', '데이트코스'] },
   { key: 'WINE', label: '와인·위스키', emoji: '🍷', keywords: ['와인', '와인바', '위스키', '하이볼', '바(bar)', '라운지', '칵테일', '비스트로', '주점', 'lp바'] },
@@ -2644,7 +2643,8 @@ function isAnniversarySpot(spot: Spot): boolean {
     '기념일', '파인다이닝', '오마카세', '코스', '코스요리', '와인바', '루프탑', '야경', '전망', '스카이라운지',
     '스테이크', '샴페인', '블루리본', '미쉐린', '미슐랭', '호텔', '럭셔리', '로맨틱'
   ];
-  return ANNIVERSARY_KEYWORDS.some((kw) => text.includes(kw)) || Boolean(spot.mood?.includes('luxury') || spot.mood?.includes('romantic') || spot.mood?.includes('view'));
+  // romantic/view는 대부분의 스팟에 붙는 흔한 무드라 변별력이 없어 luxury만 본다
+  return ANNIVERSARY_KEYWORDS.some((kw) => text.includes(kw)) || Boolean(spot.mood?.includes('luxury'));
 }
 
 /** 심야·야장·감성주점에 적합한 스팟 판별 */
@@ -4178,9 +4178,8 @@ export function getCuratedThemeChips(): SpotCategoryItem[] {
 
     // 2. 시간대별(4단계) 라이프사이클 트렌드 가중치
     if (hour >= 6 && hour < 14) {
-      // ☀️ 아침~점심 (06:00~13:59): 브런치, 카페, 숲산책, 문화, 드라이브
-      if (item.key === 'BRUNCH') score += 55;
-      else if (item.key === 'CAFE') score += 50;
+      // ☀️ 아침~점심 (06:00~13:59): 카페, 숲산책, 문화, 드라이브
+      if (item.key === 'CAFE') score += 50;
       else if (item.key === 'HEALING') score += 40;
       else if (item.key === 'CULTURE') score += 35;
       else if (item.key === 'DRIVE') score += 30;
@@ -5385,7 +5384,7 @@ function renderSpotDiscovery(): void {
           <select class="discovery-sort-select" id="discovery-sort-select" aria-label="스팟 정렬">
             <option value="distance" ${state.spotSort === 'distance' ? 'selected' : ''}>📍 가까운 거리순</option>
             <option value="popular" ${state.spotSort === 'popular' ? 'selected' : ''}>🔥 핫플/인기순</option>
-            <option value="curation" ${state.spotSort === 'curation' ? 'selected' : ''}>⭐ 블루리본/미쉐린순</option>
+            <option value="curation" ${state.spotSort === 'curation' ? 'selected' : ''}>⭐ 인증·평점순</option>
           </select>
         </div>
       </div>
