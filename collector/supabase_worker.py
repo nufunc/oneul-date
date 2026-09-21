@@ -819,9 +819,19 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
             verified_count += 1
         else:
             # 3단계 다단계 폐업 안전 판별 (골목/거리/상권 스팟은 폐업 격리에서 면제 보호)
+            #
+            # 2026-09-21 임시 비활성화: search_naver()가 부르는 네이버 지도 비공식
+            # API가 ncaptcha 봇 차단 게이트를 새로 걸어(실측: "홍종흔베이커리 본점"
+            # 등 정상 업체 조회가 100% ncaptcha-all-search-no-result로 실패) 3회
+            # 연속 실패가 실제 폐업이 아니라 캡차 차단 때문에 발생하고 있었다.
+            # is_closed=True는 이후 재검증 쿼리(is_closed=eq.false)에서 영구 제외돼
+            # 복구 경로가 없어, 최근 8일간 정상 스팟 6,700여 건이 잘못 격리됐다.
+            # 네이버 캡차 우회(또는 카카오 폴백의 상호명 일치 검증) 전까지 fail_count
+            # 기반 자동 폐업을 중단한다. 임계값을 높여 로직은 남기고 발동만 막는다.
             now_iso = datetime.now(timezone.utc).isoformat()
             new_fail = fail_count + 1
-            if new_fail >= 3 and not is_zone_street_spot(name):
+            AUTO_CLOSE_DISABLED_THRESHOLD = 999999
+            if new_fail >= AUTO_CLOSE_DISABLED_THRESHOLD and not is_zone_street_spot(name):
                 patch_data = {
                     "is_closed": True,
                     "fail_count": new_fail,
