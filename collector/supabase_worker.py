@@ -14,7 +14,6 @@ import urllib.parse
 import time
 import re
 from datetime import datetime, timezone, timedelta
-from category_filter import CATEGORY_BLACKLIST_LODGING
 try:
     from fix_spot_summaries import is_bad_summary, generate_curated_summary
 except ImportError:
@@ -778,11 +777,12 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                 if not slot_heal_dryrun:
                     patch_data["slot"] = d_slot
 
-            # [Lodging Quarantine] 당일치기 코스 대상이 아닌 숙박/펜션/호텔/글램핑 업소 자동 격리 (소셜 마이닝 API 낭비 차단)
-            is_lodging = (d_slot == "stay") or any(pat.search(heal_cat) for pat in SLOT_STAY_RE) or any(l_kw in heal_cat for l_kw in CATEGORY_BLACKLIST_LODGING)
-            if is_lodging and not any(pat.search(heal_name) for pat in SLOT_STAY_VETO_RE):
-                patch_data["is_closed"] = True
-                patch_data["slot"] = "stay"
+            # 2026-09-21 제거: [Lodging Quarantine]이 숙박/펜션/호텔/글램핑 업소를
+            # 무조건 is_closed=True로 자동 격리했다. stay가 아직 정식 슬롯이 아니던
+            # 시절("당일치기 코스 대상이 아니다") 설계로, 지금은 stay가 정식 슬롯이라
+            # (category_filter.py의 allow_lodging 게이트로 오늘 수집 경로도 새로
+            # 열어뒀다) 이 로직이 그 수집분을 다음 재검증 주기마다 도로 닫아버린다.
+            # slot="stay" 태깅은 위 [Slot Healing] 블록이 derive_slot()로 이미 처리한다.
 
             if thum and not spot.get("image_url"):
                 patch_data["image_url"] = thum
