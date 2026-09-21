@@ -219,10 +219,19 @@ def is_date_spot_category(category: str, name: str, allow_lodging: bool = False)
         if br in cat_low or br in name_low:
             return False, f"체인브랜드({br})"
 
-    # 2-b. 숙박 업종 (카테고리에만 적용)
-    for bl in CATEGORY_BLACKLIST_LODGING:
-        if bl in cat_low:
-            return False, f"숙박업종({bl})"
+    # 2-b. 숙박 업종 (카테고리에만 적용). 다만 "호텔 카푸치노 루프탑 바"처럼
+    # 카테고리만 숙박이고 실제로는 호텔 부대 상업공간(바/식당/갤러리 등)인
+    # 경우가 있다. 상호명 마지막 토큰이 화이트리스트와 일치하면 그 업종으로
+    # 보고 화이트리스트 재검사 기회를 준다(모텔/여관은 allow_lodging 자체가
+    # SLOT_STAY_CAT_RE에서 이미 빠져 있어 이 구제와 무관하게 계속 거부됨).
+    lodging_hit = next((bl for bl in CATEGORY_BLACKLIST_LODGING if bl in cat_low), None)
+    if lodging_hit:
+        name_tokens = (name or "").split()
+        last_token = name_tokens[-1] if name_tokens else ""
+        last_token_low = last_token.lower()
+        rescued = last_token in CATEGORY_WHITELIST_EXACT or any(wl in last_token_low for wl in CATEGORY_WHITELIST)
+        if not rescued:
+            return False, f"숙박업종({lodging_hit})"
 
     # 3. 화이트리스트
     tokens = [t.strip() for t in re.split(r'[>,/·|,\s]+', cat) if t.strip()]
