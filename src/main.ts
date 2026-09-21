@@ -3021,7 +3021,7 @@ function renderShell(): void {
     <section class="spot-discovery-area" id="spot-discovery-area" style="display: none;"></section>
     <footer class="app-footer">
       <p class="footer-copy">오늘 데이트 <span class="footer-version">${APP_VERSION}</span></p>
-      <p class="footer-sub">검증된 스팟만 골라 담은 오늘의 데이트 코스</p>
+      <p class="footer-sub">엄선한 스팟만 골라 담은 오늘의 데이트 코스</p>
     </footer>
     <div class="overlay-root" id="overlay-root"></div>
   `;
@@ -4137,8 +4137,8 @@ function getSpotPopularityScore(spot: Spot): number {
     else if (views >= 10000) score += 10;
   }
 
-  // 4. 검증된 스팟 가산
-  if (spot.verified) score += 10;
+  // verified는 미너가 스팟을 만들면 거의 항상 true로 박아 넣어(전체의 97%+)
+  // 실질적인 변별력이 없는 필드라 가산 대상에서 뺐다(2026-09-21).
 
   return score;
 }
@@ -4501,7 +4501,7 @@ function cleanSpotSummary(spot: Spot): string {
 
   // 9. 종합 감성 에디토리얼 풀 (20선)
   const masterDefaultPool = [
-    '현지인과 여행자 모두에게 사랑받는 검증된 핫플레이스로 실패 없는 데이트를 약속해요.',
+    '현지인과 여행자 모두에게 사랑받는 엄선한 핫플레이스로 실패 없는 데이트를 약속해요.',
     '남다른 개성과 트렌디한 감각으로 SNS에서 뜨겁게 주목받는 감성 스팟이에요.',
     '정성 가득한 공간 연출과 따스한 온기로 방문객들의 호평이 이어지는 곳이에요.',
     '세련된 감각과 아늑한 무드가 공존하여 머무는 내내 행복한 미소가 번지는 장소예요.',
@@ -4663,7 +4663,7 @@ function renderStepCard(
         <div class="step-content-col">
           <h3 class="step-name">
             <span>${escapeHtml(spot.name)}</span>
-            ${spot.verified ? `<span class="icon-verified-badge" aria-label="검증된 데이트 장소">${ICON_VERIFIED_CHECK_SVG}</span>` : ''}
+            ${spot.verified ? `<span class="icon-verified-badge" aria-label="엄선한 데이트 장소">${ICON_VERIFIED_CHECK_SVG}</span>` : ''}
           </h3>
           ${curationBadges.length > 0 ? `<div class="step-curation-row">${curationBadges.join('')}</div>` : ''}
           <p class="step-location">📍 ${escapeHtml(getDisplayLocation(spot))}</p>
@@ -5797,7 +5797,7 @@ function renderReceiverView(steps: CourseStep[]): void {
     </section>
     <footer class="app-footer">
       <p class="footer-copy">오늘 데이트 <span class="footer-version">${APP_VERSION}</span></p>
-      <p class="footer-sub">검증된 스팟만 골라 담은 오늘의 데이트 코스</p>
+      <p class="footer-sub">엄선한 스팟만 골라 담은 오늘의 데이트 코스</p>
     </footer>
   `;
 
