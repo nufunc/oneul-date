@@ -410,10 +410,9 @@ def derive_price_tier_from_text(price_text):
         return (None, None)
     text = price_text.strip()
 
+    is_free = '무료' in text or text in ('0원', '0')
     avg = None
-    if '무료' in text or text in ('0원', '0'):
-        avg = 0.0
-    else:
+    if not is_free:
         commas = [int(m.replace(',', '')) for m in _PRICE_COMMA_RE.findall(text)]
         if commas:
             avg = sum(commas) / len(commas)
@@ -430,12 +429,15 @@ def derive_price_tier_from_text(price_text):
                     if cheonwon:
                         avg = sum(float(m) * 1000 for m in cheonwon) / len(cheonwon)
 
+    if is_free:
+        # avg_price_per_person은 INTEGER 컬럼이고 "1인당 평균 가격" 개념 자체가
+        # 무료에는 성립하지 않는다. 0을 넣지 않고 null로 둔다.
+        return ("FREE", None)
+
     if avg is None:
         return (None, None)
 
-    if avg == 0:
-        tier = "FREE"
-    elif avg < 15000:
+    if avg < 15000:
         tier = "₩"
     elif avg < 30000:
         tier = "₩₩"
@@ -443,7 +445,9 @@ def derive_price_tier_from_text(price_text):
         tier = "₩₩₩"
     else:
         tier = "₩₩₩₩"
-    return (tier, avg)
+    # avg_price_per_person은 INTEGER 컬럼이라 float를 그대로 보내면
+    # (예: 15500.5) DB가 400으로 거부한다. 반올림해 정수로 반환한다.
+    return (tier, int(round(avg)))
 
 
 # ---------------------------------------------------------------------------
