@@ -392,6 +392,60 @@ def find_duplicate_spot(supabase_url, headers, name, address=""):
     return any(normalize_spot_address(row.get("address", "")) == target_addr for row in rows)
 
 
+_PRICE_COMMA_RE = re.compile(r'\d{1,3}(?:,\d{3})+')
+_PRICE_MANWON_RE = re.compile(r'(\d+(?:\.\d+)?)\s*만\s*원')
+_PRICE_CHEONWON_RE = re.compile(r'(\d+)\s*천\s*원')
+_PRICE_PLAIN_NUM_RE = re.compile(r'\d{4,7}')
+
+
+def derive_price_tier_from_text(price_text):
+    """price 자유텍스트에서 avg_price_per_person과 price_tier를 규칙 기반으로
+    추출한다. 못 읽으면 (None, None)을 반환한다(추정해서 지어내지 않는다).
+
+    실측(2026-09-21, 활성 12,923건 중 price 채워진 11,168건): 이 규칙으로
+    필드가 채워진 것 중 90.4%(전체 활성 기준 78.1%)를 변환할 수 있었다.
+    "매장별 상이", "정가제"처럼 숫자가 없는 서술형만 걸러진다(의도한 동작).
+    """
+    if not price_text:
+        return (None, None)
+    text = price_text.strip()
+
+    avg = None
+    if '무료' in text or text in ('0원', '0'):
+        avg = 0.0
+    else:
+        commas = [int(m.replace(',', '')) for m in _PRICE_COMMA_RE.findall(text)]
+        if commas:
+            avg = sum(commas) / len(commas)
+        else:
+            manwon = _PRICE_MANWON_RE.findall(text)
+            if manwon:
+                avg = sum(float(m) * 10000 for m in manwon) / len(manwon)
+            else:
+                nums = [int(n) for n in _PRICE_PLAIN_NUM_RE.findall(text)]
+                if nums:
+                    avg = sum(nums) / len(nums)
+                else:
+                    cheonwon = _PRICE_CHEONWON_RE.findall(text)
+                    if cheonwon:
+                        avg = sum(float(m) * 1000 for m in cheonwon) / len(cheonwon)
+
+    if avg is None:
+        return (None, None)
+
+    if avg == 0:
+        tier = "FREE"
+    elif avg < 15000:
+        tier = "₩"
+    elif avg < 30000:
+        tier = "₩₩"
+    elif avg < 50000:
+        tier = "₩₩₩"
+    else:
+        tier = "₩₩₩₩"
+    return (tier, avg)
+
+
 # ---------------------------------------------------------------------------
 # 슬롯 자동교정 (Slot Healing)
 #   네이버/카카오 지도가 실제로 내려주는 "공식 카테고리" 표기를 유일한 판정 근거로
@@ -831,6 +885,15 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                     patch_data["summary"] = curated_summary
                     summary_fixed_count += 1
                     print(f"  🔧 [Summary Fix] id={s_id} '{current_summary[:30]}' → '{curated_summary[:30]}'")
+
+            # [Price Healing] price 자유텍스트에서 price_tier/avg_price_per_person을
+            # 규칙 기반으로 추출해 비어있으면 채운다(추정 금지, 못 읽으면 그대로 공백).
+            if not spot.get("price_tier") and not spot.get("avg_price_per_person"):
+                price_text = patch_data.get("price") or spot.get("price") or ""
+                derived_tier, derived_avg = derive_price_tier_from_text(price_text)
+                if derived_tier:
+                    patch_data["price_tier"] = derived_tier
+                    patch_data["avg_price_per_person"] = derived_avg
 
             verified_count += 1
         else:
