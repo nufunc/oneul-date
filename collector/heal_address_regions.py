@@ -12,41 +12,54 @@ from collections import defaultdict
 
 # 상위 디렉토리 import
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from supabase_worker import derive_region_area
+from supabase_worker import derive_region_area, load_env
 
-SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://uyhwhnnzzfhtxjernfit.supabase.co")
-SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5aHdobm56emZodHhqZXJuZml0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NjkyMDI3NywiZXhwIjoyMTAyNDk2Mjc3fQ.xHrjNL8KkcewQcHHKBB6KuMDepXwosZcpABh2s3a-40")
+_env = load_env()
+SUPABASE_URL = os.environ.get("SUPABASE_URL") or _env.get("SUPABASE_URL") or "http://152.70.89.210:18088"
+SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY") or _env.get("SUPABASE_SERVICE_KEY") or ""
+
+# 2026년 인천 행정구역 개편으로 새로 생긴 area 명칭. address 문자열은 개편 전
+# 표기가 남아있는 경우가 많아 derive_region_area(주소만 봄)가 옛 표기로
+# 되돌리려 든다. area가 이미 신명칭이면 손대지 않는다.
+INCHEON_NEW_AREA_NAMES = {
+    "영종구", "검단구", "서해구", "제물포구", "강화군", "옹진군",
+    "계양구", "남동구", "미추홀구", "부평구", "연수구", "중구",
+}
+
+def build_headers(extra=None):
+    """SUPABASE_KEY가 없으면(자체 호스팅 PostgREST가 인증을 요구하지 않는
+    경우) apikey/Authorization 헤더 자체를 보내지 않는다."""
+    headers = dict(extra or {})
+    if SUPABASE_KEY:
+        headers["apikey"] = SUPABASE_KEY
+        headers["Authorization"] = f"Bearer {SUPABASE_KEY}"
+    return headers
+
 
 def fetch_all_active_spots():
-    headers = {
-        "apikey": SUPABASE_KEY,
-        "Authorization": f"Bearer {SUPABASE_KEY}",
-        "Prefer": "count=exact"
-    }
-    
-    url = f"{SUPABASE_URL}/rest/v1/spots?select=id,name,region,area,address,location,lat,lng&is_closed=eq.false&limit=1000&offset=0"
-    req = urllib.request.Request(url, headers=headers)
-    with urllib.request.urlopen(req) as res:
-        cr = res.headers.get("Content-Range")
-        total = int(cr.split("/")[1]) if cr else 1000
-        spots = json.loads(res.read().decode("utf-8"))
-        
-    for offset in range(1000, total, 1000):
-        url = f"{SUPABASE_URL}/rest/v1/spots?select=id,name,region,area,address,location,lat,lng&is_closed=eq.false&limit=1000&offset={offset}"
+    """자체 호스팅 PostgREST는 count=exact를 줘도 Content-Range 총건수가
+    '*'(미상)로 올 수 있어 신뢰하지 않는다. 응답 건수가 limit보다 적어질
+    때까지 반복 조회한다(cleanup_spots_and_dedup.py와 동일한 방식)."""
+    headers = build_headers()
+    page_size = 1000
+    offset = 0
+    spots = []
+    while True:
+        url = (f"{SUPABASE_URL}/rest/v1/spots?select=id,name,region,area,address,location,lat,lng"
+               f"&is_closed=eq.false&limit={page_size}&offset={offset}")
         req = urllib.request.Request(url, headers=headers)
         with urllib.request.urlopen(req) as res:
             chunk = json.loads(res.read().decode("utf-8"))
-            spots.extend(chunk)
-            
+        if not chunk:
+            break
+        spots.extend(chunk)
+        offset += len(chunk)
+        if len(chunk) < page_size:
+            break
     return spots
 
 def update_spot(spot_id, update_fields):
-    headers = {
-        "apikey": SUPABASE_KEY,
-        "Authorization": f"Bearer {SUPABASE_KEY}",
-        "Content-Type": "application/json",
-        "Prefer": "return=minimal"
-    }
+    headers = build_headers({"Content-Type": "application/json", "Prefer": "return=minimal"})
     url = f"{SUPABASE_URL}/rest/v1/spots?id=eq.{spot_id}"
     req = urllib.request.Request(url, data=json.dumps(update_fields).encode("utf-8"), headers=headers, method="PATCH")
     with urllib.request.urlopen(req) as res:
@@ -81,8 +94,12 @@ def main():
             updates["region"] = correct_region
             region_changes[f"{cur_region} -> {correct_region}"] += 1
             
-        # 2. area 불일치
-        if correct_area and cur_area != correct_area:
+        # 2. area 불일치. 인천은 2026년 행정구역 개편으로 area가 이미 신명칭인데
+        # address 문자열엔 옛 표기가 남아있는 경우가 많다. 그 경우 derive_region_area가
+        # address만 보고 옛 이름으로 되돌리려 드는데, 이미 맞는 값을 깨뜨리는 것이니
+        # 손대지 않는다.
+        is_incheon_already_correct = cur_region == "인천" and cur_area in INCHEON_NEW_AREA_NAMES
+        if correct_area and cur_area != correct_area and not is_incheon_already_correct:
             needs_patch = True
             updates["area"] = correct_area
             

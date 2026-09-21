@@ -23,7 +23,7 @@ from miners.youtube_miner import search_youtube_hotclip
 from miners.kakaomap_miner import search_kakaomap_place
 from score_engine import calculate_hot_score
 from category_filter import is_date_spot_category
-from supabase_worker import find_duplicate_spot
+from supabase_worker import find_duplicate_spot, derive_region_area
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -370,12 +370,18 @@ def run_bulk_mining(target_count: int = 1000, enable_social: bool = True):
             place_id = p.get("id")
             naver_place_url = f"https://map.naver.com/p/entry/place/{place_id}" if place_id else f"https://map.naver.com/p/search/{urllib.parse.quote(raw_name)}"
 
+            # 시드 쿼리가 겨냥한 지역과 실제 검색 결과 주소가 다를 수 있어
+            # road_addr로 재검증한다. 판정 불가하면(주소 파싱 실패 등) 시드 값을 유지한다.
+            derived_region, derived_area = derive_region_area(road_addr)
+            final_region = derived_region or region
+            final_area = derived_area or area
+
             current_max_id += 1
             payload = {
                 "id": current_max_id,
                 "name": raw_name,
-                "region": region,
-                "area": area,
+                "region": final_region,
+                "area": final_area,
                 "address": road_addr,
                 "location": road_addr,
                 "slot": slot,
