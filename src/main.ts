@@ -5739,10 +5739,13 @@ function renderReceiverView(steps: CourseStep[]): void {
   // 3개 스팟 다중 경유지 네이버 길찾기 URL 생성
   let naverCourseDirectionsUrl = '';
   const validSpots = sharedSpotIds.map((id) => spotById.get(id)).filter((s): s is Spot => Boolean(s));
-  if (validSpots.length >= 2) {
-    const coords = validSpots.map((s) => `${s.lng},${s.lat},${encodeURIComponent(s.name)}`).join('/');
+  // 좌표 없는 스팟이 섞이면 URL에 문자열 "null"이 그대로 박히므로(실측: 활성
+  // 스팟의 37%가 좌표 없음) 좌표 있는 것만 걸러 경유지를 만든다.
+  const geoSpots = validSpots.filter((s) => s.lat != null && s.lng != null);
+  if (geoSpots.length >= 2) {
+    const coords = geoSpots.map((s) => `${s.lng},${s.lat},${encodeURIComponent(s.name)}`).join('/');
     naverCourseDirectionsUrl = `https://map.naver.com/p/directions/${coords}/-/car`;
-  } else if (validSpots.length === 1) {
+  } else if (validSpots.length >= 1) {
     naverCourseDirectionsUrl = naverMapUrl(validSpots[0]);
   }
 
