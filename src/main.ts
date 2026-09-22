@@ -6831,9 +6831,21 @@ async function init(): Promise<void> {
     }, 1000);
   }
 
-  // 공유 링크인데 캐시/라이브 전 초기 렌더링이 안 된 경우 폴백 렌더링
+  // 공유 링크인데 캐시/라이브 전 초기 렌더링이 안 된 경우 폴백 렌더링.
+  // 캐시가 전혀 없는 첫 방문자는 이 시점에 spots가 아직 정적 샘플
+  // 번들(spots.sample.json, id가 서비스 스팟 id와 겹치지 않음)이라
+  // handleRoute()를 바로 부르면 항상 매칭 실패로 판정돼 hash가
+  // 영구 제거된다(clearCourseHash) — 공유 링크의 실사용 대상이 정확히
+  // 이 "캐시 없는 첫 방문자"라 사실상 공유 기능이 상시 실패했다
+  // (2026-09-23 발견). 라이브 데이터가 아직 없으면 실패 판정을 미루고
+  // 빈 셸만 보여준다. 실제 판정은 위 loadSpots().then() 콜백이
+  // 라이브 데이터로 다시 handleRoute()를 부를 때 이뤄진다.
   if (isSharedLink && (!state.course || state.course.length === 0)) {
-    handleRoute();
+    if (hasCachedData) {
+      handleRoute();
+    } else {
+      renderShell();
+    }
   }
 
   // 4. 브라우저 위치(GPS) 기반 현재 지역 비동기 자동 선택 (단일 요청 핸들러 연동)
