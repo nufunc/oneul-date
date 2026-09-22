@@ -453,6 +453,12 @@ html[data-theme-resolved="dark"] .discovery-sort-select:hover {
   border-color: var(--color-border-strong);
 }
 
+html[data-theme="dark"] .discovery-sort-select:focus,
+html[data-theme-resolved="dark"] .discovery-sort-select:focus {
+  border-color: var(--color-accent-text);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
 /* 다크모드 스팟 카드 넘버링 */
 html[data-theme="dark"] .step-card:not(.ad-card)::before,
 html[data-theme-resolved="dark"] .step-card:not(.ad-card)::before {
@@ -3925,6 +3931,11 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
 .discovery-sort-select:hover {
   background: var(--color-surface-hover);
   border-color: var(--color-text-sub);
+}
+
+.discovery-sort-select:focus {
+  border-color: var(--color-accent-text);
+  box-shadow: 0 0 0 3px var(--color-accent-soft), var(--shadow-card);
 }
 
 /* 스팟 탐색 그리드 레이아웃 (2개 / 3개 / 5개행) */
