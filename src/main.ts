@@ -6304,13 +6304,22 @@ function renderOverlay(): void {
 
     // 세부존 체크박스 토글 (스크롤 점프 방지: 국소 DOM 업데이트)
     root.querySelectorAll<HTMLLabelElement>('.zone-check-item').forEach((item) => {
-      item.addEventListener('click', (e) => {
-        e.preventDefault();
+      item.addEventListener('click', () => {
         const zk = item.dataset.zoneKey;
         if (!zk) return;
 
+        // 체크박스를 직접 클릭(또는 포커스 후 Space — 스크린리더 등 보조
+        // 기술의 표준 조작법)하면 브라우저가 네이티브로 이미 checked를
+        // 토글해 둔다. 예전에는 e.preventDefault() 후 JS 상태만 보고
+        // cb.checked를 수동으로 다시 대입했는데, 체크박스 자체가 클릭
+        // 대상일 때는 브라우저가 preventDefault 처리 과정에서 이 수동
+        // 대입까지 되돌려버려 네이티브 checked/접근성 트리가 항상
+        // false로 남았다(2026-09-23 발견, Playwright locator.check()로
+        // 확정). 네이티브 토글 결과를 그대로 읽어 JS 상태와 동기화한다.
+        const cb = item.querySelector<HTMLInputElement>('.zone-checkbox');
+        const willCheck = cb ? cb.checked : !state.subZones.includes(zk);
+
         const next = new Set(state.subZones);
-        const willCheck = !next.has(zk);
         if (willCheck) {
           next.add(zk);
         } else {
@@ -6320,7 +6329,6 @@ function renderOverlay(): void {
 
         // UI 즉시 반영 (스크롤 위치 유지)
         item.classList.toggle('is-checked', willCheck);
-        const cb = item.querySelector<HTMLInputElement>('.zone-checkbox');
         if (cb) cb.checked = willCheck;
 
         // 해당 지역 내 체크된 항목이 1개라도 있으면 지역 포함, 0개면 지역 기본 포함 유지
