@@ -6016,7 +6016,7 @@ function renderOverlay(): void {
     const list = loadSavedCourses();
     root.innerHTML = `
       <div class="overlay-backdrop" id="overlay-backdrop"></div>
-      <div class="overlay-panel" role="dialog" aria-label="저장한 코스">
+      <div class="overlay-panel" role="dialog" aria-modal="true" aria-label="저장한 코스">
         <div class="overlay-head">
           <span class="overlay-title">저장한 코스 <span class="overlay-count">${list.length}</span></span>
           <button class="overlay-close" id="overlay-close" aria-label="닫기">✕</button>
@@ -6126,7 +6126,7 @@ function renderOverlay(): void {
 
     root.innerHTML = `
       <div class="overlay-backdrop" id="overlay-backdrop"></div>
-      <div class="location-sheet-panel" role="dialog" aria-label="지역 선택">
+      <div class="location-sheet-panel" role="dialog" aria-modal="true" aria-label="지역 선택">
         <div class="location-sheet-head">
           <span class="location-sheet-title">📍 어디로 데이트를 떠날까요?</span>
           <button class="overlay-close" id="overlay-close" aria-label="닫기">✕</button>
@@ -6397,7 +6397,7 @@ function renderOverlay(): void {
   if (state.moodSheetOpen) {
     root.innerHTML = `
       <div class="overlay-backdrop" id="overlay-backdrop"></div>
-      <div class="overlay-panel mood-sheet-panel" role="dialog" aria-label="분위기 선택">
+      <div class="overlay-panel mood-sheet-panel" role="dialog" aria-modal="true" aria-label="분위기 선택">
         <div class="overlay-head">
           <span class="overlay-title">✨ 어떤 분위기의 데이트를 원하세요?</span>
           <button class="overlay-close" id="overlay-close" aria-label="닫기">✕</button>
@@ -6497,7 +6497,7 @@ function renderOverlay(): void {
 
     root.innerHTML = `
       <div class="overlay-backdrop" id="overlay-backdrop"></div>
-      <div class="spot-detail-sheet-panel" role="dialog" aria-label="${escapeHtml(spot.name)} 상세 정보">
+      <div class="spot-detail-sheet-panel" role="dialog" aria-modal="true" aria-label="${escapeHtml(spot.name)} 상세 정보">
         <div class="spot-detail-head">
           <span class="spot-detail-head-title">📍 데이트 스팟 상세 정보</span>
           <button class="overlay-close" id="overlay-close" aria-label="닫기">✕</button>
@@ -6771,8 +6771,36 @@ async function ensureSpotsForRegions(regionKeys: string[]): Promise<void> {
 
 async function init(): Promise<void> {
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && (state.savedOpen || state.regionSheetOpen || state.moodSheetOpen || state.spotDetailId)) {
+    const overlayOpen = state.savedOpen || state.regionSheetOpen || state.moodSheetOpen || state.spotDetailId;
+    if (!overlayOpen) return;
+    if (e.key === 'Escape') {
       closeOverlay();
+      return;
+    }
+    // role="dialog"만 붙어 있고 실제 포커스 트랩이 없어 Tab을 누르면
+    // 포커스가 배경 콘텐츠로 새어나갔다(2026-09-23 발견). 모달 안
+    // 포커스 가능 요소 사이에서만 Tab이 순환하도록 가둔다.
+    if (e.key === 'Tab') {
+      const root = document.getElementById('overlay-root');
+      if (!root) return;
+      const focusable = Array.from(
+        root.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => el.offsetParent !== null);
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (!root.contains(document.activeElement)) {
+        e.preventDefault();
+        first.focus();
+      } else if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
   });
 
