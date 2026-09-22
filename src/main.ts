@@ -5123,7 +5123,12 @@ function buildCourseFromSavedSpots(): boolean {
     return false;
   }
 
-  const slotsOn: SlotKey[] = ['day', 'evening', 'night'];
+  // 찜 목록에 숙박(stay) 유형이 있으면 별도 슬롯으로 배치한다. stay는
+  // "저녁엔 A 풀빌라, 밤엔 B 풀빌라"처럼 evening/night 아무거나 폴백에
+  // 끼워 넣으면 하룻밤 숙소가 별개 방문지처럼 나열되는 말이 안 되는
+  // 동선이 된다(2026-09-23 발견).
+  const hasSavedStay = savedList.some((s) => s.slot === 'stay');
+  const slotsOn: SlotKey[] = hasSavedStay ? ['day', 'evening', 'night', 'stay'] : ['day', 'evening', 'night'];
   const steps: CourseStep[] = [];
   const usedSpotIds = new Set<number>();
 
@@ -5137,7 +5142,8 @@ function buildCourseFromSavedSpots(): boolean {
           (slot === 'night' && getSpotGenre(s) === 'BAR')),
     );
     if (!matched) {
-      matched = savedList.find((s) => !usedSpotIds.has(s.id));
+      // stay 스팟은 day/evening/night의 "아무거나" 폴백 대상에서 제외한다
+      matched = savedList.find((s) => !usedSpotIds.has(s.id) && s.slot !== 'stay');
     }
 
     if (matched) {
