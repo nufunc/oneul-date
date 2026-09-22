@@ -54,7 +54,26 @@ AREA_CODE_MAP = {
     "39": ("제주", ["제주"]),
 }
 
-def fetch_tourapi_spots(api_key: str, area_code: str = "1", content_type_id: str = "14", num_of_rows: int = 30) -> list[dict]:
+CHECKPOINT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".tourapi_checkpoint.json")
+
+
+def _load_checkpoint() -> dict:
+    try:
+        with open(CHECKPOINT_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {"area_index": 0, "page_by_combo": {}}
+
+
+def _save_checkpoint(checkpoint: dict) -> None:
+    try:
+        with open(CHECKPOINT_PATH, "w", encoding="utf-8") as f:
+            json.dump(checkpoint, f, ensure_ascii=False)
+    except Exception:
+        pass
+
+
+def fetch_tourapi_spots(api_key: str, area_code: str = "1", content_type_id: str = "14", num_of_rows: int = 30, page_no: int = 1) -> list[dict]:
     """TourAPI 4.0 areaBasedList2 / areaBasedList1 호출하여 관광/문화 스팟 목록 수급"""
     if not api_key:
         return []
@@ -65,7 +84,7 @@ def fetch_tourapi_spots(api_key: str, area_code: str = "1", content_type_id: str
     params = {
         "serviceKey": clean_key,
         "numOfRows": str(num_of_rows),
-        "pageNo": "1",
+        "pageNo": str(page_no),
         "MobileOS": "ETC",
         "MobileApp": "OneulDate",
         "_type": "json",
@@ -129,14 +148,26 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
 
     discovered_spots = []
     batch_seen_names = set()
-    
-    area_codes = list(AREA_CODE_MAP.keys())
     import random
-    random.shuffle(area_codes)
 
-    for area_code in area_codes[:4]:
+    # 매 실행마다 area_codes를 무작위로 섞어 4개만 훑으면 같은 조합이 반복
+    # 선택되고, pageNo도 항상 1이라 매번 같은 상위 15건만 재조회해 순수
+    # 재삽입(이미 DB에 있는 스팟을 다시 발굴로 착각)이 잦았다(peer 실측
+    # 193/643, 2026-09-22). area_index/page_by_combo 체크포인트로 지역은
+    # 고정 순서로 한 바퀴씩 돌리고, 조합별 pageNo도 이어서 증가시킨다.
+    checkpoint = _load_checkpoint()
+    area_codes = sorted(AREA_CODE_MAP.keys(), key=int)
+    start_idx = checkpoint.get("area_index", 0) % len(area_codes)
+    selected_codes = [area_codes[(start_idx + i) % len(area_codes)] for i in range(4)]
+    page_by_combo = checkpoint.get("page_by_combo", {})
+
+    for area_code in selected_codes:
         for ctype_id, ctype_name, default_moods, default_slot in DATE_CONTENT_TYPES:
-            items = fetch_tourapi_spots(api_key, area_code, ctype_id, num_of_rows=15)
+            combo_key = f"{area_code}:{ctype_id}"
+            page_no = page_by_combo.get(combo_key, 0) + 1
+            items = fetch_tourapi_spots(api_key, area_code, ctype_id, num_of_rows=15, page_no=page_no)
+            # 반환 건수가 요청보다 적으면 마지막 페이지 — 다음 실행은 1페이지부터 다시 돈다
+            page_by_combo[combo_key] = 1 if len(items) < 15 else page_no
             time.sleep(0.3)
 
             for item in items:
@@ -217,6 +248,10 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                 break
         if len(discovered_spots) >= max_discoveries:
             break
+
+    checkpoint["area_index"] = (start_idx + 4) % len(area_codes)
+    checkpoint["page_by_combo"] = page_by_combo
+    _save_checkpoint(checkpoint)
 
     if discovered_spots:
         insert_url = f"{supabase_url}/rest/v1/spots"
