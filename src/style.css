@@ -58,6 +58,7 @@
   --label-tracking: 0.02em;
 
   /* 그림자 — 소프트 앰비언트 글로우 & 레이어 */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
   --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.04), 0 6px 16px rgba(15, 23, 42, 0.03);
   --shadow-lift: 0 8px 24px rgba(15, 23, 42, 0.12), 0 2px 6px rgba(15, 23, 42, 0.04);
   --shadow-float: 0 -8px 28px rgba(15, 23, 42, 0.08);
@@ -102,6 +103,7 @@ html[data-theme-resolved="dark"] {
   --color-on-accent: #0b0f17; /* 액센트 배경 위 선명한 가독성 (검정/어두운 텍스트) */
   --color-backdrop: rgba(0, 0, 0, 0.75);
   
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   --shadow-lift: 0 12px 32px rgba(0, 0, 0, 0.5);
   --shadow-float: 0 -8px 28px rgba(0, 0, 0, 0.6);
