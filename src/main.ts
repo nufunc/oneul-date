@@ -4910,6 +4910,8 @@ function regenerateCourse(): void {
     cond.mood,
     {
       avoidIds: recentSpotIdSet(),
+      searchQuery: cond.searchQuery,
+      categoryKey: state.courseCategory,
       indoorOnly: cond.indoorOnly,
       moodPreset: state.moodPreset,
       budgetFilter: cond.budgetFilter,
