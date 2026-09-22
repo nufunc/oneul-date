@@ -2432,7 +2432,12 @@ function buildNearbyCourse(coords: { lat: number; lng: number } | null): {
 
   // 사용자가 설정한 현재 활성 슬롯(기본: 낮/저녁/밤)을 그대로 적용
   const slotsOn = activeSlots().length > 0 ? activeSlots() : (['day', 'evening', 'night'] as SlotKey[]);
-  const steps = generateCourse(pool, slotsOn, state.regions, state.mood, { searchQuery: state.searchQuery, categoryKey: state.courseCategory }, state.subZones);
+  // GPS로 이미 내 위치 반경으로 pool을 좁혔다면 그 자체가 지역 조건이다.
+  // 여기에 화면에 남아있는 state.regions(다른 지역 여행 계획 등으로 미리
+  // 골라둔 필터)까지 또 겹치면 GPS 반경과 지역이 어긋날 때 교집합이 0이
+  // 돼 "내 주변 실시간 추천"이 상시 빈 결과로 끝난다(2026-09-23 발견).
+  const nearbyRegions = coords && coords.lat && coords.lng ? [] : state.regions;
+  const steps = generateCourse(pool, slotsOn, nearbyRegions, state.mood, { searchQuery: state.searchQuery, categoryKey: state.courseCategory }, state.subZones);
 
   // 코스에 포함된 실제 스팟들의 내 위치 기준 최대 이동 반경(Max Distance) 계산
   if (coords && coords.lat && coords.lng) {
