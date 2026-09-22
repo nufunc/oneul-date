@@ -5074,10 +5074,13 @@ function optimizeCourseRoute(): boolean {
     return false;
   }
 
+  // 자리(순서)가 아니라 스팟을 따라 슬롯 라벨도 함께 옮긴다. 자리 기준
+  // 라벨을 그대로 두면 밤 시간대용으로 고른 심야 술집이 순열상 2차리로
+  // 옮겨졌을 때 "저녁" 라벨이 그대로 붙어버렸다(2026-09-23 발견).
   state.course = [
-    { slot: initialSteps[0].slot, spotId: currentSpots[bestPerm[0]].id },
-    { slot: initialSteps[1].slot, spotId: currentSpots[bestPerm[1]].id },
-    { slot: initialSteps[2].slot, spotId: currentSpots[bestPerm[2]].id },
+    { slot: initialSteps[bestPerm[0]].slot, spotId: currentSpots[bestPerm[0]].id },
+    { slot: initialSteps[bestPerm[1]].slot, spotId: currentSpots[bestPerm[1]].id },
+    { slot: initialSteps[bestPerm[2]].slot, spotId: currentSpots[bestPerm[2]].id },
   ];
 
   const savedKm = (initialDistance - minDistance).toFixed(1);
