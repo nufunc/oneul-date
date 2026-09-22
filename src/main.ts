@@ -2721,7 +2721,7 @@ interface AppState {
   budgetFilter: 'ALL' | 'BUDGET' | 'LUXURY';
 }
 
-/** 저장된 테마 모드 불러오기 (기본값: 'light' 낮 테마) */
+/** 저장된 테마 모드 불러오기 (기본값: 'auto' — 시스템 다크모드를 그대로 따른다) */
 function getInitialThemeMode(): ThemeMode {
   // 구형 Safari 프라이빗 모드 등에서는 localStorage 접근 자체가 예외를 던진다.
   // 이 함수는 모듈 최상위 state 리터럴 대입 중에 바로 호출돼, 안 잡으면
@@ -2734,7 +2734,12 @@ function getInitialThemeMode(): ThemeMode {
   } catch {
     // 접근 실패 시 기본값으로 폴백
   }
-  return 'light';
+  // 저장된 선택이 없는 첫 방문자는 'light' 고정 대신 'auto'로 시작한다.
+  // 이 앱의 핵심 시나리오가 심야 데이트라 다크모드 사용자 비중이 특히
+  // 높은데, 시스템이 다크여도 첫 화면은 항상 밝게 뜨고 있었다
+  // (2026-09-23 발견). 'auto'는 이미 prefers-color-scheme을 실시간
+  // 반영하는 기존 로직을 그대로 탄다.
+  return 'auto';
 }
 
 /** 기본 시간대 슬롯 반환 (낮 | 저녁 | 밤 기본 선택, 숙박 제외) */
