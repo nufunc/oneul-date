@@ -1893,38 +1893,6 @@ function getCleanSpotSummary(spot: Spot): string {
   return '에디터가 검증한 추천 데이트 명소';
 }
 
-const urlCache = new Map<string, string>();
-
-/** URL을 TinyURL API로 실시간 초단축 (캐시 및 타임아웃 1.2초/폴백 내장) */
-async function shortenUrl(longUrl: string): Promise<string> {
-  if (urlCache.has(longUrl)) {
-    return urlCache.get(longUrl)!;
-  }
-  // 이미 네이버 공식 단축링크(naver.me)인 경우 그대로 사용
-  if (longUrl.includes('naver.me') || longUrl.length <= 30) {
-    return longUrl;
-  }
-
-  try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 1200); // 1.2초 타임아웃
-    const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`, {
-      signal: controller.signal,
-    });
-    clearTimeout(timer);
-    if (res.ok) {
-      const short = (await res.text()).trim();
-      if (short.startsWith('http://') || short.startsWith('https://')) {
-        urlCache.set(longUrl, short);
-        return short;
-      }
-    }
-  } catch {
-    // 실패 시 원본 longUrl 사용
-  }
-  return longUrl;
-}
-
 const SUPABASE_URL =
   import.meta.env.VITE_SUPABASE_URL || 'https://uyhwhnnzzfhtxjernfit.supabase.co';
 
@@ -2302,15 +2270,14 @@ async function formatCourseTextAsync(
 
   const filled = steps.filter((st): st is CourseStep & { spotId: number } => st.spotId !== null);
 
-  // 병렬로 단축 URL 생성
-  const mapUrls = await Promise.all(
-    filled.map(async (step) => {
-      const spot = byId.get(step.spotId);
-      if (!spot) return '';
-      const rawUrl = naverMapUrl(spot);
-      return await shortenUrl(rawUrl);
-    })
-  );
+  // TinyURL 단축은 브라우저에서 호출하면 CORS로 항상 실패해(TinyURL이
+  // 자기 자신 origin만 허용) 매번 최대 1.2초를 낭비하고 결국 원본
+  // URL로 폴백했다(2026-09-23 발견) — 애초에 원본 URL을 그대로 쓴다.
+  const mapUrls = filled.map((step) => {
+    const spot = byId.get(step.spotId);
+    if (!spot) return '';
+    return naverMapUrl(spot);
+  });
 
   for (let i = 0; i < filled.length; i++) {
     const step = filled[i];
