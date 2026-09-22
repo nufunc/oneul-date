@@ -49,6 +49,9 @@ KNOWN_MAP = {
     'simmons terrace': '시몬스테라스',
 }
 
+_ENV = load_env()
+KAKAO_REST_API_KEY = os.environ.get("KAKAO_REST_API_KEY") or _ENV.get("KAKAO_REST_API_KEY") or ""
+
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Accept": "application/json, text/plain, */*",
@@ -135,7 +138,36 @@ def search_naver(query: str):
     except Exception:
         pass
 
-    # 2. 카카오맵 실시간 검색 폴백 (CAPTCHA 차단 원천 우회 및 정확도 100%)
+    # 2. 카카오 로컬 공식 API (dapi.kakao.com). 소규모 상호 색인율이 비공식
+    # 스크래핑 엔드포인트보다 훨씬 높다 — 2026-09-22 실측: "바이닐시티"류
+    # 저인지도 상호가 비공식 엔드포인트에서 지역명을 붙여도 0건이었다.
+    # 이미지는 제공하지 않으므로 카테고리/좌표만 채워지고, 이미지는 3번
+    # 비공식 폴백이 잡으면 보충한다.
+    if KAKAO_REST_API_KEY:
+        try:
+            k2_url = f"https://dapi.kakao.com/v2/local/search/keyword.json?query={urllib.parse.quote(query)}"
+            k2_req = urllib.request.Request(k2_url, headers={"Authorization": f"KakaoAK {KAKAO_REST_API_KEY}"})
+            with urllib.request.urlopen(k2_req, timeout=5) as k2_res:
+                if k2_res.status == 200:
+                    k2_data = json.loads(k2_res.read().decode('utf-8'))
+                    docs = k2_data.get("documents", [])
+                    if docs:
+                        return [
+                            {
+                                "name": d.get("place_name"),
+                                "roadAddress": d.get("road_address_name") or d.get("address_name"),
+                                "thumUrl": None,
+                                "category": d.get("category_name"),
+                                "x": d.get("x"),
+                                "y": d.get("y"),
+                            }
+                            for d in docs[:3]
+                        ]
+        except Exception:
+            pass
+
+    # 3. 카카오맵 비공식 실시간 검색 폴백 (공식 API도 못 찾을 때의 마지막 수단.
+    # 이미지 썸네일은 공식 API에 없으므로 이 경로가 유일한 이미지 출처이기도 하다)
     try:
         k_url = f"https://search.map.kakao.com/mapsearch/map.daum?q={urllib.parse.quote(query)}"
         k_req = urllib.request.Request(k_url, headers={"User-Agent": HEADERS["User-Agent"], "Referer": "https://map.kakao.com/"})
@@ -202,7 +234,26 @@ def search_address_or_landmark(query: str):
     except Exception:
         pass
 
-    # 2. 카카오맵 주소/장소 검색
+    # 2. 카카오 로컬 공식 API 키워드 검색
+    if KAKAO_REST_API_KEY:
+        try:
+            k2_url = f"https://dapi.kakao.com/v2/local/search/keyword.json?query={urllib.parse.quote(query)}"
+            k2_req = urllib.request.Request(k2_url, headers={"Authorization": f"KakaoAK {KAKAO_REST_API_KEY}"})
+            with urllib.request.urlopen(k2_req, timeout=5) as k2_res:
+                if k2_res.status == 200:
+                    docs = json.loads(k2_res.read().decode('utf-8')).get("documents", [])
+                    if docs:
+                        d = docs[0]
+                        return {
+                            "roadAddress": d.get("road_address_name") or d.get("address_name"),
+                            "x": d.get("x"),
+                            "y": d.get("y"),
+                            "category": d.get("category_name") or "골목/상권 명소"
+                        }
+        except Exception:
+            pass
+
+    # 3. 카카오맵 비공식 주소/장소 검색 (최후 폴백)
     try:
         k_url = f"https://search.map.kakao.com/mapsearch/map.daum?q={urllib.parse.quote(query)}"
         k_req = urllib.request.Request(k_url, headers={"User-Agent": HEADERS["User-Agent"], "Referer": "https://map.kakao.com/"})
