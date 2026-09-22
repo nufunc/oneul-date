@@ -1119,6 +1119,8 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
     '보드게임': ['보드게임', '보드카페', '만화카페', '보드', '게임', '룸카페'],
     '만화카페': ['만화카페', '보드카페', '보드게임', '만화', '룸카페'],
     '기념일': ['럭셔리', '파인다이닝', '오마카세', '와인바', '야경', '호텔', '뷰', '스테이크'],
+    '프로포즈': ['럭셔리', '파인다이닝', '오마카세', '와인바', '야경', '호텔', '뷰', '스카이라운지', '샴페인'],
+    '프러포즈': ['럭셔리', '파인다이닝', '오마카세', '와인바', '야경', '호텔', '뷰', '스카이라운지', '샴페인'],
     '생일': ['파인다이닝', '오마카세', '레터링', '케이크', '와인바', '럭셔리', '호텔'],
     '소개팅': ['파스타', '이탈리안', '와인바', '조용한', '카페', '디저트', '스테이크'],
     '드라이브': ['뷰', '오션뷰', '루프탑', '외곽', '호수', '전망대', '남양주', '가평', '양평', '포천', '강화', '해안도로', '해변', '강변', '국도'],
@@ -1154,7 +1156,10 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
   };
 
   for (const [kw, syns] of Object.entries(NATURAL_CONTEXT_MAP)) {
-    if (cleanQ.includes(kw) || kw.includes(cleanQ)) {
+    // 1글자 키(예: '비')는 부분일치를 허용하면 "비건" 같은 무관한 검색어에도
+    // 걸려 날씨 동의어가 통째로 풀린다. 1글자 키는 완전일치일 때만 인정한다.
+    const kwMatches = kw.length <= 1 ? cleanQ === kw : (cleanQ.includes(kw) || kw.includes(cleanQ));
+    if (kwMatches) {
       const sanitizedText = cleanTargetForMatching(kw, targetText);
       if (syns.some((syn) => sanitizedText.includes(syn.toLowerCase()))) {
         return true;
@@ -2077,7 +2082,7 @@ function generateCourseStory(
   forHtml: boolean = true,
 ): string {
   const filled = steps.filter((st): st is CourseStep & { spotId: number } => st.spotId !== null);
-  if (filled.length === 0) return '두 사람의 취향을 온전히 담아낸 프라이빗 데이트 코스예요.';
+  if (filled.length === 0) return '조건에 맞는 장소를 찾지 못했어요. 필터를 완화해서 다시 시도해보세요.';
 
   // 스팟 ID 기반 결정론적 시드 (동일 코스에서 텍스트 일관성 보장)
   const idSum = filled.reduce((acc, st) => acc + st.spotId, 0);
@@ -2738,9 +2743,16 @@ interface AppState {
 
 /** 저장된 테마 모드 불러오기 (기본값: 'light' 낮 테마) */
 function getInitialThemeMode(): ThemeMode {
-  const saved = localStorage.getItem(THEME_STORAGE_KEY);
-  if (saved === 'light' || saved === 'dark' || saved === 'auto') {
-    return saved;
+  // 구형 Safari 프라이빗 모드 등에서는 localStorage 접근 자체가 예외를 던진다.
+  // 이 함수는 모듈 최상위 state 리터럴 대입 중에 바로 호출돼, 안 잡으면
+  // 모듈 초기화가 통째로 중단돼 앱이 아예 렌더링되지 않는다.
+  try {
+    const saved = localStorage.getItem(THEME_STORAGE_KEY);
+    if (saved === 'light' || saved === 'dark' || saved === 'auto') {
+      return saved;
+    }
+  } catch {
+    // 접근 실패 시 기본값으로 폴백
   }
   return 'light';
 }
@@ -2879,7 +2891,13 @@ function loadSavedCourses(): SavedCourse[] {
 }
 
 function persistSavedCourses(list: SavedCourse[]): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  } catch {
+    // 저장 공간 초과 등으로 실패하면 호출부의 showToast('저장했어요')가 그대로
+    // 실행돼 실제로는 저장 안 됐는데 성공한 것처럼 보인다. 실패를 알린다.
+    showToast('보관함 저장에 실패했어요. 저장 공간을 확인해주세요.');
+  }
 }
 
 /** 최근 노출 스폿 ID 이력 (오래된 순 → 최신 순, 최대 RECENT_MAX개 FIFO) */
@@ -2958,7 +2976,14 @@ function getThemeModeLabel(mode: ThemeMode): string {
 
 function applyTheme(mode: ThemeMode, notify = false): void {
   state.themeMode = mode;
-  localStorage.setItem(THEME_STORAGE_KEY, mode);
+  // setItem 실패(저장공간 초과 등)로 아래 화면 갱신까지 멈추지 않게 분리한다.
+  // 실패해도 이번 세션 동안은 테마가 정상 적용되고, 다음 방문 때만 저장 전
+  // 값으로 돌아간다.
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, mode);
+  } catch {
+    // 무시하고 화면 갱신은 계속 진행
+  }
 
   const isSysDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   const resolved = mode === 'auto' ? (isSysDark ? 'dark' : 'light') : mode;
@@ -3766,6 +3791,26 @@ function renderResults(): void {
         시간대와 조건을 고르고<br /><strong>코스 만들기</strong>를 눌러보세요
       </div>
     `;
+    return;
+  }
+
+  // 모든 슬롯이 spotId: null이면(조건에 맞는 후보가 하나도 없었던 경우) 카드는
+  // 각자 "찾지 못했어요"를 정상 표시하지만, 그 위 AI 브리핑은 일반 긍정 문구를
+  // 내고 복사·공유·저장·최적동선 버튼까지 그대로 노출돼 빈 코스를 실제
+  // 코스처럼 저장·공유할 수 있었다. 여기서 전용 실패 상태로 갈아탄다.
+  if (state.course.length > 0 && state.course.every((s) => s.spotId === null)) {
+    area.innerHTML = `
+      <div class="results-empty">
+        조건에 맞는 코스를 찾지 못했어요.<br />필터를 완화해서 다시 시도해보세요.
+      </div>
+      <div class="result-actions result-actions-1">
+        <button class="btn-regenerate" id="btn-regenerate" aria-label="다시 추천받기">
+          ${ICON_REFRESH_SVG}
+          <span class="btn-regenerate-text">다시 추천</span>
+        </button>
+      </div>
+    `;
+    bindResultEvents(area);
     return;
   }
 

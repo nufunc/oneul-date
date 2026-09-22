@@ -2395,6 +2395,10 @@ button {
   grid-template-columns: repeat(3, 1fr);
 }
 
+.result-actions.result-actions-1 {
+  grid-template-columns: 1fr;
+}
+
 .result-actions .btn-secondary,
 .result-actions .btn-primary {
   padding-left: var(--space-2);
