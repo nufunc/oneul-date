@@ -5706,6 +5706,13 @@ function bindDiscoveryEvents(area: HTMLElement): void {
     state.regions = [];
     state.subZones = [];
     state.spotPage = 1;
+    // "전체 스팟으로 초기화했어요" 토스트가 무색하게 실내/무드/예산/찜
+    // 필터는 빠져 있었다(2026-09-23 발견) — 특히 결과 없음 화면의 탈출구인
+    // #btn-empty-reset-all에서 좁힘의 원인이 그대로 남아 다시 0건이 날 수 있었다.
+    state.indoorOnly = false;
+    state.moodPreset = null;
+    state.budgetFilter = 'ALL';
+    state.savedOnly = false;
     ensureSpotsForRegions(['ALL']);
     renderSpotDiscovery();
     showToast('전체 스팟으로 초기화했어요');
@@ -5718,6 +5725,10 @@ function bindDiscoveryEvents(area: HTMLElement): void {
     state.regions = [];
     state.subZones = [];
     state.spotPage = 1;
+    state.indoorOnly = false;
+    state.moodPreset = null;
+    state.budgetFilter = 'ALL';
+    state.savedOnly = false;
     ensureSpotsForRegions(['ALL']);
     renderSpotDiscovery();
     showToast('전체 스팟으로 초기화했어요');
