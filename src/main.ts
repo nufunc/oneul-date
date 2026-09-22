@@ -6011,6 +6011,11 @@ function renderOverlay(): void {
   const root = document.getElementById('overlay-root');
   if (!root) return;
 
+  // 모달이 열려도 포커스가 트리거 버튼에 그대로 남아, 스크린리더가 새
+  // 다이얼로그가 뜬 것을 그 순간에 알려주지 못했다(2026-09-23 발견).
+  // WAI-ARIA 다이얼로그 패턴대로 열릴 때 포커스를 모달 안으로 옮긴다.
+  const focusOverlayEntry = () => root.querySelector<HTMLElement>('#overlay-close')?.focus();
+
   // 1. 저장한 코스 바텀시트
   if (state.savedOpen) {
     const list = loadSavedCourses();
@@ -6115,6 +6120,7 @@ function renderOverlay(): void {
         showToast('삭제했어요');
       });
     });
+    focusOverlayEntry();
     return;
   }
 
@@ -6390,6 +6396,7 @@ function renderOverlay(): void {
       closeOverlay();
     });
 
+    focusOverlayEntry();
     return;
   }
 
@@ -6428,6 +6435,7 @@ function renderOverlay(): void {
         closeOverlay();
       });
     });
+    focusOverlayEntry();
     return;
   }
 
@@ -6667,6 +6675,7 @@ function renderOverlay(): void {
       });
     });
 
+    focusOverlayEntry();
     return;
   }
 
