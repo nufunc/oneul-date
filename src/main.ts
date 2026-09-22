@@ -3101,6 +3101,9 @@ function renderMainModeNav(): void {
   `;
 
   document.getElementById('tab-mode-course')?.addEventListener('click', () => {
+    if (!state.searchQuery && state.spotSearchQuery) {
+      state.searchQuery = state.spotSearchQuery;
+    }
     if (state.mainMode !== 'course') {
       state.mainMode = 'course';
       updateModeView();
