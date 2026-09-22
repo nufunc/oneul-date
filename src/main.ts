@@ -2099,6 +2099,7 @@ function generateCourseStory(
   const stay = spotMap.get('stay');
 
   const wrap = (name: string) => (forHtml ? `<strong>${escapeHtml(name)}</strong>` : name);
+  const wrapText = (text: string) => (forHtml ? escapeHtml(text) : text);
 
   // 단일 슬롯 선택 시
   if (filled.length === 1) {
@@ -2110,7 +2111,7 @@ function generateCourseStory(
       ? '미쉐린 가이드에 선정된 '
       : '';
     const sig = spot.signature_items && spot.signature_items.length > 0
-      ? `대표 시그니처(${spot.signature_items[0]})와 함께 `
+      ? `대표 시그니처(${wrapText(spot.signature_items[0])})와 함께 `
       : '';
     const singleStyles = [
       `${badge}남다른 감각과 무드가 돋보이는 ${wrap(spot.name)}에서 ${sig}오롯이 둘만의 시간에 집중해보세요.`,
@@ -2133,7 +2134,7 @@ function generateCourseStory(
   } else if (valetSpot) {
     metaTip = ` ${wrap(valetSpot.name)}의 편리한 발렛 주차 지원으로 드라이브 데이트도 한결 여유로워요.`;
   } else if (signatureSpot && signatureSpot.signature_items && signatureSpot.signature_items.length > 0) {
-    metaTip = ` ${wrap(signatureSpot.name)}에서는 대표 시그니처인 ${signatureSpot.signature_items[0]}을(를) 추천해요.`;
+    metaTip = ` ${wrap(signatureSpot.name)}에서는 대표 시그니처인 ${wrapText(signatureSpot.signature_items[0])}을(를) 추천해요.`;
   }
 
   const moodClosing: Record<string, string> = {
@@ -5489,7 +5490,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
       ? spot._dist < 1.0
         ? `📍 ${(spot._dist * 1000).toFixed(0)}m`
         : `📍 ${spot._dist.toFixed(1)}km`
-      : `📍 ${spot.area || spot.region}`;
+      : `📍 ${escapeHtml(spot.area || spot.region || '')}`;
   const sum = cleanSpotSummary(spot) || `${spot.name}에서 특별한 데이트를 즐겨보세요.`;
 
   const bookingUrl = spot.booking_info?.url || getCatchtableUrl(spot);
