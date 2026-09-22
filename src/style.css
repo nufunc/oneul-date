@@ -4339,6 +4339,12 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
 }
 
 /* 1-Tap 퀵 지역 칩 가로 스크롤 바 */
+.quick-region-chips-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .quick-region-scroll {
   display: flex;
   align-items: center;
@@ -4350,6 +4356,11 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
 }
 .quick-region-scroll::-webkit-scrollbar {
   display: none;
+}
+
+.quick-mood-row {
+  padding-top: 4px;
+  border-top: 1px dashed var(--color-border);
 }
 
 .quick-region-chip {

@@ -3325,7 +3325,7 @@ function renderQuickRegionChips(): string {
     }
   }
 
-  return `
+  const regionRow = `
     <button class="quick-region-chip ${isAll ? 'is-active' : ''}" data-region-key="ALL" type="button" aria-label="전국 스팟 보기">
       <span class="region-chip-emoji">🗺️</span>
       <span class="region-chip-text">전국</span>
@@ -3360,14 +3360,23 @@ function renderQuickRegionChips(): string {
     <button class="quick-region-chip chip-budget ${state.budgetFilter === 'LUXURY' ? 'is-active is-luxury-active' : ''}" data-action="toggle-budget" data-budget="LUXURY" type="button" aria-label="스페셜 다이닝 필터" title="오마카세/파인다이닝/럭셔리 명소">
       <span class="region-chip-text">${state.budgetFilter === 'LUXURY' ? '🍷 스페셜 ON' : '🍷 스페셜'}</span>
     </button>
-    ${MOOD_PRESETS.map((m) => {
-      const isMoodActive = state.moodPreset === m.key;
-      return `
-        <button class="quick-region-chip chip-mood ${isMoodActive ? 'is-active is-mood-active' : ''}" data-action="toggle-mood" data-mood-preset="${m.key}" type="button" aria-label="${m.label} 데이트 모드" title="${m.desc}">
-          <span class="region-chip-text">${m.icon} ${m.label}</span>
-        </button>
-      `;
-    }).join('')}
+  `;
+
+  const moodRow = MOOD_PRESETS.map((m) => {
+    const isMoodActive = state.moodPreset === m.key;
+    return `
+      <button class="quick-region-chip chip-mood ${isMoodActive ? 'is-active is-mood-active' : ''}" data-action="toggle-mood" data-mood-preset="${m.key}" type="button" aria-label="${m.label} 데이트 모드" title="${m.desc}">
+        <span class="region-chip-text">${m.icon} ${m.label}</span>
+      </button>
+    `;
+  }).join('');
+
+  // 무드 프리셋은 지역 선택과 성격이 다른 정밀 필터라 같은 가로 스크롤 줄에
+  // 섞으면 8개 지역 칩 뒤로 밀려 기본 화면에서 100% 잘려 나간다(2026-09-23
+  // 디자인 감사 발견). 별도 줄로 분리해 항상 보이게 한다.
+  return `
+    <div class="quick-region-scroll">${regionRow}</div>
+    <div class="quick-region-scroll quick-mood-row">${moodRow}</div>
   `;
 }
 
@@ -3496,7 +3505,7 @@ function renderConditions(): void {
       </div>
 
       <!-- 2. 1-Tap 퀵 지역 칩 바 (모달 없이 전국 및 8대 권역 즉시 전환) -->
-      <div class="quick-region-scroll" id="course-quick-region-bar" style="margin-bottom: var(--space-3);" role="group" aria-label="지역 빠른 선택">
+      <div class="quick-region-chips-wrap" id="course-quick-region-bar" style="margin-bottom: var(--space-3);" role="group" aria-label="지역 빠른 선택">
         ${renderQuickRegionChips()}
       </div>
 
@@ -5382,7 +5391,7 @@ function renderSpotDiscovery(): void {
     </div>
 
     <!-- 2. 1-Tap 퀵 지역 칩 바 (모달 없이 전국 및 8대 권역 즉시 전환) -->
-    <div class="quick-region-scroll" id="spot-quick-region-bar" style="margin-bottom: var(--space-3);" role="group" aria-label="지역 빠른 선택">
+    <div class="quick-region-chips-wrap" id="spot-quick-region-bar" style="margin-bottom: var(--space-3);" role="group" aria-label="지역 빠른 선택">
       ${renderQuickRegionChips()}
     </div>
 
