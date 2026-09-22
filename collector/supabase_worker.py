@@ -105,14 +105,23 @@ def clean_keyword(name: str, location: str = "", address: str = "", region: str 
             clean = re.sub(re.escape(eng), kor, clean, flags=re.IGNORECASE)
 
     # 지역 결합 (주소, location 또는 region에서 시/군/구/동 추출)
+    # 시/군/구 단위를 도로명(로/길)보다 먼저 시도한다: "번영로", "호수로" 같은
+    # 도로명을 붙이면 네이버·카카오 둘 다 검색이 아예 0건이 되는 경우가
+    # 많다(2026-09-22 실측: "조가네갑오징어 왕송호수점 초평로" 0건 vs
+    # "조가네갑오징어 왕송호수점 의왕시" 정상 매칭). 도로명은 주소에 시/군/구
+    # 토큰이 없는 골목/상권형 스팟에서만 최후 폴백으로 쓴다.
     area_hint = ""
     if address:
-        m = re.search(r'([가-힣0-9]+(?:로|길|동|읍|면))', address)
+        m = re.search(r'([가-힣0-9]+(?:시|군|구))', address)
         if m:
             area_hint = m.group(1)
     if not area_hint and location:
         m = re.search(r'([가-힣0-9]+(?:시|군|구|동|읍|면))', location)
         if m and m.group(1) not in ('전국', '수도권'):
+            area_hint = m.group(1)
+    if not area_hint and address:
+        m = re.search(r'([가-힣0-9]+(?:로|길|동|읍|면))', address)
+        if m:
             area_hint = m.group(1)
     if not area_hint and region and region not in ('전국', '수도권'):
         area_hint = region
