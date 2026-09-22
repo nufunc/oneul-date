@@ -28,6 +28,20 @@ SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY") or _env.get("SUPABASE_SERV
 
 JUNK_META_NAME_PREFIXES = ("🗺️", "🗺")
 
+# 2026-09-23 데이터 큐레이션 감사 6회차 발견: 같은 2026-09-05 배치에서
+# "Part 1./Chapter 2./카테고리 1." 같은 리스티클 챕터 제목, "OO 20선 비교
+# 분석 매트릭스" 같은 정리글 제목, "Selection Criteria" 같은 글 서문·범례
+# 문구가 개별 스팟으로 잘못 들어간 56건. 이모지 접두어가 제각각이라
+# 패턴 매칭 대신 사람이 직접 확인한 id 목록을 쓴다. 전부 address·category
+# NULL, 실재하지 않는 "장소" 확인 완료.
+JUNK_LISTICLE_FRAGMENT_IDS = {
+    7759, 9103, 8425, 7344, 8420, 9297, 7342, 10055, 7097, 7756, 7755, 7281,
+    7447, 9767, 7908, 8236, 8430, 8733, 8839, 7446, 7489, 7530, 8153, 8532,
+    7448, 7758, 7694, 7800, 7931, 8234, 8384, 8885, 9527, 9744, 10052, 10063,
+    10091, 10095, 10097, 9985, 10008, 8419, 8427, 8754, 8816, 9873, 9896,
+    9190, 9211, 9443, 9550, 9595, 8862, 7909, 8429, 10100,
+}
+
 
 def build_headers(extra=None):
     headers = dict(extra or {})
@@ -86,8 +100,13 @@ def main():
     rows = fetch_all_active()
     print(f"  • 총 {len(rows):,}건")
 
-    # 1. 큐레이션 메타 콘텐츠 (이름이 지도/큐레이션 이모지로 시작하고 주소가 없음)
-    junk_ids = [r["id"] for r in rows if r["name"].startswith(JUNK_META_NAME_PREFIXES) and not r.get("address")]
+    # 1. 큐레이션 메타 콘텐츠 (이름이 지도/큐레이션 이모지로 시작하고 주소가 없음
+    #    + 사람이 직접 확인한 리스티클 챕터/비교표/서문 파편 id 목록)
+    junk_ids = [
+        r["id"] for r in rows
+        if (r["name"].startswith(JUNK_META_NAME_PREFIXES) and not r.get("address"))
+        or r["id"] in JUNK_LISTICLE_FRAGMENT_IDS
+    ]
     print(f"\n📦 [메타 콘텐츠 오염] {len(junk_ids)}건")
     for r in rows:
         if r["id"] in junk_ids[:3]:
