@@ -943,8 +943,15 @@ function getSpotCoordinates(spot: Spot): { lat: number; lng: number } {
     if (matchesZone(spot, [zone.key])) {
       const center = ZONE_CENTERS[zone.key];
       if (center) {
-        const jitterLat = (((spot.id * 17) % 100) - 50) * 0.00012;
-        const jitterLng = (((spot.id * 31) % 100) - 50) * 0.00012;
+        // 모듈러스 100은 배치 시딩으로 흔한 "id가 50으로 끝나는" 패턴과
+        // 겹쳐, 홀수 배수({17,31,13,29,11,23} 전부 홀수)를 곱한 뒤 -50을
+        // 빼는 이 공식이 id%100===50인 모든 id에서 지터가 정확히 0이
+        // 되는 수학적 구멍이 있었다(50*홀수 ≡ 50 mod 100이라 항상 상쇄
+        // 됨 — 100과의 공약수 문제가 아니라 50이라는 값 자체의 특성).
+        // 소수 97로 바꿔 이 정렬을 깬다(2026-09-23 발견, id=850/7650/
+        // 7750/9150 실측 재현).
+        const jitterLat = (((spot.id * 17) % 97) - 48) * 0.00012;
+        const jitterLng = (((spot.id * 31) % 97) - 48) * 0.00012;
         return { lat: center.lat + jitterLat, lng: center.lng + jitterLng };
       }
     }
@@ -955,8 +962,8 @@ function getSpotCoordinates(spot: Spot): { lat: number; lng: number } {
     if (reg.match.includes(spot.region)) {
       const center = REGION_CENTERS[reg.key];
       if (center) {
-        const jitterLat = (((spot.id * 13) % 100) - 50) * 0.0006;
-        const jitterLng = (((spot.id * 29) % 100) - 50) * 0.0006;
+        const jitterLat = (((spot.id * 13) % 97) - 48) * 0.0006;
+        const jitterLng = (((spot.id * 29) % 97) - 48) * 0.0006;
         return { lat: center.lat + jitterLat, lng: center.lng + jitterLng };
       }
     }
@@ -964,8 +971,8 @@ function getSpotCoordinates(spot: Spot): { lat: number; lng: number } {
 
   // 3. 기본 폴백 (서울 성수·서울숲 중심)
   const defaultCenter = REGION_CENTERS.SEOUL || { lat: 37.5413, lng: 127.0564 };
-  const fallbackLat = (((spot.id * 11) % 100) - 50) * 0.0005;
-  const fallbackLng = (((spot.id * 23) % 100) - 50) * 0.0005;
+  const fallbackLat = (((spot.id * 11) % 97) - 48) * 0.0005;
+  const fallbackLng = (((spot.id * 23) % 97) - 48) * 0.0005;
   return { lat: defaultCenter.lat + fallbackLat, lng: defaultCenter.lng + fallbackLng };
 }
 
