@@ -5184,7 +5184,7 @@ function buildAnchorCourse(anchorSpot: Spot): CourseStep[] {
       steps.push({ slot, spotId: anchorSpot.id });
     } else {
       const candidates = getCandidates(spots, slot, [], 'ALL', [], []);
-      const nearby = candidates
+      const withDist = candidates
         .filter((s) => s.id !== anchorSpot.id && isCourseEligible(s))
         .map((s) => ({
           spot: s,
@@ -5193,20 +5193,21 @@ function buildAnchorCourse(anchorSpot: Spot): CourseStep[] {
               ? getDistanceKm(anchorSpot.lat, anchorSpot.lng, s.lat, s.lng)
               : 9999,
         }))
-        .filter((item) => item.dist <= 8.0)
         .sort((a, b) => a.dist - b.dist);
 
-      if (nearby.length > 0) {
-        const picked = nearby[Math.floor(Math.random() * Math.min(3, nearby.length))].spot;
-        steps.push({ slot, spotId: picked.id });
-      } else {
-        const fallback = candidates.filter((s) => s.id !== anchorSpot.id && isCourseEligible(s));
-        if (fallback.length > 0) {
-          steps.push({ slot, spotId: fallback[Math.floor(Math.random() * fallback.length)].id });
-        } else {
-          steps.push({ slot, spotId: null });
+      // "이 스팟 중심으로"라는 약속을 지키려면 반경 실패 시 전국 무작위로
+      // 빠지면 안 된다(2026-09-23 발견: 평택 앵커에 대구 스팟이 섞임).
+      // 8km에서 없으면 20km, 50km로 단계적으로 넓히고, 그래도 없으면
+      // 무작위 원거리 대신 빈 스텝으로 남긴다.
+      let picked: Spot | null = null;
+      for (const radiusKm of [8.0, 20.0, 50.0]) {
+        const nearby = withDist.filter((item) => item.dist <= radiusKm);
+        if (nearby.length > 0) {
+          picked = nearby[Math.floor(Math.random() * Math.min(3, nearby.length))].spot;
+          break;
         }
       }
+      steps.push({ slot, spotId: picked ? picked.id : null });
     }
   }
 
