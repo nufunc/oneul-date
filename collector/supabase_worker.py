@@ -396,6 +396,22 @@ _SIDO_ABBREV_MAP = {
 }
 
 
+def fix_garbled_sido_prefix(address):
+    """카카오 비공식 검색이 광주·전남 지역 주소에 실존하지 않는
+    "전남광주통합특별시"를 시도 접두어로 반환하는 경우가 있다(2026-09-22
+    확인, 상호명·업종 무관하게 재현되는 카카오 쪽 데이터 문제라 우리
+    코드가 만드는 값이 아니다). 다음 토큰이 구로 끝나면 광주, 시/군으로
+    끝나면 전남으로 되돌린다.
+    """
+    prefix = "전남광주통합특별시"
+    if not address or not address.startswith(prefix):
+        return address
+    rest = address[len(prefix):].strip()
+    next_token = rest.split()[0] if rest else ""
+    sido = "광주" if next_token.endswith("구") else "전남"
+    return f"{sido} {rest}".strip()
+
+
 def normalize_spot_address(address):
     """주소 비교용 정규화: 광역명 표기를 축약형으로 통일하고, 건물명·층·호 등
     뒤쪽 꼬리 토큰을 반복 제거한 뒤 공백 없이 이어붙인다.
@@ -800,7 +816,7 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                     best_place = p
                     break
             top = best_place if best_place else places[0]
-            road_addr = top.get("roadAddress") or top.get("address")
+            road_addr = fix_garbled_sido_prefix(top.get("roadAddress") or top.get("address"))
 
             # 권역 충돌 방지: 기존 reg가 명확한데 검색된 주소가 타 권역이면 권역 힌트로 재검색
             if reg and reg not in ('전국', '수도권') and road_addr:
@@ -810,7 +826,7 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                     time.sleep(0.1)
                     if retry_places:
                         for rp in retry_places:
-                            r_addr = rp.get("roadAddress") or rp.get("address")
+                            r_addr = fix_garbled_sido_prefix(rp.get("roadAddress") or rp.get("address"))
                             if r_addr:
                                 r_reg, _ = derive_region_area(r_addr)
                                 if r_reg == reg:
