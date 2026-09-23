@@ -69,8 +69,9 @@ CREATE TABLE IF NOT EXISTS public.spots (
     -- [v4.0 확장] 라이프사이클 및 검증 추적
     last_verified_at TIMESTAMPTZ,
     fts_tokens TSVECTOR,
-    created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
-    updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+    -- TIMEZONE('utc', NOW())는 시간대 없는 값을 만들어 TIMESTAMPTZ에 넣으면 세션 시간대로 재해석돼 9시간 틀어진다
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
 -- 2-1. 기존 테이블 호환을 위한 신규 컬럼 안전 추가 (ALTER TABLE IF NOT EXISTS)
@@ -216,7 +217,7 @@ BEGIN
         to_tsvector('simple', COALESCE(array_to_string(NEW.signature_items, ' '), '')) ||
         to_tsvector('simple', COALESCE(array_to_string(NEW.mood_tags, ' '), ''));
 
-    NEW.updated_at := TIMEZONE('utc'::text, NOW());
+    NEW.updated_at := NOW();
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
