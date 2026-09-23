@@ -1092,6 +1092,11 @@ interface GenerateOptions {
 }
 
 /** 검색어 및 퀵 태그 매칭 헬퍼 (특수문자 정제, 다중 토큰, 동의어 풀 매칭 지원) */
+/** 거리 배지에 찍히는 값으로 반올림한 km 값(1km 미만은 1m, 이상은 0.1km) */
+function roundDistanceForDisplay(km: number): number {
+  return km < 1 ? Math.round(km * 1000) / 1000 : Math.round(km * 10) / 10;
+}
+
 /** 검색 관련도 등급(작을수록 앞): 이름 일치 → 이름에 검색어 전체 → 이름에 모든 단어 → 본문에 모든 단어 → 일부 단어만 */
 function searchRelevanceTier(spot: Spot, query: string): number {
   const q = query.replace(/[#·,/\\]/g, ' ').trim().toLowerCase();
@@ -5434,11 +5439,11 @@ function renderSpotDiscovery(): void {
   if (state.spotSort === 'distance') {
     // 📍 가까운 거리순 (가까운 곳부터, 동일 거리 시 인기 점수순)
     matchedSpots.sort((a, b) => {
-      const aDist = a._dist ?? 9999;
-      const bDist = b._dist ?? 9999;
-      if (Math.abs(aDist - bDist) > 0.05) {
-        return aDist - bDist;
-      }
+      // 배지에 찍히는 값(1km 미만 1m, 이상 0.1km)으로 반올림해 같을 때만 인기순으로 가른다.
+      // 50m 이내를 같다고 보던 비교는 배지상 거리가 거꾸로 늘어서고 추이성도 없었다
+      const aDist = roundDistanceForDisplay(a._dist ?? 9999);
+      const bDist = roundDistanceForDisplay(b._dist ?? 9999);
+      if (aDist !== bDist) return aDist - bDist;
       return getSpotPopularityScore(b) - getSpotPopularityScore(a);
     });
   } else if (state.spotSort === 'curation') {
