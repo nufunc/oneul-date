@@ -6117,12 +6117,22 @@ function renderOverlay(): void {
         e.stopPropagation();
         const item = loadSavedCourses().find((c) => c.id === btn.dataset.copyId);
         if (!item) return;
+        // restoreCourse()는 isCourseEligible로 걸러내고 제외된 개수를
+        // 알리는데, 이 '복사' 버튼은 spot.slot 존재 여부만 봐서 폐업·
+        // 자격 상실 스팟도 안내 없이 조용히 빠졌다(2026-09-23 발견).
+        // 같은 검증·같은 안내로 맞췄다.
         const steps: CourseStep[] = [];
+        let droppedCount = 0;
         for (const id of item.spotIds) {
           const spot = spotById.get(id);
-          if (spot && spot.slot) {
+          if (spot && isCourseEligible(spot)) {
             steps.push({ slot: spot.slot as SlotKey, spotId: id });
+          } else if (spot) {
+            droppedCount += 1;
           }
+        }
+        if (droppedCount > 0) {
+          showToast(`검증에 실패한 장소 ${droppedCount}곳을 제외하고 복사했어요`);
         }
         try {
           const text = await formatCourseTextAsync(
@@ -6145,7 +6155,18 @@ function renderOverlay(): void {
         e.stopPropagation();
         const item = loadSavedCourses().find((c) => c.id === btn.dataset.shareId);
         if (!item || item.spotIds.length === 0) return;
-        shareOrCopyLink(buildShareUrl(item.spotIds));
+        const eligibleIds = item.spotIds.filter((id) => {
+          const spot = spotById.get(id);
+          return spot && isCourseEligible(spot);
+        });
+        if (eligibleIds.length === 0) {
+          showToast('공유할 수 있는 장소가 없어요');
+          return;
+        }
+        if (eligibleIds.length < item.spotIds.length) {
+          showToast(`검증에 실패한 장소 ${item.spotIds.length - eligibleIds.length}곳을 제외하고 공유해요`);
+        }
+        shareOrCopyLink(buildShareUrl(eligibleIds));
       });
     });
 
