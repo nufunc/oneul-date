@@ -226,6 +226,16 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
             top = places[0]
             real_name = top.get("name", "").strip()
 
+            # batch_seen_names는 추가만 하고 확인하는 곳이 없어(258행)
+            # 사실상 죽은 코드였다. find_duplicate_spot은 이번 배치가 아직
+            # INSERT하지 않은 자기 자신은 못 보므로, 같은 실행 안에서 같은
+            # 업체가 서로 다른 검색 쿼리로 두 번 발견되면 중복 검사를 둘 다
+            # 통과해 배치 내부 즉시 중복 삽입이 났다(2026-09-23 확인:
+            # 이설하베이커리·홍대그술집, 둘 다 source.type=blog_mining이고
+            # created_at 초 단위 차이).
+            if real_name in batch_seen_names:
+                continue
+
             # 1. 단독 지명(광역 지자체명 단독) 또는 오염된 헤더명 필터
             if len(raw_name := real_name) <= 2 or raw_name in ["서울", "경기", "인천", "강원", "충청", "충북", "충남", "영남", "경북", "경남", "호남", "전북", "전남", "제주", "부산", "대구", "울산", "광주", "대전", "세종"]:
                 continue
