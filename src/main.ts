@@ -4244,6 +4244,8 @@ function getSpotPopularityScore(spot: Spot): number {
 /**
  * 실시간 스팟 데이터 + 시간대(4단계) + 요일별(주말/평일) 트렌드 인텔리전스 핫랭킹 테마 칩 정렬
  */
+let themeChipCache: { source: Spot[]; key: string; items: SpotCategoryItem[] } | null = null;
+
 export function getCuratedThemeChips(): SpotCategoryItem[] {
   const allItem = SPOT_EXPLORE_CATEGORIES.find((c) => c.key === 'ALL') || { key: 'ALL', label: '전체', emoji: '✨' };
   const themeItems = SPOT_EXPLORE_CATEGORIES.filter((c) => c.key !== 'ALL');
@@ -4252,6 +4254,11 @@ export function getCuratedThemeChips(): SpotCategoryItem[] {
   const hour = now.getHours();
   const dayOfWeek = now.getDay(); // 0: 일, 5: 금, 6: 토
   const isWeekend = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6;
+
+  // 테마마다 전체 스팟 텍스트를 훑어 렌더 비용의 대부분을 차지했다(4배 CPU 제한에서 약 0.7초).
+  // 결과는 spots 배열과 시각(시)·요일로만 정해지므로 그대로면 재사용한다
+  const cacheKey = `${hour}|${dayOfWeek}`;
+  if (themeChipCache?.source === spots && themeChipCache.key === cacheKey) return themeChipCache.items;
 
   const scoredThemes = themeItems.map((item) => {
     let score = 50;
@@ -4335,7 +4342,9 @@ export function getCuratedThemeChips(): SpotCategoryItem[] {
   scoredThemes.sort((a, b) => b.score - a.score);
 
   // '전체' 칩은 항상 맨 앞에 배치
-  return [allItem, ...scoredThemes.map((st) => st.item)];
+  const items = [allItem, ...scoredThemes.map((st) => st.item)];
+  themeChipCache = { source: spots, key: cacheKey, items };
+  return items;
 }
 
 /** 스팟 간 이동 동선 및 원터치 길찾기 딥링크 디바이더 렌더링 */
@@ -5272,6 +5281,8 @@ function buildAnchorCourse(anchorSpot: Spot): CourseStep[] {
 
   return steps;
 }
+let discoveryCandidateCache: { source: Spot[]; key: string; list: (Spot & { _dist: number })[] } | null = null;
+
 function renderSpotDiscovery(): void {
   const area = document.getElementById('spot-discovery-area');
   if (!area) return;
@@ -5300,16 +5311,21 @@ function renderSpotDiscovery(): void {
   }
 
   // 3. 유효 스팟 필터링 (폐업, 광역 더미 제외 및 상호명/ID 2중 중복 완벽 제거, 좌표 보정 및 거리 주입)
-  const allCandidateSpots = deduplicateSpotList(spots.filter((s) => !s.is_closed && isCourseEligible(s)))
-    .map((s) => {
-      const coords = getSpotCoordinates(s);
-      const lat = s.lat || coords.lat;
-      const lng = s.lng || coords.lng;
-      const dist = effectiveCoords
-        ? getDistanceKm(effectiveCoords.lat, effectiveCoords.lng, lat, lng)
-        : 9999;
-      return { ...s, lat, lng, _dist: dist };
-    });
+  // 전체 스팟 중복 제거와 거리 계산이 렌더 비용의 대부분이라(4배 CPU 제한에서 약 0.9초) 입력인
+  // spots 배열과 기준 좌표가 그대로면 재사용한다. 자동 더보기가 페이지마다 멈추지 않게 하려는 것이다
+  const candidateKey = `${effectiveCoords.lat},${effectiveCoords.lng}`;
+  if (discoveryCandidateCache?.source !== spots || discoveryCandidateCache.key !== candidateKey) {
+    const list = deduplicateSpotList(spots.filter((s) => !s.is_closed && isCourseEligible(s)))
+      .map((s) => {
+        const coords = getSpotCoordinates(s);
+        const lat = s.lat || coords.lat;
+        const lng = s.lng || coords.lng;
+        const dist = getDistanceKm(effectiveCoords.lat, effectiveCoords.lng, lat, lng);
+        return { ...s, lat, lng, _dist: dist };
+      });
+    discoveryCandidateCache = { source: spots, key: candidateKey, list };
+  }
+  const allCandidateSpots = discoveryCandidateCache.list;
 
   let matchedSpots = allCandidateSpots;
 
@@ -5649,6 +5665,8 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
   `;
 }
 
+let discoveryMoreObserver: IntersectionObserver | null = null;
+
 function bindDiscoveryEvents(area: HTMLElement): void {
   // 스팟 카드 본체 클릭 시 상세 모달 오픈
   area.querySelectorAll<HTMLElement>('.discovery-card').forEach((card) => {
@@ -5794,6 +5812,19 @@ function bindDiscoveryEvents(area: HTMLElement): void {
     state.spotPage += 1;
     renderSpotDiscovery();
   });
+
+  // 목록 끝 600px 전에 다음 페이지를 자동으로 붙인다. 버튼은 키보드 사용자와 미지원 환경을 위해 남긴다
+  discoveryMoreObserver?.disconnect();
+  const moreRow = area.querySelector('.discovery-more-row');
+  if (moreRow && 'IntersectionObserver' in window) {
+    discoveryMoreObserver = new IntersectionObserver((entries) => {
+      if (!entries.some((e) => e.isIntersecting)) return;
+      discoveryMoreObserver?.disconnect();
+      state.spotPage += 1;
+      renderSpotDiscovery();
+    }, { rootMargin: '0px 0px 600px 0px' });
+    discoveryMoreObserver.observe(moreRow);
+  }
 
   area.querySelectorAll<HTMLButtonElement>('.btn-build-anchor-course').forEach((btn) => {
     btn.addEventListener('click', () => {
