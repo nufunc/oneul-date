@@ -5283,6 +5283,8 @@ function buildAnchorCourse(anchorSpot: Spot): CourseStep[] {
 }
 let discoveryCandidateCache: { source: Spot[]; key: string; list: (Spot & { _dist: number })[] } | null = null;
 
+let lastDiscoveryList: { list: (Spot & { _dist?: number })[]; pageSize: number } | null = null;
+
 function renderSpotDiscovery(): void {
   const area = document.getElementById('spot-discovery-area');
   if (!area) return;
@@ -5431,6 +5433,7 @@ function renderSpotDiscovery(): void {
   const pageSize = state.spotGridCols === 5 ? 25 : state.spotGridCols === 3 ? 18 : 12;
   const displaySpots = matchedSpots.slice(0, state.spotPage * pageSize);
   const hasMore = displaySpots.length < totalCount;
+  lastDiscoveryList = { list: matchedSpots, pageSize };
 
   const regLabel = getRegionSelectorLabel();
   const isFiltered = Boolean(state.spotSearchQuery || state.spotCategory !== 'ALL' || state.regions.length > 0 || state.subZones.length > 0);
@@ -5667,9 +5670,10 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
 
 let discoveryMoreObserver: IntersectionObserver | null = null;
 
-function bindDiscoveryEvents(area: HTMLElement): void {
+/** 카드 안의 요소에만 거는 핸들러. 자동 더보기로 뒤에 붙인 카드에도 같은 함수로 건다 */
+function bindDiscoveryCardEvents(root: ParentNode, area: HTMLElement): void {
   // 스팟 카드 본체 클릭 시 상세 모달 오픈
-  area.querySelectorAll<HTMLElement>('.discovery-card').forEach((card) => {
+  root.querySelectorAll<HTMLElement>('.discovery-card').forEach((card) => {
     card.addEventListener('click', (e) => {
       if ((e.target as HTMLElement).closest('a, button')) return;
       const spotId = Number(card.dataset.spotId);
@@ -5681,7 +5685,7 @@ function bindDiscoveryEvents(area: HTMLElement): void {
   });
 
   // 하트(❤️) 찜 버튼 클릭
-  area.querySelectorAll<HTMLButtonElement>('.btn-discovery-save').forEach((btn) => {
+  root.querySelectorAll<HTMLButtonElement>('.btn-discovery-save').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const spotId = Number(btn.dataset.spotId);
@@ -5700,6 +5704,68 @@ function bindDiscoveryEvents(area: HTMLElement): void {
       }
     });
   });
+
+  root.querySelectorAll<HTMLButtonElement>('.btn-build-anchor-course').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const spotId = Number(btn.dataset.spotId);
+      const anchorSpot = spotById.get(spotId);
+      if (!anchorSpot) return;
+
+      const steps = buildAnchorCourse(anchorSpot);
+      state.course = steps;
+      state.searchQuery = anchorSpot.name;
+      state.courseConditions = {
+        regions: [...state.regions],
+        subZones: [...state.subZones],
+        mood: state.mood,
+        searchQuery: anchorSpot.name,
+      };
+
+      // 맞춤 코스 탭으로 전환
+      state.mainMode = 'course';
+      updateModeView();
+
+      showToast(`✨ '${anchorSpot.name}' 중심 맞춤 코스를 완성했어요! 🚀`);
+      const resultsEl = document.getElementById('results-area');
+      if (resultsEl) {
+        resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+}
+
+/**
+ * 다음 페이지 카드만 목록 뒤에 붙인다. 전체를 다시 그리면 키보드 포커스가 사라지고(Tab 이동 중
+ * 자동 로드가 터지면 포커스가 BODY로 빠졌다) 카드 수에 비례해 렌더 비용이 늘었다.
+ */
+function appendDiscoveryPage(area: HTMLElement): void {
+  const grid = area.querySelector('.spot-discovery-grid');
+  const moreRow = area.querySelector('.discovery-more-row');
+  if (!grid || !moreRow || !lastDiscoveryList) return;
+  const { list, pageSize } = lastDiscoveryList;
+  const start = state.spotPage * pageSize;
+  state.spotPage += 1;
+  const shown = Math.min(state.spotPage * pageSize, list.length);
+
+  const tmp = document.createElement('div');
+  tmp.innerHTML = list.slice(start, shown).map((spot) => renderDiscoverySpotCard(spot, state.spotGridCols)).join('');
+  bindDiscoveryCardEvents(tmp, area);
+  grid.append(...Array.from(tmp.children));
+
+  if (shown >= list.length) {
+    discoveryMoreObserver?.disconnect();
+    moreRow.remove();
+    return;
+  }
+  const btn = moreRow.querySelector('#btn-discovery-more');
+  if (btn) btn.textContent = `스팟 더보기 (${shown} / ${list.length}) ▾`;
+  // 붙인 뒤에도 끝이 여전히 가까우면 교차 상태가 바뀌지 않아 콜백이 다시 오지 않으므로 다시 관찰해 판정받는다
+  discoveryMoreObserver?.unobserve(moreRow);
+  discoveryMoreObserver?.observe(moreRow);
+}
+
+function bindDiscoveryEvents(area: HTMLElement): void {
+  bindDiscoveryCardEvents(area, area);
 
   // 보관함 빈 화면에서 전체 스팟 둘러보기 클릭
   area.querySelector('#btn-empty-reset-saved')?.addEventListener('click', () => {
@@ -5808,51 +5874,19 @@ function bindDiscoveryEvents(area: HTMLElement): void {
     showToast('전체 스팟으로 초기화했어요');
   });
 
-  area.querySelector('#btn-discovery-more')?.addEventListener('click', () => {
-    state.spotPage += 1;
-    renderSpotDiscovery();
-  });
+  area.querySelector('#btn-discovery-more')?.addEventListener('click', () => appendDiscoveryPage(area));
 
   // 목록 끝 600px 전에 다음 페이지를 자동으로 붙인다. 버튼은 키보드 사용자와 미지원 환경을 위해 남긴다
   discoveryMoreObserver?.disconnect();
   const moreRow = area.querySelector('.discovery-more-row');
   if (moreRow && 'IntersectionObserver' in window) {
     discoveryMoreObserver = new IntersectionObserver((entries) => {
-      if (!entries.some((e) => e.isIntersecting)) return;
-      discoveryMoreObserver?.disconnect();
-      state.spotPage += 1;
-      renderSpotDiscovery();
+      if (entries.some((e) => e.isIntersecting)) appendDiscoveryPage(area);
     }, { rootMargin: '0px 0px 600px 0px' });
     discoveryMoreObserver.observe(moreRow);
   }
 
-  area.querySelectorAll<HTMLButtonElement>('.btn-build-anchor-course').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const spotId = Number(btn.dataset.spotId);
-      const anchorSpot = spotById.get(spotId);
-      if (!anchorSpot) return;
 
-      const steps = buildAnchorCourse(anchorSpot);
-      state.course = steps;
-      state.searchQuery = anchorSpot.name;
-      state.courseConditions = {
-        regions: [...state.regions],
-        subZones: [...state.subZones],
-        mood: state.mood,
-        searchQuery: anchorSpot.name,
-      };
-
-      // 맞춤 코스 탭으로 전환
-      state.mainMode = 'course';
-      updateModeView();
-
-      showToast(`✨ '${anchorSpot.name}' 중심 맞춤 코스를 완성했어요! 🚀`);
-      const resultsEl = document.getElementById('results-area');
-      if (resultsEl) {
-        resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    });
-  });
 }
 
 // --- 수신자 뷰 (S5 — 링크로 열었을 때) ---------------------------------------------
