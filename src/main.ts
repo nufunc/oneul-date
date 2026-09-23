@@ -6273,24 +6273,17 @@ function renderOverlay(): void {
     root.querySelector('#overlay-backdrop')!.addEventListener('click', () => closeOverlay());
     root.querySelector('#overlay-close')!.addEventListener('click', () => closeOverlay());
 
-    // 지역 탭 클릭 (전체 클릭 시 자동으로 전국 기본 선택, 지역 전환 시 해당 지역 활성화)
+    // 지역 탭 클릭 — 오른쪽에 어느 지역 목록을 "미리 보여줄지"만 바꾼다.
+    // 예전에는 탭을 누르는 즉시 state.regions/subZones를 그 탭 기준으로
+    // 확정·필터링해, 다른 지역 탭을 잠깐 눌러보기만 해도 방금 체크해 둔
+    // 세부동네가 사라졌다(2026-09-23 발견). 확정은 '선택 완료' 버튼에서만
+    // 한다 — 체크박스 클릭 시점에 이미 state.regions에 해당 지역이
+    // 추가되므로(아래 세부존 토글 로직) 탭 전환 자체는 미리보기로 충분하다.
     root.querySelectorAll<HTMLButtonElement>('.region-tab-item').forEach((tabBtn) => {
       tabBtn.addEventListener('click', () => {
         const tabKey = tabBtn.dataset.regionTab || 'SEOUL';
         state.activeRegionTab = tabKey;
-        if (tabKey === 'ALL') {
-          state.regions = [];
-          state.subZones = [];
-          ensureSpotsForRegions(['ALL']);
-        } else {
-          state.regions = [tabKey];
-          // 타 지역 세부존 제거하고 현재 지역 세부존만 유지
-          state.subZones = state.subZones.filter((zk) => {
-            const z = POPULAR_ZONES.find((item) => item.key === zk);
-            return z ? z.regionKey === tabKey : false;
-          });
-          ensureSpotsForRegions([tabKey]);
-        }
+        ensureSpotsForRegions([tabKey]);
         renderOverlay();
       });
     });
