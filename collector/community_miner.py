@@ -232,8 +232,8 @@ def run_community_mining(supabase_url: str, service_key: str, max_discoveries: i
                 "summary": f"커뮤니티 추천 {real_reg} {real_area}의 찐 로컬 {cat or '데이트 명소'}",
                 "category": cat,
                 "image_url": thum,
-                "lat": float(y_coord) if y_coord else None,
-                "lng": float(x_coord) if x_coord else None,
+                "lat": y_coord,  # 숫자 변환과 범위 검증은 sanitize_spot이 맡는다(비숫자 값에 float()가 배치 전체를 중단시키던 문제)
+                "lng": x_coord,
                 "quality_score": 90,
                 "fail_count": 0,
                 "source": {

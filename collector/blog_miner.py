@@ -299,8 +299,8 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
                 "summary": f"블로그 인기 추천 {real_reg} {real_area}의 감성 {cat or '데이트 핫플'}",
                 "category": cat,
                 "image_url": thum,
-                "lat": float(y_coord) if y_coord else None,
-                "lng": float(x_coord) if x_coord else None,
+                "lat": y_coord,  # 숫자 변환과 범위 검증은 sanitize_spot이 맡는다(비숫자 값에 float()가 배치 전체를 중단시키던 문제)
+                "lng": x_coord,
                 "quality_score": 85,
                 "fail_count": 0,
                 "source": {

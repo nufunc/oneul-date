@@ -904,8 +904,12 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
             # 좌표 파싱 (x: 경도, y: 위도)
             x_coord = top.get("x") or top.get("lng")
             y_coord = top.get("y") or top.get("lat")
-            lat_val = float(y_coord) if y_coord else None
-            lng_val = float(x_coord) if x_coord else None
+            # 비숫자 좌표에 float()가 예외를 내면 run_worker 배치 전체가 중단되므로 실패는 좌표 없음으로 본다
+            try:
+                lat_val = float(y_coord) if y_coord else None
+                lng_val = float(x_coord) if x_coord else None
+            except (TypeError, ValueError):
+                lat_val = lng_val = None
 
             place_meta = {
                 "image_url": thum,
