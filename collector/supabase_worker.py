@@ -446,8 +446,15 @@ def find_duplicate_spot(supabase_url, headers, name, address=""):
     clean_name = re.sub(r'\(.*?\)|\[.*?\]', '', name).strip()
     if not clean_name:
         return False
-    encoded = urllib.parse.quote(name)
-    encoded_clean = urllib.parse.quote(clean_name)
+    # PostgREST의 or=(...) 문법은 콤마로 조건을 구분하고 괄호로 그룹을
+    # 묶는다. 값 자체에 괄호·콤마가 있으면(예: "경화장 (3, 8일)") 큰따옴표로
+    # 감싸지 않는 한 문법이 깨져 400을 반환한다(2026-09-23 확인: 라이브
+    # tourapi 크로스런 재삽입 82그룹 중 79그룹이 이 패턴). 값을 큰따옴표로
+    # 감싸 PostgREST의 예약 문자 이스케이프 규칙을 따른다.
+    def _quoted(v: str) -> str:
+        return urllib.parse.quote(f'"{v}"')
+    encoded = _quoted(name)
+    encoded_clean = _quoted(clean_name)
     names_clause = f"name.eq.{encoded}" if encoded == encoded_clean else f"name.eq.{encoded},name.eq.{encoded_clean}"
     url = f"{supabase_url}/rest/v1/spots?select=id,name,address&or=({names_clause})&limit=20"
     req = urllib.request.Request(url, headers=headers)
@@ -455,7 +462,11 @@ def find_duplicate_spot(supabase_url, headers, name, address=""):
         with urllib.request.urlopen(req, timeout=5) as res:
             rows = json.loads(res.read().decode('utf-8'))
     except Exception:
-        return False
+        # 조회 자체가 실패하면 예전에는 "중복 아님"으로 fail-open해 수집을
+        # 계속 진행시켰는데, 그게 바로 이 괄호/콤마 400 사례에서 재삽입을
+        # 계속 만들어냈다. 데이터 오염이 놓친 발굴 1건보다 비용이 크므로
+        # 실패 시 "중복일 수 있으니 건너뜀"으로 fail-closed 한다.
+        return True
 
     if not rows:
         return False
