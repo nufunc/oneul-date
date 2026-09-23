@@ -382,6 +382,9 @@ _ADDR_TAIL_TOKEN_RE = re.compile(
     r'^.*(빌딩|타워|센터|플라자|프라자|스퀘어|하우스|맨션|파크|몰|상가)$'
 )
 
+_ADDR_NUMBER_TOKEN_RE = re.compile(r'^\d+(-\d+)?$')
+_ADDR_ROAD_TOKEN_RE = re.compile(r'(로|길|동|리|가)$')
+
 
 # 광역명 정식 표기/축약 표기가 섞여 있어(예: "경기도" vs "경기") 같은 곳인데도
 # 문자열이 달라 중복 검사를 통과하는 걸 막는다. 축약형을 정본으로 삼는다.
@@ -426,6 +429,12 @@ def normalize_spot_address(address):
     tokens = address.strip().split()
     if tokens:
         tokens[0] = _SIDO_ABBREV_MAP.get(tokens[0], tokens[0])
+    # 도로명(…로/길)이나 지번(…동/리/가) 바로 뒤 번지까지만 주소로 보고 그 뒤 건물명·층·시설명은 버린다.
+    # 꼬리 정규식만으로는 "117-123층", "아쿠아리움" 같은 새 꼬리를 계속 놓쳤다(2026-09-23 중복 3쌍).
+    for i in range(1, len(tokens)):
+        if _ADDR_NUMBER_TOKEN_RE.match(tokens[i]) and _ADDR_ROAD_TOKEN_RE.search(tokens[i - 1]):
+            tokens = tokens[:i + 1]
+            break
     while tokens and _ADDR_TAIL_TOKEN_RE.match(tokens[-1]):
         tokens.pop()
     return "".join(tokens)
