@@ -426,7 +426,9 @@ def normalize_spot_address(address):
     """
     if not address:
         return ""
-    tokens = address.strip().split()
+    # TourAPI와 지도 검색이 광주·전남 주소를 "전남광주통합특별시 …"로 주기 시작해, 기존 "광주 …" 행과
+    # 문자열이 갈려 중복 검사를 통과했다(2026-09-24, 재삽입 46건). 비교 전에 광주/전남으로 되돌린다
+    tokens = fix_garbled_sido_prefix(address.strip()).split()
     if tokens:
         tokens[0] = _SIDO_ABBREV_MAP.get(tokens[0], tokens[0])
     # 도로명(…로/길)이나 지번(…동/리/가) 바로 뒤 번지까지만 주소로 보고 그 뒤 건물명·층·시설명은 버린다.
@@ -504,6 +506,10 @@ def sanitize_spot(rec: dict) -> dict:
     들어간 사례도 있었다). 원본 dict는 바꾸지 않고 새 dict를 반환한다.
     """
     rec = dict(rec)
+
+    # 저장 주소도 기존 행과 같은 광주/전남 표기로 맞춘다(비교만 맞추면 화면과 데이터에 두 표기가 섞인다)
+    if isinstance(rec.get("address"), str):
+        rec["address"] = fix_garbled_sido_prefix(rec["address"])
 
     if "image_url" in rec:
         img = rec.get("image_url")
