@@ -2939,6 +2939,20 @@ function loadSavedCourses(): SavedCourse[] {
   }
 }
 
+/**
+ * 같은 스팟 조합이 이미 있으면 새로 쌓지 않고 맨 위로 올린다. 저장을 여러 번 누르면 같은 코스가 계속 쌓였다.
+ * 새로 추가했으면 true를 돌려준다.
+ */
+function addSavedCourse(item: SavedCourse): boolean {
+  const keyOf = (ids: number[]) => [...ids].sort((a, b) => a - b).join(',');
+  const list = loadSavedCourses();
+  const dupIndex = list.findIndex((c) => keyOf(c.spotIds) === keyOf(item.spotIds));
+  const isNew = dupIndex < 0;
+  list.unshift(isNew ? item : list.splice(dupIndex, 1)[0]);
+  persistSavedCourses(list);
+  return isNew;
+}
+
 function persistSavedCourses(list: SavedCourse[]): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
@@ -5049,7 +5063,6 @@ function bindResultEvents(area: HTMLElement): void {
       showToast('저장할 장소가 없어요');
       return;
     }
-    const list = loadSavedCourses();
     const item: SavedCourse = {
       id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
       createdAt: new Date().toISOString(),
@@ -5061,9 +5074,7 @@ function bindResultEvents(area: HTMLElement): void {
       },
       spotIds: ids,
     };
-    list.unshift(item);
-    persistSavedCourses(list);
-    showToast('💾 코스를 저장했어요');
+    showToast(addSavedCourse(item) ? '💾 코스를 저장했어요' : '이미 저장한 코스라 맨 위로 올렸어요');
   });
 }
 
@@ -6056,7 +6067,6 @@ function renderReceiverView(steps: CourseStep[]): void {
       showToast('저장할 장소가 없어요');
       return;
     }
-    const list = loadSavedCourses();
     const item: SavedCourse = {
       id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
       createdAt: new Date().toISOString(),
@@ -6068,9 +6078,7 @@ function renderReceiverView(steps: CourseStep[]): void {
       },
       spotIds: sharedSpotIds,
     };
-    list.unshift(item);
-    persistSavedCourses(list);
-    showToast('💾 내 보관함에 저장했어요');
+    showToast(addSavedCourse(item) ? '💾 내 보관함에 저장했어요' : '이미 저장한 코스라 맨 위로 올렸어요');
   });
 
   document.getElementById('btn-receiver-share')?.addEventListener('click', () => {
