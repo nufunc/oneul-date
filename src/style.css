@@ -2292,6 +2292,19 @@ button {
   margin-left: auto;
 }
 
+/* 칩 모양은 32px로 두고 터치 영역만 세로 44px, 가로는 간격의 절반까지 넓혀 이웃 칩과 겹치지 않게 한다 */
+.step-actions-right > a,
+.step-actions-right > button {
+  position: relative;
+}
+
+.step-actions-right > a::after,
+.step-actions-right > button::after {
+  content: '';
+  position: absolute;
+  inset: -7px -4px; /* 1px 테두리 안쪽(padding box) 기준이라 1px씩 더한다 */
+}
+
 /* 실시간 예약 바로가기 칩 (캐치테이블/네이버) */
 .step-book-chip {
   display: inline-flex;
