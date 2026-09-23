@@ -3613,8 +3613,8 @@ function bindConditionEvents(area: HTMLElement): void {
         searchQuery: '',
         indoorOnly: state.indoorOnly,
       };
-      state.regions = [daily.regionKey];
-      state.subZones = [];
+      // 오늘의 코스가 고른 지역은 그 코스 조건(courseConditions)에만 둔다. state.regions에 넣으면 사용자가 고른 적
+      // 없는 지역이 이후 세부동네 선택에 누적돼 코스가 두 지역을 오갔다(분위기도 같은 이유로 넣지 않는다)
       showToast('🎁 오늘의 추천 데이트 코스를 완성했어요');
       renderConditions();
       renderResults();
@@ -3772,8 +3772,6 @@ function applyDailyCourseIfEmpty(): void {
       searchQuery: '',
       indoorOnly: state.indoorOnly,
     };
-    state.regions = [daily.regionKey];
-    state.subZones = [];
     renderConditions();
     renderResults();
   }
