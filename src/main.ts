@@ -2755,7 +2755,6 @@ interface AppState {
   } | null;
   savedOpen: boolean;
   regionSheetOpen: boolean;
-  moodSheetOpen: boolean;
   activeRegionTab: string;
   spotDetailId: number | null;
   /** 비 오는 날/폭염 실내 데이트 필터 (true: 실내 위주 큐레이션) */
@@ -2887,7 +2886,6 @@ const state: AppState = {
   courseConditions: null,
   savedOpen: false,
   regionSheetOpen: false,
-  moodSheetOpen: false,
   activeRegionTab: 'ALL',
   spotDetailId: null,
   indoorOnly: false,
@@ -6007,24 +6005,10 @@ function savedCourseSpotsHtml(item: SavedCourse): string {
   `;
 }
 
-function getMoodDescription(key: string): string {
-  switch (key) {
-    case 'romantic': return '은은한 조명과 다정한 대화가 흐르는 설레는 코스';
-    case 'healing': return '도심을 벗어나 편안한 쉼과 여유를 즐기는 힐링 코스';
-    case 'gourmet': return '풍부한 아로마와 정갈한 플레이팅의 미식 여행';
-    case 'trendy': return '감각적인 공간 미학과 위트 있는 에너지가 가득한 핫플';
-    case 'view': return '탁 트인 시야, 노을과 윤슬이 빛나는 전망 명소';
-    case 'luxury': return '격조 높은 우아함과 프라이빗한 프리미엄 스팟';
-    case 'retro': return '아날로그 감성과 시간의 결이 묻어나는 골목길';
-    case 'active': return '생동감 넘치는 움직임과 함께 몰입하는 이색 체험';
-    default: return '다채로운 매력의 장소들을 균형 있게 믹스한 코스';
-  }
-}
-
 let isClosingOverlay = false;
 
 function closeOverlay(callback?: () => void): void {
-  if (isClosingOverlay || (!state.savedOpen && !state.regionSheetOpen && !state.moodSheetOpen && !state.spotDetailId)) return;
+  if (isClosingOverlay || (!state.savedOpen && !state.regionSheetOpen && !state.spotDetailId)) return;
   const root = document.getElementById('overlay-root');
   if (!root) return;
   const backdrop = root.querySelector('.overlay-backdrop');
@@ -6032,7 +6016,6 @@ function closeOverlay(callback?: () => void): void {
   if (!backdrop || !panel) {
     state.savedOpen = false;
     state.regionSheetOpen = false;
-    state.moodSheetOpen = false;
     state.spotDetailId = null;
     renderOverlay();
     if (state.mainMode === 'course') {
@@ -6049,7 +6032,6 @@ function closeOverlay(callback?: () => void): void {
   window.setTimeout(() => {
     state.savedOpen = false;
     state.regionSheetOpen = false;
-    state.moodSheetOpen = false;
     state.spotDetailId = null;
     isClosingOverlay = false;
     renderOverlay();
@@ -6063,7 +6045,7 @@ function closeOverlay(callback?: () => void): void {
 }
 
 const isOverlayOpen = (): boolean =>
-  Boolean(state.savedOpen || state.regionSheetOpen || state.moodSheetOpen || state.spotDetailId);
+  Boolean(state.savedOpen || state.regionSheetOpen || state.spotDetailId);
 
 // 시트가 history 항목을 남기지 않아 뒤로 가기를 누르면 시트가 닫히지 않고 앱을 벗어났다(TWA에서는 앱 종료).
 // 시트가 열릴 때 항목 하나를 쌓고 닫힐 때 소비해, 뒤로 가기가 "열린 시트 닫기"로 동작하게 한다.
@@ -6504,46 +6486,7 @@ function renderOverlayContent(): void {
     return;
   }
 
-  // 3. 무드 선택 바텀시트
-  if (state.moodSheetOpen) {
-    root.innerHTML = `
-      <div class="overlay-backdrop" id="overlay-backdrop"></div>
-      <div class="overlay-panel mood-sheet-panel" role="dialog" aria-modal="true" aria-label="분위기 선택">
-        <div class="overlay-head">
-          <span class="overlay-title">✨ 어떤 분위기의 데이트를 원하세요?</span>
-          <button class="overlay-close" id="overlay-close" aria-label="닫기">✕</button>
-        </div>
-        <div class="overlay-body mood-cards-grid">
-          ${MOODS.map((m) => {
-            const isSelected = state.mood === m.key;
-            return `
-              <button class="mood-card ${isSelected ? 'active' : ''}" data-mood="${m.key}">
-                <span class="mood-card-emoji">${m.emoji || '✨'}</span>
-                <div class="mood-card-info">
-                  <span class="mood-card-name">${m.label}</span>
-                  <span class="mood-card-desc">${getMoodDescription(m.key)}</span>
-                </div>
-              </button>
-            `;
-          }).join('')}
-        </div>
-      </div>
-    `;
-
-    root.querySelector('#overlay-backdrop')!.addEventListener('click', () => closeOverlay());
-    root.querySelector('#overlay-close')!.addEventListener('click', () => closeOverlay());
-
-    root.querySelectorAll<HTMLButtonElement>('.mood-card').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        state.mood = btn.dataset.mood || 'ALL';
-        closeOverlay();
-      });
-    });
-    focusOverlayEntry();
-    return;
-  }
-
-  // 4. 스팟 상세 바텀시트 모달
+  // 3. 스팟 상세 바텀시트 모달
   if (state.spotDetailId) {
     const spot = spotById.get(state.spotDetailId);
     if (!spot) {
@@ -6883,7 +6826,7 @@ async function ensureSpotsForRegions(regionKeys: string[]): Promise<void> {
 
 async function init(): Promise<void> {
   window.addEventListener('keydown', (e) => {
-    const overlayOpen = state.savedOpen || state.regionSheetOpen || state.moodSheetOpen || state.spotDetailId;
+    const overlayOpen = state.savedOpen || state.regionSheetOpen || state.spotDetailId;
     if (!overlayOpen) return;
     if (e.key === 'Escape') {
       closeOverlay();
