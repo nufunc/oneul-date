@@ -5535,6 +5535,7 @@ function renderSpotDiscovery(): void {
     </div>
 
     <!-- 5. 페이지네이션 -->
+    <p class="sr-only" id="discovery-live" aria-live="polite"></p>
     ${hasMore ? `
       <div class="discovery-more-row">
         <button class="btn-discovery-more" id="btn-discovery-more">
@@ -5752,6 +5753,9 @@ function appendDiscoveryPage(area: HTMLElement, focusNew = false): void {
   bindDiscoveryCardEvents(tmp, area);
   const firstNew = tmp.firstElementChild;
   grid.append(...Array.from(tmp.children));
+  // 화면으로 보이는 카드가 늘어난 것을 스크린리더 사용자에게도 알린다
+  const live = area.querySelector('#discovery-live');
+  if (live) live.textContent = `${shown - start}곳 더 불러왔어요 (${shown} / ${list.length})`;
   // 버튼으로 불러왔을 때는 새 카드가 버튼보다 앞에 붙어 다음 Tab이 새 카드를 건너뛰므로 첫 새 카드로 포커스를 옮긴다
   if (focusNew) firstNew?.querySelector<HTMLElement>('a, button')?.focus();
 
