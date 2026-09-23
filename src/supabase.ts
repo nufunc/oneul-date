@@ -114,11 +114,9 @@ export interface Spot {
   created_at?: string;
 }
 
-const SUPABASE_URL =
-  import.meta.env.VITE_SUPABASE_URL || 'https://uyhwhnnzzfhtxjernfit.supabase.co';
-const SUPABASE_ANON_KEY =
-  import.meta.env.VITE_SUPABASE_ANON_KEY ||
-  'sb_publishable_WVe2QK8hjecachXgTqOsJA_GVfTzxba';
+// 옛 Supabase 프로젝트 주소가 기본값이라 매 로드마다 DNS 실패 요청을 보낸 뒤 폴백했다. 설정이 없으면 호출하지 않는다
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 const DB_NAME = 'oneul_date_cache';
 const STORE_NAME = 'spots_store';

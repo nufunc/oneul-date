@@ -1898,8 +1898,8 @@ function getCleanSpotSummary(spot: Spot): string {
   return '에디터가 검증한 추천 데이트 명소';
 }
 
-const SUPABASE_URL =
-  import.meta.env.VITE_SUPABASE_URL || 'https://uyhwhnnzzfhtxjernfit.supabase.co';
+// 옛 Supabase 프로젝트 주소가 기본값이라 매 로드마다 DNS 실패 요청을 보낸 뒤 폴백했다. 설정이 없으면 호출하지 않는다
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
 
 /** Groq 키를 프론트 번들에 노출하지 않기 위한 Supabase Edge Function 프록시 엔드포인트 */
 const AI_BRIEFING_ENDPOINT = `${SUPABASE_URL.replace(/\/$/, '')}/functions/v1/ai-briefing`;
@@ -2019,9 +2019,7 @@ async function fetchAiBriefing(
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 3500); // 3.5초 타임아웃 (프록시 왕복 1단계 반영)
 
-    const anonKey =
-      import.meta.env.VITE_SUPABASE_ANON_KEY ||
-      'sb_publishable_WVe2QK8hjecachXgTqOsJA_GVfTzxba';
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
     const res = await fetch(AI_BRIEFING_ENDPOINT, {
       method: 'POST',
