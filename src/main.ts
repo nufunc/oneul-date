@@ -2525,6 +2525,25 @@ function buildShareUrl(spotIds: number[]): string {
   return `${location.origin}${location.pathname}${location.search}#c=${spotIds.join('.')}`;
 }
 
+/** 공유 URL을 OS 공유 시트(Web Share API)로 우선 시도하고, 미지원 시 클립보드 복사로 폴백 */
+async function shareOrCopyLink(url: string): Promise<void> {
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: '오늘 데이트', url });
+      return;
+    } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') return; // 사용자가 공유 시트를 취소함
+      // 그 외 실패는 클립보드 복사로 폴백
+    }
+  }
+  try {
+    await navigator.clipboard.writeText(url);
+    showToast('🔗 공유 링크가 복사되었어요');
+  } catch {
+    showToast('복사하지 못했어요');
+  }
+}
+
 /** hash에서 공유 코스 ID 배열 파싱. `#c=` 형태가 아니면 null */
 function parseCourseHash(hash: string): number[] | null {
   const match = hash.match(/^#c=([0-9.]+)$/);
@@ -4985,10 +5004,7 @@ function bindResultEvents(area: HTMLElement): void {
       showToast('공유할 장소가 없어요');
       return;
     }
-    navigator.clipboard
-      .writeText(buildShareUrl(ids))
-      .then(() => showToast('🔗 공유 링크가 복사되었어요'))
-      .catch(() => showToast('복사하지 못했어요'));
+    shareOrCopyLink(buildShareUrl(ids));
   });
   area.querySelector('#btn-save')?.addEventListener('click', () => {
     if (!state.course || !state.courseConditions) return;
@@ -5941,10 +5957,7 @@ function renderReceiverView(steps: CourseStep[]): void {
       showToast('공유할 장소가 없어요');
       return;
     }
-    navigator.clipboard
-      .writeText(buildShareUrl(sharedSpotIds))
-      .then(() => showToast('🔗 공유 링크가 복사되었어요'))
-      .catch(() => showToast('복사하지 못했어요'));
+    shareOrCopyLink(buildShareUrl(sharedSpotIds));
   });
 }
 
@@ -6132,10 +6145,7 @@ function renderOverlay(): void {
         e.stopPropagation();
         const item = loadSavedCourses().find((c) => c.id === btn.dataset.shareId);
         if (!item || item.spotIds.length === 0) return;
-        navigator.clipboard
-          .writeText(buildShareUrl(item.spotIds))
-          .then(() => showToast('🔗 공유 링크가 복사되었어요'))
-          .catch(() => showToast('복사하지 못했어요'));
+        shareOrCopyLink(buildShareUrl(item.spotIds));
       });
     });
 
