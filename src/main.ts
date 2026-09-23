@@ -3372,7 +3372,7 @@ function renderQuickRegionChips(): string {
       <span class="region-chip-text">${escapeHtml(subZoneLabel)}</span>
       ${
         hasSubZones
-          ? `<span class="chip-clear-subzone" data-action="clear-subzone" title="세부 동네 해제" aria-label="세부 동네 해제">✕</span>`
+          ? `<span class="chip-clear-subzone" data-action="clear-subzone" role="button" tabindex="0" title="세부 동네 해제" aria-label="세부 동네 해제">✕</span>`
           : `<span class="chip-arrow" aria-hidden="true">▾</span>`
       }
     </button>
@@ -3438,6 +3438,17 @@ function bindQuickRegionEvents(container: HTMLElement, onRegionChange: () => voi
       e.stopPropagation();
       state.subZones = [];
       onRegionChange();
+    });
+    // <button> 안에 또 다른 <button>을 중첩할 수 없어 <span role="button">
+    // 으로 만들었는데, 마우스 클릭 핸들러만 있고 키보드(Enter/Space) 처리가
+    // 없어 이 '✕' 해제만 키보드로는 누를 방법이 없었다(2026-09-23 발견).
+    btn.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        e.stopPropagation();
+        state.subZones = [];
+        onRegionChange();
+      }
     });
   });
 
