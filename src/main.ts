@@ -6059,7 +6059,45 @@ function closeOverlay(callback?: () => void): void {
   }, 220);
 }
 
+const isOverlayOpen = (): boolean =>
+  Boolean(state.savedOpen || state.regionSheetOpen || state.moodSheetOpen || state.spotDetailId);
+
+// 시트가 history 항목을 남기지 않아 뒤로 가기를 누르면 시트가 닫히지 않고 앱을 벗어났다(TWA에서는 앱 종료).
+// 시트가 열릴 때 항목 하나를 쌓고 닫힐 때 소비해, 뒤로 가기가 "열린 시트 닫기"로 동작하게 한다.
+let overlayHistoryPushed = false;
+let ignoreNextPopstate = false;
+
+function syncOverlayHistory(): void {
+  const open = isOverlayOpen();
+  if (open && !overlayHistoryPushed) {
+    history.pushState({ overlay: true }, '');
+    overlayHistoryPushed = true;
+  } else if (!open && overlayHistoryPushed) {
+    overlayHistoryPushed = false;
+    // 닫자마자 다른 시트를 여는 경우 back()이 비동기라 새로 쌓은 항목 대신 이전 항목에 착지한다.
+    // 그 popstate로 새 시트를 닫지 않도록 한 번 무시한다.
+    ignoreNextPopstate = true;
+    history.back();
+  }
+}
+
+window.addEventListener('popstate', () => {
+  if (ignoreNextPopstate) {
+    ignoreNextPopstate = false;
+    return;
+  }
+  if (overlayHistoryPushed && isOverlayOpen()) {
+    overlayHistoryPushed = false;
+    closeOverlay();
+  }
+});
+
 function renderOverlay(): void {
+  renderOverlayContent();
+  syncOverlayHistory();
+}
+
+function renderOverlayContent(): void {
   const root = document.getElementById('overlay-root');
   if (!root) return;
 
