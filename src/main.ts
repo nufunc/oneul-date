@@ -6170,13 +6170,14 @@ function renderOverlayContent(): void {
           <button class="overlay-close" id="overlay-close" aria-label="닫기">✕</button>
         </div>
         <div class="overlay-body">
+          ${list.length > 0 ? `
           <div class="overlay-tip-banner">
             <span class="overlay-tip-icon">💡</span>
             <span class="overlay-tip-text">카톡이나 메모장에 코스를 복사해두면 기기를 변경해도 안전하게 보관돼요.</span>
-          </div>
+          </div>` : ''}
           ${
             list.length === 0
-              ? `<div class="overlay-empty">아직 저장한 코스가 없어요</div>`
+              ? `<div class="overlay-empty">아직 저장한 코스가 없어요. 코스를 만든 뒤 '저장'을 누르면 여기에 모여요</div>`
               : list
                   .map((item) => {
                     const date = new Date(item.createdAt);
