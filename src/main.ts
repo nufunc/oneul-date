@@ -5228,10 +5228,19 @@ function buildAnchorCourse(anchorSpot: Spot): CourseStep[] {
   const targetSlot = (anchorSpot.slot as SlotKey) || 'day';
   const slotsOn: SlotKey[] = ['day', 'evening', 'night'];
   const steps: CourseStep[] = [];
+  // 좌표 없는 앵커(약 37%)는 거리가 전부 9999가 돼 반경 안 후보가 없어 늘 앵커 한 곳만 남았다.
+  // 이때는 같은 시·군·구(area) 후보에서 고른다
+  const anchorHasCoords = anchorSpot.lat != null && anchorSpot.lng != null;
+  const inAnchorArea = (s: Spot) =>
+    Boolean(anchorSpot.area) && anchorSpot.area !== '전체' && s.region === anchorSpot.region && s.area === anchorSpot.area;
 
   for (const slot of slotsOn) {
     if (slot === targetSlot) {
       steps.push({ slot, spotId: anchorSpot.id });
+    } else if (!anchorHasCoords) {
+      const local = getCandidates(spots, slot, [], 'ALL', [], [])
+        .filter((s) => s.id !== anchorSpot.id && isCourseEligible(s) && inAnchorArea(s));
+      steps.push({ slot, spotId: local.length > 0 ? local[Math.floor(Math.random() * local.length)].id : null });
     } else {
       const candidates = getCandidates(spots, slot, [], 'ALL', [], []);
       const withDist = candidates
@@ -5261,7 +5270,10 @@ function buildAnchorCourse(anchorSpot: Spot): CourseStep[] {
     }
   }
 
-  if (state.slots.stay) {
+  // 숙소 앵커는 위 세 슬롯 어디에도 들어가지 않아 코스가 0장이 됐다. 숙소 칸에 앵커를 둔다
+  if (targetSlot === 'stay') {
+    steps.push({ slot: 'stay', spotId: anchorSpot.id });
+  } else if (state.slots.stay) {
     const stayCandidates = getCandidates(spots, 'stay', [], 'ALL', [], [])
       .filter((s) => isRealStaySpot(s) && isCourseEligible(s))
       .map((s) => ({
@@ -5322,7 +5334,10 @@ function renderSpotDiscovery(): void {
         const coords = getSpotCoordinates(s);
         const lat = s.lat || coords.lat;
         const lng = s.lng || coords.lng;
-        const dist = getDistanceKm(effectiveCoords.lat, effectiveCoords.lng, lat, lng);
+        // 좌표 없는 스팟(약 37%)은 세부존·지역 중심 근처의 대체 좌표라 거리가 지어낸 값이 된다.
+        // 거리순 첫 페이지를 차지하고 "84m"처럼 보였으므로 거리 없음(9999)으로 두어 뒤로 보내고 배지는 지역명을 쓴다
+        const hasRealCoords = s.lat != null && s.lng != null;
+        const dist = hasRealCoords ? getDistanceKm(effectiveCoords.lat, effectiveCoords.lng, lat, lng) : 9999;
         return { ...s, lat, lng, _dist: dist };
       });
     discoveryCandidateCache = { source: spots, key: candidateKey, list };
@@ -5726,7 +5741,10 @@ function bindDiscoveryCardEvents(root: ParentNode, area: HTMLElement): void {
       state.mainMode = 'course';
       updateModeView();
 
-      showToast(`✨ '${anchorSpot.name}' 중심 맞춤 코스를 완성했어요! 🚀`);
+      const filled = steps.filter((st) => st.spotId !== null).length;
+      showToast(filled > 1
+        ? `✨ '${anchorSpot.name}' 중심 맞춤 코스를 완성했어요! 🚀`
+        : `'${anchorSpot.name}' 주변에서 함께 갈 장소를 찾지 못했어요`);
       const resultsEl = document.getElementById('results-area');
       if (resultsEl) {
         resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
