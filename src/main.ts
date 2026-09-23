@@ -2046,6 +2046,20 @@ async function fetchAiBriefing(
   return null;
 }
 
+/** 한글 음절의 받침 유무 판별 (조사 이/가 선택용) */
+function hasKoreanBatchim(text: string): boolean {
+  const lastChar = text.trim().slice(-1);
+  const code = lastChar.charCodeAt(0);
+  if (code < 0xac00 || code > 0xd7a3) return false;
+  return (code - 0xac00) % 28 !== 0;
+}
+
+/** 자연스러운 한국어 나열: 마지막 항목 앞에만 접속어(기본 '그리고')를 붙인다 */
+function joinKoreanList(items: string[], conjunction: string = '그리고'): string {
+  if (items.length <= 1) return items.join('');
+  return `${items.slice(0, -1).join(', ')}, ${conjunction} ${items[items.length - 1]}`;
+}
+
 /**
  * 완성된 코스의 슬롯별 스팟들을 종합 분석하여 감성 매거진 에디토리얼 스타일의 10가지 다채로운 브리핑 생성
  * v4.0 메타데이터(블루리본/미쉐린 인증, 시그니처 메뉴, 발렛/주차 편의, 가격대)를 반영한 스마트 폴백 템플릿
@@ -2168,7 +2182,12 @@ function generateCourseStory(
       if (eve) lights.push(`노을빛 아래 그윽해지는 ${wrap(eve.name)}`);
       if (night) lights.push(`달빛 아래 잔잔한 속삭임이 맴도는 ${wrap(night.name)}`);
       if (stay) lights.push(`별빛을 마주하는 ${wrap(stay.name)}`);
-      return `${lights.join('부터 ')}까지, 시간의 결을 따라 자연스럽게 어우러질 수 있는 로맨틱한 하루예요.${metaTip}`;
+      // '부터'는 시작점 하나에만, '까지'는 도착점 하나에만 붙어야 하는데
+      // join('부터 ')는 항목 수만큼 반복 삽입해 "A부터 B부터 C까지"처럼
+      // 시작점이 여러 개인 것으로 읽혔다(2026-09-23 발견).
+      const lightsJoined =
+        lights.length <= 1 ? lights.join('') : `${lights[0]}부터 ${lights.slice(1).join(', ')}`;
+      return `${lightsJoined}까지, 시간의 결을 따라 자연스럽게 어우러질 수 있는 로맨틱한 하루예요.${metaTip}`;
     }
 
     // 4. 취향 & 큐레이션 찬사형
@@ -2188,7 +2207,7 @@ function generateCourseStory(
       if (eve) escapes.push(`${wrap(eve.name)}의 깊은 풍미`);
       if (night) escapes.push(`${wrap(night.name)}의 은은한 밤공기`);
       if (stay) escapes.push(`${wrap(stay.name)}에서의 하룻밤`);
-      return `도심의 번잡함을 벗어나 ${escapes.join(', 그리고 ')}에 오롯이 빠져보는 낭만적인 시간으로 맞이할 수 있어요.${metaTip}`;
+      return `도심의 번잡함을 벗어나 ${joinKoreanList(escapes)}에 오롯이 빠져보는 낭만적인 시간으로 맞이할 수 있어요.${metaTip}`;
     }
 
     // 6. 시네마틱 모먼트형
@@ -2233,7 +2252,13 @@ function generateCourseStory(
       if (eve) memories.push(`${wrap(eve.name)}의 따뜻한 식탁`);
       if (night) memories.push(`${wrap(night.name)}의 깊은 밤하늘`);
       if (stay) memories.push(`${wrap(stay.name)}의 고요한 아침`);
-      return `${memories.join('가 ')} 하나로 이어져, 두 사람에게 가장 소중한 계절의 한 페이지로 기록될 특별한 여정이에요.${metaTip}`;
+      // 이/가는 앞말의 받침 유무로 갈리는데 join('가 ')로 고정하면
+      // "식탁가"처럼 받침 있는 말 뒤에 명백한 조사 오류가 났다
+      // (2026-09-23 발견).
+      const memoriesJoined = memories
+        .map((m, i) => (i < memories.length - 1 ? `${m}${hasKoreanBatchim(m) ? '이' : '가'} ` : m))
+        .join('');
+      return `${memoriesJoined} 하나로 이어져, 두 사람에게 가장 소중한 계절의 한 페이지로 기록될 특별한 여정이에요.${metaTip}`;
     }
   }
 
