@@ -1214,13 +1214,20 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
 
   // 단일 토큰이면 부분 일치 검사
   if (tokens.length === 1) {
-    return targetText.includes(tokens[0]);
+    if (targetText.includes(tokens[0])) return true;
+  } else {
+    // 다중 토큰이면 모든 토큰이 포함되거나 첫 번째 주요 토큰이 포함되면 통과
+    if (tokens.every((t) => targetText.includes(t))) return true;
+    const firstToken = tokens[0];
+    if (firstToken.length >= 2 && targetText.includes(firstToken)) return true;
   }
 
-  // 다중 토큰이면 모든 토큰이 포함되거나 첫 번째 주요 토큰이 포함되면 통과
-  if (tokens.every((t) => targetText.includes(t))) return true;
-  const firstToken = tokens[0];
-  return firstToken.length >= 2 && targetText.includes(firstToken);
+  // 띄어쓰기를 빼고 친 검색어('수원남문통닭')는 위 비교로는 공백 있는 이름에 걸리지 않아 0건이었다.
+  // 공백을 모두 뺀 검색어가 공백을 뺀 이름·지역·주소에 들어가면 통과시킨다
+  const compactQ = cleanQ.replace(/\s+/g, '');
+  if (compactQ.length < 2) return false;
+  const compactTarget = [spot.name, spot.area, spot.address].join('|').replace(/\s+/g, '').toLowerCase();
+  return compactTarget.includes(compactQ);
 }
 
 /**
