@@ -758,6 +758,7 @@ button {
   display: flex;
   align-items: center;
   gap: 6px;
+  white-space: nowrap;
 }
 
 .app-title-link {
@@ -3785,6 +3786,19 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   cursor: pointer;
   transition: all var(--transition-fast);
   position: relative;
+  white-space: nowrap;
+}
+
+/* 320~360px대 저가 안드로이드 폭: 타이틀+탭 라벨이 줄바꿈되며 헤더가
+   깨졌다(2026-09-23 발견). 폰트·패딩을 살짝 줄여 한 줄에 들어가게 한다. */
+@media (max-width: 360px) {
+  .app-title {
+    font-size: 1.15rem;
+  }
+  .main-tab-btn {
+    padding: 9px 8px;
+    font-size: 0.78rem;
+  }
 }
 
 .main-tab-btn.is-active {
