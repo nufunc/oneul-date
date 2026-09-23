@@ -17,7 +17,7 @@ import random
 import re
 from supabase_worker import (load_env, search_naver, calculate_quality_score,
                              is_polluted_header_name, derive_region_area, is_zone_street_spot,
-                             find_duplicate_spot)
+                             find_duplicate_spot, sanitize_spot)
 from discovery_engine import infer_slot
 from category_filter import is_date_spot_category
 from area_seeds import generate_dynamic_queries, get_coverage_gap_areas
@@ -319,6 +319,7 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
             break
 
     if discovered:
+        discovered = [sanitize_spot(s) for s in discovered]
         insert_url = f"{supabase_url}/rest/v1/spots"
         data_bytes = json.dumps(discovered, ensure_ascii=False).encode('utf-8')
         ins_req = urllib.request.Request(insert_url, data=data_bytes, headers=api_headers, method='POST')

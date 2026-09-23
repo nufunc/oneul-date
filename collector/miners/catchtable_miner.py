@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from supabase_worker import load_env, search_naver, calculate_quality_score, derive_region_area, find_duplicate_spot
+from supabase_worker import load_env, search_naver, calculate_quality_score, derive_region_area, find_duplicate_spot, sanitize_spot
 from category_filter import is_date_spot_category
 
 # 캐치테이블 / 블루리본 큐레이션 마이닝 쿼리 풀 (전국 8개 권역 × 미식 테마 60개+)
@@ -284,6 +284,7 @@ def run_catchtable_mining(supabase_url: str, service_key: str, max_discoveries: 
             break
 
     if discovered_spots:
+        discovered_spots = [sanitize_spot(s) for s in discovered_spots]
         insert_url = f"{supabase_url}/rest/v1/spots"
         data_bytes = json.dumps(discovered_spots, ensure_ascii=False).encode('utf-8')
         ins_req = urllib.request.Request(insert_url, data=data_bytes, headers=api_headers, method='POST')

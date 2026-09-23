@@ -482,6 +482,54 @@ def find_duplicate_spot(supabase_url, headers, name, address=""):
     return any(normalize_spot_address(row.get("address", "")) == target_addr for row in rows)
 
 
+_CONTROL_CHAR_RE = re.compile(r'[\x00-\x1f\x7f]')
+VALID_SLOTS = {"day", "evening", "night", "stay"}
+
+
+def sanitize_spot(rec: dict) -> dict:
+    """INSERT·PATCH 직전 공통 검증(oneul-date-95734 제안, 2026-09-23).
+
+    미너 7곳이 각자 payload를 조립해 직접 POST해 검증이 들쭉날쭉했다
+    (좌표 범위 검사는 tourapi_miner 한 곳뿐이라 한반도 밖 더미 좌표가
+    다른 경로로는 그대로 통과했고, image_url에 빈 문자열이 그대로
+    들어간 사례도 있었다). 원본 dict는 바꾸지 않고 새 dict를 반환한다.
+    """
+    rec = dict(rec)
+
+    if "image_url" in rec:
+        img = rec.get("image_url")
+        if not (isinstance(img, str) and re.match(r'^https?://', img)):
+            rec["image_url"] = None
+
+    if "lat" in rec or "lng" in rec:
+        try:
+            lat_f = float(rec["lat"]) if rec.get("lat") is not None else None
+            lng_f = float(rec["lng"]) if rec.get("lng") is not None else None
+        except (TypeError, ValueError):
+            lat_f = lng_f = None
+        if lat_f is None or lng_f is None or not (33.0 <= lat_f <= 39.0 and 124.0 <= lng_f <= 132.0):
+            lat_f = lng_f = None
+        rec["lat"] = lat_f
+        rec["lng"] = lng_f
+
+    if "slot" in rec and rec.get("slot") not in VALID_SLOTS:
+        rec["slot"] = None
+
+    def _clean_text(v, max_len):
+        if not isinstance(v, str):
+            return v
+        return _CONTROL_CHAR_RE.sub('', v)[:max_len]
+
+    if "name" in rec:
+        rec["name"] = _clean_text(rec["name"], 60)
+    if "summary" in rec:
+        rec["summary"] = _clean_text(rec["summary"], 150)
+    if "address" in rec and isinstance(rec["address"], str):
+        rec["address"] = _CONTROL_CHAR_RE.sub('', rec["address"])
+
+    return rec
+
+
 _PRICE_COMMA_RE = re.compile(r'\d{1,3}(?:,\d{3})+')
 _PRICE_MANWON_RE = re.compile(r'(\d+(?:\.\d+)?)\s*만\s*원')
 _PRICE_CHEONWON_RE = re.compile(r'(\d+)\s*천\s*원')
@@ -1032,6 +1080,7 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
 
         # Supabase UPDATE (컬럼 부재 시 자동 복구 재시도)
         if patch_data:
+            patch_data = sanitize_spot(patch_data)
             patch_url = f"{supabase_url}/rest/v1/spots?id=eq.{s_id}"
             patch_bytes = json.dumps(patch_data).encode('utf-8')
             patch_req = urllib.request.Request(patch_url, data=patch_bytes, headers=api_headers, method='PATCH')

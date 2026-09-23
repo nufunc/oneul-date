@@ -39,7 +39,8 @@ if hasattr(sys.stdout, 'reconfigure'):
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from supabase_worker import (search_naver, calculate_quality_score, load_env,
-                             derive_region_area, is_zone_street_spot, find_duplicate_spot)
+                             derive_region_area, is_zone_street_spot, find_duplicate_spot,
+                             sanitize_spot)
 from category_filter import (
     is_date_spot_category,
     SLOT_STAY_CAT_RE,
@@ -1659,7 +1660,8 @@ def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
             print(f"    🧪 [DRY-RUN 등록 예정] {official_name} | {category} | {road_addr} | slot={slot} mood={moods}")
             continue
 
-        # Supabase 신규 등록 (INSERT)
+        # Supabase 신규 등록 (INSERT) — 등록 직전 공통 검증
+        spot_payload = sanitize_spot(spot_payload)
         insert_url = f"{supabase_url}/rest/v1/spots"
         insert_bytes = json.dumps(spot_payload, ensure_ascii=False).encode('utf-8')
         insert_req = urllib.request.Request(insert_url, data=insert_bytes, headers=headers, method='POST')

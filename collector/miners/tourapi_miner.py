@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from supabase_worker import load_env, derive_region_area, find_duplicate_spot, normalize_spot_address
+from supabase_worker import load_env, derive_region_area, find_duplicate_spot, normalize_spot_address, sanitize_spot
 from category_filter import is_date_spot_category
 
 # TourAPI 4.0 엔드포인트 (KorService2 국문 관광정보 서비스)
@@ -277,6 +277,7 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
     discovered_spots = deduped_spots
 
     if discovered_spots:
+        discovered_spots = [sanitize_spot(s) for s in discovered_spots]
         insert_url = f"{supabase_url}/rest/v1/spots"
         data_bytes = json.dumps(discovered_spots, ensure_ascii=False).encode('utf-8')
         ins_req = urllib.request.Request(insert_url, data=data_bytes, headers=api_headers, method='POST')

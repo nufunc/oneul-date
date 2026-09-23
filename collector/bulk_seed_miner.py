@@ -23,7 +23,7 @@ from miners.youtube_miner import search_youtube_hotclip
 from miners.kakaomap_miner import search_kakaomap_place
 from score_engine import calculate_hot_score
 from category_filter import is_date_spot_category
-from supabase_worker import find_duplicate_spot, derive_region_area
+from supabase_worker import find_duplicate_spot, derive_region_area, sanitize_spot
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -404,7 +404,9 @@ def run_bulk_mining(target_count: int = 1000, enable_social: bool = True):
                 "hot_score": hot_score
             }
 
-            # DB 적재
+            # DB 적재 (INSERT 직전 공통 검증 — image_url 스킴, 좌표 범위,
+            # slot 허용값, 제어문자·길이 제한)
+            payload = sanitize_spot(payload)
             insert_url = f"{supabase_url}/rest/v1/spots"
             try:
                 insert_req = urllib.request.Request(
