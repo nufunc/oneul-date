@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from supabase_worker import load_env, derive_region_area, find_duplicate_spot
+from supabase_worker import load_env, derive_region_area, find_duplicate_spot, normalize_spot_address
 from category_filter import is_date_spot_category
 
 # TourAPI 4.0 엔드포인트 (KorService2 국문 관광정보 서비스)
@@ -259,6 +259,22 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
     checkpoint["area_index"] = (start_idx + 4) % len(area_codes)
     checkpoint["page_by_combo"] = page_by_combo
     _save_checkpoint(checkpoint)
+
+    # find_duplicate_spot는 실행 시점의 라이브 DB만 보고, 이 배치가 아직
+    # INSERT하지 않은 자기 자신의 discovered_spots는 못 본다. 같은 업체가
+    # 이번 실행 안에서 서로 다른 조회 조합으로 두 번 발견되면 어느 쪽도
+    # DB에 없어 중복 검사를 둘 다 통과해버려, 0.1~0.2초 간격의 배치 내부
+    # 즉시 중복 삽입이 반복적으로 관측됐다(2026-09-23 확인). 최종 INSERT
+    # 직전에 이번 배치 자체 내에서 이름+주소로 한 번 더 걸러낸다.
+    seen_keys = set()
+    deduped_spots = []
+    for s in discovered_spots:
+        key = (s["name"].strip(), normalize_spot_address(s.get("address") or ""))
+        if key in seen_keys:
+            continue
+        seen_keys.add(key)
+        deduped_spots.append(s)
+    discovered_spots = deduped_spots
 
     if discovered_spots:
         insert_url = f"{supabase_url}/rest/v1/spots"
