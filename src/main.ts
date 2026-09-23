@@ -5738,7 +5738,7 @@ function bindDiscoveryCardEvents(root: ParentNode, area: HTMLElement): void {
  * 다음 페이지 카드만 목록 뒤에 붙인다. 전체를 다시 그리면 키보드 포커스가 사라지고(Tab 이동 중
  * 자동 로드가 터지면 포커스가 BODY로 빠졌다) 카드 수에 비례해 렌더 비용이 늘었다.
  */
-function appendDiscoveryPage(area: HTMLElement): void {
+function appendDiscoveryPage(area: HTMLElement, focusNew = false): void {
   const grid = area.querySelector('.spot-discovery-grid');
   const moreRow = area.querySelector('.discovery-more-row');
   if (!grid || !moreRow || !lastDiscoveryList) return;
@@ -5750,7 +5750,10 @@ function appendDiscoveryPage(area: HTMLElement): void {
   const tmp = document.createElement('div');
   tmp.innerHTML = list.slice(start, shown).map((spot) => renderDiscoverySpotCard(spot, state.spotGridCols)).join('');
   bindDiscoveryCardEvents(tmp, area);
+  const firstNew = tmp.firstElementChild;
   grid.append(...Array.from(tmp.children));
+  // 버튼으로 불러왔을 때는 새 카드가 버튼보다 앞에 붙어 다음 Tab이 새 카드를 건너뛰므로 첫 새 카드로 포커스를 옮긴다
+  if (focusNew) firstNew?.querySelector<HTMLElement>('a, button')?.focus();
 
   if (shown >= list.length) {
     discoveryMoreObserver?.disconnect();
@@ -5874,7 +5877,7 @@ function bindDiscoveryEvents(area: HTMLElement): void {
     showToast('전체 스팟으로 초기화했어요');
   });
 
-  area.querySelector('#btn-discovery-more')?.addEventListener('click', () => appendDiscoveryPage(area));
+  area.querySelector('#btn-discovery-more')?.addEventListener('click', () => appendDiscoveryPage(area, true));
 
   // 목록 끝 600px 전에 다음 페이지를 자동으로 붙인다. 버튼은 키보드 사용자와 미지원 환경을 위해 남긴다
   discoveryMoreObserver?.disconnect();
