@@ -201,12 +201,10 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                 # TourAPI가 좌표 미보유 항목에 대한민국 영역 밖(예: 19.69/117.99,
                 # 남중국해 부근) 더미값을 그대로 반환하는 경우가 있다(2026-09-23
                 # 데이터 큐레이션 감사가 서로 무관한 두 스팟에서 동일 좌표 발견).
-                # 한반도 대략 범위를 벗어나면 결측으로 처리한다.
-                lat_raw = float(mapy) if mapy else None
-                lng_raw = float(mapx) if mapx else None
-                in_korea = lat_raw is not None and lng_raw is not None and 33.0 <= lat_raw <= 39.0 and 124.0 <= lng_raw <= 132.0
-                lat_val = lat_raw if in_korea else None
-                lng_val = lng_raw if in_korea else None
+                # 한반도 대략 범위를 벗어나면 결측으로 처리한다. 숫자 변환과 이 범위
+                # 검증은 적재 직전 sanitize_spot이 맡는다(비숫자 값의 float() 예외 방지).
+                lat_val = mapy or None
+                lng_val = mapx or None
 
                 spot_id = int(time.time() * 1000) + random.randint(100, 999)
 

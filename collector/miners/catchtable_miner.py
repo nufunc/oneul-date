@@ -260,8 +260,8 @@ def run_catchtable_mining(supabase_url: str, service_key: str, max_discoveries: 
                 "summary": f"{real_name} — 캐치테이블 인기 예약 {'블루리본 인증 ' if is_blueribbon else ''}데이트 명소 ({area})",
                 "category": category or "와인바/다이닝",
                 "image_url": thum,
-                "lat": float(y_coord) if y_coord else None,
-                "lng": float(x_coord) if x_coord else None,
+                "lat": y_coord,  # 숫자 변환과 범위 검증은 sanitize_spot이 맡는다
+                "lng": x_coord,
                 "quality_score": 95 if is_blueribbon else 90,
                 "fail_count": 0,
                 "source": {

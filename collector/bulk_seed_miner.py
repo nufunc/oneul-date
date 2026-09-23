@@ -364,8 +364,8 @@ def run_bulk_mining(target_count: int = 1000, enable_social: bool = True):
             # 위경도 좌표
             x_coord = p.get("x")
             y_coord = p.get("y")
-            lng = float(x_coord) if x_coord else None
-            lat = float(y_coord) if y_coord else None
+            lng = x_coord  # 숫자 변환과 범위 검증은 sanitize_spot이 맡는다
+            lat = y_coord
             # 네이버 고유 플레이스 링크
             place_id = p.get("id")
             naver_place_url = f"https://map.naver.com/p/entry/place/{place_id}" if place_id else f"https://map.naver.com/p/search/{urllib.parse.quote(raw_name)}"

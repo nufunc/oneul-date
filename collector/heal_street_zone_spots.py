@@ -111,8 +111,12 @@ def heal_street_zone_spots():
                     patch["location"] = f"{d_reg or reg} {d_area or spot.get('area') or ''}".strip()
 
             if x_coord and y_coord and (not lat or not lng):
-                patch["lat"] = float(y_coord)
-                patch["lng"] = float(x_coord)
+                # 비숫자 좌표에 float()가 예외를 내면 교정 배치 전체가 중단되므로 그 스팟만 건너뛴다
+                try:
+                    patch["lat"] = float(y_coord)
+                    patch["lng"] = float(x_coord)
+                except (TypeError, ValueError):
+                    patch.pop("lat", None)
 
         # 2. 골목/거리 스팟 오폐업 해제 및 검증 정상화
         if is_street_zone:

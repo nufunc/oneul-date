@@ -1566,8 +1566,8 @@ def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
         road_addr = top.get("roadAddress") or top.get("address") or ""
         thum_url = top.get("thumUrl") or vinfo.get("thumbnail") or ""
         category = top.get("category") or ""
-        lat = float(top.get("y")) if top.get("y") else None
-        lng = float(top.get("x")) if top.get("x") else None
+        lat = top.get("y")  # 숫자 변환과 범위 검증은 sanitize_spot이 맡는다
+        lng = top.get("x")
 
         if not official_name or not road_addr:
             stats["no_search_result"] += 1

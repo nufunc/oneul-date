@@ -388,8 +388,8 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
                 "summary": meta["summary"],
                 "category": cat,
                 "image_url": thum_str or None,
-                "lat": float(y_coord) if y_coord else None,
-                "lng": float(x_coord) if x_coord else None,
+                "lat": y_coord,  # 숫자 변환과 범위 검증은 sanitize_spot이 맡는다
+                "lng": x_coord,
                 "quality_score": 88,
                 "fail_count": 0,
                 "source": {"type": "auto_discovery", "url": f"https://map.naver.com/p/search/{urllib.parse.quote(raw_name)}", "note": "2026 autonomous AI discovery"},
