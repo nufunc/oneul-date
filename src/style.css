@@ -4725,12 +4725,12 @@ html[data-theme-resolved="dark"] .btn-saved-recommend {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 16px;
-  border-radius: var(--radius-lg);
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-text);
-  font-size: 14px;
+  font-size: var(--font-sm);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -5391,6 +5391,7 @@ html[data-theme-resolved="dark"] .spot-link-btn.kakao {
     padding: 10px 14px;
     gap: 8px;
   }
+  .btn-detail-save,
   .btn-detail-naver-map {
     padding: 10px 12px;
     font-size: var(--font-xs);
