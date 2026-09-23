@@ -8,3 +8,4 @@ __pycache__
 tests/
 logs/
 pb_data/
+.tourapi_checkpoint.json

@@ -54,7 +54,11 @@ AREA_CODE_MAP = {
     "39": ("제주", ["제주"]),
 }
 
-CHECKPOINT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".tourapi_checkpoint.json")
+# 컨테이너 쓰기 레이어(/app)에 두면 배포로 컨테이너가 재생성될 때마다 지워져 이미 적재한 지역 1~4의
+# 1페이지만 반복했다(2026-09-23). LOG_DIR(/mnt/data/logs)이 가리키는 볼륨에 두고, 없으면 종전 위치를 쓴다
+_CHECKPOINT_DIR = (os.path.dirname(os.environ["LOG_DIR"]) if os.environ.get("LOG_DIR")
+                   else os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+CHECKPOINT_PATH = os.path.join(_CHECKPOINT_DIR, ".tourapi_checkpoint.json")
 
 
 def _load_checkpoint() -> dict:
@@ -69,8 +73,8 @@ def _save_checkpoint(checkpoint: dict) -> None:
     try:
         with open(CHECKPOINT_PATH, "w", encoding="utf-8") as f:
             json.dump(checkpoint, f, ensure_ascii=False)
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"  ⚠️ TourAPI 체크포인트 저장 실패({CHECKPOINT_PATH}): {e}")
 
 
 def fetch_tourapi_spots(api_key: str, area_code: str = "1", content_type_id: str = "14", num_of_rows: int = 30, page_no: int = 1) -> list[dict]:
