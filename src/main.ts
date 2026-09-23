@@ -1796,7 +1796,7 @@ function mapQuery(spot: Spot): string {
 /** 스폿의 네이버 지도 바로가기 URL — 정제된 상호명 및 좌표 핀포인트 앵커 결합 */
 function naverMapUrl(spot: Spot): string {
   // 1. 공식 네이버 지도 단축 링크(naver.me)는 최우선 신뢰
-  if (spot.source?.url && spot.source.url.includes('naver.me/')) {
+  if (spot.source?.url && /^https:\/\/naver\.me\//.test(spot.source.url)) {
     return spot.source.url;
   }
   // 2. 네이버 지도 실시간 검색 URL (단독 매장 상세 오픈 및 좌표 핀포인트 최적화)

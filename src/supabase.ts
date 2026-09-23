@@ -188,6 +188,37 @@ export function normalizeSpot(spot: Spot): Spot {
   if (Array.isArray(next.curation_badges)) {
     next = { ...next, curation_badges: normalizeCurationBadges(next.curation_badges) };
   }
+  return sanitizeSpotUrls(next);
+}
+
+const SAFE_URL_RE = /^https?:\/\//i;
+const isSafeUrl = (u: unknown): boolean => typeof u === 'string' && SAFE_URL_RE.test(u.trim());
+
+/**
+ * DB에서 온 URL 필드는 href로 그대로 나가는데 escapeHtml은 javascript: 스킴을 막지 못한다.
+ * 모든 스팟이 거치는 로드 시점에 http(s)가 아닌 값을 걸러 렌더 경로 전체를 한 번에 보호한다.
+ */
+function sanitizeSpotUrls(spot: Spot): Spot {
+  let next = spot;
+  if (next.source?.url && !isSafeUrl(next.source.url)) {
+    next = { ...next, source: { ...next.source, url: null } };
+  }
+  if (next.booking_info?.url && !isSafeUrl(next.booking_info.url)) {
+    next = { ...next, booking_info: { ...next.booking_info, url: undefined } };
+  }
+  if (next.reservation_url && !isSafeUrl(next.reservation_url)) {
+    next = { ...next, reservation_url: undefined };
+  }
+  if (next.image_url && !isSafeUrl(next.image_url)) {
+    next = { ...next, image_url: null };
+  }
+  if (next.social_links) {
+    const entries = Object.entries(next.social_links);
+    const safeEntries = entries.filter(([, link]) => !link || isSafeUrl(link.url));
+    if (safeEntries.length !== entries.length) {
+      next = { ...next, social_links: Object.fromEntries(safeEntries) };
+    }
+  }
   return next;
 }
 
