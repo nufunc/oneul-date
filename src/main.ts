@@ -1092,6 +1092,20 @@ interface GenerateOptions {
 }
 
 /** 검색어 및 퀵 태그 매칭 헬퍼 (특수문자 정제, 다중 토큰, 동의어 풀 매칭 지원) */
+/** 검색 관련도 등급(작을수록 앞): 이름 일치 → 이름에 검색어 전체 → 이름에 모든 단어 → 본문에 모든 단어 → 일부 단어만 */
+function searchRelevanceTier(spot: Spot, query: string): number {
+  const q = query.replace(/[#·,/\\]/g, ' ').trim().toLowerCase();
+  const name = (spot.name || '').toLowerCase();
+  const compactQ = q.replace(/\s+/g, '');
+  const compactName = name.replace(/\s+/g, '');
+  if (compactName === compactQ) return 0;
+  if (compactName.includes(compactQ)) return 1;
+  const tokens = q.split(/\s+/).filter(Boolean);
+  if (tokens.every((t) => name.includes(t))) return 2;
+  const text = [name, spot.category, spot.summary, spot.location, spot.area, spot.address].join(' ').toLowerCase();
+  return tokens.every((t) => text.includes(t)) ? 3 : 4;
+}
+
 function matchesSearchQuery(spot: Spot, query: string): boolean {
   if (!query || !query.trim()) return true;
 
@@ -5439,6 +5453,10 @@ function renderSpotDiscovery(): void {
     // 🔥 핫플/인기순 (종합 인기도 점수 기준 정렬)
     matchedSpots.sort((a, b) => getSpotPopularityScore(b) - getSpotPopularityScore(a));
   }
+
+  // 검색어가 있으면 관련도 등급으로 먼저 나눈다. 정렬은 안정적이라 등급 안에서는 위에서 고른 순서가 유지된다.
+  // 이름을 정확히 쳐도 거리·인기순에 밀려 수십~백여 번째에 나왔다(예: '수원 남문통닭' 223건 중 107위)
+  if (q) matchedSpots.sort((a, b) => searchRelevanceTier(a, q) - searchRelevanceTier(b, q));
 
   const totalCount = matchedSpots.length;
   const pageSize = state.spotGridCols === 5 ? 25 : state.spotGridCols === 3 ? 18 : 12;
