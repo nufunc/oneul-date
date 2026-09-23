@@ -1958,6 +1958,13 @@ button {
   align-items: center;
   gap: 5px;
   flex-wrap: wrap;
+  max-width: 100%;
+}
+
+/* 전역 keep-all 때문에 띄어쓰기 없는 긴 이름은 줄바꿈 자리가 없고, 플렉스 항목이라 break-word도 먹지 않아 칸 밖으로 넘친다 */
+.step-name > span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .icon-verified-badge {
