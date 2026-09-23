@@ -48,8 +48,14 @@ def fetch_all_active_spots():
         try:
             r = requests.get(API_URL, params=params, timeout=30)
             if r.status_code != 200:
+                # 페이지 도중 오류는 break로 조용히 빠지면 안 된다 —
+                # MIN_EXPECTED_SPOTS 가드는 "9,000건 넘게 받았는지"만 보고
+                # "끝까지 다 받았는지"는 안 보므로, 예를 들어 10,000건까지
+                # 받다가 여기서 끊겨도 가드를 통과해 불완전한 목록이
+                # spots.json에 그대로 커밋될 수 있었다(2026-09-23 발견,
+                # 활성 12,926건 기준). 즉시 실패시켜 커밋 자체를 막는다.
                 logger.error(f"API 호출 실패 (offset {offset}): HTTP {r.status_code} - {r.text[:200]}")
-                break
+                sys.exit(1)
             items = r.json()
             if not items:
                 break
@@ -60,7 +66,7 @@ def fetch_all_active_spots():
                 break
         except Exception as e:
             logger.error(f"API 요청 중 예외 발생: {e}")
-            break
+            sys.exit(1)
 
     return all_spots
 

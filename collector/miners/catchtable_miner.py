@@ -174,6 +174,7 @@ def run_catchtable_mining(supabase_url: str, service_key: str, max_discoveries: 
     random.shuffle(queries)
 
     discovered_spots = []
+    batch_seen_names = set()
 
     # 매 사이클마다 20개 쿼리를 적극 샘플링하여 대량 발굴
     for query_text, default_region, default_area, moods, slot, price_tier in queries[:20]:
@@ -216,6 +217,14 @@ def run_catchtable_mining(supabase_url: str, service_key: str, max_discoveries: 
             if not real_name:
                 continue
 
+            # find_duplicate_spot는 이번 배치가 아직 INSERT하지 않은 자기
+            # 자신은 못 본다 — 같은 업체가 이번 실행 안에서 서로 다른 쿼리로
+            # 두 번 발견되면 중복 검사를 둘 다 통과해 배치 내부 즉시 중복
+            # 삽입이 났다(oneul-date-95734 실측: 라이브에서 배치 내부 중복
+            # 18그룹 확인).
+            if real_name in batch_seen_names:
+                continue
+
             # 데이트 스팟 카테고리 검증
             is_valid, reason = is_date_spot_category(category, real_name, allow_lodging=True)
             if not is_valid:
@@ -224,6 +233,8 @@ def run_catchtable_mining(supabase_url: str, service_key: str, max_discoveries: 
             # 중복 검사
             if find_duplicate_spot(supabase_url, api_headers, real_name, road_addr):
                 continue
+
+            batch_seen_names.add(real_name)
 
             derived_region, derived_area = derive_region_area(road_addr)
             region = derived_region or default_region

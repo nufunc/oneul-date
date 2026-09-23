@@ -452,7 +452,10 @@ def find_duplicate_spot(supabase_url, headers, name, address=""):
     # tourapi 크로스런 재삽입 82그룹 중 79그룹이 이 패턴). 값을 큰따옴표로
     # 감싸 PostgREST의 예약 문자 이스케이프 규칙을 따른다.
     def _quoted(v: str) -> str:
-        return urllib.parse.quote(f'"{v}"')
+        # 이름 안에 "나 \가 있으면 그 자체로 따옴표를 깨뜨리니 이스케이프한다
+        # (2026-09-23 예방 조치 — 현재 해당하는 이름은 0건으로 확인했다).
+        escaped = v.replace('\\', '\\\\').replace('"', '\\"')
+        return urllib.parse.quote(f'"{escaped}"')
     encoded = _quoted(name)
     encoded_clean = _quoted(clean_name)
     names_clause = f"name.eq.{encoded}" if encoded == encoded_clean else f"name.eq.{encoded},name.eq.{encoded_clean}"
@@ -1012,11 +1015,19 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                 closed_count += 1
                 print(f"  ⚠️ [3회 연속 검색 실패 -> 폐업 격리] id: {s_id}, name: {name}")
             else:
+                # search_naver 실패는 "네트워크 오류로 아예 조회를 못 한 것"과
+                # "정상 조회했는데 결과가 0건인 것"을 구분하지 못한다. 예전엔
+                # 이 둘을 구분 없이 verified=False로 덮어써, 네트워크 오류
+                # 한 번에도 실제로는 검증된 스팟의 verified 표시가 꺼졌다
+                # (oneul-date-95734 발견). 실패로 verified를 내리지 않고
+                # 기존 값을 그대로 둔다(골목/거리형은 기존처럼 True로 올리는
+                # 것만 유지 — 검증이 원래 어려운 유형이라 예외로 둔다).
                 patch_data = {
-                    "verified": True if is_zone_street_spot(name) else False,
                     "fail_count": new_fail,
                     "updated_at": now_iso
                 }
+                if is_zone_street_spot(name):
+                    patch_data["verified"] = True
                 fail_warn_count += 1
 
         # Supabase UPDATE (컬럼 부재 시 자동 복구 재시도)

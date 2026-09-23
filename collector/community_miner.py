@@ -137,6 +137,7 @@ def run_community_mining(supabase_url: str, service_key: str, max_discoveries: i
     print(f"💬 [커뮤니티 트렌드 마이닝 시작] 타깃 쿼리 ({len(sampled)}개): {[q[0] for q in sampled[:5]]} ...")
 
     discovered = []
+    batch_seen_names = set()
 
     for query_text, region, area, moods in sampled:
         encoded = urllib.parse.quote(query_text)
@@ -186,9 +187,17 @@ def run_community_mining(supabase_url: str, service_key: str, max_discoveries: i
             if not real_name or not road_addr:
                 continue
 
+            # find_duplicate_spot는 이번 배치가 아직 INSERT하지 않은 자기
+            # 자신은 못 본다 — 배치 내부 즉시 중복 삽입 방지(2026-09-23,
+            # catchtable_miner·blog_miner와 같은 유형, oneul-date-95734 발견).
+            if real_name in batch_seen_names:
+                continue
+
             # DB 중복 검사 (이름 + 정규화 주소)
             if find_duplicate_spot(supabase_url, api_headers, real_name, road_addr):
                 continue
+
+            batch_seen_names.add(real_name)
 
             derived_reg, derived_area = derive_region_area(road_addr)
             # 검색 쿼리의 목표 권역과 실제 검색된 주소의 권역이 완전히 다른 경우 (동명 상호 오탐) 스킵

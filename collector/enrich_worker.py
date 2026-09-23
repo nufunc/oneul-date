@@ -102,9 +102,18 @@ def run_social_enrichment(supabase_url: str, service_key: str, batch_size: int =
             kakao_data = search_kakaomap_place(name, location)
             time.sleep(0.5)
 
-            # 3. 종합 스코어 및 JSONB 조립 (기존 인스타/블로그 등 social_links 보존)
-            hot_score, new_social, metrics = calculate_hot_score(yt_data, kakao_data, is_verified)
             existing_social = s.get("social_links") or {}
+            # 이번 조회가 실패(None)해도 calculate_hot_score는 무조건 "영상
+            # 없음" 기준으로 hot_score·metrics를 재계산해 덮어썼다. 네트워크
+            # 오류 등 일시적 실패와 "실제로 영상이 없음"을 구분 못 해, 이미
+            # 알고 있던 조회수 높은 영상 정보가 조용히 사라지는 경우가
+            # 있었다(oneul-date-95734 실측: 활성 2,426건 중 983건이
+            # total_video_views=0인데 실제로는 유튜브 링크가 있음). 이번
+            # 조회가 실패했으면 이전에 저장된 값으로 대체해 재계산한다.
+            effective_yt_data = yt_data if yt_data else existing_social.get("youtube")
+
+            # 3. 종합 스코어 및 JSONB 조립 (기존 인스타/블로그 등 social_links 보존)
+            hot_score, new_social, metrics = calculate_hot_score(effective_yt_data, kakao_data, is_verified)
             merged_social = {**existing_social, **new_social}
 
             # 4. 스팟 설명(summary) 불량 감지 시 자동 교정
