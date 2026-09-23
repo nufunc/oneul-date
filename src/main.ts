@@ -1522,14 +1522,19 @@ function buildDailyRecommendedCourse(all: Spot[]): { steps: CourseStep[]; region
   const candidateRegions = ['SEOUL', 'GYEONGGI', 'YEONGNAM', 'JEJU', 'GANGWON'];
   const pickedRegion = candidateRegions[Math.floor(dailyRng() * candidateRegions.length)];
 
-  const candidateMoods = ['romantic', 'hip', 'cozy', 'active'];
-  const pickedMood = candidateMoods[Math.floor(dailyRng() * candidateMoods.length)];
+  // MOODS에 없는 키('hip', 'cozy')가 섞여 있어 그 키가 뽑힌 날(약 52%)은 후보 0건으로 조용히 실패했다
+  const candidateMoods = ['romantic', 'trendy', 'healing', 'active'];
+  let pickedMood = candidateMoods[Math.floor(dailyRng() * candidateMoods.length)];
 
   const slotsOn: SlotKey[] = ['day', 'evening', 'night'];
-  const steps = generateCourse(all, slotsOn, [pickedRegion], pickedMood, { rng: dailyRng });
+  let steps = generateCourse(all, slotsOn, [pickedRegion], pickedMood, { rng: dailyRng });
 
-  const validSteps = steps.filter((st) => st.spotId !== null);
-  if (validSteps.length === 0) return null;
+  // 지역과 분위기 조합에 스팟이 없으면 분위기 조건을 풀어 한 번 더 시도한다
+  if (!steps.some((st) => st.spotId !== null)) {
+    pickedMood = 'ALL';
+    steps = generateCourse(all, slotsOn, [pickedRegion], pickedMood, { rng: dailyRng });
+  }
+  if (!steps.some((st) => st.spotId !== null)) return null;
 
   return { steps, regionKey: pickedRegion, moodKey: pickedMood };
 }
@@ -3611,7 +3616,6 @@ function bindConditionEvents(area: HTMLElement): void {
         indoorOnly: state.indoorOnly,
       };
       state.regions = [daily.regionKey];
-      state.mood = daily.moodKey;
       state.subZones = [];
       showToast('🎁 오늘의 추천 데이트 코스를 완성했어요');
       renderConditions();
@@ -3771,7 +3775,6 @@ function applyDailyCourseIfEmpty(): void {
       indoorOnly: state.indoorOnly,
     };
     state.regions = [daily.regionKey];
-    state.mood = daily.moodKey;
     state.subZones = [];
     renderConditions();
     renderResults();
@@ -6807,7 +6810,6 @@ function restoreCourse(item: SavedCourse): void {
   const subZones = Array.isArray(item.conditions.subZones) ? item.conditions.subZones : [];
   state.regions = regions;
   state.subZones = subZones;
-  state.mood = item.conditions.mood;
   for (const k of SLOT_ORDER) {
     state.slots[k] = item.conditions.slots.includes(k);
   }
