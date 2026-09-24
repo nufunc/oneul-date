@@ -839,6 +839,19 @@ button {
   white-space: nowrap;
 }
 
+/* 320px에서 기본 라벨 '⚙️ 시스템'일 때 오른쪽 버튼 묶음이 탑바 오른쪽 여백을 10px 침범해 좌우 여백이 20/10px로
+   어긋났다. 좁은 화면에서 두 버튼의 좌우 여백만 줄여(12→8, 16→10px) 탑바 안에 들어오게 한다 */
+@media (max-width: 360px) {
+  .btn-theme-toggle {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .btn-saved {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
+
 .btn-saved:hover {
   border-color: var(--color-border-strong);
   color: var(--color-text);
