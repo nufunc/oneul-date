@@ -5811,6 +5811,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
       </div>
       <div class="discovery-card-body">
         <h4 class="discovery-card-title discovery-name">${escapeHtml(spot.name)}</h4>
+        <span class="discovery-card-category discovery-category">${escapeHtml(spot.category || '데이트 스팟')}</span>
         <p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>
         <div class="discovery-card-actions">
           <button class="btn-discovery-save ${isSaved ? 'is-saved' : ''}" data-spot-id="${spot.id}" aria-label="${isSaved ? '보관함에서 제외' : '보관함에 담기'}" title="${isSaved ? '보관함에서 제외' : '보관함에 담기'}">${isSaved ? '❤️' : '🤍'}</button>

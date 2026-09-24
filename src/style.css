@@ -4276,6 +4276,14 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   white-space: nowrap;
 }
 
+/* 기본 3열 카드는 폭이 좁아 긴 업종명이 넘치지 않게 한 줄 말줄임으로 둔다 */
+.discovery-card.cols-3 .discovery-card-category {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
 .discovery-card-title,
 .discovery-name {
   font-family: var(--font-sans);
