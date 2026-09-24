@@ -1419,9 +1419,10 @@ function isSpecialDiningSpot(spot: Spot): boolean {
     return true;
   }
 
-  // price 문자열의 최고 금액이 4.5만원 이상이면 스페셜. 금액만 적힌 고가 코스("디너 코스 190,000원")를 놓쳤다
+  // price에서 금액을 읽으면 금액만으로 판정한다(최고 4.5만원 이상). 아래 분위기·키워드는 금액이 없을 때만 쓴다.
+  // 요약문 템플릿의 '위스키'·'기념일' 때문에 2만원대 레일바이크·파스타집이 스페셜로 통과했다
   const range = parsePriceRangeWon(spot.price || '');
-  if (range && range[1] >= 45000) return true;
+  if (range) return range[1] >= 45000;
 
   // 3. 큐레이션 인증 뱃지 (미쉐린, 캐치테이블 파인다이닝)
   // 2026-09-20 기준 michelin/catchtable을 채우는 수집 경로가 없어 매칭 0건.
