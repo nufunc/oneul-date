@@ -3856,7 +3856,15 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   color: var(--color-text-sub);
 }
 
+/* 보이는 크기 24px는 그대로 두고 터치 영역만 약 36x32px로 넓힌다(1px 테두리 보정 포함) */
+.btn-discovery-filter-reset::after {
+  content: '';
+  position: absolute;
+  inset: -7px -5px;
+}
+
 .btn-discovery-filter-reset {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
