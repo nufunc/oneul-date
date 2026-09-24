@@ -1089,6 +1089,21 @@ button {
   margin-left: auto;
 }
 
+/* 좁은 화면에서는 시간대 토글이 다음 줄로 내려가며 오른쪽으로 쏠리고(360px), 조건 카드 안쪽 폭보다 넓어 19px
+   넘쳤다(320px). 한 줄 전체로 펴고 네 버튼을 균등하게 나누며, 좌우 여백을 줄이고 위아래는 늘려 누르기 쉽게 한다 */
+@media (max-width: 420px) {
+  .slot-toggles-inline {
+    width: 100%;
+    margin-left: 0;
+  }
+  .slot-toggles-inline .slot-toggle-inline {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
+    padding: 8px 4px;
+  }
+}
+
 .slot-toggle-inline {
   display: inline-flex;
   align-items: center;
