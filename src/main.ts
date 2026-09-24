@@ -4963,11 +4963,13 @@ function swapStep(index: number): void {
   if (!step) return;
   const cond = state.courseConditions;
   const anchor = dominantAnchorSpot(state.course, spotById, index);
+  // 코스를 만들 때 걸었던 실내·무드 프리셋을 교체에도 똑같이 건다. 빠져 있어 실내 칩을 켠 채 교체하면
+  // 루프탑·정원이, 심야 프리셋에서는 카페·골프장이 들어왔다
   const rawCandidates = excludeRecent(
-    getCandidates(spots, step.slot, cond.regions, cond.mood, courseSpotIds(), cond.subZones, anchor),
+    getCandidates(spots, step.slot, cond.regions, cond.mood, courseSpotIds(), cond.subZones, anchor, cond.indoorOnly ?? false),
     recentSpotIdSet(),
   );
-  const candidates = filterByBudget(rawCandidates, cond.budgetFilter);
+  const candidates = filterByBudget(filterByMoodPreset(rawCandidates, state.moodPreset), cond.budgetFilter);
   // 다른 차수와 동일한 종목(장르) 중복 방지
   const otherGenres = new Set<SpotGenre>();
   state.course.forEach((st, idx) => {
