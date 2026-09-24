@@ -6335,8 +6335,18 @@ function renderOverlay(): void {
   renderOverlayContent();
   syncOverlayHistory();
   if (!open && overlayWasOpen) {
-    if (overlayReturnFocus?.isConnected) overlayReturnFocus.focus();
+    // closeOverlay는 이 함수 뒤에 목록을 다시 그리므로(스팟 탐색) 그 작업이 끝난 뒤에 돌려준다. 기억한 버튼이
+    // 교체됐으면 같은 스팟의 새 버튼을 찾는다
+    const remembered = overlayReturnFocus;
     overlayReturnFocus = null;
+    queueMicrotask(() => {
+      let target = remembered;
+      const detailId = target?.dataset.detailSpotId;
+      if (target && !target.isConnected && detailId) {
+        target = document.querySelector<HTMLElement>(`.${target.classList[0]}[data-detail-spot-id="${detailId}"]`);
+      }
+      if (target?.isConnected) target.focus();
+    });
   }
   overlayWasOpen = open;
 }
