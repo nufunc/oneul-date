@@ -259,7 +259,8 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
 
     checkpoint["area_index"] = (start_idx + 4) % len(area_codes)
     checkpoint["page_by_combo"] = page_by_combo
-    _save_checkpoint(checkpoint)
+    # 체크포인트는 적재 결과를 받은 뒤에만 저장한다. INSERT 전에 저장하면 적재가 실패해도 지역·페이지가
+    # 전진해 그 항목을 한 바퀴 돌 때까지 건너뛰었다(2026-09-24 17:08 회차)
 
     # find_duplicate_spot는 실행 시점의 라이브 DB만 보고, 이 배치가 아직
     # INSERT하지 않은 자기 자신의 discovered_spots는 못 본다. 같은 업체가
@@ -281,6 +282,8 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
         discovered_spots = [sanitize_spot(s) for s in discovered_spots]
         try:
             inserted = insert_spots(supabase_url, api_headers, discovered_spots)
+            # 행 단위 실패(제약 위반)는 다시 넣어도 같으므로 전진한다. 네트워크 오류·5xx는 예외라 저장하지 않는다
+            _save_checkpoint(checkpoint)
             if inserted:
                 print(f"✨ [TourAPI 4.0 INSERT 성공] 총 {len(inserted)}개 문화/관광 스팟 적재 완료:")
                 for s in inserted:
@@ -289,6 +292,7 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
         except Exception as e:
             print(f"❌ TourAPI 스팟 INSERT 실패: {e}")
     else:
+        _save_checkpoint(checkpoint)
         print("💡 [TourAPI Miner] 신규 발굴 스팟 없음 (DB 최신 상태 유지)")
 
     return 0
