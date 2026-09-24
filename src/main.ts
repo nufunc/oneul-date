@@ -6718,7 +6718,11 @@ function renderOverlayContent(): void {
     const signatureItems = spot.signature_items || [];
 
     // 분위기 태그
-    const moodTags = [...(spot.mood_tags || []), ...(Array.isArray(spot.mood) ? spot.mood : [spot.mood || ''])].filter(Boolean);
+    // mood는 내부 영문 키(romantic 등)라 그대로 찍으면 '#romantic'으로 보였다. MOODS 한글 라벨로 바꾸고 모르는 키는 뺀다
+    const moodLabels = (Array.isArray(spot.mood) ? spot.mood : [spot.mood || ''])
+      .map((key) => MOODS.find((m) => m.key === key && m.key !== 'ALL')?.label)
+      .filter((label): label is string => Boolean(label));
+    const moodTags = [...new Set([...(spot.mood_tags || []), ...moodLabels])];
 
     // 뱃지
     const isHot = isSuperHotSpot(spot);
