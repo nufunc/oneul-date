@@ -5776,7 +5776,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
           }
         </div>
         <div class="discovery-card-body compact">
-          <h4 class="discovery-card-title discovery-name compact">${escapeHtml(spot.name)}</h4>
+          <h4 class="discovery-card-title discovery-name compact"><button type="button" class="discovery-name-link" data-detail-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 상세 보기">${escapeHtml(spot.name)}</button></h4>
           <div class="discovery-card-actions compact">
             <button class="btn-build-anchor-course btn-discovery-action-build compact" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">🚀</button>
             <a href="${escapeHtml(naverMapUrl(spot))}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map compact" aria-label="${escapeHtml(spot.name)} 지도 열기" title="지도 열기">🗺️</a>
@@ -5802,7 +5802,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
         </div>
         <div class="discovery-card-body">
           <div class="discovery-card-header">
-            <h4 class="discovery-card-title discovery-name">${escapeHtml(spot.name)}</h4>
+            <h4 class="discovery-card-title discovery-name"><button type="button" class="discovery-name-link" data-detail-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 상세 보기">${escapeHtml(spot.name)}</button></h4>
             <span class="discovery-card-category discovery-category">${escapeHtml(spot.category || '데이트 스팟')}</span>
           </div>
           <p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>
@@ -5832,7 +5832,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
         }
       </div>
       <div class="discovery-card-body">
-        <h4 class="discovery-card-title discovery-name">${escapeHtml(spot.name)}</h4>
+        <h4 class="discovery-card-title discovery-name"><button type="button" class="discovery-name-link" data-detail-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 상세 보기">${escapeHtml(spot.name)}</button></h4>
         <span class="discovery-card-category discovery-category">${escapeHtml(spot.category || '데이트 스팟')}</span>
         <p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>
         <div class="discovery-card-actions">
@@ -7105,7 +7105,8 @@ async function ensureSpotsForRegions(regionKeys: string[]): Promise<void> {
 async function init(): Promise<void> {
   // 코스 카드 상호명을 누르면 상세 시트를 연다. 카드는 교체 때마다 새로 그려지므로 문서에 한 번만 건다
   document.addEventListener('click', (e) => {
-    const link = (e.target as HTMLElement).closest<HTMLElement>('.step-name-link');
+    // 스팟 탐색 카드 이름도 같은 방식이다. 카드 전체 클릭은 마우스 전용이라 키보드·스크린리더로는 열 수 없었다
+    const link = (e.target as HTMLElement).closest<HTMLElement>('.step-name-link, .discovery-name-link');
     // 시트를 그릴 자리가 없는 화면(공유받은 코스)에서 상태만 세우면 홈으로 갈 때 시트가 저절로 떴다
     if (!link || !document.getElementById('overlay-root')) return;
     const spotId = Number(link.dataset.detailSpotId);
