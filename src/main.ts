@@ -6710,10 +6710,9 @@ function renderOverlayContent(): void {
 
     // 선택 완료 버튼 (선택 보정 및 적용)
     root.querySelector('#btn-location-submit')?.addEventListener('click', () => {
-      if (state.activeRegionTab === 'ALL') {
-        state.regions = [];
-        state.subZones = [];
-      } else if (state.regions.length === 0 && state.subZones.length === 0) {
+      // '전체' 탭은 둘러보기일 뿐이라 이미 체크한 동네를 지우지 않는다. 마지막으로 연 탭이 '전체'라는 이유로
+      // 선택이 모두 사라졌다. 전국으로 되돌리는 일은 '전국' 칩과 [초기화]가 맡는다
+      if (state.activeRegionTab !== 'ALL' && state.regions.length === 0 && state.subZones.length === 0) {
         state.regions = [state.activeRegionTab || 'SEOUL'];
       }
       closeOverlay();
