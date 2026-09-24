@@ -256,7 +256,9 @@ def run_catchtable_mining(supabase_url: str, service_key: str, max_discoveries: 
                 "address": road_addr,
                 "location": f"{region} {area}".strip(),
                 "mood": moods,
-                "price": f"1인 {price_tier} 코스/단품",
+                # price_tier는 스팟이 아니라 검색어에 미리 붙인 등급이라 가격으로 쓰지 않는다. 5,500원 간식점에도
+                # "1인 ₩₩₩ 코스/단품"이 붙어 화면에 그대로 나갔다(2026-09-24). 등급은 source.price_tier에만 남긴다
+                "price": None,
                 "summary": f"{real_name} — 캐치테이블 인기 예약 {'블루리본 인증 ' if is_blueribbon else ''}데이트 명소 ({area})",
                 "category": category or "와인바/다이닝",
                 "image_url": thum,
@@ -293,7 +295,7 @@ def run_catchtable_mining(supabase_url: str, service_key: str, max_discoveries: 
                 if r.status in (200, 201):
                     print(f"✨ [CatchTable/블루리본 INSERT 성공] 총 {len(discovered_spots)}개 예약 다이닝 적재 완료:")
                     for s in discovered_spots:
-                        print(f"   + [{s['region']}/{s['slot']}] {s['name']} ({s['category']}) | {s.get('price', '')}")
+                        print(f"   + [{s['region']}/{s['slot']}] {s['name']} ({s['category']}) | 등급 {s['source'].get('price_tier', '')}")
                     return len(discovered_spots)
         except Exception as e:
             print(f"❌ CatchTable 스팟 INSERT 실패: {e}")
