@@ -744,8 +744,11 @@ function deduplicateSpotList(spots: Spot[]): Spot[] {
  */
 const STAY_ZONE_FALLBACK_RADIUS_KM = 20;
 
-const OUTDOOR_PATTERNS = /(?:공원|산책|둘레길|올레길|트레킹|피크닉|수목원|식물원\s*야외|유원지|해변|해수욕장|루프탑|카약|요트|패들|서핑|야외\s*전망대|야경산책|출렁다리|산성|성곽|숲|목장|농장|골프|해안|계곡|폭포|캠핑|글램핑|야시장|스카이워크|케이블카|드라이브|등산|휴양림|정원|전망대|유적|릉|묘|사찰|템플)/i;
-const INDOOR_PATTERNS = /(?:실내|아쿠아리움|수족관|박물관|미술관|전시|갤러리|쇼핑몰|백화점|아케이드|공방|스파|온천|찜질|도서관|영화관|카페|커피|베이커리|제과|디저트|레스토랑|식당|다이닝|양식|한식|일식|중식|주점|이자카야|펍|와인|칵테일|위스키|노래방|볼링|보드게임|방탈출|호텔)/i;
+const OUTDOOR_PATTERNS = /(?:공원|산책|둘레길|올레길|트레킹|피크닉|수목원|식물원\s*야외|유원지|해변|해수욕장|루프탑|카약|요트|패들|서핑|야외\s*전망대|야경산책|출렁다리|산성|성곽|숲|목장|농장|골프|해안|계곡|폭포|캠핑|글램핑|야시장|스카이워크|케이블카|드라이브|등산|휴양림|정원|전망대|유적|릉|묘|사찰|템플|선착장|항만|포구|분수|구름다리)/i;
+const INDOOR_PATTERNS = /(?:실내|아쿠아리움|수족관|박물관|미술관|전시|갤러리|쇼핑몰|백화점|아케이드|공방|스파|온천|찜질|도서관|영화관|카페|커피|베이커리|제과|디저트|레스토랑|식당|다이닝|양식|한식|일식|중식|주점|이자카야|펍|와인|칵테일|위스키|노래방|볼링|보드게임|방탈출|호텔|체험관|문화원|뮤지엄|기념관|전시관)/i;
+// TourAPI 카테고리 중 실내·야외 신호가 없는 일반어. 이 카테고리에 실내 신호가 없으면 야외로 본다(산·다리·선착장이
+// 기본값 실내로 492곳 통과했다, 2026-09-25). 테마파크(롯데월드 등 실내 포함)와 문화시설·쇼핑은 넣지 않는다
+const OUTDOOR_GENERIC_CATEGORIES = /^(관광지|레포츠\/체험|관광,명소|축제\/행사|페스티벌|테마거리|수상스포츠|관광단지|산|호수|항구·포구|섬)$/;
 
 /** 비 오는 날/폭염 등 실내 데이트 스팟 여부 판정 */
 function isIndoorSpot(spot: Spot): boolean {
@@ -757,6 +760,7 @@ function isIndoorSpot(spot: Spot): boolean {
   const summary = spot.summary || '';
   if (INDOOR_PATTERNS.test(summary)) return true;
   if (OUTDOOR_PATTERNS.test(summary)) return false;
+  if (OUTDOOR_GENERIC_CATEGORIES.test(spot.category || '')) return false;
   return true;
 }
 
