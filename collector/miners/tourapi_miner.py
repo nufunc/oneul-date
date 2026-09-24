@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from supabase_worker import load_env, derive_region_area, find_duplicate_spot, normalize_spot_address, sanitize_spot, new_spot_id
+from supabase_worker import load_env, derive_region_area, find_duplicate_spot, normalize_spot_address, sanitize_spot, new_spot_id, insert_spots
 from category_filter import is_date_spot_category
 
 # TourAPI 4.0 엔드포인트 (KorService2 국문 관광정보 서비스)
@@ -279,16 +279,13 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
 
     if discovered_spots:
         discovered_spots = [sanitize_spot(s) for s in discovered_spots]
-        insert_url = f"{supabase_url}/rest/v1/spots"
-        data_bytes = json.dumps(discovered_spots, ensure_ascii=False).encode('utf-8')
-        ins_req = urllib.request.Request(insert_url, data=data_bytes, headers=api_headers, method='POST')
         try:
-            with urllib.request.urlopen(ins_req, timeout=10) as r:
-                if r.status in (200, 201):
-                    print(f"✨ [TourAPI 4.0 INSERT 성공] 총 {len(discovered_spots)}개 문화/관광 스팟 적재 완료:")
-                    for s in discovered_spots:
-                        print(f"   + [{s['region']}/{s['slot']}] {s['name']} ({s['category']})")
-                    return len(discovered_spots)
+            inserted = insert_spots(supabase_url, api_headers, discovered_spots)
+            if inserted:
+                print(f"✨ [TourAPI 4.0 INSERT 성공] 총 {len(inserted)}개 문화/관광 스팟 적재 완료:")
+                for s in inserted:
+                    print(f"   + [{s['region']}/{s['slot']}] {s['name']} ({s['category']})")
+            return len(inserted)
         except Exception as e:
             print(f"❌ TourAPI 스팟 INSERT 실패: {e}")
     else:

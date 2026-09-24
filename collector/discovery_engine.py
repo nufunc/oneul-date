@@ -16,7 +16,7 @@ import re
 
 from category_filter import is_date_spot_category
 from area_seeds import generate_dynamic_queries, get_coverage_gap_areas
-from supabase_worker import is_polluted_header_name, derive_region_area, find_duplicate_spot, sanitize_spot, new_spot_id
+from supabase_worker import is_polluted_header_name, derive_region_area, find_duplicate_spot, sanitize_spot, new_spot_id, insert_spots
 from fix_spot_summaries import generate_curated_summary
 from heal_and_verify_spots import is_dummy_or_closed_spot
 
@@ -405,16 +405,13 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
 
     if discovered_spots:
         discovered_spots = [sanitize_spot(s) for s in discovered_spots]
-        insert_url = f"{supabase_url}/rest/v1/spots"
-        data_bytes = json.dumps(discovered_spots, ensure_ascii=False).encode('utf-8')
-        ins_req = urllib.request.Request(insert_url, data=data_bytes, headers=api_headers, method='POST')
         try:
-            with urllib.request.urlopen(ins_req, timeout=10) as r:
-                if r.status in (200, 201):
-                    print(f"✨ [신규 핫플 자동 INSERT 성공] 총 {len(discovered_spots)}곳 발굴 및 DB 증강 완료:")
-                    for s in discovered_spots:
-                        print(f"   + [{s['region']}/{s['slot']}] {s['name']} ({s['category']})")
-                    return len(discovered_spots)
+            inserted = insert_spots(supabase_url, api_headers, discovered_spots)
+            if inserted:
+                print(f"✨ [신규 핫플 자동 INSERT 성공] 총 {len(inserted)}곳 발굴 및 DB 증강 완료:")
+                for s in inserted:
+                    print(f"   + [{s['region']}/{s['slot']}] {s['name']} ({s['category']})")
+            return len(inserted)
         except Exception as e:
             print(f"❌ 신규 스팟 INSERT 실패: {e}")
     else:

@@ -15,7 +15,7 @@ import random
 import re
 from supabase_worker import (
     load_env, search_naver, calculate_quality_score, is_polluted_header_name, derive_region_area,
-    find_duplicate_spot, sanitize_spot, new_spot_id)
+    find_duplicate_spot, sanitize_spot, new_spot_id, insert_spots)
 from category_filter import is_date_spot_category
 
 if hasattr(sys.stdout, 'reconfigure'):
@@ -252,16 +252,13 @@ def run_community_mining(supabase_url: str, service_key: str, max_discoveries: i
 
     if discovered:
         discovered = [sanitize_spot(s) for s in discovered]
-        insert_url = f"{supabase_url}/rest/v1/spots"
-        data_bytes = json.dumps(discovered, ensure_ascii=False).encode('utf-8')
-        ins_req = urllib.request.Request(insert_url, data=data_bytes, headers=api_headers, method='POST')
         try:
-            with urllib.request.urlopen(ins_req, timeout=10) as r:
-                if r.status in (200, 201):
-                    print(f"🔥 [커뮤니티 마이닝 INSERT 성공] 총 {len(discovered)}곳 발굴 및 DB 적재 완료:")
-                    for s in discovered:
-                        print(f"   + [{s['region']}/{s['slot']}] {s['name']} ({s['category']})")
-                    return len(discovered)
+            inserted = insert_spots(supabase_url, api_headers, discovered)
+            if inserted:
+                print(f"🔥 [커뮤니티 마이닝 INSERT 성공] 총 {len(inserted)}곳 발굴 및 DB 적재 완료:")
+                for s in inserted:
+                    print(f"   + [{s['region']}/{s['slot']}] {s['name']} ({s['category']})")
+            return len(inserted)
         except Exception as e:
             print(f"❌ 커뮤니티 마이닝 INSERT 실패: {e}")
     else:

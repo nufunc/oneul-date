@@ -11,6 +11,7 @@ import json
 import argparse
 import urllib.request
 import urllib.parse
+import urllib.error
 import time
 import re
 from datetime import datetime, timezone, timedelta
@@ -400,6 +401,37 @@ _SIDO_ABBREV_MAP = {
 
 
 _last_spot_id = 0
+
+
+def insert_spots(supabase_url, headers, spots):
+    """스팟 배치 INSERT. 배치가 4xx로 실패하면 한 행씩 다시 넣고 실패한 행만 로그에 남긴다.
+    배치 전체가 한 행의 제약 위반으로 통째로 버려지던 문제(2026-09-24 TourAPI 409) 때문이다.
+    넣은 스팟 목록을 돌려준다. 네트워크 오류와 5xx는 호출부가 다음 회차에 다시 시도하도록 예외를 올린다."""
+    url = f"{supabase_url}/rest/v1/spots"
+
+    def post(payload):
+        req = urllib.request.Request(url, data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+                                     headers=headers, method="POST")
+        with urllib.request.urlopen(req, timeout=10) as r:
+            return r.status in (200, 201)
+
+    try:
+        if post(spots):
+            return list(spots)
+    except urllib.error.HTTPError as e:
+        if not 400 <= e.code < 500:
+            raise
+        print(f"  ⚠️ 배치 INSERT 실패(HTTP {e.code}), {len(spots)}건을 한 건씩 다시 넣습니다")
+    inserted = []
+    for s in spots:
+        try:
+            if post([s]):
+                inserted.append(s)
+        except urllib.error.HTTPError as e:
+            if not 400 <= e.code < 500:
+                raise
+            print(f"  ❌ INSERT 실패 id={s.get('id')} {s.get('name')}: HTTP {e.code}")
+    return inserted
 
 
 def new_spot_id():

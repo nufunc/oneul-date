@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from supabase_worker import load_env, search_naver, calculate_quality_score, derive_region_area, find_duplicate_spot, sanitize_spot, new_spot_id
+from supabase_worker import load_env, search_naver, calculate_quality_score, derive_region_area, find_duplicate_spot, sanitize_spot, new_spot_id, insert_spots
 from category_filter import is_date_spot_category
 
 # 캐치테이블 / 블루리본 큐레이션 마이닝 쿼리 풀 (전국 8개 권역 × 미식 테마 60개+)
@@ -287,16 +287,13 @@ def run_catchtable_mining(supabase_url: str, service_key: str, max_discoveries: 
 
     if discovered_spots:
         discovered_spots = [sanitize_spot(s) for s in discovered_spots]
-        insert_url = f"{supabase_url}/rest/v1/spots"
-        data_bytes = json.dumps(discovered_spots, ensure_ascii=False).encode('utf-8')
-        ins_req = urllib.request.Request(insert_url, data=data_bytes, headers=api_headers, method='POST')
         try:
-            with urllib.request.urlopen(ins_req, timeout=10) as r:
-                if r.status in (200, 201):
-                    print(f"✨ [CatchTable/블루리본 INSERT 성공] 총 {len(discovered_spots)}개 예약 다이닝 적재 완료:")
-                    for s in discovered_spots:
-                        print(f"   + [{s['region']}/{s['slot']}] {s['name']} ({s['category']}) | 등급 {s['source'].get('price_tier', '')}")
-                    return len(discovered_spots)
+            inserted = insert_spots(supabase_url, api_headers, discovered_spots)
+            if inserted:
+                print(f"✨ [CatchTable/블루리본 INSERT 성공] 총 {len(inserted)}개 예약 다이닝 적재 완료:")
+                for s in inserted:
+                    print(f"   + [{s['region']}/{s['slot']}] {s['name']} ({s['category']}) | 등급 {s['source'].get('price_tier', '')}")
+            return len(inserted)
         except Exception as e:
             print(f"❌ CatchTable 스팟 INSERT 실패: {e}")
     else:
