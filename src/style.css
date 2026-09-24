@@ -1523,6 +1523,22 @@ button {
   width: 100%;
 }
 
+/* 좁은 화면에서 한 줄에 두세 버튼을 두면 주 버튼이 320px에서 92px 폭·4줄로 눌렸고, 찜한 스팟이 있어 버튼이
+   셋이면 문서가 339px로 넘쳤다. 주 버튼을 한 줄로 올리고 보조 버튼은 아래 줄에 나눠 둔다 */
+@media (max-width: 480px) {
+  .course-generate-btn-group {
+    flex-wrap: wrap;
+  }
+  .course-generate-btn-group .btn-generate {
+    flex: 1 1 100%;
+  }
+  .course-generate-btn-group .btn-daily-recommend,
+  .course-generate-btn-group .btn-saved-recommend {
+    flex: 1 1 0;
+    min-height: 44px;
+  }
+}
+
 /* ==========================================================================
    결과 영역
    ========================================================================== */
