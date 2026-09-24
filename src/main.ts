@@ -5871,7 +5871,10 @@ function bindDiscoveryCardEvents(root: ParentNode, area: HTMLElement): void {
       btn.textContent = isSaved ? '❤️' : '🤍';
       btn.classList.toggle('is-saved', isSaved);
       if (state.savedOnly) {
+        // 보관함만 보기에서는 해제한 카드가 목록에서 빠지므로 그 자리에 온 카드의 찜 버튼으로 포커스를 옮긴다
+        const index = Array.from(area.querySelectorAll('.btn-discovery-save')).indexOf(btn);
         renderSpotDiscovery();
+        focusSameKindAt('.btn-discovery-save', index);
       } else {
         const savedChip = area.querySelector<HTMLElement>('[data-action="toggle-saved"] .region-chip-text');
         if (savedChip) {
@@ -6328,22 +6331,43 @@ window.addEventListener('popstate', () => {
 // 시트를 닫으면 포커스가 BODY로 가서 키보드 사용자가 제자리를 잃었다. 연 요소를 기억했다가 닫힐 때 돌려준다
 let overlayWasOpen = false;
 let overlayReturnFocus: HTMLElement | null = null;
+let overlayReturnIndex = -1;
+
+/**
+ * 목록이 다시 그려져 원래 카드가 빠졌을 때(보관함만 보기에서 찜 해제) 그 자리에 온 카드의 같은 종류 요소로
+ * 포커스를 옮긴다. 마지막 카드였으면 이전 카드로, 목록이 비었으면 빈 안내의 버튼으로 보낸다.
+ */
+function focusSameKindAt(selector: string, index: number): void {
+  const items = document.querySelectorAll<HTMLElement>(selector);
+  const target = items.length > 0 ? items[Math.min(index, items.length - 1)] : document.getElementById('btn-empty-reset-saved');
+  target?.focus();
+}
 
 function renderOverlay(): void {
   const open = isOverlayOpen();
-  if (open && !overlayWasOpen) overlayReturnFocus = document.activeElement as HTMLElement | null;
+  if (open && !overlayWasOpen) {
+    overlayReturnFocus = document.activeElement as HTMLElement | null;
+    const cls = overlayReturnFocus?.dataset.detailSpotId ? overlayReturnFocus.classList[0] : '';
+    overlayReturnIndex = cls ? Array.from(document.querySelectorAll(`.${cls}`)).indexOf(overlayReturnFocus as Element) : -1;
+  }
   renderOverlayContent();
   syncOverlayHistory();
   if (!open && overlayWasOpen) {
     // closeOverlay는 이 함수 뒤에 목록을 다시 그리므로(스팟 탐색) 그 작업이 끝난 뒤에 돌려준다. 기억한 버튼이
     // 교체됐으면 같은 스팟의 새 버튼을 찾는다
     const remembered = overlayReturnFocus;
+    const rememberedIndex = overlayReturnIndex;
     overlayReturnFocus = null;
     queueMicrotask(() => {
       let target = remembered;
       const detailId = target?.dataset.detailSpotId;
       if (target && !target.isConnected && detailId) {
-        target = document.querySelector<HTMLElement>(`.${target.classList[0]}[data-detail-spot-id="${detailId}"]`);
+        const cls = target.classList[0];
+        target = document.querySelector<HTMLElement>(`.${cls}[data-detail-spot-id="${detailId}"]`);
+        if (!target) {
+          focusSameKindAt(`.${cls}`, rememberedIndex);
+          return;
+        }
       }
       if (target?.isConnected) target.focus();
     });
