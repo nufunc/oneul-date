@@ -4897,7 +4897,9 @@ function renderStepCard(
         ${thumbHtml}
         <div class="step-content-col">
           <h3 class="step-name">
-            <button type="button" class="step-name-link" data-detail-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 상세 보기">${escapeHtml(spot.name)}</button>
+            ${swappable
+              ? `<button type="button" class="step-name-link" data-detail-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 상세 보기">${escapeHtml(spot.name)}</button>`
+              : `<span>${escapeHtml(spot.name)}</span>`}
             ${spot.verified ? `<span class="icon-verified-badge" aria-label="엄선한 데이트 장소">${ICON_VERIFIED_CHECK_SVG}</span>` : ''}
           </h3>
           ${curationBadges.length > 0 ? `<div class="step-curation-row">${curationBadges.join('')}</div>` : ''}
@@ -7093,7 +7095,8 @@ async function init(): Promise<void> {
   // 코스 카드 상호명을 누르면 상세 시트를 연다. 카드는 교체 때마다 새로 그려지므로 문서에 한 번만 건다
   document.addEventListener('click', (e) => {
     const link = (e.target as HTMLElement).closest<HTMLElement>('.step-name-link');
-    if (!link) return;
+    // 시트를 그릴 자리가 없는 화면(공유받은 코스)에서 상태만 세우면 홈으로 갈 때 시트가 저절로 떴다
+    if (!link || !document.getElementById('overlay-root')) return;
     const spotId = Number(link.dataset.detailSpotId);
     if (!spotId) return;
     state.spotDetailId = spotId;
