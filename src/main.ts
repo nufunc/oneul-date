@@ -1360,12 +1360,19 @@ function filterByMoodPreset(candidates: Spot[], preset?: MoodPresetKey | null): 
  */
 function parsePriceRangeWon(price: string): [number, number] | null {
   const amounts: number[] = [];
-  const text = price.replace(/\s+/g, '');
-  for (const m of text.matchAll(/(\d+(?:\.\d+)?)[~-](\d+(?:\.\d+)?)만/g)) {
+  // 공백을 통째로 지우면 "빅3 16,000원"이 316,000원으로 붙어 읽혔다. 숫자와 단위 사이의 공백만 허용한다
+  const text = price.trim();
+  // '원' 없이 금액만 적힌 price("14000", "5,000")도 원 단위로 읽는다
+  if (/^\d{1,3}(,\d{3})+$|^\d{4,}$/.test(text)) {
+    const n = Number(text.replace(/,/g, ''));
+    return [n, n];
+  }
+  const RANGE_MAN = /(\d+(?:\.\d+)?)\s*[~-]\s*(\d+(?:\.\d+)?)\s*만/g;
+  for (const m of text.matchAll(RANGE_MAN)) {
     amounts.push(Number(m[1]) * 10000, Number(m[2]) * 10000);
   }
-  const rest = text.replace(/(\d+(?:\.\d+)?)[~-](\d+(?:\.\d+)?)만/g, '');
-  for (const m of rest.matchAll(/(\d[\d,]*(?:\.\d+)?)(만|천)?원/g)) {
+  const rest = text.replace(RANGE_MAN, ' ');
+  for (const m of rest.matchAll(/(\d[\d,]*(?:\.\d+)?)\s*(만|천)?\s*원/g)) {
     const n = Number(m[1].replace(/,/g, ''));
     if (!Number.isFinite(n)) continue;
     amounts.push(m[2] === '만' ? n * 10000 : m[2] === '천' ? n * 1000 : n);
