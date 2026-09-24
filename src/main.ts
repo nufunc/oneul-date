@@ -6379,6 +6379,12 @@ let overlayReturnFocus: HTMLElement | null = null;
 let overlayReturnIndex = -1;
 let overlayReturnSelector: string | null = null;
 let overlayReturnScopeId: string | null = null;
+let overlayReturnToken = 0;
+
+/** 예약된 시트 닫힘 포커스 복귀를 취소한다. 닫힘 콜백이 화면을 다른 곳으로 옮길 때(저장 코스 불러오기) 쓴다 */
+function cancelOverlayFocusReturn(): void {
+  overlayReturnToken++;
+}
 
 /**
  * 목록이 다시 그려져 원래 카드가 빠졌을 때(보관함만 보기에서 찜 해제) 그 자리에 온 카드의 같은 종류 요소로
@@ -6409,7 +6415,9 @@ function renderOverlay(): void {
     const rememberedSelector = overlayReturnSelector;
     const rememberedScope = overlayReturnScopeId ? document.getElementById(overlayReturnScopeId) : null;
     overlayReturnFocus = null;
+    const token = ++overlayReturnToken;
     queueMicrotask(() => {
+      if (token !== overlayReturnToken) return;
       let target = remembered;
       const detailId = target?.dataset.detailSpotId;
       if (target && !target.isConnected && detailId) {
@@ -7138,6 +7146,9 @@ function restoreCourse(item: SavedCourse): void {
   renderConditions();
   renderResults();
   document.getElementById('results-area')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // 화면이 결과로 옮겨 가므로 시트를 연 맨 위 버튼 대신 불러온 코스의 첫 상호명으로 포커스를 준다
+  cancelOverlayFocusReturn();
+  document.querySelector<HTMLElement>('#results-area .step-name-link')?.focus({ preventScroll: true });
 }
 
 // ---------------------------------------------------------------------------
