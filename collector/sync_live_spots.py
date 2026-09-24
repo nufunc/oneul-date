@@ -6,6 +6,7 @@ OCI PostgreSQL (PostgREST API)에서 최신 유효 스팟 전수를 조회하여
 import os
 import sys
 import json
+import time
 import logging
 from datetime import datetime
 
@@ -31,6 +32,23 @@ API_URL = os.environ.get("ONEUL_API_URL", "http://152.70.89.210:18088/rest/v1/sp
 TARGET_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "public", "data", "spots.json"))
 MIN_EXPECTED_SPOTS = 9000  # 비정상 데이터 누락 방지 안전 가드
 
+def get_with_retry(params, attempts=6, wait_sec=10):
+    """18088은 my-stock-score의 API 컨테이너가 oneul-api로 중계하는 주소라, 그쪽 배포로 컨테이너가 재생성되는
+    10~20초 동안 연결이 거부된다(2026-09-23 21:54 UTC 동기화가 offset 9000에서 실패). 연결 오류와 5xx만
+    잠시 기다렸다 다시 시도하고, 끝내 실패하면 예외를 그대로 올려 아래에서 동기화를 중단시킨다."""
+    for attempt in range(1, attempts + 1):
+        try:
+            r = requests.get(API_URL, params=params, timeout=30)
+            if r.status_code < 500 or attempt == attempts:
+                return r
+            logger.warning(f"  HTTP {r.status_code} (offset {params['offset']}), {wait_sec}초 뒤 재시도 {attempt}/{attempts - 1}")
+        except requests.exceptions.ConnectionError as e:
+            if attempt == attempts:
+                raise
+            logger.warning(f"  연결 실패 (offset {params['offset']}), {wait_sec}초 뒤 재시도 {attempt}/{attempts - 1}: {e.__class__.__name__}")
+        time.sleep(wait_sec)
+
+
 def fetch_all_active_spots():
     limit = 1000
     offset = 0
@@ -46,7 +64,7 @@ def fetch_all_active_spots():
             "offset": offset
         }
         try:
-            r = requests.get(API_URL, params=params, timeout=30)
+            r = get_with_retry(params)
             if r.status_code != 200:
                 # 페이지 도중 오류는 break로 조용히 빠지면 안 된다 —
                 # MIN_EXPECTED_SPOTS 가드는 "9,000건 넘게 받았는지"만 보고
