@@ -3080,6 +3080,10 @@ function showToast(msg: string): void {
   if (!toast) {
     toast = document.createElement('div');
     toast.className = 'toast-msg';
+    // 저장·복사·필터 결과를 스크린리더에도 알린다
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'polite');
+    toast.setAttribute('aria-atomic', 'true');
     document.body.appendChild(toast);
   }
   toast.textContent = msg;
