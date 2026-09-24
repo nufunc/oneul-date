@@ -3966,7 +3966,16 @@ function getGourmetGuideUrl(spot: Spot): string | null {
   return null;
 }
 
+// 다시 추천·동선 정렬은 결과 영역을 통째로 다시 그려 키보드로 누른 버튼의 포커스가 BODY로 갔다. 전후로 기억·복원한다
 function renderResults(): void {
+  const area = document.getElementById('results-area');
+  const active = document.activeElement;
+  const refocusSelector = area && active && area.contains(active) ? focusSelectorFor(active) : null;
+  renderResultsContent();
+  if (area) restoreFocusIn(area, refocusSelector, '#btn-regenerate');
+}
+
+function renderResultsContent(): void {
   const area = document.getElementById('results-area');
   if (!area) return;
   if (!state.course || !state.courseConditions) {
@@ -4964,12 +4973,16 @@ function renderStepCard(
 function bindSwapButton(btn: HTMLButtonElement): void {
   btn.addEventListener('click', () => {
     if (btn.classList.contains('is-spinning')) return;
+    // 포커스가 있는 버튼을 disabled로 만들면 브라우저가 포커스를 BODY로 보내므로, 그 전에 기억해 교체 뒤 새 🔄로 돌려준다
+    const refocus = document.activeElement === btn;
     btn.classList.add('is-spinning');
     btn.disabled = true;
     setTimeout(() => {
-      swapStep(Number(btn.dataset.stepIndex));
+      swapStep(Number(btn.dataset.stepIndex), refocus);
       btn.disabled = false;
       btn.classList.remove('is-spinning');
+      // 후보가 없어 교체되지 않았으면 카드가 그대로라 원래 버튼으로 돌려준다
+      if (refocus && btn.isConnected) btn.focus();
     }, 150);
   });
 }
@@ -4980,7 +4993,7 @@ function bindSwapButton(btn: HTMLButtonElement): void {
  * 최근 노출 이력은 소프트 제외 (제외 후 0건이면 이력 무시).
  * 전체 renderResults 대신 해당 카드만 DOM 교체 + swap-in 트랜지션 적용.
  */
-function swapStep(index: number): void {
+function swapStep(index: number, refocus = false): void {
   if (!state.course || !state.courseConditions) return;
   const step = state.course[index];
   if (!step) return;
@@ -5049,11 +5062,14 @@ function swapStep(index: number): void {
     },
     { once: true },
   );
+  // 🔄는 마음에 들 때까지 연달아 누르는 버튼이라, 교체 전에 이 카드 안에 포커스가 있었으면 새 카드의 🔄로 옮긴다
+  const hadFocus = refocus || targetCard.contains(document.activeElement);
   targetCard.replaceWith(newCard);
 
   const newSwapBtn = newCard.querySelector<HTMLButtonElement>('.btn-swap, .btn-swap-icon');
   if (newSwapBtn) {
     bindSwapButton(newSwapBtn);
+    if (hadFocus) newSwapBtn.focus();
   }
 
   // 장소 변경 시 AI 브리핑 텍스트도 실시간 자동 갱신 (Race condition 방지)
@@ -5425,7 +5441,7 @@ function buildAnchorCourse(anchorSpot: Spot): CourseStep[] {
 
   return steps;
 }
-const FOCUS_KEY_ATTRS = ['data-budget', 'data-region-key', 'data-cat-key', 'data-mood-preset', 'data-slot', 'data-action'];
+const FOCUS_KEY_ATTRS = ['data-budget', 'data-region-key', 'data-cat-key', 'data-mood-preset', 'data-slot', 'data-step-index', 'data-action'];
 
 /**
  * 영역을 innerHTML로 다시 그리면 키보드로 누른 버튼이 사라져 포커스가 BODY로 갔다(스팟 탭 도구 막대, 코스 탭 조건).
