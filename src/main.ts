@@ -1353,6 +1353,13 @@ function filterByMoodPreset(candidates: Spot[], preset?: MoodPresetKey | null): 
   return filtered.length > 0 ? filtered : candidates;
 }
 
+/** 무드 프리셋 판정만 하고 0건이어도 원래 목록으로 되돌리지 않는다(검색어 앵커처럼 조건을 꼭 지켜야 하는 곳에 쓴다) */
+function strictMoodPresetFilter(candidates: Spot[], preset?: MoodPresetKey | null): Spot[] {
+  if (!preset) return candidates;
+  if (preset === 'BLIND_DATE') return candidates.filter((s) => isBlindDateSpot(s));
+  if (preset === 'ANNIVERSARY') return candidates.filter((s) => isAnniversarySpot(s));
+  return candidates.filter((s) => isNightLifeSpot(s));
+}
 
 /** 가성비/캐주얼 데이트에 적합한 스팟 판별 (1인 2만원 이하 또는 가성비/산책/캐주얼 명소) */
 /**
@@ -1485,7 +1492,8 @@ function generateCourse(
   let anchorPool: Spot[] = [];
   // 검색어·카테고리 앵커에도 가성비·스페셜·무드 프리셋을 건다. 빠져 있어 스페셜 칩을 켠 채 '떡볶이'를 치면
   // 4,000원 떡볶이집이 앵커가 됐다. 필터와 검색어가 함께 맞는 곳이 없으면 아래 일반 앵커로 넘어간다
-  const applyChipFilters = (list: Spot[]) => filterByBudget(filterByMoodPreset(list, moodPreset), budgetFilter);
+  // filterByMoodPreset은 0건이면 원래 목록을 돌려줘 앵커에서는 프리셋이 무시됐으므로 엄격 판정을 쓴다
+  const applyChipFilters = (list: Spot[]) => filterByBudget(strictMoodPresetFilter(list, moodPreset), budgetFilter);
 
   // 1. 검색어가 있는 경우: 검색어 매칭 스팟을 보유한 슬롯 중 앵커 후보 최우선 탐색 (분위기 제약 완화)
   if (query) {
