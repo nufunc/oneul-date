@@ -431,6 +431,10 @@ def normalize_spot_address(address):
     tokens = fix_garbled_sido_prefix(address.strip()).split()
     if tokens:
         tokens[0] = _SIDO_ABBREV_MAP.get(tokens[0], tokens[0])
+    # 인천은 2026-07-01 행정구역 개편(중구·동구 → 제물포구·영종구, 서구 → 서해구·검단구)으로 같은 곳이
+    # 옛 구와 새 구 두 표기로 들어온다. 비교할 때는 인천의 구·군 토큰을 빼고 도로명·번지로 본다
+    if len(tokens) > 1 and tokens[0] == "인천" and re.search(r"(구|군)$", tokens[1]):
+        tokens.pop(1)
     # 도로명(…로/길)이나 지번(…동/리/가) 바로 뒤 번지까지만 주소로 보고 그 뒤 건물명·층·시설명은 버린다.
     # 꼬리 정규식만으로는 "117-123층", "아쿠아리움" 같은 새 꼬리를 계속 놓쳤다(2026-09-23 중복 3쌍).
     for i in range(1, len(tokens)):
