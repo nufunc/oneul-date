@@ -1353,6 +1353,7 @@ function filterByMoodPreset(candidates: Spot[], preset?: MoodPresetKey | null): 
   return filtered.length > 0 ? filtered : candidates;
 }
 
+
 /** 가성비/캐주얼 데이트에 적합한 스팟 판별 (1인 2만원 이하 또는 가성비/산책/캐주얼 명소) */
 /**
  * price 문자열에서 원 단위 금액을 읽어 [최소, 최대]를 돌려준다. 금액이 없으면 null.
@@ -5720,10 +5721,11 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
         ? `📍 ${(spot._dist * 1000).toFixed(0)}m`
         : `📍 ${spot._dist.toFixed(1)}km`
       : `📍 ${escapeHtml(spot.area || spot.region || '')}`;
-  // 인증·평점순일 때는 정렬 근거가 보이도록 평점과 리뷰 수를 붙인다
+  // 인증·평점순일 때는 정렬 근거가 보이도록 평점 배지를 따로 단다. 거리 배지에 붙이면 두 줄로 커져
+  // 오른쪽 위 핫플 배지에 가려졌다
   const km = spot.social_links?.kakaomap;
-  const ratingText = state.spotSort === 'curation' && km?.rating
-    ? ` · ★${km.rating.toFixed(1)}${km.review_count ? ` (${km.review_count})` : ''}`
+  const ratingBadge = state.spotSort === 'curation' && km?.rating
+    ? `<span class="discovery-badge-rating">★${km.rating.toFixed(1)}${km.review_count ? ` (${km.review_count})` : ''}</span>`
     : '';
   const sum = cleanSpotSummary(spot) || `${spot.name}에서 특별한 데이트를 즐겨보세요.`;
 
@@ -5743,7 +5745,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
     return `
       <article class="discovery-card cols-5" data-spot-id="${spot.id}" title="${escapeHtml(spot.name)} 상세 보기">
         <div class="discovery-card-thumb">
-          <span class="discovery-badge-dist">${distText}${ratingText}</span>
+          <span class="discovery-badge-dist">${distText}</span>${ratingBadge}
           ${isClosedToday ? `<span class="discovery-badge-closed">⚠️ 오늘 휴무</span>` : ''}
           ${curationPill}
           <div class="thumb-fallback-box">${fallbackIcon}</div>
@@ -5768,7 +5770,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
     return `
       <article class="discovery-card cols-2" data-spot-id="${spot.id}" title="${escapeHtml(spot.name)} 상세 보기">
         <div class="discovery-card-thumb">
-          <span class="discovery-badge-dist">${distText}${ratingText}</span>
+          <span class="discovery-badge-dist">${distText}</span>${ratingBadge}
           ${isClosedToday ? `<span class="discovery-badge-closed">⚠️ 오늘 휴무</span>` : ''}
           ${curationPill}
           <div class="thumb-fallback-box">${fallbackIcon}</div>
@@ -5799,7 +5801,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
   return `
     <article class="discovery-card cols-3" data-spot-id="${spot.id}" title="${escapeHtml(spot.name)} 상세 보기">
       <div class="discovery-card-thumb">
-        <span class="discovery-badge-dist">${distText}${ratingText}</span>
+        <span class="discovery-badge-dist">${distText}</span>${ratingBadge}
         ${isClosedToday ? `<span class="discovery-badge-closed">⚠️ 오늘 휴무</span>` : ''}
         ${curationPill}
         <div class="thumb-fallback-box">${fallbackIcon}</div>

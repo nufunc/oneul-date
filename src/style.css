@@ -4182,6 +4182,22 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   opacity: 0.6;
 }
 
+/* 인증·평점순일 때만 붙는 평점 배지. 위쪽의 거리·핫플 배지와 겹치지 않게 이미지 왼쪽 아래에 둔다 */
+.discovery-badge-rating {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  z-index: 5;
+  background: rgba(15, 23, 42, 0.78);
+  color: #fbbf24;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 .discovery-badge-dist {
   position: absolute;
   top: 8px;
@@ -4810,6 +4826,12 @@ html[data-theme-resolved="dark"] .btn-saved-recommend {
    배지 위를 항상 덮어 "오늘 휴무" 경고가 보이지 않았다(2026-09-23
    발견). 거리 배지 바로 아래로 내려 겹치지 않게 한다. */
 .discovery-badge-closed {
+  top: 34px;
+}
+
+/* 기본 3열 카드는 폭이 113px 안팎이라 왼쪽 위 거리 배지와 오른쪽 위 핫플·인증 배지가 겹쳤다(인증·평점순에서
+   '150.2km'처럼 먼 거리가 붙으면 카드마다 400~570px² 가림). 핫플·인증 배지를 둘째 줄 오른쪽으로 내린다 */
+.discovery-card.cols-3 .badge-card-curation {
   top: 34px;
 }
 
