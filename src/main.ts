@@ -6386,6 +6386,21 @@ function renderOverlayContent(): void {
     root.querySelectorAll<HTMLButtonElement>('.saved-item-delete').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
+        // 바로 위 🔗와 붙어 있어 잘못 누르면 되돌릴 수 없이 지워졌다. 첫 탭은 확인 상태로만 바꾸고 3초 안에 다시 눌러야 지운다
+        if (btn.dataset.confirm !== '1') {
+          btn.dataset.confirm = '1';
+          btn.classList.add('is-confirm');
+          btn.textContent = '삭제?';
+          btn.setAttribute('aria-label', '한 번 더 누르면 삭제');
+          window.setTimeout(() => {
+            if (!btn.isConnected) return;
+            delete btn.dataset.confirm;
+            btn.classList.remove('is-confirm');
+            btn.textContent = '🗑';
+            btn.setAttribute('aria-label', '삭제');
+          }, 3000);
+          return;
+        }
         const next = loadSavedCourses().filter((c) => c.id !== btn.dataset.deleteId);
         persistSavedCourses(next);
         renderOverlay();

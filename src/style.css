@@ -2958,9 +2958,15 @@ button {
   transform: scale(0.95);
 }
 
-.saved-item-delete:hover {
+.saved-item-delete:hover,
+.saved-item-delete.is-confirm {
   border-color: #ef4444;
   color: #ef4444;
+}
+
+.saved-item-delete.is-confirm {
+  font-size: var(--font-xs);
+  font-weight: 700;
 }
 
 /* ==========================================================================
