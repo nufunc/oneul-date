@@ -744,14 +744,19 @@ function deduplicateSpotList(spots: Spot[]): Spot[] {
  */
 const STAY_ZONE_FALLBACK_RADIUS_KM = 20;
 
-const OUTDOOR_PATTERNS = /(?:공원|산책|둘레길|올레길|트레킹|피크닉|수목원|식물원\s*야외|유원지|해변|해수욕장|루프탑|카약|요트|패들|서핑|야외\s*전망대|야경산책|출렁다리)/i;
-const INDOOR_PATTERNS = /(?:실내|아쿠아리움|수족관|박물관|미술관|전시|갤러리|쇼핑몰|백화점|아케이드|공방|스파|온천|찜질|도서관|영화관)/i;
+const OUTDOOR_PATTERNS = /(?:공원|산책|둘레길|올레길|트레킹|피크닉|수목원|식물원\s*야외|유원지|해변|해수욕장|루프탑|카약|요트|패들|서핑|야외\s*전망대|야경산책|출렁다리|산성|성곽|숲|목장|농장|골프|해안|계곡|폭포|캠핑|글램핑|야시장|스카이워크|케이블카|드라이브|등산|휴양림|정원|전망대|유적|릉|묘|사찰|템플)/i;
+const INDOOR_PATTERNS = /(?:실내|아쿠아리움|수족관|박물관|미술관|전시|갤러리|쇼핑몰|백화점|아케이드|공방|스파|온천|찜질|도서관|영화관|카페|커피|베이커리|제과|디저트|레스토랑|식당|다이닝|양식|한식|일식|중식|주점|이자카야|펍|와인|칵테일|위스키|노래방|볼링|보드게임|방탈출|호텔)/i;
 
 /** 비 오는 날/폭염 등 실내 데이트 스팟 여부 판정 */
 function isIndoorSpot(spot: Spot): boolean {
-  const text = `${spot.name} ${spot.category || ''} ${spot.summary || ''}`;
-  if (INDOOR_PATTERNS.test(text)) return true;
-  if (OUTDOOR_PATTERNS.test(text)) return false;
+  // 이름·카테고리로 먼저 판정하고, 둘 다 없을 때만 요약문을 본다. 요약문은 "숲", "노을" 같은 감성 표현이 섞여
+  // 먼저 보면 카페도 야외가 된다. 종전에는 야외 유형(산성·숲·목장·골프 등)이 패턴에 없어 88%가 실내로 통과했다
+  const nameCat = `${spot.name} ${spot.category || ''}`;
+  if (INDOOR_PATTERNS.test(nameCat)) return true;
+  if (OUTDOOR_PATTERNS.test(nameCat)) return false;
+  const summary = spot.summary || '';
+  if (INDOOR_PATTERNS.test(summary)) return true;
+  if (OUTDOOR_PATTERNS.test(summary)) return false;
   return true;
 }
 
