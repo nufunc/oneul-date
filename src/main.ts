@@ -1092,6 +1092,14 @@ interface GenerateOptions {
 }
 
 /** 검색어 및 퀵 태그 매칭 헬퍼 (특수문자 정제, 다중 토큰, 동의어 풀 매칭 지원) */
+/** 지역어가 스팟의 위치·지역·주소·이름에 있거나, 라벨에 그 지역어가 든 세부동네 존에 속하면 true */
+function spotMatchesPlace(spot: Spot, place: string): boolean {
+  const text = [spot.location, spot.area, spot.address, spot.name].join(' ').toLowerCase();
+  if (text.includes(place)) return true;
+  const zoneKeys = POPULAR_ZONES.filter((z) => z.label.split('·').includes(place)).map((z) => z.key);
+  return zoneKeys.length > 0 && matchesZone(spot, zoneKeys);
+}
+
 /** 거리 배지에 찍히는 값으로 반올림한 km 값(1km 미만은 1m, 이상은 0.1km) */
 function roundDistanceForDisplay(km: number): number {
   return km < 1 ? Math.round(km * 1000) / 1000 : Math.round(km * 10) / 10;
@@ -1099,7 +1107,13 @@ function roundDistanceForDisplay(km: number): number {
 
 /** 검색 관련도 등급(작을수록 앞): 이름 일치 → 이름에 검색어 전체 → 이름에 모든 단어 → 본문에 모든 단어 → 일부 단어만 */
 function searchRelevanceTier(spot: Spot, query: string): number {
-  const q = query.replace(/[#·,/\\]/g, ' ').trim().toLowerCase();
+  let q = query.replace(/[#·,/\\]/g, ' ').trim().toLowerCase();
+  // '부산호텔'처럼 지역어로 시작하면 지역은 이미 걸러졌으므로 나머지('호텔')로 등급을 매긴다.
+  // 그대로 두면 모두 최하 등급이 돼 동의어로만 걸린 식당이 호텔보다 앞에 섰다
+  const place = FAMOUS_AREAS.find((p) => q.startsWith(p) && q.length > p.length);
+  if (place && !(spot.name || '').toLowerCase().replace(/\s+/g, '').includes(q.replace(/\s+/g, ''))) {
+    q = q.slice(place.length).trim();
+  }
   const name = (spot.name || '').toLowerCase();
   const compactQ = q.replace(/\s+/g, '');
   const compactName = name.replace(/\s+/g, '');
@@ -1117,6 +1131,15 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
   // 1. # 및 구분자(·, /, , 등) 정제
   const cleanQ = query.replace(/[#·,/\\]/g, ' ').trim().toLowerCase();
   if (!cleanQ) return true;
+
+  // 지역어로 시작하는 검색어('부산호텔', '강남 와인')는 지역과 나머지를 AND로 묶는다. 동의어 사전이 '호텔'·'와인'만
+  // 보고 곧바로 통과시켜 지역이 무시됐고, '성수카페'처럼 사전 밖 조합은 한 덩어리라 0건이었다
+  const place = FAMOUS_AREAS.find((p) => cleanQ.startsWith(p) && cleanQ.length > p.length);
+  if (place) {
+    const rest = cleanQ.slice(place.length).trim();
+    if (rest && spotMatchesPlace(spot, place)) return matchesSearchQuery(spot, rest);
+    if (rest) return false;
+  }
 
   // 2. 검색 대상 텍스트 조립
   const targetParts: string[] = [
