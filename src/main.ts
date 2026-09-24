@@ -6421,7 +6421,8 @@ function renderOverlay(): void {
         // 세부 동네 칩처럼 닫을 때 영역이 다시 그려지는 트리거는 같은 영역에서 같은 선택자로 찾는다
         target = rememberedScope.querySelector<HTMLElement>(rememberedSelector);
       }
-      if (target?.isConnected) target.focus();
+      // 화면은 움직이지 않는다. 저장한 코스를 불러오며 결과로 내려가는 스크롤을 맨 위 버튼 포커스가 되돌렸다
+      if (target?.isConnected) target.focus({ preventScroll: true });
     });
   }
   overlayWasOpen = open;
@@ -7127,8 +7128,14 @@ function restoreCourse(item: SavedCourse): void {
     mood: item.conditions.mood,
   };
 
+  // 스팟 탐색 탭에서 불러오면 결과가 숨겨진 코스 탭에 그려져 화면에 아무 변화가 없었다. 코스 탭으로 옮기고 결과로 내린다
+  if (state.mainMode !== 'course') {
+    state.mainMode = 'course';
+    updateModeView();
+  }
   renderConditions();
   renderResults();
+  document.getElementById('results-area')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ---------------------------------------------------------------------------
@@ -7189,6 +7196,9 @@ async function ensureSpotsForRegions(regionKeys: string[]): Promise<void> {
 }
 
 async function init(): Promise<void> {
+  // history 항목은 시트 열고 닫기에만 쓴다. 자동 스크롤 복원이 켜져 있으면 시트를 닫는 history.back()이 그 순간의
+  // 스크롤을 옛 위치로 되돌려, 저장한 코스를 불러오며 결과로 내려가는 스크롤이 취소됐다
+  history.scrollRestoration = 'manual';
   // 코스 카드 상호명을 누르면 상세 시트를 연다. 카드는 교체 때마다 새로 그려지므로 문서에 한 번만 건다
   document.addEventListener('click', (e) => {
     // 스팟 탐색 카드 이름도 같은 방식이다. 카드 전체 클릭은 마우스 전용이라 키보드·스크린리더로는 열 수 없었다
