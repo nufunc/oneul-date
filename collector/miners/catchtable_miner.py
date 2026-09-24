@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from supabase_worker import load_env, search_naver, calculate_quality_score, derive_region_area, find_duplicate_spot, sanitize_spot
+from supabase_worker import load_env, search_naver, calculate_quality_score, derive_region_area, find_duplicate_spot, sanitize_spot, new_spot_id
 from category_filter import is_date_spot_category
 
 # 캐치테이블 / 블루리본 큐레이션 마이닝 쿼리 풀 (전국 8개 권역 × 미식 테마 60개+)
@@ -245,7 +245,7 @@ def run_catchtable_mining(supabase_url: str, service_key: str, max_discoveries: 
             catchtable_url = f"https://app.catchtable.co.kr/ct/shop/search?keyword={encoded_real}"
             is_blueribbon = "블루리본" in query_text
 
-            spot_id = int(time.time() * 1000) + random.randint(100, 999)
+            spot_id = new_spot_id()
 
             new_spot = {
                 "id": spot_id,

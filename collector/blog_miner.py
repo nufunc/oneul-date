@@ -17,7 +17,7 @@ import random
 import re
 from supabase_worker import (load_env, search_naver, calculate_quality_score,
                              is_polluted_header_name, derive_region_area, is_zone_street_spot,
-                             find_duplicate_spot, sanitize_spot)
+                             find_duplicate_spot, sanitize_spot, new_spot_id)
 from discovery_engine import infer_slot
 from category_filter import is_date_spot_category
 from area_seeds import generate_dynamic_queries, get_coverage_gap_areas
@@ -285,7 +285,7 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
             x_coord = top.get("x") or top.get("lng")
             y_coord = top.get("y") or top.get("lat")
 
-            spot_id = int(time.time() * 1000) + random.randint(100, 999)
+            spot_id = new_spot_id()
             spot = {
                 "id": spot_id,
                 "name": real_name,

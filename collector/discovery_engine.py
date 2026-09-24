@@ -16,7 +16,7 @@ import re
 
 from category_filter import is_date_spot_category
 from area_seeds import generate_dynamic_queries, get_coverage_gap_areas
-from supabase_worker import is_polluted_header_name, derive_region_area, find_duplicate_spot, sanitize_spot
+from supabase_worker import is_polluted_header_name, derive_region_area, find_duplicate_spot, sanitize_spot, new_spot_id
 from fix_spot_summaries import generate_curated_summary
 from heal_and_verify_spots import is_dummy_or_closed_spot
 
@@ -374,7 +374,7 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
             real_area = derived_area or area
             real_loc = f"{real_reg} {real_area}".strip()
 
-            spot_id = int(time.time() * 1000) + random.randint(100, 999)
+            spot_id = new_spot_id()
             new_spot = {
                 "id": spot_id,
                 "name": raw_name,

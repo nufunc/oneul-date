@@ -399,6 +399,18 @@ _SIDO_ABBREV_MAP = {
 }
 
 
+_last_spot_id = 0
+
+
+def new_spot_id():
+    """ms 타임스탬프 기반 스팟 id. 종전의 '시각(ms)+난수(100~999)'는 한 배치에서 몇 ms 안에 여러 건을
+    만들면 서로 겹쳐, 배치 INSERT 전체가 409 Conflict로 실패했다(2026-09-24 TourAPI 0건). 한 프로세스
+    안에서는 항상 직전 값보다 큰 값을 준다."""
+    global _last_spot_id
+    _last_spot_id = max(int(time.time() * 1000), _last_spot_id + 1)
+    return _last_spot_id
+
+
 def fix_garbled_sido_prefix(address):
     """카카오 비공식 검색이 광주·전남 지역 주소에 실존하지 않는
     "전남광주통합특별시"를 시도 접두어로 반환하는 경우가 있다(2026-09-22

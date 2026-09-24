@@ -40,7 +40,7 @@ if hasattr(sys.stdout, 'reconfigure'):
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from supabase_worker import (search_naver, calculate_quality_score, load_env,
                              derive_region_area, is_zone_street_spot, find_duplicate_spot,
-                             sanitize_spot)
+                             sanitize_spot, new_spot_id)
 from category_filter import (
     is_date_spot_category,
     SLOT_STAY_CAT_RE,
@@ -1616,7 +1616,7 @@ def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
                 continue
 
         # 고유 ID 생성 (Timestamp ms)
-        spot_id = int(time.time() * 1000)
+        spot_id = new_spot_id()
         time.sleep(0.01)
 
         spot_payload = {

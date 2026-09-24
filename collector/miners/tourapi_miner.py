@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from supabase_worker import load_env, derive_region_area, find_duplicate_spot, normalize_spot_address, sanitize_spot
+from supabase_worker import load_env, derive_region_area, find_duplicate_spot, normalize_spot_address, sanitize_spot, new_spot_id
 from category_filter import is_date_spot_category
 
 # TourAPI 4.0 엔드포인트 (KorService2 국문 관광정보 서비스)
@@ -152,7 +152,6 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
 
     discovered_spots = []
     batch_seen_names = set()
-    import random
 
     # 매 실행마다 area_codes를 무작위로 섞어 4개만 훑으면 같은 조합이 반복
     # 선택되고, pageNo도 항상 1이라 매번 같은 상위 15건만 재조회해 순수
@@ -210,7 +209,7 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                 lat_val = mapy or None
                 lng_val = mapx or None
 
-                spot_id = int(time.time() * 1000) + random.randint(100, 999)
+                spot_id = new_spot_id()
 
                 new_spot = {
                     "id": spot_id,
