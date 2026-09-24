@@ -6325,9 +6325,20 @@ window.addEventListener('popstate', () => {
   }
 });
 
+// 시트를 닫으면 포커스가 BODY로 가서 키보드 사용자가 제자리를 잃었다. 연 요소를 기억했다가 닫힐 때 돌려준다
+let overlayWasOpen = false;
+let overlayReturnFocus: HTMLElement | null = null;
+
 function renderOverlay(): void {
+  const open = isOverlayOpen();
+  if (open && !overlayWasOpen) overlayReturnFocus = document.activeElement as HTMLElement | null;
   renderOverlayContent();
   syncOverlayHistory();
+  if (!open && overlayWasOpen) {
+    if (overlayReturnFocus?.isConnected) overlayReturnFocus.focus();
+    overlayReturnFocus = null;
+  }
+  overlayWasOpen = open;
 }
 
 function renderOverlayContent(): void {
