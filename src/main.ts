@@ -5440,6 +5440,17 @@ function renderSpotDiscovery(): void {
   const isSearchFocused = activeEl && activeEl.id === 'discovery-search-input';
   const selStart = isSearchFocused ? activeEl.selectionStart : null;
   const selEnd = isSearchFocused ? activeEl.selectionEnd : null;
+  // 도구 막대(보기 방식, 정렬, 지역·테마·필터 칩)도 통째로 다시 그려져 키보드로 누르면 포커스가 BODY로 갔다.
+  // 다시 그린 뒤 같은 요소를 찾을 수 있게 id나 data 속성으로 기억한다
+  const refocusSelector = (() => {
+    if (!activeEl || isSearchFocused || !area.contains(activeEl)) return null;
+    if (activeEl.id) return `#${CSS.escape(activeEl.id)}`;
+    for (const attr of ['data-budget', 'data-region-key', 'data-cat-key', 'data-mood-preset', 'data-action']) {
+      const value = activeEl.getAttribute(attr);
+      if (value) return `[${attr}="${CSS.escape(value)}"]`;
+    }
+    return null;
+  })();
 
   // 2. 기준 좌표 결정 (GPS 획득 좌표 -> 선택된 지역/세부존 중심 좌표 -> 서울 성수 기본 중심 좌표)
   let effectiveCoords = userCoords;
@@ -5705,6 +5716,7 @@ function renderSpotDiscovery(): void {
   bindDiscoveryEvents(area);
 
   // 포커스 복원
+  if (refocusSelector) area.querySelector<HTMLElement>(refocusSelector)?.focus();
   if (isSearchFocused) {
     const nextInput = area.querySelector<HTMLInputElement>('#discovery-search-input');
     if (nextInput) {
