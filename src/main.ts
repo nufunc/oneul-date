@@ -5543,9 +5543,11 @@ function renderSpotDiscovery(): void {
   } else if (state.spotSort === 'curation') {
     // ⭐ 인증·평점순 (관광공사 인증 + 카카오맵 평점). michelin/blue_ribbon은
     // 실제로 채우는 수집 경로가 없어 항상 0이라 점수식에서 제외했다.
+    // 평점은 리뷰 수로 보정한 값(trustedRating)을 쓴다. 원점수만 쓰면 리뷰 몇 개짜리 5.0점이 리뷰 수백 개의
+    // 4.6점보다 앞섰다
     matchedSpots.sort((a, b) => {
-      const aScore = (a.curation_badges?.tour_api ? 10 : 0) + ((a.social_links?.kakaomap?.rating || 0) * 5);
-      const bScore = (b.curation_badges?.tour_api ? 10 : 0) + ((b.social_links?.kakaomap?.rating || 0) * 5);
+      const aScore = (a.curation_badges?.tour_api ? 10 : 0) + trustedRating(a) * 5;
+      const bScore = (b.curation_badges?.tour_api ? 10 : 0) + trustedRating(b) * 5;
       return bScore - aScore;
     });
   } else {
@@ -5687,6 +5689,18 @@ function renderSpotDiscovery(): void {
   }
 }
 
+/**
+ * 카카오맵 평점을 리뷰 수로 보정한 값(베이지안 평균). 리뷰가 적을수록 전체 평균(4.0, 2026-09 실측 4.01)
+ * 쪽으로 당겨진다. 가중치 30은 리뷰 30개만큼 평균값을 섞는다는 뜻이다. 평점이 없으면 0이다.
+ */
+function trustedRating(spot: Spot): number {
+  const km = spot.social_links?.kakaomap;
+  const rating = km?.rating || 0;
+  if (!rating) return 0;
+  const reviews = km?.review_count || 0;
+  return (rating * reviews + 4.0 * 30) / (reviews + 30);
+}
+
 function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 5 = 3): string {
   const isHot = isSuperHotSpot(spot);
   const isClosedToday = isSpotClosedToday(spot);
@@ -5700,6 +5714,11 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
         ? `📍 ${(spot._dist * 1000).toFixed(0)}m`
         : `📍 ${spot._dist.toFixed(1)}km`
       : `📍 ${escapeHtml(spot.area || spot.region || '')}`;
+  // 인증·평점순일 때는 정렬 근거가 보이도록 평점과 리뷰 수를 붙인다
+  const km = spot.social_links?.kakaomap;
+  const ratingText = state.spotSort === 'curation' && km?.rating
+    ? ` · ★${km.rating.toFixed(1)}${km.review_count ? ` (${km.review_count})` : ''}`
+    : '';
   const sum = cleanSpotSummary(spot) || `${spot.name}에서 특별한 데이트를 즐겨보세요.`;
 
   const bookingUrl = spot.booking_info?.url || getCatchtableUrl(spot);
@@ -5718,7 +5737,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
     return `
       <article class="discovery-card cols-5" data-spot-id="${spot.id}" title="${escapeHtml(spot.name)} 상세 보기">
         <div class="discovery-card-thumb">
-          <span class="discovery-badge-dist">${distText}</span>
+          <span class="discovery-badge-dist">${distText}${ratingText}</span>
           ${isClosedToday ? `<span class="discovery-badge-closed">⚠️ 오늘 휴무</span>` : ''}
           ${curationPill}
           <div class="thumb-fallback-box">${fallbackIcon}</div>
@@ -5743,7 +5762,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
     return `
       <article class="discovery-card cols-2" data-spot-id="${spot.id}" title="${escapeHtml(spot.name)} 상세 보기">
         <div class="discovery-card-thumb">
-          <span class="discovery-badge-dist">${distText}</span>
+          <span class="discovery-badge-dist">${distText}${ratingText}</span>
           ${isClosedToday ? `<span class="discovery-badge-closed">⚠️ 오늘 휴무</span>` : ''}
           ${curationPill}
           <div class="thumb-fallback-box">${fallbackIcon}</div>
@@ -5774,7 +5793,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
   return `
     <article class="discovery-card cols-3" data-spot-id="${spot.id}" title="${escapeHtml(spot.name)} 상세 보기">
       <div class="discovery-card-thumb">
-        <span class="discovery-badge-dist">${distText}</span>
+        <span class="discovery-badge-dist">${distText}${ratingText}</span>
         ${isClosedToday ? `<span class="discovery-badge-closed">⚠️ 오늘 휴무</span>` : ''}
         ${curationPill}
         <div class="thumb-fallback-box">${fallbackIcon}</div>
