@@ -5566,7 +5566,9 @@ function renderSpotDiscovery(): void {
   lastDiscoveryList = { list: matchedSpots, pageSize };
 
   const regLabel = getRegionSelectorLabel();
-  const isFiltered = Boolean(state.spotSearchQuery || state.spotCategory !== 'ALL' || state.regions.length > 0 || state.subZones.length > 0);
+  // 초기화 버튼은 실내·무드·가격·찜도 풀어 주는데, 버튼을 보여 줄지는 이 조건들을 보지 않아 해당 칩만 켰을 때 버튼이 없었다
+  const isFiltered = Boolean(state.spotSearchQuery || state.spotCategory !== 'ALL' || state.regions.length > 0 || state.subZones.length > 0
+    || state.indoorOnly || state.savedOnly || state.moodPreset !== null || state.budgetFilter !== 'ALL');
 
   area.innerHTML = `
     <!-- 1. 통합 검색창 -->
