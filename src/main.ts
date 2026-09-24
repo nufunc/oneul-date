@@ -5478,6 +5478,7 @@ function renderSpotDiscovery(): void {
 
   // 스팟 전용 검색어 필터 적용 (스마트 전국 확장 지원)
   const q = state.spotSearchQuery.trim();
+  let expandedNationwide = false;
   if (q) {
     const inRegionMatched = matchedSpots.filter((s) => matchesSearchQuery(s, q));
     if (inRegionMatched.length > 0) {
@@ -5487,6 +5488,8 @@ function renderSpotDiscovery(): void {
       const nationwideMatched = allCandidateSpots.filter((s) => matchesSearchQuery(s, q));
       if (nationwideMatched.length > 0) {
         matchedSpots = nationwideMatched;
+        // 화면은 계속 선택 지역으로 보여 60km 밖 스팟을 지역 안으로 믿게 했다. 넓혔다고 알린다
+        expandedNationwide = state.regions.length > 0 || state.subZones.length > 0;
       } else {
         matchedSpots = [];
       }
@@ -5666,6 +5669,8 @@ function renderSpotDiscovery(): void {
         </div>
       </div>
     </div>
+
+    ${expandedNationwide ? `<p class="discovery-scope-notice" role="status">📍 ${escapeHtml(regLabel.title)}에는 '${escapeHtml(q)}' 스팟이 없어 전국 결과를 보여드려요</p>` : ''}
 
     <!-- 4. 그리드 피드 -->
     <div class="spot-discovery-grid cols-${state.spotGridCols}">

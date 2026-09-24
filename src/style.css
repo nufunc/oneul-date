@@ -4284,6 +4284,18 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   margin-bottom: 4px;
 }
 
+/* 선택 지역에 검색 결과가 없어 전국으로 넓혔을 때만 보이는 안내 줄 */
+.discovery-scope-notice {
+  margin: 0 0 var(--space-3);
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-sub);
+  color: var(--color-text-sub);
+  font-size: var(--font-xs);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
 .discovery-card-category,
 .discovery-category {
   font-size: 0.70rem;
