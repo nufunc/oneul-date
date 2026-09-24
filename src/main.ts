@@ -3177,6 +3177,11 @@ function renderShell(): void {
   document.getElementById('brand-home-link')?.addEventListener('click', (e) => {
     e.preventDefault();
     clearCourseHash();
+    // 스팟 탐색 탭에서 누르면 스크롤만 올라가 '홈으로 이동'이라는 설명과 달랐다. 홈인 맞춤 코스 탭으로 돌아간다
+    if (state.mainMode !== 'course') {
+      state.mainMode = 'course';
+      updateModeView();
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
   document.getElementById('btn-theme-toggle')?.addEventListener('click', () => {
