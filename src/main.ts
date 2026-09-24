@@ -3865,6 +3865,11 @@ function triggerCourseGeneration(): void {
   };
   addRecentSpotIds(courseSpotIds());
   renderResults();
+  // 모바일에서는 결과가 버튼 바로 아래 화면 밖에서 시작해 눌러도 변화가 보이지 않았다. 결과가 화면 아래쪽이면 그리로 내린다
+  const resultsEl = document.getElementById('results-area');
+  if (resultsEl && resultsEl.getBoundingClientRect().top > window.innerHeight * 0.6) {
+    resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 
   // 검색어가 포함된 경우 토스트 피드백
   if (state.searchQuery) {
