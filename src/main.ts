@@ -3118,6 +3118,8 @@ function applyTheme(mode: ThemeMode, notify = false): void {
   const themeBtn = document.getElementById('btn-theme-toggle');
   if (themeBtn) {
     themeBtn.textContent = getThemeModeLabel(mode);
+    // 고정 aria-label이 보이는 문구를 가려 스크린리더에는 현재 테마가 전해지지 않았다
+    themeBtn.setAttribute('aria-label', `테마 변경, 현재 ${getThemeModeLabel(mode)}`);
   }
 
   // 모바일 브라우저 상단 상태바 테마 컬러 동기화
@@ -3159,7 +3161,7 @@ function renderShell(): void {
     <header class="topbar">
       <h1 class="app-title"><a href="#" class="app-title-link" id="brand-home-link" aria-label="오늘 데이트 홈으로 이동">오늘 데이트</a></h1>
       <div class="topbar-actions">
-        <button class="btn-theme-toggle" id="btn-theme-toggle" aria-label="테마 변경">${getThemeModeLabel(state.themeMode)}</button>
+        <button class="btn-theme-toggle" id="btn-theme-toggle" aria-label="테마 변경, 현재 ${getThemeModeLabel(state.themeMode)}">${getThemeModeLabel(state.themeMode)}</button>
         <button class="btn-saved" id="btn-open-saved">저장한 코스</button>
       </div>
     </header>
