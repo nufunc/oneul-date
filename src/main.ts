@@ -1482,6 +1482,9 @@ function generateCourse(
 
   let anchorSlot: SlotKey | null = null;
   let anchorPool: Spot[] = [];
+  // 검색어·카테고리 앵커에도 가성비·스페셜·무드 프리셋을 건다. 빠져 있어 스페셜 칩을 켠 채 '떡볶이'를 치면
+  // 4,000원 떡볶이집이 앵커가 됐다. 필터와 검색어가 함께 맞는 곳이 없으면 아래 일반 앵커로 넘어간다
+  const applyChipFilters = (list: Spot[]) => filterByBudget(filterByMoodPreset(list, moodPreset), budgetFilter);
 
   // 1. 검색어가 있는 경우: 검색어 매칭 스팟을 보유한 슬롯 중 앵커 후보 최우선 탐색 (분위기 제약 완화)
   if (query) {
@@ -1489,7 +1492,7 @@ function generateCourse(
     for (const slot of slotsOn) {
       // 검색어가 있을 때는 mood 제약 없이 해당 지역/존의 스팟 풀에서 폭넓게 검색
       const candidates = excludeRecent(getCandidates(all, slot, regionKeys, 'ALL', [], zoneKeys, null, isIndoor), avoid);
-      const matched = candidates.filter((s) => matchesSearchQuery(s, query));
+      const matched = applyChipFilters(candidates.filter((s) => matchesSearchQuery(s, query)));
       if (matched.length > 0 && (anchorSlot === null || matched.length < anchorPool.length)) {
         anchorSlot = slot;
         anchorPool = matched;
@@ -1500,7 +1503,7 @@ function generateCourse(
     if (anchorPool.length === 0) {
       for (const slot of SLOT_ORDER) {
         const candidates = excludeRecent(getCandidates(all, slot, regionKeys, 'ALL', [], zoneKeys, null, isIndoor), avoid);
-        const matched = candidates.filter((s) => matchesSearchQuery(s, query));
+        const matched = applyChipFilters(candidates.filter((s) => matchesSearchQuery(s, query)));
         if (matched.length > 0 && (anchorSlot === null || matched.length < anchorPool.length)) {
           anchorSlot = slot;
           anchorPool = matched;
@@ -1514,10 +1517,10 @@ function generateCourse(
     // 1-3. 카테고리 칩이 선택된 경우: 카테고리 키워드 매칭 스팟을 보유한 슬롯 앵커 최우선 탐색
     for (const slot of slotsOn) {
       const candidates = excludeRecent(getCandidates(all, slot, regionKeys, moodKey, [], zoneKeys, null, isIndoor), avoid);
-      const matched = candidates.filter((s) => {
+      const matched = applyChipFilters(candidates.filter((s) => {
         const text = [s.name, s.category, s.summary, ...(s.signature_items || []), ...(s.mood_tags || [])].join(' ').toLowerCase();
         return categoryDef.keywords!.some((kw) => text.includes(kw.toLowerCase()));
-      });
+      }));
       if (matched.length > 0 && (anchorSlot === null || matched.length < anchorPool.length)) {
         anchorSlot = slot;
         anchorPool = matched;
@@ -3859,6 +3862,8 @@ function triggerCourseGeneration(): void {
     });
     if (hasMatchedSpot) {
       showToast(`'${state.searchQuery}' 중심 맞춤 코스를 추천했어요`);
+    } else if (state.budgetFilter !== 'ALL' || state.moodPreset !== null || state.indoorOnly) {
+      showToast(`'${state.searchQuery}' 중 켜 둔 필터에 맞는 스팟이 없어 필터 기준으로 추천했어요`);
     } else {
       showToast(`'${state.searchQuery}' 매칭 스팟이 없어 인기 코스로 추천했어요`);
     }
