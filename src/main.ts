@@ -5644,7 +5644,7 @@ function renderSpotDiscovery(): void {
       </div>
 
       <div class="status-right">
-        <button class="btn-density-cycle" id="btn-density-cycle" aria-label="보기 방식 전환" title="보기 전환">
+        <button class="btn-density-cycle" id="btn-density-cycle" aria-label="보기 방식 전환, 현재 ${state.spotGridCols}열, 누르면 ${state.spotGridCols === 3 ? 2 : state.spotGridCols === 2 ? 5 : 3}열" title="${state.spotGridCols === 3 ? 2 : state.spotGridCols === 2 ? 5 : 3}열 보기로 전환">
           ${state.spotGridCols === 2 ? `
             <svg class="density-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <rect x="1" y="1" width="5.5" height="14" rx="0.75" fill="currentColor"/>
