@@ -6023,6 +6023,8 @@ function bindDiscoveryEvents(area: HTMLElement): void {
     state.spotSearchQuery = '';
     state.spotPage = 1;
     renderSpotDiscovery();
+    // 지운 뒤 바로 새 검색어를 칠 수 있게 검색창으로 보낸다(코스 탭 지우기 버튼과 같은 동작)
+    document.getElementById('discovery-search-input')?.focus();
   });
 
   // 1-Tap 퀵 지역 칩 바 이벤트 연동
