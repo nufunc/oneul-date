@@ -4892,7 +4892,7 @@ function renderStepCard(
         ${thumbHtml}
         <div class="step-content-col">
           <h3 class="step-name">
-            <span>${escapeHtml(spot.name)}</span>
+            <button type="button" class="step-name-link" data-detail-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 상세 보기">${escapeHtml(spot.name)}</button>
             ${spot.verified ? `<span class="icon-verified-badge" aria-label="엄선한 데이트 장소">${ICON_VERIFIED_CHECK_SVG}</span>` : ''}
           </h3>
           ${curationBadges.length > 0 ? `<div class="step-curation-row">${curationBadges.join('')}</div>` : ''}
@@ -7085,6 +7085,15 @@ async function ensureSpotsForRegions(regionKeys: string[]): Promise<void> {
 }
 
 async function init(): Promise<void> {
+  // 코스 카드 상호명을 누르면 상세 시트를 연다. 카드는 교체 때마다 새로 그려지므로 문서에 한 번만 건다
+  document.addEventListener('click', (e) => {
+    const link = (e.target as HTMLElement).closest<HTMLElement>('.step-name-link');
+    if (!link) return;
+    const spotId = Number(link.dataset.detailSpotId);
+    if (!spotId) return;
+    state.spotDetailId = spotId;
+    renderOverlay();
+  });
   window.addEventListener('keydown', (e) => {
     const overlayOpen = state.savedOpen || state.regionSheetOpen || state.spotDetailId;
     if (!overlayOpen) return;
