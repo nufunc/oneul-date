@@ -5716,7 +5716,11 @@ function renderSpotDiscovery(): void {
   bindDiscoveryEvents(area);
 
   // 포커스 복원
-  if (refocusSelector) area.querySelector<HTMLElement>(refocusSelector)?.focus();
+  if (refocusSelector) {
+    // 누른 요소가 다시 그린 화면에 없으면(필터 초기화 ↺, 결과 없음의 전체 보기) 검색창으로 보낸다
+    const again = area.querySelector<HTMLElement>(refocusSelector) ?? area.querySelector<HTMLElement>('#discovery-search-input');
+    again?.focus();
+  }
   if (isSearchFocused) {
     const nextInput = area.querySelector<HTMLInputElement>('#discovery-search-input');
     if (nextInput) {
