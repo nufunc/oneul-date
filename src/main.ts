@@ -4057,18 +4057,8 @@ function renderResultsContent(): void {
         return html;
       }).join('')}
     </div>
-    ${(() => {
-      // 공유받은 화면에만 있던 전체 코스 길찾기를 직접 만든 코스에도 둔다. 데이트 당일 세 곳 동선을 한 번에 연다
-      const url = courseDirectionsUrl(courseSpotIds().map((id) => spotById.get(id)).filter((sp): sp is Spot => Boolean(sp)));
-      return url ? `
-    <div class="receiver-directions-box">
-      <a class="btn-receiver-directions" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">
-        <span class="receiver-directions-icon">🗺️</span>
-        <span class="receiver-directions-text">전체 코스 한눈에 길찾기 (네이버 지도)</span>
-        <span class="receiver-directions-arrow" aria-hidden="true">↗</span>
-      </a>
-    </div>` : '';
-    })()}
+    ${/* 공유받은 화면에만 있던 전체 코스 길찾기를 직접 만든 코스에도 둔다. 데이트 당일 세 곳 동선을 한 번에 연다 */ ''}
+    ${courseDirectionsBoxHtml(courseSpotIds().map((id) => spotById.get(id)).filter((sp): sp is Spot => Boolean(sp)))}
     <div class="result-actions result-actions-3">
       <button class="btn-secondary" id="btn-copy">📋 복사</button>
       <button class="btn-secondary" id="btn-share-link">🔗 링크</button>
@@ -5085,11 +5075,9 @@ function swapStep(index: number, refocus = false): void {
   }
 
   // 카드 한 장만 새로 그리므로 전체 코스 길찾기 링크도 바뀐 스팟으로 갱신한다
-  const directionsLink = document.querySelector<HTMLAnchorElement>('#results-area .btn-receiver-directions');
-  if (directionsLink) {
-    const url = courseDirectionsUrl(courseSpotIds().map((id) => spotById.get(id)).filter((sp): sp is Spot => Boolean(sp)));
-    if (url) directionsLink.href = url;
-    else directionsLink.closest('.receiver-directions-box')?.remove();
+  const directionsBox = document.querySelector<HTMLElement>('#results-area .receiver-directions-box');
+  if (directionsBox) {
+    directionsBox.outerHTML = courseDirectionsBoxHtml(courseSpotIds().map((id) => spotById.get(id)).filter((sp): sp is Spot => Boolean(sp)));
   }
 
   // 장소 변경 시 AI 브리핑 텍스트도 실시간 자동 갱신 (Race condition 방지)
@@ -6173,6 +6161,27 @@ function courseDirectionsUrl(courseSpots: Spot[]): string {
   return `https://map.naver.com/p/directions/${coords}/-/car`;
 }
 
+/**
+ * 전체 코스 길찾기 박스. 좌표 없는 스팟은 경유지에서 빠지므로 빠진 곳이 있으면 그 사실을 한 줄로 알린다
+ * (좌표 null이 약 25%라 3곳 코스의 2곳 경로가 흔했고, 지도를 열면 한 곳이 왜 없는지 알 수 없었다).
+ * fallbackUrl은 경유지가 부족할 때 대신 열 주소다(공유 화면은 첫 스팟 지도).
+ */
+function courseDirectionsBoxHtml(courseSpots: Spot[], fallbackUrl = ''): string {
+  const routeUrl = courseDirectionsUrl(courseSpots);
+  const url = routeUrl || fallbackUrl;
+  if (!url) return '';
+  const skipped = routeUrl ? courseSpots.filter((s) => s.lat == null || s.lng == null).length : 0;
+  return `
+    <div class="receiver-directions-box">
+      <a class="btn-receiver-directions" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">
+        <span class="receiver-directions-icon">🗺️</span>
+        <span class="receiver-directions-text">전체 코스 한눈에 길찾기 <span class="receiver-directions-brand">(네이버 지도)</span></span>
+        <span class="receiver-directions-arrow" aria-hidden="true">↗</span>
+      </a>
+      ${skipped > 0 ? `<p class="receiver-directions-note">위치 정보가 없는 ${skipped}곳은 경로에서 빠져요</p>` : ''}
+    </div>`;
+}
+
 /** URL에서 코스 hash 제거 (히스토리 오염 없이) */
 function clearCourseHash(): void {
   history.replaceState(null, '', location.pathname + location.search);
@@ -6186,7 +6195,7 @@ function renderReceiverView(steps: CourseStep[]): void {
 
   // 3개 스팟 다중 경유지 네이버 길찾기 URL 생성(경유지가 부족하면 첫 스팟 지도)
   const validSpots = sharedSpotIds.map((id) => spotById.get(id)).filter((s): s is Spot => Boolean(s));
-  const naverCourseDirectionsUrl = courseDirectionsUrl(validSpots) || (validSpots[0] ? naverMapUrl(validSpots[0]) : '');
+  const directionsBox = courseDirectionsBoxHtml(validSpots, validSpots[0] ? naverMapUrl(validSpots[0]) : '');
 
   app.innerHTML = `
     <header class="topbar">
@@ -6219,15 +6228,7 @@ function renderReceiverView(steps: CourseStep[]): void {
         }).join('')}
       </div>
 
-      ${naverCourseDirectionsUrl ? `
-        <div class="receiver-directions-box">
-          <a class="btn-receiver-directions" href="${escapeHtml(naverCourseDirectionsUrl)}" target="_blank" rel="noopener noreferrer">
-            <span class="receiver-directions-icon">🗺️</span>
-            <span class="receiver-directions-text">전체 코스 한눈에 길찾기 (네이버 지도)</span>
-            <span class="receiver-directions-arrow" aria-hidden="true">↗</span>
-          </a>
-        </div>
-      ` : ''}
+      ${directionsBox}
 
       <div class="receiver-actions-bar">
         <button class="btn-secondary btn-receiver-action" id="btn-receiver-copy" type="button">📋 코스 복사</button>

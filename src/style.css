@@ -2693,6 +2693,18 @@ button {
   box-shadow: var(--shadow-sm);
 }
 
+/* 좁은 화면에서 '(네이버 / 지도)'로 끊기지 않게 괄호째 한 덩어리로 넘긴다 */
+.receiver-directions-brand {
+  white-space: nowrap;
+}
+
+/* 좌표 없는 스팟이 경유지에서 빠졌을 때만 보이는 안내 한 줄 */
+.receiver-directions-note {
+  margin: 6px 4px 0;
+  font-size: var(--font-xs);
+  color: var(--color-text-sub);
+}
+
 .btn-receiver-directions:hover {
   background: var(--color-surface);
   border-color: var(--color-accent);
