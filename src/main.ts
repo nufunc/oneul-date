@@ -3647,6 +3647,8 @@ function bindQuickRegionEvents(container: HTMLElement, onRegionChange: () => voi
 function renderConditions(): void {
   const area = document.getElementById('conditions-area');
   if (!area) return;
+  const active = document.activeElement;
+  const refocusSelector = active && area.contains(active) ? focusSelectorFor(active) : null;
 
   const regLabel = getRegionSelectorLabel();
 
@@ -3721,6 +3723,7 @@ function renderConditions(): void {
     </div>
   `;
   bindConditionEvents(area);
+  restoreFocusIn(area, refocusSelector, '#search-input');
 }
 
 function bindConditionEvents(area: HTMLElement): void {
@@ -5422,6 +5425,28 @@ function buildAnchorCourse(anchorSpot: Spot): CourseStep[] {
 
   return steps;
 }
+const FOCUS_KEY_ATTRS = ['data-budget', 'data-region-key', 'data-cat-key', 'data-mood-preset', 'data-slot', 'data-action'];
+
+/**
+ * 영역을 innerHTML로 다시 그리면 키보드로 누른 버튼이 사라져 포커스가 BODY로 갔다(스팟 탭 도구 막대, 코스 탭 조건).
+ * 다시 그린 뒤 같은 요소를 찾을 선택자를 만든다. id가 있으면 id, 없으면 식별 data 속성을 쓴다.
+ */
+function focusSelectorFor(el: Element | null): string | null {
+  if (!(el instanceof HTMLElement)) return null;
+  if (el.id) return `#${CSS.escape(el.id)}`;
+  for (const attr of FOCUS_KEY_ATTRS) {
+    const value = el.getAttribute(attr);
+    if (value) return `[${attr}="${CSS.escape(value)}"]`;
+  }
+  return null;
+}
+
+/** 다시 그린 영역에서 기억한 요소로 포커스를 돌린다. 누른 버튼이 사라졌으면(초기화, 지우기) 폴백 요소로 보낸다 */
+function restoreFocusIn(root: ParentNode, selector: string | null, fallbackSelector: string): void {
+  if (!selector) return;
+  (root.querySelector<HTMLElement>(selector) ?? root.querySelector<HTMLElement>(fallbackSelector))?.focus();
+}
+
 let discoveryCandidateCache: { source: Spot[]; key: string; list: (Spot & { _dist: number })[] } | null = null;
 
 let lastDiscoveryList: { list: (Spot & { _dist?: number })[]; pageSize: number } | null = null;
@@ -5440,17 +5465,7 @@ function renderSpotDiscovery(): void {
   const isSearchFocused = activeEl && activeEl.id === 'discovery-search-input';
   const selStart = isSearchFocused ? activeEl.selectionStart : null;
   const selEnd = isSearchFocused ? activeEl.selectionEnd : null;
-  // 도구 막대(보기 방식, 정렬, 지역·테마·필터 칩)도 통째로 다시 그려져 키보드로 누르면 포커스가 BODY로 갔다.
-  // 다시 그린 뒤 같은 요소를 찾을 수 있게 id나 data 속성으로 기억한다
-  const refocusSelector = (() => {
-    if (!activeEl || isSearchFocused || !area.contains(activeEl)) return null;
-    if (activeEl.id) return `#${CSS.escape(activeEl.id)}`;
-    for (const attr of ['data-budget', 'data-region-key', 'data-cat-key', 'data-mood-preset', 'data-action']) {
-      const value = activeEl.getAttribute(attr);
-      if (value) return `[${attr}="${CSS.escape(value)}"]`;
-    }
-    return null;
-  })();
+  const refocusSelector = activeEl && !isSearchFocused && area.contains(activeEl) ? focusSelectorFor(activeEl) : null;
 
   // 2. 기준 좌표 결정 (GPS 획득 좌표 -> 선택된 지역/세부존 중심 좌표 -> 서울 성수 기본 중심 좌표)
   let effectiveCoords = userCoords;
@@ -5716,11 +5731,7 @@ function renderSpotDiscovery(): void {
   bindDiscoveryEvents(area);
 
   // 포커스 복원
-  if (refocusSelector) {
-    // 누른 요소가 다시 그린 화면에 없으면(필터 초기화 ↺, 결과 없음의 전체 보기) 검색창으로 보낸다
-    const again = area.querySelector<HTMLElement>(refocusSelector) ?? area.querySelector<HTMLElement>('#discovery-search-input');
-    again?.focus();
-  }
+  restoreFocusIn(area, refocusSelector, '#discovery-search-input');
   if (isSearchFocused) {
     const nextInput = area.querySelector<HTMLInputElement>('#discovery-search-input');
     if (nextInput) {
@@ -6348,6 +6359,8 @@ window.addEventListener('popstate', () => {
 let overlayWasOpen = false;
 let overlayReturnFocus: HTMLElement | null = null;
 let overlayReturnIndex = -1;
+let overlayReturnSelector: string | null = null;
+let overlayReturnScopeId: string | null = null;
 
 /**
  * 목록이 다시 그려져 원래 카드가 빠졌을 때(보관함만 보기에서 찜 해제) 그 자리에 온 카드의 같은 종류 요소로
@@ -6363,6 +6376,8 @@ function renderOverlay(): void {
   const open = isOverlayOpen();
   if (open && !overlayWasOpen) {
     overlayReturnFocus = document.activeElement as HTMLElement | null;
+    overlayReturnSelector = focusSelectorFor(overlayReturnFocus);
+    overlayReturnScopeId = overlayReturnFocus?.closest('#conditions-area, #spot-discovery-area')?.id ?? null;
     const cls = overlayReturnFocus?.dataset.detailSpotId ? overlayReturnFocus.classList[0] : '';
     overlayReturnIndex = cls ? Array.from(document.querySelectorAll(`.${cls}`)).indexOf(overlayReturnFocus as Element) : -1;
   }
@@ -6373,6 +6388,8 @@ function renderOverlay(): void {
     // 교체됐으면 같은 스팟의 새 버튼을 찾는다
     const remembered = overlayReturnFocus;
     const rememberedIndex = overlayReturnIndex;
+    const rememberedSelector = overlayReturnSelector;
+    const rememberedScope = overlayReturnScopeId ? document.getElementById(overlayReturnScopeId) : null;
     overlayReturnFocus = null;
     queueMicrotask(() => {
       let target = remembered;
@@ -6384,6 +6401,9 @@ function renderOverlay(): void {
           focusSameKindAt(`.${cls}`, rememberedIndex);
           return;
         }
+      } else if (target && !target.isConnected && rememberedSelector && rememberedScope) {
+        // 세부 동네 칩처럼 닫을 때 영역이 다시 그려지는 트리거는 같은 영역에서 같은 선택자로 찾는다
+        target = rememberedScope.querySelector<HTMLElement>(rememberedSelector);
       }
       if (target?.isConnected) target.focus();
     });
