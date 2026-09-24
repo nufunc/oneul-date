@@ -1349,6 +1349,26 @@ function filterByMoodPreset(candidates: Spot[], preset?: MoodPresetKey | null): 
 }
 
 /** 가성비/캐주얼 데이트에 적합한 스팟 판별 (1인 2만원 이하 또는 가성비/산책/캐주얼 명소) */
+/**
+ * price 문자열에서 원 단위 금액을 읽어 [최소, 최대]를 돌려준다. 금액이 없으면 null.
+ * "150,000원", "1인 45,000원", "2~4만원대", "1.5만원", "5천원"을 읽는다.
+ */
+function parsePriceRangeWon(price: string): [number, number] | null {
+  const amounts: number[] = [];
+  const text = price.replace(/\s+/g, '');
+  for (const m of text.matchAll(/(\d+(?:\.\d+)?)[~-](\d+(?:\.\d+)?)만/g)) {
+    amounts.push(Number(m[1]) * 10000, Number(m[2]) * 10000);
+  }
+  const rest = text.replace(/(\d+(?:\.\d+)?)[~-](\d+(?:\.\d+)?)만/g, '');
+  for (const m of rest.matchAll(/(\d[\d,]*(?:\.\d+)?)(만|천)?원/g)) {
+    const n = Number(m[1].replace(/,/g, ''));
+    if (!Number.isFinite(n)) continue;
+    amounts.push(m[2] === '만' ? n * 10000 : m[2] === '천' ? n * 1000 : n);
+  }
+  const valid = amounts.filter((a) => a > 0);
+  return valid.length > 0 ? [Math.min(...valid), Math.max(...valid)] : null;
+}
+
 function isBudgetSpot(spot: Spot): boolean {
   // 1. 명시적 가격 티어 (₩ 또는 FREE)
   if (spot.price_tier === 'FREE' || spot.price_tier === '₩') return true;
@@ -1360,10 +1380,12 @@ function isBudgetSpot(spot: Spot): boolean {
     if (spot.avg_price_per_person > 35000) return false;
   }
 
-  // 3. price 문자열 검사
+  // 3. price 문자열 금액: 적힌 금액이 모두 3만원 이하일 때만 가성비. 종전의 includes('0원')은 "190,000원"에도 걸려
+  // 고가 코스가 가성비로 분류됐다(가성비 판정 7,463곳 중 6,604곳이 이 부분 일치로 통과)
   const pStr = spot.price || '';
-  if (pStr.includes('무료') || pStr.includes('0원')) return true;
-  if (/^[1-9],000|1[0-9],000|20,000/.test(pStr)) return true;
+  if (pStr.includes('무료')) return true;
+  const range = parsePriceRangeWon(pStr);
+  if (range) return range[1] <= 30000;
 
   // 4. 카테고리/태그/소개 텍스트 검사
   const text = `${spot.name} ${spot.category || ''} ${spot.summary || ''} ${(spot.mood_tags || []).join(' ')}`.toLowerCase();
@@ -1384,6 +1406,10 @@ function isSpecialDiningSpot(spot: Spot): boolean {
   if (typeof spot.avg_price_per_person === 'number' && spot.avg_price_per_person >= 45000) {
     return true;
   }
+
+  // price 문자열의 최고 금액이 4.5만원 이상이면 스페셜. 금액만 적힌 고가 코스("디너 코스 190,000원")를 놓쳤다
+  const range = parsePriceRangeWon(spot.price || '');
+  if (range && range[1] >= 45000) return true;
 
   // 3. 큐레이션 인증 뱃지 (미쉐린, 캐치테이블 파인다이닝)
   // 2026-09-20 기준 michelin/catchtable을 채우는 수집 경로가 없어 매칭 0건.
