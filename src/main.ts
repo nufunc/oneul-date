@@ -1385,12 +1385,12 @@ function isBudgetSpot(spot: Spot): boolean {
     if (spot.avg_price_per_person > 35000) return false;
   }
 
-  // 3. price 문자열 금액: 적힌 금액이 모두 3만원 이하일 때만 가성비. 종전의 includes('0원')은 "190,000원"에도 걸려
+  // 3. price 문자열 금액: 적힌 금액이 모두 22,000원 이하일 때만 가성비(칩 설명 '1인 2만원 이하'와 위 평균가 기준에 맞춤). 종전의 includes('0원')은 "190,000원"에도 걸려
   // 고가 코스가 가성비로 분류됐다(가성비 판정 7,463곳 중 6,604곳이 이 부분 일치로 통과)
   const pStr = spot.price || '';
   if (pStr.includes('무료')) return true;
   const range = parsePriceRangeWon(pStr);
-  if (range) return range[1] <= 30000;
+  if (range) return range[1] <= 22000;
 
   // 4. 카테고리/태그/소개 텍스트 검사
   const text = `${spot.name} ${spot.category || ''} ${spot.summary || ''} ${(spot.mood_tags || []).join(' ')}`.toLowerCase();
