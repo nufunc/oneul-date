@@ -4052,6 +4052,18 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   transform: scale(0.92);
 }
 
+/* 겉모습은 정렬 셀렉트와 같은 32px로 두고 누르는 영역만 44px로 넓힌다. inset은 테두리 안쪽 기준이라 -7px이면
+   바깥으로 6px 나가고, 옆 요소와 간격이 8px라 겹치지 않는다 */
+.btn-density-cycle {
+  position: relative;
+}
+
+.btn-density-cycle::after {
+  content: '';
+  position: absolute;
+  inset: -7px;
+}
+
 .btn-density-cycle .density-icon {
   display: block;
   pointer-events: none;
@@ -4875,6 +4887,10 @@ html[data-theme-resolved="dark"] .quick-region-chip.chip-budget.is-luxury-active
   transform: translateY(-1px);
   background: rgba(234, 179, 8, 0.2);
   border-color: #eab308;
+}
+
+.btn-optimize-route:active {
+  transform: scale(0.95);
 }
 
 html[data-theme="dark"] .btn-optimize-route,

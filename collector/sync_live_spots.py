@@ -34,7 +34,7 @@ MIN_EXPECTED_SPOTS = 9000  # 비정상 데이터 누락 방지 안전 가드
 
 def get_with_retry(params, attempts=6, wait_sec=10):
     """18088은 my-stock-score의 API 컨테이너가 oneul-api로 중계하는 주소라, 그쪽 배포로 컨테이너가 재생성되는
-    10~20초 동안 연결이 거부된다(2026-09-23 21:54 UTC 동기화가 offset 9000에서 실패). 연결 오류와 5xx만
+    10~20초 동안 연결이 거부된다(2026-09-23 21:54 UTC 동기화가 offset 9000에서 실패). 연결 오류, 응답 시간 초과, 5xx만
     잠시 기다렸다 다시 시도하고, 끝내 실패하면 예외를 그대로 올려 아래에서 동기화를 중단시킨다."""
     for attempt in range(1, attempts + 1):
         try:
@@ -42,7 +42,7 @@ def get_with_retry(params, attempts=6, wait_sec=10):
             if r.status_code < 500 or attempt == attempts:
                 return r
             logger.warning(f"  HTTP {r.status_code} (offset {params['offset']}), {wait_sec}초 뒤 재시도 {attempt}/{attempts - 1}")
-        except requests.exceptions.ConnectionError as e:
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
             if attempt == attempts:
                 raise
             logger.warning(f"  연결 실패 (offset {params['offset']}), {wait_sec}초 뒤 재시도 {attempt}/{attempts - 1}: {e.__class__.__name__}")
