@@ -6205,6 +6205,9 @@ function renderReceiverView(steps: CourseStep[]): void {
   app.innerHTML = `
     <header class="topbar">
       <h1 class="app-title"><a href="#" class="app-title-link" id="receiver-home-link" aria-label="오늘 데이트 홈으로 이동">오늘 데이트</a></h1>
+      <div class="topbar-actions">
+        <button class="btn-theme-toggle" id="btn-theme-toggle" aria-label="테마 변경, 현재 ${getThemeModeLabel(state.themeMode)}">${getThemeModeLabel(state.themeMode)}</button>
+      </div>
     </header>
     <section class="receiver-view">
       <div class="receiver-hero-card">
@@ -6255,6 +6258,7 @@ function renderReceiverView(steps: CourseStep[]): void {
     renderShell();
   };
   document.getElementById('receiver-home-link')?.addEventListener('click', goHome);
+  document.getElementById('btn-theme-toggle')?.addEventListener('click', cycleThemeMode);
   document.getElementById('btn-make-own')?.addEventListener('click', goHome);
   document.getElementById('btn-make-own-hero')?.addEventListener('click', goHome);
 
