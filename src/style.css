@@ -1704,24 +1704,6 @@ button {
   transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.ai-briefing-text.is-loading {
-  font-style: normal;
-  color: var(--color-text-sub);
-  opacity: 0.8;
-}
-
-.ai-loading-pulse {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  animation: pulse-briefing 1.4s infinite ease-in-out;
-}
-
-@keyframes pulse-briefing {
-  0%, 100% { opacity: 0.45; }
-  50% { opacity: 0.95; }
-}
-
 .ai-briefing-text strong {
   font-style: normal;
   color: var(--color-text);

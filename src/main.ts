@@ -4017,11 +4017,11 @@ function renderResultsContent(): void {
   const cacheKey = `${cond.mood}_${courseSpotIds().join('-')}`;
   const hasCachedStory = aiStoryCache.has(cacheKey);
 
+  // AI 응답을 기다리는 동안 한 줄짜리 로딩 문구를 두면 문장이 도착할 때 카드가 두세 배로 늘어 아래가 밀린다.
+  // 로컬 문장을 먼저 보여 주고 AI 문장이 오면 그때만 바꾼다
   let initialStoryHtml = '';
   if (hasCachedStory) {
     initialStoryHtml = `“${escapeHtml(normalizeEditorialTone(aiStoryCache.get(cacheKey)!))}”`;
-  } else if (AI_BRIEFING_ENABLED) {
-    initialStoryHtml = `<span class="ai-loading-pulse">두 사람만을 위한 맞춤 코스 브리핑을 작성하고 있어요...</span>`;
   } else {
     initialStoryHtml = `“${normalizeEditorialTone(generateCourseStory(state.course, spotById, cond.mood, true))}”`;
   }
@@ -4046,7 +4046,7 @@ function renderResultsContent(): void {
         <span class="ai-sparkle-icon">✨</span>
         <span>AI 에디터 브리핑</span>
       </div>
-      <p class="ai-briefing-text ${!hasCachedStory && AI_BRIEFING_ENABLED ? 'is-loading' : ''}" id="ai-briefing-content">${initialStoryHtml}</p>
+      <p class="ai-briefing-text" id="ai-briefing-content">${initialStoryHtml}</p>
     </div>
     <div class="step-list">
       ${state.course.length > 0 ? renderUserOriginTransitDivider(state.course[0]) : ''}
@@ -4078,11 +4078,10 @@ function renderResultsContent(): void {
     const currentCourse = state.course;
     fetchAiBriefing(currentCourse, spotById, cond.mood).then((aiText) => {
       const el = document.getElementById('ai-briefing-content');
-      if (!el) return;
-      const finalText = aiText || generateCourseStory(currentCourse, spotById, cond.mood, false);
+      if (!el || !aiText) return;
+      const finalText = aiText;
       el.style.opacity = '0';
       setTimeout(() => {
-        el.classList.remove('is-loading');
         el.innerHTML = `“${escapeHtml(finalText)}”`;
         el.style.opacity = '1';
       }, 100);
@@ -5095,27 +5094,23 @@ function swapStep(index: number, refocus = false): void {
 
     if (aiStoryCache.has(cacheKey)) {
       briefingEl.innerHTML = `“${escapeHtml(normalizeEditorialTone(aiStoryCache.get(cacheKey)!))}”`;
-      briefingEl.classList.remove('is-loading');
     } else if (AI_BRIEFING_ENABLED) {
-      briefingEl.classList.add('is-loading');
-      briefingEl.innerHTML = `<span class="ai-loading-pulse">새로운 코스에 맞춰 브리핑을 작성하고 있어요...</span>`;
+      briefingEl.innerHTML = `“${normalizeEditorialTone(generateCourseStory(currentCourse, spotById, mood, true))}”`;
       fetchAiBriefing(currentCourse, spotById, mood).then((aiText) => {
         const el = document.getElementById('ai-briefing-content');
-        if (!el) return;
+        if (!el || !aiText) return;
         // 응답 도착 시점의 코스가 요청 시점과 다르면 무시 (Race condition 방지)
         if (courseSpotIds().join('-') !== currentSpotKey) return;
 
-        const finalText = normalizeEditorialTone(aiText || generateCourseStory(currentCourse, spotById, mood, false));
+        const finalText = normalizeEditorialTone(aiText);
         el.style.opacity = '0';
         setTimeout(() => {
-          el.classList.remove('is-loading');
           el.innerHTML = `“${escapeHtml(finalText)}”`;
           el.style.opacity = '1';
         }, 100);
       });
     } else {
       briefingEl.innerHTML = `“${normalizeEditorialTone(generateCourseStory(currentCourse, spotById, mood, true))}”`;
-      briefingEl.classList.remove('is-loading');
     }
   }
 }
