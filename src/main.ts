@@ -3325,7 +3325,7 @@ function renderTodayCourse(): void {
   }
 
   area.innerHTML = `
-    <button class="live-ambient-ticker" id="btn-today-course" aria-label="실시간 맞춤 코스 불러오기">
+    <button class="live-ambient-ticker" id="btn-today-course" aria-label="${escapeHtml(`실시간 맞춤 코스 불러오기: ${initial.ambient.title}, ${initial.distKm != null ? `1차 스팟 ${initial.distKm}km` : initial.ambient.subtitle}`)}">
       <span class="ticker-pulse" aria-hidden="true"></span>
       <span class="ticker-emoji">${initial.ambient.emoji}</span>
       <span class="ticker-title">${initial.ambient.title}</span>
