@@ -2628,7 +2628,11 @@ button {
   font-weight: 700;
   color: var(--color-text);
   white-space: nowrap;
-  /* 좁은 화면에서는 문구가 고정된 제목 쪽을 줄이고 거리(1차 스팟 N km)가 담긴 부제는 온전히 보인다 */
+  flex-shrink: 0;
+}
+/* 거리(1차 스팟 N km)가 있을 때만 제목 쪽을 줄여 부제를 온전히 보인다. 없으면 일반 문구인 부제를 줄인다 */
+.live-ambient-ticker:has(.ticker-subtitle.is-dist) .ticker-title {
+  flex-shrink: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2643,6 +2647,11 @@ button {
   color: var(--color-accent-text);
   font-weight: 600;
   white-space: nowrap;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ticker-subtitle.is-dist {
   flex-shrink: 0;
 }
 
