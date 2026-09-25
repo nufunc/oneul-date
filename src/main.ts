@@ -2949,6 +2949,7 @@ function requestUserGeolocation(showFeedback = false): void {
       if (state.mainMode === 'spots') {
         renderSpotDiscovery();
       } else {
+        renderTodayCourse(); // 첫 화면 티커는 위치를 받기 전에 그려지므로 거리(1차 스팟 N km)를 여기서 채운다
         renderConditions();
         if (state.course && state.course.length > 0) {
           renderResults();
@@ -7329,6 +7330,7 @@ async function init(): Promise<void> {
           } else if (state.mainMode === 'spots') {
             renderSpotDiscovery();
           } else if (state.mainMode === 'course') {
+            renderTodayCourse(); // 첫 티커는 정적 샘플로 그려져 거리가 비므로 전체 데이터로 다시 그린다
             applyDailyCourseIfEmpty();
           }
         }
