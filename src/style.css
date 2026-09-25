@@ -2628,6 +2628,10 @@ button {
   font-weight: 700;
   color: var(--color-text);
   white-space: nowrap;
+  /* 좁은 화면에서는 문구가 고정된 제목 쪽을 줄이고 거리(1차 스팟 N km)가 담긴 부제는 온전히 보인다 */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .ticker-sep {
@@ -2639,8 +2643,7 @@ button {
   color: var(--color-accent-text);
   font-weight: 600;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  flex-shrink: 0;
 }
 
 .ticker-subtitle strong {
@@ -2940,6 +2943,15 @@ button {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+}
+
+/* 320px에서 좌우 20px 여백이면 저장 코스의 스팟 칩이 한 줄에 하나씩 꺾여 목록이 길어진다 */
+@media (max-width: 360px) {
+  .overlay-head,
+  .overlay-body {
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+  }
 }
 
 .overlay-tip-banner {
