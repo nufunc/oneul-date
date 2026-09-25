@@ -41,17 +41,19 @@ def get_with_retry(params, attempts=6, wait_sec=10):
             r = requests.get(API_URL, params=params, timeout=30)
             if r.status_code < 500 or attempt == attempts:
                 return r
-            logger.warning(f"  HTTP {r.status_code} (offset {params['offset']}), {wait_sec}초 뒤 재시도 {attempt}/{attempts - 1}")
-        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+            logger.warning(f"  HTTP {r.status_code} ({params['id']}), {wait_sec}초 뒤 재시도 {attempt}/{attempts - 1}")
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout, requests.exceptions.ChunkedEncodingError) as e:
             if attempt == attempts:
                 raise
-            logger.warning(f"  연결 실패 (offset {params['offset']}), {wait_sec}초 뒤 재시도 {attempt}/{attempts - 1}: {e.__class__.__name__}")
+            logger.warning(f"  연결 실패 ({params['id']}), {wait_sec}초 뒤 재시도 {attempt}/{attempts - 1}: {e.__class__.__name__}")
         time.sleep(wait_sec)
 
 
 def fetch_all_active_spots():
+    # offset 대신 마지막 id 기준으로 넘긴다. 받는 도중 이미 지나간 id가 닫히면(enrich_worker가 상시 PATCH)
+    # offset 방식은 뒤 행이 한 칸 당겨져 다음 페이지 첫 행을 오류 없이 건너뛴다
     limit = 1000
-    offset = 0
+    last_id = 0
     all_spots = []
     
     logger.info(f"OCI DB에서 활성 스팟 동기화 시작: {API_URL}")
@@ -60,8 +62,8 @@ def fetch_all_active_spots():
         params = {
             "is_closed": "eq.false",
             "order": "id.asc",
+            "id": f"gt.{last_id}",
             "limit": limit,
-            "offset": offset
         }
         try:
             r = get_with_retry(params)
@@ -72,14 +74,14 @@ def fetch_all_active_spots():
                 # 받다가 여기서 끊겨도 가드를 통과해 불완전한 목록이
                 # spots.json에 그대로 커밋될 수 있었다(2026-09-23 발견,
                 # 활성 12,926건 기준). 즉시 실패시켜 커밋 자체를 막는다.
-                logger.error(f"API 호출 실패 (offset {offset}): HTTP {r.status_code} - {r.text[:200]}")
+                logger.error(f"API 호출 실패 (id gt.{last_id}): HTTP {r.status_code} - {r.text[:200]}")
                 sys.exit(1)
             items = r.json()
             if not items:
                 break
             all_spots.extend(items)
-            offset += len(items)
-            logger.info(f"  ... {len(all_spots)}개 스팟 수신 중 (offset: {offset})")
+            last_id = items[-1]["id"]
+            logger.info(f"  ... {len(all_spots)}개 스팟 수신 중 (마지막 id: {last_id})")
             if len(items) < limit:
                 break
         except Exception as e:
