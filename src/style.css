@@ -5584,6 +5584,13 @@ html[data-theme-resolved="dark"] .spot-link-btn.kakao {
   }
 }
 
+/* 세로가 짧은 폰(320×568 등)에서 170px 히어로가 소개 카드를 하단 버튼 아래로 밀어낸다 */
+@media (max-width: 480px) and (max-height: 600px) {
+  .spot-detail-hero {
+    height: 140px;
+  }
+}
+
 /* SEO 랜딩 페이지(지역×시간대 정적 페이지)의 크롤링용 콘텐츠 영역 */
 #seo-landing {
   max-width: var(--layout-max);
