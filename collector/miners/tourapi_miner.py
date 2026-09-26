@@ -20,6 +20,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from supabase_worker import load_env, derive_region_area, find_duplicate_spot, normalize_spot_address, sanitize_spot, new_spot_id, insert_spots
 from category_filter import is_date_spot_category
 from event_period import fetch_event_period
+from tour_fee import fee_fields, fetch_usefee
 
 KST = timezone(timedelta(hours=9))
 
@@ -241,6 +242,12 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                     if event_period and event_period["end"] < datetime.now(KST).strftime("%Y-%m-%d"):
                         continue
 
+                # 문화시설은 detailIntro의 이용요금(usefee)을 실제 가격으로 쓴다. 없으면 가격을 비워 둔다
+                fee = None
+                if ctype_id == "14":
+                    fee = fee_fields(fetch_usefee(clean_api_key, content_id))
+                    time.sleep(0.3)
+
                 spot_id = new_spot_id()
 
                 new_spot = {
@@ -254,7 +261,8 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                     "mood": default_moods,
                     # '무료/입장권'은 파생 단계가 FREE 등급을 만들어 입장료가 있는 곳까지 무료로 보였고 '현장결제'는 가격이 아니다.
                     # 실제 요금은 detailIntro의 usefee 등에서 받을 수 있으나 지금은 비워 둔다(2026-09-27)
-                    "price": None,
+                    "price": (fee or {}).get("price"),
+                    **({k: fee[k] for k in ("price_tier", "avg_price_per_person") if fee and fee.get(k) is not None}),
                     "summary": f"{title} — 한국관광공사 인증 {ctype_name} 명소 ({area})",
                     "category": ctype_name,
                     "image_url": first_img,

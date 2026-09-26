@@ -730,7 +730,9 @@ def derive_price_tier_from_text(price_text):
         return (None, None)
     text = price_text.strip()
 
-    is_free = '무료' in text or text in ('0원', '0')
+    # '성인 3,000원 / 어린이 무료'처럼 금액이 함께 있으면 무료가 아니다. 금액을 먼저 읽고, 없을 때만 '무료'를 인정한다
+    # (2026-09-27: 종전에는 '무료'가 들어 있기만 하면 FREE로 판정)
+    is_free = text in ('0원', '0')
     avg = None
     if not is_free:
         commas = [int(m.replace(',', '')) for m in _PRICE_COMMA_RE.findall(text)]
@@ -749,6 +751,8 @@ def derive_price_tier_from_text(price_text):
                     if cheonwon:
                         avg = sum(float(m) * 1000 for m in cheonwon) / len(cheonwon)
 
+    if avg is None and '무료' in text and '유료' not in text:
+        is_free = True
     if is_free:
         # avg_price_per_person은 INTEGER 컬럼이고 "1인당 평균 가격" 개념 자체가
         # 무료에는 성립하지 않는다. 0을 넣지 않고 null로 둔다.
