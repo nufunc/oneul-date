@@ -12,6 +12,7 @@ import sys
 import json
 import urllib.request
 import urllib.parse
+from collections import Counter
 import time
 import random
 import re
@@ -207,6 +208,8 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
 
     discovered = []
     batch_seen_names = set()
+    # 거절 사유별 건수. 종전에는 로그 없이 continue만 해 어디서 걸러지는지 알 수 없었다(2026-09-26)
+    rej = Counter()
 
     for query_text, region, area, moods in sampled:
         raw_candidates = fetch_blog_candidates(query_text)
@@ -222,6 +225,7 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
                 time.sleep(0.2)
 
             if not places or len(places) == 0:
+                rej["검색무결과"] += 1
                 continue
 
             top = places[0]
@@ -235,19 +239,24 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
             # 이설하베이커리·홍대그술집, 둘 다 source.type=blog_mining이고
             # created_at 초 단위 차이).
             if real_name in batch_seen_names:
+                rej["배치내중복"] += 1
                 continue
 
             # 1. 단독 지명(광역 지자체명 단독) 또는 오염된 헤더명 필터
             if len(raw_name := real_name) <= 2 or raw_name in ["서울", "경기", "인천", "강원", "충청", "충북", "충남", "영남", "경북", "경남", "호남", "전북", "전남", "제주", "부산", "대구", "울산", "광주", "대전", "세종"]:
+                rej["지명·오염이름"] += 1
                 continue
             if "권역" in raw_name or " / " in raw_name or is_polluted_header_name(raw_name):
+                rej["지명·오염이름"] += 1
                 continue
 
             # 2-b. 후보 키워드와 실제 상호명 유사도 검증
             from youtube_vlog_miner import is_name_match, is_zone_composite_cand
             if is_zone_composite_cand(candidate_name) and is_zone_street_spot(real_name):
+                rej["상호명불일치"] += 1
                 continue
             if not is_name_match(candidate_name, real_name):
+                rej["상호명불일치"] += 1
                 continue
 
             cat = str(top.get("category") or "")
@@ -256,14 +265,17 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
             # 3. 데이트 스팟 카테고리 & 상호명 엄격 검증 (비데이트 업종·숙박·체인브랜드 차단)
             ok_cat, cat_reason = is_date_spot_category(cat, real_name, allow_lodging=True)
             if not ok_cat:
+                rej["카테고리"] += 1
                 continue
 
             if not real_name or not road_addr or len(road_addr.strip()) < 5:
+                rej["주소없음"] += 1
                 continue
 
             # 4. DB 중복 검사 (이름 + 정규화 주소)
             pids = provider_ids_of(top)
             if find_duplicate_spot(supabase_url, api_headers, real_name, road_addr, pids):
+                rej["DB중복"] += 1
                 continue
 
             batch_seen_names.add(real_name)
@@ -272,6 +284,7 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
             # 검색 쿼리의 목표 권역과 실제 검색된 주소의 권역이 완전히 다른 경우 (동명 상호 오탐) 스킵
             if derived_reg and region and derived_reg != region:
                 if region not in ("전국", "전체"):
+                    rej["권역불일치"] += 1
                     continue
 
             real_reg = derived_reg or region
@@ -282,6 +295,7 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
             thum = top.get("thumUrl") or top.get("image") or top.get("imageUrl") or top.get("thumbUrl")
             # [품질 가드] 고유 대표 이미지가 없는 스팟은 DB 적재 거부
             if not thum or not thum.strip():
+                rej["이미지없음"] += 1
                 continue
 
             x_coord = top.get("x") or top.get("lng")
@@ -321,6 +335,7 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
         if len(discovered) >= max_discoveries:
             break
 
+    print(f"📊 [블로그 마이닝 거절 사유] 후보 통과 {len(discovered)}건 · " + (", ".join(f"{k} {v}" for k, v in rej.most_common()) or "거절 없음"))
     if discovered:
         discovered = [sanitize_spot(s) for s in discovered]
         try:

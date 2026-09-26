@@ -1824,8 +1824,14 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
     per_kw_cap = max(3, -(-pool_target // len(SEARCH_KEYWORDS)))
     per_kw_scan = 20  # 검색 결과 상위 N개까지 훑어 이력에 없는 것을 고른다
 
-    # 쿼리 풀 랜덤 셔플
-    shuffled_kws = list(SEARCH_KEYWORDS)
+    # 쿼리 풀 랜덤 셔플. 고정 40개만 돌면 같은 상위 영상이 반복되고 해외·쇼츠가 섞여(09-16~17: 488개 중 165개 낭비)
+    # blog·discovery가 쓰는 지역 동적 쿼리 10개를 브이로그 형태로 섞는다. 검증 경로는 그대로라 정확도는 같다
+    try:
+        from area_seeds import generate_dynamic_queries
+        dynamic_kws = [f"{q} 브이로그" for q, _, _, _ in generate_dynamic_queries(count=10)]
+    except Exception:
+        dynamic_kws = []
+    shuffled_kws = list(SEARCH_KEYWORDS) + dynamic_kws
     random.shuffle(shuffled_kws)
 
     for kw in shuffled_kws:

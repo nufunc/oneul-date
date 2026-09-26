@@ -10,13 +10,14 @@ import sys
 import json
 import urllib.request
 import urllib.parse
+from collections import Counter
 import time
 import random
 import re
 
 from category_filter import is_date_spot_category
 from area_seeds import generate_dynamic_queries, get_coverage_gap_areas
-from supabase_worker import is_polluted_header_name, derive_region_area, find_duplicate_spot, sanitize_spot, new_spot_id, insert_spots, provider_ids_of
+from supabase_worker import search_naver, is_polluted_header_name, derive_region_area, find_duplicate_spot, sanitize_spot, new_spot_id, insert_spots, provider_ids_of
 from fix_spot_summaries import generate_curated_summary
 from heal_and_verify_spots import is_dummy_or_closed_spot
 
@@ -209,46 +210,9 @@ def infer_slot(category: str, name: str) -> str:
     return "day"
 
 def search_discovery(query: str):
-    # 1. 네이버 지도 검색 시도
-    url = f"https://map.naver.com/p/api/search/allSearch?query={urllib.parse.quote(query)}&type=all&searchCoord=&boundary="
-    req = urllib.request.Request(url, headers=HEADERS)
-    try:
-        with urllib.request.urlopen(req, timeout=5) as response:
-            if response.status == 200:
-                data = json.loads(response.read().decode('utf-8'))
-                res_data = data.get("result") or {}
-                place_obj = res_data.get("place") or {}
-                site_obj = res_data.get("site") or {}
-                places = place_obj.get("list", []) or site_obj.get("list", [])
-                if places:
-                    return places
-    except Exception:
-        pass
-
-    # 2. 카카오맵 실시간 검색 폴백
-    try:
-        k_url = f"https://search.map.kakao.com/mapsearch/map.daum?q={urllib.parse.quote(query)}"
-        k_req = urllib.request.Request(k_url, headers={"User-Agent": HEADERS["User-Agent"], "Referer": "https://map.kakao.com/"})
-        with urllib.request.urlopen(k_req, timeout=5) as k_res:
-            if k_res.status == 200:
-                k_data = json.loads(k_res.read().decode('utf-8'))
-                k_places = k_data.get("place", [])
-                if k_places:
-                    converted = []
-                    for kp in k_places[:6]:
-                        converted.append({
-                            "name": kp.get("name"),
-                            "roadAddress": kp.get("new_address") or kp.get("address"),
-                            "thumUrl": kp.get("img"),
-                            "category": kp.get("last_cate_name") or kp.get("cate_name_depth2") or kp.get("cate_name_depth1"),
-                            "x": kp.get("lon"),
-                            "y": kp.get("lat"),
-                        })
-                    return converted
-    except Exception:
-        pass
-
-    return []
+    """지도 검색 상위 8건. 종전에는 카카오 비공식 검색 사본을 따로 써서 결과가 1건 안팎이었고 장소 번호도 없었다.
+    공용 search_naver를 쓰면 카카오 공식 로컬 API(2026-09-26 활성화)와 이미지 보충, provider id를 함께 탄다"""
+    return search_naver(query, limit=8) or []
 
 def generate_spot_metadata_rule_based(raw_name: str, cat: str, region: str, area: str, default_moods: list[str] = None) -> dict:
     """
@@ -314,40 +278,51 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
 
     discovered_spots = []
     batch_seen_names = set()
+    # 거절 사유별 건수. 23번 돌아 0건이었는데 사유가 전부 로그 없는 continue라 원인을 가를 수 없었다(2026-09-26)
+    rej = Counter()
 
     for query_text, region, area, default_moods in sampled_queries:
         places = search_discovery(query_text)
         time.sleep(0.2)
+        if not places:
+            rej["검색무결과"] += 1
 
         for p in places[:8]:  # 상위 8개 정밀 검토
             raw_name = p.get("name", "").strip()
 
             # 1. 단독 지명(광역 지자체명 단독) 또는 오염된 헤더명 필터
             if len(raw_name) <= 2 or raw_name in ["서울", "경기", "인천", "강원", "충청", "충북", "충남", "영남", "경북", "경남", "호남", "전북", "전남", "제주", "부산", "대구", "울산", "광주", "대전", "세종"]:
+                rej["지명·오염이름"] += 1
                 continue
             if "권역" in raw_name or " / " in raw_name or is_polluted_header_name(raw_name):
+                rej["지명·오염이름"] += 1
                 continue
             # AI 가공 상호명 / 더미 상호명 유입 원천 차단
             is_dummy, dummy_reason = is_dummy_or_closed_spot({"name": raw_name})
             if is_dummy:
+                rej["더미이름"] += 1
                 continue
 
             # 2. 단일 배치(메모리) 내 중복 검사
             if raw_name in batch_seen_names:
+                rej["배치내중복"] += 1
                 continue
 
             # 3. 데이트 스팟 카테고리 & 상호명 엄격 검증 (비데이트 업종·숙박·체인브랜드 차단)
             cat = str(p.get("category") or "")
             ok_cat, cat_reason = is_date_spot_category(cat, raw_name, allow_lodging=True)
             if not ok_cat:
+                rej["카테고리"] += 1
                 continue
 
             road_addr = p.get("roadAddress") or p.get("address") or ""
             if not raw_name or not road_addr or len(road_addr.strip()) < 5:
+                rej["주소없음"] += 1
                 continue
 
             # 4. DB 중복 검사 (이름 + 정규화 주소)
             if find_duplicate_spot(supabase_url, api_headers, raw_name, road_addr, provider_ids_of(p)):
+                rej["DB중복"] += 1
                 continue  # 이미 존재하는 스팟
 
             batch_seen_names.add(raw_name)
@@ -359,6 +334,7 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
             y_coord = p.get("y") or p.get("lat")
             # [품질 가드] 주소나 좌표가 없는 불완전 장소는 거부
             if not road_addr or not x_coord or not y_coord:
+                rej["좌표없음"] += 1
                 continue
 
             thum = p.get("thumUrl") or p.get("image") or p.get("imageUrl") or p.get("thumbUrl")
@@ -368,6 +344,7 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
             # 검색 쿼리의 목표 권역과 실제 검색된 주소의 권역이 완전히 다른 경우 (동명 상호 오탐) 스킵
             if derived_reg and region and derived_reg != region:
                 if region not in ("전국", "전체"):
+                    rej["권역불일치"] += 1
                     continue
 
             real_reg = derived_reg or region
@@ -404,6 +381,7 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
         if len(discovered_spots) >= max_discoveries:
             break
 
+    print(f"📊 [신규 핫플 탐색 거절 사유] 후보 통과 {len(discovered_spots)}건 · " + (", ".join(f"{k} {v}" for k, v in rej.most_common()) or "거절 없음"))
     if discovered_spots:
         discovered_spots = [sanitize_spot(s) for s in discovered_spots]
         try:
