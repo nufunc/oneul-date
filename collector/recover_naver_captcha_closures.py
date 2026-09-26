@@ -46,7 +46,7 @@ def fetch_recovery_candidates():
     offset = 0
     rows = []
     while True:
-        url = (f"{SUPABASE_URL}/rest/v1/spots?select=id,name,category,fail_count,updated_at"
+        url = (f"{SUPABASE_URL}/rest/v1/spots?select=id,name,category,fail_count,updated_at,source"
                f"&is_closed=eq.true&fail_count=gte.3&updated_at=gte.{cutoff}"
                f"&order=id.asc&limit={page_size}&offset={offset}")
         req = urllib.request.Request(url, headers=headers)
@@ -58,7 +58,12 @@ def fetch_recovery_candidates():
         if len(batch) < page_size:
             break
         offset += page_size
-    return rows
+    # 사람이 정리했거나 병합으로 닫은 행은 캡차 차단 오폐업이 아니므로 되열지 않는다.
+    # note를 보지 않아 2026-09-27 기준 fail_count>=3 닫힌 행 45건(closed 44·merged_into 1)이 되열릴 수 있었다
+    def _closed_on_purpose(row):
+        note = ((row.get("source") or {}).get("note") or "") if isinstance(row.get("source"), dict) else ""
+        return "merged_into" in note or "closed" in note
+    return [r for r in rows if not _closed_on_purpose(r)]
 
 
 def reopen_spots_batch(spot_ids):
