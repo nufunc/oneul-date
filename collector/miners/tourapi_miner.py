@@ -13,12 +13,15 @@ import time
 import urllib.request
 import urllib.parse
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from supabase_worker import load_env, derive_region_area, find_duplicate_spot, normalize_spot_address, sanitize_spot, new_spot_id, insert_spots
 from category_filter import is_date_spot_category
+from event_period import fetch_event_period
+
+KST = timezone(timedelta(hours=9))
 
 # TourAPI 4.0 엔드포인트 (KorService2 국문 관광정보 서비스)
 TOUR_API_BASE = os.getenv("TOUR_API_BASE") or "https://apis.data.go.kr/B551011/KorService2"
@@ -153,6 +156,7 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
     if not api_key:
         print("💡 [TourAPI Miner] TOUR_API_KEY(공공데이터포털 인증키)가 설정되지 않아 공공데이터 수집을 스킵합니다.")
         return 0
+    clean_api_key = urllib.parse.unquote(api_key.strip())
 
     supabase_url = supabase_url.rstrip("/")
     api_headers = {
@@ -229,6 +233,14 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                 lat_val = mapy or None
                 lng_val = mapx or None
 
+                # 행사는 기간을 함께 받아 source.event에 둔다. 이미 끝난 행사는 넣지 않는다(2026-09-27: 행사 216곳 기간 0곳)
+                event_period = None
+                if ctype_id == "15":
+                    event_period = fetch_event_period(clean_api_key, content_id)
+                    time.sleep(0.3)
+                    if event_period and event_period["end"] < datetime.now(KST).strftime("%Y-%m-%d"):
+                        continue
+
                 spot_id = new_spot_id()
 
                 new_spot = {
@@ -262,7 +274,8 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                     "source": {
                         "type": "tourapi",
                         "url": f"https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid={content_id}",
-                        "note": f"TourAPI 4.0 {ctype_name}"
+                        "note": f"TourAPI 4.0 {ctype_name}",
+                        **({"event": event_period} if event_period else {}),
                     },
                     "verified": True,
                     "is_closed": False,
