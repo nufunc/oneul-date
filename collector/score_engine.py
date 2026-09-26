@@ -8,7 +8,22 @@
 
 from __future__ import annotations
 
+import re
 from datetime import datetime, timezone
+
+
+def _recency_bonus(published_text: str) -> float:
+    """유튜브 게시 시점 문구('3일 전', '2주 전', '1개월 전')로 최신성 가산점을 준다.
+    조회수만 보면 몇 년 된 영상과 이번 주 화제 영상이 같은 점수라 '지금 뜨는 곳'이 드러나지 않았다(2026-09-26)."""
+    text = published_text or ""
+    if re.search(r'\d+\s*(초|분|시간|일|주)\s*전', text):
+        return 10.0
+    m = re.search(r'(\d+)\s*개월\s*전', text)
+    if m:
+        months = int(m.group(1))
+        return 10.0 if months <= 1 else 5.0 if months <= 3 else 0.0
+    return 0.0
+
 
 def calculate_hot_score(youtube_data: dict | None, kakaomap_data: dict | None, is_verified: bool = False) -> tuple[float, dict, dict]:
     """
@@ -47,6 +62,7 @@ def calculate_hot_score(youtube_data: dict | None, kakaomap_data: dict | None, i
             
         if is_shorts:
             yt_score = min(45.0, yt_score + 5.0) # 쇼츠 보너스
+        yt_score += _recency_bonus(youtube_data.get("published_at", ""))
     else:
         yt_score = 15.0 # 기본값
         

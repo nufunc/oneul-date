@@ -111,7 +111,10 @@ def run_social_enrichment(supabase_url: str, service_key: str, batch_size: int =
             # 있었다(oneul-date-95734 실측: 활성 2,426건 중 983건이
             # total_video_views=0인데 실제로는 유튜브 링크가 있음). 이번
             # 조회가 실패했으면 이전에 저장된 값으로 대체해 재계산한다.
-            effective_yt_data = yt_data if yt_data else existing_social.get("youtube")
+            # 새로 찾은 영상과 저장된 영상(수집기가 넣은 원본 영상 포함) 가운데 조회수가 큰 쪽을 쓴다.
+            # 종전에는 검색 결과가 있으면 무조건 덮어써, 5만 뷰 원본 영상이 1천 뷰 검색 영상으로 바뀌기도 했다
+            candidates = [v for v in (yt_data, existing_social.get("youtube")) if isinstance(v, dict) and v.get("url")]
+            effective_yt_data = max(candidates, key=lambda v: v.get("views") or 0) if candidates else None
 
             # 3. 종합 스코어 및 JSONB 조립 (기존 인스타/블로그 등 social_links 보존)
             hot_score, new_social, metrics = calculate_hot_score(effective_yt_data, kakao_data, is_verified)

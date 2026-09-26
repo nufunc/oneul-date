@@ -132,7 +132,7 @@ def clean_keyword(name: str, location: str = "", address: str = "", region: str 
         return f"{clean} {area_hint}".strip()
     return clean
 
-def search_naver(query: str):
+def search_naver(query: str, limit: int = 3):
     # 1. 네이버 지도 검색 시도
     url = f"https://map.naver.com/p/api/search/allSearch?query={urllib.parse.quote(query)}&type=all&searchCoord=127.0276197;37.497942&boundary="
     req = urllib.request.Request(url, headers=HEADERS)
@@ -176,9 +176,9 @@ def search_naver(query: str):
                                 "x": d.get("x"),
                                 "y": d.get("y"),
                             }
-                            for d in docs[:3]
+                            for d in docs[:limit]
                         ]
-                        imgs = {p["id"]: p["thumUrl"] for p in (_search_kakao_unofficial(query) or []) if p.get("id")}
+                        imgs = {p["id"]: p["thumUrl"] for p in (_search_kakao_unofficial(query, limit) or []) if p.get("id")}
                         for p in official:
                             p["thumUrl"] = imgs.get(p["id"]) or None
                         return official
@@ -186,10 +186,10 @@ def search_naver(query: str):
             pass
 
     # 3. 카카오맵 비공식 실시간 검색 폴백 (공식 API도 못 찾을 때의 마지막 수단)
-    return _search_kakao_unofficial(query)
+    return _search_kakao_unofficial(query, limit)
 
 
-def _search_kakao_unofficial(query: str):
+def _search_kakao_unofficial(query: str, limit: int = 3):
     """카카오맵 비공식 검색. 공식 API가 주지 않는 이미지의 유일한 출처이기도 하다.
     confirmid는 공식 API의 장소 id와 같은 값이다(2026-09-26 확인: '카페루시아 본점' 1666998566)."""
     try:
@@ -201,7 +201,7 @@ def _search_kakao_unofficial(query: str):
                 k_places = k_data.get("place", [])
                 if k_places:
                     converted = []
-                    for kp in k_places[:3]:
+                    for kp in k_places[:limit]:
                         converted.append({
                             "id": str(kp.get("confirmid") or "") or None,
                             "provider": "kakao",

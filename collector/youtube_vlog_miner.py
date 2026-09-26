@@ -42,6 +42,7 @@ from supabase_worker import (search_naver, calculate_quality_score, load_env,
                              derive_region_area, is_zone_street_spot, find_duplicate_spot,
                              sanitize_spot, new_spot_id, is_polluted_header_name,
                              provider_ids_of)
+from score_engine import calculate_hot_score
 from category_filter import (
     is_date_spot_category,
     SLOT_STAY_CAT_RE,
@@ -1660,8 +1661,8 @@ def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
                     "is_shorts": False
                 }
             },
-            # 조회수 5만 이상 또는 좋아요 2,500개 이상 시 실시간 초인기 핫플(hot_score=85) 판정
-            "hot_score": (85.0 if (vinfo.get("views", 0) >= 50000 or vinfo.get("likes", 0) >= 2500) else 75.0) if (vinfo.get("views") or vinfo.get("likes")) else 60.0,
+            # enrich 5단계와 같은 식으로 계산한다. 따로 정한 85·75는 enrich가 곧 덮어써 의미가 없었다
+            "hot_score": calculate_hot_score({"url": vinfo["url"], "title": vinfo["title"], "views": vinfo["views"]}, None, True)[0],
             "quality_score": 90
         }
 
@@ -1823,8 +1824,14 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
     per_kw_cap = max(3, -(-pool_target // len(SEARCH_KEYWORDS)))
     per_kw_scan = 20  # 검색 결과 상위 N개까지 훑어 이력에 없는 것을 고른다
 
-    # 쿼리 풀 랜덤 셔플
-    shuffled_kws = list(SEARCH_KEYWORDS)
+    # 쿼리 풀 랜덤 셔플. 고정 40개만 돌면 같은 상위 영상이 반복되고 해외·쇼츠가 섞여(09-16~17: 488개 중 165개 낭비)
+    # blog·discovery가 쓰는 지역 동적 쿼리 10개를 브이로그 형태로 섞는다. 검증 경로는 그대로라 정확도는 같다
+    try:
+        from area_seeds import generate_dynamic_queries
+        dynamic_kws = [f"{q} 브이로그" for q, _, _, _ in generate_dynamic_queries(count=10)]
+    except Exception:
+        dynamic_kws = []
+    shuffled_kws = list(SEARCH_KEYWORDS) + dynamic_kws
     random.shuffle(shuffled_kws)
 
     for kw in shuffled_kws:
