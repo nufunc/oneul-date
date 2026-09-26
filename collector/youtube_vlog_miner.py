@@ -40,7 +40,8 @@ if hasattr(sys.stdout, 'reconfigure'):
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from supabase_worker import (search_naver, calculate_quality_score, load_env,
                              derive_region_area, is_zone_street_spot, find_duplicate_spot,
-                             sanitize_spot, new_spot_id, is_polluted_header_name)
+                             sanitize_spot, new_spot_id, is_polluted_header_name,
+                             provider_ids_of)
 from category_filter import (
     is_date_spot_category,
     SLOT_STAY_CAT_RE,
@@ -1618,7 +1619,7 @@ def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
 
         # 중복 검사 (이름 + 정규화 주소, 읽기 전용)
         if supabase_url and supabase_key:
-            if find_duplicate_spot(supabase_url, headers, official_name, road_addr):
+            if find_duplicate_spot(supabase_url, headers, official_name, road_addr, provider_ids_of(top)):
                 stats["duplicated"] += 1
                 if verbose:
                     print(f"    ⏩ [이미 존재하는 스팟 건너뜀] {official_name}")
@@ -1644,6 +1645,7 @@ def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
             "lat": lat,
             "lng": lng,
             "verified": True,
+            "provider_ids": provider_ids_of(top),
             "source": {
                 "type": "youtube_vlog",
                 "url": vinfo["url"],
