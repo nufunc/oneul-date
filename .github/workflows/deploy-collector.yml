@@ -58,8 +58,9 @@ jobs:
             git reset --hard origin/main
 
             echo "🔨 Rebuilding containers..."
-            $COMPOSE_CMD down
-            $COMPOSE_CMD up -d --build
+            # 먼저 빌드한다. 종전처럼 down부터 하면 빌드가 실패했을 때 수집기와 브리핑이 모두 멈춘 채 남는다(2026-09-26)
+            $COMPOSE_CMD build
+            $COMPOSE_CMD up -d --remove-orphans
 
             echo "🧹 Cleaning unused images..."
             docker image prune -f
