@@ -248,14 +248,8 @@ def generate_spot_metadata_rule_based(raw_name: str, cat: str, region: str, area
     mood = default_moods or ["romantic", "trendy"]
     clean_cat = cat.split(">")[-1].strip() if ">" in cat else (cat or "데이트 명소")
     summary = f"{area}의 분위기 좋은 감성 {clean_cat} 데이트 코스"
-    if any(k in cat for k in ["오마카세", "파인다이닝", "호텔", "스테이크", "코스"]):
-        price = "5만원이상"
-    elif any(k in cat for k in ["와인", "칵테일", "다이닝", "이자카야", "바(bar)", "비스트로", "펍"]):
-        price = "3~5만원대"
-    elif any(k in cat for k in ["카페", "베이커리", "디저트", "찻집", "분식", "도넛"]):
-        price = "1~2만원대"
-    else:
-        price = "2~3만원대"
+    # 업종으로 가격대를 지어내지 않는다. 고정 문자열이 avg_price_per_person·price_tier로 파생돼 틀린 가격이 보였다(2026-09-27)
+    price = None
     return {"slot": slot, "mood": mood, "summary": summary, "price": price}
 
 def get_max_spot_id(supabase_url: str, headers: dict) -> int:
