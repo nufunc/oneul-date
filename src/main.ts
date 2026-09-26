@@ -1244,6 +1244,13 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
     return text;
   };
 
+  // '비 오는 날'처럼 띄어 쓴 표기가 공백을 빼면 사전 항목과 정확히 같으면 붙여 쓴 검색어로 판정한다(결과를 똑같이 맞춤).
+  // 포함이 아니라 완전 일치라 '성수 비오는날'처럼 다른 단어가 섞인 검색어는 새지 않는다
+  if (/\s/.test(cleanQ)) {
+    const compactKey = cleanQ.replace(/\s+/g, '');
+    if (compactKey in NATURAL_CONTEXT_MAP) return matchesSearchQuery(spot, compactKey);
+  }
+
   // '한우맛집', '오션뷰카페'처럼 수식어와 업종을 붙여 친 검색어는 동의어 루프보다 먼저 '수식어 AND 업종'으로 본다.
   // 루프가 '맛집'만 보고 통과시켜 수식어가 무시됐다. 검색어나 수식어가 사전 항목('디저트카페', '비오는날')이면 사전에 맡긴다
   const bizMod = cleanQ.match(BIZ_SUFFIX);
