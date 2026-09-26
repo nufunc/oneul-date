@@ -4311,13 +4311,10 @@ function isSuperHotSpot(spot: Spot): boolean {
   const badges = spot.curation_badges;
   const isMichelin = !!badges?.michelin || (Array.isArray(badges) && badges.includes('michelin'));
   const isBlueRibbon = !!badges?.blue_ribbon || (Array.isArray(badges) && badges.includes('blue_ribbon'));
-  const isCatchtable = spot.source?.type === 'catchtable_miner' || 
-    spot.source?.url?.includes('catchtable') || !!badges?.catchtable ||
-    (Array.isArray(badges) && badges.includes('catchtable'));
-
+  // 캐치테이블에서 왔다는 것만으로 85점(🔥)을 주던 조건은 뺐다. 그 행의 40%가 폐업이었고(2026-09-26 콜렉터 감사),
+  // 화제성과 무관한 출처 표시라 🔥가 실제 화제성을 뜻하지 않게 됐다
   if (isMichelin) curationScore = 100;
   else if (isBlueRibbon) curationScore = 90;
-  else if (isCatchtable && (spot.verified || (spot.hot_score || 0) >= 60)) curationScore = 85;
 
   // 3. 🗺️ 지도 평점 채널 점수 (0~100)
   let mapScore = 0;
