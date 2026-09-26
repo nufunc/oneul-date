@@ -194,7 +194,8 @@ def heal_category_and_slot(spot: Dict[str, Any]) -> Tuple[str, str]:
     if cat in POLLUTED_CATEGORIES:
         cat = None
         
-    text = ' '.join([str(spot.get(k, '')) for k in ['name', 'summary', 'location', 'area', 'address']]).lower()
+    # 주소까지 붙이면 도로명이 카테고리를 정한다('고기로' 주소 → 한식·미식, '광안해변로' 카페 → 자연·산책)
+    text = ' '.join([str(spot.get(k, '')) for k in ['name', 'summary']]).lower()
     
     # 1. 키워드 기반 정밀 매칭
     if not cat:
