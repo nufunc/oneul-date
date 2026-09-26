@@ -14,6 +14,7 @@ import urllib.parse
 import urllib.error
 import time
 import re
+import unicodedata
 from datetime import datetime, timezone, timedelta
 try:
     from fix_spot_summaries import is_bad_summary, generate_curated_summary
@@ -169,7 +170,9 @@ def search_naver(query: str):
                                 "name": d.get("place_name"),
                                 "roadAddress": d.get("road_address_name") or d.get("address_name"),
                                 "thumUrl": None,
-                                "category": d.get("category_name"),
+                                # 공식 API는 '음식점 > 카페'처럼 전체 경로를 준다. 기존 데이터와 비공식 경로처럼 마지막 단계만 쓴다.
+                                # 전체 경로로 넣으면 POLLUTED_CATEGORIES·프론트의 완전 일치 규칙이 빗나간다
+                                "category": (d.get("category_name") or "").split(">")[-1].strip() or None,
                                 "x": d.get("x"),
                                 "y": d.get("y"),
                             }
@@ -504,55 +507,79 @@ def normalize_spot_address(address):
     return "".join(tokens)
 
 
-def find_duplicate_spot(supabase_url, headers, name, address=""):
-    """상호명(+주소)으로 DB에 이미 있는 스팟인지 확인한다.
+def normalize_spot_name(name):
+    """이름 비교용 정규화: NFKC·소문자, 한글·영문·숫자만 남기고 끝의 '본점'·'점'을 한 번 뗀다.
+    '동궁과 월지'/'동궁과월지', '카페루시아'/'카페루시아 본점'이 같은 값이 된다(2026-09-26 열린 중복 70그룹 표본 전부 같은 가게)."""
+    n = re.sub(r'[^0-9a-z가-힣]', '', unicodedata.normalize('NFKC', name or '').lower())
+    stripped = re.sub(r'(본점|점)$', '', n)
+    return stripped if len(stripped) >= 2 else n
 
-    이름은 원형과 괄호 제거본 둘 다로 조회하고, 주소가 주어지면
-    normalize_spot_address로 건물명/층 꼬리를 제거한 뒤 비교해 같은 곳을
-    가리키는 표기 차이(건물명 유무 등)를 흡수한다. 주소가 없으면 이름
-    일치만으로 중복 처리한다(과거 마이너들의 동작과 동일).
-    이름이 같아도 주소가 명백히 다르면(동명 다른 지점) 중복으로 보지 않는다.
-    조회 자체가 실패하면 수집 파이프라인을 막지 않기 위해 중복 아님으로 간주한다.
+
+def provider_ids_of(place):
+    """지도 검색 결과 한 건에서 {provider: 장소 번호}를 만든다. 번호가 없으면 빈 dict."""
+    pid = (place or {}).get("id") or (place or {}).get("placeId")
+    return {((place or {}).get("provider") or "naver"): str(pid)} if pid else {}
+
+
+def _get_rows(url, headers):
+    req = urllib.request.Request(url, headers=headers)
+    with urllib.request.urlopen(req, timeout=5) as res:
+        return json.loads(res.read().decode('utf-8'))
+
+
+def find_duplicate_spot(supabase_url, headers, name, address="", provider_ids=None):
+    """DB에 이미 있는 스팟인지 확인한다. 닫힌 행도 본다(폐업·병합한 곳이 다시 들어오지 않게).
+
+    1. provider_ids(지도 장소 번호)가 같은 행이 있으면 중복이다.
+    2. 이름이 원형이나 괄호 제거본과 정확히 같은 행을 찾고, 주소가 주어지면 normalize_spot_address로 비교한다.
+       기존 행의 주소가 비어 있으면 같은 곳일 수 있으므로 중복으로 본다.
+    3. 표기만 다른 이름(공백·부호·끝의 '점/본점')은 normalize_spot_name이 같고 정규화 주소도 같을 때만 중복이다.
+       주소 없이 정규화 이름만으로 막지 않는다(체인점 오판 방지).
+    새 후보의 주소가 없으면 정확한 이름 일치만으로 중복 처리한다(과거 마이너들의 동작과 동일).
+    조회가 실패하면 중복일 수 있으니 건너뛴다(fail-closed): 데이터 오염이 놓친 발굴 1건보다 비용이 크다.
     """
     if not name:
         return False
     clean_name = re.sub(r'\(.*?\)|\[.*?\]', '', name).strip()
     if not clean_name:
         return False
-    # PostgREST의 or=(...) 문법은 콤마로 조건을 구분하고 괄호로 그룹을
-    # 묶는다. 값 자체에 괄호·콤마가 있으면(예: "경화장 (3, 8일)") 큰따옴표로
-    # 감싸지 않는 한 문법이 깨져 400을 반환한다(2026-09-23 확인: 라이브
-    # tourapi 크로스런 재삽입 82그룹 중 79그룹이 이 패턴). 값을 큰따옴표로
-    # 감싸 PostgREST의 예약 문자 이스케이프 규칙을 따른다.
-    def _quoted(v: str) -> str:
-        # 이름 안에 "나 \가 있으면 그 자체로 따옴표를 깨뜨리니 이스케이프한다
-        # (2026-09-23 예방 조치 — 현재 해당하는 이름은 0건으로 확인했다).
-        escaped = v.replace('\\', '\\\\').replace('"', '\\"')
-        return urllib.parse.quote(f'"{escaped}"')
-    encoded = _quoted(name)
-    encoded_clean = _quoted(clean_name)
-    names_clause = f"name.eq.{encoded}" if encoded == encoded_clean else f"name.eq.{encoded},name.eq.{encoded_clean}"
-    url = f"{supabase_url}/rest/v1/spots?select=id,name,address&or=({names_clause})&limit=20"
-    req = urllib.request.Request(url, headers=headers)
+    base = f"{supabase_url}/rest/v1/spots?select=id,name,address&order=id.asc"
+    target_addr = normalize_spot_address(address) if address else ""
+
     try:
-        with urllib.request.urlopen(req, timeout=5) as res:
-            rows = json.loads(res.read().decode('utf-8'))
+        for provider, pid in (provider_ids or {}).items():
+            if pid and _get_rows(f"{base}&provider_ids->>{provider}=eq.{urllib.parse.quote(str(pid))}&limit=1", headers):
+                return True
+
+        # PostgREST의 or=(...) 문법은 콤마로 조건을 구분하고 괄호로 그룹을 묶는다. 값에 괄호·콤마가 있으면
+        # (예: "경화장 (3, 8일)") 큰따옴표로 감싸야 400이 나지 않는다(2026-09-23, tourapi 재삽입 79그룹).
+        # 이름 안의 "와 \는 이스케이프한다. 따옴표는 or=(...) 안에서만 벗겨지고 단독 name=eq.에서는 벗겨지지 않는다
+        def _quoted(v: str) -> str:
+            escaped = v.replace('\\', '\\\\').replace('"', '\\"')
+            return urllib.parse.quote(f'"{escaped}"')
+        encoded, encoded_clean = _quoted(name), _quoted(clean_name)
+        names_clause = f"name.eq.{encoded}" if encoded == encoded_clean else f"name.eq.{encoded},name.eq.{encoded_clean}"
+        # limit=20에 정렬이 없어 동명 20행을 넘는 이름(최다 '올리오(Olio)' 42행)은 일부가 비교에서 빠졌다
+        rows = _get_rows(f"{base}&or=({names_clause})&limit=500", headers)
+        if rows:
+            if not target_addr:
+                return True
+            if any(not row.get("address") or normalize_spot_address(row["address"]) == target_addr for row in rows):
+                return True
+
+        if not target_addr:
+            return False
+        core = normalize_spot_name(clean_name)
+        if len(core) < 2:
+            return False
+        # 글자 사이에 *를 넣은 ilike로 공백·부호가 끼인 표기까지 넓게 받은 뒤, 정규화 이름과 주소로 좁힌다
+        pattern = "*" + "*".join(core) + "*"
+        loose = _get_rows(f"{base}&name=ilike.{urllib.parse.quote(pattern)}&limit=500", headers)
     except Exception:
-        # 조회 자체가 실패하면 예전에는 "중복 아님"으로 fail-open해 수집을
-        # 계속 진행시켰는데, 그게 바로 이 괄호/콤마 400 사례에서 재삽입을
-        # 계속 만들어냈다. 데이터 오염이 놓친 발굴 1건보다 비용이 크므로
-        # 실패 시 "중복일 수 있으니 건너뜀"으로 fail-closed 한다.
         return True
 
-    if not rows:
-        return False
-    if not address:
-        return True
-
-    target_addr = normalize_spot_address(address)
-    if not target_addr:
-        return True
-    return any(normalize_spot_address(row.get("address", "")) == target_addr for row in rows)
+    return any(normalize_spot_name(row.get("name")) == core
+               and normalize_spot_address(row.get("address") or "") == target_addr for row in loose)
 
 
 _CONTROL_CHAR_RE = re.compile(r'[\x00-\x1f\x7f]')

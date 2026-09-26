@@ -15,7 +15,7 @@ import random
 import re
 from supabase_worker import (
     load_env, search_naver, calculate_quality_score, is_polluted_header_name, derive_region_area,
-    find_duplicate_spot, sanitize_spot, new_spot_id, insert_spots)
+    find_duplicate_spot, sanitize_spot, new_spot_id, insert_spots, provider_ids_of)
 from category_filter import is_date_spot_category
 # efded74에서 이 import가 빠져 211행 infer_slot이 NameError를 냈고, 후보가 나와도 INSERT에 닿지 못했다(2026-09-26 확인: 전 기간 0행)
 from discovery_engine import infer_slot
@@ -200,7 +200,8 @@ def run_community_mining(supabase_url: str, service_key: str, max_discoveries: i
                 continue
 
             # DB 중복 검사 (이름 + 정규화 주소)
-            if find_duplicate_spot(supabase_url, api_headers, real_name, road_addr):
+            pids = provider_ids_of(top)
+            if find_duplicate_spot(supabase_url, api_headers, real_name, road_addr, pids):
                 continue
 
             batch_seen_names.add(real_name)
@@ -242,6 +243,7 @@ def run_community_mining(supabase_url: str, service_key: str, max_discoveries: i
                 "lng": x_coord,
                 "quality_score": 90,
                 "fail_count": 0,
+                "provider_ids": pids,
                 "source": {
                     "type": "community_miner",
                     "url": f"https://map.naver.com/p/search/{urllib.parse.quote(real_name)}",

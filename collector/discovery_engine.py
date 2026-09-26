@@ -16,7 +16,7 @@ import re
 
 from category_filter import is_date_spot_category
 from area_seeds import generate_dynamic_queries, get_coverage_gap_areas
-from supabase_worker import is_polluted_header_name, derive_region_area, find_duplicate_spot, sanitize_spot, new_spot_id, insert_spots
+from supabase_worker import is_polluted_header_name, derive_region_area, find_duplicate_spot, sanitize_spot, new_spot_id, insert_spots, provider_ids_of
 from fix_spot_summaries import generate_curated_summary
 from heal_and_verify_spots import is_dummy_or_closed_spot
 
@@ -347,7 +347,7 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
                 continue
 
             # 4. DB 중복 검사 (이름 + 정규화 주소)
-            if find_duplicate_spot(supabase_url, api_headers, raw_name, road_addr):
+            if find_duplicate_spot(supabase_url, api_headers, raw_name, road_addr, provider_ids_of(p)):
                 continue  # 이미 존재하는 스팟
 
             batch_seen_names.add(raw_name)
@@ -392,6 +392,7 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
                 "lng": x_coord,
                 "quality_score": 88,
                 "fail_count": 0,
+                "provider_ids": provider_ids_of(p),
                 "source": {"type": "auto_discovery", "url": f"https://map.naver.com/p/search/{urllib.parse.quote(raw_name)}", "note": "2026 autonomous AI discovery"},
                 "verified": True,
                 "is_closed": False
