@@ -1518,7 +1518,13 @@ function isBudgetSpot(spot: Spot): boolean {
 }
 
 /** 스페셜/파인다이닝 데이트에 적합한 스팟 판별 (오마카세, 파인다이닝, 와인바, 럭셔리) */
+/** 입장권·클래스·촬영 가격이 등급이 되는 비식음 업종. 식당 카테고리가 오염된 행이 많아 허용 목록이 아니라 제외 목록으로 둔다 */
+const NON_DINING_CATEGORY_RE = /테마파크|전망대|아쿠아리움|수족관|민속촌|고궁|궁궐|관광지|관광,명소|공방|클래스|체험|시장/;
+
 function isSpecialDiningSpot(spot: Spot): boolean {
+  // 스페셜은 '특별한 날의 다이닝'이라 테마파크·전망대 입장권 가격으로 들어오지 않게 한다(에버랜드·서울스카이 등 약 340곳)
+  if (NON_DINING_CATEGORY_RE.test(spot.category || '')) return false;
+
   // 1. 명시적 가격 티어 (₩₩₩ 또는 ₩₩₩₩)
   if (spot.price_tier === '₩₩₩' || spot.price_tier === '₩₩₩₩') return true;
   if (spot.price_tier === 'FREE' || spot.price_tier === '₩') return false;
@@ -1543,8 +1549,8 @@ function isSpecialDiningSpot(spot: Spot): boolean {
   // 분위기 태그 'luxury'는 수집 때 요약문 템플릿과 함께 자동으로 붙은 값이라(공원·국밥집에도 있음) 근거로 쓰지 않는다.
   // 가격 템플릿을 비운 뒤 이 분기만으로 스페셜에 든 곳이 약 590곳이었다(2026-09-27)
 
-  // 4. 키워드 검사
-  const text = `${spot.name} ${spot.category || ''} ${spot.summary || ''} ${(spot.signature_items || []).join(' ')}`.toLowerCase();
+  // 4. 키워드 검사. 요약문은 템플릿 표현('위스키', '기념일')이 섞여 선녀바위 같은 관광지가 통과해 뺀다
+  const text = `${spot.name} ${spot.category || ''} ${(spot.signature_items || []).join(' ')}`.toLowerCase();
   const LUXURY_KEYWORDS = [
     '오마카세', '파인다이닝', '코스요리', '미쉐린', '미슐랭', '호텔', '스테이크', '와인바',
     '위스키', '기념일', '비스트로', '샴페인', '스카이라운지', '한우코스', '캐비어', '트러플'
