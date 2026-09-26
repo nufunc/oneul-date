@@ -9,3 +9,4 @@ tests/
 logs/
 pb_data/
 .tourapi_checkpoint.json
+data/
