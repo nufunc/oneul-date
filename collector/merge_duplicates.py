@@ -196,11 +196,13 @@ def main():
     ap.add_argument("--apply", action="store_true", help="실제로 DB에 쓴다(기본은 드라이런)")
     ap.add_argument("--backup-dir", default=os.path.expanduser("~/oneul-backups"))
     ap.add_argument("--report", help="드라이런 결과(병합 그룹·검토 목록)를 JSON으로 저장할 경로")
+    ap.add_argument("--include-address-differs", action="store_true", help="주소가 다른 같은 좌표 그룹도 병합한다(기본은 건너뜀)")
     args = ap.parse_args()
-    return run_merge(apply=args.apply, backup_dir=args.backup_dir, report_path=args.report)
+    return run_merge(apply=args.apply, backup_dir=args.backup_dir, report_path=args.report,
+                     skip_address_differs=not args.include_address_differs)
 
 
-def run_merge(apply=False, backup_dir=None, report_path=None, log=print):
+def run_merge(apply=False, backup_dir=None, report_path=None, log=print, skip_address_differs=True):
     env = load_env()
     base_url = (os.getenv("SUPABASE_URL") or env.get("SUPABASE_URL") or "").rstrip("/")
     key = os.getenv("SUPABASE_SERVICE_KEY") or env.get("SUPABASE_SERVICE_KEY") or env.get("VITE_SUPABASE_ANON_KEY") or ""  # main.py와 같은 순서
@@ -216,14 +218,19 @@ def run_merge(apply=False, backup_dir=None, report_path=None, log=print):
     plans = [plan_merge(g) for g in groups]
     in_groups = {r["id"] for g in groups for r in g}
     coord_groups = find_samecoord_groups(rows, in_groups)
+    # 주소가 다른 좌표 그룹은 좌표가 이름 검색으로 한쪽에 붙었을 수 있고, 남길 최소 id의 주소가 틀린 쪽일 수 있다.
+    # 근거로 남길 행을 고르기 전까지 기본은 건너뛴다(2026-09-27 호스트 검토: 피커스 클라이밍 구로점, 에이트 등)
+    differs = lambda g: len({normalize_spot_address(r.get("address") or "") for r in g}) > 1
+    skipped_addr = [g for g in coord_groups if differs(g)] if skip_address_differs else []
+    coord_groups = [g for g in coord_groups if not (skip_address_differs and differs(g))]
     coord_plans = [plan_merge(g) for g in coord_groups]
     plans += coord_plans
     merged_ids = {d["id"] for _, dups, _ in plans for d in dups}
     review = find_review_pairs(rows, merged_ids)
-    addr_diff = sum(1 for g in coord_groups if len({normalize_spot_address(r.get("address") or "") for r in g}) > 1)
+    addr_diff = sum(1 for g in coord_groups if differs(g))
 
     log(f"열린 행 {len(rows)}개 · 자동 병합 {len(groups)}+{len(coord_groups)}그룹(정규화 이름·주소 + 같은 좌표·핵심 이름, "
-        f"닫을 행 {len(merged_ids)}개, 좌표 그룹 중 주소 다름 {addr_diff}) · "
+        f"닫을 행 {len(merged_ids)}개, 좌표 그룹 중 주소 다름 {addr_diff}, 주소 달라 건너뜀 {len(skipped_addr)}) · "
         f"좌표가 {MAX_GROUP_DISTANCE_M}m 넘게 떨어져 제외 {len(skipped_far)}그룹 · 검토 목록 {len(review)}쌍")
     for keep, dups, fill in plans[:10]:
         log(f"  남김 {keep['id']} {keep['name']} | {keep.get('address')}")
@@ -241,6 +248,7 @@ def run_merge(apply=False, backup_dir=None, report_path=None, log=print):
                                   "rows": [{x: r.get(x) for x in ("id", "name", "address", "lat", "lng", "category")} for r in [k, *ds]]}
                                  for k, ds, fl in plans],
                 "skipped_far": [[r["id"] for r in g] for g in skipped_far],
+                "skipped_address_differs": [[{x: r.get(x) for x in ("id", "name", "address", "lat", "lng")} for r in g] for g in skipped_addr],
                 "review_pairs": [{"a": a["id"], "b": b["id"], "name": [a["name"], b["name"]],
                                   "address": [a.get("address"), b.get("address")], "distance_m": d} for a, b, d in review],
             }, f, ensure_ascii=False, indent=2)
