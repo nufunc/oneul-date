@@ -64,6 +64,17 @@ _CHECKPOINT_DIR = (os.path.dirname(os.environ["LOG_DIR"]) if os.environ.get("LOG
 CHECKPOINT_PATH = os.path.join(_CHECKPOINT_DIR, ".tourapi_checkpoint.json")
 
 
+def _cotid_exists(supabase_url, headers, content_id):
+    """같은 TourAPI 콘텐츠(cotid)로 만든 행이 이미 있는지 본다. 조회가 실패하면 find_duplicate_spot처럼 건너뛴다(fail-closed)"""
+    detail_url = f"https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid={content_id}"
+    url = f"{supabase_url}/rest/v1/spots?select=id&source->>url=eq.{urllib.parse.quote(detail_url, safe='')}&limit=1"
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=5) as res:
+            return bool(json.loads(res.read().decode("utf-8")))
+    except Exception:
+        return True
+
+
 def _load_checkpoint() -> dict:
     try:
         with open(CHECKPOINT_PATH, "r", encoding="utf-8") as f:
@@ -192,6 +203,12 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
 
                 is_valid, reason = is_date_spot_category(ctype_name, title, allow_lodging=True)
                 if not is_valid and "블랙리스트" in reason:
+                    continue
+
+                # 이름 확인보다 먼저 본다. 제목에 ' & ' 같은 표기가 있으면 run_worker의 [Auto-Healing]이 나중에
+                # 이름을 검색 1위 상호로 바꿔, 다음 수집 때 같은 제목으로는 기존 행을 못 찾고 다시 넣었다
+                # (농부마켓 & 농부밥상 → 농부밥상, 같은 cotid 행 3개. 2026-09-26 확인). 닫힌 행도 막는다
+                if _cotid_exists(supabase_url, api_headers, content_id):
                     continue
 
                 if find_duplicate_spot(supabase_url, api_headers, title, addr1):
