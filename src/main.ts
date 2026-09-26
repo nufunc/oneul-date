@@ -1119,10 +1119,16 @@ function searchRelevanceTier(spot: Spot, query: string): number {
   let q = query.replace(/[#·,/\\]/g, ' ').trim().toLowerCase();
   // '부산호텔'처럼 지역어로 시작하면 지역은 이미 걸러졌으므로 나머지('호텔')로 등급을 매긴다.
   // 그대로 두면 모두 최하 등급이 돼 동의어로만 걸린 식당이 호텔보다 앞에 섰다
-  const place = FAMOUS_AREAS.find((p) => q.startsWith(p) && q.length > p.length);
+  const place = SEARCH_PLACE_PREFIXES.find((p) => q.startsWith(p) && q.length > p.length);
   if (place && !(spot.name || '').toLowerCase().replace(/\s+/g, '').includes(q.replace(/\s+/g, ''))) {
     q = q.slice(place.length).trim();
+    const bare = q.replace(PLACE_SUFFIX, '').trim();
+    if (bare && bare !== q) return Math.min(relevanceTierFor(spot, q), relevanceTierFor(spot, bare));
   }
+  return relevanceTierFor(spot, q);
+}
+
+function relevanceTierFor(spot: Spot, q: string): number {
   const name = (spot.name || '').toLowerCase();
   const compactQ = q.replace(/\s+/g, '');
   const compactName = name.replace(/\s+/g, '');
@@ -1143,10 +1149,20 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
 
   // 지역어로 시작하는 검색어('부산호텔', '강남 와인')는 지역과 나머지를 AND로 묶는다. 동의어 사전이 '호텔'·'와인'만
   // 보고 곧바로 통과시켜 지역이 무시됐고, '성수카페'처럼 사전 밖 조합은 한 덩어리라 0건이었다
-  const place = FAMOUS_AREAS.find((p) => cleanQ.startsWith(p) && cleanQ.length > p.length);
+  const place = SEARCH_PLACE_PREFIXES.find((p) => cleanQ.startsWith(p) && cleanQ.length > p.length);
   if (place) {
     const rest = cleanQ.slice(place.length).trim();
-    if (rest && spotMatchesPlace(spot, place)) return matchesSearchQuery(spot, rest);
+    // 인기 동네에서 가져온 이름('문래', '연남')은 권역 전체(영등포·여의도, 마포구)로 넓히지 않고 주소·이름에 있을 때만 본다
+    const inPlace = FAMOUS_AREAS.includes(place)
+      ? spotMatchesPlace(spot, place)
+      : [spot.location, spot.area, spot.address, spot.name].join(' ').toLowerCase().includes(place);
+    if (rest && inPlace) {
+      if (matchesSearchQuery(spot, rest)) return true;
+      // '성수동카페', '서면역카페', '홍대입구 카페'처럼 지역어에 붙은 동·역·입구·시를 떼고 한 번 더 본다.
+      // 떼기 전에 먼저 보므로 '대전동물원'은 '물원'으로 잘리지 않는다
+      const bare = rest.replace(PLACE_SUFFIX, '').trim();
+      return Boolean(bare) && bare !== rest && matchesSearchQuery(spot, bare);
+    }
     if (rest) return false;
   }
 
@@ -1691,6 +1707,12 @@ const FAMOUS_AREAS = [
   '가평', '양평', '파주', '수원', '용인', '화성', '안성', '이천', '하남', '남양주',
   '김포', '광명', '안양', '부천', '인천', '대전', '대구', '부산', '울산', '광주',
 ];
+/** 검색어 앞의 지역어 후보. 인기 동네 이름('연남', '문래', '을지로' 등)도 넣고, '서귀포'가 '서'보다 먼저 걸리게 긴 것부터 본다 */
+const SEARCH_PLACE_PREFIXES = [
+  ...new Set([...FAMOUS_AREAS, ...POPULAR_ZONES.flatMap((z) => z.label.split(/[·\s]/)).filter((p) => p.length >= 2)]),
+].sort((a, b) => b.length - a.length);
+/** 지역어 바로 뒤에 붙는 행정·교통 접미사 */
+const PLACE_SUFFIX = /^(입구역|입구|역|동|시|구|읍|면)\s*/;
 
 /**
  * 네이버 지도 검색어 고도화 정제.
