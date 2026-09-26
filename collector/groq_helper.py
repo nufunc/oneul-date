@@ -26,7 +26,9 @@ import urllib.error
 
 GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions"
 DEFAULT_MODEL = "groq/compound-mini"  # 초고속 최신 모델 (30 RPM, 0.2초 초고속 레이턴시)
-CACHE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".groq_cache.json")
+# 재배포 뒤에도 캐시가 남아 같은 요청으로 할당량을 다시 쓰지 않게 볼륨(LOG_DIR의 상위)에 둔다
+CACHE_FILE = os.path.join(os.path.dirname(os.environ["LOG_DIR"]) if os.environ.get("LOG_DIR")
+                          else os.path.dirname(os.path.abspath(__file__)), ".groq_cache.json")
 
 # 인메모리 레이트리미트 및 429 쿨다운 상태 관리
 _last_request_time = 0.0
@@ -124,6 +126,7 @@ def call_groq_json(prompt: str, system_prompt: str = "", model: str = None, max_
     ctx = ssl.create_default_context()
 
     # 2. 멀티 모델 순차 시도 (1순위 실패 시 2순위로 즉시 무중단 전환)
+    rate_limited = 0
     for target_model in models_to_try:
         # 레이트 리미트 방어 (최소 1.5초 간격)
         now = time.time()
@@ -175,10 +178,15 @@ def call_groq_json(prompt: str, system_prompt: str = "", model: str = None, max_
         except urllib.error.HTTPError as e:
             if e.code == 429:
                 # 429 시 다음 모델로 즉시 폴백 시도
+                rate_limited += 1
                 continue
         except Exception:
             continue
 
+    # Groq 한도는 모델별이라 한 모델의 429는 다음 모델로 넘기고, 모든 모델이 429일 때만 10분 쉰다.
+    # 종전에는 쿨다운 값을 넣는 곳이 없어 한도가 찬 뒤에도 매 호출마다 전 모델을 두드렸다(브리핑과 같은 키를 쓴다)
+    if rate_limited == len(models_to_try):
+        _cooldown_until = time.time() + 600
     return None
 
     return None

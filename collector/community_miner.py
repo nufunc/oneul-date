@@ -17,6 +17,8 @@ from supabase_worker import (
     load_env, search_naver, calculate_quality_score, is_polluted_header_name, derive_region_area,
     find_duplicate_spot, sanitize_spot, new_spot_id, insert_spots)
 from category_filter import is_date_spot_category
+# efded74에서 이 import가 빠져 211행 infer_slot이 NameError를 냈고, 후보가 나와도 INSERT에 닿지 못했다(2026-09-26 확인: 전 기간 0행)
+from discovery_engine import infer_slot
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -184,6 +186,11 @@ def run_community_mining(supabase_url: str, service_key: str, max_discoveries: i
                 continue
 
             if not real_name or not road_addr:
+                continue
+
+            # ' & '·'명소' 같은 헤더형 이름은 run_worker가 나중에 다른 상호로 바꿔, 같은 원문이 다시 들어올 때
+            # 이름 조회가 빗나가 재삽입된다(TourAPI 농부밥상 사례). blog_miner처럼 넣기 전에 거른다
+            if is_polluted_header_name(real_name):
                 continue
 
             # find_duplicate_spot는 이번 배치가 아직 INSERT하지 않은 자기

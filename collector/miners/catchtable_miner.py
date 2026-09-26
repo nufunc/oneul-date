@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from supabase_worker import load_env, search_naver, calculate_quality_score, derive_region_area, find_duplicate_spot, sanitize_spot, new_spot_id, insert_spots
+from supabase_worker import load_env, search_naver, calculate_quality_score, derive_region_area, find_duplicate_spot, sanitize_spot, new_spot_id, insert_spots, is_polluted_header_name
 from category_filter import is_date_spot_category
 
 # 캐치테이블 / 블루리본 큐레이션 마이닝 쿼리 풀 (전국 8개 권역 × 미식 테마 60개+)
@@ -138,9 +138,11 @@ def extract_gourmet_candidates_from_web(query_text: str) -> list[str]:
     if extract_spots_from_unstructured_text and text_corpus and len(candidates) < 3:
         try:
             ai_candidates = extract_spots_from_unstructured_text(text_corpus[:3000], query_text)
+            # extract_spots_from_unstructured_text는 {"name": ...} dict 목록을 돌려준다. 종전에는 str만 받아 전부 버렸다
             for ac in ai_candidates:
-                if isinstance(ac, str) and 2 <= len(ac) <= 15:
-                    candidates.append(ac.strip())
+                name = str(ac.get("name") or "").strip() if isinstance(ac, dict) else ""
+                if 2 <= len(name) <= 15:
+                    candidates.append(name)
         except Exception:
             pass
 
@@ -153,6 +155,9 @@ def extract_gourmet_candidates_from_web(query_text: str) -> list[str]:
             unique_candidates.append(c)
 
     return unique_candidates[:15]
+
+from youtube_vlog_miner import is_name_match
+
 
 def run_catchtable_mining(supabase_url: str, service_key: str, max_discoveries: int = 60) -> int:
     """캐치테이블 & 블루리본 미식 큐레이션 마이닝 실행"""
@@ -214,7 +219,18 @@ def run_catchtable_mining(supabase_url: str, service_key: str, max_discoveries: 
             y_coord = top.get("y")
             place_id = str(top.get("id") or "")
 
-            if not real_name:
+            # 주소가 없으면 find_duplicate_spot이 이름만으로 판정하고, 이름 대조·권역 검사가 없으면 쿼리와 무관한
+            # 검색 1위가 들어갔다(2026-09-26 실측: 대구 동성로 쿼리에 서울 홍초불닭 장충동점, 7일 적재분 폐업 40%)
+            if not real_name or not road_addr or not category:
+                continue
+            if is_polluted_header_name(real_name):
+                continue
+            if not is_name_match(cand_name, real_name):
+                continue
+            derived_region, derived_area = derive_region_area(road_addr)
+            # 쿼리 권역은 '부산'·'대구'처럼 시도명이고 derive_region_area는 영남 권역을 '영남' 하나로 돌려준다
+            target_region = "영남" if default_region in ("부산", "대구", "울산", "경북", "경남") else default_region
+            if derived_region and target_region not in ("전국", "전체") and derived_region != target_region:
                 continue
 
             # find_duplicate_spot는 이번 배치가 아직 INSERT하지 않은 자기
@@ -236,7 +252,6 @@ def run_catchtable_mining(supabase_url: str, service_key: str, max_discoveries: 
 
             batch_seen_names.add(real_name)
 
-            derived_region, derived_area = derive_region_area(road_addr)
             region = derived_region or default_region
             area = derived_area or default_area
 
@@ -260,7 +275,7 @@ def run_catchtable_mining(supabase_url: str, service_key: str, max_discoveries: 
                 # "1인 ₩₩₩ 코스/단품"이 붙어 화면에 그대로 나갔다(2026-09-24). 등급은 source.price_tier에만 남긴다
                 "price": None,
                 "summary": f"{real_name} — 캐치테이블 인기 예약 {'블루리본 인증 ' if is_blueribbon else ''}데이트 명소 ({area})",
-                "category": category or "와인바/다이닝",
+                "category": category,
                 "image_url": thum,
                 "lat": y_coord,  # 숫자 변환과 범위 검증은 sanitize_spot이 맡는다
                 "lng": x_coord,

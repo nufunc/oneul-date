@@ -40,7 +40,7 @@ if hasattr(sys.stdout, 'reconfigure'):
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from supabase_worker import (search_naver, calculate_quality_score, load_env,
                              derive_region_area, is_zone_street_spot, find_duplicate_spot,
-                             sanitize_spot, new_spot_id)
+                             sanitize_spot, new_spot_id, is_polluted_header_name)
 from category_filter import (
     is_date_spot_category,
     SLOT_STAY_CAT_RE,
@@ -127,8 +127,11 @@ INNERTUBE_CLIENTS = [
 INNERTUBE_NEXT_URL = ("https://www.youtube.com/youtubei/v1/next"
                       "?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8&prettyPrint=false")
 
-# 처리 이력 (매 사이클 같은 영상 재처리 방지)
-HISTORY_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".processed_videos.json")
+# 처리 이력 (매 사이클 같은 영상 재처리 방지).
+# 컨테이너 안(/app)에 두면 재배포마다 사라지므로 TourAPI 체크포인트처럼 LOG_DIR(/mnt/data/logs)의 볼륨에 둔다
+_STATE_DIR = (os.path.dirname(os.environ["LOG_DIR"]) if os.environ.get("LOG_DIR")
+              else os.path.dirname(os.path.abspath(__file__)))
+HISTORY_PATH = os.path.join(_STATE_DIR, ".processed_videos.json")
 HISTORY_MAX = 2000
 
 # ─────────────────────────────────────────────────────────────
@@ -175,7 +178,7 @@ INITIAL_VERIFIED_CHANNELS = [
     {"name": "강지영의 동그라미", "handle": "@jiyoung_circle", "category": "vlog_date_hotplace"},
 ]
 
-VERIFIED_CHANNELS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".verified_channels.json")
+VERIFIED_CHANNELS_PATH = os.path.join(_STATE_DIR, ".verified_channels.json")
 
 def load_verified_channels() -> dict:
     if os.path.exists(VERIFIED_CHANNELS_PATH):
@@ -1462,6 +1465,7 @@ def _new_stats() -> dict:
         "name_mismatch": 0,
         "category_rejected": 0,
         "duplicated": 0,
+        "polluted_name": 0,
         "insert_failed": 0,
         "registered": 0,
         "spots": [],
@@ -1603,6 +1607,11 @@ def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
             stats["region_underivable"] += 1
             if verbose:
                 print(f"    ⏩ '{cand}' → {official_name} — 주소에서 권역 도출 실패 ({road_addr[:24]})")
+            continue
+
+        # 헤더형 이름(' & '·'명소' 등)은 run_worker가 나중에 다른 상호로 바꿔 재삽입의 원인이 된다(TourAPI 농부밥상 사례)
+        if is_polluted_header_name(official_name):
+            stats["polluted_name"] += 1
             continue
 
         slot, moods = detect_slot_and_mood(category, official_name, extra_text=cand)
