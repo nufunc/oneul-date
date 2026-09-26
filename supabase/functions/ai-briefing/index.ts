@@ -82,9 +82,10 @@ const GROQ_TIMEOUT_MS = 3_000;
 
 /**
  * 모델이 분량 지시(1~2문장, 130자)를 자주 넘겨 카드가 커지며 코스가 밀린다. 줄바꿈을 합치고,
- * 넘치면 상한 안의 마지막 문장 끝에서 자른다. 문장 끝이 없으면 null(프론트는 로컬 문장을 유지)
+ * 넘치면 상한 안의 마지막 문장 끝에서 자른다. 상한은 로컬 문장(85~137자)에 맞춘다. 130자로 두면 첫 문장만 남아
+ * 카드가 오히려 줄며 코스가 당겨졌다. 문장 끝이 없으면 null(프론트는 로컬 문장을 유지)
  */
-const MAX_TEXT_LENGTH = 130;
+const MAX_TEXT_LENGTH = 150;
 
 function fitBriefingLength(text: string): string | null {
   const flat = text.replace(/\s*\n+\s*/g, ' ').replace(/\s{2,}/g, ' ').trim();
