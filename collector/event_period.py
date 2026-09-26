@@ -23,6 +23,7 @@ import urllib.request
 from datetime import datetime, timedelta, timezone
 
 from supabase_worker import load_env
+from tourapi_quota import TourApiRateLimited, tour_get_json, usage_today
 
 TOUR_API_BASE = os.getenv("TOUR_API_BASE") or "https://apis.data.go.kr/B551011/KorService2"
 KST = timezone(timedelta(hours=9))
@@ -51,8 +52,8 @@ def fetch_event_period(api_key, content_id):
                                 "contentId": str(content_id), "contentTypeId": "15"})
     for attempt in range(3):
         try:
-            with urllib.request.urlopen(f"{TOUR_API_BASE}/{op}?{q}", timeout=15) as res:
-                items = ((json.loads(res.read().decode("utf-8")).get("response") or {}).get("body") or {}).get("items") or {}
+            data = tour_get_json(f"{TOUR_API_BASE}/{op}?{q}")
+            items = ((data.get("response") or {}).get("body") or {}).get("items") or {}
             item = (items.get("item") or [None])[0] if isinstance(items, dict) else None
             if not item:
                 return None
@@ -61,6 +62,8 @@ def fetch_event_period(api_key, content_id):
                 return None
             return {"start": start, "end": end, "play_time": (item.get("playtime") or "")[:80],
                     "place": (item.get("eventplace") or "")[:80], "synced_at": datetime.now(timezone.utc).isoformat()}
+        except TourApiRateLimited:
+            raise
         except Exception:
             time.sleep(2 * (attempt + 1))
     return None
@@ -144,7 +147,11 @@ def run_event_sync(apply=False, log=print, backup_dir=None):
         time.sleep(0.3)
         return fetch_event_period(api_key, cotid)
 
-    plans = plan_event_updates(rows, fetch, today)
+    try:
+        plans = plan_event_updates(rows, fetch, today)
+    except TourApiRateLimited:
+        log(f"TourAPI 한도 초과로 행사 기간 동기화를 멈춘다(오늘 호출 {usage_today()}회). 쓰기는 하지 않았다")
+        return 1
     closes = [p for p in plans if p["action"] == "close"]
     reopens = [p for p in plans if p["action"] == "reopen"]
     log(f"행사 행 {len(rows)}개 · 기간 새로 받음 {sum(p['fetched'] for p in plans)} · 기간 없음 {sum(not p['has_period'] for p in plans)} · "
