@@ -16,6 +16,10 @@ def test_free_only_when_explicit_and_without_amounts():
     assert fee_fields("") is None and fee_fields(None) is None
 
 
+def test_small_amount_gets_lowest_tier():
+    assert (fee_fields("500원")["price_tier"], fee_fields("500원")["avg_price_per_person"]) == ("₩", 500)
+
+
 def test_no_amount_no_tier():
     f = fee_fields("전시별 상이")
     assert f["price"] == "전시별 상이" and f["price_tier"] is None and f["avg_price_per_person"] is None
