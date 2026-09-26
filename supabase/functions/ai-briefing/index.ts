@@ -80,6 +80,21 @@ const GROQ_MAX_TOKENS = 200;
  */
 const GROQ_TIMEOUT_MS = 3_000;
 
+/**
+ * 모델이 분량 지시(1~2문장, 130자)를 자주 넘겨 카드가 커지며 코스가 밀린다. 줄바꿈을 합치고,
+ * 넘치면 상한 안의 마지막 문장 끝에서 자른다. 문장 끝이 없으면 null(프론트는 로컬 문장을 유지)
+ */
+const MAX_TEXT_LENGTH = 130;
+
+function fitBriefingLength(text: string): string | null {
+  const flat = text.replace(/\s*\n+\s*/g, ' ').replace(/\s{2,}/g, ' ').trim();
+  if (flat.length <= MAX_TEXT_LENGTH) return flat;
+  const head = flat.slice(0, MAX_TEXT_LENGTH + 1);
+  let cut = -1;
+  for (const m of head.matchAll(/[.!?](?=\s|$)/g)) cut = m.index! + 1;
+  return cut >= MIN_TEXT_LENGTH ? flat.slice(0, cut) : null;
+}
+
 /** 브리핑으로 인정할 최소 길이 (src/main.ts와 동일: 15자 미만이면 폴백) */
 const MIN_TEXT_LENGTH = 15;
 
@@ -558,11 +573,17 @@ async function callGroq(apiKey: string, spots: SpotInput[], mood: string): Promi
           continue;
         }
 
-        const cleanText = rawText
-          .replace(/^["'“”]/, '')
-          .replace(/["'“”]$/, '')
-          .replace(/\*\*/g, '')
-          .trim();
+        const cleanText = fitBriefingLength(
+          rawText
+            .replace(/^["'“”]/, '')
+            .replace(/["'“”]$/, '')
+            .replace(/\*\*/g, '')
+            .trim(),
+        );
+        if (!cleanText) {
+          console.warn(`[ai-briefing] model ${targetModel} returned no sentence end within ${MAX_TEXT_LENGTH} chars → 다음 모델 시도`);
+          continue;
+        }
 
         return { ok: true, text: cleanText };
       } catch (innerErr) {
