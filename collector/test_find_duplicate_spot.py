@@ -81,6 +81,13 @@ def test_lookup_failure_is_fail_closed():
         w._get_rows = orig
 
 
+def test_place_name_matches_for_worker():
+    # run_worker가 같은 건물의 다른 가게 속성을 옮기지 않도록 이름을 대조한다(2026-09-27 롯데슈퍼프레시 사례)
+    assert w.place_name_matches("청주 데어데어 베이커리", "데어데어")
+    assert not w.place_name_matches("세종 써밋뷰 루프탑라운지", "롯데슈퍼프레시 세종점")
+    assert not w.place_name_matches("전주 서학예술마을 갤러리카페 산들다헌", "서학예술마을도서관")
+
+
 def test_normalize_spot_name():
     assert w.normalize_spot_name("동궁과 월지") == w.normalize_spot_name("동궁과월지")
     assert w.normalize_spot_name("카페루시아 본점") == w.normalize_spot_name("카페루시아")

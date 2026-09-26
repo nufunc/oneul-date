@@ -526,6 +526,20 @@ def normalize_spot_address(address):
     return "".join(tokens)
 
 
+def place_name_matches(name, place_name):
+    """DB 스팟 이름과 지도 검색 결과 이름이 같은 곳을 가리키는지 느슨하게 본다.
+    수집기의 is_name_match에 더해, 정규화 이름 한쪽이 다른 쪽을 포함하면 같은 곳으로 본다
+    ('청주 데어데어 베이커리'/'데어데어'). 지역명이 앞에 붙은 DB 이름을 is_name_match만으로 보면 대부분 떨어진다."""
+    a, b = normalize_spot_name(name), normalize_spot_name(place_name)
+    if len(a) >= 2 and len(b) >= 2 and (a in b or b in a):
+        return True
+    try:
+        from youtube_vlog_miner import is_name_match
+        return is_name_match(name or "", place_name or "")
+    except Exception:
+        return False
+
+
 def normalize_spot_name(name):
     """이름 비교용 정규화: NFKC·소문자, 한글·영문·숫자만 남기고 끝의 '본점'·'점'을 한 번 뗀다.
     '동궁과 월지'/'동궁과월지', '카페루시아'/'카페루시아 본점'이 같은 값이 된다(2026-09-26 열린 중복 70그룹 표본 전부 같은 가게)."""
@@ -1018,15 +1032,15 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
         patch_data = {}
         if places and len(places) > 0:
             # 1위 결과가 비스팟(주차장, 아파트, 은행 등)이면 2~3위 중 정상 데이트 장소 탐색
-            best_place = None
-            for p in places:
-                p_cat = p.get("category") or ""
-                if not isinstance(p_cat, str):
-                    p_cat = str(p_cat)
-                if not any(pat.search(p_cat) for pat in SLOT_NONSPOT_RE):
-                    best_place = p
-                    break
+            # 이름이 맞는 결과를 먼저 고른다. 종전에는 비스팟이 아닌 첫 결과를 이름 대조 없이 써서, 같은 건물의
+            # 다른 가게(세종 써밋뷰 루프탑라운지 → 롯데슈퍼프레시)의 카테고리·장소 번호·이미지를 옮겨 붙였다(2026-09-27)
+            def _spot_like(p):
+                return not any(pat.search(str(p.get("category") or "")) for pat in SLOT_NONSPOT_RE)
+            matched = next((p for p in places if _spot_like(p) and place_name_matches(name, p.get("name"))), None)
+            best_place = matched or next((p for p in places if _spot_like(p)), None)
             top = best_place if best_place else places[0]
+            # 이름이 맞지 않는 결과에서는 존재 확인만 하고 속성(이름·카테고리·장소 번호·이미지·좌표·주소)은 옮기지 않는다
+            trusted = matched is not None
             road_addr = fix_garbled_sido_prefix(top.get("roadAddress") or top.get("address"))
 
             # 권역 충돌 방지: 기존 reg가 명확한데 검색된 주소가 타 권역이면 권역 힌트로 재검색
@@ -1064,6 +1078,9 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                 "lng": lng_val,
                 "category": str(category) if category else None
             }
+            if not trusted:
+                place_meta = {"image_url": None, "lat": None, "lng": None, "category": None}
+                thum, lat_val, lng_val, category = None, None, None, None
 
             now_iso = datetime.now(timezone.utc).isoformat()
             patch_data = {
@@ -1076,7 +1093,7 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
 
             # [Provider ID 추적]
             top_id = top.get("id") or top.get("placeId")
-            if top_id:
+            if top_id and trusted:
                 p_ids = spot.get("provider_ids") or {}
                 if not isinstance(p_ids, dict):
                     p_ids = {}
@@ -1085,7 +1102,7 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                 patch_data["provider_ids"] = p_ids
 
             # [Auto-Healing] 소제목으로 오염된 상호명을 네이버 공식 상호명으로 자동 치유
-            if is_polluted_header_name(name):
+            if is_polluted_header_name(name) and trusted:
                 official_name = top.get("name", "").strip()
                 if official_name and len(official_name) < 25 and official_name != name:
                     patch_data["name"] = official_name
@@ -1097,6 +1114,8 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
             if len(check_name) <= 2 or check_name in ["서울", "경기", "인천", "강원", "충청", "영남", "호남", "제주", "부산", "대구", "울산", "광주", "대전", "세종", "한남", "압구정", "카페", "곱창전골", "맛집", "식당"]:
                 patch_data["is_closed"] = True
 
+            if not trusted:
+                road_addr = ""
             if road_addr and not spot.get("address"):
                 patch_data["address"] = road_addr
 
