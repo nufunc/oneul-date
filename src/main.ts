@@ -1172,7 +1172,10 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
   if (bizEarly && !/\s/.test(cleanQ)) {
     const head = cleanQ.slice(0, -bizEarly[0].length);
     const bareHead = head.replace(PLACE_SUFFIX_END, '');
-    if (bareHead !== head && bareHead.length >= 2) {
+    // 동·역 등으로 끝나거나, 샤로수길·경리단길처럼 길·거리로 끝나거나, 활성 스팟 3곳 이상의 주소에 나오는 말('합정')이면 동네로 본다
+    const looksLikePlace =
+      (bareHead !== head && bareHead.length >= 2) || (head.length >= 3 && /(길|거리)$/.test(head)) || isPlaceHead(head);
+    if (looksLikePlace) {
       const placeText = [spot.location, spot.area, spot.address, spot.name].join(' ').toLowerCase();
       return (placeText.includes(head) || placeText.includes(bareHead)) && matchesSearchQuery(spot, bizEarly[0]);
     }
@@ -1739,6 +1742,27 @@ const SEARCH_PLACE_PREFIXES = [
 const PLACE_SUFFIX = /^(입구역|입구|역|동|시|구|읍|면)\s*/;
 /** 동네 이름 끝에 붙는 같은 접미사('망원동' → '망원') */
 const PLACE_SUFFIX_END = /(입구역|입구|역|동|시|구|읍|면)$/;
+/** 활성 스팟 3곳 이상의 location·area·address에 나오는 말이면 동네로 본다. 스팟 목록이 바뀌면 다시 센다 */
+const placeHeadCache = new Map<string, boolean>();
+let placeHeadCacheSize = -1;
+function isPlaceHead(head: string): boolean {
+  if (head.length < 2) return false;
+  if (placeHeadCacheSize !== spots.length) {
+    placeHeadCache.clear();
+    placeHeadCacheSize = spots.length;
+  }
+  let hit = placeHeadCache.get(head);
+  if (hit === undefined) {
+    let n = 0;
+    for (const s of spots) {
+      if (s.is_closed) continue;
+      if (`${s.location || ''} ${s.area || ''} ${s.address || ''}`.toLowerCase().includes(head) && ++n >= 3) break;
+    }
+    hit = n >= 3;
+    placeHeadCache.set(head, hit);
+  }
+  return hit;
+}
 /** 붙여 친 검색어 끝의 업종어 */
 const BIZ_SUFFIX = /(카페|맛집|술집|와인바|펍|호텔|펜션|베이커리|빵집|브런치|이자카야|포차)$/;
 
