@@ -569,6 +569,26 @@ def normalize_spot_name(name):
     return stripped if len(stripped) >= 2 else n
 
 
+_SIDO_WORDS = {"서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종", "경기", "강원", "충북", "충남", "전북", "전남",
+               "경북", "경남", "제주"}
+_CORE_GENERIC = {"카페", "살롱", "본점", "점", "레스토랑", "식당", "펍", "바", "베이커리", "커피", "뮤직", "음악감상실", "스페이스",
+                 "the", "더"}
+# 한쪽 이름에만 붙으면 숙소·상품 단위라 같은 곳으로 보지 않는다('태백 바람의언덕 샬레')
+LODGING_PRODUCT_RE = re.compile(r'샬레|스테이|펜션|풀빌라|독채|민박|게스트|글램핑|캠핑|카라반|룸|프라이빗|패키지|코스|투어|클래스|체험|대관|VIP',
+                                re.I)
+
+
+def spot_core_name(name, address=""):
+    """시도명, 주소의 시군구 낱말, 일반어(카페·살롱·본점 등)를 뗀 정규화 이름.
+    '춘천산토리니'/'춘천 산토리니 카페'처럼 지역어·업종어만 다른 표기가 같은 값이 된다."""
+    tokens = (address or "").split()[:3]
+    # 주소의 '속초시'는 이름에 '속초'로 붙어 나오므로 끝의 시·군·구를 뗀 형태도 지역어로 본다
+    area = set(tokens) | {re.sub(r'(특별자치시|특별자치도|광역시|특별시|시|군|구)$', '', t) for t in tokens}
+    words = [w for w in re.findall(r'[0-9a-z가-힣]+', unicodedata.normalize('NFKC', name or '').lower())
+             if w not in _SIDO_WORDS and w not in area and w not in _CORE_GENERIC and not re.fullmatch(r'[가-힣]+(시|군|구)', w)]
+    return normalize_spot_name(' '.join(words))
+
+
 def provider_ids_of(place):
     """지도 검색 결과 한 건에서 {provider: 장소 번호}를 만든다. 번호가 없으면 빈 dict."""
     pid = (place or {}).get("id") or (place or {}).get("placeId")
@@ -589,7 +609,9 @@ def find_duplicate_spot(supabase_url, headers, name, address="", provider_ids=No
        기존 행의 주소가 비어 있으면 같은 곳일 수 있으므로 중복으로 본다.
     3. 표기만 다른 이름(공백·부호·끝의 '점/본점')은 normalize_spot_name이 같고 정규화 주소도 같을 때만 중복이다.
        주소 없이 정규화 이름만으로 막지 않는다(체인점 오판 방지).
-    4. 좌표가 주어지면 정규화 이름이 같고 50m 이내인 행도 중복이다. 번지만 다르게 적힌 같은 가게를 막는다
+    4. 좌표가 주어지면 정규화 이름이 같고 50m 이내인 행도 중복이다.
+    5. 좌표가 주어지면 지역어·일반어를 뗀 핵심 이름(spot_core_name)이 같고 10m 이내인 행도 중복이다
+       ('카메라타'/'카메라타 음악감상실'). 숙소·상품어가 한쪽에만 붙으면 제외한다. 번지만 다르게 적힌 같은 가게를 막는다
        (2026-09-26 서울베이글: 판교역로10번길 22와 14-3, 좌표는 소수 7자리까지 같음).
     새 후보의 주소가 없으면 정확한 이름 일치만으로 중복 처리한다(과거 마이너들의 동작과 동일).
     조회가 실패하면 중복일 수 있으니 건너뛴다(fail-closed): 데이터 오염이 놓친 발굴 1건보다 비용이 크다.
@@ -637,9 +659,22 @@ def find_duplicate_spot(supabase_url, headers, name, address="", provider_ids=No
     except Exception:
         return True
 
-    return any(normalize_spot_name(row.get("name")) == core
-               and ((target_addr and normalize_spot_address(row.get("address") or "") == target_addr)
-                    or (near and near(row))) for row in loose)
+    if any(normalize_spot_name(row.get("name")) == core
+           and ((target_addr and normalize_spot_address(row.get("address") or "") == target_addr)
+                or (near and near(row))) for row in loose):
+        return True
+
+    near10 = _near_fn(lat, lng, meters=10)
+    key = spot_core_name(clean_name, address)
+    if not near10 or len(key) < 3 or key == core:
+        return False
+    try:
+        close = _get_rows(f"{base}&name=ilike.{urllib.parse.quote('*' + '*'.join(key) + '*')}&limit=500", headers)
+    except Exception:
+        return True
+    lodging = bool(LODGING_PRODUCT_RE.search(name))
+    return any(near10(row) and spot_core_name(row.get("name"), row.get("address")) == key
+               and bool(LODGING_PRODUCT_RE.search(row.get("name") or "")) == lodging for row in close)
 
 
 def _near_fn(lat, lng, meters=50):
@@ -730,7 +765,9 @@ def derive_price_tier_from_text(price_text):
         return (None, None)
     text = price_text.strip()
 
-    is_free = '무료' in text or text in ('0원', '0')
+    # '성인 3,000원 / 어린이 무료'처럼 금액이 함께 있으면 무료가 아니다. 금액을 먼저 읽고, 없을 때만 '무료'를 인정한다
+    # (2026-09-27: 종전에는 '무료'가 들어 있기만 하면 FREE로 판정)
+    is_free = text in ('0원', '0')
     avg = None
     if not is_free:
         commas = [int(m.replace(',', '')) for m in _PRICE_COMMA_RE.findall(text)]
@@ -749,6 +786,8 @@ def derive_price_tier_from_text(price_text):
                     if cheonwon:
                         avg = sum(float(m) * 1000 for m in cheonwon) / len(cheonwon)
 
+    if avg is None and '무료' in text and '유료' not in text:
+        is_free = True
     if is_free:
         # avg_price_per_person은 INTEGER 컬럼이고 "1인당 평균 가격" 개념 자체가
         # 무료에는 성립하지 않는다. 0을 넣지 않고 null로 둔다.
