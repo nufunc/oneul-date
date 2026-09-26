@@ -21,6 +21,7 @@ from datetime import datetime, timedelta, timezone
 
 from supabase_worker import derive_price_tier_from_text, load_env
 from event_period import TOUR_API_BASE, _request, _tour_api_key
+from tourapi_quota import TourApiRateLimited, tour_get_json, usage_today
 
 KST = timezone(timedelta(hours=9))
 
@@ -51,16 +52,18 @@ def fetch_usefee(api_key, content_id):
                                 "contentId": str(content_id), "contentTypeId": "14"})
     for attempt in range(3):
         try:
-            with urllib.request.urlopen(f"{TOUR_API_BASE}/{op}?{q}", timeout=15) as res:
-                items = ((json.loads(res.read().decode("utf-8")).get("response") or {}).get("body") or {}).get("items") or {}
+            data = tour_get_json(f"{TOUR_API_BASE}/{op}?{q}")
+            items = ((data.get("response") or {}).get("body") or {}).get("items") or {}
             item = (items.get("item") or [None])[0] if isinstance(items, dict) else None
             return (item or {}).get("usefee") or None
+        except TourApiRateLimited:
+            raise
         except Exception:
             time.sleep(2 * (attempt + 1))
     return None
 
 
-def run_fee_backfill(apply=False, log=print, backup_dir=None):
+def run_fee_backfill(apply=False, log=print, backup_dir=None, limit=None):
     env = load_env()
     base_url = (os.getenv("SUPABASE_URL") or env.get("SUPABASE_URL") or "").rstrip("/")
     key = os.getenv("SUPABASE_SERVICE_KEY") or env.get("SUPABASE_SERVICE_KEY") or env.get("VITE_SUPABASE_ANON_KEY") or ""
@@ -85,16 +88,22 @@ def run_fee_backfill(apply=False, log=print, backup_dir=None):
         if len(page) < 1000:
             break
     targets = [r for r in rows if not r.get("price")]
+    # TourAPI 하루 한도(개발 계정 약 1,000회)를 수집기와 나눠 쓰므로 한 번에 limit행까지만 조회한다
+    todo = targets[:limit] if limit else targets
     plans = []
-    for r in targets:
+    for r in todo:
         cotid = (r["source"].get("url") or "").rsplit("cotid=", 1)[-1]
-        fields = fee_fields(fetch_usefee(api_key, cotid)) if cotid else None
+        try:
+            fields = fee_fields(fetch_usefee(api_key, cotid)) if cotid else None
+        except TourApiRateLimited:
+            log(f"TourAPI 한도 초과로 조회를 멈춘다(오늘 호출 {usage_today()}회). 여기까지 받은 {len(plans)}행만 다룬다")
+            break
         time.sleep(0.3)
         if fields:
             plans.append((r, fields))
     free = sum(1 for _, f in plans if f["price_tier"] == "FREE")
     priced = sum(1 for _, f in plans if f["avg_price_per_person"])
-    log(f"문화시설 {len(rows)}행 · price 빈 행 {len(targets)} · 요금 받음 {len(plans)}(금액 {priced}, 무료 {free}, 등급 없음 {len(plans) - priced - free})")
+    log(f"문화시설 {len(rows)}행 · price 빈 행 {len(targets)} · 이번 조회 {len(todo)} · 요금 받음 {len(plans)}(금액 {priced}, 무료 {free}, 등급 없음 {len(plans) - priced - free})")
     for r, f in plans[:12]:
         log(f"  {r['id']} {r['name']} | {f['price'][:50]} | {f['price_tier']} {f['avg_price_per_person']}")
     if not apply or not plans:
@@ -121,5 +130,6 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--apply", action="store_true", help="실제로 DB에 쓴다(기본은 드라이런)")
     ap.add_argument("--backup-dir", default=os.path.expanduser("~/oneul-backups"))
+    ap.add_argument("--limit", type=int, help="이번에 조회할 최대 행 수(TourAPI 하루 한도를 나눠 쓸 때)")
     args = ap.parse_args()
-    sys.exit(run_fee_backfill(apply=args.apply, backup_dir=args.backup_dir))
+    sys.exit(run_fee_backfill(apply=args.apply, backup_dir=args.backup_dir, limit=args.limit))

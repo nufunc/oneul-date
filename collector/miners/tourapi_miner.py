@@ -21,6 +21,7 @@ from supabase_worker import load_env, derive_region_area, find_duplicate_spot, n
 from category_filter import is_date_spot_category
 from event_period import fetch_event_period
 from tour_fee import fee_fields, fetch_usefee
+from tourapi_quota import TourApiRateLimited, tour_get_json, usage_today
 
 KST = timezone(timedelta(hours=9))
 
@@ -118,19 +119,17 @@ def fetch_tourapi_spots(api_key: str, area_code: str = "1", content_type_id: str
     # KorService2면 areaBasedList2, KorService1이면 areaBasedList1
     op_name = "areaBasedList2" if "KorService2" in TOUR_API_BASE else "areaBasedList1"
     url = f"{TOUR_API_BASE}/{op_name}?{urllib.parse.urlencode(params)}"
-    req = urllib.request.Request(url, headers={"User-Agent": "OneulDate-DataEngine/4.0"})
-
     try:
-        with urllib.request.urlopen(req, timeout=8) as res:
-            if res.status == 200:
-                raw = json.loads(res.read().decode('utf-8'))
-                body = raw.get("response", {}).get("body", {})
-                items = body.get("items", {})
-                if isinstance(items, dict):
-                    item_list = items.get("item", [])
-                    if isinstance(item_list, dict):
-                        item_list = [item_list]
-                    return item_list
+        raw = tour_get_json(url, timeout=8)
+        body = raw.get("response", {}).get("body", {})
+        items = body.get("items", {})
+        if isinstance(items, dict):
+            item_list = items.get("item", [])
+            if isinstance(item_list, dict):
+                item_list = [item_list]
+            return item_list
+    except TourApiRateLimited:
+        raise
     except Exception as e:
         print(f"  ⚠️ TourAPI 호출 오류 (area: {area_code}, type: {content_type_id}): {e}")
 
@@ -183,11 +182,19 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
     selected_codes = [area_codes[(start_idx + i) % len(area_codes)] for i in range(4)]
     page_by_combo = checkpoint.get("page_by_combo", {})
 
+    # 429(하루 한도 초과)를 받으면 이번 회차의 TourAPI 조회를 멈추고, 이미 모은 행만 넣는다.
+    # 종전에는 실패가 조용히 넘어가 요금·기간이 빈 채 적재됐다(2026-09-27)
+    rate_limited = False
     for area_code in selected_codes:
         for ctype_id, ctype_name, default_moods, default_slot in DATE_CONTENT_TYPES:
             combo_key = f"{area_code}:{ctype_id}"
-            page_no = page_by_combo.get(combo_key, 0) + 1
-            items = fetch_tourapi_spots(api_key, area_code, ctype_id, num_of_rows=15, page_no=page_no)
+            prev_page = page_by_combo.get(combo_key, 0)
+            page_no = prev_page + 1
+            try:
+                items = fetch_tourapi_spots(api_key, area_code, ctype_id, num_of_rows=15, page_no=page_no)
+            except TourApiRateLimited:
+                rate_limited = True
+                break
             # 반환 건수가 요청보다 적으면 마지막 페이지 — 다음 실행은 1페이지부터 다시 돈다
             page_by_combo[combo_key] = 1 if len(items) < 15 else page_no
             time.sleep(0.3)
@@ -237,7 +244,12 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                 # 행사는 기간을 함께 받아 source.event에 둔다. 이미 끝난 행사는 넣지 않는다(2026-09-27: 행사 216곳 기간 0곳)
                 event_period = None
                 if ctype_id == "15":
-                    event_period = fetch_event_period(clean_api_key, content_id)
+                    try:
+                        event_period = fetch_event_period(clean_api_key, content_id)
+                    except TourApiRateLimited:
+                        rate_limited = True
+                        page_by_combo[combo_key] = prev_page  # 이 페이지의 남은 항목을 다음 회차에 다시 본다
+                        break
                     time.sleep(0.3)
                     if event_period and event_period["end"] < datetime.now(KST).strftime("%Y-%m-%d"):
                         continue
@@ -245,7 +257,12 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                 # 문화시설은 detailIntro의 이용요금(usefee)을 실제 가격으로 쓴다. 없으면 가격을 비워 둔다
                 fee = None
                 if ctype_id == "14":
-                    fee = fee_fields(fetch_usefee(clean_api_key, content_id))
+                    try:
+                        fee = fee_fields(fetch_usefee(clean_api_key, content_id))
+                    except TourApiRateLimited:
+                        rate_limited = True
+                        page_by_combo[combo_key] = prev_page  # 이 페이지의 남은 항목을 다음 회차에 다시 본다
+                        break
                     time.sleep(0.3)
 
                 spot_id = new_spot_id()
@@ -295,12 +312,16 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                 discovered_spots.append(new_spot)
                 if len(discovered_spots) >= max_discoveries:
                     break
-            if len(discovered_spots) >= max_discoveries:
+            if len(discovered_spots) >= max_discoveries or rate_limited:
                 break
-        if len(discovered_spots) >= max_discoveries:
+        if len(discovered_spots) >= max_discoveries or rate_limited:
             break
 
-    checkpoint["area_index"] = (start_idx + 4) % len(area_codes)
+    if rate_limited:
+        # 한도 초과로 끊긴 회차는 같은 지역부터 다시 돌도록 지역 순서를 넘기지 않는다
+        print(f"  ⚠️ [TourAPI Miner] 한도 초과로 회차 중단(오늘 호출 {usage_today()}회), 모은 {len(discovered_spots)}건만 적재")
+    else:
+        checkpoint["area_index"] = (start_idx + 4) % len(area_codes)
     checkpoint["page_by_combo"] = page_by_combo
     # 체크포인트는 적재 결과를 받은 뒤에만 저장한다. INSERT 전에 저장하면 적재가 실패해도 지역·페이지가
     # 전진해 그 항목을 한 바퀴 돌 때까지 건너뛰었다(2026-09-24 17:08 회차)
