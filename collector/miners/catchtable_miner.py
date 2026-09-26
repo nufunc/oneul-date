@@ -248,7 +248,7 @@ def run_catchtable_mining(supabase_url: str, service_key: str, max_discoveries: 
 
             # 중복 검사
             pids = provider_ids_of(top)
-            if find_duplicate_spot(supabase_url, api_headers, real_name, road_addr, pids):
+            if find_duplicate_spot(supabase_url, api_headers, real_name, road_addr, pids, y_coord, x_coord):
                 continue
 
             batch_seen_names.add(real_name)

@@ -285,6 +285,13 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
         places = search_discovery(query_text)
         time.sleep(0.2)
         if not places:
+            # 지도 장소 검색은 '강원 강릉 경포 안목해변 오션뷰 브런치' 같은 서술형 쿼리에 0건을 준다(첫 회차 117건).
+            # 권역 다음의 지명 하나와 끝의 업종어('강릉 브런치')로 줄여 다시 찾는다. 30개 표본에서 1건 → 26건
+            words = query_text.split()
+            if len(words) >= 3:
+                places = search_discovery(f"{words[1]} {words[-1]}")
+                time.sleep(0.2)
+        if not places:
             rej["검색무결과"] += 1
 
         for p in places[:8]:  # 상위 8개 정밀 검토
@@ -321,7 +328,8 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
                 continue
 
             # 4. DB 중복 검사 (이름 + 정규화 주소)
-            if find_duplicate_spot(supabase_url, api_headers, raw_name, road_addr, provider_ids_of(p)):
+            if find_duplicate_spot(supabase_url, api_headers, raw_name, road_addr, provider_ids_of(p),
+                                   p.get("y") or p.get("lat"), p.get("x") or p.get("lng")):
                 rej["DB중복"] += 1
                 continue  # 이미 존재하는 스팟
 

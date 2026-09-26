@@ -1620,7 +1620,7 @@ def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
 
         # 중복 검사 (이름 + 정규화 주소, 읽기 전용)
         if supabase_url and supabase_key:
-            if find_duplicate_spot(supabase_url, headers, official_name, road_addr, provider_ids_of(top)):
+            if find_duplicate_spot(supabase_url, headers, official_name, road_addr, provider_ids_of(top), lat, lng):
                 stats["duplicated"] += 1
                 if verbose:
                     print(f"    ⏩ [이미 존재하는 스팟 건너뜀] {official_name}")
