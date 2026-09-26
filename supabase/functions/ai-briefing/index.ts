@@ -614,7 +614,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
   // 3) 레이트리밋
   const ip = clientIp(req);
-  const limited = checkRateLimit(ip) ?? checkGlobalLimit();
+  const limited = checkRateLimit(ip);
   if (limited) {
     return jsonResponse(
       { error: `rate limit exceeded (per ${limited.scope})` },
@@ -654,7 +654,18 @@ Deno.serve(async (req: Request): Promise<Response> => {
     return jsonResponse({ error: 'service unavailable' }, 502, origin);
   }
 
-  // 7) Groq 호출
+  // 7) 전역 상한은 검증을 통과해 실제로 Groq를 부를 요청만 센다(잘못된 요청이 일 한도를 깎지 않게)
+  const globalLimited = checkGlobalLimit();
+  if (globalLimited) {
+    return jsonResponse(
+      { error: `rate limit exceeded (per ${globalLimited.scope})` },
+      429,
+      origin,
+      { 'Retry-After': String(globalLimited.retryAfter) },
+    );
+  }
+
+  // 8) Groq 호출
   const { spots, mood } = validated.data;
   const outcome = await callGroq(apiKey, spots, mood);
   if (!outcome.ok) {
