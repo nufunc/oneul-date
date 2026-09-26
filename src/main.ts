@@ -1540,12 +1540,10 @@ function isSpecialDiningSpot(spot: Spot): boolean {
     return true;
   }
 
-  // 4. 분위기 태그
-  if (spot.mood && spot.mood.includes('luxury')) {
-    return true;
-  }
+  // 분위기 태그 'luxury'는 수집 때 요약문 템플릿과 함께 자동으로 붙은 값이라(공원·국밥집에도 있음) 근거로 쓰지 않는다.
+  // 가격 템플릿을 비운 뒤 이 분기만으로 스페셜에 든 곳이 약 590곳이었다(2026-09-27)
 
-  // 5. 키워드 검사
+  // 4. 키워드 검사
   const text = `${spot.name} ${spot.category || ''} ${spot.summary || ''} ${(spot.signature_items || []).join(' ')}`.toLowerCase();
   const LUXURY_KEYWORDS = [
     '오마카세', '파인다이닝', '코스요리', '미쉐린', '미슐랭', '호텔', '스테이크', '와인바',
