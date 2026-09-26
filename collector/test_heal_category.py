@@ -12,7 +12,15 @@ def test_valid_category_kept():
     assert heal({"name": "어느 카페", "category": "감성카페", "slot": "day"})[0] == "감성카페"
 
 
+def test_summary_template_words_do_not_decide_category():
+    # 시간대 템플릿 요약문의 '칵테일'·'위스키'로 술집 카테고리를 주지 않는다(삽교호 바다공원 전망데크 사례)
+    spot = {"name": "삽교호 바다공원 전망데크", "slot": "night",
+            "summary": "부드러운 위스키 향을 음미하며 달콤한 칵테일과 함께 둘만의 밤을"}
+    assert heal(spot)[0] != "칵테일·위스키바"
+
+
 if __name__ == "__main__":
     test_no_evidence_keeps_category_empty()
     test_valid_category_kept()
+    test_summary_template_words_do_not_decide_category()
     print("ok")

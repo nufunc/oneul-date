@@ -216,7 +216,10 @@ def heal_category_and_slot(spot: Dict[str, Any]) -> Tuple[str, str]:
         cat = None
         
     # 주소까지 붙이면 도로명이 카테고리를 정한다('고기로' 주소 → 한식·미식, '광안해변로' 카페 → 자연·산책)
-    text = ' '.join([str(spot.get(k, '')) for k in ['name', 'summary']]).lower()
+    # 이름만 본다. summary는 시간대 템플릿('달콤한 칵테일과 함께 둘만의 밤…')이라, 카테고리가 빈 밤 시간대 행이
+    # 요약문 단어로 칵테일·위스키바·와인바를 받았다(2026-09-27: 요약문으로만 정해지는 86행 중 표본 절반이 틀림,
+    # 삽교호 바다공원 전망데크 → 칵테일·위스키바). 주소는 2314d7f에서 이미 뺐다
+    text = str(spot.get('name') or '').lower()
     
     # 1. 키워드 기반 정밀 매칭
     if not cat:
