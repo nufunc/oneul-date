@@ -1116,7 +1116,7 @@ function roundDistanceForDisplay(km: number): number {
 
 /** 검색 관련도 등급(작을수록 앞): 이름 일치 → 이름에 검색어 전체 → 이름에 모든 단어 → 본문에 모든 단어 → 일부 단어만 */
 function searchRelevanceTier(spot: Spot, query: string): number {
-  let q = query.replace(/[#·,/\\]/g, ' ').trim().toLowerCase();
+  let q = stripSearchStopwords(query.replace(/[#·,/\\]/g, ' ').trim().toLowerCase());
   // '부산호텔'처럼 지역어로 시작하면 지역은 이미 걸러졌으므로 나머지('호텔')로 등급을 매긴다.
   // 그대로 두면 모두 최하 등급이 돼 동의어로만 걸린 식당이 호텔보다 앞에 섰다
   const place = SEARCH_PLACE_PREFIXES.find((p) => q.startsWith(p) && q.length > p.length);
@@ -1144,7 +1144,7 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
   if (!query || !query.trim()) return true;
 
   // 1. # 및 구분자(·, /, , 등) 정제
-  const cleanQ = query.replace(/[#·,/\\]/g, ' ').trim().toLowerCase();
+  const cleanQ = stripSearchStopwords(query.replace(/[#·,/\\]/g, ' ').trim().toLowerCase());
   if (!cleanQ) return true;
 
   // 지역어로 시작하는 검색어('부산호텔', '강남 와인')는 지역과 나머지를 AND로 묶는다. 동의어 사전이 '호텔'·'와인'만
@@ -1783,6 +1783,15 @@ function isPlaceHead(head: string): boolean {
     placeHeadCache.set(head, hit);
   }
   return hit;
+}
+/**
+ * 데이트 앱에서 정보가 없는 단어('가성비 데이트'의 '데이트', '성수 데이트코스'의 '데이트코스')는 다른 단어가 있을 때만 뺀다.
+ * 띄어 쓴 단어만 대상이라 '데이트맛집' 같은 붙여 쓴 말은 그대로다
+ */
+function stripSearchStopwords(q: string): string {
+  const stripped = q.replace(/(^|\s)(데이트\s*코스|데이트|코스)(?=\s|$)/g, ' ').replace(/\s+/g, ' ').trim();
+  // '데이트코스'만 쳤으면 '데이트'로 읽는다(그대로면 0건)
+  return stripped || (/^데이트\s*코스$/.test(q) ? '데이트' : q);
 }
 /** 수식어 비교용 본문(이름·카테고리·요약·대표 메뉴·무드 태그, 공백 제거) */
 function spotModifierText(s: Spot): string {
