@@ -535,7 +535,8 @@ def run_cycle():
     if is_step_due("event_period", 24.0):
         log("▶ 11단계: 행사 기간 동기화")
         try:
-            run_event_sync(apply=True, log=lambda m: log(f"  {m}"))
+            run_event_sync(apply=True, log=lambda m: log(f"  {m}"),
+                           backup_dir=os.path.join(os.path.dirname(LOG_DIR), "oneul-backups"))
         except Exception as e:
             log(f"11단계 행사 기간 동기화 오류: {e}", level="ERROR")
     else:
