@@ -5958,6 +5958,10 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
   const ratingBadge = state.spotSort === 'curation' && km?.rating
     ? `<span class="discovery-badge-rating">★${km.rating.toFixed(1)}${km.review_count ? ` (${km.review_count})` : ''}</span>`
     : '';
+  // 행사 기간은 카테고리 줄에 붙이면 기본 3열에서 말줄임에 가려 이미지 오른쪽 아래 배지로 둔다(거리·평점·핫플 배지와 다른 모서리).
+  // 5열은 이미지가 51px 안팎이고 거리 배지가 대부분을 덮어 겹치므로 붙이지 않는다(상세 시트에는 보인다)
+  const eventLabel = cols === 5 ? '' : eventPeriodLabel(spot);
+  const eventBadge = eventLabel ? `<span class="discovery-badge-event">${escapeHtml(eventLabel)}</span>` : '';
   const sum = cleanSpotSummary(spot) || `${spot.name}에서 특별한 데이트를 즐겨보세요.`;
 
   const bookingUrl = spot.booking_info?.url || getCatchtableUrl(spot);
@@ -5976,7 +5980,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
     return `
       <article class="discovery-card cols-5" data-spot-id="${spot.id}" title="${escapeHtml(spot.name)} 상세 보기">
         <div class="discovery-card-thumb">
-          <span class="discovery-badge-dist">${distText}</span>${ratingBadge}
+          <span class="discovery-badge-dist">${distText}</span>${ratingBadge}${eventBadge}
           ${isClosedToday ? `<span class="discovery-badge-closed">⚠️ 오늘 휴무</span>` : ''}
           ${curationPill}
           <div class="thumb-fallback-box">${fallbackIcon}</div>
@@ -6001,7 +6005,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
     return `
       <article class="discovery-card cols-2" data-spot-id="${spot.id}" title="${escapeHtml(spot.name)} 상세 보기">
         <div class="discovery-card-thumb">
-          <span class="discovery-badge-dist">${distText}</span>${ratingBadge}
+          <span class="discovery-badge-dist">${distText}</span>${ratingBadge}${eventBadge}
           ${isClosedToday ? `<span class="discovery-badge-closed">⚠️ 오늘 휴무</span>` : ''}
           ${curationPill}
           <div class="thumb-fallback-box">${fallbackIcon}</div>
@@ -6014,7 +6018,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
         <div class="discovery-card-body">
           <div class="discovery-card-header">
             <h4 class="discovery-card-title discovery-name"><button type="button" class="discovery-name-link" data-detail-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 상세 보기">${escapeHtml(spot.name)}</button></h4>
-            <span class="discovery-card-category discovery-category">${escapeHtml(spot.category || '데이트 스팟')}${eventPeriodLabel(spot) ? ` · ${escapeHtml(eventPeriodLabel(spot))}` : ''}</span>
+            <span class="discovery-card-category discovery-category">${escapeHtml(spot.category || '데이트 스팟')}</span>
           </div>
           <p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>
           <div class="discovery-card-actions">
@@ -6032,7 +6036,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
   return `
     <article class="discovery-card cols-3" data-spot-id="${spot.id}" title="${escapeHtml(spot.name)} 상세 보기">
       <div class="discovery-card-thumb">
-        <span class="discovery-badge-dist">${distText}</span>${ratingBadge}
+        <span class="discovery-badge-dist">${distText}</span>${ratingBadge}${eventBadge}
         ${isClosedToday ? `<span class="discovery-badge-closed">⚠️ 오늘 휴무</span>` : ''}
         ${curationPill}
         <div class="thumb-fallback-box">${fallbackIcon}</div>
@@ -6044,7 +6048,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
       </div>
       <div class="discovery-card-body">
         <h4 class="discovery-card-title discovery-name"><button type="button" class="discovery-name-link" data-detail-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 상세 보기">${escapeHtml(spot.name)}</button></h4>
-        <span class="discovery-card-category discovery-category">${escapeHtml(spot.category || '데이트 스팟')}${eventPeriodLabel(spot) ? ` · ${escapeHtml(eventPeriodLabel(spot))}` : ''}</span>
+        <span class="discovery-card-category discovery-category">${escapeHtml(spot.category || '데이트 스팟')}</span>
         <p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>
         <div class="discovery-card-actions">
           <button class="btn-discovery-save ${isSaved ? 'is-saved' : ''}" data-spot-id="${spot.id}" aria-label="${isSaved ? '보관함에서 제외' : '보관함에 담기'}" title="${isSaved ? '보관함에서 제외' : '보관함에 담기'}">${isSaved ? '❤️' : '🤍'}</button>

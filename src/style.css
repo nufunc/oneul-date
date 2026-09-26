@@ -4326,6 +4326,22 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   pointer-events: none;
 }
 
+/* 행사 기간 배지. 거리(왼쪽 위)·평점(왼쪽 아래)·핫플(오른쪽 위)과 겹치지 않게 오른쪽 아래에 둔다 */
+.discovery-badge-event {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  z-index: 5;
+  background: rgba(15, 23, 42, 0.78);
+  color: #ffffff;
+  font-size: 0.66rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 .discovery-badge-dist {
   position: absolute;
   top: 8px;
