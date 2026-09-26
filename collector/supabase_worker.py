@@ -151,8 +151,8 @@ def search_naver(query: str):
     # 2. 카카오 로컬 공식 API (dapi.kakao.com). 소규모 상호 색인율이 비공식
     # 스크래핑 엔드포인트보다 훨씬 높다 — 2026-09-22 실측: "바이닐시티"류
     # 저인지도 상호가 비공식 엔드포인트에서 지역명을 붙여도 0건이었다.
-    # 이미지는 제공하지 않으므로 카테고리/좌표만 채워지고, 이미지는 3번
-    # 비공식 폴백이 잡으면 보충한다.
+    # 공식 API는 이미지를 주지 않으므로 비공식 검색 결과에서 같은 장소 번호(confirmid)의 이미지를 채운다.
+    # 채우지 않으면 이미지 필수인 blog·community가 공식 API 결과를 전부 버린다
     if KAKAO_REST_API_KEY:
         try:
             k2_url = f"https://dapi.kakao.com/v2/local/search/keyword.json?query={urllib.parse.quote(query)}"
@@ -162,8 +162,10 @@ def search_naver(query: str):
                     k2_data = json.loads(k2_res.read().decode('utf-8'))
                     docs = k2_data.get("documents", [])
                     if docs:
-                        return [
+                        official = [
                             {
+                                "id": d.get("id"),
+                                "provider": "kakao",
                                 "name": d.get("place_name"),
                                 "roadAddress": d.get("road_address_name") or d.get("address_name"),
                                 "thumUrl": None,
@@ -173,11 +175,20 @@ def search_naver(query: str):
                             }
                             for d in docs[:3]
                         ]
+                        imgs = {p["id"]: p["thumUrl"] for p in (_search_kakao_unofficial(query) or []) if p.get("id")}
+                        for p in official:
+                            p["thumUrl"] = imgs.get(p["id"]) or None
+                        return official
         except Exception:
             pass
 
-    # 3. 카카오맵 비공식 실시간 검색 폴백 (공식 API도 못 찾을 때의 마지막 수단.
-    # 이미지 썸네일은 공식 API에 없으므로 이 경로가 유일한 이미지 출처이기도 하다)
+    # 3. 카카오맵 비공식 실시간 검색 폴백 (공식 API도 못 찾을 때의 마지막 수단)
+    return _search_kakao_unofficial(query)
+
+
+def _search_kakao_unofficial(query: str):
+    """카카오맵 비공식 검색. 공식 API가 주지 않는 이미지의 유일한 출처이기도 하다.
+    confirmid는 공식 API의 장소 id와 같은 값이다(2026-09-26 확인: '카페루시아 본점' 1666998566)."""
     try:
         k_url = f"https://search.map.kakao.com/mapsearch/map.daum?q={urllib.parse.quote(query)}"
         k_req = urllib.request.Request(k_url, headers={"User-Agent": HEADERS["User-Agent"], "Referer": "https://map.kakao.com/"})
@@ -189,6 +200,8 @@ def search_naver(query: str):
                     converted = []
                     for kp in k_places[:3]:
                         converted.append({
+                            "id": str(kp.get("confirmid") or "") or None,
+                            "provider": "kakao",
                             "name": kp.get("name"),
                             "roadAddress": kp.get("new_address") or kp.get("address"),
                             "thumUrl": kp.get("img"),
@@ -199,6 +212,7 @@ def search_naver(query: str):
                     return converted
     except Exception:
         pass
+    return None
 
 ZONE_STREET_KEYWORDS = [
     "골목", "거리", "먹자골목", "카페거리", "공방거리", "포차거리", "야시장", 
@@ -996,7 +1010,8 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                 p_ids = spot.get("provider_ids") or {}
                 if not isinstance(p_ids, dict):
                     p_ids = {}
-                p_ids["naver"] = str(top_id)
+                # 09-21 네이버 차단 뒤로 결과는 카카오라 "naver" 고정 키면 카카오 id가 네이버 칸에 들어간다
+                p_ids[top.get("provider") or "naver"] = str(top_id)
                 patch_data["provider_ids"] = p_ids
 
             # [Auto-Healing] 소제목으로 오염된 상호명을 네이버 공식 상호명으로 자동 치유

@@ -34,8 +34,9 @@ def run_social_enrichment(supabase_url: str, service_key: str, batch_size: int =
         "Prefer": "return=minimal"
     }
 
-    # 아직 social_links가 없거나 동기화가 가장 오래된 스팟 우선 순환 조회
-    fetch_url = f"{supabase_url}/rest/v1/spots?select=id,name,location,area,verified,social_links,metrics&is_closed=eq.false&order=metrics->>last_synced_at.asc.nullsfirst,id.asc&limit={batch_size}"
+    # 아직 social_links가 없거나 동기화가 가장 오래된 스팟 우선 순환 조회.
+    # summary 등을 읽지 않으면 is_bad_summary("")가 항상 참이라 스팟마다 Groq로 요약을 다시 만들었다(2026-09-26)
+    fetch_url = f"{supabase_url}/rest/v1/spots?select=id,name,location,area,verified,social_links,metrics,summary,category,region,signature_items&is_closed=eq.false&order=metrics->>last_synced_at.asc.nullsfirst,id.asc&limit={batch_size}"
     
     try:
         req = urllib.request.Request(fetch_url, headers=api_headers)
