@@ -602,8 +602,15 @@ function isPollutedMediaChannelDummy(spot: Spot): boolean {
 }
 
 /** 코스 후보로 올릴 수 있는 스폿인지 — 생성·공유복원·저장복원 전 경로가 공유하는 단일 관문 */
+/** 축제·행사인데 이름에 올해보다 이른 연도가 든 곳('2025 진주전통공예비엔날레'). 행사 기간 데이터가 없어 이름으로 판정한다 */
+function isPastYearEvent(spot: Spot): boolean {
+  if (!/축제|행사|페스티벌/.test(spot.category || '')) return false;
+  const years = (spot.name || '').match(/(?:19|20)\d{2}/g);
+  return Boolean(years) && Math.max(...years!.map(Number)) < new Date().getFullYear();
+}
+
 function isCourseEligible(spot: Spot): boolean {
-  return isValidSlot(spot.slot) && !isListicleEntry(spot) && !isBroadRegionDummy(spot) && !isPollutedMediaChannelDummy(spot) && !isZoneCompositeDummy(spot) && isRealStaySpot(spot);
+  return !isPastYearEvent(spot) && isValidSlot(spot.slot) && !isListicleEntry(spot) && !isBroadRegionDummy(spot) && !isPollutedMediaChannelDummy(spot) && !isZoneCompositeDummy(spot) && isRealStaySpot(spot);
 }
 
 const DEDUPE_REGION_TOKENS = new Set([
@@ -4497,7 +4504,8 @@ function getSpotPopularityScore(spot: Spot): number {
   let score = spot.hot_score || 50;
 
   // 1. 카카오맵 평점 가산
-  const rating = spot.social_links?.kakaomap?.rating;
+  // 인증·평점순과 같이 리뷰 수로 보정한 평점을 쓴다. 원점수면 리뷰 1개짜리 ★5가 덕수궁(★4.8, 1,566개)보다 앞섰다
+  const rating = spot.social_links?.kakaomap?.rating ? trustedRating(spot) : 0;
   if (rating) {
     if (rating >= 4.7) score += 35;
     else if (rating >= 4.5) score += 25;
