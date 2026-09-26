@@ -1177,7 +1177,7 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
       (bareHead !== head && bareHead.length >= 2) || (head.length >= 3 && /(길|거리)$/.test(head)) || isPlaceHead(head);
     if (looksLikePlace) {
       const placeText = [spot.location, spot.area, spot.address, spot.name].join(' ').toLowerCase();
-      return (placeText.includes(head) || placeText.includes(bareHead)) && matchesSearchQuery(spot, bizEarly[0]);
+      return (placeText.includes(head) || placeText.includes(bareHead)) && bizMatches(spot, bizEarly[0]);
     }
   }
 
@@ -1244,6 +1244,24 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
     return text;
   };
 
+  // '한우맛집', '오션뷰카페'처럼 수식어와 업종을 붙여 친 검색어는 동의어 루프보다 먼저 '수식어 AND 업종'으로 본다.
+  // 루프가 '맛집'만 보고 통과시켜 수식어가 무시됐다. 검색어나 수식어가 사전 항목('디저트카페', '비오는날')이면 사전에 맡긴다
+  const bizMod = cleanQ.match(BIZ_SUFFIX);
+  if (
+    bizMod &&
+    !/\s/.test(cleanQ) &&
+    !(cleanQ in NATURAL_CONTEXT_MAP) &&
+    !POPULAR_QUICK_TAGS.some((t) => t.query.toLowerCase() === cleanQ)
+  ) {
+    const head = cleanQ.slice(0, -bizMod[0].length);
+    if (head.length >= 2 && !(head in NATURAL_CONTEXT_MAP) && isModifierHead(head)) {
+      // 수식어가 없는 스팟은 막고(새던 결과), 수식어와 업종이 맞으면 통과시킨다.
+      // 수식어는 있는데 업종 동의어가 안 맞으면 아래 기존 판정에 맡겨 종전 결과('브런치카페')를 줄이지 않는다
+      if (!spotModifierText(spot).includes(head)) return false;
+      if (bizMatches(spot, bizMod[0])) return true;
+    }
+  }
+
   for (const [kw, syns] of Object.entries(NATURAL_CONTEXT_MAP)) {
     // 1글자 키(예: '비')는 부분일치를 허용하면 "비건" 같은 무관한 검색어에도
     // 걸려 날씨 동의어가 통째로 풀린다. 1글자 키는 완전일치일 때만 인정한다.
@@ -1300,7 +1318,7 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
     const bareHead = head.replace(PLACE_SUFFIX_END, '');
     const placeText = [spot.location, spot.area, spot.address, spot.name].join(' ').toLowerCase();
     const inHead = placeText.includes(head) || (bareHead.length >= 2 && placeText.includes(bareHead));
-    return inHead && matchesSearchQuery(spot, biz[0]);
+    return inHead && bizMatches(spot, biz[0]);
   }
   return false;
 }
@@ -1762,6 +1780,40 @@ function isPlaceHead(head: string): boolean {
     placeHeadCache.set(head, hit);
   }
   return hit;
+}
+/** 수식어 비교용 본문(이름·카테고리·요약·대표 메뉴·무드 태그, 공백 제거) */
+function spotModifierText(s: Spot): string {
+  return [s.name, s.category, s.summary, ...(s.signature_items || []), ...(s.mood_tags || [])]
+    .join('')
+    .replace(/\s+/g, '')
+    .toLowerCase();
+}
+/** 수식어가 활성 스팟 어딘가에 실제로 나오는지. 없으면 기존 판정으로 넘긴다 */
+const modifierHeadCache = new Map<string, boolean>();
+let modifierHeadCacheSize = -1;
+function isModifierHead(head: string): boolean {
+  if (modifierHeadCacheSize !== spots.length) {
+    modifierHeadCache.clear();
+    modifierHeadCacheSize = spots.length;
+  }
+  let hit = modifierHeadCache.get(head);
+  if (hit === undefined) {
+    hit = spots.some((s) => !s.is_closed && spotModifierText(s).includes(head));
+    modifierHeadCache.set(head, hit);
+  }
+  return hit;
+}
+/** 분리한 업종어의 동의어. 이름·카테고리에서만 찾아 요약문의 '바다' 같은 글자에 걸리지 않게 한다 */
+const BIZ_SYNONYMS: Record<string, string[]> = {
+  술집: ['술집', '바', '펍', '주점', '포차', '이자카야', '와인', '칵테일', '위스키', '하이볼', '호프', '맥주', '전통주'],
+  카페: ['카페', '커피', '베이커리', '디저트', '로스터', '찻집', '티룸'],
+};
+function bizMatches(spot: Spot, biz: string): boolean {
+  const syns = BIZ_SYNONYMS[biz];
+  if (!syns) return matchesSearchQuery(spot, biz);
+  const text = `${spot.name || ''} ${spot.category || ''}`.toLowerCase();
+  // 동의어가 안 맞으면 기존 사전 판정으로도 본다(동네·수식어 AND가 먼저 걸려 있어 넓혀도 새지 않는다)
+  return syns.some((w) => text.includes(w)) || matchesSearchQuery(spot, biz);
 }
 /** 붙여 친 검색어 끝의 업종어 */
 const BIZ_SUFFIX = /(카페|맛집|술집|와인바|펍|호텔|펜션|베이커리|빵집|브런치|이자카야|포차)$/;
