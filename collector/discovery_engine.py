@@ -283,13 +283,15 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
 
     for query_text, region, area, default_moods in sampled_queries:
         places = search_discovery(query_text)
+        used_query = query_text
         time.sleep(0.2)
         if not places:
             # 지도 장소 검색은 '강원 강릉 경포 안목해변 오션뷰 브런치' 같은 서술형 쿼리에 0건을 준다(첫 회차 117건).
             # 권역 다음의 지명 하나와 끝의 업종어('강릉 브런치')로 줄여 다시 찾는다. 30개 표본에서 1건 → 26건
             words = query_text.split()
             if len(words) >= 3:
-                places = search_discovery(f"{words[1]} {words[-1]}")
+                used_query = f"{words[1]} {words[-1]}"
+                places = search_discovery(used_query)
                 time.sleep(0.2)
         if not places:
             rej["검색무결과"] += 1
@@ -378,7 +380,7 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
                 "quality_score": 88,
                 "fail_count": 0,
                 "provider_ids": provider_ids_of(p),
-                "source": {"type": "auto_discovery", "url": f"https://map.naver.com/p/search/{urllib.parse.quote(raw_name)}", "note": "2026 autonomous AI discovery"},
+                "source": {"type": "auto_discovery", "url": f"https://map.naver.com/p/search/{urllib.parse.quote(raw_name)}", "note": f"Mined from discovery query: {used_query}" + (f" (원 쿼리: {query_text})" if used_query != query_text else "")},
                 "verified": True,
                 "is_closed": False
             }
