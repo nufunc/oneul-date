@@ -540,6 +540,27 @@ def place_name_matches(name, place_name):
         return False
 
 
+_NAME_TOKEN_STOPWORDS = {
+    "서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종", "경기", "강원", "충북", "충남", "전북", "전남",
+    "경북", "경남", "제주", "본점", "점", "카페", "호텔", "레스토랑", "식당", "the",
+}
+
+
+def same_place_by_address(name, address, place):
+    """이름 판정은 떨어졌지만 같은 가게로 볼 수 있는지: 정규화 주소가 같고, 지역명·일반어를 뺀 이름 토큰
+    (2자 이상)을 하나 이상 공유하면 같은 곳으로 본다('WELLNESS the HANNAM'/'웰니스더한남'은 못 잡음).
+    주소만 같은 다른 곳('양평 샬레 트리'/'양평군보건소')은 공유 토큰이 없어 걸러진다."""
+    target = normalize_spot_address(address or "")
+    place_addr = normalize_spot_address((place or {}).get("roadAddress") or (place or {}).get("address") or "")
+    if not target or target != place_addr:
+        return False
+
+    def tokens(v):
+        return {t for t in re.findall(r'[0-9a-z가-힣]+', unicodedata.normalize('NFKC', v or '').lower())
+                if len(t) >= 2 and t not in _NAME_TOKEN_STOPWORDS}
+    return bool(tokens(name) & tokens((place or {}).get("name")))
+
+
 def normalize_spot_name(name):
     """이름 비교용 정규화: NFKC·소문자, 한글·영문·숫자만 남기고 끝의 '본점'·'점'을 한 번 뗀다.
     '동궁과 월지'/'동궁과월지', '카페루시아'/'카페루시아 본점'이 같은 값이 된다(2026-09-26 열린 중복 70그룹 표본 전부 같은 가게)."""
@@ -1036,7 +1057,8 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
             # 다른 가게(세종 써밋뷰 루프탑라운지 → 롯데슈퍼프레시)의 카테고리·장소 번호·이미지를 옮겨 붙였다(2026-09-27)
             def _spot_like(p):
                 return not any(pat.search(str(p.get("category") or "")) for pat in SLOT_NONSPOT_RE)
-            matched = next((p for p in places if _spot_like(p) and place_name_matches(name, p.get("name"))), None)
+            matched = next((p for p in places if _spot_like(p) and (place_name_matches(name, p.get("name"))
+                                                                     or same_place_by_address(name, addr, p))), None)
             best_place = matched or next((p for p in places if _spot_like(p)), None)
             top = best_place if best_place else places[0]
             # 이름이 맞지 않는 결과에서는 존재 확인만 하고 속성(이름·카테고리·장소 번호·이미지·좌표·주소)은 옮기지 않는다
@@ -1054,9 +1076,12 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                             r_addr = fix_garbled_sido_prefix(rp.get("roadAddress") or rp.get("address"))
                             if r_addr:
                                 r_reg, _ = derive_region_area(r_addr)
-                                if r_reg == reg:
+                                # 이름이 맞는 결과로만 바꾼다. 종전에는 권역만 맞으면 이름이 다른 가게로 바꾸고도
+                                # trusted가 True로 남아 그 가게 속성이 옮겨 붙을 수 있었다(2026-09-27 코드 판독)
+                                if r_reg == reg and place_name_matches(name, rp.get("name")):
                                     top = rp
                                     road_addr = r_addr
+                                    trusted = True
                                     break
 
             thum = top.get("thumUrl") or top.get("image") or top.get("imageUrl") or top.get("thumbUrl")
@@ -1083,13 +1108,19 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                 thum, lat_val, lng_val, category = None, None, None, None
 
             now_iso = datetime.now(timezone.utc).isoformat()
-            patch_data = {
-                "verified": True,
-                "is_closed": False,
-                "fail_count": 0,
-                "quality_score": calculate_quality_score(spot, place_meta),
-                "updated_at": now_iso
-            }
+            if trusted:
+                patch_data = {
+                    "verified": True,
+                    "is_closed": False,
+                    "fail_count": 0,
+                    "quality_score": calculate_quality_score(spot, place_meta),
+                    "updated_at": now_iso
+                }
+            else:
+                # 이름이 맞지 않는 결과(옆 가게)로는 영업 중을 확인하지 않고, 실패로 세지도 않는다.
+                # 종전에는 보건소·주차장 결과로도 verified=True·fail_count=0이 돼, 카카오에 없는 곳이 검증된 채 남았다
+                # (2026-09-27 표본 150건 중 2~4%). 실패로 세면 표기만 다른 같은 가게(약 9%)가 폐업 쪽으로 밀린다
+                patch_data = {"updated_at": now_iso}
 
             # [Provider ID 추적]
             top_id = top.get("id") or top.get("placeId")
@@ -1210,7 +1241,8 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                     patch_data["price_tier"] = derived_tier
                     patch_data["avg_price_per_person"] = derived_avg
 
-            verified_count += 1
+            if trusted:
+                verified_count += 1
         else:
             # 3단계 다단계 폐업 안전 판별 (골목/거리/상권 스팟은 폐업 격리에서 면제 보호)
             #
