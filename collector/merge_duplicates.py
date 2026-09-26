@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """열린 중복 스팟을 찾아 소프트 병합한다. 기본은 드라이런이고 --apply일 때만 DB에 쓴다.
 
-자동 병합 대상은 하나다: normalize_spot_name이 같고 normalize_spot_address도 같은 열린 행들.
+자동 병합 대상은 둘이다.
+1. normalize_spot_name이 같고 normalize_spot_address도 같은 열린 행들.
+2. 10m 이내이고 지역어·일반어를 뗀 핵심 이름(spot_core_name)이 같은 열린 행들(2026-09-27 추가, 드라이런 192군집).
+   숙소·상품어가 한쪽에만 있거나 kakao 장소 번호가 서로 다르면 묶지 않는다.
 2026-09-26 실측 70그룹/141행이었고 표본이 전부 같은 가게였다(동궁과 월지/동궁과월지, 카페루시아/카페루시아 본점).
 정규화 주소에 번지 숫자가 없거나(동까지만 남은 주소) 그룹 안 좌표가 200m 넘게 떨어지면 자동 병합하지 않는다.
 
@@ -28,7 +31,8 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 
-from supabase_worker import load_env, normalize_spot_address, normalize_spot_name
+from supabase_worker import (load_env, normalize_spot_address, normalize_spot_name, spot_core_name,
+                             LODGING_PRODUCT_RE)
 
 NO_TRANSFER_FIELDS = {"id", "name", "category", "is_closed", "source", "created_at", "updated_at"}
 MAX_GROUP_DISTANCE_M = 200
@@ -101,6 +105,55 @@ def find_merge_groups(rows):
     return groups, skipped_far
 
 
+SAME_COORD_M = 10
+
+
+def find_samecoord_groups(rows, merged_ids):
+    """자동 병합 그룹 2: 10m 이내이고 지역어·일반어를 뗀 핵심 이름(spot_core_name)이 같은 열린 행들
+    ('카메라타'/'카메라타 음악감상실'). 주소 번지가 달라도 묶는다. 숙소·상품어가 한쪽에만 있거나,
+    두 행의 kakao 장소 번호가 서로 다르면 묶지 않는다. 좌표는 이름 검색으로 붙은 경우가 많아 핵심 이름 일치를 필수로 둔다."""
+    grid = {}
+    for r in rows:
+        if r["id"] in merged_ids or r.get("lat") in (None, "") or r.get("lng") in (None, ""):
+            continue
+        key = spot_core_name(r.get("name"), r.get("address"))
+        if len(key) < 3:
+            continue
+        r["_core"] = key
+        grid.setdefault((key, round(float(r["lat"]), 3), round(float(r["lng"]), 3)), []).append(r)
+    parent = {}
+
+    def find(x):
+        parent.setdefault(x, x)
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    by_id = {}
+    for (key, la, lo), bucket in grid.items():
+        near = [r for dla in (-0.001, 0, 0.001) for dlo in (-0.001, 0, 0.001)
+                for r in grid.get((key, round(la + dla, 3), round(lo + dlo, 3)), [])]
+        for a in bucket:
+            for b in near:
+                if a["id"] >= b["id"]:
+                    continue
+                d = _distance_m(a, b)
+                if d is None or d > SAME_COORD_M:
+                    continue
+                if bool(LODGING_PRODUCT_RE.search(a["name"])) != bool(LODGING_PRODUCT_RE.search(b["name"])):
+                    continue
+                ka, kb = (a.get("provider_ids") or {}).get("kakao"), (b.get("provider_ids") or {}).get("kakao")
+                if ka and kb and ka != kb:
+                    continue
+                by_id[a["id"]], by_id[b["id"]] = a, b
+                parent[find(a["id"])] = find(b["id"])
+    groups = {}
+    for i in by_id:
+        groups.setdefault(find(i), []).append(by_id[i])
+    return [sorted(g, key=lambda r: r["id"]) for g in groups.values() if len(g) >= 2]
+
+
 def find_review_pairs(rows, merged_ids):
     """검토 목록: 이름이 같고 50m 이내인데, 같은 시군구·같은 도로(동)에서 번지만 다른 쌍."""
     by_name = {}
@@ -161,10 +214,16 @@ def run_merge(apply=False, backup_dir=None, report_path=None, log=print):
     rows = fetch_open_spots(base_url, headers)
     groups, skipped_far = find_merge_groups(rows)
     plans = [plan_merge(g) for g in groups]
+    in_groups = {r["id"] for g in groups for r in g}
+    coord_groups = find_samecoord_groups(rows, in_groups)
+    coord_plans = [plan_merge(g) for g in coord_groups]
+    plans += coord_plans
     merged_ids = {d["id"] for _, dups, _ in plans for d in dups}
     review = find_review_pairs(rows, merged_ids)
+    addr_diff = sum(1 for g in coord_groups if len({normalize_spot_address(r.get("address") or "") for r in g}) > 1)
 
-    log(f"열린 행 {len(rows)}개 · 자동 병합 {len(groups)}그룹(닫을 행 {len(merged_ids)}개) · "
+    log(f"열린 행 {len(rows)}개 · 자동 병합 {len(groups)}+{len(coord_groups)}그룹(정규화 이름·주소 + 같은 좌표·핵심 이름, "
+        f"닫을 행 {len(merged_ids)}개, 좌표 그룹 중 주소 다름 {addr_diff}) · "
         f"좌표가 {MAX_GROUP_DISTANCE_M}m 넘게 떨어져 제외 {len(skipped_far)}그룹 · 검토 목록 {len(review)}쌍")
     for keep, dups, fill in plans[:10]:
         log(f"  남김 {keep['id']} {keep['name']} | {keep.get('address')}")
@@ -177,6 +236,8 @@ def run_merge(apply=False, backup_dir=None, report_path=None, log=print):
         with open(report_path, "w", encoding="utf-8") as f:
             json.dump({
                 "merge_groups": [{"keep": k["id"], "close": [d["id"] for d in ds], "fill_fields": sorted(fl),
+                                  "kind": "same_coord_core" if (k, ds, fl) in coord_plans else "name_address",
+                                  "address_differs": len({normalize_spot_address(r.get("address") or "") for r in [k, *ds]}) > 1,
                                   "rows": [{x: r.get(x) for x in ("id", "name", "address", "lat", "lng", "category")} for r in [k, *ds]]}
                                  for k, ds, fl in plans],
                 "skipped_far": [[r["id"] for r in g] for g in skipped_far],
@@ -205,7 +266,8 @@ def run_merge(apply=False, backup_dir=None, report_path=None, log=print):
         for d in dups:
             source = d.get("source") if isinstance(d.get("source"), dict) else {}
             note = (source.get("note") or "").strip()
-            source = {**source, "note": f"{note} | merged_into:{keep['id']} ({stamp[:8]} 정규화 이름·주소 중복)".lstrip(" |")}
+            reason = "같은 좌표·핵심 이름 중복" if (keep, dups, fill) in coord_plans else "정규화 이름·주소 중복"
+            source = {**source, "note": f"{note} | merged_into:{keep['id']} ({stamp[:8]} {reason})".lstrip(" |")}
             _request(f"{base_url}/rest/v1/spots?id=eq.{d['id']}", {**headers, "Prefer": "return=minimal"}, "PATCH",
                      {"is_closed": True, "source": source, "updated_at": now})
             closed += 1
