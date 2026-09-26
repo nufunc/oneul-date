@@ -209,6 +209,9 @@ def infer_slot(category: str, name: str) -> str:
         return "evening"
     return "day"
 
+FALLBACK_CAP = 30
+
+
 def search_discovery(query: str):
     """지도 검색 상위 8건. 종전에는 카카오 비공식 검색 사본을 따로 써서 결과가 1건 안팎이었고 장소 번호도 없었다.
     공용 search_naver를 쓰면 카카오 공식 로컬 API(2026-09-26 활성화)와 이미지 보충, provider id를 함께 탄다"""
@@ -280,6 +283,9 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
     batch_seen_names = set()
     # 거절 사유별 건수. 23번 돌아 0건이었는데 사유가 전부 로그 없는 continue라 원인을 가를 수 없었다(2026-09-26)
     rej = Counter()
+    # 축약 재검색은 '군산 카페'처럼 일반 검색의 상위 결과라 화제성 근거가 약하다. 첫 회차에 344건이 이 경로로
+    # 들어왔다(2026-09-26). 쿼리당 상위 3건, 회차당 FALLBACK_CAP건까지만 받는다
+    fallback_inserted = 0
 
     for query_text, region, area, default_moods in sampled_queries:
         places = search_discovery(query_text)
@@ -289,9 +295,9 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
             # 지도 장소 검색은 '강원 강릉 경포 안목해변 오션뷰 브런치' 같은 서술형 쿼리에 0건을 준다(첫 회차 117건).
             # 권역 다음의 지명 하나와 끝의 업종어('강릉 브런치')로 줄여 다시 찾는다. 30개 표본에서 1건 → 26건
             words = query_text.split()
-            if len(words) >= 3:
+            if len(words) >= 3 and fallback_inserted < FALLBACK_CAP:
                 used_query = f"{words[1]} {words[-1]}"
-                places = search_discovery(used_query)
+                places = search_discovery(used_query)[:3]
                 time.sleep(0.2)
         if not places:
             rej["검색무결과"] += 1
@@ -385,6 +391,10 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
                 "is_closed": False
             }
             discovered_spots.append(new_spot)
+            if used_query != query_text:
+                fallback_inserted += 1
+                if fallback_inserted >= FALLBACK_CAP:
+                    break
 
             if len(discovered_spots) >= max_discoveries:
                 break
