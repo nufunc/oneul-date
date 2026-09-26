@@ -1247,6 +1247,9 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
   // '한우맛집', '오션뷰카페'처럼 수식어와 업종을 붙여 친 검색어는 동의어 루프보다 먼저 '수식어 AND 업종'으로 본다.
   // 루프가 '맛집'만 보고 통과시켜 수식어가 무시됐다. 검색어나 수식어가 사전 항목('디저트카페', '비오는날')이면 사전에 맡긴다
   const bizMod = cleanQ.match(BIZ_SUFFIX);
+  // '가성비맛집'은 앱의 가성비 판정(가성비 칩과 같은 기준)과 업종의 AND로 본다. '가성비'는 사전 항목이라 아래로 가면 전국 맛집으로 샜다
+  if (bizMod && cleanQ === `가성비${bizMod[0]}`) return isBudgetSpot(spot) && bizMatches(spot, bizMod[0]);
+  if (cleanQ === '가성비') return isBudgetSpot(spot);
   if (
     bizMod &&
     !/\s/.test(cleanQ) &&
