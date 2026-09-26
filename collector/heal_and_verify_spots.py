@@ -119,6 +119,27 @@ NOTE_THEME_MAP = [
     (r'Gourmet|Dining|Restaurant|Food', '이탈리안·양식'),
     (r'Heritage_Gourmet|KoreanFood', '한식·미식'),
     (r'Bakery|Cafe|Dessert', '감성카페'),
+    # 2026-09-26: 빈 카테고리 1,109곳의 출처 메모 테마(Live_Research_2026_Theme_*). 지역만 담긴 메모와, 표본에서 테마와
+    # 가게가 어긋난 드라이브(카페)·야시장(술집)·기념일 사진(빵집) 메모는 넣지 않는다. 캠핑 BBQ는 실내 콘셉트 식당이 많아 바베큐로 둔다
+    (r'Props_SelectShop', '쇼핑/소품'),
+    (r'Racing_Luge', '레포츠/체험'),
+    (r'Tea_Ceremony|Hanok_TeaCulture', '전통찻집'),
+    (r'Book_Tea', '북카페'),
+    (r'Specialty_Roastery', '감성카페'),
+    (r'Terrace_Brunch', '브런치'),
+    (r'Audio_Music_Salon', '음악감상실'),
+    (r'Yacht_WaterLeisure', '수상스포츠'),
+    (r'Flagship_Popup', '팝업스토어'),
+    (r'Midnight_Book', '서점'),
+    (r'Outdoor_BBQ', '바베큐'),
+    (r'Climbing_Sports', '클라이밍'),
+    (r'Riverside_Stream_Walk|Seasonal_Picnic|Scenic_Sunset_View', '자연·산책'),
+    (r'Scenic_Train', '관광열차'),
+    (r'Stargazing_Observatory', '천문대'),
+    (r'Cablecar_Cruise', '케이블카·유람선'),
+    (r'Ceramic_ArtVillage', '공방·체험'),
+    (r'Flower_Festival', '축제/행사'),
+    (r'Traditional_Market', '전통시장'),
 ]
 
 # 4. 정밀 키워드 카테고리 매핑 규칙
