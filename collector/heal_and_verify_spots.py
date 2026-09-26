@@ -211,14 +211,9 @@ def heal_category_and_slot(spot: Dict[str, Any]) -> Tuple[str, str]:
                 cat = cname
                 break
                 
-    # 3. 기본 폴백
-    if not cat:
-        slot = spot.get("slot")
-        if slot == 'stay': cat = '호텔·감성숙소'
-        elif slot == 'day': cat = '감성카페'
-        elif slot == 'evening': cat = '이탈리안·양식'
-        elif slot == 'night': cat = '칵테일·위스키바'
-        else: cat = '데이트 명소'
+    # 3. 근거가 없으면 비워 둔다. 종전에는 시간대로 감성카페·이탈리안·칵테일바를 지어 넣어 동기화마다
+    #    활성 1,060곳(2026-09-26 실측)에 가짜 카테고리가 붙었고, 그 값이 다시 슬롯 교정과 실내 필터를 틀리게 했다.
+    #    앱은 빈 카테고리를 '데이트 스팟'으로 표시한다
 
     # 슬롯 정합성 교정
     slot = spot.get("slot")
