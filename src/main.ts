@@ -2002,13 +2002,10 @@ function getCleanSpotSummary(spot: Spot): string {
   return '에디터가 검증한 추천 데이트 명소';
 }
 
-// 옛 Supabase 프로젝트 주소가 기본값이라 매 로드마다 DNS 실패 요청을 보낸 뒤 폴백했다. 설정이 없으면 호출하지 않는다
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
-
-/** Groq 키를 프론트 번들에 노출하지 않기 위한 Supabase Edge Function 프록시 엔드포인트 */
-const AI_BRIEFING_ENDPOINT = `${SUPABASE_URL.replace(/\/$/, '')}/functions/v1/ai-briefing`;
-/** 프록시 주소가 확보된 경우에만 AI 브리핑을 시도한다 (실패 시 로컬 템플릿 폴백) */
-const AI_BRIEFING_ENABLED = Boolean(SUPABASE_URL);
+/** Groq 키를 프론트 번들에 노출하지 않기 위한 브리핑 프록시. OCI의 Caddy(https) → Deno(supabase/functions/ai-briefing) */
+const AI_BRIEFING_ENDPOINT = 'https://152-70-89-210.sslip.io/ai-briefing';
+/** 실패하면 로컬 템플릿 문장이 그대로 남는다 */
+const AI_BRIEFING_ENABLED = true;
 
 const aiStoryCache = new Map<string, string>();
 
@@ -2123,15 +2120,9 @@ async function fetchAiBriefing(
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 3500); // 3.5초 타임아웃 (프록시 왕복 1단계 반영)
 
-    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-
     const res = await fetch(AI_BRIEFING_ENDPOINT, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: anonKey,
-        Authorization: `Bearer ${anonKey}`,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ spots, mood: moodKey }),
       signal: controller.signal,
     });
