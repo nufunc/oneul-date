@@ -252,7 +252,9 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                     "address": addr1,
                     "location": f"{region} {area}".strip(),
                     "mood": default_moods,
-                    "price": "무료/입장권" if ctype_id in ("14", "12") else "현장결제",
+                    # '무료/입장권'은 파생 단계가 FREE 등급을 만들어 입장료가 있는 곳까지 무료로 보였고 '현장결제'는 가격이 아니다.
+                    # 실제 요금은 detailIntro의 usefee 등에서 받을 수 있으나 지금은 비워 둔다(2026-09-27)
+                    "price": None,
                     "summary": f"{title} — 한국관광공사 인증 {ctype_name} 명소 ({area})",
                     "category": ctype_name,
                     "image_url": first_img,

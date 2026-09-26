@@ -315,7 +315,8 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
                 "address": road_addr,
                 "mood": moods,
                 "location": real_loc,
-                "price": "2~4만원대",
+                # 가격은 비워 둔다. 고정 문자열을 넣으면 run_worker가 avg_price_per_person·price_tier까지 파생해 리조트가 1박 2~4만원으로 보였다(2026-09-27)
+                "price": None,
                 "summary": f"블로그 인기 추천 {real_reg} {real_area}의 감성 {cat or '데이트 핫플'}",
                 "category": cat,
                 "image_url": thum,
