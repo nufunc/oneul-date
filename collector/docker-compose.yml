@@ -41,3 +41,46 @@ services:
       resources:
         limits:
           memory: 128M
+
+  # AI 코스 브리핑(supabase/functions/ai-briefing). Supabase 프로젝트가 없어져 OCI에서 같은 Deno 코드를 돌린다
+  briefing:
+    image: denoland/deno:2.5.6
+    container_name: oneul-briefing
+    restart: unless-stopped
+    command: run --allow-net --allow-env /app/index.ts
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+    volumes:
+      - ../supabase/functions/ai-briefing:/app:ro
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  # GitHub Pages(https)에서 부르려면 브리핑도 https여야 한다. sslip.io 주소로 인증서를 자동 발급받는다
+  caddy:
+    image: caddy:2-alpine
+    container_name: oneul-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ${DATA_DIR:-./data}/caddy:/data
+    depends_on:
+      - briefing
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 64M

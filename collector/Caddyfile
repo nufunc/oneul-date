@@ -1,0 +1,6 @@
+152-70-89-210.sslip.io {
+	handle /ai-briefing {
+		reverse_proxy briefing:8000
+	}
+	respond 404
+}

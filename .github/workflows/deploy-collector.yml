@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'collector/**'
+      - 'supabase/functions/ai-briefing/**'
       - '.github/workflows/deploy-collector.yml'
   workflow_dispatch:
 
