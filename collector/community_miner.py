@@ -161,11 +161,12 @@ def run_community_mining(supabase_url: str, service_key: str, max_discoveries: i
             if not places or len(places) == 0:
                 continue
 
-            top = places[0]
+            # 상위 3건 가운데 후보 이름과 맞는 첫 결과를 쓴다(blog_miner와 같은 이유)
+            from youtube_vlog_miner import is_name_match
+            top = next((p for p in places[:3] if is_name_match(cand_name, (p.get("name") or "").strip())), places[0])
             real_name = top.get("name", "").strip()
 
             # 후보 키워드와 실제 상호명 유사도 검증
-            from youtube_vlog_miner import is_name_match
             if not is_name_match(cand_name, real_name):
                 continue
 
@@ -193,7 +194,8 @@ def run_community_mining(supabase_url: str, service_key: str, max_discoveries: i
 
             # DB 중복 검사 (이름 + 정규화 주소)
             pids = provider_ids_of(top)
-            if find_duplicate_spot(supabase_url, api_headers, real_name, road_addr, pids):
+            if find_duplicate_spot(supabase_url, api_headers, real_name, road_addr, pids,
+                                   top.get("y") or top.get("lat"), top.get("x") or top.get("lng")):
                 continue
 
             batch_seen_names.add(real_name)

@@ -9,6 +9,8 @@ ROWS = [
     {"id": 2, "name": "카페루시아", "address": "제주특별자치도 서귀포시 안덕면 난드르로 49-17 2층", "provider_ids": {"kakao": "1666998566"}},
     {"id": 3, "name": "주소없는집", "address": "", "provider_ids": {}},
     {"id": 4, "name": "올리오", "address": "서울 강남구 테헤란로 1", "provider_ids": {}},
+    {"id": 5, "name": "서울베이글", "address": "경기도 성남시 분당구 판교역로10번길 22", "provider_ids": {},
+     "lat": 37.38496646, "lng": 127.1119794},
 ]
 
 
@@ -27,11 +29,11 @@ def _fake_get(url, headers):
     return []
 
 
-def _dup(name, address="", pids=None):
+def _dup(name, address="", pids=None, lat=None, lng=None):
     orig = w._get_rows
     w._get_rows = _fake_get
     try:
-        return w.find_duplicate_spot("http://db", {}, name, address, pids)
+        return w.find_duplicate_spot("http://db", {}, name, address, pids, lat, lng)
     finally:
         w._get_rows = orig
 
@@ -55,6 +57,16 @@ def test_existing_row_without_address_blocks_same_name():
 
 def test_exact_name_other_branch_is_not_duplicate():
     assert not _dup("올리오", "부산 해운대구 달맞이길 30")
+
+
+def test_same_name_within_50m_is_duplicate_even_with_other_lot_number():
+    # 서울베이글: 번지 22와 14-3, 좌표는 같은 곳(2026-09-26 discovery 재삽입)
+    assert _dup("서울베이글", "경기 성남시 분당구 판교역로10번길 14-3", None, 37.3849664568, 127.1119794013)
+    assert _dup("서울 베이글", "경기 성남시 분당구 판교역로10번길 14-3", None, 37.38497, 127.11198)
+
+
+def test_same_name_far_away_is_not_duplicate():
+    assert not _dup("서울베이글", "경기 성남시 분당구 판교역로 99", None, 37.40, 127.13)
 
 
 def test_lookup_failure_is_fail_closed():

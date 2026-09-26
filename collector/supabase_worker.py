@@ -13,6 +13,7 @@ import urllib.request
 import urllib.parse
 import urllib.error
 import time
+import math
 import re
 import unicodedata
 from datetime import datetime, timezone, timedelta
@@ -527,7 +528,7 @@ def _get_rows(url, headers):
         return json.loads(res.read().decode('utf-8'))
 
 
-def find_duplicate_spot(supabase_url, headers, name, address="", provider_ids=None):
+def find_duplicate_spot(supabase_url, headers, name, address="", provider_ids=None, lat=None, lng=None):
     """DB에 이미 있는 스팟인지 확인한다. 닫힌 행도 본다(폐업·병합한 곳이 다시 들어오지 않게).
 
     1. provider_ids(지도 장소 번호)가 같은 행이 있으면 중복이다.
@@ -535,6 +536,8 @@ def find_duplicate_spot(supabase_url, headers, name, address="", provider_ids=No
        기존 행의 주소가 비어 있으면 같은 곳일 수 있으므로 중복으로 본다.
     3. 표기만 다른 이름(공백·부호·끝의 '점/본점')은 normalize_spot_name이 같고 정규화 주소도 같을 때만 중복이다.
        주소 없이 정규화 이름만으로 막지 않는다(체인점 오판 방지).
+    4. 좌표가 주어지면 정규화 이름이 같고 50m 이내인 행도 중복이다. 번지만 다르게 적힌 같은 가게를 막는다
+       (2026-09-26 서울베이글: 판교역로10번길 22와 14-3, 좌표는 소수 7자리까지 같음).
     새 후보의 주소가 없으면 정확한 이름 일치만으로 중복 처리한다(과거 마이너들의 동작과 동일).
     조회가 실패하면 중복일 수 있으니 건너뛴다(fail-closed): 데이터 오염이 놓친 발굴 1건보다 비용이 크다.
     """
@@ -543,7 +546,7 @@ def find_duplicate_spot(supabase_url, headers, name, address="", provider_ids=No
     clean_name = re.sub(r'\(.*?\)|\[.*?\]', '', name).strip()
     if not clean_name:
         return False
-    base = f"{supabase_url}/rest/v1/spots?select=id,name,address&order=id.asc"
+    base = f"{supabase_url}/rest/v1/spots?select=id,name,address,lat,lng&order=id.asc"
     target_addr = normalize_spot_address(address) if address else ""
 
     try:
@@ -567,7 +570,10 @@ def find_duplicate_spot(supabase_url, headers, name, address="", provider_ids=No
             if any(not row.get("address") or normalize_spot_address(row["address"]) == target_addr for row in rows):
                 return True
 
-        if not target_addr:
+        near = _near_fn(lat, lng)
+        if rows and near and any(near(row) for row in rows):
+            return True
+        if not target_addr and not near:
             return False
         core = normalize_spot_name(clean_name)
         if len(core) < 2:
@@ -579,7 +585,26 @@ def find_duplicate_spot(supabase_url, headers, name, address="", provider_ids=No
         return True
 
     return any(normalize_spot_name(row.get("name")) == core
-               and normalize_spot_address(row.get("address") or "") == target_addr for row in loose)
+               and ((target_addr and normalize_spot_address(row.get("address") or "") == target_addr)
+                    or (near and near(row))) for row in loose)
+
+
+def _near_fn(lat, lng, meters=50):
+    """(lat, lng)에서 meters 안에 있는 행인지 판정하는 함수. 좌표가 없거나 숫자가 아니면 None."""
+    try:
+        lat0, lng0 = float(lat), float(lng)
+    except (TypeError, ValueError):
+        return None
+
+    def near(row):
+        try:
+            lat1, lng1 = float(row.get("lat")), float(row.get("lng"))
+        except (TypeError, ValueError):
+            return False
+        dy = (lat1 - lat0) * 111_320
+        dx = (lng1 - lng0) * 111_320 * math.cos(math.radians(lat0))
+        return dx * dx + dy * dy <= meters * meters
+    return near
 
 
 _CONTROL_CHAR_RE = re.compile(r'[\x00-\x1f\x7f]')

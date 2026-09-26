@@ -228,7 +228,10 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
                 rej["검색무결과"] += 1
                 continue
 
-            top = places[0]
+            # 1위만 보면 '아르브'(성수)가 1위 '신당아르브'에 걸려 버려지고 2위 '성수향수공방 아르브'를 놓쳤다.
+            # 상위 3건 가운데 후보 이름과 맞는 첫 결과를 쓰고, 없으면 1위로 아래 검증을 그대로 탄다
+            from youtube_vlog_miner import is_name_match
+            top = next((p for p in places[:3] if is_name_match(candidate_name, (p.get("name") or "").strip())), places[0])
             real_name = top.get("name", "").strip()
 
             # batch_seen_names는 추가만 하고 확인하는 곳이 없어(258행)
@@ -274,7 +277,8 @@ def run_blog_mining(supabase_url: str, service_key: str, max_discoveries: int = 
 
             # 4. DB 중복 검사 (이름 + 정규화 주소)
             pids = provider_ids_of(top)
-            if find_duplicate_spot(supabase_url, api_headers, real_name, road_addr, pids):
+            if find_duplicate_spot(supabase_url, api_headers, real_name, road_addr, pids,
+                                   top.get("y") or top.get("lat"), top.get("x") or top.get("lng")):
                 rej["DB중복"] += 1
                 continue
 
