@@ -70,7 +70,7 @@ const GROQ_MODELS_CASCADE = [
 ];
 const DEFAULT_GROQ_MODEL = GROQ_MODELS_CASCADE[0];
 const GROQ_TEMPERATURE = 0.72;
-const GROQ_MAX_TOKENS = 350;
+const GROQ_MAX_TOKENS = 200;
 
 /**
  * Groq 호출 타임아웃.
@@ -137,6 +137,31 @@ const RATE_LIMIT_PER_HOUR = 250;
 const MINUTE_MS = 60_000;
 const HOUR_MS = 3_600_000;
 const MAX_TRACKED_IPS = 10_000;
+
+/**
+ * IP와 무관한 전역 상한. Origin은 브라우저 밖에서 위조할 수 있어, 여러 IP로 부르면 IP별 한도만으로는
+ * Groq 키 할당량이 바닥나 모든 사용자가 로컬 문장으로 떨어진다(Supabase 플랫폼 보호가 없어진 OCI 이전 뒤)
+ */
+const GLOBAL_LIMIT_PER_MINUTE = 60;
+const GLOBAL_LIMIT_PER_DAY = 3_000;
+let globalMinute: number[] = [];
+let globalDay = { date: '', count: 0 };
+
+function checkGlobalLimit(): { retryAfter: number; scope: string } | null {
+  const now = Date.now();
+  globalMinute = globalMinute.filter((t) => now - t < MINUTE_MS);
+  if (globalMinute.length >= GLOBAL_LIMIT_PER_MINUTE) {
+    return { retryAfter: Math.max(1, Math.ceil((MINUTE_MS - (now - globalMinute[0])) / 1000)), scope: 'global-minute' };
+  }
+  const today = new Date(now).toISOString().slice(0, 10);
+  if (globalDay.date !== today) globalDay = { date: today, count: 0 };
+  if (globalDay.count >= GLOBAL_LIMIT_PER_DAY) {
+    return { retryAfter: 3600, scope: 'global-day' };
+  }
+  globalMinute.push(now);
+  globalDay.count += 1;
+  return null;
+}
 
 /** IP → 최근 1시간 내 요청 타임스탬프(ms) 오름차순 목록 */
 const requestLog = new Map<string, number[]>();
@@ -396,9 +421,9 @@ const SYSTEM_PROMPT = `당신은 감성 라이프스타일 매거진(킨포크, 
    - "~로 하루가 더욱 특별해질 거예요." / "~에서 잊지 못할 추억을 완성해보세요."
 
 [핵심 작성 원칙]
-1. 분량 및 구성 (2~3문장, 약 120~220자):
-   - 1~2문장: 시간의 자연스러운 흐름(낮의 햇살/커피/산책 → 저녁의 미식/노을 → 밤의 조명/와인/야경 → 숙박의 쉼)과 공간의 감각적 매력을 엮은 코스 스토리.
-   - 마지막 1문장: 해당 코스를 200% 만끽할 수 있는 실용 팁이나 다정한 추천 포인트 (예: 발렛/주차 편의, 대표 시그니처 메뉴 페어링, 프라이빗 뷰 포인트 등).
+1. 분량 및 구성 (1~2문장, 약 80~120자, 절대 130자를 넘기지 마세요):
+   - 시간의 자연스러운 흐름(낮의 햇살/커피/산책 → 저녁의 미식/노을 → 밤의 조명/와인/야경 → 숙박의 쉼)과 공간의 감각적 매력을 엮은 코스 스토리.
+   - 실용 팁(발렛/주차 편의, 대표 시그니처 메뉴 등)은 분량 안에 자연스럽게 들어갈 때만 한 구절로 덧붙입니다.
 
 2. v4.0 메타데이터의 자연스럽고 감각적인 활용:
    - 인증 배지: 블루리본 서베이나 미쉐린 가이드 인증이 있다면 "블루리본 인증을 받은 대표 파스타 맛집", "미쉐린이 인정한 정갈한 테이블"처럼 신뢰감을 주는 에디토리얼 표현으로 자연스럽게 녹여냅니다.
@@ -589,7 +614,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
   // 3) 레이트리밋
   const ip = clientIp(req);
-  const limited = checkRateLimit(ip);
+  const limited = checkRateLimit(ip) ?? checkGlobalLimit();
   if (limited) {
     return jsonResponse(
       { error: `rate limit exceeded (per ${limited.scope})` },
