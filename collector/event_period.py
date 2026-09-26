@@ -86,7 +86,7 @@ def _event_rows(base_url, headers):
     """TourAPI 행사 행 전체(열린 행과 닫힌 행). 키셋으로 받는다."""
     rows, last = [], 0
     while True:
-        q = urllib.parse.urlencode({"select": "id,name,is_closed,source", "source->>type": "eq.tourapi",
+        q = urllib.parse.urlencode({"select": "id,name,is_closed,source,updated_at", "source->>type": "eq.tourapi",
                                     "category": "eq.축제/행사", "order": "id.asc", "id": f"gt.{last}", "limit": 1000})
         page = _request(f"{base_url}/rest/v1/spots?{q}", headers)
         if not page:
@@ -125,7 +125,7 @@ def plan_event_updates(rows, fetch, today, now=None):
     return plans
 
 
-def run_event_sync(apply=False, log=print):
+def run_event_sync(apply=False, log=print, backup_dir=None):
     env = load_env()
     base_url = (os.getenv("SUPABASE_URL") or env.get("SUPABASE_URL") or "").rstrip("/")
     key = os.getenv("SUPABASE_SERVICE_KEY") or env.get("SUPABASE_SERVICE_KEY") or env.get("VITE_SUPABASE_ANON_KEY") or ""
@@ -156,10 +156,20 @@ def run_event_sync(apply=False, log=print):
         log("드라이런: DB에 쓰지 않았다. 실제 반영은 --apply")
         return 0
 
+    # 일괄 쓰기 규약: 바꿀 행의 원래 값(source·is_closed·updated_at)을 먼저 백업한다
+    changed = [p for p in plans if p["changed"]]
+    if changed:
+        backup_dir = backup_dir or os.path.expanduser("~/oneul-backups")
+        os.makedirs(backup_dir, exist_ok=True)
+        by_id = {r["id"]: r for r in rows}
+        path = os.path.join(backup_dir, f"event_period_{datetime.now(KST).strftime('%Y%m%d-%H%M%S')}.json")
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump({"rows": [by_id[p["id"]] for p in changed],
+                       "actions": {str(p["id"]): p["action"] or "period" for p in changed}}, f, ensure_ascii=False, indent=2)
+        log(f"백업: {path}")
+
     now = datetime.now(timezone.utc).isoformat()
-    for p in plans:
-        if not p["changed"]:
-            continue
+    for p in changed:
         body = {"source": p["source"], "updated_at": now}
         if p["action"] == "close":
             body["is_closed"] = True
@@ -173,4 +183,6 @@ def run_event_sync(apply=False, log=print):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--apply", action="store_true", help="실제로 DB에 쓴다(기본은 드라이런)")
-    sys.exit(run_event_sync(apply=ap.parse_args().apply))
+    ap.add_argument("--backup-dir", default=os.path.expanduser("~/oneul-backups"))
+    args = ap.parse_args()
+    sys.exit(run_event_sync(apply=args.apply, backup_dir=args.backup_dir))
