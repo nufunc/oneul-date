@@ -15,6 +15,17 @@ def test_generic_leaf_is_kept():
     assert k("음식점 > 한식 > 육류,고기 > 삼겹살", "하남돼지집") == "삼겹살"
 
 
+def test_three_level_small_chain_falls_back():
+    assert k("음식점 > 카페 > 더노벰버라운지", "더노벰버라운지 하남미사점") == "카페"
+    assert k("음식점 > 한식 > 뽁식당", "뽁식당 배곧점") == "한식"
+
+
+def test_generic_type_in_name_is_kept():
+    assert k("여행 > 관광,명소 > 전망대", "남산전망대") == "전망대"
+    assert k("음식점 > 카페 > 커피전문점", "카페 틈") == "커피전문점"
+    assert k("음식점 > 한식 > 국수", "명동국수") == "국수"
+
+
 def test_empty_path():
     assert k("", "아무가게") is None
     assert k(None, "아무가게") is None

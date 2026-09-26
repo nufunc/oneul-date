@@ -137,20 +137,36 @@ def clean_keyword(name: str, location: str = "", address: str = "", region: str 
 _BRAND_GENERIC_SUFFIX_RE = re.compile(r'(호텔|리조트|커피|베이커리|점)$')
 
 
+def _is_brand_level(level, place_name):
+    """카카오 경로 한 단계가 브랜드(상호)인지. 두 경우만 브랜드로 본다.
+    1. 상호가 그 단계로 시작하고 남는 것이 없거나 지점명('…점')뿐이다('더노벰버라운지 하남미사점', '메가MGC커피 녹번점').
+       업종어는 대개 이름 뒤에 붙어('남산전망대', '명동국수') 앞머리 조건에 걸리지 않고, '카페 틈'처럼 앞에 와도
+       남는 말이 지점명이 아니라 걸리지 않는다.
+    2. 끝의 일반어(호텔·리조트·커피·베이커리·점)를 뗀 핵심어가 상호 안에 있다('앰배서더호텔' → '앰배서더').
+       '카페'는 떼지 않는다('디저트카페'가 '안나의디저트'에 걸려 오판)."""
+    name = re.sub(r'[^0-9a-z가-힣]', '', unicodedata.normalize('NFKC', place_name or '').lower())
+    lv = normalize_spot_name(level)
+    if len(lv) >= 2 and name.startswith(lv):
+        rest = name[len(lv):]
+        if not rest or re.search(r'(본점|직영점|점)$', rest):
+            return True
+    core = normalize_spot_name(_BRAND_GENERIC_SUFFIX_RE.sub("", level)) if len(level) > 2 else ""
+    return len(core) >= 2 and core != lv and core in name
+
+
 def kakao_category_from_path(path, place_name):
     """카카오 공식 API의 카테고리 경로('음식점 > 카페 > 커피전문점 > 에그카페24')에서 저장할 한 단계를 고른다.
-    기존 데이터와 비공식 경로처럼 마지막 단계를 쓰되, 4단계 이상이고 마지막 단계가 브랜드명이면 한 단계 위를 쓴다.
-    브랜드 판정: 끝의 일반어(호텔·리조트·커피·베이커리·점)를 뗀 핵심어가 정규화한 상호명에 들어 있다
-    ('앰배서더호텔' → '앰배서더'가 '머큐어 앰배서더 서울 홍대'에 있음). 전체 경로나 브랜드명을 넣으면
-    POLLUTED_CATEGORIES·체인 필터·프론트의 완전 일치 규칙이 빗나간다(2026-09-26 에그카페24·앰배서더호텔·메가MGC커피)."""
+    기존 데이터와 비공식 경로처럼 마지막 단계를 쓰되, 그 단계가 브랜드면 위로 올라가 브랜드가 아닌 첫 단계를 쓴다.
+    위의 두 단계('음식점 > 카페')는 브랜드로 보지 않는다. 3단계 경로의 소규모 체인('음식점 > 카페 > 더노벰버라운지')도
+    걸러진다(2026-09-28, 종전에는 4단계 이상만 봄). 전체 경로나 브랜드명을 넣으면 POLLUTED_CATEGORIES·체인 필터·
+    프론트의 완전 일치 규칙이 빗나간다(2026-09-26 에그카페24·앰배서더호텔·메가MGC커피)."""
     parts = [p.strip() for p in (path or "").split(">") if p.strip()]
     if not parts:
         return None
-    if len(parts) >= 4:
-        core = normalize_spot_name(_BRAND_GENERIC_SUFFIX_RE.sub("", parts[-1])) if len(parts[-1]) > 2 else ""
-        if len(core) >= 2 and core in re.sub(r'[^0-9a-z가-힣]', '', unicodedata.normalize('NFKC', place_name or '').lower()):
-            return parts[-2]
-    return parts[-1]
+    i = len(parts) - 1
+    while i >= 2 and _is_brand_level(parts[i], place_name):
+        i -= 1
+    return parts[i]
 
 
 def search_naver(query: str, limit: int = 3):
