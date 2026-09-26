@@ -28,6 +28,7 @@ from youtube_vlog_miner import run_youtube_vlog_mining
 from miners.catchtable_miner import run_catchtable_mining
 from miners.tourapi_miner import run_tourapi_mining
 from heal_and_verify_spots import heal_all_spots
+from merge_duplicates import run_merge
 from notifier import send_daily_digest
 
 if hasattr(sys.stdout, 'reconfigure'):
@@ -517,6 +518,17 @@ def run_cycle():
             log(f"9단계 자동 보정 오류: {e}", level="ERROR")
     else:
         log("⏩ 9단계(자동 보정 파이프라인) 대기 중 (2시간 주기 보호)")
+
+    # 10단계: 정규화 이름·주소가 같은 열린 중복 소프트 병합 (24시간 주기). 백업과 id 매핑은 볼륨에 남긴다
+    if is_step_due("merge_duplicates", 24.0):
+        log("▶ 10단계: 열린 중복 스팟 소프트 병합")
+        try:
+            run_merge(apply=True, backup_dir=os.path.join(os.path.dirname(LOG_DIR), "oneul-backups"),
+                      log=lambda m: log(f"  {m}"))
+        except Exception as e:
+            log(f"10단계 중복 병합 오류: {e}", level="ERROR")
+    else:
+        log("⏩ 10단계(중복 병합) 대기 중 (24시간 주기 보호)")
 
     # 일일 서머리 검사
     check_and_generate_daily_summary()
