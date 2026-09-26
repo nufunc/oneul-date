@@ -614,6 +614,16 @@ function isPastYearEvent(spot: Spot): boolean {
   return Boolean(years) && Math.max(...years!.map(Number)) < new Date().getFullYear();
 }
 
+/** 행사 기간 표시('📅 10.17~10.18', 진행 중이면 '진행 중 ~10.30'). 이름의 연도와 실제 회차가 달라도 날짜로 오해를 푼다 */
+function eventPeriodLabel(spot: Spot): string {
+  const ev = spot.source?.event;
+  if (!ev?.start || !ev?.end) return '';
+  const md = (d: string) => `${Number(d.slice(5, 7))}.${Number(d.slice(8, 10))}`;
+  const today = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+  if (ev.start <= today) return `진행 중 ~${md(ev.end)}`;
+  return ev.start === ev.end ? `📅 ${md(ev.start)}` : `📅 ${md(ev.start)}~${md(ev.end)}`;
+}
+
 function isCourseEligible(spot: Spot): boolean {
   return !isPastYearEvent(spot) && isValidSlot(spot.slot) && !isListicleEntry(spot) && !isBroadRegionDummy(spot) && !isPollutedMediaChannelDummy(spot) && !isZoneCompositeDummy(spot) && isRealStaySpot(spot);
 }
@@ -6004,7 +6014,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
         <div class="discovery-card-body">
           <div class="discovery-card-header">
             <h4 class="discovery-card-title discovery-name"><button type="button" class="discovery-name-link" data-detail-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 상세 보기">${escapeHtml(spot.name)}</button></h4>
-            <span class="discovery-card-category discovery-category">${escapeHtml(spot.category || '데이트 스팟')}</span>
+            <span class="discovery-card-category discovery-category">${escapeHtml(spot.category || '데이트 스팟')}${eventPeriodLabel(spot) ? ` · ${escapeHtml(eventPeriodLabel(spot))}` : ''}</span>
           </div>
           <p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>
           <div class="discovery-card-actions">
@@ -6034,7 +6044,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
       </div>
       <div class="discovery-card-body">
         <h4 class="discovery-card-title discovery-name"><button type="button" class="discovery-name-link" data-detail-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 상세 보기">${escapeHtml(spot.name)}</button></h4>
-        <span class="discovery-card-category discovery-category">${escapeHtml(spot.category || '데이트 스팟')}</span>
+        <span class="discovery-card-category discovery-category">${escapeHtml(spot.category || '데이트 스팟')}${eventPeriodLabel(spot) ? ` · ${escapeHtml(eventPeriodLabel(spot))}` : ''}</span>
         <p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>
         <div class="discovery-card-actions">
           <button class="btn-discovery-save ${isSaved ? 'is-saved' : ''}" data-spot-id="${spot.id}" aria-label="${isSaved ? '보관함에서 제외' : '보관함에 담기'}" title="${isSaved ? '보관함에서 제외' : '보관함에 담기'}">${isSaved ? '❤️' : '🤍'}</button>
@@ -7123,6 +7133,7 @@ function renderOverlayContent(): void {
             <div class="spot-detail-category-row">
               <span class="spot-detail-slot">${SLOT_META[slotKey]?.emoji || '✨'} ${SLOT_META[slotKey]?.label || ''} 추천</span>
               <span class="spot-detail-cat-pill">${escapeHtml(spot.category || '데이트 명소')}</span>
+              ${eventPeriodLabel(spot) ? `<span class="spot-detail-dist">${escapeHtml(eventPeriodLabel(spot))}</span>` : ''}
               <span class="spot-detail-dist">${escapeHtml(distText)}</span>
             </div>
             <h3 class="spot-detail-name">${escapeHtml(spot.name)}</h3>
