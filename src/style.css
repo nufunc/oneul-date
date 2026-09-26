@@ -4894,7 +4894,7 @@ html[data-theme-resolved="dark"] .btn-optimize-route {
   justify-content: center;
   gap: 6px;
   padding: 12px 16px;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-full);
   border: 1px solid rgba(244, 63, 94, 0.4);
   background: rgba(244, 63, 94, 0.08);
   color: #e11d48;
@@ -4964,6 +4964,11 @@ html[data-theme-resolved="dark"] .btn-saved-recommend {
   font-weight: 700;
   backdrop-filter: blur(4px);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+/* 핫플이면서 오늘 휴무면 두 배지가 같은 자리에 겹쳐 휴무 경고가 가려진다. 휴무를 핫플 아래로 내린다 */
+.badge-hot-floating + .badge-closed-floating {
+  top: 32px;
 }
 
 /* discovery-badge-dist(top:8px/left:8px, z-index:5)가 같은 카드에서 이
