@@ -19,6 +19,8 @@ from supabase_worker import (
 from category_filter import is_date_spot_category
 # efded74에서 이 import가 빠져 211행 infer_slot이 NameError를 냈고, 후보가 나와도 INSERT에 닿지 못했다(2026-09-26 확인: 전 기간 0행)
 from discovery_engine import infer_slot
+from blog_miner import fetch_blog_candidates
+from miners.catchtable_miner import extract_gourmet_candidates_from_web
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -141,23 +143,13 @@ def run_community_mining(supabase_url: str, service_key: str, max_discoveries: i
     batch_seen_names = set()
 
     for query_text, region, area, moods in sampled:
-        encoded = urllib.parse.quote(query_text)
-        html_content = ""
-        try:
-            url = f"https://search.daum.net/search?w=web&q={encoded}&sort=recency"
-            req = urllib.request.Request(url, headers=HEADERS)
-            with urllib.request.urlopen(req, timeout=5) as res:
-                html_content = res.read().decode('utf-8', errors='replace')
-        except Exception:
-            pass
-
-        if not html_content:
-            continue
-
-        raw_candidates = extract_list_items(html_content)
+        # 다음 웹검색(w=web)은 2026-09-26 기준 본문 없이 297바이트만 돌려줘 후보가 0건이었다(로그 '신규 발굴 없음' 937번).
+        # 커뮤니티 사이트는 직접 받을 수 없어, 블로그 수집기의 네이버 VIEW 추출과 캐치테이블의 모바일 VIEW 추출을
+        # 커뮤니티 쿼리로 돌린다. 후보는 아래의 지도 검색·상호명 대조·권역·카테고리·이미지 검증을 그대로 거친다
+        raw_candidates = list(dict.fromkeys(fetch_blog_candidates(query_text) + extract_gourmet_candidates_from_web(query_text)))
         time.sleep(0.2)
 
-        for cand_name in raw_candidates[:8]:
+        for cand_name in raw_candidates[:12]:
             search_query = f"{cand_name} {area}"
             places = search_naver(search_query)
             time.sleep(0.2)
