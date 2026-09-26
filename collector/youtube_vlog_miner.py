@@ -42,6 +42,7 @@ from supabase_worker import (search_naver, calculate_quality_score, load_env,
                              derive_region_area, is_zone_street_spot, find_duplicate_spot,
                              sanitize_spot, new_spot_id, is_polluted_header_name,
                              provider_ids_of)
+from score_engine import calculate_hot_score
 from category_filter import (
     is_date_spot_category,
     SLOT_STAY_CAT_RE,
@@ -1660,8 +1661,8 @@ def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
                     "is_shorts": False
                 }
             },
-            # 조회수 5만 이상 또는 좋아요 2,500개 이상 시 실시간 초인기 핫플(hot_score=85) 판정
-            "hot_score": (85.0 if (vinfo.get("views", 0) >= 50000 or vinfo.get("likes", 0) >= 2500) else 75.0) if (vinfo.get("views") or vinfo.get("likes")) else 60.0,
+            # enrich 5단계와 같은 식으로 계산한다. 따로 정한 85·75는 enrich가 곧 덮어써 의미가 없었다
+            "hot_score": calculate_hot_score({"url": vinfo["url"], "title": vinfo["title"], "views": vinfo["views"]}, None, True)[0],
             "quality_score": 90
         }
 
