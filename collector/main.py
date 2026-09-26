@@ -29,6 +29,7 @@ from miners.catchtable_miner import run_catchtable_mining
 from miners.tourapi_miner import run_tourapi_mining
 from heal_and_verify_spots import heal_all_spots
 from merge_duplicates import run_merge
+from event_period import run_event_sync
 from notifier import send_daily_digest
 
 if hasattr(sys.stdout, 'reconfigure'):
@@ -529,6 +530,16 @@ def run_cycle():
             log(f"10단계 중복 병합 오류: {e}", level="ERROR")
     else:
         log("⏩ 10단계(중복 병합) 대기 중 (24시간 주기 보호)")
+
+    # 11단계: TourAPI 행사 기간 동기화, 끝난 행사 닫기, 다음 회차가 잡힌 연례 행사 다시 열기 (24시간 주기)
+    if is_step_due("event_period", 24.0):
+        log("▶ 11단계: 행사 기간 동기화")
+        try:
+            run_event_sync(apply=True, log=lambda m: log(f"  {m}"))
+        except Exception as e:
+            log(f"11단계 행사 기간 동기화 오류: {e}", level="ERROR")
+    else:
+        log("⏩ 11단계(행사 기간) 대기 중 (24시간 주기 보호)")
 
     # 일일 서머리 검사
     check_and_generate_daily_summary()
