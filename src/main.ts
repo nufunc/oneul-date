@@ -1166,6 +1166,18 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
     if (rest) return false;
   }
 
+  // '익선동맛집'처럼 동네(동·역 등으로 끝남)와 업종을 붙여 친 검색어는 동의어 사전보다 먼저 나눈다.
+  // 사전이 '맛집'만 보고 곧바로 통과시켜 동네가 무시됐다. '디저트카페'처럼 앞이 동네가 아니면 건너뛴다
+  const bizEarly = cleanQ.match(BIZ_SUFFIX);
+  if (bizEarly && !/\s/.test(cleanQ)) {
+    const head = cleanQ.slice(0, -bizEarly[0].length);
+    const bareHead = head.replace(PLACE_SUFFIX_END, '');
+    if (bareHead !== head && bareHead.length >= 2) {
+      const placeText = [spot.location, spot.area, spot.address, spot.name].join(' ').toLowerCase();
+      return (placeText.includes(head) || placeText.includes(bareHead)) && matchesSearchQuery(spot, bizEarly[0]);
+    }
+  }
+
   // 2. 검색 대상 텍스트 조립
   const targetParts: string[] = [
     spot.name || '',
@@ -1275,7 +1287,19 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
   const compactQ = cleanQ.replace(/\s+/g, '');
   if (compactQ.length < 2) return false;
   const compactTarget = [spot.name, spot.area, spot.address].join('|').replace(/\s+/g, '').toLowerCase();
-  return compactTarget.includes(compactQ);
+  if (compactTarget.includes(compactQ)) return true;
+
+  // 지역어 목록에 없는 동네를 업종과 붙여 친 검색어('망원동카페', '익선동맛집')는 끝의 업종어를 떼어
+  // 동네(주소·이름에 있어야 함)와 업종의 AND로 본다. 동네 목록을 늘리지 않아도 새 동네에 통한다
+  const biz = cleanQ.match(BIZ_SUFFIX);
+  if (biz && !/\s/.test(cleanQ) && cleanQ.length - biz[0].length >= 2) {
+    const head = cleanQ.slice(0, -biz[0].length);
+    const bareHead = head.replace(PLACE_SUFFIX_END, '');
+    const placeText = [spot.location, spot.area, spot.address, spot.name].join(' ').toLowerCase();
+    const inHead = placeText.includes(head) || (bareHead.length >= 2 && placeText.includes(bareHead));
+    return inHead && matchesSearchQuery(spot, biz[0]);
+  }
+  return false;
 }
 
 /**
@@ -1713,6 +1737,10 @@ const SEARCH_PLACE_PREFIXES = [
 ].sort((a, b) => b.length - a.length);
 /** 지역어 바로 뒤에 붙는 행정·교통 접미사 */
 const PLACE_SUFFIX = /^(입구역|입구|역|동|시|구|읍|면)\s*/;
+/** 동네 이름 끝에 붙는 같은 접미사('망원동' → '망원') */
+const PLACE_SUFFIX_END = /(입구역|입구|역|동|시|구|읍|면)$/;
+/** 붙여 친 검색어 끝의 업종어 */
+const BIZ_SUFFIX = /(카페|맛집|술집|와인바|펍|호텔|펜션|베이커리|빵집|브런치|이자카야|포차)$/;
 
 /**
  * 네이버 지도 검색어 고도화 정제.
