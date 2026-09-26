@@ -12,6 +12,8 @@ def test_core_name_strips_region_and_generic_words():
     assert spot_core_name("춘천 산토리니 카페", addr) == spot_core_name("산토리니", addr) == "산토리니"
     # 붙여 쓴 지역어('춘천산토리니')는 떼지 못한다(알려진 한계)
     assert spot_core_name("카메라타 음악감상실") == "카메라타"
+    # 앞에 따로 붙은 업종어도 뗀다('보드게임카페 레드버튼 강남점' = '레드버튼 강남점')
+    assert spot_core_name("보드게임카페 레드버튼 강남점", "서울 강남구 1") == spot_core_name("레드버튼 강남점", "서울 강남구 1")
 
 
 def test_same_coord_same_core_is_grouped_even_with_other_lot_number():
