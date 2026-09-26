@@ -38,6 +38,9 @@ def fee_fields(raw):
     if not price:
         return None
     amounts = [int(a.replace(',', '')) for a in re.findall(r'(\d{1,3}(?:,\d{3})+|\d{3,6})\s*원', price)]
+    if amounts and max(amounts) < 1000:
+        # derive_price_tier_from_text는 네 자리 이상 숫자만 읽어 '500원'이 등급 없이 남았다
+        return {"price": price, "price_tier": "₩", "avg_price_per_person": max(amounts)}
     tier, avg = derive_price_tier_from_text(f"{max(amounts):,}원" if amounts else price)
     return {"price": price, "price_tier": tier, "avg_price_per_person": avg}
 
