@@ -26,7 +26,7 @@ interface Spot {
   lat?: number | null;
   lng?: number | null;
   quality_score?: number;
-  source: { type: string; url: string | null; note: string };
+  source: { type: string; url: string | null; note: string; event?: { start?: string; end?: string } };
   verified: boolean;
   is_closed?: boolean;
 
@@ -602,8 +602,13 @@ function isPollutedMediaChannelDummy(spot: Spot): boolean {
 }
 
 /** 코스 후보로 올릴 수 있는 스폿인지 — 생성·공유복원·저장복원 전 경로가 공유하는 단일 관문 */
-/** 축제·행사인데 이름에 올해보다 이른 연도가 든 곳('2025 진주전통공예비엔날레'). 행사 기간 데이터가 없어 이름으로 판정한다 */
+/**
+ * 끝난 행사. 수집기가 TourAPI 기간(source.event.end, 'YYYY-MM-DD')을 채운 행은 종료일로 보고,
+ * 없으면 축제·행사 카테고리의 이름에 올해보다 이른 연도가 든 곳('2025 진주전통공예비엔날레')으로 판정한다
+ */
 function isPastYearEvent(spot: Spot): boolean {
+  const end = spot.source?.event?.end;
+  if (end) return end < new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
   if (!/축제|행사|페스티벌/.test(spot.category || '')) return false;
   const years = (spot.name || '').match(/(?:19|20)\d{2}/g);
   return Boolean(years) && Math.max(...years!.map(Number)) < new Date().getFullYear();
