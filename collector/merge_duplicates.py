@@ -32,7 +32,7 @@ import urllib.request
 from datetime import datetime, timezone
 
 from supabase_worker import (load_env, normalize_spot_address, normalize_spot_name, spot_core_name,
-                             LODGING_PRODUCT_RE)
+                             LODGING_PRODUCT_RE, place_name_matches)
 
 NO_TRANSFER_FIELDS = {"id", "name", "category", "is_closed", "source", "created_at", "updated_at"}
 MAX_GROUP_DISTANCE_M = 200
@@ -154,6 +154,60 @@ def find_samecoord_groups(rows, merged_ids):
     return [sorted(g, key=lambda r: r["id"]) for g in groups.values() if len(g) >= 2]
 
 
+def coord_to_addresses(lat, lng, kakao_key):
+    """카카오 좌표→주소 변환. 도로명·지번 주소의 정규화 값 집합(없으면 빈 집합)."""
+    url = f"https://dapi.kakao.com/v2/local/geo/coord2address.json?x={lng}&y={lat}"
+    try:
+        req = urllib.request.Request(url, headers={"Authorization": f"KakaoAK {kakao_key}"})
+        docs = json.loads(urllib.request.urlopen(req, timeout=10).read().decode("utf-8")).get("documents") or []
+    except Exception:
+        return set()
+    out = set()
+    for d in docs:
+        for k in ("road_address", "address"):
+            a = (d.get(k) or {}).get("address_name")
+            if a:
+                out.add(normalize_spot_address(a))
+    return out
+
+
+def resolve_address_group(group, kakao_key):
+    """주소가 다른 같은 좌표 그룹에서 남길 행을 근거로 고른다. 공유 좌표를 주소로 바꿔 정규화 주소가 맞는 행을 남긴다.
+    맞는 행이 없거나, 맞는 행들의 주소가 서로 다르거나, 핵심 이름이 3자 이하(흔한 이름)면 None(검토)."""
+    if len(group[0].get("_core") or spot_core_name(group[0].get("name"), group[0].get("address"))) <= 3:
+        return None
+    lat = sum(float(r["lat"]) for r in group) / len(group)
+    lng = sum(float(r["lng"]) for r in group) / len(group)
+    truth = coord_to_addresses(lat, lng, kakao_key)
+    matched = [r for r in group if normalize_spot_address(r.get("address") or "") in truth]
+    if not matched or len({normalize_spot_address(r["address"]) for r in matched}) > 1:
+        return None
+    keep = min(matched, key=lambda r: r["id"])
+    # 좌표 자체가 이름 검색으로 다른 지점에 붙었을 수 있다('그라운드시소 서촌' 좌표가 세종대로 14를 가리킴).
+    # 좌표 100m 안에서 핵심 이름으로 카카오 장소를 찾아, 이름이 맞는 장소의 주소가 남길 행의 주소와 같을 때만 확정한다
+    if not _poi_confirms(keep, lat, lng, kakao_key):
+        return None
+    return [keep] + [r for r in group if r is not keep]
+
+
+def _poi_confirms(row, lat, lng, kakao_key, radius=100):
+    q = urllib.parse.quote(row.get("name") or "")
+    url = (f"https://dapi.kakao.com/v2/local/search/keyword.json?size=15&sort=distance&x={lng}&y={lat}&radius={radius}&query={q}")
+    try:
+        req = urllib.request.Request(url, headers={"Authorization": f"KakaoAK {kakao_key}"})
+        docs = json.loads(urllib.request.urlopen(req, timeout=10).read().decode("utf-8")).get("documents") or []
+    except Exception:
+        return False
+    target = normalize_spot_address(row.get("address") or "")
+    for d in docs:
+        if not place_name_matches(row.get("name"), d.get("place_name")):
+            continue
+        addrs = {normalize_spot_address(d.get("road_address_name") or ""), normalize_spot_address(d.get("address_name") or "")}
+        if target in addrs:
+            return True
+    return False
+
+
 def find_review_pairs(rows, merged_ids):
     """검토 목록: 이름이 같고 50m 이내인데, 같은 시군구·같은 도로(동)에서 번지만 다른 쌍."""
     by_name = {}
@@ -223,14 +277,27 @@ def run_merge(apply=False, backup_dir=None, report_path=None, log=print, skip_ad
     differs = lambda g: len({normalize_spot_address(r.get("address") or "") for r in g}) > 1
     skipped_addr = [g for g in coord_groups if differs(g)] if skip_address_differs else []
     coord_groups = [g for g in coord_groups if not (skip_address_differs and differs(g))]
+    # 주소가 다른 그룹은 카카오 키가 있으면 공유 좌표의 주소와 그 자리의 카카오 장소로 남길 행을 고른다.
+    # 고르지 못한 그룹(맞는 행 없음, 흔한 이름, 장소 확인 실패)은 계속 건너뛴다
+    resolved_addr = []
+    kakao_key = os.getenv("KAKAO_REST_API_KEY") or env.get("KAKAO_REST_API_KEY") or ""
+    if skipped_addr and kakao_key:
+        still = []
+        for g in skipped_addr:
+            ordered = resolve_address_group(g, kakao_key)
+            (resolved_addr if ordered else still).append(ordered or g)
+            time.sleep(0.2)
+        skipped_addr = still
+    coord_groups += resolved_addr
     coord_plans = [plan_merge(g) for g in coord_groups]
+    resolved_keep_ids = {g[0]["id"] for g in resolved_addr}
     plans += coord_plans
     merged_ids = {d["id"] for _, dups, _ in plans for d in dups}
     review = find_review_pairs(rows, merged_ids)
     addr_diff = sum(1 for g in coord_groups if differs(g))
 
     log(f"열린 행 {len(rows)}개 · 자동 병합 {len(groups)}+{len(coord_groups)}그룹(정규화 이름·주소 + 같은 좌표·핵심 이름, "
-        f"닫을 행 {len(merged_ids)}개, 좌표 그룹 중 주소 다름 {addr_diff}, 주소 달라 건너뜀 {len(skipped_addr)}) · "
+        f"닫을 행 {len(merged_ids)}개, 주소가 달라 좌표 주소로 남길 행을 고른 그룹 {len(resolved_addr)}, 주소 달라 건너뜀 {len(skipped_addr)}) · "
         f"좌표가 {MAX_GROUP_DISTANCE_M}m 넘게 떨어져 제외 {len(skipped_far)}그룹 · 검토 목록 {len(review)}쌍")
     for keep, dups, fill in plans[:10]:
         log(f"  남김 {keep['id']} {keep['name']} | {keep.get('address')}")
@@ -243,7 +310,8 @@ def run_merge(apply=False, backup_dir=None, report_path=None, log=print, skip_ad
         with open(report_path, "w", encoding="utf-8") as f:
             json.dump({
                 "merge_groups": [{"keep": k["id"], "close": [d["id"] for d in ds], "fill_fields": sorted(fl),
-                                  "kind": "same_coord_core" if (k, ds, fl) in coord_plans else "name_address",
+                                  "kind": ("same_coord_core_resolved" if k["id"] in resolved_keep_ids else "same_coord_core")
+                                          if (k, ds, fl) in coord_plans else "name_address",
                                   "address_differs": len({normalize_spot_address(r.get("address") or "") for r in [k, *ds]}) > 1,
                                   "rows": [{x: r.get(x) for x in ("id", "name", "address", "lat", "lng", "category")} for r in [k, *ds]]}
                                  for k, ds, fl in plans],
@@ -274,7 +342,8 @@ def run_merge(apply=False, backup_dir=None, report_path=None, log=print, skip_ad
         for d in dups:
             source = d.get("source") if isinstance(d.get("source"), dict) else {}
             note = (source.get("note") or "").strip()
-            reason = "같은 좌표·핵심 이름 중복" if (keep, dups, fill) in coord_plans else "정규화 이름·주소 중복"
+            reason = ("같은 좌표·핵심 이름 중복, 좌표 주소와 맞는 행을 남김" if keep["id"] in resolved_keep_ids
+                      else "같은 좌표·핵심 이름 중복" if (keep, dups, fill) in coord_plans else "정규화 이름·주소 중복")
             source = {**source, "note": f"{note} | merged_into:{keep['id']} ({stamp[:8]} {reason})".lstrip(" |")}
             _request(f"{base_url}/rest/v1/spots?id=eq.{d['id']}", {**headers, "Prefer": "return=minimal"}, "PATCH",
                      {"is_closed": True, "source": source, "updated_at": now})

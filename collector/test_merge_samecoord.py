@@ -28,6 +28,22 @@ def test_far_apart_is_not_grouped():
     assert find_samecoord_groups([_r(1, "칠성조선소"), _r(2, "칠성조선소", lat=38.21)], set()) == []
 
 
+def test_address_group_keeps_row_matching_coordinate_address():
+    import merge_duplicates as m
+    g = [_r(1, "도멘청담", "서울 강남구 압구정로79길 19"), _r(2, "도멘청담", "서울 강남구 도산대로57길 8")]
+    orig = (m.coord_to_addresses, m._poi_confirms)
+    m.coord_to_addresses = lambda lat, lng, key: {m.normalize_spot_address("서울 강남구 도산대로57길 8")}
+    m._poi_confirms = lambda row, lat, lng, key: True
+    try:
+        assert [r["id"] for r in m.resolve_address_group(g, "k")] == [2, 1]  # 최소 id가 아니라 주소가 맞는 행을 남긴다
+        m._poi_confirms = lambda row, lat, lng, key: False
+        assert m.resolve_address_group(g, "k") is None  # 그 자리의 카카오 장소로 확인되지 않으면 검토
+        m._poi_confirms = lambda row, lat, lng, key: True
+        assert m.resolve_address_group([_r(1, "에이트", "대전 1"), _r(2, "에이트", "대전 2")], "k") is None  # 흔한 이름
+    finally:
+        m.coord_to_addresses, m._poi_confirms = orig
+
+
 if __name__ == "__main__":
     for fn in [v for k, v in list(globals().items()) if k.startswith("test_")]:
         fn()
