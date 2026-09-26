@@ -133,6 +133,26 @@ def clean_keyword(name: str, location: str = "", address: str = "", region: str 
         return f"{clean} {area_hint}".strip()
     return clean
 
+# '카페'는 떼지 않는다: '디저트카페'가 '디저트'로 줄어 '안나의디저트'에 걸려 브랜드로 오판됐다(2026-09-27 전후 비교)
+_BRAND_GENERIC_SUFFIX_RE = re.compile(r'(호텔|리조트|커피|베이커리|점)$')
+
+
+def kakao_category_from_path(path, place_name):
+    """카카오 공식 API의 카테고리 경로('음식점 > 카페 > 커피전문점 > 에그카페24')에서 저장할 한 단계를 고른다.
+    기존 데이터와 비공식 경로처럼 마지막 단계를 쓰되, 4단계 이상이고 마지막 단계가 브랜드명이면 한 단계 위를 쓴다.
+    브랜드 판정: 끝의 일반어(호텔·리조트·커피·베이커리·점)를 뗀 핵심어가 정규화한 상호명에 들어 있다
+    ('앰배서더호텔' → '앰배서더'가 '머큐어 앰배서더 서울 홍대'에 있음). 전체 경로나 브랜드명을 넣으면
+    POLLUTED_CATEGORIES·체인 필터·프론트의 완전 일치 규칙이 빗나간다(2026-09-26 에그카페24·앰배서더호텔·메가MGC커피)."""
+    parts = [p.strip() for p in (path or "").split(">") if p.strip()]
+    if not parts:
+        return None
+    if len(parts) >= 4:
+        core = normalize_spot_name(_BRAND_GENERIC_SUFFIX_RE.sub("", parts[-1])) if len(parts[-1]) > 2 else ""
+        if len(core) >= 2 and core in re.sub(r'[^0-9a-z가-힣]', '', unicodedata.normalize('NFKC', place_name or '').lower()):
+            return parts[-2]
+    return parts[-1]
+
+
 def search_naver(query: str, limit: int = 3):
     # 1. 네이버 지도 검색 시도
     url = f"https://map.naver.com/p/api/search/allSearch?query={urllib.parse.quote(query)}&type=all&searchCoord=127.0276197;37.497942&boundary="
@@ -171,9 +191,7 @@ def search_naver(query: str, limit: int = 3):
                                 "name": d.get("place_name"),
                                 "roadAddress": d.get("road_address_name") or d.get("address_name"),
                                 "thumUrl": None,
-                                # 공식 API는 '음식점 > 카페'처럼 전체 경로를 준다. 기존 데이터와 비공식 경로처럼 마지막 단계만 쓴다.
-                                # 전체 경로로 넣으면 POLLUTED_CATEGORIES·프론트의 완전 일치 규칙이 빗나간다
-                                "category": (d.get("category_name") or "").split(">")[-1].strip() or None,
+                                "category": kakao_category_from_path(d.get("category_name"), d.get("place_name")),
                                 "x": d.get("x"),
                                 "y": d.get("y"),
                             }
