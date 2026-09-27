@@ -2799,9 +2799,13 @@ function buildShareUrl(spotIds: number[]): string {
   return `${location.origin}${location.pathname}${location.search}#c=${spotIds.join('.')}`;
 }
 
-/** 공유 URL을 OS 공유 시트(Web Share API)로 우선 시도하고, 미지원 시 클립보드 복사로 폴백 */
-async function shareOrCopyLink(url: string): Promise<void> {
+/**
+ * 공유 URL을 OS 공유 시트(Web Share API)로 우선 시도하고, 미지원 시 클립보드 복사로 폴백.
+ * dropped: 뺀 장소 수. 제외 안내와 완료 안내를 따로 띄우면 뒤의 것이 앞의 것을 덮어 한 번만 알린다
+ */
+async function shareOrCopyLink(url: string, dropped = 0): Promise<void> {
   if (navigator.share) {
+    if (dropped > 0) showToast(`${dropped}곳을 빼고 공유해요`);
     try {
       await navigator.share({ title: '오늘 데이트', url });
       return;
@@ -2812,7 +2816,7 @@ async function shareOrCopyLink(url: string): Promise<void> {
   }
   try {
     await navigator.clipboard.writeText(url);
-    showToast('🔗 공유 링크가 복사되었어요');
+    showToast(dropped > 0 ? `🔗 ${dropped}곳을 빼고 공유 링크를 복사했어요` : '🔗 공유 링크가 복사되었어요');
   } catch {
     showToast('복사하지 못했어요');
   }
@@ -6742,18 +6746,12 @@ function renderOverlayContent(): void {
         e.stopPropagation();
         const item = loadSavedCourses().find((c) => c.id === btn.dataset.shareId);
         if (!item || item.spotIds.length === 0) return;
-        const eligibleIds = item.spotIds.filter((id) => {
-          const spot = spotById.get(id);
-          return spot && isCourseEligible(spot);
-        });
-        if (eligibleIds.length === 0) {
+        const { steps, dropped } = resolveSavedSteps(item.spotIds);
+        if (steps.length === 0) {
           showToast('공유할 수 있는 장소가 없어요');
           return;
         }
-        if (eligibleIds.length < item.spotIds.length) {
-          showToast(`검증에 실패한 장소 ${item.spotIds.length - eligibleIds.length}곳을 제외하고 공유해요`);
-        }
-        shareOrCopyLink(buildShareUrl(eligibleIds));
+        shareOrCopyLink(buildShareUrl(steps.map((st) => st.spotId as number)), dropped);
       });
     });
 
