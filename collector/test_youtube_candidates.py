@@ -59,6 +59,47 @@ def test_saved_registry_gets_new_channels_and_handle_fixes():
     assert "@gahiiide" in v and "누군가" in v
 
 
+
+def _isolated(fn):
+    import io, os, tempfile
+    d = tempfile.mkdtemp()
+    saved = {k: getattr(y, k) for k in ("HISTORY_PATH", "FAILURES_PATH", "VERIFIED_CHANNELS_PATH", "_innertube_web",
+                                         "get_youtube_video_info", "_day_course_queries")}
+    y.HISTORY_PATH, y.FAILURES_PATH, y.VERIFIED_CHANNELS_PATH = (os.path.join(d, n) for n in ("h.json", "f.json", "v.json"))
+    y._day_course_queries = lambda count=5: []
+    try:
+        return fn()
+    finally:
+        for k, v in saved.items():
+            setattr(y, k, v)
+
+
+def test_rate_limit_ends_the_round():
+    import io, urllib.error
+
+    def boom(endpoint, body, timeout=10):
+        raise urllib.error.HTTPError("u", 429, "Too Many Requests", {}, io.BytesIO(b""))
+
+    def run():
+        y._innertube_web = boom
+        y.get_youtube_video_info = lambda *a, **k: (_ for _ in ()).throw(AssertionError("429 뒤에 영상 조회를 계속함"))
+        return y.run_youtube_vlog_mining("http://db", "k", limit=1)
+    assert _isolated(run) == 0
+
+
+def test_video_failing_three_times_goes_to_history():
+    item = {"contents": [{"videoRenderer": {"videoId": "ccccccccccc", "title": {"runs": [{"text": "t"}]}}}]}
+
+    def run():
+        y._innertube_web = lambda endpoint, body, timeout=10: item if endpoint == "search" else {}
+        y.get_youtube_video_info = lambda *a, **k: None
+        for _ in range(3):
+            assert "ccccccccccc" not in y.load_processed_history()
+            y.run_youtube_vlog_mining("http://db", "k", limit=1)
+        return y.load_processed_history()
+    assert "ccccccccccc" in _isolated(run)
+
+
 if __name__ == "__main__":
     for fn in [v for k, v in list(globals().items()) if k.startswith("test_")]:
         fn()

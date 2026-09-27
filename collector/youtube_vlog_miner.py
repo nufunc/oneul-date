@@ -30,6 +30,7 @@ import json
 from datetime import datetime, timezone
 import time
 import random
+import urllib.error
 import urllib.request
 import urllib.parse
 import argparse
@@ -136,6 +137,18 @@ _STATE_DIR = (os.path.dirname(os.environ["LOG_DIR"]) if os.environ.get("LOG_DIR"
               else os.path.dirname(os.path.abspath(__file__)))
 HISTORY_PATH = os.path.join(_STATE_DIR, ".processed_videos.json")
 HISTORY_MAX = 2000
+# 정보 조회나 마이닝이 실패한 영상의 실패 횟수. 조회수가 높아 매 회차 풀 앞에 다시 오므로 3회 실패하면 이력에 넣는다
+FAILURES_PATH = os.path.join(_STATE_DIR, ".video_failures.json")
+MAX_VIDEO_FAILURES = 3
+
+
+class YouTubeRateLimited(Exception):
+    """유튜브가 429를 돌려줬다. 그 회차를 끝낸다."""
+
+
+def _raise_if_rate_limited(e: Exception) -> None:
+    if isinstance(e, urllib.error.HTTPError) and e.code == 429:
+        raise YouTubeRateLimited(str(e)) from e
 
 # ─────────────────────────────────────────────────────────────
 # [Channel Registry] 검증된 고품질 미식/여행 채널 레지스트리 & 자율 승격
@@ -234,7 +247,7 @@ def record_channel_success(author: str, video_title: str, spots_registered: int)
     
     # 이미 검증된 채널이면 스킵
     for k, v in verified.items():
-        if v.get("name") == author or k == author:
+        if k == author or _channel_title_matches(v.get("name", ""), author):
             return
             
     c_info = candidates.setdefault(author, {"name": author, "success_count": 0, "total_spots": 0})
@@ -785,6 +798,7 @@ def get_youtube_video_info(video_id: str, verbose: bool = False) -> dict | None:
             thum_url = data.get("thumbnail_url", "")
         diag.append("oEmbed:OK")
     except Exception as e:
+        _raise_if_rate_limited(e)
         diag.append(f"oEmbed:FAIL({str(e)[:40]})")
 
     description, views, likes, desc_source = "", 0, 0, "none"
@@ -883,6 +897,23 @@ def save_processed_history(video_ids: list[str]) -> None:
                       f, ensure_ascii=False)
     except Exception as e:
         print(f"  ⚠️ 처리 이력 저장 실패: {e}")
+
+
+def _load_failures() -> dict:
+    try:
+        with open(FAILURES_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
+def _save_failures(failures: dict) -> None:
+    try:
+        with open(FAILURES_PATH, "w", encoding="utf-8") as f:
+            json.dump(failures, f)
+    except Exception as e:
+        print(f"  ⚠️ 실패 횟수 저장 실패: {e}")
 
 
 # 일본어 가나 / 태국어 등 비(非)한국어 문자 — 해외 영상 판별 보조
@@ -1561,7 +1592,7 @@ def attach_video_to_existing(supabase_url, headers, existing, vinfo, dry_run=Fal
 
 
 def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
-                    dry_run: bool = False, verbose: bool = True) -> dict:
+                    dry_run: bool = False, verbose: bool = True, manual: bool = False) -> dict:
     """이미 조회된 영상 메타데이터로 역방향 마이닝 수행. 통계 dict 반환."""
     stats = _new_stats()
 
@@ -1729,7 +1760,8 @@ def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
             "source": {
                 "type": "youtube_vlog",
                 "url": vinfo["url"],
-                "note": f"{vinfo['author']} 유튜브 ({vinfo['title'][:40]})"
+                # --url 수동 실행은 'manual: '로 시작해 자동 탐색 경로와 구분한다
+                "note": f"{'manual: ' if manual else ''}{vinfo['author']} 유튜브 ({vinfo['title'][:40]})"
             },
             "social_links": {
                 "youtube": {
@@ -1789,7 +1821,7 @@ def mine_youtube_vlog(url: str, supabase_url: str, supabase_key: str, dry_run: b
         print(f"  ℹ️ 설명란 부재 — 고정 댓글, 자막 및 Groq 지능형 추출 파이프라인으로 처리를 시도합니다.")
 
     print(f"\n🔍 [2/3] 영상 내 방문 장소 추출 및 지도 정밀 검증 중...{' [DRY-RUN]' if dry_run else ''}")
-    stats = mine_video_info(vinfo, supabase_url, supabase_key, dry_run=dry_run)
+    stats = mine_video_info(vinfo, supabase_url, supabase_key, dry_run=dry_run, manual=True)
 
     print(f"\n🎉 [3/3] 유튜브 역방향 마이닝 완료: 총 {stats['registered']}개 스팟 "
           f"{'등록 예정(dry-run)' if dry_run else '신규 등록 완료'}!")
@@ -1909,7 +1941,8 @@ def _search_innertube_videos(query: str, max_results: int = 20) -> list[dict]:
     try:
         data = _innertube_web("search", {"query": query, "params": SEARCH_PARAMS_POPULAR_THIS_YEAR}, timeout=8)
         return _parse_video_items(data)[:max_results]
-    except Exception:
+    except Exception as e:
+        _raise_if_rate_limited(e)
         return []
 
 
@@ -1941,7 +1974,8 @@ def _browse_channel_videos(handle: str, name: str, popular: bool = True) -> list
             if token:
                 data = _innertube_web("browse", {"continuation": token})
         return _parse_video_items(data)
-    except Exception:
+    except Exception as e:
+        _raise_if_rate_limited(e)
         return []
 
 
@@ -1998,38 +2032,43 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
                 break
         return added
 
-    # 1-1. 검증된 채널 4곳을 샘플링해 채널 동영상 탭에서 직접 받는다. 핸들이 없거나 틀리면 이름 검색으로 대신한다
-    # 동네 하루코스 채널은 영상이 모두 코스형이라 인기순을 받는다. 다른 채널은 인기순에 역대 인기작(축구 하이라이트,
-    # 수년 전 먹방)이 먼저 와서 최신순을 받아 조회수로 정렬한다
-    for ch in random.sample(verified_channels, min(4, len(verified_channels))):
-        popular = ch.get("category") == "vlog_day_course"
-        items = _browse_channel_videos(ch.get("handle", ""), ch.get("name", ""), popular=popular)
-        via = "인기순" if popular else "최신순"
-        if not items:
-            items, via = _search_innertube_videos(f"{ch.get('name', '')} 여행 맛집 코스", max_results=10), "이름 검색"
-        added = take(sorted(items, key=_pool_priority, reverse=True), 3)
-        if added:
-            print(f"  🌟 [검증 채널] '{ch.get('name')}' {via} 영상 {added}개 확보")
-
-    # 2. 일반 미식/데이트/여행 쿼리 풀 탐색
-    # 쿼리 풀 랜덤 셔플. 고정 목록만 돌면 같은 상위 영상이 반복되고 해외·쇼츠가 섞여(09-16~17: 488개 중 165개 낭비)
-    # blog·discovery가 쓰는 지역 동적 쿼리 10개와 '{동네} 하루코스' 5개를 섞는다. 검증 경로는 그대로라 정확도는 같다
+    rate_limited = False
     try:
-        from area_seeds import generate_dynamic_queries
-        dynamic_kws = [f"{q} 브이로그" for q, _, _, _ in generate_dynamic_queries(count=10)]
-    except Exception:
-        dynamic_kws = []
-    shuffled_kws = list(SEARCH_KEYWORDS) + dynamic_kws + _day_course_queries(5)
-    random.shuffle(shuffled_kws)
-    per_kw_cap = max(3, -(-pool_target // len(shuffled_kws)))
+        # 1-1. 검증된 채널 4곳을 샘플링해 채널 동영상 탭에서 직접 받는다. 핸들이 없거나 틀리면 이름 검색으로 대신한다
+        # 동네 하루코스 채널은 영상이 모두 코스형이라 인기순을 받는다. 다른 채널은 인기순에 역대 인기작(축구 하이라이트,
+        # 수년 전 먹방)이 먼저 와서 최신순을 받아 조회수로 정렬한다
+        for ch in random.sample(verified_channels, min(4, len(verified_channels))):
+            popular = ch.get("category") == "vlog_day_course"
+            items = _browse_channel_videos(ch.get("handle", ""), ch.get("name", ""), popular=popular)
+            via = "인기순" if popular else "최신순"
+            if not items:
+                items, via = _search_innertube_videos(f"{ch.get('name', '')} 여행 맛집 코스", max_results=10), "이름 검색"
+            added = take(sorted(items, key=_pool_priority, reverse=True), 3)
+            if added:
+                print(f"  🌟 [검증 채널] '{ch.get('name')}' {via} 영상 {added}개 확보")
 
-    for kw in shuffled_kws:
-        if len(pool) >= pool_target:
-            break
-        before = seen_in_history
-        added = take(_search_innertube_videos(kw, max_results=20), per_kw_cap)
-        if added > 0:
-            print(f"  • '{kw}' 검색: 신규 {added}개 확보 (이력 스킵 {seen_in_history - before}개)")
+        # 2. 일반 미식/데이트/여행 쿼리 풀 탐색
+        # 쿼리 풀 랜덤 셔플. 고정 목록만 돌면 같은 상위 영상이 반복되고 해외·쇼츠가 섞여(09-16~17: 488개 중 165개 낭비)
+        # blog·discovery가 쓰는 지역 동적 쿼리 10개와 '{동네} 하루코스' 5개를 섞는다. 검증 경로는 그대로라 정확도는 같다
+        try:
+            from area_seeds import generate_dynamic_queries
+            dynamic_kws = [f"{q} 브이로그" for q, _, _, _ in generate_dynamic_queries(count=10)]
+        except Exception:
+            dynamic_kws = []
+        shuffled_kws = list(SEARCH_KEYWORDS) + dynamic_kws + _day_course_queries(5)
+        random.shuffle(shuffled_kws)
+        per_kw_cap = max(3, -(-pool_target // len(shuffled_kws)))
+
+        for kw in shuffled_kws:
+            if len(pool) >= pool_target:
+                break
+            before = seen_in_history
+            added = take(_search_innertube_videos(kw, max_results=20), per_kw_cap)
+            if added > 0:
+                print(f"  • '{kw}' 검색: 신규 {added}개 확보 (이력 스킵 {seen_in_history - before}개)")
+    except YouTubeRateLimited as e:
+        rate_limited = True
+        print(f"  ⛔ [YouTube 429] 후보 수집 중 요청 한도에 걸려 이번 회차의 유튜브 요청을 멈춥니다: {e}")
 
     # 조회수 10만 회 이상 → 롱폼 → 조회수 순으로 처리한다
     found_ids = [v["id"] for v in sorted(pool.values(), key=_pool_priority, reverse=True)]
@@ -2067,21 +2106,35 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
     # 설명란을 먼저 받아 거른 뒤, 장소가 셋 이상 실린 영상 → 10만 회 이상 → 조회수 순으로 마이닝한다. 받아 두고 마이닝하지 않은 영상은 이력에 넣지 않아 다음 회차에 다시 본다
     ready = []
     ready_target = min(limit * 2, limit + 10)
-    for video_id in found_ids:
+    failures = _load_failures()
+
+    def record_failure(vid):
+        failures[vid] = failures.get(vid, 0) + 1
+        if failures[vid] >= MAX_VIDEO_FAILURES:
+            newly_processed.append(vid)
+            del failures[vid]
+
+    for video_id in ([] if rate_limited else found_ids):
         if len(ready) >= ready_target:
             break
 
         vurl = f"https://www.youtube.com/watch?v={video_id}"
         try:
             vinfo = get_youtube_video_info(video_id, verbose=True)
+        except YouTubeRateLimited as e:
+            rate_limited = True
+            print(f"  ⛔ [YouTube 429] 영상 정보 조회 중 요청 한도에 걸려 이번 회차의 유튜브 요청을 멈춥니다: {e}")
+            break
         except Exception as e:
             print(f"  ❌ 영상 정보 조회 실패 ({vurl}): {e}")
             agg["info_failed"] += 1
+            record_failure(video_id)
             continue
 
         if not vinfo:
             print(f"📹 (정보 조회 실패) | {vurl}")
             agg["info_failed"] += 1
+            record_failure(video_id)
             continue
 
         desc_len = len(vinfo["description"] or "")
@@ -2131,6 +2184,7 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
         except Exception as e:
             print(f"  ❌ 영상 마이닝 실패 ({vurl}): {e}")
             agg["info_failed"] += 1
+            record_failure(video_id)
             continue
 
         agg["mined"] += 1
@@ -2156,6 +2210,8 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
     # 처리 이력 저장 (dry-run 은 이력을 오염시키지 않음)
     if newly_processed and not dry_run:
         save_processed_history(history + [v for v in newly_processed if v not in history_set])
+    if not dry_run:
+        _save_failures({k: v for k, v in failures.items() if k not in newly_processed})
 
     # [E] 사이클 집계
     print(f"\n📊 [YouTube Vlog 사이클 집계]{' (DRY-RUN — DB/이력 미변경)' if dry_run else ''}")
@@ -2165,6 +2221,8 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
     print(f"  • 설명란 확보 실패 스킵: {agg['no_desc_skipped']}개")
     print(f"  • 설명란 미달 스킵: {agg['short_desc_skipped']}개")
     print(f"  • 정보 조회 실패: {agg['info_failed']}개")
+    if rate_limited:
+        print("  • ⛔ YouTube 429로 회차를 일찍 끝냄")
     print(f"  • 실제 마이닝: {agg['mined']}개")
     print(f"  • 후보 0건 영상: {agg['zero_candidate']}개")
     print(f"  • 지도 검색 무결과: {agg['no_search_result']}건")
