@@ -58,6 +58,31 @@ def test_usage_is_counted_per_day():
     assert _with_429(run) == 1
 
 
+
+def test_miner_drops_name_pattern_but_keeps_whitelist_miss():
+    """상호명 패턴(어린이 시설)은 버리고, 콘텐츠 유형이 화이트리스트 밖이라는 사유는 통과시킨다."""
+    import tourapi_miner as m
+    items = [{"contentid": "1", "title": "울산어린이천문대", "addr1": "울산 북구"},
+             {"contentid": "2", "title": "더좋은 펜션 캠핑장", "addr1": "강원 홍천군"}]
+    checked = []
+    orig = (m._load_checkpoint, m._save_checkpoint, m.insert_spots, m.fetch_tourapi_spots, m._cotid_exists, m.time.sleep)
+    m._load_checkpoint = lambda: {"area_index": 0, "page_by_combo": {}}
+    m._save_checkpoint = lambda c: None
+    m.insert_spots = lambda *a, **k: []
+    m.fetch_tourapi_spots = lambda *a, **k: items
+    m.time.sleep = lambda s: None
+
+    def cotid(url, headers, cid):
+        checked.append(cid)
+        return True  # 게이트를 지난 항목만 여기에 온다. 이미 있는 것으로 보고 멈춘다
+    m._cotid_exists = cotid
+    try:
+        m.run_tourapi_mining("http://db", "k", tour_api_key="x")
+    finally:
+        m._load_checkpoint, m._save_checkpoint, m.insert_spots, m.fetch_tourapi_spots, m._cotid_exists, m.time.sleep = orig
+    assert "1" not in checked and "2" in checked
+
+
 if __name__ == "__main__":
     for fn in [v for k, v in list(globals().items()) if k.startswith("test_")]:
         fn()

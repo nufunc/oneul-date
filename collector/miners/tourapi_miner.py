@@ -213,8 +213,10 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                 if title in batch_seen_names or re.sub(r'\(.*?\)|\[.*?\]', '', title).strip() in batch_seen_names:
                     continue
 
+                # 콘텐츠 유형은 화이트리스트 밖이 많아 '화이트리스트외'만 통과시키고, 상호명 패턴(어린이 시설, 주식회사 등)과
+                # 숙박업종은 다른 마이너처럼 버린다. 전에는 '블랙리스트'만 버려 울산어린이천문대가 들어왔다
                 is_valid, reason = is_date_spot_category(ctype_name, title, allow_lodging=True)
-                if not is_valid and "블랙리스트" in reason:
+                if not is_valid and not reason.startswith("화이트리스트외"):
                     continue
 
                 # 이름 확인보다 먼저 본다. 제목에 ' & ' 같은 표기가 있으면 run_worker의 [Auto-Healing]이 나중에
