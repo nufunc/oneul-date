@@ -4603,7 +4603,7 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
 .quick-region-chip.is-active {
   background: var(--color-accent);
   border-color: var(--color-accent);
-  color: #fff;
+  color: var(--color-on-accent);
   font-weight: 700;
   box-shadow: 0 2px 8px rgba(225, 29, 72, 0.25);
 }
@@ -4628,7 +4628,7 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   background: var(--color-accent);
   border-style: solid;
   border-color: var(--color-accent);
-  color: #fff;
+  color: var(--color-on-accent);
 }
 
 .quick-region-chip .chip-clear-subzone {
@@ -5138,7 +5138,7 @@ html[data-theme-resolved="dark"] .btn-saved-recommend {
   padding: 8px 16px;
   border-radius: var(--radius-full);
   background: var(--color-accent);
-  color: #ffffff;
+  color: var(--color-on-accent);
   border: none;
   font-size: var(--font-xs);
   font-weight: 700;
