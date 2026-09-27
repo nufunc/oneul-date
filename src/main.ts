@@ -1296,6 +1296,11 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
     if (compactKey in NATURAL_CONTEXT_MAP) return matchesSearchQuery(spot, compactKey);
   }
 
+  // '떡볶이 맛집'처럼 띄어 쓴 '맛집'은 정보가 없다. 그대로 두면 '맛집' 동의어(식당·분식 등)로 넓게 풀려 떡볶이와 무관한
+  // 식당이 매칭으로 잡혔다. 앞말만으로 판정한다('성수 맛집'처럼 동네로 시작하면 위의 지역 분기가 먼저 처리한다)
+  const spacedMatjip = cleanQ.match(/^(.+?)\s+맛집$/);
+  if (spacedMatjip) return matchesSearchQuery(spot, spacedMatjip[1]);
+
   // '한우맛집', '오션뷰카페'처럼 수식어와 업종을 붙여 친 검색어는 동의어 루프보다 먼저 '수식어 AND 업종'으로 본다.
   // 루프가 '맛집'만 보고 통과시켜 수식어가 무시됐다. 검색어나 수식어가 사전 항목('디저트카페', '비오는날')이면 사전에 맡긴다
   const bizMod = cleanQ.match(BIZ_SUFFIX);
