@@ -303,6 +303,17 @@ export async function loadStaticSpots(): Promise<Spot[]> {
   return normalizeSpots(rawSpotsData as Spot[]);
 }
 
+/** 병합으로 닫힌 스팟의 옛 id → 남은 id (동기화가 public/data/spot_aliases.json으로 내보낸다). 실패하면 빈 객체 */
+export async function loadSpotAliases(): Promise<Record<string, number>> {
+  try {
+    const res = await fetch('./data/spot_aliases.json');
+    if (res.ok) return (await res.json()) as Record<string, number>;
+  } catch {
+    // 별칭이 없어도 앱은 동작한다. 병합된 옛 id만 찾지 못한다
+  }
+  return {};
+}
+
 /**
  * Supabase DB에서 활성 스팟 목록을 가져옵니다.
  * 특정 regionMatches(예: ['서울'] 또는 ['경기', '인천'])가 지정되면 해당 지역만 우선 경량 조회합니다.
