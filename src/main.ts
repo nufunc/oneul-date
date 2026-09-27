@@ -1788,6 +1788,7 @@ function normalizeRegionCond(value: string[] | string | undefined): string[] {
 function courseTitle(cond: NonNullable<AppState['courseConditions']>, course: CourseStep[]): string {
   const anchor = cond.anchorId ? spotById.get(cond.anchorId) : undefined;
   if (anchor) return `📍 ${anchor.name} 중심 코스`;
+  if (cond.searchQuery && cond.searchQuery.trim()) return `🔍 ${cond.searchQuery.trim()} 코스`;
   if (cond.fromSaved) {
     const first = course.find((st) => st.spotId)?.spotId;
     const region = first ? spotById.get(first)?.region : undefined;
@@ -4054,9 +4055,17 @@ function bindConditionEvents(area: HTMLElement): void {
   });
 }
 
+/** 검색어가 세부 동네 이름('성수', '서울숲')으로 시작하면 그 동네 키. 없으면 빈 배열 */
+function zoneKeysForQuery(query: string): string[] {
+  const q = (query || '').trim().toLowerCase();
+  if (!q) return [];
+  const zone = POPULAR_ZONES.find((z) => z.label.split('·').some((part) => part.length >= 2 && q.startsWith(part.toLowerCase())));
+  return zone ? [zone.key] : [];
+}
+
 function triggerCourseGeneration(): void {
   // 숙박 키워드(호텔, 숙소, 호캉스, 리조트, 펜션, 글램핑) 검색 시 stay 슬롯 자동 활성화
-  if (state.searchQuery && /호텔|숙소|숙박|호캉스|리조트|펜션|글램핑|스테이|모텔/.test(state.searchQuery)) {
+  if (state.searchQuery && /호텔|숙소|숙박|호캉스|리조트|펜션|글램핑|스테이|모텔|풀빌라|게스트하우스|캠핑|카라반|료칸|감성숙소/.test(state.searchQuery)) {
     if (!state.slots.stay) {
       state.slots.stay = true;
       renderConditions();
@@ -4068,6 +4077,9 @@ function triggerCourseGeneration(): void {
     showToast('시간대를 하나 이상 선택해 주세요');
     return;
   }
+  // '성수', '성수 카페'처럼 세부 동네 이름으로 시작하는 검색은 나머지 칸도 그 동네 안에서 찾는다.
+  // 매칭된 한 칸만 성수이고 나머지는 종로·강남으로 넓게 채워졌다. 지역 시트에서 고른 세부 동네가 있으면 그것을 따른다
+  const zoneKeys = state.subZones.length > 0 ? state.subZones : zoneKeysForQuery(state.searchQuery);
   state.course = generateCourse(
     spots,
     slotsOn,
@@ -4081,11 +4093,11 @@ function triggerCourseGeneration(): void {
       moodPreset: state.moodPreset,
       budgetFilter: state.budgetFilter,
     },
-    state.subZones,
+    zoneKeys,
   );
   state.courseConditions = {
     regions: [...state.regions],
-    subZones: [...state.subZones],
+    subZones: [...zoneKeys],
     mood: state.mood,
     searchQuery: state.searchQuery,
     indoorOnly: state.indoorOnly,
@@ -4126,7 +4138,7 @@ function triggerCourseGeneration(): void {
           moodPreset: state.moodPreset,
           budgetFilter: state.budgetFilter,
         },
-        state.subZones,
+        zoneKeys,
       );
       if (matchesIn(place)) {
         if (state.courseConditions) state.courseConditions = { ...state.courseConditions, searchQuery: place };
