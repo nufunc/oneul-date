@@ -6584,8 +6584,21 @@ function renderReceiverView(steps: CourseStep[]): void {
   };
   document.getElementById('receiver-home-link')?.addEventListener('click', goHome);
   document.getElementById('btn-theme-toggle')?.addEventListener('click', cycleThemeMode);
-  document.getElementById('btn-make-own')?.addEventListener('click', goHome);
-  document.getElementById('btn-make-own-hero')?.addEventListener('click', goHome);
+  // '나도 이런 코스 만들기'는 받은 코스의 지역을 이어받는다. 모든 장소가 한 세부 동네 안이면 그 동네, 아니면 첫 장소의 광역 지역
+  const makeOwn = (e: Event) => {
+    const shared = steps.map((st) => (st.spotId ? spotById.get(st.spotId) : undefined)).filter((s): s is Spot => Boolean(s));
+    const zone = shared.length > 0 ? POPULAR_ZONES.find((z) => shared.every((s) => matchesZone(s, [z.key]))) : undefined;
+    const region = zone
+      ? REGIONS.find((r) => r.key === zone.regionKey)
+      : REGIONS.find((r) => r.key !== 'ALL' && shared[0]?.region && r.match.includes(shared[0].region));
+    if (region) {
+      state.regions = [region.key];
+      state.subZones = zone ? [zone.key] : [];
+    }
+    goHome(e);
+  };
+  document.getElementById('btn-make-own')?.addEventListener('click', makeOwn);
+  document.getElementById('btn-make-own-hero')?.addEventListener('click', makeOwn);
 
   // 수신자 뷰 액션 이벤트 바인딩
   document.getElementById('btn-receiver-copy')?.addEventListener('click', async () => {
