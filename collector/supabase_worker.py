@@ -620,7 +620,7 @@ def _get_rows(url, headers):
         return json.loads(res.read().decode('utf-8'))
 
 
-def find_duplicate_spot(supabase_url, headers, name, address="", provider_ids=None, lat=None, lng=None):
+def _find_duplicate(supabase_url, headers, name, address="", provider_ids=None, lat=None, lng=None):
     """DB에 이미 있는 스팟인지 확인한다. 닫힌 행도 본다(폐업·병합한 곳이 다시 들어오지 않게).
 
     1. provider_ids(지도 장소 번호)가 같은 행이 있으면 중복이다.
@@ -636,17 +636,18 @@ def find_duplicate_spot(supabase_url, headers, name, address="", provider_ids=No
     조회가 실패하면 중복일 수 있으니 건너뛴다(fail-closed): 데이터 오염이 놓친 발굴 1건보다 비용이 크다.
     """
     if not name:
-        return False
+        return False, None
     clean_name = re.sub(r'\(.*?\)|\[.*?\]', '', name).strip()
     if not clean_name:
-        return False
-    base = f"{supabase_url}/rest/v1/spots?select=id,name,address,lat,lng&order=id.asc"
+        return False, None
+    base = f"{supabase_url}/rest/v1/spots?select=id,name,address,lat,lng,is_closed,verified,social_links&order=id.asc"
     target_addr = normalize_spot_address(address) if address else ""
 
     try:
         for provider, pid in (provider_ids or {}).items():
-            if pid and _get_rows(f"{base}&provider_ids->>{provider}=eq.{urllib.parse.quote(str(pid))}&limit=1", headers):
-                return True
+            hit = _get_rows(f"{base}&provider_ids->>{provider}=eq.{urllib.parse.quote(str(pid))}&limit=1", headers) if pid else []
+            if hit:
+                return True, hit[0]
 
         # PostgREST의 or=(...) 문법은 콤마로 조건을 구분하고 괄호로 그룹을 묶는다. 값에 괄호·콤마가 있으면
         # (예: "경화장 (3, 8일)") 큰따옴표로 감싸야 400이 나지 않는다(2026-09-23, tourapi 재삽입 79그룹).
@@ -660,40 +661,54 @@ def find_duplicate_spot(supabase_url, headers, name, address="", provider_ids=No
         rows = _get_rows(f"{base}&or=({names_clause})&limit=500", headers)
         if rows:
             if not target_addr:
-                return True
-            if any(not row.get("address") or normalize_spot_address(row["address"]) == target_addr for row in rows):
-                return True
+                return True, rows[0]
+            hit = next((row for row in rows if not row.get("address") or normalize_spot_address(row["address"]) == target_addr), None)
+            if hit:
+                return True, hit
 
         near = _near_fn(lat, lng)
-        if rows and near and any(near(row) for row in rows):
-            return True
+        hit = next((row for row in rows if near and near(row)), None) if rows else None
+        if hit:
+            return True, hit
         if not target_addr and not near:
-            return False
+            return False, None
         core = normalize_spot_name(clean_name)
         if len(core) < 2:
-            return False
+            return False, None
         # 글자 사이에 *를 넣은 ilike로 공백·부호가 끼인 표기까지 넓게 받은 뒤, 정규화 이름과 주소로 좁힌다
         pattern = "*" + "*".join(core) + "*"
         loose = _get_rows(f"{base}&name=ilike.{urllib.parse.quote(pattern)}&limit=500", headers)
     except Exception:
-        return True
+        return True, None
 
-    if any(normalize_spot_name(row.get("name")) == core
-           and ((target_addr and normalize_spot_address(row.get("address") or "") == target_addr)
-                or (near and near(row))) for row in loose):
-        return True
+    hit = next((row for row in loose if normalize_spot_name(row.get("name")) == core
+                and ((target_addr and normalize_spot_address(row.get("address") or "") == target_addr)
+                     or (near and near(row)))), None)
+    if hit:
+        return True, hit
 
     near10 = _near_fn(lat, lng, meters=10)
     key = spot_core_name(clean_name, address)
     if not near10 or len(key) < 3 or key == core:
-        return False
+        return False, None
     try:
         close = _get_rows(f"{base}&name=ilike.{urllib.parse.quote('*' + '*'.join(key) + '*')}&limit=500", headers)
     except Exception:
-        return True
+        return True, None
     lodging = bool(LODGING_PRODUCT_RE.search(name))
-    return any(near10(row) and spot_core_name(row.get("name"), row.get("address")) == key
-               and bool(LODGING_PRODUCT_RE.search(row.get("name") or "")) == lodging for row in close)
+    hit = next((row for row in close if near10(row) and spot_core_name(row.get("name"), row.get("address")) == key
+                and bool(LODGING_PRODUCT_RE.search(row.get("name") or "")) == lodging), None)
+    return (True, hit) if hit else (False, None)
+
+
+def find_duplicate_spot(supabase_url, headers, name, address="", provider_ids=None, lat=None, lng=None):
+    """DB에 이미 있는 스팟이면 True(조회 실패도 True, fail-closed). 판정 규칙은 _find_duplicate의 설명을 본다."""
+    return _find_duplicate(supabase_url, headers, name, address, provider_ids, lat, lng)[0]
+
+
+def find_duplicate_row(supabase_url, headers, name, address="", provider_ids=None, lat=None, lng=None):
+    """겹치는 기존 행(id·name·address·is_closed·verified·social_links 등)을 돌려준다. 없거나 조회 실패면 None."""
+    return _find_duplicate(supabase_url, headers, name, address, provider_ids, lat, lng)[1]
 
 
 def _near_fn(lat, lng, meters=50):
