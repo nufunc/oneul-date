@@ -7,6 +7,8 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timedelta, timezone
 
+from state_io import StateCorrupt, atomic_dump, load_json, locked
+
 KST = timezone(timedelta(hours=9))
 # 수집기 볼륨(LOG_DIR의 상위)에 둬 재배포 뒤에도 그날 사용량이 이어진다. 로컬 실행은 이 파일 옆에 둔다
 USAGE_FILE = os.path.join(os.path.dirname(os.environ["LOG_DIR"]) if os.environ.get("LOG_DIR")
@@ -41,28 +43,29 @@ def _check_envelope(data, n):
 
 
 def _count():
+    """오늘 호출 수를 1 올린다. 사용량 파일이 손상돼 오늘 사용량을 모르면 0으로 보지 않고 한도 초과처럼 멈춘다."""
     day = datetime.now(KST).strftime("%Y-%m-%d")
-    try:
-        with open(USAGE_FILE, encoding="utf-8") as f:
-            usage = json.load(f)
-    except Exception:
-        usage = {}
-    usage = {k: v for k, v in usage.items() if k >= (datetime.now(KST) - timedelta(days=7)).strftime("%Y-%m-%d")}
-    usage[day] = usage.get(day, 0) + 1
-    try:
-        with open(USAGE_FILE, "w", encoding="utf-8") as f:
-            json.dump(usage, f)
-    except Exception:
-        pass
+    with locked(USAGE_FILE):
+        try:
+            usage = load_json(USAGE_FILE, {})
+        except StateCorrupt as e:
+            print("  ⚠️ [TourAPI] 사용량 파일을 읽지 못해 오늘 사용량을 모릅니다. 이번 회차의 TourAPI 작업을 건너뜁니다", flush=True)
+            raise TourApiRateLimited() from e
+        usage = {k: v for k, v in usage.items() if k >= (datetime.now(KST) - timedelta(days=7)).strftime("%Y-%m-%d")}
+        usage[day] = usage.get(day, 0) + 1
+        try:
+            atomic_dump(USAGE_FILE, usage)
+        except OSError:
+            pass
     return usage[day]
 
 
 def usage_today():
+    """로그용 오늘 호출 수. 파일을 읽지 못하면 -1."""
     try:
-        with open(USAGE_FILE, encoding="utf-8") as f:
-            return json.load(f).get(datetime.now(KST).strftime("%Y-%m-%d"), 0)
-    except Exception:
-        return 0
+        return load_json(USAGE_FILE, {}).get(datetime.now(KST).strftime("%Y-%m-%d"), 0)
+    except StateCorrupt:
+        return -1
 
 
 def tour_get_json(url, timeout=15):

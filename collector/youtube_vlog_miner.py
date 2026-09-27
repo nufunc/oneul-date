@@ -35,6 +35,7 @@ import urllib.request
 import urllib.parse
 import argparse
 import difflib
+from state_io import StateCorrupt, atomic_dump, load_json, locked
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -207,12 +208,10 @@ INITIAL_VERIFIED_CHANNELS = [
 VERIFIED_CHANNELS_PATH = os.path.join(_STATE_DIR, ".verified_channels.json")
 
 def load_verified_channels() -> dict:
-    if os.path.exists(VERIFIED_CHANNELS_PATH):
-        try:
-            with open(VERIFIED_CHANNELS_PATH, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception:
-            pass
+    """레지스트리를 읽는다. 파일이 있는데 읽지 못하면 StateCorrupt(INITIAL로 되돌려 덮어쓰지 않는다)."""
+    data = load_json(VERIFIED_CHANNELS_PATH, None)
+    if isinstance(data, dict):
+        return data
     init_data = {
         "verified": {c["handle"]: c for c in INITIAL_VERIFIED_CHANNELS},
         "candidates": {}
@@ -238,10 +237,10 @@ def _merge_initial_channels(data: dict) -> dict:
 
 def save_verified_channels(data: dict):
     try:
-        with open(VERIFIED_CHANNELS_PATH, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-    except Exception:
-        pass
+        with locked(VERIFIED_CHANNELS_PATH):
+            atomic_dump(VERIFIED_CHANNELS_PATH, data, indent=2)
+    except OSError as e:
+        print(f"  ⚠️ 채널 목록 저장 실패: {e}")
 
 def record_channel_success(author: str, video_title: str, spots_registered: int):
     """
@@ -250,32 +249,33 @@ def record_channel_success(author: str, video_title: str, spots_registered: int)
     """
     if not author or spots_registered <= 0:
         return
-    data = load_verified_channels()
-    verified = data.setdefault("verified", {})
-    candidates = data.setdefault("candidates", {})
+    with locked(VERIFIED_CHANNELS_PATH):
+        data = load_verified_channels()
+        verified = data.setdefault("verified", {})
+        candidates = data.setdefault("candidates", {})
     
-    # 이미 검증된 채널이면 스킵
-    for k, v in verified.items():
-        if k == author or _channel_title_matches(v.get("name", ""), author):
-            return
+        # 이미 검증된 채널이면 스킵
+        for k, v in verified.items():
+            if k == author or _channel_title_matches(v.get("name", ""), author):
+                return
             
-    c_info = candidates.setdefault(author, {"name": author, "success_count": 0, "total_spots": 0})
-    c_info["success_count"] += 1
-    c_info["total_spots"] += spots_registered
-    c_info["last_video"] = video_title[:40]
+        c_info = candidates.setdefault(author, {"name": author, "success_count": 0, "total_spots": 0})
+        c_info["success_count"] += 1
+        c_info["total_spots"] += spots_registered
+        c_info["last_video"] = video_title[:40]
     
-    # 2회 이상 성공 시 정식 검증 채널로 자동 승격!
-    if c_info["success_count"] >= 2:
-        verified[author] = {
-            "name": author,
-            "promoted_at": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "total_spots": c_info["total_spots"],
-            "auto_promoted": True
-        }
-        print(f"🎉 [크리에이터 채널 자동 승격] '{author}' 채널이 검증 채널 레지스트리에 등록되었습니다! (누적 {c_info['total_spots']}개 스팟 발굴)")
-        del candidates[author]
+        # 2회 이상 성공 시 정식 검증 채널로 자동 승격!
+        if c_info["success_count"] >= 2:
+            verified[author] = {
+                "name": author,
+                "promoted_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+                "total_spots": c_info["total_spots"],
+                "auto_promoted": True
+            }
+            print(f"🎉 [크리에이터 채널 자동 승격] '{author}' 채널이 검증 채널 레지스트리에 등록되었습니다! (누적 {c_info['total_spots']}개 스팟 발굴)")
+            del candidates[author]
         
-    save_verified_channels(data)
+        save_verified_channels(data)
 
 # ─────────────────────────────────────────────────────────────
 # [Watch Registry] 채널 성과 기록과 감시 채널 자동 승격·강등
@@ -310,19 +310,15 @@ def _days_since(day: str) -> int:
 
 
 def load_channel_stats() -> dict:
-    try:
-        with open(CHANNEL_STATS_PATH, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        return data if isinstance(data, dict) else {}
-    except Exception:
-        return {}
+    data = load_json(CHANNEL_STATS_PATH, {})
+    return data if isinstance(data, dict) else {}
 
 
 def save_channel_stats(data: dict) -> None:
     try:
-        with open(CHANNEL_STATS_PATH, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False)
-    except Exception as e:
+        with locked(CHANNEL_STATS_PATH):
+            atomic_dump(CHANNEL_STATS_PATH, data)
+    except OSError as e:
         print(f"  ⚠️ 채널 성과 저장 실패: {e}")
 
 
@@ -335,28 +331,30 @@ def record_channel_video(vinfo: dict, stats: dict) -> None:
     key = _channel_key(vinfo.get("handle", ""), vinfo.get("author", ""))
     if not key:
         return
-    data = load_channel_stats()
-    c = data.setdefault("channels", {}).setdefault(key, {"name": vinfo.get("author", ""), "handle": vinfo.get("handle", ""),
-                                                        "mined": 0, "productive": 0, "spots": [], "attached": 0,
-                                                        "first_seen": _today()})
-    c["mined"] += 1
-    ids = stats.get("spot_ids") or []
-    if ids:
-        c["productive"] += 1
-        c["spots"].extend({"id": i, "date": _today()} for i in ids)
-        c["last_registered"] = _today()
-    c["attached"] += stats.get("video_attached", 0)
-    save_channel_stats(data)
+    with locked(CHANNEL_STATS_PATH):
+        data = load_channel_stats()
+        c = data.setdefault("channels", {}).setdefault(key, {"name": vinfo.get("author", ""), "handle": vinfo.get("handle", ""),
+                                                            "mined": 0, "productive": 0, "spots": [], "attached": 0,
+                                                            "first_seen": _today()})
+        c["mined"] += 1
+        ids = stats.get("spot_ids") or []
+        if ids:
+            c["productive"] += 1
+            c["spots"].extend({"id": i, "date": _today()} for i in ids)
+            c["last_registered"] = _today()
+        c["attached"] += stats.get("video_attached", 0)
+        save_channel_stats(data)
 
 
 def record_watch_hit(handle: str, name: str) -> None:
     """감시 경로에서 기준(5만 회 이상, 30일 이내) 영상이 나온 날을 남긴다. 강등 판정에 쓴다."""
-    data = load_channel_stats()
-    c = data.setdefault("channels", {}).setdefault(_channel_key(handle, name), {"name": name, "handle": handle, "mined": 0,
-                                                                              "productive": 0, "spots": [], "attached": 0,
-                                                                              "first_seen": _today()})
-    c["last_watch_hit"] = _today()
-    save_channel_stats(data)
+    with locked(CHANNEL_STATS_PATH):
+        data = load_channel_stats()
+        c = data.setdefault("channels", {}).setdefault(_channel_key(handle, name), {"name": name, "handle": handle,
+                                                                                  "mined": 0, "productive": 0, "spots": [],
+                                                                                  "attached": 0, "first_seen": _today()})
+        c["last_watch_hit"] = _today()
+        save_channel_stats(data)
 
 
 def _closed_ratio(supabase_url: str, ids: list) -> float | None:
@@ -379,7 +377,13 @@ def _closed_ratio(supabase_url: str, ids: list) -> float | None:
 
 
 def review_watch_channels(ch_data: dict, supabase_url: str, dry_run: bool = False) -> list[str]:
-    """하루 한 번 감시 채널을 승격·강등하고 목록을 요약한다. 로그 줄 목록을 돌려준다."""
+    """하루 한 번 감시 채널을 승격·강등하고 목록을 요약한다. 로그 줄 목록을 돌려준다.
+    판정 동안 채널 성과 파일을 잠가, 그 사이 --url 실행이 남긴 기록이 판정 결과 저장에 덮이지 않게 한다."""
+    with locked(CHANNEL_STATS_PATH):
+        return _review_watch_channels(ch_data, supabase_url, dry_run)
+
+
+def _review_watch_channels(ch_data: dict, supabase_url: str, dry_run: bool) -> list[str]:
     stats = load_channel_stats()
     meta = stats.setdefault("_meta", {})
     if meta.get("last_review") == _today():
@@ -1066,42 +1070,35 @@ def get_youtube_video_info(video_id: str, verbose: bool = False) -> dict | None:
 
 
 def load_processed_history() -> list[str]:
-    """이미 처리한 video_id 목록 로드 (최근 HISTORY_MAX 개)"""
-    try:
-        with open(HISTORY_PATH, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        if isinstance(data, dict):
-            data = data.get("video_ids", [])
-        return [str(v) for v in data][-HISTORY_MAX:]
-    except Exception:
-        return []
+    """이미 처리한 video_id 목록 로드 (최근 HISTORY_MAX 개). 파일이 있는데 읽지 못하면 StateCorrupt"""
+    data = load_json(HISTORY_PATH, [])
+    if isinstance(data, dict):
+        data = data.get("video_ids", [])
+    return [str(v) for v in data][-HISTORY_MAX:]
 
 
 def save_processed_history(video_ids: list[str]) -> None:
-    """처리 이력 저장 (FIFO, 최근 HISTORY_MAX 개만 유지)"""
+    """처리 이력 저장 (FIFO, 최근 HISTORY_MAX 개만 유지).
+    저장 직전에 파일을 다시 읽어 합친다. 회차 시작 때 읽은 목록으로 덮으면 그 사이 --url이 넣은 id가 지워졌다"""
     try:
-        trimmed = video_ids[-HISTORY_MAX:]
-        with open(HISTORY_PATH, "w", encoding="utf-8") as f:
-            json.dump({"video_ids": trimmed, "updated_at": int(time.time())},
-                      f, ensure_ascii=False)
-    except Exception as e:
+        with locked(HISTORY_PATH):
+            current = load_processed_history()
+            seen = set(current)
+            merged = current + [v for v in dict.fromkeys(video_ids) if v not in seen]
+            atomic_dump(HISTORY_PATH, {"video_ids": merged[-HISTORY_MAX:], "updated_at": int(time.time())})
+    except OSError as e:
         print(f"  ⚠️ 처리 이력 저장 실패: {e}")
 
 
 def _load_failures() -> dict:
-    try:
-        with open(FAILURES_PATH, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        return data if isinstance(data, dict) else {}
-    except Exception:
-        return {}
+    data = load_json(FAILURES_PATH, {})
+    return data if isinstance(data, dict) else {}
 
 
 def _save_failures(failures: dict) -> None:
     try:
-        with open(FAILURES_PATH, "w", encoding="utf-8") as f:
-            json.dump(failures, f)
-    except Exception as e:
+        atomic_dump(FAILURES_PATH, failures)
+    except OSError as e:
         print(f"  ⚠️ 실패 횟수 저장 실패: {e}")
 
 

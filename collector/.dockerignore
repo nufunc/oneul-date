@@ -10,4 +10,8 @@ logs/
 pb_data/
 .tourapi_checkpoint.json
 .tourapi_usage.json
+.channel_stats.json
+.video_failures.json
+*.lock
+*.corrupt-*
 data/
