@@ -21,14 +21,15 @@ class _Res(io.BytesIO):
         pass
 
 
-def _run(places):
+def _run(places, spot=None):
+    spot = spot or SPOT
     patches = []
 
     def fake_urlopen(req, timeout=None, **kw):
         if getattr(req, "method", "GET") == "PATCH":
             patches.append(json.loads(req.data.decode("utf-8")))
             return _Res(b"")
-        return _Res(json.dumps([dict(SPOT)]).encode("utf-8"))
+        return _Res(json.dumps([dict(spot)]).encode("utf-8"))
 
     orig = (w.urllib.request.urlopen, w.search_naver, w.time.sleep)
     w.urllib.request.urlopen, w.search_naver, w.time.sleep = fake_urlopen, lambda q, limit=3: places, lambda s: None
@@ -61,6 +62,22 @@ def test_address_and_shared_token_is_trusted():
 def test_matched_result_verifies():
     patch = _run([dict(HEALTH_CENTER, name="양평 샬레 트리", category="펜션")])
     assert patch.get("verified") is True and patch.get("fail_count") == 0
+
+
+
+def test_two_letter_shop_names_are_not_quarantined():
+    # 두 글자 이름까지 닫아 부빙·윤슬·책바가 등록 직후 닫혔다(2026-09-27 하루 15곳)
+    for name in ("부빙", "윤슬", "책바"):
+        spot = dict(SPOT, name=name, verified=True, fail_count=0)
+        patch = _run([dict(HEALTH_CENTER, name=name, category="카페")], spot)
+        assert patch.get("is_closed") is not True, name
+
+
+def test_emoji_one_letter_and_place_names_are_still_quarantined():
+    assert w.is_noise_spot_name("🌿") and w.is_noise_spot_name("🛍️") and w.is_noise_spot_name("숲")
+    assert not w.is_noise_spot_name("부빙") and not w.is_noise_spot_name("오브")
+    patch = _run([dict(HEALTH_CENTER, name="압구정", category="카페")], dict(SPOT, name="압구정"))
+    assert patch.get("is_closed") is True
 
 
 if __name__ == "__main__":

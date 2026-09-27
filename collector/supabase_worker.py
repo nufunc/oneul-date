@@ -577,6 +577,12 @@ def same_place_by_address(name, address, place):
     return bool(tokens(name) & tokens((place or {}).get("name")))
 
 
+def is_noise_spot_name(name: str) -> bool:
+    """한글이나 영문이 한 글자도 없거나(이모지·기호만) 한 글자뿐인 이름."""
+    letters = re.findall(r'[가-힣A-Za-z]', name or "")
+    return not letters or len((name or "").strip()) <= 1
+
+
 def normalize_spot_name(name):
     """이름 비교용 정규화: NFKC·소문자, 한글·영문·숫자만 남기고 끝의 '본점'·'점'을 한 번 뗀다.
     '동궁과 월지'/'동궁과월지', '카페루시아'/'카페루시아 본점'이 같은 값이 된다(2026-09-26 열린 중복 70그룹 표본 전부 같은 가게)."""
@@ -1213,9 +1219,10 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
                     old_sum = spot.get("summary") or ""
                     patch_data["summary"] = f"{name} — {old_sum}"[:150] if old_sum and old_sum not in name else name
 
-            # [Noise Quarantine] 단독 지명, 2자 이하 일반명사, 오염 헤더명은 자동 격리
+            # [Noise Quarantine] 단독 지명, 일반명사, 한글·영문이 없는 이름(이모지 등), 한 글자 이름은 자동 격리.
+            # 두 글자 이름까지 닫으면 부빙·윤슬·책바 같은 실제 가게가 등록 직후 닫혔다(2026-09-27 하루 15곳)
             check_name = patch_data.get("name") or name
-            if len(check_name) <= 2 or check_name in ["서울", "경기", "인천", "강원", "충청", "영남", "호남", "제주", "부산", "대구", "울산", "광주", "대전", "세종", "한남", "압구정", "카페", "곱창전골", "맛집", "식당"]:
+            if is_noise_spot_name(check_name) or check_name in ["서울", "경기", "인천", "강원", "충청", "영남", "호남", "제주", "부산", "대구", "울산", "광주", "대전", "세종", "한남", "압구정", "카페", "곱창전골", "맛집", "식당"]:
                 patch_data["is_closed"] = True
 
             if not trusted:
