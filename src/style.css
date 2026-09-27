@@ -4372,17 +4372,17 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
 }
 
 .badge-card-curation.hot {
-  background: rgba(225, 29, 72, 0.88);
+  background: #e11d48; /* 사진 위에서도 흰 글씨 4.7:1. 반투명이면 밝은 사진에서 4.15:1까지 내려갔다 */
   color: #ffffff;
 }
 
 .badge-card-curation.blueribbon {
-  background: rgba(37, 99, 235, 0.90);
+  background: #2563eb; /* 흰 글씨 5.17:1 */
   color: #ffffff;
 }
 
 .badge-card-curation.michelin {
-  background: rgba(217, 119, 6, 0.92);
+  background: #b45309; /* 흰 글씨 5.02:1 (#d97706는 불투명이어도 3.19:1) */
   color: #ffffff;
 }
 
