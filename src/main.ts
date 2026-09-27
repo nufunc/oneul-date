@@ -1784,6 +1784,16 @@ function normalizeRegionCond(value: string[] | string | undefined): string[] {
   return [];
 }
 
+/** 코스 결과 제목. 찜으로 만든 코스는 선택 조건이 아니라 첫 장소의 지역을 보인다 */
+function courseTitle(cond: NonNullable<AppState['courseConditions']>, course: CourseStep[]): string {
+  if (cond.fromSaved) {
+    const first = course.find((st) => st.spotId)?.spotId;
+    const region = first ? spotById.get(first)?.region : undefined;
+    return region ? `❤️ 찜한 코스 · ${region}` : '❤️ 찜한 코스';
+  }
+  return `${regionsLabel(cond.regions, cond.subZones)} · ${moodLabel(cond.mood)}`;
+}
+
 function moodLabel(moodKey: string): string {
   if (moodKey === 'ALL') return '모든 분위기';
   return MOODS.find((m) => m.key === moodKey)?.label ?? moodKey;
@@ -3058,6 +3068,8 @@ interface AppState {
     searchQuery?: string;
     indoorOnly?: boolean;
     budgetFilter?: 'ALL' | 'BUDGET' | 'LUXURY';
+    /** 찜으로 만든 코스. 지역·분위기 선택과 무관하므로 제목을 따로 붙인다 */
+    fromSaved?: boolean;
   } | null;
   savedOpen: boolean;
   regionSheetOpen: boolean;
@@ -4232,7 +4244,7 @@ function renderResultsContent(): void {
 
   area.innerHTML = `
     <div class="course-head">
-      <span class="course-title">${escapeHtml(regionsLabel(cond.regions, cond.subZones))} · ${escapeHtml(moodLabel(cond.mood))}</span>
+      <span class="course-title">${escapeHtml(courseTitle(cond, state.course))}</span>
       <div class="course-head-actions">
         ${state.course.length >= 3 ? `
           <button class="btn-optimize-route" id="btn-optimize-route" type="button" title="이동 거리가 가장 짧은 최적 동선으로 순서 자동 정렬" aria-label="최적 동선 정렬">
@@ -5618,6 +5630,7 @@ function buildCourseFromSavedSpots(): boolean {
     mood: state.mood,
     searchQuery: '',
     indoorOnly: state.indoorOnly,
+    fromSaved: true,
   };
   state.mainMode = 'course';
   updateModeView();
