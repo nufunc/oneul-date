@@ -3642,7 +3642,7 @@ function getRegionSelectorLabel(): { title: string; subtitle: string; isSelected
 function renderQuickRegionChips(): string {
   const isAll = state.regions.length === 0 && state.subZones.length === 0;
   const hasSubZones = state.subZones.length > 0;
-  const savedCount = state.savedSpotIds ? state.savedSpotIds.size : 0;
+  const savedCount = visibleSavedSpotCount();
 
   let subZoneLabel = '+ 세부 동네';
   if (hasSubZones) {
@@ -3890,9 +3890,9 @@ function renderConditions(): void {
         <button class="btn-daily-recommend" id="btn-daily-recommend" type="button" title="오늘 날짜 기반 에디터 추천 코스 바로 보기">
           🎁 오늘의 코스
         </button>
-        ${state.savedSpotIds && state.savedSpotIds.size > 0 ? `
+        ${visibleSavedSpotCount() > 0 ? `
           <button class="btn-saved-recommend" id="btn-saved-recommend" type="button" title="보관함에 담아둔 스팟으로 코스 완성하기">
-            ❤️ 찜한 코스 (${state.savedSpotIds.size})
+            ❤️ 찜한 코스 (${visibleSavedSpotCount()})
           </button>
         ` : ''}
       </div>
@@ -5476,6 +5476,17 @@ function optimizeCourseRoute(): boolean {
   return true;
 }
 
+/**
+ * 화면에 보일 찜 수. 병합·폐업으로 데이터에서 사라진 id는 세지 않는다.
+ * 저장소에서는 지우지 않는다: 스팟이 다시 열리거나 옛 id가 이어지면 찜이 되살아나야 한다
+ */
+function visibleSavedSpotCount(): number {
+  if (!state.savedSpotIds) return 0;
+  let n = 0;
+  for (const id of state.savedSpotIds) if (spotById.has(id)) n += 1;
+  return n;
+}
+
 /** 찜한 스팟(보관함)을 활용한 나만의 데이트 코스 즉시 빌드 */
 function buildCourseFromSavedSpots(): boolean {
   if (!state.savedSpotIds || state.savedSpotIds.size === 0) {
@@ -6102,7 +6113,7 @@ function bindDiscoveryCardEvents(root: ParentNode, area: HTMLElement): void {
       } else {
         const savedChip = area.querySelector<HTMLElement>('[data-action="toggle-saved"] .region-chip-text');
         if (savedChip) {
-          const count = state.savedSpotIds.size;
+          const count = visibleSavedSpotCount();
           savedChip.textContent = count > 0 ? `❤️ ${count}` : '🤍 찜';
         }
       }
