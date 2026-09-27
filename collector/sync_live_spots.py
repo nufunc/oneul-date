@@ -6,6 +6,7 @@ OCI PostgreSQL (PostgREST API)에서 최신 유효 스팟 전수를 조회하여
 import os
 import sys
 import json
+import re
 import time
 import logging
 from datetime import datetime
@@ -31,6 +32,7 @@ except ImportError:
 API_URL = os.environ.get("ONEUL_API_URL", "http://152.70.89.210:18088/rest/v1/spots")
 TARGET_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "public", "data", "spots.json"))
 MIN_EXPECTED_SPOTS = 9000  # 비정상 데이터 누락 방지 안전 가드
+ALIAS_FILE = os.path.join(os.path.dirname(TARGET_FILE), "spot_aliases.json")
 
 def get_with_retry(params, attempts=6, wait_sec=10):
     """18088은 my-stock-score의 API 컨테이너가 oneul-api로 중계하는 주소라, 그쪽 배포로 컨테이너가 재생성되는
@@ -90,6 +92,35 @@ def fetch_all_active_spots():
 
     return all_spots
 
+def fetch_merge_aliases(active_ids):
+    """병합으로 닫힌 행(source.note의 merged_into:{id})을 남은 열린 행 id로 잇는다.
+    찜·저장 코스·공유 링크가 병합된 옛 id를 들고 있어도 앱이 남은 스팟을 찾게 한다"""
+    merged, last_id = {}, 0
+    while True:
+        r = get_with_retry({"select": "id,source", "is_closed": "eq.true", "source->>note": "like.*merged_into:*",
+                            "order": "id.asc", "id": f"gt.{last_id}", "limit": 1000})
+        if r.status_code != 200:
+            logger.error(f"병합 별칭 조회 실패: HTTP {r.status_code} - {r.text[:200]}")
+            sys.exit(1)
+        items = r.json()
+        for it in items:
+            hits = re.findall(r"merged_into:(\d+)", (it.get("source") or {}).get("note") or "")
+            if hits:
+                merged[it["id"]] = int(hits[-1])
+        if len(items) < 1000:
+            break
+        last_id = items[-1]["id"]
+    aliases = {}
+    for src, dst in merged.items():
+        seen = {src}
+        while dst in merged and dst not in seen:  # 병합이 이어진 경우 끝까지 따라간다
+            seen.add(dst)
+            dst = merged[dst]
+        if dst in active_ids:
+            aliases[str(src)] = dst
+    return aliases
+
+
 def main():
     spots = fetch_all_active_spots()
     total = len(spots)
@@ -113,6 +144,12 @@ def main():
     if os.path.exists(TARGET_FILE):
         os.remove(TARGET_FILE)
     os.rename(tmp_file, TARGET_FILE)
+
+    active_ids = {sp["id"] for sp in healed_spots if not sp.get("is_closed")}
+    aliases = fetch_merge_aliases(active_ids)
+    with open(ALIAS_FILE, "w", encoding="utf-8") as f:
+        json.dump(aliases, f, separators=(",", ":"), sort_keys=True)
+    logger.info(f"병합 별칭 {len(aliases)}건 기록: {ALIAS_FILE}")
 
     file_size_mb = os.path.getsize(TARGET_FILE) / (1024 * 1024)
     logger.info(f"동기화 완료: {TARGET_FILE} ({total}개 스팟, {file_size_mb:.2f} MB)")

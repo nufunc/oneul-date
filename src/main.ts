@@ -225,7 +225,7 @@ const ZONE_CENTERS: Record<string, { lat: number; lng: number }> = {
 
 const STORAGE_KEY = 'oneul_saved_courses';
 const RECENT_KEY = 'oneul_recent_spots';
-import { loadSpots, getCachedSpots, mergeSpots } from './supabase';
+import { loadSpots, getCachedSpots, mergeSpots, loadSpotAliases } from './supabase';
 
 const RECENT_MAX = 100;
 
@@ -7505,6 +7505,14 @@ async function init(): Promise<void> {
   });
 
   const isSharedLink = location.hash.startsWith('#c=');
+
+  // 병합된 옛 id를 남은 id로 잇는 별칭. 공유 링크는 옛 id를 들고 올 수 있어 별칭을 받은 뒤에 판정한다
+  const aliasesReady = loadSpotAliases().then((aliases) => {
+    for (const [from, to] of Object.entries(aliases)) spotAliasIds.set(Number(from), to);
+    spotById = buildSpotIndex(spots);
+    canonicalizeSavedSpotIds();
+  });
+  if (isSharedLink) await aliasesReady;
 
   // 1. 일반 홈 진입 시 0ms 즉시 셸 렌더링 (블로킹 제거)
   if (!isSharedLink) {
