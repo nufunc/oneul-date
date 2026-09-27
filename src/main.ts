@@ -4101,11 +4101,41 @@ function triggerCourseGeneration(): void {
 
   // 검색어가 포함된 경우 토스트 피드백
   if (state.searchQuery) {
-    const hasMatchedSpot = state.course?.some((st) => {
-      if (!st.spotId) return false;
-      const spot = spotById.get(st.spotId);
-      return spot ? matchesSearchQuery(spot, state.searchQuery) : false;
-    });
+    const matchesIn = (q: string) =>
+      state.course?.some((st) => {
+        if (!st.spotId) return false;
+        const spot = spotById.get(st.spotId);
+        return spot ? matchesSearchQuery(spot, q) : false;
+      }) ?? false;
+    const hasMatchedSpot = matchesIn(state.searchQuery);
+    // '성수 호텔'처럼 동네+업종이 0건이면 동네까지 버리고 전국 인기 코스(가평·제주)로 넘어갔다. 동네만으로 한 번 더 짠다
+    const cleanQ = state.searchQuery.trim().toLowerCase();
+    const place = hasMatchedSpot ? undefined : SEARCH_PLACE_PREFIXES.find((p) => cleanQ.startsWith(p) && cleanQ.length > p.length);
+    if (place) {
+      const rest = state.searchQuery.trim().slice(place.length).trim();
+      state.course = generateCourse(
+        spots,
+        activeSlots(),
+        state.regions,
+        state.mood,
+        {
+          avoidIds: recentSpotIdSet(),
+          searchQuery: place,
+          categoryKey: state.courseCategory,
+          indoorOnly: state.indoorOnly,
+          moodPreset: state.moodPreset,
+          budgetFilter: state.budgetFilter,
+        },
+        state.subZones,
+      );
+      if (matchesIn(place)) {
+        if (state.courseConditions) state.courseConditions = { ...state.courseConditions, searchQuery: place };
+        addRecentSpotIds(courseSpotIds());
+        renderResults();
+        showToast(`'${place}'에는 '${rest}'에 맞는 곳이 없어 ${place} 코스로 추천했어요`);
+        return;
+      }
+    }
     if (hasMatchedSpot) {
       showToast(`'${state.searchQuery}' 중심 맞춤 코스를 추천했어요`);
     } else if (state.budgetFilter !== 'ALL' || state.moodPreset !== null || state.indoorOnly) {
