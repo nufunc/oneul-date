@@ -4161,6 +4161,41 @@ function triggerCourseGeneration(): void {
     } else {
       showToast(`'${state.searchQuery}' 매칭 스팟이 없어 인기 코스로 추천했어요`);
     }
+  } else {
+    notifyRelaxedSlots();
+  }
+}
+
+/**
+ * 스페셜·가성비·분위기 프리셋은 칸에 맞는 후보가 0건이면 필터 전 목록에서 뽑는다(filterByBudget·filterByMoodPreset).
+ * 그 칸이 필터 밖이라는 것을 알리지 않아, 강원 '실내+스페셜' 낮 칸에 동네 마트가 조용히 들어왔다(2026-09-27)
+ */
+function notifyRelaxedSlots(): void {
+  if (!state.course) return;
+  const filters: { label: string; ok: (s: Spot) => boolean }[] = [];
+  if (state.budgetFilter === 'LUXURY') filters.push({ label: '스페셜', ok: isSpecialDiningSpot });
+  if (state.budgetFilter === 'BUDGET') filters.push({ label: '가성비', ok: isBudgetSpot });
+  if (state.moodPreset) {
+    const preset = state.moodPreset;
+    filters.push({
+      label: MOOD_PRESETS.find((m) => m.key === preset)?.label ?? '분위기',
+      ok: (s) => strictMoodPresetFilter([s], preset).length > 0,
+    });
+  }
+  if (filters.length === 0) return;
+  const relaxedSlots: string[] = [];
+  const failedFilters = new Set<string>();
+  for (const st of state.course) {
+    const spot = st.spotId ? spotById.get(st.spotId) : undefined;
+    if (!spot) continue;
+    const failed = filters.filter((f) => !f.ok(spot));
+    if (failed.length > 0) {
+      relaxedSlots.push(SLOT_META[st.slot].label);
+      failed.forEach((f) => failedFilters.add(f.label));
+    }
+  }
+  if (relaxedSlots.length > 0) {
+    showToast(`${relaxedSlots.join('·')} 칸은 ${[...failedFilters].join('·')}에 맞는 곳이 없어 조건을 풀어 골랐어요`);
   }
 }
 
@@ -5413,6 +5448,7 @@ function regenerateCourse(): void {
   );
   addRecentSpotIds(courseSpotIds());
   renderResults();
+  notifyRelaxedSlots();
 }
 
 function bindResultEvents(area: HTMLElement): void {
