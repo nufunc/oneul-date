@@ -88,7 +88,7 @@ def test_rate_limit_ends_the_round():
 
 
 def test_video_failing_three_times_goes_to_history():
-    item = {"contents": [{"videoRenderer": {"videoId": "ccccccccccc", "title": {"runs": [{"text": "t"}]}}}]}
+    item = {"contents": [{"videoRenderer": {"videoId": "ccccccccccc", "title": {"runs": [{"text": "부암동 하루코스"}]}}}]}
 
     def run():
         y._innertube_web = lambda endpoint, body, timeout=10: item if endpoint == "search" else {}
@@ -98,6 +98,13 @@ def test_video_failing_three_times_goes_to_history():
             y.run_youtube_vlog_mining("http://db", "k", limit=1)
         return y.load_processed_history()
     assert "ccccccccccc" in _isolated(run)
+
+
+
+def test_latest_channel_titles_need_course_words():
+    assert y.is_course_title("부암동 하루코스") and y.is_course_title("망원동 브이로그")
+    for t in ("ISA 계좌 총정리", "스타크래프트 레전드", "15억 자산가의 하루", "대한항공 일등석 기내식"):
+        assert not y.is_course_title(t), t
 
 
 if __name__ == "__main__":

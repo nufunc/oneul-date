@@ -1984,14 +1984,30 @@ def _pool_priority(v: dict) -> tuple:
     return (v.get("views", 0) >= HOT_VIEWS, v.get("length", 0) >= LONGFORM_SEC or v.get("length", 0) == 0, v.get("views", 0))
 
 
-def _day_course_queries(count: int = 5) -> list[str]:
-    """'{동네} 하루코스' 검색어. 동네 이름은 area_seeds의 세부 지역에서 고른다."""
+# 최신순으로 받는 검증 채널 영상은 제목에 코스나 장소를 뜻하는 말이 있어야 풀에 넣는다.
+# 먹방·여행 채널의 최신 영상에 재테크, 게임, 뮤직비디오가 섞여 마이닝 자리를 차지했다(2026-09-28 첫 회차 25자리 중 8)
+COURSE_TITLE_RE = re.compile(r"코스|가볼\s*만한|맛집|카페|여행|투어|데이트|당일치기|브이로그|vlog|산책|나들이|핫플|빵지순례|노포",
+                             re.IGNORECASE)
+
+
+def _area_sub_names() -> list[str]:
     try:
         from area_seeds import SEOUL_DISTRICTS, GYEONGGI_INCHEON_AREAS, OTHER_REGIONAL_AREAS
     except Exception:
         return []
-    subs = sorted({s for src in list(SEOUL_DISTRICTS.values()) + GYEONGGI_INCHEON_AREAS + OTHER_REGIONAL_AREAS
+    return sorted({s for src in list(SEOUL_DISTRICTS.values()) + GYEONGGI_INCHEON_AREAS + OTHER_REGIONAL_AREAS
                    for s in src.get("sub_areas", [])})
+
+
+def is_course_title(title: str) -> bool:
+    """제목에 코스·장소 낱말이나 지명이 있는가."""
+    t = title or ""
+    return bool(COURSE_TITLE_RE.search(t) or extract_region_hints(t) or any(n in t for n in _area_sub_names()))
+
+
+def _day_course_queries(count: int = 5) -> list[str]:
+    """'{동네} 하루코스' 검색어. 동네 이름은 area_seeds의 세부 지역에서 고른다."""
+    subs = _area_sub_names()
     return [f"{s} 하루코스" for s in random.sample(subs, min(count, len(subs)))]
 
 
@@ -2017,7 +2033,7 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
     pool_target = max(limit * 3, 25)
     seen_in_history = 0
 
-    def take(items: list[dict], cap: int) -> int:
+    def take(items: list[dict], cap: int, course_only: bool = False) -> int:
         nonlocal seen_in_history
         added = 0
         for v in items:
@@ -2025,6 +2041,11 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
                 seen_in_history += 1
                 continue
             if v["id"] in pool:
+                continue
+            # 해외 영상과 코스 무관 영상은 설명란을 받기 전에 제목으로 거른다
+            if v.get("title") and is_overseas_video(v["title"]):
+                continue
+            if course_only and not is_course_title(v.get("title", "")):
                 continue
             pool[v["id"]] = v
             added += 1
@@ -2043,7 +2064,7 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
             via = "인기순" if popular else "최신순"
             if not items:
                 items, via = _search_innertube_videos(f"{ch.get('name', '')} 여행 맛집 코스", max_results=10), "이름 검색"
-            added = take(sorted(items, key=_pool_priority, reverse=True), 3)
+            added = take(sorted(items, key=_pool_priority, reverse=True), 3, course_only=not popular)
             if added:
                 print(f"  🌟 [검증 채널] '{ch.get('name')}' {via} 영상 {added}개 확보")
 
