@@ -194,11 +194,14 @@ INITIAL_VERIFIED_CHANNELS = [
     {"name": "강지영의 동그라미", "handle": "@강지영의동그라미", "category": "vlog_date_hotplace"},
 
     # 3. 동네 하루코스 (한 동네의 맛집·카페·볼거리를 한 영상에 묶는 롱폼, 2026-09-27 추가)
-    {"name": "가희드 gahiiide", "handle": "@gahiiide", "category": "vlog_day_course"},
-    {"name": "너도 가봤으면 해", "handle": "@yougotoo", "category": "vlog_day_course"},
-    {"name": "보리코 Boriko", "handle": "@Boriko", "category": "vlog_day_course"},
-    {"name": "아무개개 Amugae", "handle": "@Amugaegae", "category": "vlog_day_course"},
-    {"name": "백년해방", "handle": "@백년해방", "category": "vlog_day_course"},
+    #    watch: 매 회차 최신 영상을 따로 받는 감시 채널(run_youtube_vlog_mining의 [감시 채널] 단계)
+    {"name": "가희드 gahiiide", "handle": "@gahiiide", "category": "vlog_day_course", "watch": True},
+    {"name": "너도 가봤으면 해", "handle": "@yougotoo", "category": "vlog_day_course", "watch": True},
+    {"name": "보리코 Boriko", "handle": "@Boriko", "category": "vlog_day_course", "watch": True},
+    {"name": "아무개개 Amugae", "handle": "@Amugaegae", "category": "vlog_day_course", "watch": True},
+    {"name": "백년해방", "handle": "@백년해방", "category": "vlog_day_course", "watch": True},
+    {"name": "아일랜드 트래블러", "handle": "@islandtraveler", "category": "vlog_day_course", "watch": True},
+    {"name": "우주트래블로그", "handle": "@woojutravellog", "category": "vlog_day_course", "watch": True},
 ]
 
 VERIFIED_CHANNELS_PATH = os.path.join(_STATE_DIR, ".verified_channels.json")
@@ -222,7 +225,8 @@ def _merge_initial_channels(data: dict) -> dict:
     """저장된 레지스트리에 INITIAL 목록의 추가분과 핸들 교정을 반영한다. 파일이 한 번 생기면 코드의 목록이 다시 읽히지 않았다."""
     verified = data.setdefault("verified", {})
     initial_names = {c["name"] for c in INITIAL_VERIFIED_CHANNELS}
-    for k in [k for k, v in verified.items() if v.get("name") in initial_names and not v.get("auto_promoted")]:
+    # 자동 승격된 채널도 코드 목록에 올라오면 코드 쪽 항목(핸들·감시 표시)으로 바꾼다
+    for k in [k for k, v in verified.items() if v.get("name") in initial_names]:
         del verified[k]
     verified.update({c["handle"]: c for c in INITIAL_VERIFIED_CHANNELS})
     return data
@@ -1867,6 +1871,12 @@ INNERTUBE_WEB_HEADERS = {
 SEARCH_PARAMS_POPULAR_THIS_YEAR = "CAMSAggF"
 HOT_VIEWS = 100_000
 LONGFORM_SEC = 8 * 60
+# 감시 채널: 최신 영상 WATCH_LATEST개 가운데 조회수 WATCH_MIN_VIEWS 이상을 회차당 WATCH_LIMIT개까지 따로 마이닝한다.
+# 기준 미달 영상은 이력에 넣지 않아 조회수가 오르면 다음 회차에 다시 보고, WATCH_MAX_AGE_DAYS가 지나면 보지 않는다
+WATCH_LATEST = 10
+WATCH_MIN_VIEWS = 50_000
+WATCH_MAX_AGE_DAYS = 30
+WATCH_LIMIT = 10
 
 
 def _innertube_web(endpoint: str, body: dict, timeout: int = 10) -> dict:
@@ -1888,22 +1898,31 @@ def _length_sec(text: str) -> int:
     return sec
 
 
+def _age_days(text: str) -> int | None:
+    """'1일 전', '3주 전', '2개월 전', '스트리밍 시간: 5시간 전'을 일수로 바꾼다. 형식이 다르면 None."""
+    m = re.search(r'(\d+)\s*(초|분|시간|일|주|개월|년)\s*전', text or "")
+    if not m:
+        return None
+    return int(m.group(1)) * {"초": 0, "분": 0, "시간": 0, "일": 1, "주": 7, "개월": 30, "년": 365}[m.group(2)]
+
+
 def _parse_video_items(data: dict) -> list[dict]:
-    """검색 결과(videoRenderer)와 채널 목록(lockupViewModel)에서 영상 id·제목·조회수·길이를 뽑는다."""
+    """검색 결과(videoRenderer)와 채널 목록(lockupViewModel)에서 영상 id·제목·조회수·길이·올라온 지 며칠인지 뽑는다."""
     out, seen = [], set()
 
-    def add(vid, title, views_text, length_text):
+    def add(vid, title, views_text, length_text, age_text=""):
         if vid and vid not in seen:
             seen.add(vid)
             out.append({"id": vid, "title": title or "", "views": _parse_like_count(views_text or ""),
-                        "length": _length_sec(length_text)})
+                        "length": _length_sec(length_text), "age_days": _age_days(age_text)})
 
     def walk(o):
         if isinstance(o, dict):
             v = o.get("videoRenderer")
             if isinstance(v, dict):
                 add(v.get("videoId"), "".join(r.get("text", "") for r in (v.get("title") or {}).get("runs", [])),
-                    (v.get("viewCountText") or {}).get("simpleText"), (v.get("lengthText") or {}).get("simpleText"))
+                    (v.get("viewCountText") or {}).get("simpleText"), (v.get("lengthText") or {}).get("simpleText"),
+                    (v.get("publishedTimeText") or {}).get("simpleText"))
             lv = o.get("lockupViewModel")
             if isinstance(lv, dict) and lv.get("contentType") == "LOCKUP_CONTENT_TYPE_VIDEO":
                 meta = (lv.get("metadata") or {}).get("lockupMetadataViewModel") or {}
@@ -1911,7 +1930,8 @@ def _parse_video_items(data: dict) -> list[dict]:
                 lengths = [t for t in _find_all(lv.get("contentImage") or {}, "text") if isinstance(t, str)]
                 add(lv.get("contentId"), (meta.get("title") or {}).get("content"),
                     next((t for t in texts if "조회수" in t or "views" in t), ""),
-                    next((t for t in lengths if re.fullmatch(r'\d+(?::\d+){1,2}', t)), ""))
+                    next((t for t in lengths if re.fullmatch(r'\d+(?::\d+){1,2}', t)), ""),
+                    next((t for t in texts if _age_days(t) is not None), ""))
             for x in o.values():
                 walk(x)
         elif isinstance(o, list):
@@ -2053,12 +2073,28 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
                 break
         return added
 
+    # 감시 채널 영상. 무작위 표본 풀과 따로 두고 회차당 WATCH_LIMIT개까지 마이닝한다
+    watch: dict[str, dict] = {}
+
     rate_limited = False
     try:
+        # 1-0. 감시 채널은 매 회차 최신순 목록을 받는다. 제목 필터는 무작위 표본과 같다
+        for ch in [c for c in verified_channels if c.get("watch")]:
+            latest = _browse_channel_videos(ch.get("handle", ""), ch.get("name", ""), popular=False)[:WATCH_LATEST]
+            hits = [v for v in latest
+                    if v["views"] >= WATCH_MIN_VIEWS and v.get("age_days") is not None and v["age_days"] <= WATCH_MAX_AGE_DAYS
+                    and v["id"] not in history_set and not is_overseas_video(v.get("title", ""))
+                    and is_course_title(v.get("title", ""))]
+            for v in hits:
+                watch.setdefault(v["id"], v)
+            print(f"  👀 [감시 채널] {ch.get('name')}: 최신 {len(latest)}개 중 5만+ {len(hits)}개")
+
         # 1-1. 검증된 채널 4곳을 샘플링해 채널 동영상 탭에서 직접 받는다. 핸들이 없거나 틀리면 이름 검색으로 대신한다
         # 동네 하루코스 채널은 영상이 모두 코스형이라 인기순을 받는다. 다른 채널은 인기순에 역대 인기작(축구 하이라이트,
         # 수년 전 먹방)이 먼저 와서 최신순을 받아 조회수로 정렬한다
-        for ch in random.sample(verified_channels, min(4, len(verified_channels))):
+        # 감시 채널은 위에서 매 회차 받으므로 표본에서 뺀다. 넣으면 5만 회 미만 영상이 표본 경로로 마이닝돼 이력에 들어간다
+        sample_pool = [c for c in verified_channels if not c.get("watch")]
+        for ch in random.sample(sample_pool, min(4, len(sample_pool))):
             popular = ch.get("category") == "vlog_day_course"
             items = _browse_channel_videos(ch.get("handle", ""), ch.get("name", ""), popular=popular)
             via = "인기순" if popular else "최신순"
@@ -2091,8 +2127,9 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
         rate_limited = True
         print(f"  ⛔ [YouTube 429] 후보 수집 중 요청 한도에 걸려 이번 회차의 유튜브 요청을 멈춥니다: {e}")
 
-    # 조회수 10만 회 이상 → 롱폼 → 조회수 순으로 처리한다
-    found_ids = [v["id"] for v in sorted(pool.values(), key=_pool_priority, reverse=True)]
+    # 조회수 10만 회 이상 → 롱폼 → 조회수 순으로 처리한다. 감시 채널 영상은 앞에 두고 따로 센다
+    watch_ids = [v["id"] for v in sorted(watch.values(), key=lambda v: v["views"], reverse=True)][:WATCH_LIMIT]
+    found_ids = watch_ids + [v["id"] for v in sorted(pool.values(), key=_pool_priority, reverse=True) if v["id"] not in watch]
 
     if not found_ids:
         print(f"  ⚠️ 발견된 신규 영상 0개 — 검색 실패/차단이거나 상위 결과가 모두 처리 이력에 있습니다. "
@@ -2100,7 +2137,8 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
         return 0
 
     hot = sum(1 for v in pool.values() if v.get("views", 0) >= HOT_VIEWS)
-    print(f"  • 후보 영상 풀: {len(found_ids)}개 (10만 회 이상 {hot}개 / 이력 스킵 {seen_in_history}개 / 마이닝 목표: {limit}개)\n")
+    print(f"  • 후보 영상 풀: {len(found_ids)}개 (감시 채널 {len(watch_ids)}개 / 10만 회 이상 {hot}개 / "
+          f"이력 스킵 {seen_in_history}개 / 마이닝 목표: {limit}개 + 감시 {len(watch_ids)}개)\n")
 
     agg = {
         "searched": len(found_ids),
@@ -2135,8 +2173,9 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
             newly_processed.append(vid)
             del failures[vid]
 
+    watch_ready = []
     for video_id in ([] if rate_limited else found_ids):
-        if len(ready) >= ready_target:
+        if video_id not in watch and len(ready) >= ready_target:
             break
 
         vurl = f"https://www.youtube.com/watch?v={video_id}"
@@ -2189,13 +2228,13 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
             _print_video_line(vinfo, _new_stats(), skip_reason=f"스킵: 설명란 {desc_len}자 < {MIN_DESCRIPTION_LEN}자")
             continue
 
-        ready.append({**vinfo, "_vid": video_id})
+        (watch_ready if video_id in watch else ready).append({**vinfo, "_vid": video_id})
 
     def places(v):
         return sum(1 for c in _collect_description_candidates(v.get("description") or "") if passes_spot_name_gate(c)[0])
     ready.sort(key=lambda v: (places(v) >= 3, v.get("views", 0) >= HOT_VIEWS, v.get("views", 0)), reverse=True)
 
-    for vinfo in ready[:limit]:
+    for vinfo in watch_ready + ready[:limit]:
         video_id, vurl = vinfo["_vid"], vinfo["url"]
         desc_len = len(vinfo["description"] or "")
         print(f"\n─── 🎬 {vinfo['title'][:50]} | {vinfo['author']} | 조회 {vinfo['views']:,} | "
