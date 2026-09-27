@@ -31,6 +31,34 @@ def test_empty_path():
     assert k(None, "아무가게") is None
 
 
+
+def test_landmark_fallback_does_not_store_full_path():
+    # 주소·랜드마크 폴백이 카카오 경로 전체를 category로 돌려줘 19행에 '가정,생활 > 미용 > 미용실'이 들어갔다(2026-09-26)
+    import io, json
+    import supabase_worker as w
+
+    class R(io.BytesIO):
+        status = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            pass
+
+    def fake(req, timeout=None):
+        if "naver" in getattr(req, "full_url", ""):
+            raise OSError("naver off")
+        return R(json.dumps({"documents": [{"place_name": "빗앤붓", "road_address_name": "서울 강남구 1", "x": "1", "y": "2",
+                                            "category_name": "가정,생활 > 미용 > 미용실"}]}).encode())
+    orig = (w.urllib.request.urlopen, w.KAKAO_REST_API_KEY)
+    w.urllib.request.urlopen, w.KAKAO_REST_API_KEY = fake, "k"
+    try:
+        assert w.search_address_or_landmark("빗앤붓")["category"] == "미용실"
+    finally:
+        w.urllib.request.urlopen, w.KAKAO_REST_API_KEY = orig
+
+
 if __name__ == "__main__":
     for fn in [v for key, v in list(globals().items()) if key.startswith("test_")]:
         fn()
