@@ -1549,6 +1549,12 @@ function isSpecialDiningSpot(spot: Spot): boolean {
   // 스페셜은 '특별한 날의 다이닝'이라 테마파크·전망대 입장권 가격으로 들어오지 않게 한다(에버랜드·서울스카이 등 약 340곳)
   if (NON_DINING_CATEGORY_RE.test(spot.category || '')) return false;
 
+  // price에서 금액을 읽으면 금액만으로 판정한다(최고 4.5만원 이상). 티어·평균가·분위기·키워드는 금액이 없을 때만 쓴다.
+  // 요약문 템플릿의 '위스키'·'기념일' 때문에 2만원대 레일바이크·파스타집이 스페셜로 통과했고, 티어를 먼저 보면
+  // 털게탕 한 접시나 2인 가격에서 나온 ₩₩₩ 때문에 곰치국·포장마차 약 100곳이 통과했다(2026-09-27)
+  const range = parsePriceRangeWon(spot.price || '');
+  if (range) return range[1] >= 45000;
+
   // 1. 명시적 가격 티어 (₩₩₩ 또는 ₩₩₩₩)
   if (spot.price_tier === '₩₩₩' || spot.price_tier === '₩₩₩₩') return true;
   if (spot.price_tier === 'FREE' || spot.price_tier === '₩') return false;
@@ -1557,11 +1563,6 @@ function isSpecialDiningSpot(spot: Spot): boolean {
   if (typeof spot.avg_price_per_person === 'number' && spot.avg_price_per_person >= 45000) {
     return true;
   }
-
-  // price에서 금액을 읽으면 금액만으로 판정한다(최고 4.5만원 이상). 아래 분위기·키워드는 금액이 없을 때만 쓴다.
-  // 요약문 템플릿의 '위스키'·'기념일' 때문에 2만원대 레일바이크·파스타집이 스페셜로 통과했다
-  const range = parsePriceRangeWon(spot.price || '');
-  if (range) return range[1] >= 45000;
 
   // 3. 큐레이션 인증 뱃지 (미쉐린, 캐치테이블 파인다이닝)
   // 2026-09-20 기준 michelin/catchtable을 채우는 수집 경로가 없어 매칭 0건.
