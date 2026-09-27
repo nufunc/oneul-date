@@ -6692,9 +6692,19 @@ function renderOverlayContent(): void {
       btn.addEventListener('click', () => {
         const item = loadSavedCourses().find((c) => c.id === btn.dataset.courseId);
         if (!item) return;
+        const { steps, dropped } = resolveSavedSteps(item.spotIds);
+        // 남은 곳이 없으면 빈 결과 화면과 '필터를 완화하라'는 안내로 가지 않고 시트에 머문다
+        if (steps.length === 0) {
+          showToast('이 코스의 장소를 지금은 모두 찾을 수 없어요');
+          return;
+        }
         closeOverlay(() => {
-          restoreCourse(item);
-          showToast('코스를 불러왔어요');
+          restoreCourse(item, steps);
+          showToast(
+            dropped > 0
+              ? `저장한 ${item.spotIds.length}곳 중 ${dropped}곳은 지금 코스에 넣을 수 없어 뺐어요`
+              : '코스를 불러왔어요',
+          );
         });
       });
     });
@@ -6704,22 +6714,11 @@ function renderOverlayContent(): void {
         e.stopPropagation();
         const item = loadSavedCourses().find((c) => c.id === btn.dataset.copyId);
         if (!item) return;
-        // restoreCourse()는 isCourseEligible로 걸러내고 제외된 개수를
-        // 알리는데, 이 '복사' 버튼은 spot.slot 존재 여부만 봐서 폐업·
-        // 자격 상실 스팟도 안내 없이 조용히 빠졌다(2026-09-23 발견).
-        // 같은 검증·같은 안내로 맞췄다.
-        const steps: CourseStep[] = [];
-        let droppedCount = 0;
-        for (const id of item.spotIds) {
-          const spot = spotById.get(id);
-          if (spot && isCourseEligible(spot)) {
-            steps.push({ slot: spot.slot as SlotKey, spotId: id });
-          } else if (spot) {
-            droppedCount += 1;
-          }
-        }
-        if (droppedCount > 0) {
-          showToast(`검증에 실패한 장소 ${droppedCount}곳을 제외하고 복사했어요`);
+        // 불러오기와 같은 판정을 쓴다. 폐업·자격 상실 스팟이 안내 없이 빠지던 문제(2026-09-23 발견)
+        const { steps, dropped } = resolveSavedSteps(item.spotIds);
+        if (steps.length === 0) {
+          showToast('복사할 수 있는 장소가 없어요');
+          return;
         }
         try {
           const text = await formatCourseTextAsync(
@@ -6730,7 +6729,8 @@ function renderOverlayContent(): void {
             item.conditions.subZones || [],
           );
           await navigator.clipboard.writeText(text);
-          showToast('📋 코스가 복사되었어요');
+          // 제외 안내를 먼저 띄우면 바로 이 토스트가 덮어써 한 번에 합친다
+          showToast(dropped > 0 ? `📋 ${dropped}곳을 빼고 코스를 복사했어요` : '📋 코스가 복사되었어요');
         } catch {
           showToast('복사하지 못했어요');
         }
@@ -7302,23 +7302,22 @@ function renderOverlayContent(): void {
 }
 
 /** 저장한 코스를 결과 영역에 복원 (조건 상태도 함께 복원) */
-function restoreCourse(item: SavedCourse): void {
-  // spotId → 해당 스폿의 slot으로 스텝 재구성
-  // (스폿 데이터가 사라진 ID, 그리고 숙박 검증에 실패한 과거 저장분은 건너뜀)
+/**
+ * 저장 코스의 spotId를 지금 코스에 넣을 수 있는 스텝으로 바꾼다.
+ * 병합·폐업으로 데이터에서 사라진 id와 검증에 실패한 id를 모두 dropped로 센다.
+ * 사라진 id를 세지 않으면 불러오기·복사에서 안내 없이 빠졌다
+ */
+function resolveSavedSteps(spotIds: number[]): { steps: CourseStep[]; dropped: number } {
   const steps: CourseStep[] = [];
-  let droppedCount = 0;
-  for (const id of item.spotIds) {
+  for (const id of spotIds) {
     const spot = spotById.get(id);
-    if (spot && isCourseEligible(spot)) {
-      steps.push({ slot: spot.slot as SlotKey, spotId: id });
-    } else if (spot) {
-      droppedCount += 1;
-    }
-  }
-  if (droppedCount > 0) {
-    showToast(`검증에 실패한 장소 ${droppedCount}곳을 코스에서 제외했어요`);
+    if (spot && isCourseEligible(spot)) steps.push({ slot: spot.slot as SlotKey, spotId: id });
   }
   steps.sort((a, b) => SLOT_ORDER.indexOf(a.slot) - SLOT_ORDER.indexOf(b.slot));
+  return { steps, dropped: spotIds.length - steps.length };
+}
+
+function restoreCourse(item: SavedCourse, steps: CourseStep[]): void {
 
   // 하위호환: 과거 저장분은 region이 문자열 — 배열로 정규화해 복원
   const regions = normalizeRegionCond(item.conditions.region);
