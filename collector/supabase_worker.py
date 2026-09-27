@@ -460,6 +460,14 @@ def insert_spots(supabase_url, headers, spots):
     배치 전체가 한 행의 제약 위반으로 통째로 버려지던 문제(2026-09-24 TourAPI 409) 때문이다.
     넣은 스팟 목록을 돌려준다. 네트워크 오류와 5xx는 호출부가 다음 회차에 다시 시도하도록 예외를 올린다."""
     url = f"{supabase_url}/rest/v1/spots"
+    # 카테고리 없는 행은 넣지 않는다. 마이너가 카카오·TourAPI로 카테고리를 채운 뒤 부르는 공통 지점이라 여기서 거른다
+    # (2026-09-27 열린 행 2,285건이 category null, 모두 이관분이었고 이 경로에는 검사가 없었다)
+    missing = [s for s in spots if not (s.get("category") or "").strip()]
+    if missing:
+        print(f"  ⚠️ 카테고리 없는 {len(missing)}건은 넣지 않습니다: {', '.join(str(s.get('name')) for s in missing[:5])}")
+        spots = [s for s in spots if (s.get("category") or "").strip()]
+    if not spots:
+        return []
 
     def post(payload):
         req = urllib.request.Request(url, data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),

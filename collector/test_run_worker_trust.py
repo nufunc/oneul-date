@@ -80,6 +80,24 @@ def test_emoji_one_letter_and_place_names_are_still_quarantined():
     assert patch.get("is_closed") is True
 
 
+
+def test_insert_spots_skips_rows_without_category():
+    posted = []
+
+    def fake_urlopen(req, timeout=None, **kw):
+        posted.extend(json.loads(req.data.decode("utf-8")))
+        return _Res(b"")
+    orig = w.urllib.request.urlopen
+    w.urllib.request.urlopen = fake_urlopen
+    try:
+        out = w.insert_spots("http://db", {}, [{"id": 1, "name": "부빙", "category": "디저트카페"},
+                                               {"id": 2, "name": "빈칸", "category": None}, {"id": 3, "name": "공백", "category": " "}])
+        assert w.insert_spots("http://db", {}, [{"id": 4, "name": "없음"}]) == []
+    finally:
+        w.urllib.request.urlopen = orig
+    assert [s["id"] for s in out] == [1] and [s["id"] for s in posted] == [1]
+
+
 if __name__ == "__main__":
     for fn in [v for k, v in list(globals().items()) if k.startswith("test_")]:
         fn()
