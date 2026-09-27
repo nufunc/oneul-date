@@ -7358,6 +7358,9 @@ function handleRoute(): void {
     const steps = buildSharedSteps(sharedIds);
     if (steps.length > 0) {
       renderReceiverView(steps);
+      // 병합·폐업으로 사라진 곳을 조용히 빼면 수신자가 그대로 저장·재공유해 원래 코스가 줄어든 채 퍼진다
+      const dropped = new Set(sharedIds).size - steps.length;
+      if (dropped > 0) showToast(`공유된 ${steps.length + dropped}곳 중 ${dropped}곳은 지금 코스에 넣을 수 없어 뺐어요`);
       return;
     }
     // 전부 무효 ID → 안내 후 홈으로
