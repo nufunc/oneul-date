@@ -1786,6 +1786,8 @@ function normalizeRegionCond(value: string[] | string | undefined): string[] {
 
 /** 코스 결과 제목. 찜으로 만든 코스는 선택 조건이 아니라 첫 장소의 지역을 보인다 */
 function courseTitle(cond: NonNullable<AppState['courseConditions']>, course: CourseStep[]): string {
+  const anchor = cond.anchorId ? spotById.get(cond.anchorId) : undefined;
+  if (anchor) return `📍 ${anchor.name} 중심 코스`;
   if (cond.fromSaved) {
     const first = course.find((st) => st.spotId)?.spotId;
     const region = first ? spotById.get(first)?.region : undefined;
@@ -3070,6 +3072,8 @@ interface AppState {
     budgetFilter?: 'ALL' | 'BUDGET' | 'LUXURY';
     /** 찜으로 만든 코스. 지역·분위기 선택과 무관하므로 제목을 따로 붙인다 */
     fromSaved?: boolean;
+    /** '이 스팟 중심' 맞춤 코스의 앵커. 다시 추천도 이 스팟 주변에서 뽑는다 */
+    anchorId?: number;
   } | null;
   savedOpen: boolean;
   regionSheetOpen: boolean;
@@ -5332,6 +5336,14 @@ function swapStep(index: number, refocus = false): void {
 /** 동일 조건 스냅샷으로 모든 스텝 재생성 (체감 랜덤 보정 적용) */
 function regenerateCourse(): void {
   if (!state.course || !state.courseConditions) return;
+  // 앵커 코스는 같은 앵커 주변에서 다시 뽑는다(가까운 후보 가운데 무작위라 매번 달라진다)
+  const anchor = state.courseConditions.anchorId ? spotById.get(state.courseConditions.anchorId) : undefined;
+  if (anchor) {
+    state.course = buildAnchorCourse(anchor);
+    addRecentSpotIds(courseSpotIds());
+    renderResults();
+    return;
+  }
   // 다시 추천한 코스에는 찜이 들어가지 않으므로 찜 코스 제목을 끈다
   if (state.courseConditions.fromSaved) state.courseConditions = { ...state.courseConditions, fromSaved: false };
   const cond = state.courseConditions;
@@ -6216,12 +6228,11 @@ function bindDiscoveryCardEvents(root: ParentNode, area: HTMLElement): void {
 
       const steps = buildAnchorCourse(anchorSpot);
       state.course = steps;
-      state.searchQuery = anchorSpot.name;
       state.courseConditions = {
         regions: [...state.regions],
         subZones: [...state.subZones],
         mood: state.mood,
-        searchQuery: anchorSpot.name,
+        anchorId: anchorSpot.id,
       };
 
       // 맞춤 코스 탭으로 전환
@@ -7377,12 +7388,12 @@ function renderOverlayContent(): void {
       closeOverlay(() => {
         const steps = buildAnchorCourse(spot);
         state.course = steps;
-        state.searchQuery = spot.name;
+        // 앵커는 이름 검색이 아니라 id로 남긴다. 숙소 앵커는 이름 검색에 잡히지 않아 다시 추천에서 빠졌다
         state.courseConditions = {
           regions: [...state.regions],
           subZones: [...state.subZones],
           mood: state.mood,
-          searchQuery: spot.name,
+          anchorId: spot.id,
         };
         state.mainMode = 'course';
         updateModeView();
