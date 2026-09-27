@@ -3835,7 +3835,7 @@ html[data-theme-resolved="dark"] .step-transit-badge:hover {
 }
 
 .step-transit-divider.origin-start .step-transit-time {
-  color: #059669;
+  color: #047857; /* 초록 8% 배경에서 WCAG AA 4.5:1 이상 (#059669는 3.25:1) */
 }
 
 html[data-theme="dark"] .step-transit-divider.origin-start .step-transit-badge,
@@ -4877,7 +4877,7 @@ html[data-theme-resolved="dark"] .quick-region-chip.chip-budget.is-luxury-active
   border-radius: 9999px;
   border: 1px solid rgba(234, 179, 8, 0.4);
   background: rgba(234, 179, 8, 0.1);
-  color: #ca8a04;
+  color: #854d0e; /* 노랑 10% 배경에서 WCAG AA 4.5:1 이상 (#ca8a04는 2.56:1) */
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
