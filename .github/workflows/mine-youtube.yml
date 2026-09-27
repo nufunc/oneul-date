@@ -1,0 +1,57 @@
+name: Mine YouTube Video
+
+# 유튜브 영상 링크를 받아 수집기(youtube_vlog_miner.py)로 영상 속 장소를 등록한다
+on:
+  workflow_dispatch:
+    inputs:
+      urls:
+        description: '유튜브 영상 링크 (여러 개는 공백이나 줄바꿈으로 구분, 최대 10개)'
+        required: true
+        type: string
+      dry_run:
+        description: '시험 실행 (DB를 바꾸지 않고 결과만 본다)'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: mine-youtube
+  cancel-in-progress: false
+
+jobs:
+  mine:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract video ids
+        id: ids
+        env:
+          URLS: ${{ inputs.urls }}
+        run: |
+          # 입력을 셸 명령에 그대로 넣지 않도록 11자리 영상 id만 뽑는다
+          ids=$(printf '%s\n' "$URLS" | grep -oE '(v=|youtu\.be/|shorts/|live/)[A-Za-z0-9_-]{11}' | sed -E 's#.*(=|/)##' | awk '!seen[$0]++' | head -10 | tr '\n' ' ')
+          if [ -z "$ids" ]; then echo "유튜브 영상 링크를 찾지 못했습니다"; exit 1; fi
+          echo "ids=$ids" >> "$GITHUB_OUTPUT"
+          echo "영상 id: $ids"
+
+      - name: Run miner on server
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          VIDEO_IDS: ${{ steps.ids.outputs.ids }}
+          DRY_FLAG: ${{ inputs.dry_run && '--dry-run' || '' }}
+        with:
+          host: ${{ secrets.OCI_HOST }}
+          username: ${{ secrets.OCI_USERNAME }}
+          key: ${{ secrets.OCI_SSH_KEY }}
+          port: ${{ secrets.OCI_PORT || 22 }}
+          envs: VIDEO_IDS,DRY_FLAG
+          command_timeout: 30m
+          script: |
+            set -o pipefail
+            fail=0
+            for id in $VIDEO_IDS; do
+              case "$id" in *[!A-Za-z0-9_-]*) echo "잘못된 id: $id"; fail=1; continue;; esac
+              echo "::group::$id"
+              docker exec oneul-collector python3 youtube_vlog_miner.py --url "https://www.youtube.com/watch?v=$id" $DRY_FLAG 2>&1 | tail -40 || fail=1
+              echo "::endgroup::"
+            done
+            exit $fail
