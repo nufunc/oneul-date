@@ -353,7 +353,7 @@ html[data-theme-resolved="dark"] .main-tab-btn.is-active {
 
 html[data-theme="dark"] .main-tab-btn.is-active .main-tab-badge,
 html[data-theme-resolved="dark"] .main-tab-btn.is-active .main-tab-badge {
-  background: #ef4444;
+  background: #dc2626; /* 흰 글씨 4.83:1 (#ef4444는 3.76:1) */
   color: #ffffff;
 }
 
@@ -3909,7 +3909,7 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
 .main-tab-badge {
   font-size: 0.65rem;
   font-weight: 800;
-  color: #ef4444;
+  color: #b91c1c; /* #fee2e2 배경에서 5.3:1 (#ef4444는 3.08:1) */
   background: #fee2e2;
   padding: 1px 6px;
   border-radius: var(--radius-full);
@@ -4443,7 +4443,7 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
 .discovery-card-category,
 .discovery-category {
   font-size: 0.70rem;
-  color: var(--color-primary, #0284c7);
+  color: #0369a1; /* 흰 카드에서 5.93:1 (#0284c7는 4.1:1). 다크 모드는 아래 규칙 */
   font-weight: 700;
   white-space: nowrap;
 }
@@ -4687,6 +4687,18 @@ html[data-theme-resolved="dark"] .quick-region-chip.chip-indoor.is-indoor-active
 .quick-region-chip.chip-saved {
   border-color: rgba(244, 63, 94, 0.4);
   color: #e11d48;
+}
+
+html[data-theme="dark"] .quick-region-chip.chip-saved,
+html[data-theme-resolved="dark"] .quick-region-chip.chip-saved {
+  color: #fb7185; /* 어두운 칩 배경에서 5.9:1 이상 (#e11d48는 3.64:1) */
+}
+
+html[data-theme="dark"] .discovery-card-category,
+html[data-theme-resolved="dark"] .discovery-card-category,
+html[data-theme="dark"] .discovery-category,
+html[data-theme-resolved="dark"] .discovery-category {
+  color: var(--color-primary);
 }
 
 .quick-region-chip.chip-saved:hover {
