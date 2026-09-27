@@ -98,6 +98,30 @@ def test_insert_spots_skips_rows_without_category():
     assert [s["id"] for s in out] == [1] and [s["id"] for s in posted] == [1]
 
 
+
+def test_enrich_quarantine_uses_same_noise_rule():
+    # 5단계도 두 글자 이름을 닫아, run_worker에서 고친 뒤 되살린 행을 다시 닫을 수 있었다(2026-09-27)
+    import enrich_worker as e
+    patches = []
+
+    def fake_urlopen(req, timeout=None, **kw):
+        if getattr(req, "method", "GET") == "PATCH":
+            patches.append((req.full_url, json.loads(req.data.decode("utf-8"))))
+            return _Res(b"")
+        return _Res(json.dumps([{"id": 1, "name": "부빙", "location": "서울 종로구"},
+                                {"id": 2, "name": "🌿", "location": ""}]).encode("utf-8"))
+    orig = (e.urllib.request.urlopen, e.search_youtube_hotclip, e.search_kakaomap_place, e.time.sleep)
+    e.urllib.request.urlopen, e.time.sleep = fake_urlopen, lambda s: None
+    e.search_youtube_hotclip = lambda *a, **k: None
+    e.search_kakaomap_place = lambda *a, **k: None
+    try:
+        e.run_social_enrichment("http://db", "k", batch_size=2)
+    finally:
+        e.urllib.request.urlopen, e.search_youtube_hotclip, e.search_kakaomap_place, e.time.sleep = orig
+    closed = {url.rsplit("eq.", 1)[-1] for url, body in patches if body.get("is_closed") is True}
+    assert closed == {"2"}, patches
+
+
 if __name__ == "__main__":
     for fn in [v for k, v in list(globals().items()) if k.startswith("test_")]:
         fn()

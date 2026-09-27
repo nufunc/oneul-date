@@ -17,6 +17,7 @@ from datetime import datetime, timezone, timedelta
 from miners.youtube_miner import search_youtube_hotclip
 from miners.kakaomap_miner import search_kakaomap_place
 from score_engine import calculate_hot_score
+from supabase_worker import is_noise_spot_name
 
 def run_social_enrichment(supabase_url: str, service_key: str, batch_size: int = 15):
     """
@@ -69,8 +70,9 @@ def run_social_enrichment(supabase_url: str, service_key: str, batch_size: int =
 
         seen_spot_ids.add(spot_id)
 
-        # 단독 지명 및 오염된 일반명사는 소셜 API 조회 없이 자동 격리 처리
-        if len(name) <= 2 or name in ["서울", "경기", "인천", "강원", "충청", "영남", "호남", "제주", "부산", "대구", "울산", "광주", "대전", "세종", "한남", "압구정", "카페", "곱창전골"]:
+        # 단독 지명, 오염된 일반명사, 한글·영문이 없는 이름, 한 글자 이름은 소셜 API 조회 없이 자동 격리 처리.
+        # run_worker와 같은 규칙(is_noise_spot_name)을 쓴다. 두 글자 이름까지 닫으면 부빙·윤슬 같은 실제 가게가 닫혔다(c0038dc)
+        if is_noise_spot_name(name) or name in ["서울", "경기", "인천", "강원", "충청", "영남", "호남", "제주", "부산", "대구", "울산", "광주", "대전", "세종", "한남", "압구정", "카페", "곱창전골"]:
             try:
                 quarantine_url = f"{supabase_url}/rest/v1/spots?id=eq.{spot_id}"
                 patch_payload = json.dumps({"is_closed": True, "updated_at": datetime.now(timezone.utc).isoformat()}).encode('utf-8')
