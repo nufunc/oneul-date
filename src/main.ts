@@ -6083,7 +6083,7 @@ function renderSpotDiscovery(): void {
 
         <div class="discovery-sort-group">
           <select class="discovery-sort-select" id="discovery-sort-select" aria-label="스팟 정렬">
-            <option value="distance" ${state.spotSort === 'distance' ? 'selected' : ''}>📍 가까운 거리순</option>
+            <option value="distance" ${state.spotSort === 'distance' ? 'selected' : ''}>${userCoords ? '📍 가까운 거리순' : `📍 ${escapeHtml(distanceBasisLabel())} 중심 거리순`}</option>
             <option value="popular" ${state.spotSort === 'popular' ? 'selected' : ''}>🔥 핫플/인기순</option>
             <option value="curation" ${state.spotSort === 'curation' ? 'selected' : ''}>⭐ 인증·평점순</option>
           </select>
@@ -6143,6 +6143,17 @@ function trustedRating(spot: Spot): number {
   return (rating * reviews + 4.0 * 30) / (reviews + 30);
 }
 
+/** 위치 권한이 없을 때 거리순의 기준점 이름. renderSpotDiscovery의 대체 좌표 순서(세부 동네 → 지역 → 성수)와 같다 */
+function distanceBasisLabel(): string {
+  if (state.subZones.length > 0 && ZONE_CENTERS[state.subZones[0]]) {
+    return POPULAR_ZONES.find((z) => z.key === state.subZones[0])?.label ?? '선택한 동네';
+  }
+  if (state.regions.length > 0 && REGION_CENTERS[state.regions[0]]) {
+    return REGIONS.find((r) => r.key === state.regions[0])?.label ?? '선택한 지역';
+  }
+  return '성수';
+}
+
 function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 5 = 3): string {
   const isHot = isSuperHotSpot(spot);
   const isClosedToday = isSpotClosedToday(spot);
@@ -6150,8 +6161,10 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
   const slotKey = (spot.slot as SlotKey) || 'day';
   const targetImgUrl = getSpotImageUrl(spot, slotKey);
   const fallbackIcon = getSpotFallbackIcon(spot, slotKey);
+  // 위치 권한이 없으면 거리는 사용자 위치가 아니라 대체 기준점(세부 동네·지역 중심, 기본 성수)에서 잰 값이다.
+  // 그 값을 '📍 25m'로 보이면 부산 사용자에게도 성수 가게가 25m로 보였다. 이때는 지역 이름만 보인다
   const distText =
-    spot._dist !== undefined && spot._dist < 9000
+    userCoords && spot._dist !== undefined && spot._dist < 9000
       ? spot._dist < 1.0
         ? `📍 ${(spot._dist * 1000).toFixed(0)}m`
         : `📍 ${spot._dist.toFixed(1)}km`
