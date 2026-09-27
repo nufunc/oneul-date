@@ -27,6 +27,7 @@ import os
 import sys
 import re
 import json
+from datetime import datetime, timezone
 import time
 import random
 import urllib.request
@@ -41,7 +42,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from supabase_worker import (search_naver, calculate_quality_score, load_env,
                              derive_region_area, is_zone_street_spot, find_duplicate_spot,
                              sanitize_spot, new_spot_id, is_polluted_header_name,
-                             provider_ids_of)
+                             provider_ids_of, _find_duplicate)
 from score_engine import calculate_hot_score
 from category_filter import (
     is_date_spot_category,
@@ -1020,7 +1021,8 @@ ORDINAL_PREFIX_RE = re.compile(
     re.IGNORECASE
 )
 NUM_PREFIX_RE = re.compile(
-    r'^(?:[✨💡📍📌🏠☕🍽️🏛️🌳🌿🎪▶✔·\s]*)(?:[①-⑳❶-❿⑴-⒇]|\d+[\.\)\-:\s]|[\[\(]\d+[\]\)])\s*',
+    # '4.19 카페거리'의 '4.'는 목록 번호가 아니다. 마침표 뒤에 숫자가 오면 떼지 않는다(2026-09-28 우이동 영상)
+    r'^(?:[✨💡📍📌🏠☕🍽️🏛️🌳🌿🎪▶✔·\s]*)(?:[①-⑳❶-❿⑴-⒇]|\d+(?:\.(?!\d)|[\)\-:\s])|[\[\(]\d+[\]\)])\s*',
     re.IGNORECASE
 )
 
@@ -1029,6 +1031,8 @@ def clean_vlog_spot_name(line: str) -> str:
     if not line:
         return ""
     cleaned = line.strip()
+    # '4·19'는 게이트가 가운뎃점을 특수문자로 떨어뜨리므로 '4.19'로 맞춘다(국립4·19민주묘지)
+    cleaned = re.sub(r'(\d)·(\d)', r'\1.\2', cleaned)
     # 0. 잔여 타임스탬프 (예: '01:30 메타세콰이어길', '12:40 1. 서울숲')
     cleaned = re.sub(r'^(?:[0-9]{1,2}:[0-9]{2}(?::[0-9]{2})?)\s*[-~:•·]?\s*', '', cleaned).strip()
     # 1. 'MZ피디의 문래동 코스 ① 포토바이문래' or '1일차 점심 1. 성수다락'
@@ -1038,7 +1042,7 @@ def clean_vlog_spot_name(line: str) -> str:
     # 3. '📍 1. 어니언 안국' or '① 러스트베이커리'
     cleaned = NUM_PREFIX_RE.sub('', cleaned).strip()
     # 4. 잔여 숫자 접두사 (예: '30 메타세콰이어길', '00 인트로', '12 서울월드컵경기장', '49 커뮤니티센타')
-    cleaned = re.sub(r'^\d{1,3}[\s\.:\-_]+', '', cleaned).strip()
+    cleaned = re.sub(r'^\d{1,3}(?:[\s:\-_]|\.(?!\d))+', '', cleaned).strip()
     # 5. 앞뒤 장식 기호 정리
     cleaned = cleaned.strip(' -~:•·📍📌🏠☕🍽️🏛️🌳🌿🎪▶✔*#')
     return cleaned
@@ -1055,18 +1059,30 @@ def _collect_description_candidates(description: str) -> list[str]:
             raw.append(cleaned)
 
     # 2. 번호 리스트 (예: "1. 초막골생태공원", "3) 반월호수공원", "① 러스트베이커리")
-    for line in re.findall(r'(?:^|\n)\s*[0-9①-⑳❶-❿]{1,2}[\.\)\-:]?\s*([^\n\r:—]+)', description):
+    # '4.19 민주묘지 전망대'처럼 소수점 숫자로 시작하는 줄은 번호 목록이 아니라 이름 자체로 본다
+    for line in re.findall(r'(?:^|\n)\s*(?![0-9]+\.[0-9])[0-9①-⑳❶-❿]{1,2}[\.\)\-:]?\s*([^\n\r:—]+)', description):
+        cleaned = clean_vlog_spot_name(line)
+        if cleaned:
+            raw.append(cleaned)
+    for line in re.findall(r'(?:^|\n)\s*([0-9]+\.[0-9]+\s*[^\n\r:—]+)', description):
         cleaned = clean_vlog_spot_name(line)
         if cleaned:
             raw.append(cleaned)
 
     # 4. 아이콘/헤더 기반 (예: "📍 선샤인스튜디오")
-    for spot in re.findall(r'(?:📍|📌|🏠|☕|🍽️|🏛️|🌳|🌿|🎪|▶|✔|·)\s*([^\n\r:—]+)', description):
+    # '·'는 줄머리 기호일 때만 본다. '국립4·19민주묘지'처럼 글자 사이의 가운뎃점에서 자르면 '19민주묘지'가 됐다
+    for spot in re.findall(r'(?:📍|📌|🏠|☕|🍽️|🏛️|🌳|🌿|🎪|▶|✔|(?<![0-9A-Za-z가-힣])·)\s*([^\n\r:—]+)', description):
         cleaned = clean_vlog_spot_name(spot)
         if cleaned:
             raw.append(cleaned)
 
-    return raw
+    # 주소 줄('서울 강북구 4.19로 135')은 상호가 아니다
+    return [c for c in raw if not ADDRESS_LINE_RE.search(c)]
+
+
+ADDRESS_LINE_RE = re.compile(
+    r'^(?:서울|부산|대구|인천|광주|대전|울산|세종|경기|강원|충북|충남|전북|전남|경북|경남|제주)[가-힣]*\s+[가-힣0-9]+(?:시|군|구)\s'
+    r'|\S+(?:로|길)\s*\d+(?:-\d+)?(?:\s|$)')
 
 
 def _collect_title_candidates(title: str) -> list[str]:
@@ -1467,6 +1483,7 @@ def _new_stats() -> dict:
         "name_mismatch": 0,
         "category_rejected": 0,
         "duplicated": 0,
+        "video_attached": 0,
         "polluted_name": 0,
         "insert_failed": 0,
         "registered": 0,
@@ -1488,6 +1505,37 @@ def is_non_date_video(title: str, description: str = "") -> tuple[bool, str]:
         if kw in t:
             return True, f"비데이트 키워드({kw})"
     return False, ""
+
+def attach_video_to_existing(supabase_url, headers, existing, vinfo, dry_run=False, stats=None, verbose=False):
+    """기존 스팟의 social_links.youtube가 비었거나 조회수가 더 낮으면 이 영상으로 바꾸고 hot_score를 다시 계산한다."""
+    social = existing.get("social_links") if isinstance(existing.get("social_links"), dict) else {}
+    current = social.get("youtube") if isinstance(social.get("youtube"), dict) else {}
+    views = vinfo.get("views") or 0
+    if current.get("url") and (current.get("views") or 0) >= views:
+        if verbose:
+            print(f"    ⏩ [이미 존재, 더 많이 본 영상이 있음] {existing.get('name')}")
+        return False
+    video = {"url": vinfo["url"], "title": (vinfo.get("title") or "")[:60], "channel": (vinfo.get("author") or "")[:40],
+             "views": views, "likes": vinfo.get("likes", 0), "is_shorts": False}
+    hot, new_social, metrics = calculate_hot_score(video, social.get("kakaomap"), bool(existing.get("verified")))
+    patch = {"social_links": {**social, **new_social}, "hot_score": hot, "metrics": metrics,
+             "updated_at": datetime.now(timezone.utc).isoformat()}
+    if stats is not None:
+        stats["video_attached"] = stats.get("video_attached", 0) + 1
+    print(f"    🎬 [이미 존재 → 영상 연결{' DRY-RUN' if dry_run else ''}] {existing.get('name')} (id {existing.get('id')}) "
+          f"조회수 {current.get('views') or 0:,} → {views:,}, hot_score {hot}")
+    if dry_run:
+        return True
+    try:
+        req = urllib.request.Request(f"{supabase_url}/rest/v1/spots?id=eq.{existing['id']}", method="PATCH",
+                                     data=json.dumps(patch).encode("utf-8"),
+                                     headers={**headers, "Content-Type": "application/json", "Prefer": "return=minimal"})
+        urllib.request.urlopen(req, timeout=10)
+        return True
+    except Exception as e:
+        print(f"    ⚠️ 영상 연결 실패 (id {existing.get('id')}): {e}")
+        return False
+
 
 def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
                     dry_run: bool = False, verbose: bool = True) -> dict:
@@ -1620,9 +1668,16 @@ def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
 
         # 중복 검사 (이름 + 정규화 주소, 읽기 전용)
         if supabase_url and supabase_key:
-            if find_duplicate_spot(supabase_url, headers, official_name, road_addr, provider_ids_of(top), lat, lng):
+            is_dup, existing = _find_duplicate(supabase_url, headers, official_name, road_addr, provider_ids_of(top), lat, lng)
+            if is_dup:
                 stats["duplicated"] += 1
-                if verbose:
+                # 이미 있는 스팟이어도 이 영상이 그곳을 소개했다는 근거는 남긴다. 저장된 영상이 없거나 조회수가 더 낮으면
+                # 이 영상으로 바꾸고 hot_score를 다시 계산한다(2026-09-28: 조회수 68만 우이동 영상의 8곳이 흔적 없이 건너뛰어짐)
+                attached = stats.setdefault("_attached_ids", set())
+                if existing and not existing.get("is_closed") and existing.get("id") not in attached:
+                    attached.add(existing.get("id"))
+                    attach_video_to_existing(supabase_url, headers, existing, vinfo, dry_run=dry_run, stats=stats, verbose=verbose)
+                elif verbose:
                     print(f"    ⏩ [이미 존재하는 스팟 건너뜀] {official_name}")
                 continue
 
