@@ -5981,12 +5981,10 @@ function renderSpotDiscovery(): void {
     // ⭐ 인증·평점순 (관광공사 인증 + 카카오맵 평점). michelin/blue_ribbon은
     // 실제로 채우는 수집 경로가 없어 항상 0이라 점수식에서 제외했다.
     // 평점은 리뷰 수로 보정한 값(trustedRating)을 쓴다. 원점수만 쓰면 리뷰 몇 개짜리 5.0점이 리뷰 수백 개의
-    // 4.6점보다 앞섰다
-    matchedSpots.sort((a, b) => {
-      const aScore = (a.curation_badges?.tour_api ? 10 : 0) + trustedRating(a) * 5;
-      const bScore = (b.curation_badges?.tour_api ? 10 : 0) + trustedRating(b) * 5;
-      return bScore - aScore;
-    });
+    // 4.6점보다 앞섰다. 인증은 평점이 비슷할 때만 앞서도록 0.2점만 더한다. 종전 +10점은 평점 차이(최대 약 10점)보다 커서
+    // 서울 상위 175위가 모두 인증 공공시설(구민회관 공연장 등)이었고 식당은 상위 50위에 없었다(2026-09-28)
+    const curationScore = (s: Spot) => trustedRating(s) + (s.curation_badges?.tour_api ? 0.2 : 0);
+    matchedSpots.sort((a, b) => curationScore(b) - curationScore(a));
   } else {
     // 🔥 핫플/인기순 (종합 인기도 점수 기준 정렬)
     matchedSpots.sort((a, b) => getSpotPopularityScore(b) - getSpotPopularityScore(a));
