@@ -8,6 +8,9 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    # 스팟 API(중계 서버 18088)를 공인 IP 대신 호스트 안에서 부른다. 공인 IP로 부르면 비밀값이 평문으로 OCI 게이트웨이를 돈다
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - PYTHONUNBUFFERED=1
       - TZ=Asia/Seoul
