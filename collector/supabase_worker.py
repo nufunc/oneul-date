@@ -310,7 +310,8 @@ def search_address_or_landmark(query: str):
                             "roadAddress": d.get("road_address_name") or d.get("address_name"),
                             "x": d.get("x"),
                             "y": d.get("y"),
-                            "category": d.get("category_name") or "골목/상권 명소"
+                            # 경로 전체('가정,생활 > 미용 > 미용실')가 category에 들어가지 않게 search_naver와 같은 규칙으로 줄인다
+                            "category": kakao_category_from_path(d.get("category_name"), d.get("place_name")) or "골목/상권 명소"
                         }
         except Exception:
             pass
