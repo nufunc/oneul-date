@@ -46,6 +46,29 @@ def test_address_group_keeps_row_matching_coordinate_address():
         m.coord_to_addresses, m._poi_confirms = orig
 
 
+
+def test_backup_holds_every_row_the_merge_touches():
+    # 같은 좌표 그룹의 행이 백업에서 빠졌다(2026-09-27 262행)
+    import glob, json, os, tempfile
+    import merge_duplicates as m
+    rows = [_r(1, "속초 바다정원"), _r(2, "바다정원 카페"),
+            dict(_r(3, "오징어난전"), address="강원 속초시 해안로 9", lat=38.3), dict(_r(4, "오징어난전"), address="강원 속초시 해안로 9", lat=38.3)]
+    saved = (m.fetch_open_spots, m._request, m.load_env, m.find_review_pairs)
+    m.fetch_open_spots = lambda url, headers: [dict(r) for r in rows]
+    m._request = lambda *a, **k: None
+    m.load_env = lambda: {"SUPABASE_URL": "http://db"}
+    m.find_review_pairs = lambda rows, ids: []
+    d = tempfile.mkdtemp()
+    try:
+        os.environ.pop("KAKAO_REST_API_KEY", None)
+        m.run_merge(apply=True, backup_dir=d, report_path=os.path.join(d, "r.md"), log=lambda *a: None)
+    finally:
+        m.fetch_open_spots, m._request, m.load_env, m.find_review_pairs = saved
+    backup = json.load(open(glob.glob(os.path.join(d, "merge_duplicates_*.json"))[0]))
+    assert sorted(r["id"] for r in backup["rows"]) == [1, 2, 3, 4]
+    assert backup["id_map"] == {"2": 1, "4": 3}
+
+
 if __name__ == "__main__":
     for fn in [v for k, v in list(globals().items()) if k.startswith("test_")]:
         fn()
