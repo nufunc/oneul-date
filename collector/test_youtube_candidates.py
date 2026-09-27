@@ -136,6 +136,34 @@ def test_watch_channel_mines_fresh_hits_and_keeps_low_views_out_of_history():
     assert "hit00000000" in history and "low00000000" not in history and "old00000000" not in history
 
 
+
+def test_overseas_titles_missed_in_first_watch_round():
+    for t in ("유니버설 스튜디오 재팬 완벽 공략", "[VLOG] 2박 3일 일본 소도시", "리스본🇵🇹 인생 여행 코스", "인생 여행 코스 🇵🇹"):
+        assert y.is_overseas_video(t), t
+    for t in ("연남동 일본식 라멘 맛집", "서울 🇰🇷 데이트 코스", "부암동 하루코스"):
+        assert not y.is_overseas_video(t), t
+
+
+def test_neighborhood_in_title_narrows_region_to_its_district():
+    assert y.extract_region_hints("성북동이 부자 동네라더니") == ["성북구"]
+    assert y.extract_region_hints("홍길동 이야기") == []
+    assert y.extract_region_hints("강릉 연남동 느낌 카페") == ["강릉"]
+
+
+def test_manual_run_goes_to_history():
+    def run():
+        y.get_youtube_video_info = lambda vid, verbose=False: {"url": f"https://www.youtube.com/watch?v={vid}", "title": "우이동 하루코스",
+                                                               "author": "가희드", "views": 1, "description": "x"}
+        saved = y.mine_video_info
+        y.mine_video_info = lambda *a, **k: y._new_stats()
+        try:
+            y.mine_youtube_vlog("https://www.youtube.com/watch?v=bp-Uinfc2vM", "http://db", "k")
+            return y.load_processed_history()
+        finally:
+            y.mine_video_info = saved
+    assert "bp-Uinfc2vM" in _isolated(run)
+
+
 if __name__ == "__main__":
     for fn in [v for k, v in list(globals().items()) if k.startswith("test_")]:
         fn()

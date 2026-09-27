@@ -287,7 +287,15 @@ OVERSEAS_KEYWORDS = [
     "두바이", "터키", "이스탄불", "몰디브", "칸쿤",
     "해외여행", "일본여행", "베트남여행", "태국여행", "유럽여행", "미국여행", "중국여행",
     "일본 여행", "해외 여행", "유럽 여행",
+    # 2026-09-28 첫 감시 회차에서 놓친 영상: 유니버설 스튜디오 재팬, 일본 소도시, 리스본
+    "재팬", "유니버설 스튜디오", "리스본", "포르투갈", "마드리드", "피렌체", "베네치아", "밀라노",
+    "부다페스트", "비엔나", "암스테르담", "베를린", "뮌헨", "몽골", "라오스", "캄보디아",
 ]
+
+# '일본'은 '일본식 라멘'처럼 국내 가게 설명에도 나와 뒤 글자를 보고 판정한다
+JAPAN_RE = re.compile(r"일본(?!식|어|풍|가정식|라멘|요리|음식|술|주점)")
+# 국기 이모지(지역 표시 기호 두 개). 한국 국기는 뺀다
+FLAG_RE = re.compile(r"(?!\U0001F1F0\U0001F1F7)[\U0001F1E6-\U0001F1FF]{2}")
 
 # ─────────────────────────────────────────────────────────────
 # [A] 영상 소싱 설정
@@ -938,6 +946,11 @@ def is_overseas_video(title: str, description: str = "") -> str:
         if kw.lower() in blob:
             return kw
 
+    if JAPAN_RE.search(blob):
+        return "일본"
+    if FLAG_RE.search(t):
+        return "국기"
+
     # 2. 해외 드라마/웹소설 키워드
     for dkw in FOREIGN_DRAMA_KEYWORDS:
         if dkw.lower() in blob:
@@ -1346,8 +1359,37 @@ def extract_region_hints(text: str) -> list[str]:
         if token not in bucket:
             bucket.append(token)
 
+    # 시군구 이름이 없고 동네 이름만 있으면 그 동네의 시군구를 힌트로 쓴다
+    # ('성북동이 부자 동네라더니'의 길상사가 고양시 길상사로 등록됐다, 2026-09-28)
+    if not local_hints:
+        for dong, district in _dong_districts().items():
+            if dong in text and not _is_residence(dong) and district not in local_hints:
+                local_hints.append(district)
+
     # 기초 힌트 우선 — 광역은 기초가 없을 때만 쓴다
     return local_hints or metro_hints
+
+
+_DONG_DISTRICTS: dict[str, str] | None = None
+
+
+def _dong_districts() -> dict[str, str]:
+    """area_seeds 세부 지역 가운데 '~동'으로 끝나는 세 글자 이상 이름 → 시군구. 두 시군구에 걸친 이름은 뺀다.
+    두 글자 이름(남산, 길동, 고덕)은 다른 낱말 안에 들어 있거나 다른 시에도 있어 쓰지 않는다."""
+    global _DONG_DISTRICTS
+    if _DONG_DISTRICTS is None:
+        try:
+            from area_seeds import SEOUL_DISTRICTS, GYEONGGI_INCHEON_AREAS, OTHER_REGIONAL_AREAS
+            srcs = list(SEOUL_DISTRICTS.values()) + GYEONGGI_INCHEON_AREAS + OTHER_REGIONAL_AREAS
+        except Exception:
+            srcs = []
+        seen: dict[str, set] = {}
+        for src in srcs:
+            for sub in src.get("sub_areas", []):
+                if len(sub) >= 3 and sub.endswith("동"):
+                    seen.setdefault(sub, set()).add(src["area"])
+        _DONG_DISTRICTS = {k: next(iter(v)) for k, v in seen.items() if len(v) == 1}
+    return _DONG_DISTRICTS
 
 
 
@@ -1826,6 +1868,11 @@ def mine_youtube_vlog(url: str, supabase_url: str, supabase_key: str, dry_run: b
 
     print(f"\n🔍 [2/3] 영상 내 방문 장소 추출 및 지도 정밀 검증 중...{' [DRY-RUN]' if dry_run else ''}")
     stats = mine_video_info(vinfo, supabase_url, supabase_key, dry_run=dry_run, manual=True)
+    # 수동으로 처리한 영상을 자동 탐색이 다시 마이닝하지 않도록 이력에 넣는다(우이동 영상 중복 10, 2026-09-28)
+    if not dry_run:
+        history = load_processed_history()
+        if video_id not in history:
+            save_processed_history(history + [video_id])
 
     print(f"\n🎉 [3/3] 유튜브 역방향 마이닝 완료: 총 {stats['registered']}개 스팟 "
           f"{'등록 예정(dry-run)' if dry_run else '신규 등록 완료'}!")
