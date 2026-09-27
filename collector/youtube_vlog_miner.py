@@ -143,42 +143,49 @@ HISTORY_MAX = 2000
 
 INITIAL_VERIFIED_CHANNELS = [
     # 1. 미식 / 파인다이닝 / 노포 전문
-    {"name": "더들리", "handle": "@dudely_", "category": "gourmet_travel"},
+    {"name": "더들리", "handle": "@dudely_08", "category": "gourmet_travel"},
     {"name": "성시경 SUNG SI KYUNG", "handle": "@sungsikyung", "category": "gourmet_nodae"},
     {"name": "스튜디오 와플 - 또간집", "handle": "@studio_waffle", "category": "gourmet_travel"},
-    {"name": "마리아주", "handle": "@mariage_food", "category": "fine_dining"},
+    {"name": "마리아주", "handle": "@mariage_in", "category": "fine_dining"},
     {"name": "비밀이야", "handle": "@bimirya", "category": "fine_dining"},
-    {"name": "김사원세끼", "handle": "@kimsawon3kki", "category": "gourmet_nopo"},
-    {"name": "맛상무", "handle": "@mat_sang_moo", "category": "gourmet_nopo"},
-    {"name": "정육왕 Meat Creator", "handle": "@meatking", "category": "gourmet_bbq"},
-    {"name": "오사사 오사카에사는사람들TV", "handle": "@matsuda_osasa", "category": "gourmet_dining"},
-    {"name": "빅페이스 BIGFACE", "handle": "@bigface_tv", "category": "gourmet_review"},
-    {"name": "윤호찌", "handle": "@yoonhottzy", "category": "gourmet_nopo"},
+    {"name": "김사원세끼", "handle": "@kim3meals", "category": "gourmet_nopo"},
+    {"name": "맛상무", "handle": "@matsangmu", "category": "gourmet_nopo"},
+    {"name": "정육왕 Meat Creator", "handle": "@meatcreator", "category": "gourmet_bbq"},
+    {"name": "오사사 오사카에사는사람들TV", "handle": "@osaka544", "category": "gourmet_dining"},
+    {"name": "빅페이스 BIGFACE", "handle": "@bigfacetv", "category": "gourmet_review"},
+    {"name": "윤호찌", "handle": "@윤호찌", "category": "gourmet_nopo"},
     {"name": "먹보스 손석호", "handle": "@mukbossson", "category": "gourmet_dining"},
-    {"name": "맛객리우", "handle": "@matgaek_riu", "category": "gourmet_nopo"},
-    {"name": "츄릅켠", "handle": "@churupkyeon", "category": "gourmet_busan"},
+    {"name": "맛객리우", "handle": "@Liwoo_foodie", "category": "gourmet_nopo"},
+    {"name": "츄릅켠", "handle": "@ChuReupKyeon", "category": "gourmet_busan"},
     {"name": "비디오머그 - 푸드", "handle": "@videomug", "category": "gourmet_story"},
 
     # 2. 감성 여행 / 당일치기 / 데이트 브이로그
-    {"name": "수코 sookoh", "handle": "@sookoh", "category": "travel_vlog"},
+    {"name": "수코 sookoh", "handle": "@Sookohaseyo", "category": "travel_vlog"},
     {"name": "딤디 deemd", "handle": "@deemd", "category": "vlog_cafe"},
     {"name": "혬복 hyembok", "handle": "@hyembok", "category": "vlog_date"},
     {"name": "슛뚜 sueddu", "handle": "@sueddu", "category": "vlog_travel"},
-    {"name": "여락이들", "handle": "@yeorakidul", "category": "travel_vlog"},
+    {"name": "여락이들", "handle": "@여락이들", "category": "travel_vlog"},
     {"name": "제이림 JLim", "handle": "@jlim_vlog", "category": "vlog_travel"},
-    {"name": "나강 Nagang", "handle": "@nagang_vlog", "category": "travel_vlog"},
+    {"name": "나강 Nagang", "handle": "@nakang", "category": "travel_vlog"},
     {"name": "트래블러조", "handle": "@traveler_joe", "category": "travel_vlog"},
     {"name": "밍키 Mingky", "handle": "@mingky_vlog", "category": "vlog_date"},
     {"name": "자몽부부", "handle": "@jamong_couple", "category": "vlog_couple"},
     {"name": "소소한날", "handle": "@sosohannal", "category": "vlog_date"},
     {"name": "가든스테이", "handle": "@gardenstay", "category": "vlog_stay"},
-    {"name": "또떠남", "handle": "@ddoddeonam", "category": "vlog_hotel_stay"},
+    {"name": "또떠남", "handle": "@ddoddunam", "category": "vlog_hotel_stay"},
     {"name": "체크인", "handle": "@checkin_hotel", "category": "vlog_hotel"},
-    {"name": "여행에미치다", "handle": "@travelholic_korea", "category": "travel_curation"},
+    {"name": "여행에미치다", "handle": "@YEOMI", "category": "travel_curation"},
     {"name": "데이트립 DayTrip", "handle": "@daytrip_official", "category": "vlog_date"},
-    {"name": "제주에딧", "handle": "@jeju_edit", "category": "vlog_jeju"},
-    {"name": "부산언니", "handle": "@busan_unnie", "category": "vlog_busan"},
-    {"name": "강지영의 동그라미", "handle": "@jiyoung_circle", "category": "vlog_date_hotplace"},
+    {"name": "제주에딧", "handle": "@제주에딧", "category": "vlog_jeju"},
+    {"name": "부산언니", "handle": "@busanunnie", "category": "vlog_busan"},
+    {"name": "강지영의 동그라미", "handle": "@강지영의동그라미", "category": "vlog_date_hotplace"},
+
+    # 3. 동네 하루코스 (한 동네의 맛집·카페·볼거리를 한 영상에 묶는 롱폼, 2026-09-27 추가)
+    {"name": "가희드 gahiiide", "handle": "@gahiiide", "category": "vlog_day_course"},
+    {"name": "너도 가봤으면 해", "handle": "@yougotoo", "category": "vlog_day_course"},
+    {"name": "보리코 Boriko", "handle": "@Boriko", "category": "vlog_day_course"},
+    {"name": "아무개개 Amugae", "handle": "@Amugaegae", "category": "vlog_day_course"},
+    {"name": "백년해방", "handle": "@백년해방", "category": "vlog_day_course"},
 ]
 
 VERIFIED_CHANNELS_PATH = os.path.join(_STATE_DIR, ".verified_channels.json")
@@ -196,6 +203,16 @@ def load_verified_channels() -> dict:
     }
     save_verified_channels(init_data)
     return init_data
+
+
+def _merge_initial_channels(data: dict) -> dict:
+    """저장된 레지스트리에 INITIAL 목록의 추가분과 핸들 교정을 반영한다. 파일이 한 번 생기면 코드의 목록이 다시 읽히지 않았다."""
+    verified = data.setdefault("verified", {})
+    initial_names = {c["name"] for c in INITIAL_VERIFIED_CHANNELS}
+    for k in [k for k, v in verified.items() if v.get("name") in initial_names and not v.get("auto_promoted")]:
+        del verified[k]
+    verified.update({c["handle"]: c for c in INITIAL_VERIFIED_CHANNELS})
+    return data
 
 def save_verified_channels(data: dict):
     try:
@@ -308,6 +325,12 @@ SEARCH_KEYWORDS = [
     "커플 원데이클래스 데이트 코스 추천",
     "감성 숙소 호캉스 1박2일 브이로그 타임라인",
     "스파 풀빌라 펜션 힐링 여행 브이로그",
+
+    # 5. 동네 하루코스 (한 동네를 걸으며 맛집·카페·볼거리를 묶는 롱폼, 2026-09-27 추가)
+    "하루코스",
+    "동네 하루코스",
+    "등산 안 해도",
+    "반나절 코스",
 ]
 
 # 설명란이 이보다 짧으면 파싱할 코스 목록이 없다고 보고 스킵 (50자 이상으로 완화)
@@ -1799,43 +1822,143 @@ def _print_video_line(vinfo: dict, stats: dict, skip_reason: str = "") -> None:
           f"게이트통과 {stats.get('candidates_gated', 0)}개 | 등록 {stats.get('registered', 0)}건{note}")
 
 
-def _search_innertube_videos(query: str, max_results: int = 20) -> list[str]:
-    """InnerTube Search API (공식 JSON 프로토콜)로 최신 영상 ID를 안전하고 정확하게 수급"""
-    url = "https://www.youtube.com/youtubei/v1/search"
-    payload = {
-        "context": {
-            "client": {
-                "clientName": "WEB",
-                "clientVersion": "2.20240313.01.00",
-                "hl": "ko",
-                "gl": "KR"
-            }
-        },
-        "query": query,
-        "params": "EgIIAw%3D%3D"  # 20분 이상 롱폼 브이로그 필터
-    }
-    headers = {
-        "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-        "Accept-Language": "ko-KR,ko;q=0.9",
-        "Origin": "https://www.youtube.com",
-        "Referer": "https://www.youtube.com/",
-        "Cookie": "CONSENT=YES+1; SOCS=CAI"
-    }
+INNERTUBE_WEB_CONTEXT = {"client": {"clientName": "WEB", "clientVersion": "2.20240313.01.00", "hl": "ko", "gl": "KR"}}
+INNERTUBE_WEB_HEADERS = {
+    "Content-Type": "application/json",
+    "User-Agent": UA_DESKTOP,
+    "Accept-Language": "ko-KR,ko;q=0.9",
+    "Origin": "https://www.youtube.com",
+    "Referer": "https://www.youtube.com/",
+    "Cookie": "CONSENT=YES+1; SOCS=CAI",
+}
+# 조회수순 + 올해 업로드. 이전 값 EgIIAw%3D%3D는 롱폼 필터가 아니라 '이번 주 업로드'라 조회수 수백 회 영상만 왔다
+SEARCH_PARAMS_POPULAR_THIS_YEAR = "CAMSAggF"
+HOT_VIEWS = 100_000
+LONGFORM_SEC = 8 * 60
+
+
+def _innertube_web(endpoint: str, body: dict, timeout: int = 10) -> dict:
+    req = urllib.request.Request(f"https://www.youtube.com/youtubei/v1/{endpoint}",
+                                 data=json.dumps({"context": INNERTUBE_WEB_CONTEXT, **body}).encode("utf-8"),
+                                 headers=INNERTUBE_WEB_HEADERS, method="POST")
+    with urllib.request.urlopen(req, timeout=timeout) as res:
+        return json.loads(res.read().decode("utf-8"))
+
+
+def _length_sec(text: str) -> int:
+    """'14:56', '1:02:03'을 초로 바꾼다. 형식이 다르면 0."""
+    text = (text or "").strip()
+    if not re.fullmatch(r'\d+(?::\d+){1,2}', text):
+        return 0
+    sec = 0
+    for x in text.split(":"):
+        sec = sec * 60 + int(x)
+    return sec
+
+
+def _parse_video_items(data: dict) -> list[dict]:
+    """검색 결과(videoRenderer)와 채널 목록(lockupViewModel)에서 영상 id·제목·조회수·길이를 뽑는다."""
+    out, seen = [], set()
+
+    def add(vid, title, views_text, length_text):
+        if vid and vid not in seen:
+            seen.add(vid)
+            out.append({"id": vid, "title": title or "", "views": _parse_like_count(views_text or ""),
+                        "length": _length_sec(length_text)})
+
+    def walk(o):
+        if isinstance(o, dict):
+            v = o.get("videoRenderer")
+            if isinstance(v, dict):
+                add(v.get("videoId"), "".join(r.get("text", "") for r in (v.get("title") or {}).get("runs", [])),
+                    (v.get("viewCountText") or {}).get("simpleText"), (v.get("lengthText") or {}).get("simpleText"))
+            lv = o.get("lockupViewModel")
+            if isinstance(lv, dict) and lv.get("contentType") == "LOCKUP_CONTENT_TYPE_VIDEO":
+                meta = (lv.get("metadata") or {}).get("lockupMetadataViewModel") or {}
+                texts = [p.get("text", {}).get("content", "") for p in _find_all(meta, "metadataParts")]
+                lengths = [t for t in _find_all(lv.get("contentImage") or {}, "text") if isinstance(t, str)]
+                add(lv.get("contentId"), (meta.get("title") or {}).get("content"),
+                    next((t for t in texts if "조회수" in t or "views" in t), ""),
+                    next((t for t in lengths if re.fullmatch(r'\d+(?::\d+){1,2}', t)), ""))
+            for x in o.values():
+                walk(x)
+        elif isinstance(o, list):
+            for x in o:
+                walk(x)
+    walk(data)
+    return out
+
+
+def _find_all(node, key: str) -> list:
+    """중첩 dict/list에서 key의 값을 모두 모은다(값이 리스트면 펼친다)."""
+    found = []
+    if isinstance(node, dict):
+        for k, v in node.items():
+            if k == key:
+                found.extend(v if isinstance(v, list) else [v])
+            else:
+                found.extend(_find_all(v, key))
+    elif isinstance(node, list):
+        for x in node:
+            found.extend(_find_all(x, key))
+    return found
+
+
+def _search_innertube_videos(query: str, max_results: int = 20) -> list[dict]:
+    """InnerTube 검색으로 올해 올라온 영상을 조회수순으로 받는다. 항목: id, title, views, length(초)."""
     try:
-        req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST")
-        with urllib.request.urlopen(req, timeout=8) as res:
-            if res.status == 200:
-                data = json.loads(res.read().decode("utf-8"))
-                txt = json.dumps(data)
-                ids = []
-                for vid in re.findall(r'\"videoId\":\s*\"([a-zA-Z0-9_-]{11})\"', txt):
-                    if vid not in ids:
-                        ids.append(vid)
-                return ids[:max_results]
+        data = _innertube_web("search", {"query": query, "params": SEARCH_PARAMS_POPULAR_THIS_YEAR}, timeout=8)
+        return _parse_video_items(data)[:max_results]
     except Exception:
-        pass
-    return []
+        return []
+
+
+def _channel_title_matches(registered: str, title: str) -> bool:
+    """핸들이 다른 채널을 가리키는지 확인한다. 등록 이름과 실제 채널명이 두 글자 이상 낱말 하나를 공유해야 한다."""
+    a = {t.lower() for t in re.findall(r'[가-힣A-Za-z0-9]{2,}', registered or "")}
+    b = {t.lower() for t in re.findall(r'[가-힣A-Za-z0-9]{2,}', title or "")}
+    return bool(a & b)
+
+
+def _browse_channel_videos(handle: str, name: str, popular: bool = True) -> list[dict]:
+    """채널 핸들로 동영상 탭을 받는다. popular면 '인기순' 칩을 눌러 조회수순 목록을 받는다.
+    핸들이 없거나 다른 채널이면 빈 목록을 돌려주고, 호출한 쪽이 이름 검색으로 대신한다."""
+    if not handle:
+        return []
+    try:
+        ep = _innertube_web("navigation/resolve_url", {"url": f"https://www.youtube.com/{handle}/videos"})
+        be = (ep.get("endpoint") or {}).get("browseEndpoint") or {}
+        if not be.get("browseId"):
+            return []
+        data = _innertube_web("browse", {"browseId": be["browseId"], "params": be.get("params")})
+        title = ((data.get("metadata") or {}).get("channelMetadataRenderer") or {}).get("title", "")
+        if not _channel_title_matches(name, title):
+            print(f"  ⚠️ [검증 채널] 핸들 {handle}이 '{title}' 채널을 가리켜 이름 검색으로 대신합니다 (등록 이름 '{name}')")
+            return []
+        if popular:
+            chip = next((c for c in _find_all(data, "chipViewModel") if c.get("text") == "인기순"), None)
+            token = (((chip or {}).get("tapCommand") or {}).get("innertubeCommand") or {}).get("continuationCommand", {}).get("token")
+            if token:
+                data = _innertube_web("browse", {"continuation": token})
+        return _parse_video_items(data)
+    except Exception:
+        return []
+
+
+def _pool_priority(v: dict) -> tuple:
+    """후보 풀 정렬 키: 10만 회 이상 → 롱폼 → 조회수."""
+    return (v.get("views", 0) >= HOT_VIEWS, v.get("length", 0) >= LONGFORM_SEC or v.get("length", 0) == 0, v.get("views", 0))
+
+
+def _day_course_queries(count: int = 5) -> list[str]:
+    """'{동네} 하루코스' 검색어. 동네 이름은 area_seeds의 세부 지역에서 고른다."""
+    try:
+        from area_seeds import SEOUL_DISTRICTS, GYEONGGI_INCHEON_AREAS, OTHER_REGIONAL_AREAS
+    except Exception:
+        return []
+    subs = sorted({s for src in list(SEOUL_DISTRICTS.values()) + GYEONGGI_INCHEON_AREAS + OTHER_REGIONAL_AREAS
+                   for s in src.get("sub_areas", [])})
+    return [f"{s} 하루코스" for s in random.sample(subs, min(count, len(subs)))]
 
 
 def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5,
@@ -1849,77 +1972,75 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
     print(f"  • 처리 이력: {len(history)}개 (파일: {os.path.basename(HISTORY_PATH)})")
 
     # 검증된 채널 목록 로드
-    ch_data = load_verified_channels()
-    verified_channels = list(ch_data.get("verified", {}).values()) if isinstance(ch_data, dict) and "verified" in ch_data else INITIAL_VERIFIED_CHANNELS
+    ch_data = _merge_initial_channels(load_verified_channels())
+    if not dry_run:
+        save_verified_channels(ch_data)
+    verified_channels = list(ch_data["verified"].values())
     print(f"  • 검증된 미식/여행 채널 풀: {len(verified_channels)}개 채널 가동")
 
-    # 발굴 대상 영상 ID 수집
-    found_ids = []
+    # 발굴 대상 영상. id → {id, title, views, length}
+    pool: dict[str, dict] = {}
     pool_target = max(limit * 3, 25)
     seen_in_history = 0
 
-    # 1-1. 검증된 채널 최신 영상 우선 소싱 (상위 3~4개 채널 샘플링)
-    sampled_channels = random.sample(verified_channels, min(4, len(verified_channels)))
-    for ch in sampled_channels:
-        ch_query = f"{ch.get('name', '')} 여행 맛집 코스"
-        raw_ids = _search_innertube_videos(ch_query, max_results=10)
+    def take(items: list[dict], cap: int) -> int:
+        nonlocal seen_in_history
         added = 0
-        for vid in raw_ids:
-            if vid in history_set:
+        for v in items:
+            if v["id"] in history_set:
                 seen_in_history += 1
                 continue
-            if vid not in found_ids:
-                found_ids.append(vid)
-                added += 1
-            if added >= 2:
+            if v["id"] in pool:
+                continue
+            pool[v["id"]] = v
+            added += 1
+            if added >= cap:
                 break
-        if added > 0:
-            print(f"  🌟 [검증 채널] '{ch.get('name')}' 최신 영상 {added}개 우선 확보")
+        return added
+
+    # 1-1. 검증된 채널 4곳을 샘플링해 채널 동영상 탭에서 직접 받는다. 핸들이 없거나 틀리면 이름 검색으로 대신한다
+    # 동네 하루코스 채널은 영상이 모두 코스형이라 인기순을 받는다. 다른 채널은 인기순에 역대 인기작(축구 하이라이트,
+    # 수년 전 먹방)이 먼저 와서 최신순을 받아 조회수로 정렬한다
+    for ch in random.sample(verified_channels, min(4, len(verified_channels))):
+        popular = ch.get("category") == "vlog_day_course"
+        items = _browse_channel_videos(ch.get("handle", ""), ch.get("name", ""), popular=popular)
+        via = "인기순" if popular else "최신순"
+        if not items:
+            items, via = _search_innertube_videos(f"{ch.get('name', '')} 여행 맛집 코스", max_results=10), "이름 검색"
+        added = take(sorted(items, key=_pool_priority, reverse=True), 3)
+        if added:
+            print(f"  🌟 [검증 채널] '{ch.get('name')}' {via} 영상 {added}개 확보")
 
     # 2. 일반 미식/데이트/여행 쿼리 풀 탐색
-    per_kw_cap = max(3, -(-pool_target // len(SEARCH_KEYWORDS)))
-    per_kw_scan = 20  # 검색 결과 상위 N개까지 훑어 이력에 없는 것을 고른다
-
-    # 쿼리 풀 랜덤 셔플. 고정 40개만 돌면 같은 상위 영상이 반복되고 해외·쇼츠가 섞여(09-16~17: 488개 중 165개 낭비)
-    # blog·discovery가 쓰는 지역 동적 쿼리 10개를 브이로그 형태로 섞는다. 검증 경로는 그대로라 정확도는 같다
+    # 쿼리 풀 랜덤 셔플. 고정 목록만 돌면 같은 상위 영상이 반복되고 해외·쇼츠가 섞여(09-16~17: 488개 중 165개 낭비)
+    # blog·discovery가 쓰는 지역 동적 쿼리 10개와 '{동네} 하루코스' 5개를 섞는다. 검증 경로는 그대로라 정확도는 같다
     try:
         from area_seeds import generate_dynamic_queries
         dynamic_kws = [f"{q} 브이로그" for q, _, _, _ in generate_dynamic_queries(count=10)]
     except Exception:
         dynamic_kws = []
-    shuffled_kws = list(SEARCH_KEYWORDS) + dynamic_kws
+    shuffled_kws = list(SEARCH_KEYWORDS) + dynamic_kws + _day_course_queries(5)
     random.shuffle(shuffled_kws)
+    per_kw_cap = max(3, -(-pool_target // len(shuffled_kws)))
 
     for kw in shuffled_kws:
-        if len(found_ids) >= pool_target:
+        if len(pool) >= pool_target:
             break
-        raw_ids = _search_innertube_videos(kw, max_results=per_kw_scan)
-        if not raw_ids:
-            continue
-        scanned, added, skipped_hist = [], 0, 0
-        for vid in raw_ids:
-            if vid in scanned:
-                continue
-            scanned.append(vid)
-            if vid in history_set:
-                skipped_hist += 1
-                continue
-            if vid in found_ids:
-                continue
-            found_ids.append(vid)
-            added += 1
-            if added >= per_kw_cap or len(found_ids) >= pool_target:
-                break
-        seen_in_history += skipped_hist
+        before = seen_in_history
+        added = take(_search_innertube_videos(kw, max_results=20), per_kw_cap)
         if added > 0:
-            print(f"  • '{kw}' 검색: 스캔 {len(scanned)}개 → 신규 {added}개 확보 (이력 스킵 {skipped_hist}개)")
+            print(f"  • '{kw}' 검색: 신규 {added}개 확보 (이력 스킵 {seen_in_history - before}개)")
+
+    # 조회수 10만 회 이상 → 롱폼 → 조회수 순으로 처리한다
+    found_ids = [v["id"] for v in sorted(pool.values(), key=_pool_priority, reverse=True)]
 
     if not found_ids:
         print(f"  ⚠️ 발견된 신규 영상 0개 — 검색 실패/차단이거나 상위 결과가 모두 처리 이력에 있습니다. "
               f"(이력 스킵 누적 {seen_in_history}개)")
         return 0
 
-    print(f"  • 후보 영상 풀: {len(found_ids)}개 (이력 스킵 {seen_in_history}개 / 마이닝 목표: {limit}개)\n")
+    hot = sum(1 for v in pool.values() if v.get("views", 0) >= HOT_VIEWS)
+    print(f"  • 후보 영상 풀: {len(found_ids)}개 (10만 회 이상 {hot}개 / 이력 스킵 {seen_in_history}개 / 마이닝 목표: {limit}개)\n")
 
     agg = {
         "searched": len(found_ids),
@@ -1943,8 +2064,11 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
     all_spots = []
     newly_processed = []
 
+    # 설명란을 먼저 받아 거른 뒤, 장소가 셋 이상 실린 영상 → 10만 회 이상 → 조회수 순으로 마이닝한다. 받아 두고 마이닝하지 않은 영상은 이력에 넣지 않아 다음 회차에 다시 본다
+    ready = []
+    ready_target = min(limit * 2, limit + 10)
     for video_id in found_ids:
-        if agg["mined"] >= limit:
+        if len(ready) >= ready_target:
             break
 
         vurl = f"https://www.youtube.com/watch?v={video_id}"
@@ -1991,6 +2115,15 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
             _print_video_line(vinfo, _new_stats(), skip_reason=f"스킵: 설명란 {desc_len}자 < {MIN_DESCRIPTION_LEN}자")
             continue
 
+        ready.append({**vinfo, "_vid": video_id})
+
+    def places(v):
+        return sum(1 for c in _collect_description_candidates(v.get("description") or "") if passes_spot_name_gate(c)[0])
+    ready.sort(key=lambda v: (places(v) >= 3, v.get("views", 0) >= HOT_VIEWS, v.get("views", 0)), reverse=True)
+
+    for vinfo in ready[:limit]:
+        video_id, vurl = vinfo["_vid"], vinfo["url"]
+        desc_len = len(vinfo["description"] or "")
         print(f"\n─── 🎬 {vinfo['title'][:50]} | {vinfo['author']} | 조회 {vinfo['views']:,} | "
               f"설명 {desc_len}자 [{vinfo.get('desc_source')}]")
         try:
