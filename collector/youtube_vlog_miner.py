@@ -226,9 +226,14 @@ def _merge_initial_channels(data: dict) -> dict:
     verified = data.setdefault("verified", {})
     initial_names = {c["name"] for c in INITIAL_VERIFIED_CHANNELS}
     # 자동 승격된 채널도 코드 목록에 올라오면 코드 쪽 항목(핸들·감시 표시)으로 바꾼다
+    managed = {v.get("name"): v["watch"] for v in verified.values() if v.get("watch_managed")}
     for k in [k for k, v in verified.items() if v.get("name") in initial_names]:
         del verified[k]
-    verified.update({c["handle"]: c for c in INITIAL_VERIFIED_CHANNELS})
+    verified.update({c["handle"]: dict(c) for c in INITIAL_VERIFIED_CHANNELS})
+    # 성과로 승격·강등된 감시 표시는 코드 목록보다 앞선다(review_watch_channels)
+    for v in verified.values():
+        if v.get("name") in managed:
+            v["watch"], v["watch_managed"] = managed[v["name"]], True
     return data
 
 def save_verified_channels(data: dict):
@@ -271,6 +276,176 @@ def record_channel_success(author: str, video_title: str, spots_registered: int)
         del candidates[author]
         
     save_verified_channels(data)
+
+# ─────────────────────────────────────────────────────────────
+# [Watch Registry] 채널 성과 기록과 감시 채널 자동 승격·강등
+#   사람이 채널을 넣지 않으므로 수집기가 성과로 감시 목록을 늘리고 줄인다(2026-09-27 호스트 요청)
+# ─────────────────────────────────────────────────────────────
+
+CHANNEL_STATS_PATH = os.path.join(_STATE_DIR, ".channel_stats.json")
+WATCH_PROMOTE_VIDEOS = 2      # 등록이 나온 서로 다른 영상 수
+WATCH_PROMOTE_SPOTS = 8       # 누적 신규 등록 수
+WATCH_PROMOTE_MAX_CLOSED = 0.2
+WATCH_DEMOTE_IDLE_DAYS = 30   # 이 기간 동안 기준 영상도 등록도 없으면 강등
+WATCH_DEMOTE_CLOSED = 0.3
+WATCH_DEMOTE_MIN_SPOTS = 5    # 닫힘 비율로 강등하려면 등록이 이만큼은 있어야 한다
+WATCH_MAX = 20
+
+
+def _handle_from_url(url: str) -> str:
+    """oEmbed author_url('https://www.youtube.com/@gahiiide')에서 핸들을 뽑는다."""
+    m = re.search(r"/(@[^/?#]+)", urllib.parse.unquote(url or ""))
+    return m.group(1) if m else ""
+
+
+def _today() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+
+def _days_since(day: str) -> int:
+    try:
+        return (datetime.now(timezone.utc).date() - datetime.strptime(day, "%Y-%m-%d").date()).days
+    except Exception:
+        return 10 ** 6
+
+
+def load_channel_stats() -> dict:
+    try:
+        with open(CHANNEL_STATS_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
+def save_channel_stats(data: dict) -> None:
+    try:
+        with open(CHANNEL_STATS_PATH, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False)
+    except Exception as e:
+        print(f"  ⚠️ 채널 성과 저장 실패: {e}")
+
+
+def _channel_key(handle: str, name: str) -> str:
+    return handle or name
+
+
+def record_channel_video(vinfo: dict, stats: dict) -> None:
+    """마이닝한 영상 하나의 성과를 채널별로 누적한다(마이닝 수, 등록이 나온 영상 수, 등록 id와 날짜, 영상 연결 수)."""
+    key = _channel_key(vinfo.get("handle", ""), vinfo.get("author", ""))
+    if not key:
+        return
+    data = load_channel_stats()
+    c = data.setdefault("channels", {}).setdefault(key, {"name": vinfo.get("author", ""), "handle": vinfo.get("handle", ""),
+                                                        "mined": 0, "productive": 0, "spots": [], "attached": 0,
+                                                        "first_seen": _today()})
+    c["mined"] += 1
+    ids = stats.get("spot_ids") or []
+    if ids:
+        c["productive"] += 1
+        c["spots"].extend({"id": i, "date": _today()} for i in ids)
+        c["last_registered"] = _today()
+    c["attached"] += stats.get("video_attached", 0)
+    save_channel_stats(data)
+
+
+def record_watch_hit(handle: str, name: str) -> None:
+    """감시 경로에서 기준(5만 회 이상, 30일 이내) 영상이 나온 날을 남긴다. 강등 판정에 쓴다."""
+    data = load_channel_stats()
+    c = data.setdefault("channels", {}).setdefault(_channel_key(handle, name), {"name": name, "handle": handle, "mined": 0,
+                                                                              "productive": 0, "spots": [], "attached": 0,
+                                                                              "first_seen": _today()})
+    c["last_watch_hit"] = _today()
+    save_channel_stats(data)
+
+
+def _closed_ratio(supabase_url: str, ids: list) -> float | None:
+    """등록한 스팟 가운데 닫힌 비율. 병합으로 닫힌 행(merged_into)은 빼고 센다. 조회에 실패하면 None."""
+    if not ids or not supabase_url:
+        return None
+    closed = total = 0
+    try:
+        for i in range(0, len(ids), 100):
+            q = f"{supabase_url}/rest/v1/spots?select=id,is_closed,source&id=in.({','.join(map(str, ids[i:i + 100]))})"
+            with urllib.request.urlopen(q, timeout=20) as res:
+                for r in json.loads(res.read().decode("utf-8")):
+                    if r.get("is_closed") and "merged_into" in ((r.get("source") or {}).get("note") or ""):
+                        continue
+                    total += 1
+                    closed += bool(r.get("is_closed"))
+    except Exception:
+        return None
+    return closed / total if total else None
+
+
+def review_watch_channels(ch_data: dict, supabase_url: str, dry_run: bool = False) -> list[str]:
+    """하루 한 번 감시 채널을 승격·강등하고 목록을 요약한다. 로그 줄 목록을 돌려준다."""
+    stats = load_channel_stats()
+    meta = stats.setdefault("_meta", {})
+    if meta.get("last_review") == _today():
+        return []
+    verified = ch_data.setdefault("verified", {})
+    channels = stats.setdefault("channels", {})
+    by_key = {_channel_key(v.get("handle", ""), v.get("name", "")): (k, v) for k, v in verified.items()}
+    # 자동 승격(record_channel_success) 항목은 핸들 없이 채널명으로 들어 있어 이름으로도 찾는다
+    by_name = {v.get("name"): (k, v) for k, v in verified.items() if v.get("name")}
+    logs = []
+
+    def recent(c, days=30):
+        return sum(1 for s in c.get("spots", []) if _days_since(s.get("date", "")) <= days)
+
+    for key, c in channels.items():
+        reg_key, entry = by_key.get(key) or by_name.get(c.get("name")) or (None, None)
+        ratio = _closed_ratio(supabase_url, [s["id"] for s in c.get("spots", [])])
+        c["closed_ratio"] = ratio
+        watching = bool(entry and entry.get("watch"))
+        if not watching:
+            if (c.get("productive", 0) >= WATCH_PROMOTE_VIDEOS and len(c.get("spots", [])) >= WATCH_PROMOTE_SPOTS
+                    and ratio is not None and ratio < WATCH_PROMOTE_MAX_CLOSED and c.get("handle")):
+                if entry is None:
+                    reg_key, entry = c["handle"], {"name": c.get("name") or c["handle"], "handle": c["handle"],
+                                                   "category": "vlog_day_course", "auto_promoted": True}
+                    verified[reg_key] = entry
+                entry.update({"handle": entry.get("handle") or c["handle"], "watch": True, "watch_managed": True,
+                              "watch_since": _today()})
+                logs.append(f"  ⬆️ [감시 채널 승격] {entry['name']}: 등록 영상 {c['productive']}개, 스팟 {len(c['spots'])}곳, "
+                            f"닫힘 {ratio:.0%}")
+            continue
+        since = entry.get("watch_since") or c.get("first_seen") or _today()
+        last_active = max(c.get("last_watch_hit", ""), c.get("last_registered", ""), since)
+        reason = ""
+        if _days_since(last_active) > WATCH_DEMOTE_IDLE_DAYS:
+            reason = f"{WATCH_DEMOTE_IDLE_DAYS}일 동안 기준 영상과 등록 없음(마지막 {last_active})"
+        elif ratio is not None and len(c.get("spots", [])) >= WATCH_DEMOTE_MIN_SPOTS and ratio >= WATCH_DEMOTE_CLOSED:
+            reason = f"등록 스팟 닫힘 {ratio:.0%}"
+        if reason:
+            entry.update({"watch": False, "watch_managed": True})
+            logs.append(f"  ⬇️ [감시 채널 강등] {entry['name']}: {reason}")
+
+    # 감시 채널에 성과 기록이 아직 없으면 오늘을 기준일로 둔다. 처음 넣은 7곳도 30일 뒤부터 같은 기준을 받는다
+    for k, v in verified.items():
+        if v.get("watch"):
+            channels.setdefault(_channel_key(v.get("handle", ""), v.get("name", "")),
+                                {"name": v.get("name"), "handle": v.get("handle", ""), "mined": 0, "productive": 0,
+                                 "spots": [], "attached": 0, "first_seen": _today()})
+
+    watch = [(k, v) for k, v in verified.items() if v.get("watch")]
+    if len(watch) > WATCH_MAX:
+        ranked = sorted(watch, key=lambda kv: recent(channels.get(_channel_key(kv[1].get("handle", ""), kv[1].get("name", "")), {})),
+                        reverse=True)
+        for k, v in ranked[WATCH_MAX:]:
+            v.update({"watch": False, "watch_managed": True})
+            logs.append(f"  ⬇️ [감시 채널 강등] {v['name']}: 상한 {WATCH_MAX}곳 초과(최근 30일 등록 순위 밖)")
+        watch = ranked[:WATCH_MAX]
+    summary = ", ".join(f"{v['name']} {recent(channels.get(_channel_key(v.get('handle', ''), v.get('name', '')), {}))}"
+                        for _, v in watch)
+    logs.append(f"  📋 [감시 채널 요약] {len(watch)}곳 (최근 30일 등록): {summary}")
+    if not dry_run:
+        meta["last_review"] = _today()
+        save_channel_stats(stats)
+        save_verified_channels(ch_data)
+    return logs
+
 
 # 해외 여행 영상 (국내 데이트 스팟 파이프라인 대상 아님) — 제목에 걸리면 영상 자체 스킵
 OVERSEAS_KEYWORDS = [
@@ -800,13 +975,14 @@ def get_youtube_video_info(video_id: str, verbose: bool = False) -> dict | None:
 
     # 1. oEmbed 기본 메타데이터 (제목/채널명/썸네일)
     oembed_url = f"https://www.youtube.com/oembed?url={urllib.parse.quote(video_url)}&format=json"
-    title, author_name, thum_url = "", "", ""
+    title, author_name, thum_url, author_url = "", "", "", ""
     try:
         req = urllib.request.Request(oembed_url, headers=HEADERS)
         with urllib.request.urlopen(req, timeout=6) as resp:
             data = json.loads(resp.read().decode('utf-8'))
             title = data.get("title", "")
             author_name = data.get("author_name", "")
+            author_url = data.get("author_url", "")
             thum_url = data.get("thumbnail_url", "")
         diag.append("oEmbed:OK")
     except Exception as e:
@@ -879,6 +1055,7 @@ def get_youtube_video_info(video_id: str, verbose: bool = False) -> dict | None:
         "url": video_url,
         "title": title,
         "author": author_name,
+        "handle": _handle_from_url(author_url),
         "description": description,
         "views": views,
         "likes": likes,
@@ -1588,6 +1765,7 @@ def _new_stats() -> dict:
         "insert_failed": 0,
         "registered": 0,
         "spots": [],
+        "spot_ids": [],
     }
 
 
@@ -1838,6 +2016,7 @@ def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
             with urllib.request.urlopen(insert_req, timeout=5):
                 stats["registered"] += 1
                 stats["spots"].append(official_name)
+                stats["spot_ids"].append(spot_id)
                 print(f"    ✨ [신규 스팟 등록 성공!] {official_name} ({road_addr}) [슬롯: {slot}]")
         except Exception as e:
             stats["insert_failed"] += 1
@@ -1868,6 +2047,8 @@ def mine_youtube_vlog(url: str, supabase_url: str, supabase_key: str, dry_run: b
 
     print(f"\n🔍 [2/3] 영상 내 방문 장소 추출 및 지도 정밀 검증 중...{' [DRY-RUN]' if dry_run else ''}")
     stats = mine_video_info(vinfo, supabase_url, supabase_key, dry_run=dry_run, manual=True)
+    if not dry_run:
+        record_channel_video(vinfo, stats)
     # 수동으로 처리한 영상을 자동 탐색이 다시 마이닝하지 않도록 이력에 넣는다(우이동 영상 중복 10, 2026-09-28)
     if not dry_run:
         history = load_processed_history()
@@ -2092,6 +2273,8 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
     ch_data = _merge_initial_channels(load_verified_channels())
     if not dry_run:
         save_verified_channels(ch_data)
+    for line in review_watch_channels(ch_data, supabase_url, dry_run=dry_run):
+        print(line)
     verified_channels = list(ch_data["verified"].values())
     print(f"  • 검증된 미식/여행 채널 풀: {len(verified_channels)}개 채널 가동")
 
@@ -2134,6 +2317,8 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
                     and is_course_title(v.get("title", ""))]
             for v in hits:
                 watch.setdefault(v["id"], v)
+            if hits and not dry_run:
+                record_watch_hit(ch.get("handle", ""), ch.get("name", ""))
             print(f"  👀 [감시 채널] {ch.get('name')}: 최신 {len(latest)}개 중 5만+ {len(hits)}개")
 
         # 1-1. 검증된 채널 4곳을 샘플링해 채널 동영상 탭에서 직접 받는다. 핸들이 없거나 틀리면 이름 검색으로 대신한다
@@ -2309,6 +2494,8 @@ def run_youtube_vlog_mining(supabase_url: str, supabase_key: str, limit: int = 5
         all_spots.extend(stats["spots"])
 
         # 채널 성과 기록 및 자율 승격 검토
+        if not dry_run:
+            record_channel_video(vinfo, stats)
         if stats["registered"] > 0 and not dry_run:
             record_channel_success(vinfo.get("author", ""), vinfo.get("title", ""), stats["registered"])
 

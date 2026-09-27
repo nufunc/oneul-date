@@ -66,9 +66,11 @@ def test_saved_registry_gets_new_channels_and_handle_fixes():
 def _isolated(fn):
     import io, os, tempfile
     d = tempfile.mkdtemp()
-    saved = {k: getattr(y, k) for k in ("HISTORY_PATH", "FAILURES_PATH", "VERIFIED_CHANNELS_PATH", "_innertube_web",
-                                         "get_youtube_video_info", "_day_course_queries")}
-    y.HISTORY_PATH, y.FAILURES_PATH, y.VERIFIED_CHANNELS_PATH = (os.path.join(d, n) for n in ("h.json", "f.json", "v.json"))
+    saved = {k: getattr(y, k) for k in ("HISTORY_PATH", "FAILURES_PATH", "VERIFIED_CHANNELS_PATH", "CHANNEL_STATS_PATH",
+                                         "_innertube_web", "get_youtube_video_info", "_day_course_queries", "_closed_ratio")}
+    y.HISTORY_PATH, y.FAILURES_PATH, y.VERIFIED_CHANNELS_PATH, y.CHANNEL_STATS_PATH = (
+        os.path.join(d, n) for n in ("h.json", "f.json", "v.json", "c.json"))
+    y._closed_ratio = lambda url, ids: None
     y._day_course_queries = lambda count=5: []
     try:
         return fn()
@@ -162,6 +164,64 @@ def test_manual_run_goes_to_history():
         finally:
             y.mine_video_info = saved
     assert "bp-Uinfc2vM" in _isolated(run)
+
+
+
+def _stats_env(fn, closed=0.0):
+    import os, tempfile
+    d = tempfile.mkdtemp()
+    saved = (y.CHANNEL_STATS_PATH, y.VERIFIED_CHANNELS_PATH, y._closed_ratio)
+    y.CHANNEL_STATS_PATH, y.VERIFIED_CHANNELS_PATH = os.path.join(d, "c.json"), os.path.join(d, "v.json")
+    y._closed_ratio = lambda url, ids: closed if ids else None
+    try:
+        return fn()
+    finally:
+        y.CHANNEL_STATS_PATH, y.VERIFIED_CHANNELS_PATH, y._closed_ratio = saved
+
+
+def test_handle_from_oembed_author_url():
+    assert y._handle_from_url("https://www.youtube.com/@gahiiide") == "@gahiiide"
+    assert y._handle_from_url("https://www.youtube.com/@%EB%B0%B1%EB%85%84%ED%95%B4%EB%B0%A9") == "@백년해방"
+    assert y._handle_from_url("") == ""
+
+
+def test_productive_channel_is_promoted_to_watch_and_survives_registry_merge():
+    def run():
+        v = {"author": "새채널", "handle": "@newch"}
+        y.record_channel_video(v, {"spot_ids": [1, 2, 3, 4], "video_attached": 1})
+        y.record_channel_video(v, {"spot_ids": [5, 6, 7, 8]})
+        y.record_channel_video(v, {"spot_ids": []})
+        c = y.load_channel_stats()["channels"]["@newch"]
+        assert (c["mined"], c["productive"], len(c["spots"]), c["attached"]) == (3, 2, 8, 1)
+        ch = y._merge_initial_channels({"verified": {}})
+        logs = y.review_watch_channels(ch, "http://db")
+        assert ch["verified"]["@newch"]["watch"] is True and any("승격" in l for l in logs)
+        assert y.review_watch_channels(ch, "http://db") == []  # 하루 한 번
+        return y._merge_initial_channels(y.load_verified_channels())
+    assert _stats_env(run)["verified"]["@newch"]["watch"] is True
+
+
+def test_idle_initial_watch_channel_is_demoted_and_stays_demoted():
+    def run():
+        ch = y._merge_initial_channels({"verified": {}})
+        y.save_channel_stats({"channels": {"@gahiiide": {"name": "가희드 gahiiide", "handle": "@gahiiide", "mined": 0,
+                                                         "productive": 0, "spots": [], "attached": 0, "first_seen": "2026-08-01"}}})
+        logs = y.review_watch_channels(ch, "http://db")
+        assert ch["verified"]["@gahiiide"]["watch"] is False and any("강등" in l for l in logs)
+        assert ch["verified"]["@yougotoo"]["watch"] is True  # 기록이 없던 곳은 오늘부터 30일을 센다
+        return y._merge_initial_channels(y.load_verified_channels())
+    assert _stats_env(run)["verified"]["@gahiiide"]["watch"] is False
+
+
+def test_watch_channel_with_many_closed_spots_is_demoted():
+    def run():
+        ch = y._merge_initial_channels({"verified": {}})
+        y.save_channel_stats({"channels": {"@Boriko": {"name": "보리코 Boriko", "handle": "@Boriko", "mined": 3, "productive": 2,
+                                                       "spots": [{"id": i, "date": y._today()} for i in range(6)],
+                                                       "attached": 0, "first_seen": y._today(), "last_registered": y._today()}}})
+        y.review_watch_channels(ch, "http://db")
+        return ch["verified"]["@Boriko"]["watch"]
+    assert _stats_env(run, closed=0.5) is False
 
 
 if __name__ == "__main__":
