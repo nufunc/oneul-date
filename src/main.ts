@@ -450,7 +450,7 @@ const FACILITY_KEYWORDS = [
  * '스파'→인스파이어·에스파스·예스파크, '빌라'→타임빌라스(아울렛).
  */
 const KEYWORD_FALSE_HOSTS: Record<string, string[]> = {
-  '스테이': ['스테이크', '스테이션', '힐스테이트', '에스테이트', '스테이지'],
+  '스테이': ['스테이크', '스테이션', '스테이트', '스테이지', '스테이블'],
   '한옥': ['한옥마을'],
   '캠핑': ['캠핑용품', '캠핑장비'],
   '스파': ['인스파이어', '에스파스', '예스파크', '아그네스파크', '파라스파라', '스파크', '스파이', '스파게티'],
@@ -1215,7 +1215,8 @@ const NATURAL_CONTEXT_MAP: Record<string, string[]> = {
   '액티비티': ['액티비티', '루지', '서핑', '요트', '패러글라이딩', '케이블카', '짚라인', '클라이밍', '카약', '레일바이크', '모노레일', '수상레저', '스포츠'],
   '반려동물': ['반려', '애견', '펫', '동반', '야외', '테라스', '공원'],
   '애견': ['반려', '애견', '펫', '동반', '야외', '테라스', '공원'],
-  '호텔': ['호텔', '스테이', '호캉스', '리조트', '라운지', '스파', '다이닝', '오크우드', '하얏트', '메리어트', '시그니엘', '신라', '조선'],
+  // 라운지·스파·다이닝은 뺐다. '호텔' 검색에 청담 와인라운지·러쉬 스파·스테이크하우스가 숙소보다 앞에 섞였다
+  '호텔': ['호텔', '스테이', '호캉스', '리조트', '오크우드', '하얏트', '메리어트', '시그니엘', '신라', '조선'],
   '호캉스': ['호텔', '스테이', '호캉스', '리조트', '라운지', '수영장', '카바나', '스파', '하얏트', '메리어트', '시그니엘', '신라'],
   '숙소': ['호텔', '스테이', '리조트', '펜션', '글램핑', '한옥', '게스트하우스', '숙박'],
   '글램핑': ['글램핑', '캠핑', '캠크닉', '카라반', '야영'],
@@ -1322,7 +1323,8 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
     const kwMatches = kw.length <= 1 ? cleanQ === kw : (cleanQ.includes(kw) || kw.includes(cleanQ));
     if (kwMatches) {
       const sanitizedText = cleanTargetForMatching(kw, targetText);
-      if (syns.some((syn) => sanitizedText.includes(syn.toLowerCase()))) {
+      // 숙소 판정과 같은 오탐 표를 쓴다: '스테이'가 스테이크·스테이션을, '스파'가 스파게티를 잡지 않게
+      if (syns.some((syn) => hasKeyword(sanitizedText, syn.toLowerCase()))) {
         return true;
       }
     }
@@ -1337,9 +1339,7 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
 
   if (matchedQuickTag && matchedQuickTag.synonyms.length > 0) {
     const sanitizedText = cleanTargetForMatching(matchedQuickTag.query, targetText);
-    const hasSynonymMatch = matchedQuickTag.synonyms.some((syn) =>
-      sanitizedText.includes(syn.toLowerCase())
-    );
+    const hasSynonymMatch = matchedQuickTag.synonyms.some((syn) => hasKeyword(sanitizedText, syn.toLowerCase()));
     if (hasSynonymMatch) return true;
   }
 
@@ -1349,7 +1349,7 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
 
   // 단일 토큰이면 부분 일치 검사
   if (tokens.length === 1) {
-    if (targetText.includes(tokens[0])) return true;
+    if (hasKeyword(targetText, tokens[0])) return true;
   } else {
     // 다중 토큰이면 모든 토큰이 포함되거나 첫 번째 주요 토큰이 포함되면 통과
     if (tokens.every((t) => targetText.includes(t))) return true;
@@ -1362,7 +1362,7 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
   const compactQ = cleanQ.replace(/\s+/g, '');
   if (compactQ.length < 2) return false;
   const compactTarget = [spot.name, spot.area, spot.address].join('|').replace(/\s+/g, '').toLowerCase();
-  if (compactTarget.includes(compactQ)) return true;
+  if (hasKeyword(compactTarget, compactQ)) return true;
 
   // 지역어 목록에 없는 동네를 업종과 붙여 친 검색어('망원동카페', '익선동맛집')는 끝의 업종어를 떼어
   // 동네(주소·이름에 있어야 함)와 업종의 AND로 본다. 동네 목록을 늘리지 않아도 새 동네에 통한다
