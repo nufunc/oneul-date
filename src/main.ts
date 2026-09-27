@@ -713,6 +713,22 @@ function mergeBestSpot(a: Spot, b: Spot): Spot {
 }
 
 /**
+ * 중복 제거에서 진 id → 남은 id. 찜·저장 코스·공유 링크가 진 id를 들고 있으면 스팟이 사라진 것처럼 보였다.
+ * 호출마다 비우지 않는다: 한 번 진 행은 다음 호출의 입력에 없어서 비우면 연결이 끊긴다
+ */
+const spotAliasIds = new Map<number, number>();
+
+/** spotById를 만든다. 진 id도 남은 스팟을 가리키게 한다 */
+function buildSpotIndex(list: Spot[]): Map<number, Spot> {
+  const index = new Map<number, Spot>(list.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
+  for (const [from, to] of spotAliasIds) {
+    const target = index.get(to);
+    if (target && !index.has(from)) index.set(from, target);
+  }
+  return index;
+}
+
+/**
  * ⚡ 스팟 목록 전수 중복 제거 (ID, 도로명 주소, 정제 상호명 코어 기준 통합 및 품질 병합)
  */
 function deduplicateSpotList(spots: Spot[]): Spot[] {
@@ -750,7 +766,9 @@ function deduplicateSpotList(spots: Spot[]): Spot[] {
 
     if (matchedIndex !== undefined) {
       // 이미 존재하는 스팟과 병합하여 최고 품질 데이터로 업데이트
-      result[matchedIndex] = mergeBestSpot(result[matchedIndex], s);
+      const merged = mergeBestSpot(result[matchedIndex], s);
+      result[matchedIndex] = merged;
+      if (s.id !== merged.id) spotAliasIds.set(s.id, merged.id);
     } else {
       result.push({ ...s });
     }
@@ -2902,6 +2920,21 @@ function loadSavedSpotIds(): Set<number> {
 }
 
 /** 찜 스팟 ID 목록 LocalStorage에 원자적 저장 */
+/** 찜 목록의 진 id를 남은 id로 바꿔 저장한다. 지우지 않고 가리키는 id만 바꾼다 */
+function canonicalizeSavedSpotIds(): void {
+  if (!state.savedSpotIds) return;
+  let changed = false;
+  const next = new Set<number>();
+  for (const id of state.savedSpotIds) {
+    const to = spotAliasIds.get(id);
+    if (to !== undefined && spotById.has(to)) { next.add(to); changed = true; } else next.add(id);
+  }
+  if (changed) {
+    state.savedSpotIds = next;
+    saveSavedSpotIds(next);
+  }
+}
+
 function saveSavedSpotIds(ids: Set<number>): void {
   try {
     localStorage.setItem(SAVED_SPOTS_STORAGE_KEY, JSON.stringify(Array.from(ids)));
@@ -3169,7 +3202,7 @@ const state: AppState = {
   budgetFilter: 'ALL',
 };
 
-let spotById = new Map<number, Spot>(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
+let spotById = buildSpotIndex(spots);
 
 function activeSlots(): SlotKey[] {
   return SLOT_ORDER.filter((k) => state.slots[k]);
@@ -7393,7 +7426,8 @@ async function ensureSpotsForRegions(regionKeys: string[]): Promise<void> {
     const allSpots = await loadSpots();
     if (allSpots && allSpots.length > 0) {
       spots = deduplicateSpotList(mergeSpots(spots, allSpots));
-      spotById = new Map(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
+      spotById = buildSpotIndex(spots);
+      canonicalizeSavedSpotIds();
       loadedRegionKeys.add('ALL');
       if (state.mainMode === 'spots') {
         renderSpotDiscovery();
@@ -7408,7 +7442,8 @@ async function ensureSpotsForRegions(regionKeys: string[]): Promise<void> {
   const newSpots = await loadSpots(matchesToFetch);
   if (newSpots && newSpots.length > 0) {
     spots = deduplicateSpotList(mergeSpots(spots, newSpots));
-    spotById = new Map(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
+    spotById = buildSpotIndex(spots);
+    canonicalizeSavedSpotIds();
     missingKeys.forEach((k) => loadedRegionKeys.add(k));
     if (state.mainMode === 'spots') {
       renderSpotDiscovery();
@@ -7484,7 +7519,8 @@ async function init(): Promise<void> {
     if (cachedSpots && cachedSpots.length > 0) {
       hasCachedData = true;
       spots = deduplicateSpotList(cachedSpots);
-      spotById = new Map(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
+      spotById = buildSpotIndex(spots);
+      canonicalizeSavedSpotIds();
       loadedRegionKeys.add('ALL');
       if (isSharedLink) {
         handleRoute();
@@ -7503,7 +7539,8 @@ async function init(): Promise<void> {
       .then((firstSpots) => {
         if (firstSpots && firstSpots.length > 0) {
           spots = deduplicateSpotList(mergeSpots(spots, firstSpots));
-          spotById = new Map(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
+          spotById = buildSpotIndex(spots);
+          canonicalizeSavedSpotIds();
           loadedRegionKeys.add('ALL');
           if (isSharedLink && (!state.course || state.course.length === 0)) {
             handleRoute();
@@ -7523,7 +7560,8 @@ async function init(): Promise<void> {
         .then((liveSpots) => {
           if (liveSpots && liveSpots.length > 0) {
             spots = deduplicateSpotList(liveSpots);
-            spotById = new Map(spots.filter((s) => typeof s.id === 'number').map((s) => [s.id, s]));
+            spotById = buildSpotIndex(spots);
+            canonicalizeSavedSpotIds();
             loadedRegionKeys.add('ALL');
           }
         })
