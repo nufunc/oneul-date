@@ -35,8 +35,11 @@ BROWSE = {"items": [{"lockupViewModel": {"contentId": "bbbbbbbbbbb", "contentTyp
 
 
 def test_parse_search_and_channel_items():
-    assert y._parse_video_items(SEARCH) == [{"id": "aaaaaaaaaaa", "title": "우이동 하루코스", "views": 685922, "length": 896}]
-    assert y._parse_video_items(BROWSE) == [{"id": "bbbbbbbbbbb", "title": "부암동 하루코스", "views": 79000, "length": 3723}]
+    assert y._parse_video_items(SEARCH) == [{"id": "aaaaaaaaaaa", "title": "우이동 하루코스", "views": 685922, "length": 896,
+                                             "age_days": None}]
+    assert y._parse_video_items(BROWSE) == [{"id": "bbbbbbbbbbb", "title": "부암동 하루코스", "views": 79000, "length": 3723,
+                                             "age_days": 1}]
+    assert y._age_days("3주 전") == 21 and y._age_days("스트리밍 시간: 5시간 전") == 0 and y._age_days("") is None
 
 
 def test_pool_puts_hot_longform_first():
@@ -105,6 +108,32 @@ def test_latest_channel_titles_need_course_words():
     assert y.is_course_title("부암동 하루코스") and y.is_course_title("망원동 브이로그")
     for t in ("ISA 계좌 총정리", "스타크래프트 레전드", "15억 자산가의 하루", "대한항공 일등석 기내식"):
         assert not y.is_course_title(t), t
+
+
+
+def test_watch_channel_mines_fresh_hits_and_keeps_low_views_out_of_history():
+    latest = [{"id": "hit00000000", "title": "공주 하루코스", "views": 60_000, "length": 900, "age_days": 3},
+              {"id": "low00000000", "title": "부여 하루코스", "views": 30_000, "length": 900, "age_days": 3},
+              {"id": "old00000000", "title": "대전 하루코스", "views": 90_000, "length": 900, "age_days": 40}]
+    mined = []
+
+    def run():
+        saved = (y._browse_channel_videos, y._search_innertube_videos, y.mine_video_info, y.INITIAL_VERIFIED_CHANNELS)
+        y.INITIAL_VERIFIED_CHANNELS = [{"name": "아일랜드 트래블러", "handle": "@islandtraveler", "watch": True}]
+        y._browse_channel_videos = lambda handle, name, popular=True: latest if not popular else []
+        y._search_innertube_videos = lambda q, max_results=20: []
+        y.get_youtube_video_info = lambda vid, verbose=False: {"url": f"https://www.youtube.com/watch?v={vid}", "title": "공주 하루코스",
+                                                               "author": "아일랜드 트래블러", "views": 60_000,
+                                                               "description": "1. 공산성\n2. 공주산성시장\n3. 카페 우리" + " " * 60}
+        y.mine_video_info = lambda vinfo, *a, **k: mined.append(vinfo["_vid"]) or {**y._new_stats()}
+        try:
+            y.run_youtube_vlog_mining("http://db", "k", limit=1)
+            return y.load_processed_history()
+        finally:
+            y._browse_channel_videos, y._search_innertube_videos, y.mine_video_info, y.INITIAL_VERIFIED_CHANNELS = saved
+    history = _isolated(run)
+    assert mined == ["hit00000000"]
+    assert "hit00000000" in history and "low00000000" not in history and "old00000000" not in history
 
 
 if __name__ == "__main__":
