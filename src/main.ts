@@ -5332,6 +5332,8 @@ function swapStep(index: number, refocus = false): void {
 /** 동일 조건 스냅샷으로 모든 스텝 재생성 (체감 랜덤 보정 적용) */
 function regenerateCourse(): void {
   if (!state.course || !state.courseConditions) return;
+  // 다시 추천한 코스에는 찜이 들어가지 않으므로 찜 코스 제목을 끈다
+  if (state.courseConditions.fromSaved) state.courseConditions = { ...state.courseConditions, fromSaved: false };
   const cond = state.courseConditions;
   const slotsOn = state.course.map((st) => st.slot);
   state.course = generateCourse(
