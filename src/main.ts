@@ -5544,27 +5544,52 @@ function buildCourseFromSavedSpots(): boolean {
   const slotsOn: SlotKey[] = hasSavedStay ? ['day', 'evening', 'night', 'stay'] : ['day', 'evening', 'night'];
   const steps: CourseStep[] = [];
   const usedSpotIds = new Set<number>();
+  // 찜이 여러 지역에 흩어져 있어도 한 지역 안에서 동선을 짠다. 저장 순서대로 고르면 성수 코스 중간에 부산 찜이 들어가
+  // 차량 5시간 동선이 나왔다(2026-09-27 발견). 앞 단계와 이 거리를 넘는 찜은 쓰지 않고 근처 후보로 채운다
+  const SAVED_COURSE_MAX_KM = 40;
+  const distKm = (a: Spot, b: Spot): number => {
+    if (a.lat != null && a.lng != null && b.lat != null && b.lng != null) return getDistanceKm(a.lat, a.lng, b.lat, b.lng);
+    return a.region === b.region && a.area && a.area === b.area ? 0 : Infinity;
+  };
+  const fitsSlot = (s: Spot, slot: SlotKey) =>
+    s.slot === slot ||
+    (slot === 'day' && getSpotGenre(s) === 'CAFE') ||
+    (slot === 'evening' && getSpotGenre(s) === 'MEAL') ||
+    (slot === 'night' && getSpotGenre(s) === 'BAR');
+  const nearbyCount = (s: Spot) => savedList.filter((o) => o.id !== s.id && distKm(s, o) <= SAVED_COURSE_MAX_KM).length;
 
   for (const slot of slotsOn) {
-    let matched = savedList.find(
-      (s) =>
-        !usedSpotIds.has(s.id) &&
-        (s.slot === slot ||
-          (slot === 'day' && getSpotGenre(s) === 'CAFE') ||
-          (slot === 'evening' && getSpotGenre(s) === 'MEAL') ||
-          (slot === 'night' && getSpotGenre(s) === 'BAR')),
-    );
-    if (!matched) {
-      // stay 스팟은 day/evening/night의 "아무거나" 폴백 대상에서 제외한다
-      matched = savedList.find((s) => !usedSpotIds.has(s.id) && s.slot !== 'stay');
+    const prev = steps.length > 0 && steps[steps.length - 1].spotId ? spotById.get(steps[steps.length - 1].spotId as number) || null : null;
+    const unused = savedList.filter((s) => !usedSpotIds.has(s.id));
+    const slotMatches = unused.filter((s) => fitsSlot(s, slot));
+    // stay 스팟은 day/evening/night의 "아무거나" 폴백 대상에서 제외한다
+    const pool = slotMatches.length > 0 ? slotMatches : unused.filter((s) => s.slot !== 'stay');
+    let matched: Spot | undefined;
+    if (!prev) {
+      // 첫 단계: 다른 찜이 가장 많이 모인 곳에서 시작한다. 동률이면 저장 순서를 따른다
+      matched = pool.reduce<Spot | undefined>((best, s) => (!best || nearbyCount(s) > nearbyCount(best) ? s : best), undefined);
+    } else {
+      const nearest = pool
+        .map((s) => ({ s, d: distKm(prev, s) }))
+        .sort((a, b) => a.d - b.d)[0];
+      if (nearest && nearest.d <= SAVED_COURSE_MAX_KM) matched = nearest.s;
     }
 
     if (matched) {
       steps.push({ slot, spotId: matched.id });
       usedSpotIds.add(matched.id);
     } else {
-      const anchor = steps.length > 0 && steps[0].spotId ? spotById.get(steps[0].spotId) || null : null;
-      const candidates = getCandidates(spots, slot, [], 'ALL', Array.from(usedSpotIds), [], anchor);
+      // getCandidates의 기준점은 숙박 배치에만 쓰여 가까운 순을 보장하지 않는다. 앞 단계와 가까운 후보를 직접 고르고,
+      // 50km 안에 없으면 먼 곳으로 채우지 않고 빈 단계로 둔다
+      let candidates = getCandidates(spots, slot, [], 'ALL', Array.from(usedSpotIds), [], prev).filter(isCourseEligible);
+      if (prev) {
+        const pc = getSpotCoordinates(prev);
+        candidates = candidates
+          .map((c) => ({ c, d: getDistanceKm(pc.lat, pc.lng, getSpotCoordinates(c).lat, getSpotCoordinates(c).lng) }))
+          .filter((x) => x.d <= 50)
+          .sort((x, y) => x.d - y.d)
+          .map((x) => x.c);
+      }
       if (candidates.length > 0) {
         const picked = candidates[0];
         steps.push({ slot, spotId: picked.id });
@@ -5574,6 +5599,9 @@ function buildCourseFromSavedSpots(): boolean {
       }
     }
   }
+
+  const first = steps[0]?.spotId ? spotById.get(steps[0].spotId) : undefined;
+  const farCount = first ? savedList.filter((s) => !usedSpotIds.has(s.id) && distKm(first, s) > SAVED_COURSE_MAX_KM).length : 0;
 
   state.course = steps;
   state.courseConditions = {
@@ -5586,7 +5614,11 @@ function buildCourseFromSavedSpots(): boolean {
   state.mainMode = 'course';
   updateModeView();
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  showToast(`❤️ 찜한 스팟으로 나만의 데이트 코스를 완성했어요!`);
+  showToast(
+    farCount > 0
+      ? `❤️ 찜한 스팟으로 코스를 만들었어요. 찜 ${farCount}곳은 멀어서 이번 코스에서 뺐어요`
+      : `❤️ 찜한 스팟으로 나만의 데이트 코스를 완성했어요!`,
+  );
   renderResults();
   return true;
 }
