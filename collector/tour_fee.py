@@ -21,7 +21,7 @@ from datetime import datetime, timedelta, timezone
 
 from supabase_worker import derive_price_tier_from_text, load_env
 from event_period import TOUR_API_BASE, _request, _tour_api_key
-from tourapi_quota import TourApiRateLimited, tour_get_json, usage_today
+from tourapi_quota import TourApiFetchFailed, TourApiRateLimited, tour_get_json, usage_today
 
 KST = timezone(timedelta(hours=9))
 
@@ -58,9 +58,10 @@ def fetch_usefee(api_key, content_id):
             return (item or {}).get("usefee") or None
         except TourApiRateLimited:
             raise
-        except Exception:
+        except Exception as e:
+            err = e
             time.sleep(2 * (attempt + 1))
-    return None
+    raise TourApiFetchFailed(f"usefee {content_id}: {err}")
 
 
 def run_fee_backfill(apply=False, log=print, backup_dir=None, limit=None):
@@ -90,7 +91,7 @@ def run_fee_backfill(apply=False, log=print, backup_dir=None, limit=None):
     targets = [r for r in rows if not r.get("price")]
     # TourAPI 하루 한도(개발 계정 약 1,000회)를 수집기와 나눠 쓰므로 한 번에 limit행까지만 조회한다
     todo = targets[:limit] if limit else targets
-    plans = []
+    plans, failed = [], 0
     for r in todo:
         cotid = (r["source"].get("url") or "").rsplit("cotid=", 1)[-1]
         try:
@@ -98,12 +99,16 @@ def run_fee_backfill(apply=False, log=print, backup_dir=None, limit=None):
         except TourApiRateLimited:
             log(f"TourAPI 한도 초과로 조회를 멈춘다(오늘 호출 {usage_today()}회). 여기까지 받은 {len(plans)}행만 다룬다")
             break
+        except TourApiFetchFailed as e:
+            failed += 1
+            log(f"  조회 실패로 건너뜀: {r['id']} {r['name']} ({e})")
+            continue
         time.sleep(0.3)
         if fields:
             plans.append((r, fields))
     free = sum(1 for _, f in plans if f["price_tier"] == "FREE")
     priced = sum(1 for _, f in plans if f["avg_price_per_person"])
-    log(f"문화시설 {len(rows)}행 · price 빈 행 {len(targets)} · 이번 조회 {len(todo)} · 요금 받음 {len(plans)}(금액 {priced}, 무료 {free}, 등급 없음 {len(plans) - priced - free})")
+    log(f"문화시설 {len(rows)}행 · price 빈 행 {len(targets)} · 이번 조회 {len(todo)} · 조회 실패 {failed} · 요금 받음 {len(plans)}(금액 {priced}, 무료 {free}, 등급 없음 {len(plans) - priced - free})")
     for r, f in plans[:12]:
         log(f"  {r['id']} {r['name']} | {f['price'][:50]} | {f['price_tier']} {f['avg_price_per_person']}")
     if not apply or not plans:

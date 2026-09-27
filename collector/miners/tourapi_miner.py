@@ -21,7 +21,7 @@ from supabase_worker import load_env, derive_region_area, find_duplicate_spot, n
 from category_filter import is_date_spot_category
 from event_period import fetch_event_period
 from tour_fee import fee_fields, fetch_usefee
-from tourapi_quota import TourApiRateLimited, tour_get_json, usage_today
+from tourapi_quota import TourApiFetchFailed, TourApiRateLimited, tour_get_json, usage_today
 
 KST = timezone(timedelta(hours=9))
 
@@ -132,6 +132,8 @@ def fetch_tourapi_spots(api_key: str, area_code: str = "1", content_type_id: str
         raise
     except Exception as e:
         print(f"  ⚠️ TourAPI 호출 오류 (area: {area_code}, type: {content_type_id}): {e}")
+        # 빈 목록과 구분한다. 빈 목록을 돌려주면 마지막 페이지로 보고 페이지를 1로 되돌렸다
+        raise TourApiFetchFailed(f"list {area_code}:{content_type_id}") from e
 
     return []
 
@@ -195,6 +197,8 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
             except TourApiRateLimited:
                 rate_limited = True
                 break
+            except TourApiFetchFailed:
+                continue  # 페이지 번호를 그대로 두고 다음 회차에 같은 페이지를 다시 받는다
             # 반환 건수가 요청보다 적으면 마지막 페이지 — 다음 실행은 1페이지부터 다시 돈다
             page_by_combo[combo_key] = 1 if len(items) < 15 else page_no
             time.sleep(0.3)
@@ -252,6 +256,11 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                         rate_limited = True
                         page_by_combo[combo_key] = prev_page  # 이 페이지의 남은 항목을 다음 회차에 다시 본다
                         break
+                    except TourApiFetchFailed as e:
+                        # 기간 없이 넣지 않는다. 이 페이지를 다음 회차에 다시 받고 다른 조합으로 넘어간다
+                        print(f"  ⚠️ {title}: {e} — 이 페이지를 다음 회차로 미룬다")
+                        page_by_combo[combo_key] = prev_page
+                        break
                     time.sleep(0.3)
                     if event_period and event_period["end"] < datetime.now(KST).strftime("%Y-%m-%d"):
                         continue
@@ -264,6 +273,10 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                     except TourApiRateLimited:
                         rate_limited = True
                         page_by_combo[combo_key] = prev_page  # 이 페이지의 남은 항목을 다음 회차에 다시 본다
+                        break
+                    except TourApiFetchFailed as e:
+                        print(f"  ⚠️ {title}: {e} — 이 페이지를 다음 회차로 미룬다")
+                        page_by_combo[combo_key] = prev_page
                         break
                     time.sleep(0.3)
 

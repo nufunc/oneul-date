@@ -23,7 +23,7 @@ import urllib.request
 from datetime import datetime, timedelta, timezone
 
 from supabase_worker import load_env
-from tourapi_quota import TourApiRateLimited, tour_get_json, usage_today
+from tourapi_quota import TourApiFetchFailed, TourApiRateLimited, tour_get_json, usage_today
 
 TOUR_API_BASE = os.getenv("TOUR_API_BASE") or "https://apis.data.go.kr/B551011/KorService2"
 KST = timezone(timedelta(hours=9))
@@ -64,9 +64,10 @@ def fetch_event_period(api_key, content_id):
                     "place": (item.get("eventplace") or "")[:80], "synced_at": datetime.now(timezone.utc).isoformat()}
         except TourApiRateLimited:
             raise
-        except Exception:
+        except Exception as e:
+            err = e
             time.sleep(2 * (attempt + 1))
-    return None
+    raise TourApiFetchFailed(f"event {content_id}: {err}")
 
 
 def _request(url, headers, method="GET", body=None):
@@ -143,9 +144,16 @@ def run_event_sync(apply=False, log=print, backup_dir=None):
     today = datetime.now(KST).strftime("%Y-%m-%d")
     rows = _event_rows(base_url, headers)
 
+    failed = []
+
     def fetch(cotid):
         time.sleep(0.3)
-        return fetch_event_period(api_key, cotid)
+        try:
+            return fetch_event_period(api_key, cotid)
+        except TourApiFetchFailed as e:
+            failed.append(cotid)  # None이면 그 행은 바꾸지 않는다. 다음 회차에 다시 받는다
+            log(f"  조회 실패로 건너뜀: cotid {cotid} ({e})")
+            return None
 
     try:
         plans = plan_event_updates(rows, fetch, today)
@@ -154,7 +162,7 @@ def run_event_sync(apply=False, log=print, backup_dir=None):
         return 1
     closes = [p for p in plans if p["action"] == "close"]
     reopens = [p for p in plans if p["action"] == "reopen"]
-    log(f"행사 행 {len(rows)}개 · 기간 새로 받음 {sum(p['fetched'] for p in plans)} · 기간 없음 {sum(not p['has_period'] for p in plans)} · "
+    log(f"행사 행 {len(rows)}개 · 조회 실패 {len(failed)} · 기간 새로 받음 {sum(p['fetched'] for p in plans)} · 기간 없음 {sum(not p['has_period'] for p in plans)} · "
         f"닫을 행 {len(closes)} · 다시 열 행 {len(reopens)}")
     for p in (closes + reopens)[:15]:
         ev = p["source"].get("event") or {}
