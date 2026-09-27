@@ -5556,7 +5556,11 @@ function buildCourseFromSavedSpots(): boolean {
     (slot === 'day' && getSpotGenre(s) === 'CAFE') ||
     (slot === 'evening' && getSpotGenre(s) === 'MEAL') ||
     (slot === 'night' && getSpotGenre(s) === 'BAR');
-  const nearbyCount = (s: Spot) => savedList.filter((o) => o.id !== s.id && distKm(s, o) <= SAVED_COURSE_MAX_KM).length;
+  // 40km 안 이웃 수와 그 이웃까지의 거리 합. 이웃 수가 같으면 거리 합이 작은 곳이 더 모인 곳이다
+  const neighborStats = (s: Spot) => {
+    const ds = savedList.filter((o) => o.id !== s.id).map((o) => distKm(s, o)).filter((d) => d <= SAVED_COURSE_MAX_KM);
+    return { count: ds.length, sum: ds.reduce((x, y) => x + y, 0) };
+  };
 
   for (const slot of slotsOn) {
     const prev = steps.length > 0 && steps[steps.length - 1].spotId ? spotById.get(steps[steps.length - 1].spotId as number) || null : null;
@@ -5566,8 +5570,12 @@ function buildCourseFromSavedSpots(): boolean {
     const pool = slotMatches.length > 0 ? slotMatches : unused.filter((s) => s.slot !== 'stay');
     let matched: Spot | undefined;
     if (!prev) {
-      // 첫 단계: 다른 찜이 가장 많이 모인 곳에서 시작한다. 동률이면 저장 순서를 따른다
-      matched = pool.reduce<Spot | undefined>((best, s) => (!best || nearbyCount(s) > nearbyCount(best) ? s : best), undefined);
+      // 첫 단계: 다른 찜이 가장 많이 모인 곳에서 시작한다. 이웃 수가 같으면 이웃까지 거리 합이 작은 곳, 그래도 같으면 저장 순서
+      matched = pool.reduce<Spot | undefined>((best, s) => {
+        if (!best) return s;
+        const a = neighborStats(s), b = neighborStats(best);
+        return a.count > b.count || (a.count === b.count && a.sum < b.sum) ? s : best;
+      }, undefined);
     } else {
       const nearest = pool
         .map((s) => ({ s, d: distKm(prev, s) }))
