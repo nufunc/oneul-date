@@ -1163,6 +1163,8 @@ function searchRelevanceTier(spot: Spot, query: string): number {
   // 그대로 두면 모두 최하 등급이 돼 동의어로만 걸린 식당이 호텔보다 앞에 섰다
   const place = SEARCH_PLACE_PREFIXES.find((p) => q.startsWith(p) && q.length > p.length);
   if (place && !(spot.name || '').toLowerCase().replace(/\s+/g, '').includes(q.replace(/\s+/g, ''))) {
+    // '성수역'처럼 나머지가 접미사뿐이면 동네 이름으로 순위를 매긴다. '역'으로 매기면 이름에 '역'이 든 역사의서재가 1위였다
+    if (!q.slice(place.length).replace(PLACE_SUFFIX, '').trim()) return relevanceTierFor(spot, place);
     q = q.slice(place.length).trim();
     const bare = q.replace(PLACE_SUFFIX, '').trim();
     if (bare && bare !== q) return Math.min(relevanceTierFor(spot, q), relevanceTierFor(spot, bare));
@@ -1238,6 +1240,8 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
     const inPlace = FAMOUS_AREAS.includes(place)
       ? spotMatchesPlace(spot, place)
       : [spot.location, spot.area, spot.address, spot.name].join(' ').toLowerCase().includes(place);
+    // '성수역', '홍대입구'처럼 나머지가 역·입구 같은 접미사뿐이면 동네 검색이다. 종전에는 접미사를 뗀 빈 말로 판정해 0건이었다
+    if (!rest.replace(PLACE_SUFFIX, '').trim()) return matchesSearchQuery(spot, place);
     if (rest && inPlace) {
       if (matchesSearchQuery(spot, rest)) return true;
       // '성수동카페', '서면역카페', '홍대입구 카페'처럼 지역어에 붙은 동·역·입구·시를 떼고 한 번 더 본다.
@@ -1354,7 +1358,8 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
 
   // 단일 토큰이면 부분 일치 검사
   if (tokens.length === 1) {
-    if (hasKeyword(targetText, tokens[0])) return true;
+    // 한 글자('역')는 부분 일치에 쓰지 않는다. '역'이 이름에 든 면역공방·역사의서재 1,065곳이 걸렸다
+    if (tokens[0].length >= 2 && hasKeyword(targetText, tokens[0])) return true;
   } else {
     // 다중 토큰이면 모든 토큰이 포함되거나 첫 번째 주요 토큰이 포함되면 통과
     if (tokens.every((t) => targetText.includes(t))) return true;
