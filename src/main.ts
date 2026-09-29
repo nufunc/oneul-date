@@ -1180,7 +1180,7 @@ function relevanceTierFor(spot: Spot, q: string): number {
   if (compactName.includes(compactQ)) return 1;
   const tokens = q.split(/\s+/).filter(Boolean);
   if (tokens.every((t) => name.includes(t))) return 2;
-  const text = [name, spot.category, spot.summary, spot.location, spot.area, spot.address].join(' ').toLowerCase();
+  const text = [name, spot.category, spot.location, spot.area, spot.address].join(' ').toLowerCase();
   return tokens.every((t) => text.includes(t)) ? 3 : 4;
 }
 
@@ -1219,6 +1219,13 @@ const NATURAL_CONTEXT_MAP: Record<string, string[]> = {
   '애견': ['반려', '애견', '펫', '동반', '야외', '테라스', '공원'],
   // 라운지·스파·다이닝은 뺐다. '호텔' 검색에 청담 와인라운지·러쉬 스파·스테이크하우스가 숙소보다 앞에 섞였다
   '호텔': ['호텔', '스테이', '호캉스', '리조트', '오크우드', '하얏트', '메리어트', '시그니엘', '신라', '조선'],
+  // 형용사 검색은 요약 템플릿이 아니라 업종으로 잇는다. 어떤 업종을 붙일지는 편집 판단이다(2026-09-29)
+  '조용한': ['찻집', '전통찻집', '북카페', '서점', '한옥', '정원', '미술관', '갤러리', '수목원'],
+  '아늑한': ['와인바', '비스트로', '북카페', '찻집', '한옥', '라운지', '칵테일바'],
+  '분위기좋은': ['와인바', '칵테일바', '비스트로', '다이닝', '루프탑', '라운지', '재즈바', '파인다이닝'],
+  '뷰좋은': ['전망', '전망대', '오션뷰', '리버뷰', '한강뷰', '루프탑', '야경', '스카이', '케이블카'],
+  '뷰': ['전망', '전망대', '오션뷰', '리버뷰', '한강뷰', '루프탑', '야경', '스카이', '케이블카'],
+  '넓은': ['공원', '풀빌라', '정원', '수목원', '식물원', '해수욕장', '목장'],
   '호캉스': ['호텔', '스테이', '호캉스', '리조트', '라운지', '수영장', '카바나', '스파', '하얏트', '메리어트', '시그니엘', '신라'],
   '숙소': ['호텔', '스테이', '리조트', '펜션', '글램핑', '한옥', '게스트하우스', '숙박'],
   '글램핑': ['글램핑', '캠핑', '캠크닉', '카라반', '야영'],
@@ -1230,6 +1237,8 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
   // 1. # 및 구분자(·, /, , 등) 정제
   const cleanQ = stripSearchStopwords(query.replace(/[#·,/\\]/g, ' ').trim().toLowerCase());
   if (!cleanQ) return true;
+  // '데이트'만 친 검색은 거를 정보가 없다(모든 장소가 데이트 장소다). 요약 템플릿에서 빼기 전에는 요약에 걸려 사실상 전체였다
+  if (cleanQ === '데이트') return true;
 
   // 지역어로 시작하는 검색어('부산호텔', '강남 와인')는 지역과 나머지를 AND로 묶는다. 동의어 사전이 '호텔'·'와인'만
   // 보고 곧바로 통과시켜 지역이 무시됐고, '성수카페'처럼 사전 밖 조합은 한 덩어리라 0건이었다
@@ -1267,11 +1276,11 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
     }
   }
 
-  // 2. 검색 대상 텍스트 조립
+  // 2. 검색 대상 텍스트 조립. 요약(summary)은 넣지 않는다: 수집 때 붙는 템플릿 문장이라 '조용한'·'아늑한'·'분위기 좋은'이
+  // 장소의 실제 성격과 무관하게 수백~수천 곳에 걸렸다(2026-09-29). 형용사는 아래 NATURAL_CONTEXT_MAP에서 업종으로 잇는다
   const targetParts: string[] = [
     spot.name || '',
     spot.category || '',
-    spot.summary || '',
     spot.location || '',
     spot.area || '',
     spot.address || '',
