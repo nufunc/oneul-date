@@ -137,9 +137,14 @@ def main():
     os.makedirs(os.path.dirname(TARGET_FILE), exist_ok=True)
 
     # 임시 파일 작성 후 원자적 교체
+    # 모든 행에서 비어 있는 칸은 빼고 공백 없이 쓴다. 앱은 이 칸들을 없는 값으로 다룬다.
+    # 2026-09-29 실측 31.3MB → 21.0MB(gzip 3.56 → 3.25MB). 값이 한 행이라도 생기면 다시 들어간다
+    keys = set().union(*(sp.keys() for sp in healed_spots))
+    empty_keys = {k for k in keys if all(sp.get(k) in (None, "", [], {}) for sp in healed_spots)}
+    out_spots = [{k: v for k, v in sp.items() if k not in empty_keys} for sp in healed_spots]
     tmp_file = f"{TARGET_FILE}.tmp"
     with open(tmp_file, "w", encoding="utf-8") as f:
-        json.dump(healed_spots, f, ensure_ascii=False, indent=2)
+        json.dump(out_spots, f, ensure_ascii=False, separators=(",", ":"))
 
     if os.path.exists(TARGET_FILE):
         os.remove(TARGET_FILE)
