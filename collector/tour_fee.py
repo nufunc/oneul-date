@@ -74,7 +74,8 @@ def parse_closed_days(raw):
                 days.update(WEEKDAYS[i0:j0 + 1] if i0 <= j0 else WEEKDAYS[i0:] + WEEKDAYS[:j0 + 1])
             if i == 0 and '주말' in seg:
                 days.update("토일")
-    return [f"{d}요일" for d in WEEKDAYS if d in days]
+    # '매주 월요일~일요일'(충현박물관)처럼 7일 전부면 개관 요일을 적은 것이라 매일 휴관으로 읽으면 안 된다
+    return [] if len(days) == len(WEEKDAYS) else [f"{d}요일" for d in WEEKDAYS if d in days]
 
 
 def fetch_intro(api_key, content_id):

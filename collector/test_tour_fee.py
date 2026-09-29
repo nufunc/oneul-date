@@ -44,6 +44,8 @@ def test_closed_days_skips_what_is_not_a_weekly_rule():
     assert parse_closed_days("- 자료열람실 매주 금요일 / 공휴일<br>- 열람실 매월 첫째, 셋째 금요일") == []
     # 공휴일이면 다음 날로 밀리는 조건은 요일만으로 나타낼 수 없다
     assert parse_closed_days("매주 화요일, 공휴일이면 다음날") == []
+    # 2026-09-30 충현박물관 원문. 7일 전부는 매일 휴관이 아니라 개관 요일을 적은 것이다
+    assert parse_closed_days("매주 월요일~일요일 / 1월 1일 / 설·추석 연휴") == []
 
 
 if __name__ == "__main__":
