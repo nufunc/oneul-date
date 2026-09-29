@@ -2208,6 +2208,30 @@ function isValidYoutubeHotclip(yt?: { url?: string; title?: string; views?: numb
   return false;
 }
 
+// 상호 낱말로 쓰이지만 동네 코스 영상 제목에도 흔한 말. 이 낱말만 겹치는 영상은 그 가게 영상으로 보지 않는다
+const YT_GENERIC_NAME_WORDS = new Set([
+  '카페', '커피', '식당', '레스토랑', '호텔', '리조트', '공원', '맛집', '본점', '해수욕장', '박물관', '미술관', '시장',
+  '전시관', '갤러리', '펜션', '스테이', '하우스', '서울', '제주', '부산', '강릉', '경기', '인천', '대구', '대전', '광주',
+  '울산', '수원', '전주', '여수', '속초', '양양', '서촌', '성수', '한남', '이태원', '홍대', '연남', '종로', '강남',
+]);
+
+const normalizeYoutubeMatchText = (text: string): string => text.toLowerCase().replace(/[^0-9a-z가-힣]/g, '');
+
+/** 영상 제목에 그 가게 이름이 있는지. 지점명을 뗀 이름 전체, 또는 흔한 상호 낱말이 아닌 두 글자 이상 낱말이 제목에 있으면 참이다.
+ * 없으면 '서촌 핫플코스'처럼 동네 코스 영상이라 가게가 어디 나오는지 알 수 없다(2026-09-30 라이브 3,661곳 중 1,405곳, 38%) */
+function youtubeTitleNamesSpot(spot: Spot, yt?: { title?: string } | null): boolean {
+  const title = normalizeYoutubeMatchText(yt?.title || '');
+  const name = (spot.name || '').replace(/\([^)]*\)|\[[^\]]*\]/g, '').replace(/\s+\S+점$/, '').trim();
+  const whole = normalizeYoutubeMatchText(name);
+  if (whole.length >= 2 && title.includes(whole)) return true;
+  return name.split(/\s+/).map(normalizeYoutubeMatchText)
+    .some((word) => word.length >= 2 && !YT_GENERIC_NAME_WORDS.has(word) && title.includes(word));
+}
+
+/** 유튜브 링크가 그 가게 영상이면 '영상', 동네 코스 영상이면 '동네 코스 영상' */
+const youtubeLinkLabel = (spot: Spot, yt?: { title?: string } | null): string =>
+  youtubeTitleNamesSpot(spot, yt) ? '영상' : '동네 코스 영상';
+
 /** 복사 텍스트용 스팟 한 줄 소개 정제 (영문 날것 태그 방지 & 한국어 보강) */
 function getCleanSpotSummary(spot: Spot): string {
   if (spot.summary && spot.summary.trim().length > 0) {
@@ -4623,7 +4647,7 @@ function isSuperHotSpot(spot: Spot): boolean {
   // 1. 🎬 유튜브 바이럴 채널 점수 (0~100)
   let ytScore = 0;
   const yt = spot.social_links?.youtube;
-  if (isValidYoutubeHotclip(yt)) {
+  if (isValidYoutubeHotclip(yt) && youtubeTitleNamesSpot(spot, yt)) {
     const views = Number(yt?.views) || 0;
     const likes = Number(yt?.likes) || 0;
     if (views >= 100000) ytScore = 100;
@@ -4694,7 +4718,7 @@ function getSpotPopularityScore(spot: Spot): number {
   if (spot.curation_badges?.tour_api) score += 10;
 
   // 3. 유튜브 바이럴 가산
-  if (isValidYoutubeHotclip(spot.social_links?.youtube)) {
+  if (isValidYoutubeHotclip(spot.social_links?.youtube) && youtubeTitleNamesSpot(spot, spot.social_links?.youtube)) {
     const views = spot.social_links?.youtube?.views || 0;
     if (views >= 100000) score += 35;
     else if (views >= 30000) score += 20;
@@ -5256,7 +5280,7 @@ function renderStepCard(
           ${(() => {
             const yt = spot.social_links?.youtube;
             if (!isValidYoutubeHotclip(yt) || !yt?.url) return '';
-            return `<a class="btn-action-icon btn-yt-icon" href="${escapeHtml(yt.url)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(spot.name)} 유튜브 핫클립">${ICON_YOUTUBE_SVG}</a>`;
+            return `<a class="btn-action-icon btn-yt-icon" href="${escapeHtml(yt.url)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(spot.name)} ${youtubeTitleNamesSpot(spot, yt) ? '유튜브 핫클립' : '동네 코스 영상'}">${ICON_YOUTUBE_SVG}</a>`;
           })()}
           ${(() => {
             const ctUrl = getCatchtableUrl(spot);
@@ -6259,7 +6283,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
             <button class="btn-discovery-save ${isSaved ? 'is-saved' : ''}" data-spot-id="${spot.id}" aria-label="${isSaved ? '보관함에서 제외' : '보관함에 담기'}" title="${isSaved ? '보관함에서 제외' : '보관함에 담기'}">${isSaved ? '❤️' : '🤍'}</button>
             <button class="btn-build-anchor-course btn-discovery-action-build with-label" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">🚀 코스</button>
             <a href="${escapeHtml(naverMapUrl(spot))}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map with-label" aria-label="${escapeHtml(spot.name)} 지도 열기" title="지도 열기">🗺️ 지도</a>
-            ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-yt" aria-label="${escapeHtml(spot.name)} 유튜브 핫클립" title="유튜브 핫클립 시청">▶️</a>` : ''}
+            ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-yt" aria-label="${escapeHtml(spot.name)} ${youtubeTitleNamesSpot(spot, yt) ? '유튜브 핫클립' : '동네 코스 영상'}" title="${youtubeTitleNamesSpot(spot, yt) ? '유튜브 핫클립 시청' : '동네 코스 영상 시청'}">▶️</a>` : ''}
             ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-book" aria-label="${escapeHtml(spot.name)} 실시간 예약" title="실시간 예약">📅</a>` : ''}
           </div>
         </div>
@@ -7456,7 +7480,7 @@ function renderOverlayContent(): void {
           <!-- 5. 공식 채널 및 링크 바로가기 -->
           <div class="spot-detail-links-row">
             ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn book" aria-label="캐치테이블 실시간 예약" title="캐치테이블 실시간 예약"><span>📅 예약</span></a>` : ''}
-            ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn yt" aria-label="유튜브 핫클립 시청" title="유튜브 핫클립 시청"><span>▶️ 영상</span></a>` : ''}
+            ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn yt" aria-label="${youtubeTitleNamesSpot(spot, yt) ? '유튜브 핫클립 시청' : '동네 코스 영상 시청'}" title="${youtubeTitleNamesSpot(spot, yt) ? '유튜브 핫클립 시청' : '동네 코스 영상 시청'}"><span>▶️ ${youtubeLinkLabel(spot, yt)}</span></a>` : ''}
             <a href="${escapeHtml(tmapUrl(spot))}" target="_blank" rel="noopener noreferrer" class="spot-link-btn tmap" aria-label="T맵 길안내" title="T맵 길안내"><span>🧭 T맵</span></a>
             <a href="${escapeHtml(kakaoNaviUrl(spot))}" target="_blank" rel="noopener noreferrer" class="spot-link-btn navi" aria-label="카카오내비 길안내" title="카카오내비 길안내"><span>🧭 카카오내비</span></a>
             <a href="${escapeHtml(kakaoTaxiUrl(spot))}" target="_blank" rel="noopener noreferrer" class="spot-link-btn taxi" aria-label="카카오 T 택시 호출" title="카카오 T 택시 호출"><span>🚕 카카오 T</span></a>
