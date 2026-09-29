@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from supabase_worker import load_env, derive_region_area, find_duplicate_spot, normalize_spot_address, sanitize_spot, new_spot_id, insert_spots
 from category_filter import is_date_spot_category
 from event_period import fetch_event_period
-from tour_fee import fee_fields, fetch_usefee
+from tour_fee import fee_fields, fetch_intro, parse_closed_days
 from tourapi_quota import TourApiFetchFailed, TourApiRateLimited, tour_get_json, usage_today
 
 KST = timezone(timedelta(hours=9))
@@ -29,14 +29,25 @@ KST = timezone(timedelta(hours=9))
 TOUR_API_BASE = os.getenv("TOUR_API_BASE") or "https://apis.data.go.kr/B551011/KorService2"
 
 # 데이트 적합 콘텐츠 타입
-# 12: 관광지, 14: 문화시설, 15: 축제공연행사, 28: 레포츠, 38: 쇼핑, 39: 음식점
+# 12: 관광지, 14: 문화시설, 15: 축제공연행사, 28: 레포츠, 32: 숙박, 38: 쇼핑, 39: 음식점
 DATE_CONTENT_TYPES = [
     ("14", "문화시설", ["healing", "romantic"], "day"),
     ("12", "관광지", ["view", "healing"], "day"),
     ("28", "레포츠/체험", ["active"], "day"),
     ("38", "쇼핑/소품", ["trendy"], "day"),
     ("15", "축제/행사", ["romantic", "trendy"], "evening"),
+    # 서울·제주에 숙소가 적어 추가했다(2026-09-30). 좌표는 공식 데이터로 바로 받는다
+    ("32", "숙박", ["romantic", "healing"], "stay"),
 ]
+
+# 숙박 중 데이트 코스로 추천하지 않는 저가 단기 숙박: 모텔·여관·호스텔(category_filter의 숙박 예외와 같은 기준).
+# TourAPI 분류(cat3)는 쓰지 않는다. 포도호텔이 모텔(B02010900)로 분류돼 있어 좋은 곳까지 걸러진다(2026-09-30)
+LODGING_SKIP_NAME = re.compile(r"모텔|여관|호스텔|hostel", re.IGNORECASE)
+
+
+def is_skipped_lodging(item: dict) -> bool:
+    return bool(LODGING_SKIP_NAME.search(item.get("title") or ""))
+
 
 # 전국 8대 권역별 TourAPI areaCode 매핑
 # TourAPI areaCode와 지역 이름. 두 번째 값은 주소로 지역을 못 읽을 때 쓰는 DB region 라벨(서울·경기·인천·강원·
@@ -219,6 +230,8 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
 
                 # 콘텐츠 유형은 화이트리스트 밖이 많아 '화이트리스트외'만 통과시키고, 상호명 패턴(어린이 시설, 주식회사 등)과
                 # 숙박업종은 다른 마이너처럼 버린다. 전에는 '블랙리스트'만 버려 울산어린이천문대가 들어왔다
+                if ctype_id == "32" and is_skipped_lodging(item):
+                    continue
                 is_valid, reason = is_date_spot_category(ctype_name, title, allow_lodging=True)
                 if not is_valid and not reason.startswith("화이트리스트외"):
                     continue
@@ -265,11 +278,14 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                     if event_period and event_period["end"] < datetime.now(KST).strftime("%Y-%m-%d"):
                         continue
 
-                # 문화시설은 detailIntro의 이용요금(usefee)을 실제 가격으로 쓴다. 없으면 가격을 비워 둔다
-                fee = None
+                # 문화시설은 detailIntro의 이용요금(usefee)을 실제 가격으로 쓴다. 없으면 가격을 비워 둔다.
+                # 같은 응답의 휴관 요일(restdateculture)도 closed_days로 받는다
+                fee, closed_days = None, []
                 if ctype_id == "14":
                     try:
-                        fee = fee_fields(fetch_usefee(clean_api_key, content_id))
+                        intro = fetch_intro(clean_api_key, content_id)
+                        fee = fee_fields(intro.get("usefee"))
+                        closed_days = parse_closed_days(intro.get("restdateculture"))
                     except TourApiRateLimited:
                         rate_limited = True
                         page_by_combo[combo_key] = prev_page  # 이 페이지의 남은 항목을 다음 회차에 다시 본다
@@ -297,6 +313,7 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                     **({k: fee[k] for k in ("price_tier", "avg_price_per_person") if fee and fee.get(k) is not None}),
                     "summary": f"{title} — 한국관광공사 인증 {ctype_name} 명소 ({area})",
                     "category": ctype_name,
+                    **({"closed_days": closed_days} if closed_days else {}),
                     "image_url": first_img,
                     "lat": lat_val,
                     "lng": lng_val,
