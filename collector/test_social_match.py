@@ -45,6 +45,8 @@ def _yt(spot_name, title):
 def test_youtube_short_core_name_does_not_match_other_word():
     assert _yt("흑백식당", "흑백요리사 셰프 맛집 투어 vlog") is None
     assert _yt("흑백식당", "흑백식당 데이트 vlog") is not None
+    assert _yt("꺼거 본점", "용산 대박맛집 (꺼거, 웨이팅꿀팁) 데이트") is not None
+    assert _yt("대흥식당", "대흥역 카페부터 맛집까지 데이트") is None
 
 
 if __name__ == "__main__":

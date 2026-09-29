@@ -122,6 +122,8 @@ def search_youtube_hotclip(spot_name: str, region_or_area: str = "") -> dict | N
             
             norm_clean = _norm_name(clean_name)
             norm_core = _norm_name(core_name)
+            # '꺼거 본점'·'오뎅식당 본점'은 제목에 지점명 없이 나온다
+            norm_branchless = _norm_name(re.sub(r'(본점|직영점|지점|[0-9]{1,2}호점)$', '', clean_name).strip())
 
             # 상위 5개 영상 중 실제 상호명이 포함된 영상만 선정
             for video in contents[:5]:
@@ -168,6 +170,7 @@ def search_youtube_hotclip(spot_name: str, region_or_area: str = "") -> dict | N
                 # ('흑백식당' → '흑백'이 '흑백요리사' 영상에 붙었다, 2026-09-29)
                 has_name_match = (
                     (len(norm_clean) >= 2 and norm_clean in norm_title) or
+                    (len(norm_branchless) >= 2 and norm_branchless in norm_title) or
                     (len(norm_core) >= 3 and norm_core in norm_title)
                 )
 
