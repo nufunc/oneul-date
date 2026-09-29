@@ -76,6 +76,7 @@ def test_two_letter_shop_names_are_not_quarantined():
 def test_emoji_one_letter_and_place_names_are_still_quarantined():
     assert w.is_noise_spot_name("🌿") and w.is_noise_spot_name("🛍️") and w.is_noise_spot_name("숲")
     assert not w.is_noise_spot_name("부빙") and not w.is_noise_spot_name("오브")
+    assert not w.is_noise_spot_name("7.8") and not w.is_noise_spot_name("913")
     patch = _run([dict(HEALTH_CENTER, name="압구정", category="카페")], dict(SPOT, name="압구정"))
     assert patch.get("is_closed") is True
 
