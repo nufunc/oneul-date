@@ -587,8 +587,9 @@ def same_place_by_address(name, address, place):
 
 
 def is_noise_spot_name(name: str) -> bool:
-    """한글이나 영문이 한 글자도 없거나(이모지·기호만) 한 글자뿐인 이름."""
-    letters = re.findall(r'[가-힣A-Za-z]', name or "")
+    """한글·영문·숫자가 한 글자도 없거나(이모지·기호만) 한 글자뿐인 이름.
+    숫자 이름('7.8', '913')은 실제 가게 이름이라 잡음으로 보지 않는다(2026-09-29, 두 곳이 닫혔다)."""
+    letters = re.findall(r'[가-힣A-Za-z0-9]', name or "")
     return not letters or len((name or "").strip()) <= 1
 
 
