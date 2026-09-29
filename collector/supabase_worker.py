@@ -1146,8 +1146,15 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
             # 다른 가게(세종 써밋뷰 루프탑라운지 → 롯데슈퍼프레시)의 카테고리·장소 번호·이미지를 옮겨 붙였다(2026-09-27)
             def _spot_like(p):
                 return not any(pat.search(str(p.get("category") or "")) for pat in SLOT_NONSPOT_RE)
-            matched = next((p for p in places if _spot_like(p) and (place_name_matches(name, p.get("name"))
-                                                                     or same_place_by_address(name, addr, p))), None)
+            # 행 주소의 권역과 다른 권역 결과는 이름이 포함 관계여도 같은 곳으로 보지 않는다. 종전에는 '베르트'(광주 동명동)가
+            # 대구 '풀베르트', 'LSC'(광주)가 대전 'lsc공방'에 이어져 좌표·권역·카테고리가 그쪽으로 바뀌었다(2026-09-29 18곳)
+            addr_reg = derive_region_area(fix_garbled_sido_prefix(addr))[0] if addr else None
+
+            def _same_region(p):
+                p_reg = derive_region_area(fix_garbled_sido_prefix(p.get("roadAddress") or p.get("address")))[0]
+                return not addr_reg or not p_reg or p_reg == addr_reg
+            matched = next((p for p in places if _spot_like(p) and _same_region(p)
+                            and (place_name_matches(name, p.get("name")) or same_place_by_address(name, addr, p))), None)
             best_place = matched or next((p for p in places if _spot_like(p)), None)
             top = best_place if best_place else places[0]
             # 이름이 맞지 않는 결과에서는 존재 확인만 하고 속성(이름·카테고리·장소 번호·이미지·좌표·주소)은 옮기지 않는다
@@ -1155,6 +1162,7 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
             road_addr = fix_garbled_sido_prefix(top.get("roadAddress") or top.get("address"))
 
             # 권역 충돌 방지: 기존 reg가 명확한데 검색된 주소가 타 권역이면 권역 힌트로 재검색
+            reg = addr_reg or reg
             if reg and reg not in ('전국', '수도권') and road_addr:
                 d_reg, _ = derive_region_area(road_addr)
                 if d_reg and d_reg != reg:

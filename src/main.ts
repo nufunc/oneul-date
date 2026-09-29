@@ -452,6 +452,7 @@ const FACILITY_KEYWORDS = [
 const KEYWORD_FALSE_HOSTS: Record<string, string[]> = {
   '스테이': ['스테이크', '스테이션', '스테이트', '스테이지', '스테이블'],
   '한옥': ['한옥마을'],
+  '바다': ['로바다'],
   '캠핑': ['캠핑용품', '캠핑장비'],
   '스파': ['인스파이어', '에스파스', '예스파크', '아그네스파크', '파라스파라', '스파크', '스파이', '스파게티'],
   '빌라': ['타임빌라스', '빌라드'],
@@ -1227,6 +1228,7 @@ const NATURAL_CONTEXT_MAP: Record<string, string[]> = {
   '뷰': ['전망', '전망대', '오션뷰', '리버뷰', '한강뷰', '루프탑', '야경', '스카이', '케이블카'],
   '넓은': ['공원', '풀빌라', '정원', '수목원', '식물원', '해수욕장', '목장'],
   '오션뷰': ['오션뷰', '오션', '바다', '해변', '해수욕장'],
+  '바다': ['바다', '오션뷰', '오션', '해변', '해수욕장'],
   '호캉스': ['호텔', '스테이', '호캉스', '리조트', '라운지', '수영장', '카바나', '스파', '하얏트', '메리어트', '시그니엘', '신라'],
   '숙소': ['호텔', '스테이', '리조트', '펜션', '글램핑', '한옥', '게스트하우스', '숙박'],
   '글램핑': ['글램핑', '캠핑', '캠크닉', '카라반', '야영'],
@@ -1339,7 +1341,7 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
   for (const [kw, syns] of Object.entries(NATURAL_CONTEXT_MAP)) {
     // 1글자 키(예: '비')는 부분일치를 허용하면 "비건" 같은 무관한 검색어에도
     // 걸려 날씨 동의어가 통째로 풀린다. 1글자 키는 완전일치일 때만 인정한다.
-    const kwMatches = kw.length <= 1 ? cleanQ === kw : (cleanQ.includes(kw) || kw.includes(cleanQ));
+    const kwMatches = kw.length <= 1 ? cleanQ === kw : (hasKeyword(cleanQ, kw) || kw.includes(cleanQ));
     if (kwMatches) {
       const sanitizedText = cleanTargetForMatching(kw, targetText);
       // 숙소 판정과 같은 오탐 표를 쓴다: '스테이'가 스테이크·스테이션을, '스파'가 스파게티를 잡지 않게
