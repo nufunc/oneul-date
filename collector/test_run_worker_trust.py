@@ -123,6 +123,18 @@ def test_enrich_quarantine_uses_same_noise_rule():
     assert closed == {"2"}, patches
 
 
+def test_other_province_name_hit_is_not_trusted():
+    # 행 주소가 광주인데 대구 '풀베르트'가 이름 포함으로 맞아 좌표·권역이 대구로 바뀌었다(2026-09-29 1591 베르트)
+    spot = dict(SPOT, id=1591, name="베르트", address="광주 동구 동계천로 137-7", region="영남", area="수성구",
+                location="영남 수성구", category=None, slot="day")
+    wrong = {"id": "940327341", "provider": "kakao", "name": "풀베르트", "roadAddress": "대구 수성구 무학로21길 88",
+             "category": "꽃집,꽃배달", "x": "128.62", "y": "35.86", "thumUrl": None}
+    patch = _run([wrong], spot)
+    assert "provider_ids" not in patch and "verified" not in patch and patch.get("region") != "영남"
+    right = dict(wrong, id="1", name="베르트", roadAddress="광주 동구 동계천로 137-7")
+    assert _run([right], spot).get("region") == "호남"
+
+
 if __name__ == "__main__":
     for fn in [v for k, v in list(globals().items()) if k.startswith("test_")]:
         fn()
