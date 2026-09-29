@@ -2,8 +2,8 @@ name: Auto Sync Spots from OCI DB
 
 on:
   schedule:
-    # 매일 한국 시간(KST) 새벽 4시 (UTC 19:00)
-    - cron: '0 19 * * *'
+    # 매일 한국 시간(KST) 새벽 4시 17분 (UTC 19:17). 정각 예약이 몰려 실행이 2.7~4.6시간 늦어져 분을 비켜 뒀다(2026-09-30)
+    - cron: '17 19 * * *'
   workflow_dispatch:
 
 permissions:
