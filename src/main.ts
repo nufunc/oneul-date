@@ -6089,7 +6089,7 @@ function renderSpotDiscovery(): void {
           <span class="pill-title">${escapeHtml(regLabel.title)}</span>
           <span class="pill-arrow" aria-hidden="true">▾</span>
         </button>
-        <span class="status-count-badge">${totalCount}</span>
+        <span class="status-count-badge">${totalCount.toLocaleString('ko-KR')}</span>
         <span class="status-text">개 스팟</span>
         ${isFiltered ? `
           <button class="btn-discovery-filter-reset" id="btn-reset-discovery-filters" title="검색 및 필터 초기화" aria-label="검색 및 필터 초기화">
@@ -6151,7 +6151,7 @@ function renderSpotDiscovery(): void {
     ${hasMore ? `
       <div class="discovery-more-row">
         <button class="btn-discovery-more" id="btn-discovery-more">
-          스팟 더보기 (${displaySpots.length} / ${totalCount}) ▾
+          스팟 더보기 (${displaySpots.length.toLocaleString('ko-KR')} / ${totalCount.toLocaleString('ko-KR')}) ▾
         </button>
       </div>
     ` : ''}
@@ -6419,7 +6419,7 @@ function appendDiscoveryPage(area: HTMLElement, focusNew = false): void {
     return;
   }
   const btn = moreRow.querySelector('#btn-discovery-more');
-  if (btn) btn.textContent = `스팟 더보기 (${shown} / ${list.length}) ▾`;
+  if (btn) btn.textContent = `스팟 더보기 (${shown.toLocaleString('ko-KR')} / ${list.length.toLocaleString('ko-KR')}) ▾`;
   // 붙인 뒤에도 끝이 여전히 가까우면 교차 상태가 바뀌지 않아 콜백이 다시 오지 않으므로 다시 관찰해 판정받는다
   discoveryMoreObserver?.unobserve(moreRow);
   discoveryMoreObserver?.observe(moreRow);
