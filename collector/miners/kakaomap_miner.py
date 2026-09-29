@@ -18,6 +18,21 @@ HEADERS = {
     "Referer": "https://map.kakao.com/",
 }
 
+def _pick_place(places, spot_name, address_or_area):
+    """이름이 맞고, 주소가 있으면 시·도까지 같은 첫 결과. 종전에는 1위 결과를 대조 없이 써서
+    '베르트'(광주)에 부천 '베르트', '성수 대림창고'에 옆 갤러리의 평점이 붙었다(2026-09-29)."""
+    from supabase_worker import place_name_matches, derive_region_area
+    want_reg = derive_region_area(address_or_area)[0]
+    for p in places:
+        if not place_name_matches(spot_name, p.get("name")):
+            continue
+        p_reg = derive_region_area(p.get("new_address") or p.get("address"))[0]
+        if want_reg and p_reg and p_reg != want_reg:
+            continue
+        return p
+    return None
+
+
 def search_kakaomap_place(spot_name: str, address_or_area: str = "") -> dict | None:
     """
     카카오맵 검색(mapsearch/map.daum)을 통해 장소 ID와 실평점, 리뷰 수를 수집합니다.
@@ -33,8 +48,8 @@ def search_kakaomap_place(spot_name: str, address_or_area: str = "") -> dict | N
             if res.status == 200:
                 data = json.loads(res.read().decode('utf-8'))
                 places = data.get("place", []) or data.get("places", []) or []
-                if places and len(places) > 0:
-                    best = places[0]
+                best = _pick_place(places, clean_name, address_or_area)
+                if best:
                     place_id = best.get("confirmid") or best.get("id")
                     raw_rating = best.get("rating_average") or best.get("score") or best.get("rating")
                     rating = float(raw_rating) if raw_rating else 0.0

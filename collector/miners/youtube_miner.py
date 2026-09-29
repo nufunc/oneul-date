@@ -164,9 +164,11 @@ def search_youtube_hotclip(spot_name: str, region_or_area: str = "") -> dict | N
 
                 # 상호명 또는 핵심 상호명이 제목에 실제로 존재하는지 엄격히 검증
                 # ('데이트', '핫플' 등 일반 불용어만 있는 일반 모음 영상은 철저 배제)
+                # 업종어를 떼고 두 글자만 남은 핵심 이름은 다른 말의 일부로 흔히 걸려 쓰지 않는다
+                # ('흑백식당' → '흑백'이 '흑백요리사' 영상에 붙었다, 2026-09-29)
                 has_name_match = (
                     (len(norm_clean) >= 2 and norm_clean in norm_title) or
-                    (len(norm_core) >= 2 and norm_core in norm_title)
+                    (len(norm_core) >= 3 and norm_core in norm_title)
                 )
 
                 if not has_name_match:

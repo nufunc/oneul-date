@@ -102,7 +102,8 @@ def run_social_enrichment(supabase_url: str, service_key: str, batch_size: int =
             time.sleep(0.5)
 
             # 2. 카카오맵 평점 탐색
-            kakao_data = search_kakaomap_place(name, location)
+            # 권역 이름('호남 동구')보다 주소 앞 두 단어('광주 동구')가 검색과 시·도 대조에 맞다
+            kakao_data = search_kakaomap_place(name, " ".join((s.get("address") or "").split()[:2]) or location)
             time.sleep(0.5)
 
             existing_social = s.get("social_links") or {}
