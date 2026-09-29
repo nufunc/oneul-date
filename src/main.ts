@@ -2915,8 +2915,10 @@ function isSpotClosedToday(spot: Spot, date = new Date()): boolean {
 
   // 1. closed_days 배열 직접 매칭
   if (spot.closed_days && Array.isArray(spot.closed_days)) {
+    // '월요일'.includes('일')이 참이라 일요일마다 월·화·수요일 휴무 스팟이 모두 휴무로 나왔다. 앞뒤가 한글이 아닌 요일만 본다
+    const dayInText = new RegExp(`(?:^|[^가-힣])${todayDay}(?:요일)?(?![가-힣])`);
     for (const d of spot.closed_days) {
-      if (typeof d === 'string' && (d.includes(todayDay) || d.includes(`${todayDay}요일`))) {
+      if (typeof d === 'string' && dayInText.test(d)) {
         return true;
       }
     }
