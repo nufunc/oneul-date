@@ -1279,7 +1279,7 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
   const broad = cleanQ.match(BROAD_REGION_PREFIX);
   if (broad) return inBroadRegion(spot, broad[1]) && matchesSearchQuery(spot, cleanQ.slice(broad[0].length).trim());
   // '경북'만 친 검색도 주소가 '경상북도'인 스팟을 세야 한다(약칭만 보면 경북 779곳 중 387곳)
-  if (cleanQ in BROAD_REGION_ALIASES) return inBroadRegion(spot, cleanQ);
+  if (Object.hasOwn(BROAD_REGION_ALIASES, cleanQ)) return inBroadRegion(spot, cleanQ);
   const place = SEARCH_PLACE_PREFIXES.find((p) => cleanQ.startsWith(p) && cleanQ.length > p.length);
   if (place) {
     const rest = cleanQ.slice(place.length).trim();
@@ -1886,13 +1886,19 @@ const FAMOUS_AREAS = [
 const SEARCH_PLACE_PREFIXES = [
   ...new Set([...FAMOUS_AREAS, ...POPULAR_ZONES.flatMap((z) => z.label.split(/[·\s]/)).filter((p) => p.length >= 2)]),
 ].sort((a, b) => b.length - a.length);
-/** 검색어 맨 앞의 광역 권역명·도 약칭과 그 뒤 띄어쓰기. 붙여 쓴 '서울역'은 걸리지 않는다 */
-const BROAD_REGION_PREFIX = /^(서울|경기|강원|충청|영남|호남|충북|충남|전북|전남|경북|경남)\s+(?=\S)/;
-/** 도 약칭은 주소에 '경남 창원시'와 '경상남도 통영시'가 섞여 있어 둘 다 본다(2026-09-30 열린 스팟 경남 258곳, 경상남도 392곳) */
-const BROAD_REGION_ALIASES: Record<string, string[]> = {
-  충북: ['충북', '충청북도'], 충남: ['충남', '충청남도'], 전북: ['전북', '전라북도'], 전남: ['전남', '전라남도'],
-  경북: ['경북', '경상북도'], 경남: ['경남', '경상남도'],
-};
+/** 도 이름의 약칭과 정식 명칭. 저장된 주소가 '경남 창원시'와 '경상남도 통영시'로 섞여 있어(2026-09-30 열린 스팟 경남 258곳,
+ * 경상남도 392곳) 어느 쪽으로 쳐도 두 표기를 모두 본다 */
+const PROVINCE_NAMES: string[][] = [
+  ['충북', '충청북도'], ['충남', '충청남도'], ['전북', '전라북도', '전북특별자치도'], ['전남', '전라남도'],
+  ['경북', '경상북도'], ['경남', '경상남도'],
+];
+const BROAD_REGION_ALIASES: Record<string, string[]> = Object.fromEntries(
+  PROVINCE_NAMES.flatMap((names) => names.map((name) => [name, names])),
+);
+/** 검색어 맨 앞의 광역 권역명·도 이름과 그 뒤 띄어쓰기. 붙여 쓴 '서울역'은 걸리지 않는다 */
+const BROAD_REGION_PREFIX = new RegExp(
+  `^(서울|경기|강원|충청|영남|호남|${Object.keys(BROAD_REGION_ALIASES).join('|')})\\s+(?=\\S)`,
+);
 /** 지역어 바로 뒤에 붙는 행정·교통 접미사 */
 const PLACE_SUFFIX = /^(입구역|입구|역|동|시|구|읍|면)\s*/;
 /** 동네 이름 끝에 붙는 같은 접미사('망원동' → '망원') */
