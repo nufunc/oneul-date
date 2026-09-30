@@ -12,7 +12,12 @@
 import re
 import json
 import logging
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Optional, Tuple
+
+try:
+    from supabase_worker import derive_price_tier_from_text
+except ImportError:
+    from collector.supabase_worker import derive_price_tier_from_text
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
 logger = logging.getLogger("heal_and_verify")
@@ -232,6 +237,18 @@ def strip_address_tail(name: str, address: str) -> str:
     return name
 
 
+# '무료 관람 (리조트 시설 이용료 별도)'처럼 무료가 일부뿐이거나 조건부인 문구는 FREE로 읽지 않는다
+_FREE_QUALIFIER = re.compile(r"별도|상이|또는")
+
+
+def derive_export_price_tier(price: str) -> Optional[str]:
+    """가격 문구에서 티어를 읽는다. 못 읽거나 조건부 무료면 None(지어내지 않는다)"""
+    tier, _ = derive_price_tier_from_text(price or "")
+    if tier == "FREE" and _FREE_QUALIFIER.search(price):
+        return None
+    return tier
+
+
 def heal_category_and_slot(spot: Dict[str, Any]) -> Tuple[str, str]:
     """스팟의 카테고리 결측치/오염을 보정하고 적합한 슬롯(day/evening/night/stay)을 도출"""
     cat = spot.get("category")
@@ -290,6 +307,7 @@ def heal_all_spots(spots: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], D
         "cleaned_names": 0,
         "healed_categories": 0,
         "healed_slots": 0,
+        "filled_price_tiers": 0,
         "active_total": 0,
     }
 
@@ -325,6 +343,14 @@ def heal_all_spots(spots: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], D
             if orig_slot != new_slot:
                 s["slot"] = new_slot
                 stats["healed_slots"] += 1
+
+            # 4. 가격 티어. 방문 검증이 닿지 않은 web 출처 행은 문구만 있고 티어가 비어 있다(2026-10-01 열린 2,454곳).
+            # DB는 건드리지 않고 내보내기에서만 채운다
+            if not s.get("price_tier") and s.get("price"):
+                tier = derive_export_price_tier(s["price"])
+                if tier:
+                    s["price_tier"] = tier
+                    stats["filled_price_tiers"] += 1
 
         if not s.get("is_closed"):
             stats["active_total"] += 1

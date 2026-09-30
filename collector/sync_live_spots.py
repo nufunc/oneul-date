@@ -133,7 +133,7 @@ def main():
 
     logger.info("수집 데이터 정밀 검증 및 보정 파이프라인 가동...")
     healed_spots, stats = heal_all_spots(spots)
-    logger.info(f"보정 완료: 더미비활성화 {stats['deactivated_dummies']}건, 상호정제 {stats['cleaned_names']}건, 카테고리보정 {stats['healed_categories']}건, 슬롯보정 {stats['healed_slots']}건 (최종 유효 활성: {stats['active_total']}건)")
+    logger.info(f"보정 완료: 더미비활성화 {stats['deactivated_dummies']}건, 상호정제 {stats['cleaned_names']}건, 카테고리보정 {stats['healed_categories']}건, 슬롯보정 {stats['healed_slots']}건, 가격티어 {stats['filled_price_tiers']}건 (최종 유효 활성: {stats['active_total']}건)")
 
     os.makedirs(os.path.dirname(TARGET_FILE), exist_ok=True)
 
