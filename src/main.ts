@@ -1268,6 +1268,13 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
 
   // 지역어로 시작하는 검색어('부산호텔', '강남 와인')는 지역과 나머지를 AND로 묶는다. 동의어 사전이 '호텔'·'와인'만
   // 보고 곧바로 통과시켜 지역이 무시됐고, '성수카페'처럼 사전 밖 조합은 한 덩어리라 0건이었다
+  // '서울 카페'처럼 광역 권역명 뒤에 띄어 쓴 말이 있으면 권역과 나머지를 AND로 묶는다. 권역명이 지역어 목록에 없어 아래 다중 토큰
+  // 규칙의 '첫 토큰만 맞으면 통과'로 빠져 업종과 무관하게 권역 전체(3,480곳)가 걸렸다. 붙여 쓴 '서울역'·'서울숲'은 대상이 아니다
+  const broad = cleanQ.match(BROAD_REGION_PREFIX);
+  if (broad) {
+    const inBroad = [spot.location, spot.area, spot.address, spot.name].join(' ').toLowerCase().includes(broad[1]);
+    return inBroad && matchesSearchQuery(spot, cleanQ.slice(broad[0].length).trim());
+  }
   const place = SEARCH_PLACE_PREFIXES.find((p) => cleanQ.startsWith(p) && cleanQ.length > p.length);
   if (place) {
     const rest = cleanQ.slice(place.length).trim();
@@ -1874,6 +1881,8 @@ const FAMOUS_AREAS = [
 const SEARCH_PLACE_PREFIXES = [
   ...new Set([...FAMOUS_AREAS, ...POPULAR_ZONES.flatMap((z) => z.label.split(/[·\s]/)).filter((p) => p.length >= 2)]),
 ].sort((a, b) => b.length - a.length);
+/** 검색어 맨 앞의 광역 권역명과 그 뒤 띄어쓰기. 붙여 쓴 '서울역'은 걸리지 않는다 */
+const BROAD_REGION_PREFIX = /^(서울|경기|강원|충청|영남|호남)\s+(?=\S)/;
 /** 지역어 바로 뒤에 붙는 행정·교통 접미사 */
 const PLACE_SUFFIX = /^(입구역|입구|역|동|시|구|읍|면)\s*/;
 /** 동네 이름 끝에 붙는 같은 접미사('망원동' → '망원') */
