@@ -209,6 +209,29 @@ def clean_spot_name(name: str) -> str:
     
     return clean.strip()
 
+ADDRESS_TAIL = re.compile(
+    r'\s+((?:서울|경기|인천|부산|대구|대전|광주|울산|세종|강원|충북|충남|전북|전남|경북|경남|제주)(?:\s+\S+){1,3})$'
+)
+
+
+def strip_address_tail(name: str, address: str) -> str:
+    """웹 출처 이름 끝에 붙은 '서울 강남구 압구정동' 같은 시도·시군구·동 덩어리를 뗀다.
+    그 행의 주소에 같은 시군구가 있을 때만 뗀다. '스타벅스 제주 성산'처럼 지점을 가리키는 꼬리는 주소와 맞아도
+    동·읍·면·가로 끝나지 않으면 남긴다(2026-10-01 웹 출처 26곳 실측)."""
+    m = ADDRESS_TAIL.search(name or "")
+    if not m or not address:
+        return name
+    tokens = m.group(1).split()[1:]
+    in_address = any(t in address for t in tokens if t.endswith(("구", "시", "군")))
+    neighborhood = tokens[-1].endswith(("동", "읍", "면", "가"))
+    # 충북 영동처럼 군 이름만 붙은 꼬리는 '영동군'이 주소에 있을 때만 뗀다
+    county_only = len(tokens) == 1 and any(tokens[0] + suffix in address for suffix in ("시", "군", "구"))
+    base = name[: m.start()].strip()
+    if base and ((in_address and neighborhood) or county_only):
+        return base
+    return name
+
+
 def heal_category_and_slot(spot: Dict[str, Any]) -> Tuple[str, str]:
     """스팟의 카테고리 결측치/오염을 보정하고 적합한 슬롯(day/evening/night/stay)을 도출"""
     cat = spot.get("category")
@@ -285,7 +308,7 @@ def heal_all_spots(spots: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], D
         else:
             # 2. 상호명 정제
             original_name = s.get("name", "")
-            cleaned_name = clean_spot_name(original_name)
+            cleaned_name = strip_address_tail(clean_spot_name(original_name), s.get("address") or "")
             if cleaned_name != original_name:
                 s["name"] = cleaned_name
                 stats["cleaned_names"] += 1
