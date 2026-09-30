@@ -75,6 +75,8 @@ interface SavedCourse {
   /** region: 현재 포맷은 배열(다중 선택), 과거 저장분은 문자열 — normalizeRegionCond로 복원 */
   conditions: { region: string[] | string; subZones?: string[]; mood: string; slots: SlotKey[] };
   spotIds: number[];
+  /** 저장할 때의 코스 제목('🔍 성수 카페 코스' 등). 예전 저장분과 공유받아 저장한 코스에는 없다 */
+  title?: string;
 }
 
 const SLOT_ORDER: SlotKey[] = ['day', 'evening', 'night', 'stay'];
@@ -5547,6 +5549,7 @@ function bindResultEvents(area: HTMLElement): void {
         slots: state.course.map((st) => st.slot),
       },
       spotIds: ids,
+      title: courseTitle(state.courseConditions, state.course),
     };
     showToast(addSavedCourse(item) ? '💾 코스를 저장했어요' : '이미 저장한 코스라 맨 위로 올렸어요');
   });
@@ -6923,7 +6926,7 @@ function renderOverlayContent(): void {
                     return `
                 <div class="saved-item">
                   <button class="saved-item-main" data-course-id="${escapeHtml(item.id)}">
-                    <span class="saved-item-meta">${dateStr} · ${escapeHtml(regionsLabel(normalizeRegionCond(item.conditions.region)))} · ${escapeHtml(moodLabel(item.conditions.mood))}</span>
+                    <span class="saved-item-meta">${dateStr} · ${escapeHtml(item.title ?? `${regionsLabel(normalizeRegionCond(item.conditions.region), item.conditions.subZones)} · ${moodLabel(item.conditions.mood)}`)}</span>
                     <div class="saved-item-spots">${savedCourseSpotsHtml(item)}</div>
                   </button>
                   <div class="saved-item-actions">
