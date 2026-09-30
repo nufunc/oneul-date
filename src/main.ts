@@ -7631,7 +7631,8 @@ async function ensureSpotsForRegions(regionKeys: string[]): Promise<void> {
   if (missingKeys.includes('ALL')) {
     const allSpots = await loadSpots();
     if (allSpots && allSpots.length > 0) {
-      spots = deduplicateSpotList(mergeSpots(spots, allSpots));
+      // 전체를 받았으니 합치지 않고 바꾼다. 합치면 번들 샘플에만 있는 닫힌 행(가평 글램핑이 서울 숙소로 나온 7056 등)이 남는다
+      spots = deduplicateSpotList(allSpots);
       spotById = buildSpotIndex(spots);
       canonicalizeSavedSpotIds();
       loadedRegionKeys.add('ALL');
@@ -7752,7 +7753,8 @@ async function init(): Promise<void> {
     loadSpots()
       .then((firstSpots) => {
         if (firstSpots && firstSpots.length > 0) {
-          spots = deduplicateSpotList(mergeSpots(spots, firstSpots));
+          // 위와 같은 이유로 번들 샘플을 전체 데이터로 바꾼다
+          spots = deduplicateSpotList(firstSpots);
           spotById = buildSpotIndex(spots);
           canonicalizeSavedSpotIds();
           loadedRegionKeys.add('ALL');
