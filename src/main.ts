@@ -1272,7 +1272,8 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
   // 규칙의 '첫 토큰만 맞으면 통과'로 빠져 업종과 무관하게 권역 전체(3,480곳)가 걸렸다. 붙여 쓴 '서울역'·'서울숲'은 대상이 아니다
   const broad = cleanQ.match(BROAD_REGION_PREFIX);
   if (broad) {
-    const inBroad = [spot.location, spot.area, spot.address, spot.name].join(' ').toLowerCase().includes(broad[1]);
+    const placeText = [spot.location, spot.area, spot.address, spot.name].join(' ').toLowerCase();
+    const inBroad = (BROAD_REGION_ALIASES[broad[1]] ?? [broad[1]]).some((alias) => placeText.includes(alias));
     return inBroad && matchesSearchQuery(spot, cleanQ.slice(broad[0].length).trim());
   }
   const place = SEARCH_PLACE_PREFIXES.find((p) => cleanQ.startsWith(p) && cleanQ.length > p.length);
@@ -1881,8 +1882,13 @@ const FAMOUS_AREAS = [
 const SEARCH_PLACE_PREFIXES = [
   ...new Set([...FAMOUS_AREAS, ...POPULAR_ZONES.flatMap((z) => z.label.split(/[·\s]/)).filter((p) => p.length >= 2)]),
 ].sort((a, b) => b.length - a.length);
-/** 검색어 맨 앞의 광역 권역명과 그 뒤 띄어쓰기. 붙여 쓴 '서울역'은 걸리지 않는다 */
-const BROAD_REGION_PREFIX = /^(서울|경기|강원|충청|영남|호남)\s+(?=\S)/;
+/** 검색어 맨 앞의 광역 권역명·도 약칭과 그 뒤 띄어쓰기. 붙여 쓴 '서울역'은 걸리지 않는다 */
+const BROAD_REGION_PREFIX = /^(서울|경기|강원|충청|영남|호남|충북|충남|전북|전남|경북|경남)\s+(?=\S)/;
+/** 도 약칭은 주소에 '경남 창원시'와 '경상남도 통영시'가 섞여 있어 둘 다 본다(2026-09-30 열린 스팟 경남 258곳, 경상남도 392곳) */
+const BROAD_REGION_ALIASES: Record<string, string[]> = {
+  충북: ['충북', '충청북도'], 충남: ['충남', '충청남도'], 전북: ['전북', '전라북도'], 전남: ['전남', '전라남도'],
+  경북: ['경북', '경상북도'], 경남: ['경남', '경상남도'],
+};
 /** 지역어 바로 뒤에 붙는 행정·교통 접미사 */
 const PLACE_SUFFIX = /^(입구역|입구|역|동|시|구|읍|면)\s*/;
 /** 동네 이름 끝에 붙는 같은 접미사('망원동' → '망원') */
