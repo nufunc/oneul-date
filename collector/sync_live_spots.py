@@ -32,6 +32,7 @@ except ImportError:
 API_URL = os.environ.get("ONEUL_API_URL", "http://152.70.89.210:18088/rest/v1/spots")
 TARGET_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "public", "data", "spots.json"))
 MIN_EXPECTED_SPOTS = 9000  # 비정상 데이터 누락 방지 안전 가드
+CLIENT_UNUSED_KEYS = {"metrics", "created_at", "updated_at", "provider_ids", "reservation_type", "fail_count"}
 ALIAS_FILE = os.path.join(os.path.dirname(TARGET_FILE), "spot_aliases.json")
 
 def get_with_retry(params, attempts=6, wait_sec=10):
@@ -141,7 +142,10 @@ def main():
     # 2026-09-29 실측 31.3MB → 21.0MB(gzip 3.56 → 3.25MB). 값이 한 행이라도 생기면 다시 들어간다
     keys = set().union(*(sp.keys() for sp in healed_spots))
     empty_keys = {k for k in keys if all(sp.get(k) in (None, "", [], {}) for sp in healed_spots)}
-    out_spots = [{k: v for k, v in sp.items() if k not in empty_keys} for sp in healed_spots]
+    # 앱이 읽지 않는 칸도 뺀다. 2026-09-30 src에서 타입 선언 밖 참조가 0건이었고 이 여섯이 압축 전 4.5MB(23%)였다.
+    # 화면이 이 값을 쓰게 되면 여기서 빼야 한다
+    drop_keys = empty_keys | CLIENT_UNUSED_KEYS
+    out_spots = [{k: v for k, v in sp.items() if k not in drop_keys} for sp in healed_spots]
     tmp_file = f"{TARGET_FILE}.tmp"
     with open(tmp_file, "w", encoding="utf-8") as f:
         json.dump(out_spots, f, ensure_ascii=False, separators=(",", ":"))
