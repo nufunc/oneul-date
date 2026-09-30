@@ -1931,11 +1931,11 @@ function isPlaceHead(head: string): boolean {
   return hit;
 }
 /**
- * 데이트 앱에서 정보가 없는 단어('가성비 데이트'의 '데이트', '성수 데이트코스'의 '데이트코스')는 다른 단어가 있을 때만 뺀다.
+ * 데이트 앱에서 정보가 없는 단어('가성비 데이트'의 '데이트', '성수 데이트코스'의 '데이트코스', '제주도 여행'의 '여행')는 다른 단어가 있을 때만 뺀다.
  * 띄어 쓴 단어만 대상이라 '데이트맛집' 같은 붙여 쓴 말은 그대로다
  */
 function stripSearchStopwords(q: string): string {
-  const stripped = q.replace(/(^|\s)(데이트\s*코스|데이트|코스)(?=\s|$)/g, ' ').replace(/\s+/g, ' ').trim();
+  const stripped = q.replace(/(^|\s)(데이트\s*코스|데이트|코스|여행)(?=\s|$)/g, ' ').replace(/\s+/g, ' ').trim();
   // '데이트코스'만 쳤으면 '데이트'로 읽는다(그대로면 0건)
   return stripped || (/^데이트\s*코스$/.test(q) ? '데이트' : q);
 }
