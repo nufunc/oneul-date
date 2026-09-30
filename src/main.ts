@@ -627,8 +627,12 @@ function eventPeriodLabel(spot: Spot): string {
   return ev.start === ev.end ? `📅 ${md(ev.start)}` : `📅 ${md(ev.start)}~${md(ev.end)}`;
 }
 
+/** 도매시장·교육원처럼 이름만으로 데이트 장소가 아닌 기관. TourAPI가 '쇼핑'·'체험'으로 분류해 들여온다(2026-09-30 열린 스팟 도매시장 27곳, 교육원 3곳).
+ * 수산물시장·직판장은 관광 시장이라 뺀다. 수집기가 같은 기관을 계속 들여오므로 원천 차단은 수집기 category_filter의 몫이다 */
+const NON_DATE_INSTITUTION = /도매\s*시장|교육원/;
+
 function isCourseEligible(spot: Spot): boolean {
-  return !isPastYearEvent(spot) && isValidSlot(spot.slot) && !isListicleEntry(spot) && !isBroadRegionDummy(spot) && !isPollutedMediaChannelDummy(spot) && !isZoneCompositeDummy(spot) && isRealStaySpot(spot);
+  return !isPastYearEvent(spot) && isValidSlot(spot.slot) && !isListicleEntry(spot) && !isBroadRegionDummy(spot) && !isPollutedMediaChannelDummy(spot) && !isZoneCompositeDummy(spot) && isRealStaySpot(spot) && !NON_DATE_INSTITUTION.test(spot.name || '');
 }
 
 const DEDUPE_REGION_TOKENS = new Set([
@@ -1185,7 +1189,8 @@ function searchRelevanceTier(spot: Spot, query: string): number {
   if (/\s/.test(q) && q.replace(/\s+/g, '') in NATURAL_CONTEXT_MAP) q = q.replace(/\s+/g, '');
   // '부산호텔'처럼 지역어로 시작하면 지역은 이미 걸러졌으므로 나머지('호텔')로 등급을 매긴다.
   // 그대로 두면 모두 최하 등급이 돼 동의어로만 걸린 식당이 호텔보다 앞에 섰다
-  const place = SEARCH_PLACE_PREFIXES.find((p) => q.startsWith(p) && q.length > p.length);
+  // '제주도'는 '제주'+'도'로 갈라 이름에 '도'가 든 식당이 위로 올랐다. 도 이름 자체를 친 검색은 그대로 등급을 매긴다
+  const place = Object.hasOwn(BROAD_REGION_ALIASES, q) ? undefined : SEARCH_PLACE_PREFIXES.find((p) => q.startsWith(p) && q.length > p.length);
   if (place && !(spot.name || '').toLowerCase().replace(/\s+/g, '').includes(q.replace(/\s+/g, ''))) {
     // '성수역'처럼 나머지가 접미사뿐이면 동네 이름으로 순위를 매긴다. '역'으로 매기면 이름에 '역'이 든 역사의서재가 1위였다
     if (!q.slice(place.length).replace(PLACE_SUFFIX, '').trim()) return relevanceTierFor(spot, place);
@@ -5903,6 +5908,34 @@ function restoreFocusIn(root: ParentNode, selector: string | null, fallbackSelec
 
 let discoveryCandidateCache: { source: Spot[]; key: string; list: (Spot & { _dist: number })[] } | null = null;
 
+/** 검색어 맨 앞의 지역어('부산', '인천 데이트', '제주도 여행', '경북'). 지역어로 시작하지 않으면 null */
+function searchRegionHead(query: string): string | null {
+  const cleanQ = stripSearchStopwords(query.replace(/[#·,/\\]/g, ' ').trim().toLowerCase());
+  const broad = cleanQ.match(BROAD_REGION_PREFIX);
+  if (broad) return broad[1];
+  if (Object.hasOwn(BROAD_REGION_ALIASES, cleanQ)) return cleanQ;
+  return SEARCH_PLACE_PREFIXES.find((p) => cleanQ.startsWith(p)) ?? null;
+}
+
+/** 지역어에 드는 스팟 좌표의 중앙값. 표본이 5곳 미만이면 중심으로 삼지 않는다. 스팟 목록이 바뀌면 다시 센다 */
+const searchRegionCenterCache = new Map<string, { lat: number; lng: number } | null>();
+let searchRegionCenterSource: Spot[] | null = null;
+function searchRegionCenter(head: string): { lat: number; lng: number } | null {
+  if (searchRegionCenterSource !== spots) {
+    searchRegionCenterCache.clear();
+    searchRegionCenterSource = spots;
+  }
+  if (searchRegionCenterCache.has(head)) return searchRegionCenterCache.get(head)!;
+  const hits = spots.filter((s) => !s.is_closed && s.lat != null && s.lng != null && matchesSearchQuery(s, head));
+  const median = (values: number[]) => values.sort((a, b) => a - b)[Math.floor(values.length / 2)];
+  const center = hits.length >= 5 ? { lat: median(hits.map((s) => s.lat!)), lng: median(hits.map((s) => s.lng!)) } : null;
+  searchRegionCenterCache.set(head, center);
+  return center;
+}
+
+/** 검색어의 지역 중심을 거리순 기준점으로 쓰고 있으면 그 지역어. 위치가 검색 지역에서 30km 안이면 위치를 그대로 쓴다 */
+let discoveryQueryOrigin: string | null = null;
+
 let lastDiscoveryList: { list: (Spot & { _dist?: number })[]; pageSize: number } | null = null;
 
 function renderSpotDiscovery(): void {
@@ -5922,7 +5955,15 @@ function renderSpotDiscovery(): void {
   const refocusSelector = activeEl && !isSearchFocused && area.contains(activeEl) ? focusSelectorFor(activeEl) : null;
 
   // 2. 기준 좌표 결정 (GPS 획득 좌표 -> 선택된 지역/세부존 중심 좌표 -> 서울 성수 기본 중심 좌표)
+  // 검색어가 지역이면 그 지역 중심이 먼저다. 지역 검색이 성수에서 가까운 순으로 늘어서 제주·부산 검색의 앞이 변두리였다
   let effectiveCoords = userCoords;
+  discoveryQueryOrigin = null;
+  const queryHead = searchRegionHead(state.spotSearchQuery);
+  const queryCenter = queryHead ? searchRegionCenter(queryHead) : null;
+  if (queryHead && queryCenter && (!userCoords || getDistanceKm(userCoords.lat, userCoords.lng, queryCenter.lat, queryCenter.lng) > 30)) {
+    effectiveCoords = queryCenter;
+    discoveryQueryOrigin = queryHead;
+  }
   if (!effectiveCoords) {
     if (state.subZones.length > 0 && ZONE_CENTERS[state.subZones[0]]) {
       effectiveCoords = ZONE_CENTERS[state.subZones[0]];
@@ -6147,7 +6188,7 @@ function renderSpotDiscovery(): void {
 
         <div class="discovery-sort-group">
           <select class="discovery-sort-select" id="discovery-sort-select" aria-label="스팟 정렬">
-            <option value="distance" ${state.spotSort === 'distance' ? 'selected' : ''}>${userCoords ? '📍 가까운 거리순' : `📍 ${escapeHtml(distanceBasisLabel())} 중심 거리순`}</option>
+            <option value="distance" ${state.spotSort === 'distance' ? 'selected' : ''}>${userCoords && !discoveryQueryOrigin ? '📍 가까운 거리순' : `📍 ${escapeHtml(discoveryQueryOrigin ?? distanceBasisLabel())} 중심 거리순`}</option>
             <option value="popular" ${state.spotSort === 'popular' ? 'selected' : ''}>🔥 핫플/인기순</option>
             <option value="curation" ${state.spotSort === 'curation' ? 'selected' : ''}>⭐ 인증·평점순</option>
           </select>
@@ -6228,7 +6269,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
   // 위치 권한이 없으면 거리는 사용자 위치가 아니라 대체 기준점(세부 동네·지역 중심, 기본 성수)에서 잰 값이다.
   // 그 값을 '📍 25m'로 보이면 부산 사용자에게도 성수 가게가 25m로 보였다. 이때는 지역 이름만 보인다
   const distText =
-    userCoords && spot._dist !== undefined && spot._dist < 9000
+    userCoords && !discoveryQueryOrigin && spot._dist !== undefined && spot._dist < 9000
       ? spot._dist < 1.0
         ? `📍 ${(spot._dist * 1000).toFixed(0)}m`
         : `📍 ${spot._dist.toFixed(1)}km`
