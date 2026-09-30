@@ -1257,6 +1257,12 @@ const NATURAL_CONTEXT_MAP: Record<string, string[]> = {
   '글램핑': ['글램핑', '캠핑', '캠크닉', '카라반', '야영'],
 };
 
+/** 스팟이 도 약칭·광역 권역명에 드는지. 주소가 '경남 창원시'와 '경상남도 통영시'로 섞여 있어 별칭을 모두 본다 */
+function inBroadRegion(spot: Spot, key: string): boolean {
+  const placeText = [spot.location, spot.area, spot.address, spot.name].join(' ').toLowerCase();
+  return (BROAD_REGION_ALIASES[key] ?? [key]).some((alias) => placeText.includes(alias));
+}
+
 function matchesSearchQuery(spot: Spot, query: string): boolean {
   if (!query || !query.trim()) return true;
 
@@ -1271,11 +1277,9 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
   // '서울 카페'처럼 광역 권역명 뒤에 띄어 쓴 말이 있으면 권역과 나머지를 AND로 묶는다. 권역명이 지역어 목록에 없어 아래 다중 토큰
   // 규칙의 '첫 토큰만 맞으면 통과'로 빠져 업종과 무관하게 권역 전체(3,480곳)가 걸렸다. 붙여 쓴 '서울역'·'서울숲'은 대상이 아니다
   const broad = cleanQ.match(BROAD_REGION_PREFIX);
-  if (broad) {
-    const placeText = [spot.location, spot.area, spot.address, spot.name].join(' ').toLowerCase();
-    const inBroad = (BROAD_REGION_ALIASES[broad[1]] ?? [broad[1]]).some((alias) => placeText.includes(alias));
-    return inBroad && matchesSearchQuery(spot, cleanQ.slice(broad[0].length).trim());
-  }
+  if (broad) return inBroadRegion(spot, broad[1]) && matchesSearchQuery(spot, cleanQ.slice(broad[0].length).trim());
+  // '경북'만 친 검색도 주소가 '경상북도'인 스팟을 세야 한다(약칭만 보면 경북 779곳 중 387곳)
+  if (cleanQ in BROAD_REGION_ALIASES) return inBroadRegion(spot, cleanQ);
   const place = SEARCH_PLACE_PREFIXES.find((p) => cleanQ.startsWith(p) && cleanQ.length > p.length);
   if (place) {
     const rest = cleanQ.slice(place.length).trim();
