@@ -1892,9 +1892,12 @@ const PROVINCE_NAMES: string[][] = [
   ['충북', '충청북도'], ['충남', '충청남도'], ['전북', '전라북도', '전북특별자치도'], ['전남', '전라남도'],
   ['경북', '경상북도'], ['경남', '경상남도'],
 ];
-const BROAD_REGION_ALIASES: Record<string, string[]> = Object.fromEntries(
-  PROVINCE_NAMES.flatMap((names) => names.map((name) => [name, names])),
-);
+const BROAD_REGION_ALIASES: Record<string, string[]> = {
+  ...Object.fromEntries(PROVINCE_NAMES.flatMap((names) => names.map((name) => [name, names]))),
+  // 강원·제주는 약칭 검색이 종전 경로(제주는 동네 판정)를 타므로 정식 명칭만 키로 둔다
+  강원특별자치도: ['강원', '강원특별자치도'],
+  제주특별자치도: ['제주', '제주특별자치도'],
+};
 /** 검색어 맨 앞의 광역 권역명·도 이름과 그 뒤 띄어쓰기. 붙여 쓴 '서울역'은 걸리지 않는다 */
 const BROAD_REGION_PREFIX = new RegExp(
   `^(서울|경기|강원|충청|영남|호남|${Object.keys(BROAD_REGION_ALIASES).join('|')})\\s+(?=\\S)`,
