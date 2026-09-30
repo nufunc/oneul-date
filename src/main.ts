@@ -1894,9 +1894,12 @@ const PROVINCE_NAMES: string[][] = [
 ];
 const BROAD_REGION_ALIASES: Record<string, string[]> = {
   ...Object.fromEntries(PROVINCE_NAMES.flatMap((names) => names.map((name) => [name, names]))),
-  // 강원·제주는 약칭 검색이 종전 경로(제주는 동네 판정)를 타므로 정식 명칭만 키로 둔다
+  // 강원·제주는 약칭 검색이 종전 경로(제주는 동네 판정)를 타므로 약칭('강원', '제주')은 키로 두지 않는다.
+  // '제주도'·'강원도'는 종전 경로에서 지역 뒤에 '도'만 남아 0건이었다(2026-09-30 라이브)
   강원특별자치도: ['강원', '강원특별자치도'],
+  강원도: ['강원', '강원특별자치도'],
   제주특별자치도: ['제주', '제주특별자치도'],
+  제주도: ['제주', '제주특별자치도'],
 };
 /** 검색어 맨 앞의 광역 권역명·도 이름과 그 뒤 띄어쓰기. 붙여 쓴 '서울역'은 걸리지 않는다 */
 const BROAD_REGION_PREFIX = new RegExp(
