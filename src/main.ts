@@ -967,6 +967,27 @@ function getDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): 
   return R * c;
 }
 
+/** 두 지점 사이 거리(km)로 표기 문구와 아이콘을 만든다. 1km 미만은 도보, 그 이상은 차량이다.
+ * 차량은 30km 미만이 25km/h에 3분, 30km부터는 그 30km 값(75분)에 60km/h를 이어 붙인다.
+ * 종전에는 30km 이상이 dist/60시간이라 29.9km는 75분, 37km는 0.6시간(37분)으로 더 먼 구간이 짧게 나왔다 */
+function describeTransit(dist: number): { distanceText: string; timeText: string; icon: string } {
+  if (dist < 1.0) {
+    return { distanceText: `${Math.round(dist * 1000)}m`, timeText: `도보 약 ${Math.max(1, Math.round(dist * 15))}분`, icon: '🚶‍♂️' };
+  }
+  const carMin = dist < 30.0
+    ? Math.max(3, Math.round((dist / 25) * 60 + 3))
+    : Math.round((30 / 25) * 60 + 3 + (dist - 30));
+  const hours = Math.floor(carMin / 60);
+  const rest = carMin % 60;
+  const time = hours === 0 ? `${carMin}분` : rest === 0 ? `${hours}시간` : `${hours}시간 ${rest}분`;
+  return {
+    distanceText: dist < 30.0 ? `${dist.toFixed(1)}km` : `${dist.toFixed(0)}km`,
+    timeText: `차량·이동 약 ${time}`,
+    icon: '🚗',
+  };
+}
+
+
 /**
  * 스폿의 정확한 또는 추정 위경도 좌표 산출
  * 1) spot.lat, spot.lng가 존재하면 실제 좌표 반환
@@ -2818,23 +2839,7 @@ function renderUserOriginTransitDivider(firstStep: CourseStep): string {
     let timeText = '';
     let icon = '🚶‍♂️';
 
-    if (dist < 1.0) {
-      const meters = Math.round(dist * 1000);
-      const walkMin = Math.max(1, Math.round(dist * 15));
-      distanceText = `${meters}m`;
-      timeText = `도보 약 ${walkMin}분`;
-      icon = '🚶‍♂️';
-    } else if (dist < 30.0) {
-      const carMin = Math.max(3, Math.round((dist / 25) * 60 + 3));
-      distanceText = `${dist.toFixed(1)}km`;
-      timeText = `차량·이동 약 ${carMin}분`;
-      icon = '🚗';
-    } else {
-      const hours = (dist / 60).toFixed(1);
-      distanceText = `${dist.toFixed(0)}km`;
-      timeText = `차량 약 ${hours}시간`;
-      icon = '🚗';
-    }
+    ({ distanceText, timeText, icon } = describeTransit(dist));
 
     const naviUrl = `https://map.naver.com/p/directions/${userCoords.lng},${userCoords.lat},${encodeURIComponent('내위치')}/${s.lng},${s.lat},${encodeURIComponent(s.name)}/-/${dist < 1.0 ? 'walk' : 'transit'}`;
 
@@ -4852,23 +4857,7 @@ function renderStepTransitDivider(prevStep: CourseStep, nextStep: CourseStep): s
 
   if (s1.lat && s1.lng && s2.lat && s2.lng) {
     const dist = getDistanceKm(s1.lat, s1.lng, s2.lat, s2.lng);
-    if (dist < 1.0) {
-      const meters = Math.round(dist * 1000);
-      const walkMin = Math.max(1, Math.round(dist * 15));
-      distanceText = `${meters}m`;
-      timeText = `도보 약 ${walkMin}분`;
-      icon = '🚶‍♂️';
-    } else if (dist < 30.0) {
-      const carMin = Math.max(3, Math.round((dist / 25) * 60 + 3));
-      distanceText = `${dist.toFixed(1)}km`;
-      timeText = `차량·이동 약 ${carMin}분`;
-      icon = '🚗';
-    } else {
-      const hours = (dist / 60).toFixed(1);
-      distanceText = `${dist.toFixed(0)}km`;
-      timeText = `차량 약 ${hours}시간`;
-      icon = '🚗';
-    }
+    ({ distanceText, timeText, icon } = describeTransit(dist));
   } else {
     timeText = '다음 코스로 이동';
     icon = '📍';
