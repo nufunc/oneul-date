@@ -4986,7 +4986,7 @@ html[data-theme-resolved="dark"] .btn-saved-recommend {
   z-index: 3;
   padding: 2px 7px;
   border-radius: 9999px;
-  background: rgba(239, 68, 68, 0.9);
+  background: #b91c1c; /* 불투명 붉은색에 흰 글씨 6.47:1. 반투명이면 밝은 사진 위에서 AA(4.5:1)에 못 미쳤다 */
   color: #fff;
   font-size: 10px;
   font-weight: 700;
@@ -5018,10 +5018,14 @@ html[data-theme-resolved="dark"] .btn-saved-recommend {
   padding: 2px 6px;
   border-radius: 4px;
   background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
+  color: #b91c1c; /* 라이트 5.57:1. #ef4444는 3.24:1이었다 */
   font-size: 11px;
   font-weight: 700;
   vertical-align: middle;
+}
+html[data-theme="dark"] .spot-closed-badge,
+html[data-theme-resolved="dark"] .spot-closed-badge {
+  color: #f87171; /* 다크 5.46:1. #ef4444는 4.02:1이었다 */
 }
 
 .discovery-card-actions {
@@ -5527,7 +5531,7 @@ html[data-theme-resolved="dark"] .btn-discovery-chip-action.btn-discovery-yt {
 .spot-link-btn.yt {
   background: #fef2f2;
   border-color: #fee2e2;
-  color: #dc2626;
+  color: #b91c1c; /* 5.91:1. #dc2626은 4.41:1이었다 */
 }
 .spot-link-btn.guide {
   background: #f0fdf4;
