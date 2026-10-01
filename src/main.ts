@@ -1657,6 +1657,17 @@ function filterByBudget(candidates: Spot[], budget?: 'ALL' | 'BUDGET' | 'LUXURY'
   return filtered.length > 0 ? filtered : candidates;
 }
 
+/** 식음료 카테고리. 예산 칩의 '가격 정보 없음' 안내가 세는 범위다(2026-10-01 단서 없는 식음료 2,409곳) */
+const DINING_CATEGORY_RE = /카페|커피|양식|한식|이탈리안|제과|베이커리|디저트|호프|요리주점|육류|고기|주점|일식|칵테일바|와인바|술집|해물|생선|분식|회$|국수|피자|한정식|포장마차|칼국수|중국요리|돈까스|우동|찻집|맥주/;
+
+/** 티어·평균가·가격 문구가 모두 없는 식음료. 예산 칩은 이런 곳을 판정하지 못해 말없이 뺀다 */
+function isUnpricedDining(spot: Spot): boolean {
+  return !spot.price_tier && !spot.avg_price_per_person && !spot.price && DINING_CATEGORY_RE.test(spot.category || '');
+}
+
+/** 예산 칩을 켠 탐색 목록에서 가격 정보 없는 식음료를 함께 보여 줄지. 칩을 끄면 다시 뺀다 */
+let includeUnpricedDining = false;
+
 /**
  * 앵커 기반 근접 코스 생성 (물리적 거리 및 자치구 클러스터링).
  * 1) 검색어(searchQuery)가 있는 경우 해당 키워드 매칭 스팟을 앵커로 최우선 선정
@@ -6071,11 +6082,13 @@ function renderSpotDiscovery(): void {
     matchedSpots = matchedSpots.filter((s) => isNightLifeSpot(s));
   }
 
-  // 스마트 예산 필터 적용 (가성비 / 스페셜 다이닝)
-  if (state.budgetFilter === 'BUDGET') {
-    matchedSpots = matchedSpots.filter((s) => isBudgetSpot(s));
-  } else if (state.budgetFilter === 'LUXURY') {
-    matchedSpots = matchedSpots.filter((s) => isSpecialDiningSpot(s));
+  // 스마트 예산 필터 적용 (가성비 / 스페셜 다이닝). 가격 정보가 없는 식음료는 판정할 수 없어 빠지므로 몇 곳인지 알린다
+  let unpricedHidden = 0;
+  if (state.budgetFilter === 'ALL') includeUnpricedDining = false;
+  else {
+    const passes = state.budgetFilter === 'BUDGET' ? isBudgetSpot : isSpecialDiningSpot;
+    unpricedHidden = matchedSpots.filter((s) => !passes(s) && isUnpricedDining(s)).length;
+    matchedSpots = matchedSpots.filter((s) => passes(s) || (includeUnpricedDining && isUnpricedDining(s)));
   }
 
   // 4. 정렬 적용 (거리순 / 핫플·인기순 / 인증·평점순)
@@ -6201,6 +6214,12 @@ function renderSpotDiscovery(): void {
       </div>
     </div>
 
+    ${unpricedHidden > 0 || (state.budgetFilter !== 'ALL' && includeUnpricedDining)
+      ? `<p class="discovery-scope-notice" role="status">${includeUnpricedDining
+          ? '💬 가격 정보가 없는 식음료를 함께 보여드려요'
+          : `💬 가격 정보가 없는 식음료 ${unpricedHidden.toLocaleString('ko-KR')}곳은 빠졌어요`}
+          <button type="button" class="scope-notice-btn" id="btn-toggle-unpriced">${includeUnpricedDining ? '빼고 보기' : '포함해서 보기'}</button></p>`
+      : ''}
     ${expandedNationwide ? `<p class="discovery-scope-notice" role="status">📍 ${escapeHtml(regLabel.title)}에는 '${escapeHtml(q)}' 스팟이 없어 전국 결과를 보여드려요</p>` : ''}
 
     <!-- 4. 그리드 피드 -->
@@ -6570,6 +6589,12 @@ function bindDiscoveryEvents(area: HTMLElement): void {
       }
     });
   }
+
+  area.querySelector('#btn-toggle-unpriced')?.addEventListener('click', () => {
+    includeUnpricedDining = !includeUnpricedDining;
+    state.spotPage = 1;
+    renderSpotDiscovery();
+  });
 
   area.querySelector('#btn-reset-discovery-filters')?.addEventListener('click', () => {
     state.spotSearchQuery = '';

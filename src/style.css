@@ -4440,6 +4440,18 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   overflow-wrap: anywhere;
 }
 
+.scope-notice-btn {
+  margin-left: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #0369a1; /* 안내 줄 배경에서 4.5:1 이상. 다크 모드는 아래 규칙 */
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .discovery-card-category,
 .discovery-category {
   font-size: 0.70rem;
@@ -4694,6 +4706,8 @@ html[data-theme-resolved="dark"] .quick-region-chip.chip-saved {
   color: #fb7185; /* 어두운 칩 배경에서 5.9:1 이상 (#e11d48는 3.64:1) */
 }
 
+html[data-theme="dark"] .scope-notice-btn,
+html[data-theme-resolved="dark"] .scope-notice-btn,
 html[data-theme="dark"] .discovery-card-category,
 html[data-theme-resolved="dark"] .discovery-card-category,
 html[data-theme="dark"] .discovery-category,
