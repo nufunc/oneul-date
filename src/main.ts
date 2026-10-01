@@ -6312,7 +6312,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
   // 5열은 이미지가 51px 안팎이고 거리 배지가 대부분을 덮어 겹치므로 붙이지 않는다(상세 시트에는 보인다)
   const eventLabel = cols === 5 ? '' : eventPeriodLabel(spot);
   const eventBadge = eventLabel ? `<span class="discovery-badge-event">${escapeHtml(eventLabel)}</span>` : '';
-  const sum = cleanSpotSummary(spot) || `${spot.name}에서 특별한 데이트를 즐겨보세요.`;
+  const sum = cleanSpotSummary(spot);
 
   const bookingUrl = spot.booking_info?.url || getCatchtableUrl(spot);
   const yt = spot.social_links?.youtube;
@@ -6370,7 +6370,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
             <h4 class="discovery-card-title discovery-name"><button type="button" class="discovery-name-link" data-detail-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 상세 보기">${escapeHtml(spot.name)}</button></h4>
             <span class="discovery-card-category discovery-category">${escapeHtml(spot.category || '데이트 스팟')}</span>
           </div>
-          <p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>
+          ${sum ? `<p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>` : ''}
           <div class="discovery-card-actions">
             <button class="btn-discovery-save ${isSaved ? 'is-saved' : ''}" data-spot-id="${spot.id}" aria-label="${isSaved ? '보관함에서 제외' : '보관함에 담기'}" title="${isSaved ? '보관함에서 제외' : '보관함에 담기'}">${isSaved ? '❤️' : '🤍'}</button>
             <button class="btn-build-anchor-course btn-discovery-action-build with-label" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">🚀 코스</button>
@@ -6399,7 +6399,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
       <div class="discovery-card-body">
         <h4 class="discovery-card-title discovery-name"><button type="button" class="discovery-name-link" data-detail-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 상세 보기">${escapeHtml(spot.name)}</button></h4>
         <span class="discovery-card-category discovery-category">${escapeHtml(spot.category || '데이트 스팟')}</span>
-        <p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>
+        ${sum ? `<p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>` : ''}
         <div class="discovery-card-actions">
           <button class="btn-discovery-save ${isSaved ? 'is-saved' : ''}" data-spot-id="${spot.id}" aria-label="${isSaved ? '보관함에서 제외' : '보관함에 담기'}" title="${isSaved ? '보관함에서 제외' : '보관함에 담기'}">${isSaved ? '❤️' : '🤍'}</button>
           <button class="btn-build-anchor-course btn-discovery-action-build" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">🚀</button>
