@@ -4945,6 +4945,10 @@ function cleanSpotSummary(spot: Spot): string {
   const raw = (spot.summary || '').trim();
   const name = spot.name.trim();
 
+  // TourAPI 수집기가 이름·분류·지역을 이어 붙인 폴백 문장('엠버리조트 — 한국관광공사 인증 숙박 명소 (제주시)')은 이미 화면에 있는
+  // 정보만 되풀이한다(열린 2,425곳). 아래 인증 뱃지 문구로 바꾸면 갑천에도 '대표 데이트 명소'가 붙어 과장이라 빈 값을 돌려준다
+  if (/ — 한국관광공사 인증 .+ 명소 \(.+\)$/.test(raw)) return '';
+
   // 비정상 케이스 판별 (영문 태그 나열, 스팟명과 동일, 너무 짧거나 무의미한 텍스트, 과거 단조로운 판박이 템플릿)
   const isBad =
     !raw ||
@@ -7420,7 +7424,7 @@ function renderOverlayContent(): void {
     const slotKey = (spot.slot as SlotKey) || 'day';
     const targetImgUrl = getSpotImageUrl(spot, slotKey);
     const fallbackIcon = getSpotFallbackIcon(spot, slotKey);
-    const sum = cleanSpotSummary(spot) || spot.ai_summary_editorial || `${spot.name}에서 특별한 데이트를 즐겨보세요.`;
+    const sum = cleanSpotSummary(spot) || spot.ai_summary_editorial || '';
     const bookingUrl = spot.booking_info?.url || getCatchtableUrl(spot);
     const yt = spot.social_links?.youtube;
     const hasYt = isValidYoutubeHotclip(yt) && yt?.url;
@@ -7505,11 +7509,11 @@ function renderOverlayContent(): void {
             </p>
           </div>
 
-          <!-- 3. AI 에디토리얼 요약 -->
-          <div class="spot-detail-editorial-card">
+          <!-- 3. AI 에디토리얼 요약. 보여 줄 문장이 없으면 카드째 뺀다 -->
+          ${sum ? `<div class="spot-detail-editorial-card">
             <span class="editorial-sparkle">✨ 오늘 데이트 에디토리얼</span>
             <blockquote class="editorial-text">“${escapeHtml(sum)}”</blockquote>
-          </div>
+          </div>` : ''}
 
           <!-- 4. 실용 정보 그리드 (영업시간, 주차, 가격, 메뉴 등) -->
           <div class="spot-detail-meta-grid">
