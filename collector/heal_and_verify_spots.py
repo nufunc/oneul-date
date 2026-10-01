@@ -237,6 +237,17 @@ def strip_address_tail(name: str, address: str) -> str:
     return name
 
 
+# https로도 받아지는 것을 확인한 이미지 호스트(2026-10-01 호스트마다 12개 표본 모두 200). 목록 밖 호스트는 건드리지 않는다
+HTTPS_IMAGE_HOSTS = ("tong.visitkorea.or.kr", "t1.daumcdn.net", "t1.kakaocdn.net")
+
+
+def upgrade_image_url(url: str) -> str:
+    """http:// 이미지 주소를 https://로 바꾼다. 브라우저의 혼합 콘텐츠 자동 승격에 기대지 않으려는 것이다"""
+    if url and url.startswith("http://") and url.split("/")[2] in HTTPS_IMAGE_HOSTS:
+        return "https://" + url[len("http://"):]
+    return url
+
+
 # '무료 관람 (리조트 시설 이용료 별도)'처럼 무료가 일부뿐이거나 조건부인 문구는 FREE로 읽지 않는다
 _FREE_QUALIFIER = re.compile(r"별도|상이|또는")
 
@@ -308,6 +319,7 @@ def heal_all_spots(spots: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], D
         "healed_categories": 0,
         "healed_slots": 0,
         "filled_price_tiers": 0,
+        "https_images": 0,
         "active_total": 0,
     }
 
@@ -343,6 +355,12 @@ def heal_all_spots(spots: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], D
             if orig_slot != new_slot:
                 s["slot"] = new_slot
                 stats["healed_slots"] += 1
+
+            # 5. 이미지 주소는 https로
+            upgraded = upgrade_image_url(s.get("image_url") or "")
+            if upgraded != (s.get("image_url") or ""):
+                s["image_url"] = upgraded
+                stats["https_images"] += 1
 
             # 4. 가격 티어. 방문 검증이 닿지 않은 web 출처 행은 문구만 있고 티어가 비어 있다(2026-10-01 열린 2,454곳).
             # DB는 건드리지 않고 내보내기에서만 채운다

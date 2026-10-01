@@ -21,3 +21,11 @@ out, stats = heal_all_spots([
 ])
 assert out[0]["price_tier"] == "₩" and out[1]["price_tier"] == "₩₩₩" and stats["filled_price_tiers"] == 1
 print("ok")
+
+from heal_and_verify_spots import upgrade_image_url
+assert upgrade_image_url("http://tong.visitkorea.or.kr/cms/a.jpg") == "https://tong.visitkorea.or.kr/cms/a.jpg"
+assert upgrade_image_url("http://t1.kakaocdn.net/x.png") == "https://t1.kakaocdn.net/x.png"
+assert upgrade_image_url("http://example.com/a.jpg") == "http://example.com/a.jpg"
+assert upgrade_image_url("https://t1.daumcdn.net/a.jpg") == "https://t1.daumcdn.net/a.jpg"
+assert upgrade_image_url("") == ""
+print("ok image")
