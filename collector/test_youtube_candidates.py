@@ -234,6 +234,18 @@ def test_map_link_query_adds_branch_hint():
     assert y.map_link_query_for("담솥", "") == ""
 
 
+def test_truncated_description_links_are_restored_from_command_runs():
+    content = "✨ 09:25 📍담솥\nhttps://www.google.com/maps/search/?a...\n끝"
+    shown = "https://www.google.com/maps/search/?a..."
+    start = len("✨ 09:25 📍담솥\n".encode("utf-16-le")) // 2
+    q = "https%3A%2F%2Fwww.google.com%2Fmaps%2Fsearch%2F%3Fapi%3D1%26query%3D%25EB%258B%25B4%25EC%2586%25A5%2B%25EC%25A2%2585%25EB%25A1%259C"
+    attr = {"content": content, "commandRuns": [{"startIndex": start, "length": len(shown), "onTap": {"innertubeCommand": {
+        "commandMetadata": {"webCommandMetadata": {"url": f"https://www.youtube.com/redirect?event=video_description&q={q}"}}}}}]}
+    out = y._expand_truncated_links(attr)
+    assert "..." not in out and out.endswith("\n끝")
+    assert y.map_link_query_for("담솥", out) == "담솥 종로"
+
+
 if __name__ == "__main__":
     for fn in [v for k, v in list(globals().items()) if k.startswith("test_")]:
         fn()

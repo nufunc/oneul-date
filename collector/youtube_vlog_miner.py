@@ -836,6 +836,30 @@ def _find_key(node, key: str):
     return None
 
 
+def _expand_truncated_links(attr: dict) -> str:
+    """attributedDescription의 content는 긴 링크를 'https://www.google.com/maps/search/?a...'로 줄여 보여 준다.
+    commandRuns의 redirect 주소에 든 q= 값이 전체 링크라서 줄여진 글자를 그것으로 되돌린다.
+    startIndex와 length는 UTF-16 단위라 이모지가 있으면 파이썬 문자 위치와 어긋나므로 UTF-16으로 자른다."""
+    content = attr.get("content") or ""
+    raw = content.encode("utf-16-le")
+    edits = []
+    for run in attr.get("commandRuns") or []:
+        try:
+            start, length = int(run["startIndex"]), int(run["length"])
+            url = run["onTap"]["innertubeCommand"]["commandMetadata"]["webCommandMetadata"]["url"]
+        except (KeyError, TypeError, ValueError):
+            continue
+        shown = raw[start * 2:(start + length) * 2].decode("utf-16-le", errors="ignore")
+        if not shown.endswith(("...", "…")):
+            continue
+        full = (urllib.parse.parse_qs(urllib.parse.urlparse(url).query).get("q") or [""])[0]
+        if full.startswith("http"):
+            edits.append((start * 2, (start + length) * 2, full))
+    for a, b, full in sorted(edits, reverse=True):
+        raw = raw[:a] + full.encode("utf-16-le") + raw[b:]
+    return raw.decode("utf-16-le", errors="ignore")
+
+
 def _fetch_innertube_next(video_id: str) -> dict:
     """InnerTube next 엔드포인트 폴백 — attributedDescription 에서 설명란 확보"""
     out = {"description": "", "views": 0, "likes": 0, "title": "", "status": 0, "length": 0, "error": ""}
@@ -865,7 +889,7 @@ def _fetch_innertube_next(video_id: str) -> dict:
             data = json.loads(raw)
         attr = _find_key(data, "attributedDescription")
         if isinstance(attr, dict):
-            out["description"] = attr.get("content") or ""
+            out["description"] = _expand_truncated_links(attr)
         vc = _find_key(data, "viewCount")
         if isinstance(vc, dict):
             txt = json.dumps(vc, ensure_ascii=False)
