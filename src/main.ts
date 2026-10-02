@@ -4955,6 +4955,29 @@ function renderStepTransitDivider(prevStep: CourseStep, nextStep: CourseStep): s
 
 /** 비정상적이거나 영문 태그 나열/판박이 템플릿인 summary를 감지하여 다채롭고 감각적인 에디토리얼 한줄 소개로 교정 */
 /** 100선 이상의 다채롭고 감각적인 에디토리얼 한 줄 소개 생성 엔진 */
+/** 이름만 바꾼 같은 문장이 이만큼 이상의 스팟에 쓰였으면 정보가 아니라 틀로 본다(열린 16,695곳 중 약 11,500곳이 해당) */
+const SUMMARY_TEMPLATE_MIN_REPEATS = 5;
+let summaryTemplateCache: { source: Spot[]; counts: Map<string, number> } | null = null;
+
+function summaryTemplateKey(spot: Spot, text: string): string {
+  return text.split(spot.name.trim()).join('{N}');
+}
+
+/** 탐색 카드용 요약. 여러 스팟에 같은 틀로 쓰인 문장은 카드가 길어지기만 하므로 빈 값을 돌려 요약 줄을 뺀다. 상세 시트는 cleanSpotSummary를 그대로 쓴다 */
+function cardSpotSummary(spot: Spot): string {
+  const text = cleanSpotSummary(spot);
+  if (!text) return '';
+  if (summaryTemplateCache?.source !== spots) {
+    const counts = new Map<string, number>();
+    for (const s of spots) {
+      const t = cleanSpotSummary(s);
+      if (t) counts.set(summaryTemplateKey(s, t), (counts.get(summaryTemplateKey(s, t)) ?? 0) + 1);
+    }
+    summaryTemplateCache = { source: spots, counts };
+  }
+  return (summaryTemplateCache.counts.get(summaryTemplateKey(spot, text)) ?? 0) >= SUMMARY_TEMPLATE_MIN_REPEATS ? '' : text;
+}
+
 function cleanSpotSummary(spot: Spot): string {
   // 도입구와 본문이 같은 구절로 시작해 '소중한 사람과 함께, 소중한 사람과 함께 둘만의 …'처럼 겹친 요약(열린 26곳)은 한 번만 남긴다
   const raw = (spot.summary || '').trim().replace(/^(.{4,30}?),\s*\1(?=\s)/, '$1');
@@ -6333,7 +6356,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
   // 5열은 이미지가 51px 안팎이고 거리 배지가 대부분을 덮어 겹치므로 붙이지 않는다(상세 시트에는 보인다)
   const eventLabel = cols === 5 ? '' : eventPeriodLabel(spot);
   const eventBadge = eventLabel ? `<span class="discovery-badge-event">${escapeHtml(eventLabel)}</span>` : '';
-  const sum = cleanSpotSummary(spot);
+  const sum = cardSpotSummary(spot);
 
   const bookingUrl = spot.booking_info?.url || getCatchtableUrl(spot);
   const yt = spot.social_links?.youtube;
