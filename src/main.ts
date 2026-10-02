@@ -4949,7 +4949,8 @@ function renderStepTransitDivider(prevStep: CourseStep, nextStep: CourseStep): s
 /** 비정상적이거나 영문 태그 나열/판박이 템플릿인 summary를 감지하여 다채롭고 감각적인 에디토리얼 한줄 소개로 교정 */
 /** 100선 이상의 다채롭고 감각적인 에디토리얼 한 줄 소개 생성 엔진 */
 function cleanSpotSummary(spot: Spot): string {
-  const raw = (spot.summary || '').trim();
+  // 도입구와 본문이 같은 구절로 시작해 '소중한 사람과 함께, 소중한 사람과 함께 둘만의 …'처럼 겹친 요약(열린 26곳)은 한 번만 남긴다
+  const raw = (spot.summary || '').trim().replace(/^(.{4,30}?),\s*\1(?=\s)/, '$1');
   const name = spot.name.trim();
 
   // TourAPI 수집기가 이름·분류·지역을 이어 붙인 폴백 문장('엠버리조트 — 한국관광공사 인증 숙박 명소 (제주시)')은 이미 화면에 있는
@@ -7461,7 +7462,8 @@ function renderOverlayContent(): void {
     const closedText = spot.closed_days && spot.closed_days.length > 0 ? spot.closed_days.join(', ') : '';
 
     // 주차
-    const parkingText = spot.parking_detail || spot.parking_info?.detail || (spot.parking_type === 'free' ? '무료 주차 가능' : spot.parking_type === 'paid' ? '유료 주차' : spot.parking_type === 'valet' ? '발렛 가능' : '');
+    // type 'unknown'의 '인근 공영주차장 이용'은 TourAPI 수집기가 근거 없이 넣은 기본값이라 보이지 않는다(열린 약 5,800곳)
+    const parkingText = spot.parking_detail || (spot.parking_info?.type === 'unknown' ? '' : spot.parking_info?.detail) || (spot.parking_type === 'free' ? '무료 주차 가능' : spot.parking_type === 'paid' ? '유료 주차' : spot.parking_type === 'valet' ? '발렛 가능' : '');
 
     // 가격
     const priceText = spot.avg_price_per_person ? `1인 약 ${spot.avg_price_per_person.toLocaleString()}원` : spot.price || '';

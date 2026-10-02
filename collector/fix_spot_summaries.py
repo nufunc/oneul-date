@@ -215,7 +215,10 @@ def generate_curated_summary(name: str, cat: str, region: str, area: str, sig_it
         base 인덱스와 다른 산술(곱셈 해시 믹스)로 골라 base 선택과 상관관계를 줄인다."""
         openers = OPENER_BANK.get(pool_key) or OPENER_BANK["default"]
         mixed = (id_hash * 2654435761) & 0xFFFFFFFF
-        return f"{openers[mixed % len(openers)]} {base}"
+        opener = openers[mixed % len(openers)]
+        if base.startswith(opener.rstrip(",")):
+            return base  # 본문이 같은 구절로 시작하면 덧붙이지 않는다
+        return f"{opener} {base}"
 
     if sig_items and len(sig_items) > 0:
         sig = sig_items[0]
