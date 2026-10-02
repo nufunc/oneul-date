@@ -224,6 +224,16 @@ def test_watch_channel_with_many_closed_spots_is_demoted():
     assert _stats_env(run, closed=0.5) is False
 
 
+def test_map_link_query_adds_branch_hint():
+    d = ("09:25 📍담솥\nhttps://www.google.com/maps/search/?api=1&query=담솥+종로\n"
+         "03:52 📍국립중앙박물관\nhttps://www.google.com/maps/search/?api=1&query=국립중앙박물관\n"
+         "07:31 📍남산타워\nhttps://www.google.com/maps/search/?api=1&query=N서울타워")
+    assert y.map_link_query_for("담솥", d) == "담솥 종로"
+    assert y.map_link_query_for("국립중앙박물관", d) == ""
+    assert y.map_link_query_for("남산타워", d) == ""
+    assert y.map_link_query_for("담솥", "") == ""
+
+
 if __name__ == "__main__":
     for fn in [v for k, v in list(globals().items()) if k.startswith("test_")]:
         fn()

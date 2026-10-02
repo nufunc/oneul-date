@@ -1389,6 +1389,18 @@ def _extract_shortlink_candidates(text: str) -> list[str]:
     return candidates
 
 
+def map_link_query_for(cand: str, description: str) -> str:
+    """설명란 지도 링크의 query= 값 가운데 후보로 시작하면서 더 구체적인 것을 돌려준다. 없으면 ''.
+    '담솥' 후보는 링크 query가 '담솥 종로'라서 지역어만 붙여 검색하면 다른 지점(성수점)이 잡혔다."""
+    key = _norm_name(cand)
+    for m in re.finditer(r'[?&]query=([^&\s]+)', description or ""):
+        q = urllib.parse.unquote_plus(m.group(1)).strip()
+        nq = _norm_name(q)
+        if nq != key and nq.startswith(key):
+            return q
+    return ""
+
+
 def extract_spot_candidates_verbose(title: str, description: str, video_id: str = "") -> dict:
     """후보 추출 + 게이트 통과 결과를 상세 반환.
     반환: {raw: int, passed: list[str], source: 'shortlink_resolver'|'description'|'pinned_comment'|'groq_semantic_extractor'|'title'|'none', rejected: list[(원문, 사유)]}
@@ -1869,7 +1881,10 @@ def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
 
         # 네이버/카카오 정밀 로컬 검색 (지역 힌트 결합 우선)
         search_res = []
-        if region_hint:
+        link_query = map_link_query_for(cand, vinfo.get("description", ""))
+        if link_query:
+            search_res = search_naver(link_query)
+        if not search_res and region_hint:
             search_res = search_naver(f"{region_hint} {cand}")
         if not search_res:
             search_res = search_naver(cand)
