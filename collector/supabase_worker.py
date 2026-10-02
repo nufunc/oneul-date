@@ -1047,6 +1047,19 @@ def derive_slot(category, name=""):
     return verdict
 
 
+SLOT_CAMP_NAME_RE = re.compile(r"캠프|캠핑|야영|글램핑|카라반")
+
+
+def stay_flip_vetoed(own_category, name):
+    """네이버 재검증 결과로 slot을 stay로 바꿀 때, 행이 원래 갖던 카테고리가 숙소가 아니라고 분명하면 True.
+    상호명이 같은 다른 숙소(메르씨엘 → 호텔, 클래식 → 모텔)가 이름 대조를 통과해 양식·카페 행이 stay가 됐다(2026-10-02).
+    상호명에 숙박·캠핑 단어가 있으면 카테고리가 오염된 숙소일 수 있어 막지 않는다."""
+    if derive_slot(own_category, name) not in ("day", "evening", "night"):
+        return False
+    nm = name or ""
+    return not (any(p.search(nm) for p in SLOT_LODGING_NAME_RE) or SLOT_CAMP_NAME_RE.search(nm))
+
+
 def _env_flag(name, env=None):
     """환경변수(또는 .env) 값이 truthy 인지 판별"""
     raw = os.getenv(name)
@@ -1282,6 +1295,8 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
             heal_name = patch_data.get("name") or name or ""
             d_slot = derive_slot(heal_cat, heal_name)
             old_slot = spot.get("slot")
+            if d_slot == "stay" and old_slot != "stay" and stay_flip_vetoed(spot.get("category"), heal_name):
+                d_slot = None
             if d_slot and (not old_slot or (d_slot != old_slot and (slot_heal_all or "stay" in (d_slot, old_slot)))):
                 slot_fixed_count += 1
                 print(

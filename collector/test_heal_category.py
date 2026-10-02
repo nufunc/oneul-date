@@ -19,8 +19,20 @@ def test_summary_template_words_do_not_decide_category():
     assert heal(spot)[0] != "칵테일·위스키바"
 
 
+def test_stay_flip_is_vetoed_only_for_clear_non_stay_category():
+    import supabase_worker as w
+    assert w.stay_flip_vetoed("양식", "메르씨엘")
+    assert w.stay_flip_vetoed("카페", "클래식")
+    assert w.stay_flip_vetoed("쇼핑/소품", "옥천장 (5, 10일)")
+    assert not w.stay_flip_vetoed("레포츠/체험", "대가야캠프타운")
+    assert not w.stay_flip_vetoed("일본식주점", "모노 풀빌라")
+    assert not w.stay_flip_vetoed("", "어느 호텔")
+    assert not w.stay_flip_vetoed(None, "클래식")
+
+
 if __name__ == "__main__":
     test_no_evidence_keeps_category_empty()
     test_valid_category_kept()
     test_summary_template_words_do_not_decide_category()
+    test_stay_flip_is_vetoed_only_for_clear_non_stay_category()
     print("ok")
