@@ -2999,15 +2999,23 @@ function getTodayDayOfWeek(date = new Date()): (typeof KOREAN_DAY_NAMES)[number]
   return KOREAN_DAY_NAMES[date.getDay()];
 }
 
+/** 요일 7개가 모두 든 closed_days는 휴업이 아니라 수집 오류다(충현박물관). 정기휴무로 보지 않는다 */
+function regularClosedDays(spot: Spot): string[] {
+  const days = Array.isArray(spot.closed_days) ? spot.closed_days : [];
+  const covered = KOREAN_DAY_NAMES.filter((d) => days.some((t) => typeof t === 'string' && t.startsWith(d)));
+  return covered.length === KOREAN_DAY_NAMES.length ? [] : days;
+}
+
 /** 스팟이 오늘 정기휴무인지 판별 (현장 헛걸음 방지) */
 function isSpotClosedToday(spot: Spot, date = new Date()): boolean {
   const todayDay = getTodayDayOfWeek(date);
 
   // 1. closed_days 배열 직접 매칭
-  if (spot.closed_days && Array.isArray(spot.closed_days)) {
+  const closedDays = regularClosedDays(spot);
+  if (closedDays.length > 0) {
     // '월요일'.includes('일')이 참이라 일요일마다 월·화·수요일 휴무 스팟이 모두 휴무로 나왔다. 앞뒤가 한글이 아닌 요일만 본다
     const dayInText = new RegExp(`(?:^|[^가-힣])${todayDay}(?:요일)?(?![가-힣])`);
-    for (const d of spot.closed_days) {
+    for (const d of closedDays) {
       if (typeof d === 'string' && dayInText.test(d)) {
         return true;
       }
@@ -7439,7 +7447,7 @@ function renderOverlayContent(): void {
     }
 
     // 휴무일
-    const closedText = spot.closed_days && spot.closed_days.length > 0 ? spot.closed_days.join(', ') : '';
+    const closedText = regularClosedDays(spot).join(', ');
 
     // 주차
     // type 'unknown'의 '인근 공영주차장 이용'은 TourAPI 수집기가 근거 없이 넣은 기본값이라 보이지 않는다(열린 약 5,800곳)
