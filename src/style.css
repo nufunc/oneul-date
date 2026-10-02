@@ -2717,66 +2717,6 @@ button {
   margin-top: var(--space-3);
 }
 
-.receiver-directions-box {
-  margin-top: var(--space-4);
-}
-
-.btn-receiver-directions {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  width: 100%;
-  min-height: 48px;
-  padding: var(--space-3) var(--space-4);
-  background: var(--color-surface-sub);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  color: var(--color-text);
-  font-size: var(--font-sm);
-  font-weight: 700;
-  text-decoration: none;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: var(--shadow-sm);
-}
-
-/* 좁은 화면에서 '(네이버 / 지도)'로 끊기지 않게 괄호째 한 덩어리로 넘긴다 */
-.receiver-directions-brand {
-  white-space: nowrap;
-}
-
-/* 좌표 없는 스팟이 경유지에서 빠졌을 때만 보이는 안내 한 줄 */
-.receiver-directions-note {
-  margin: 6px 4px 0;
-  font-size: var(--font-xs);
-  color: var(--color-text-sub);
-}
-
-.btn-receiver-directions:hover {
-  background: var(--color-surface);
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-  transform: translateY(-1px);
-}
-
-.btn-receiver-directions:active {
-  transform: scale(0.98);
-}
-
-.receiver-directions-icon {
-  font-size: 1.1em;
-}
-
-.receiver-directions-text {
-  flex: 1;
-  text-align: left;
-}
-
-.receiver-directions-arrow {
-  color: var(--color-accent);
-  font-weight: 800;
-}
-
 .receiver-actions-bar {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
