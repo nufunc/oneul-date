@@ -419,6 +419,9 @@ const STAY_CATEGORY_KEYWORDS = [
   '료칸', '게스트하우스', '민박', '모텔', '여관', '콘도', '숙박', '숙소', '유스호스텔',
 ];
 
+/** 캠핑·야영 시설 이름. '캠핑용품' 같은 가게는 '캠핑장'으로 끝나지 않아 걸리지 않는다 */
+const CAMPING_NAME_RE = /캠핑장|야영장|오토캠핑|글램핑|카라반/;
+
 /** 숙박 '형태' 명사 — category가 없을 때(현 데이터의 77%) 통과를 인정하는 강한 근거 */
 const LODGING_FORM_KEYWORDS = [
   '펜션', '풀빌라', '글램핑', '카라반', '료칸', '게스트하우스', '민박', '모텔', '여관', '콘도',
@@ -553,6 +556,9 @@ function isRealStaySpot(spot: Spot): boolean {
 
   if (cat.length > 0 && hasAnyKeyword(cat, STAY_CATEGORY_KEYWORDS)) return true;
   if (hasLodgingPrice(spot.price)) return true;
+  // TourAPI 캠핑장·야영장은 category가 '레포츠/체험'이라 아래 category 분기에서 걸러졌다. 같은 이름의 day 행은 보이는데 stay 행만
+  // 사라져 캠핑장 420곳 중 약 180곳만 나왔다(2026-10-02). 이름이 야영·캠핑 시설이면 숙소로 인정한다
+  if (CAMPING_NAME_RE.test(name)) return true;
   if (cat.length > 0) return false;
 
   if (hasBarToken(name)) return false;
