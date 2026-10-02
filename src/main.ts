@@ -6236,14 +6236,26 @@ function renderSpotDiscovery(): void {
 
     <!-- 4. 그리드 피드 -->
     <div class="spot-discovery-grid cols-${state.spotGridCols}">
-      ${displaySpots.length > 0 ? displaySpots.map((spot) => renderDiscoverySpotCard(spot, state.spotGridCols)).join('') : `
+      ${displaySpots.length > 0 ? displaySpots.map((spot) => renderDiscoverySpotCard(spot, state.spotGridCols)).join('') : (() => {
+        // 찜이 있는데 지역·검색 같은 다른 조건 때문에 0건이면 '담은 스팟이 없다'는 문구가 사실과 어긋난다
+        const savedCount = state.savedSpotIds?.size ?? 0;
+        if (state.savedOnly && savedCount > 0) {
+          return `
+        <div class="spot-empty-state">
+          <span class="empty-icon">❤️</span>
+          <p class="empty-title">보관함 ${savedCount.toLocaleString('ko-KR')}곳 중 이 조건에 맞는 곳이 없어요</p>
+          <p class="empty-desc">지역이나 검색어를 바꾸면 찜한 곳이 보여요</p>
+          <button class="btn-empty-reset" id="btn-empty-reset-saved-filters">조건 풀고 보관함 보기</button>
+        </div>`;
+        }
+        return `
         <div class="spot-empty-state">
           <span class="empty-icon">${state.savedOnly ? '❤️' : '🧭'}</span>
           <p class="empty-title">${state.savedOnly ? '아직 보관함에 담은 스팟이 없어요' : '검색 조건에 맞는 스팟을 찾지 못했어요'}</p>
           <p class="empty-desc">${state.savedOnly ? '마음에 드는 스팟 카드의 하트(🤍)를 눌러 나만의 데이트 리스트를 모아보세요!' : '지역명이나 키워드를 변경해보세요!'}</p>
           <button class="btn-empty-reset" id="${state.savedOnly ? 'btn-empty-reset-saved' : 'btn-empty-reset-all'}">${state.savedOnly ? '전체 스팟 둘러보기' : '전체 스팟 다시 보기'}</button>
-        </div>
-      `}
+        </div>`;
+      })()}
     </div>
 
     <!-- 5. 페이지네이션 -->
@@ -6625,6 +6637,20 @@ function bindDiscoveryEvents(area: HTMLElement): void {
     ensureSpotsForRegions(['ALL']);
     renderSpotDiscovery();
     showToast('전체 스팟으로 초기화했어요');
+  });
+
+  // 찜은 두고 지역·검색·카테고리·실내·무드·예산 조건만 푼다
+  area.querySelector('#btn-empty-reset-saved-filters')?.addEventListener('click', () => {
+    state.spotSearchQuery = '';
+    state.spotCategory = 'ALL';
+    state.regions = [];
+    state.subZones = [];
+    state.spotPage = 1;
+    state.indoorOnly = false;
+    state.moodPreset = null;
+    state.budgetFilter = 'ALL';
+    ensureSpotsForRegions(['ALL']);
+    renderSpotDiscovery();
   });
 
   area.querySelector('#btn-empty-reset-all')?.addEventListener('click', () => {
