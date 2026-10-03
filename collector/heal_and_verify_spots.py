@@ -19,6 +19,11 @@ try:
 except ImportError:
     from collector.supabase_worker import derive_price_tier_from_text
 
+try:
+    from youtube_vlog_miner import METRO_REGIONS, DISTRICT_NAMES, BARE_CITY_NAMES
+except ImportError:
+    from collector.youtube_vlog_miner import METRO_REGIONS, DISTRICT_NAMES, BARE_CITY_NAMES
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
 logger = logging.getLogger("heal_and_verify")
 
@@ -237,6 +242,21 @@ def strip_address_tail(name: str, address: str) -> str:
     return name
 
 
+def is_place_name_only(name: str, address: str) -> bool:
+    """이름이 비었거나 시·도, 시군구, 주소의 읍면동, 역 이름뿐이면 참이다. 정제가 '사당역 야장골목 전주전집'을 '사당역'으로,
+    '금산(남해)'를 '금산'으로 자른 것을 되돌리는 데 쓴다(2026-10-03 P-045)"""
+    address_tokens = set((address or "").split())
+    for token in name.split():
+        if token in METRO_REGIONS or token in DISTRICT_NAMES or token in BARE_CITY_NAMES:
+            continue
+        if token in address_tokens and token.endswith(("동", "읍", "면", "리", "가")):
+            continue
+        if len(token) >= 3 and token.endswith("역"):
+            continue
+        return False
+    return True
+
+
 # https로도 받아지는 것을 확인한 이미지 호스트(2026-10-01 호스트마다 12개 표본 모두 200). 목록 밖 호스트는 건드리지 않는다
 HTTPS_IMAGE_HOSTS = ("tong.visitkorea.or.kr", "t1.daumcdn.net", "t1.kakaocdn.net")
 
@@ -339,6 +359,8 @@ def heal_all_spots(spots: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], D
             # 2. 상호명 정제
             original_name = s.get("name", "")
             cleaned_name = strip_address_tail(clean_spot_name(original_name), s.get("address") or "")
+            if is_place_name_only(cleaned_name, s.get("address") or ""):
+                cleaned_name = original_name
             if cleaned_name != original_name:
                 s["name"] = cleaned_name
                 stats["cleaned_names"] += 1
