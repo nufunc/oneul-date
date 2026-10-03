@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""검색으로 같은 장소를 확인한 중복 병합과 카테고리 채움(P-053, P-051, P-054). 기본은 드라이런이고 --apply일 때만 DB에 쓴다.
+"""검색으로 같은 장소를 확인한 중복 병합과 카테고리 채움(P-053, P-051, P-054), 남은 교정(P-055). 기본은 드라이런이고 --apply일 때만 DB에 쓴다.
 
 P-053: 결과 파일(duplicate-merge-YYYYMMDD.json)의 merge 묶음을 병합 규약대로 합치고, 남길 행 12곳은 KEEP_FIX 값으로 고친다.
   keep_fix는 결과 파일에 문장으로만 있어 값을 KEEP_FIX 표로 옮겼다. 장소 번호를 바꾸면 카카오 장소 링크도 새 번호로 바꾸고(옛 평점은 버린다),
   주소를 바꾸면 area를 새 주소로 다시 계산한다.
 P-051, P-054: MERGES와 FILLS 표의 행만 쓴다. 닫기는 close_date_fit_spots.py --ids로 따로 한다.
+P-055: FIXES 표의 값으로 카테고리, 사진, 이름을 바꾼다(앞 제안의 판단할 지점에 대한 리드 결정). 이미 값이 있어도 바꾼다.
 병합은 닫는 행 source.note에 merged_into를 남기고 남는 행의 빈 필드만 채운다(category는 옮기지 않는다). 소속 명소로 합치는 행(야경, 공연)은
 영업시간과 가격이 명소의 값이 아니어서 분위기 값만 옮긴다. 쓰기 직전에 다시 읽어 지금도 열려 있고 이름이 결과 파일 때와 같은 행만 고친다.
 
@@ -88,6 +89,40 @@ FILLS = {
     },
 }
 
+# 남은 교정: id: (지금 이름, 바꿀 값). 이름을 바꾸면 note에 renamed를 남긴다
+FIXES = {
+    "P-055": {
+        514: ("밀락더마켓", {"category": "복합문화공간", "image_url": None}),  # 중식과 사진은 입점 업장 값(P-053 보기 a, 네이버 분류)
+        797: ("인천 개항장 문화지구", {"category": "전시·문화"}),  # 결과 파일의 앱 카테고리(P-051 보기 a)
+        # 네이버 포크너 안산고잔점 22m. 카카오는 같은 주소(광덕대로 168)의 포크너 신도시점이고 앱 지도 검색은 네이버다
+        858: ("포크너 고잔점", {"name": "포크너 안산고잔점"}),
+        # 958 킨토토 갈마본점, 1202 지리산 뱀사골 힐링트레킹, 4024 비밀의화원 다운타운 홍대점은 같은 주소의 상호를 찾지 못해 두었다
+    },
+}
+
+
+def fix_list(proposal, rows, skipped):
+    """FIXES 가운데 지금도 열려 있고 이름이 같은 행."""
+    fixes = []
+    for i, (name, patch) in FIXES.get(proposal, {}).items():
+        row = rows.get(i)
+        if not row or row.get("is_closed") or row["name"] != name:
+            skipped[i] = "행 없음" if not row else "닫힘" if row.get("is_closed") else f"이름 바뀜: {row['name']}"
+        else:
+            fixes.append({"row": row, "patch": patch})
+    return fixes
+
+
+def fix_body(row, patch, stamp, now, proposal):
+    body = rename_body(row, patch["name"], stamp, now, proposal) if "name" in patch else {}
+    rest = {k: v for k, v in patch.items() if k != "name"}
+    if rest:
+        source = dict(body.get("source") or row.get("source") or {})
+        text = ", ".join(f"{k} {row.get(k)}→{v}" if v is not None else f"{k} 비움" for k, v in rest.items())
+        source["note"] = f"{(source.get('note') or '').strip()} | fixed: {proposal} {text} ({stamp[:8]})".lstrip(" |")
+        body.update({**rest, "source": source})
+    return body
+
 
 def merge_list(proposal, result):
     """(닫을 id, 지금 이름, 남길 id, 남길 행 이름 또는 None, 옮길 값)."""
@@ -159,7 +194,7 @@ def plan(proposal, result, rows):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("proposal", choices=["P-053", "P-051", "P-054"])
+    ap.add_argument("proposal", choices=["P-053", "P-051", "P-054", "P-055"])
     ap.add_argument("--result", help="P-053 결과 파일(duplicate-merge-YYYYMMDD.json)")
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--backup-dir", default=os.path.expanduser("~/oneul-backups"))
@@ -168,9 +203,11 @@ def main():
 
     result = json.load(open(args.result, encoding="utf-8")) if args.result else {}
     ids = {x for i, _, into, _, _ in merge_list(args.proposal, result) for x in (i, into)} | set(FILLS.get(args.proposal, {}))
+    ids |= set(FIXES.get(args.proposal, {}))
     base, headers = connect()
     rows = {r["id"]: r for r in fetch_ids(base, headers, sorted(ids))}
     merges, fills, skipped = plan(args.proposal, result, rows)
+    fixes = fix_list(args.proposal, rows, skipped)
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     now = datetime.now(timezone.utc).isoformat()
     for m in merges:
@@ -183,19 +220,27 @@ def main():
             skipped[f["row"]["id"]] = f"이름 그대로(300m 안 같은 이름 열린 행 {dup})"
             f["name"] = None
         print(f"  채움 {f['row']['id']} {f['row']['name']} · {f['category']}{' · 이름 → ' + f['name'] if f['name'] else ''}")
+    for f in list(fixes):
+        if "name" in f["patch"] and (dup := same_name_open(base, headers, f["patch"]["name"], f["row"])):
+            skipped[f["row"]["id"]] = f"이름 그대로(300m 안 같은 이름 열린 행 {dup})"
+            fixes.remove(f)
+            continue
+        f["body"] = fix_body(f["row"], f["patch"], stamp, now, args.proposal)
+        print(f"  교정 {f['row']['id']} {f['row']['name']} · {f['patch']}")
     unfixed = set(KEEP_FIX) - {m["keep"]["id"] for m in merges} if args.proposal == "P-053" else set()
     print(f"병합 {sum(len(m['dups']) for m in merges)}행 → {len(merges)}행 · 남길 행 교정 {sum(bool(m['fix']) for m in merges)}"
-          f"(못 함 {sorted(unfixed)}) · 채움 {len(fills)} · 제외 {len(skipped)} {skipped}")
+          f"(못 함 {sorted(unfixed)}) · 채움 {len(fills)} · 교정 {len(fixes)} · 제외 {len(skipped)} {skipped}")
     if not args.apply:
         print("드라이런: DB에 쓰지 않았다")
         return 0
 
     backup = os.path.join(args.backup_dir, f"{args.proposal.lower().replace('-', '')}_merge_{stamp}.json")
     with open(backup, "w", encoding="utf-8") as fp:
-        json.dump({"rows": [r for m in merges for r in (m["keep"], *m["dups"])] + [f["row"] for f in fills],
+        json.dump({"rows": [r for m in merges for r in (m["keep"], *m["dups"])] + [f["row"] for f in fills] + [f["row"] for f in fixes],
                    "id_map": {str(d["id"]): m["keep"]["id"] for m in merges for d in m["dups"]},
                    "patches": {str(m["keep"]["id"]): m["patch"] for m in merges},
-                   "fills": {str(f["row"]["id"]): [f["category"], f["name"]] for f in fills}, "skipped": skipped},
+                   "fills": {str(f["row"]["id"]): [f["category"], f["name"]] for f in fills},
+                   "fixes": {str(f["row"]["id"]): f["body"] for f in fixes}, "skipped": skipped},
                   fp, ensure_ascii=False, indent=1)
     print(f"백업: {backup}")
 
@@ -217,6 +262,8 @@ def main():
     for f in fills:
         body = rename_body(f["row"], f["name"], stamp, now, args.proposal) if f["name"] else {}
         patch(f["row"]["id"], {**body, "category": f["category"]}, "fill")
+    for f in fixes:
+        patch(f["row"]["id"], f["body"], "fix")
     print(f"실패 {failed}")
 
     after = {r["id"]: r for r in fetch_ids(base, headers, sorted(ids))}
@@ -226,7 +273,9 @@ def main():
                                                                   if k != "updated_at") for m in merges)
     ok_fill = sum(not after[f["row"]["id"]]["is_closed"] and after[f["row"]["id"]]["category"] == f["category"]
                   and (not f["name"] or after[f["row"]["id"]]["name"] == f["name"]) for f in fills)
-    print(f"쓰기 뒤 DB 재조회: 닫힘·merged_into {ok_close}/{sum(len(m['dups']) for m in merges)} · 남는 행 열림·고침 "
+    ok_fix = sum(not after[f["row"]["id"]]["is_closed"] and all(after[f["row"]["id"]].get(k) == v for k, v in f["body"].items()
+                                                                 if k != "updated_at") for f in fixes)
+    print(f"쓰기 뒤 DB 재조회: 교정 {ok_fix}/{len(fixes)} · 닫힘·merged_into {ok_close}/{sum(len(m['dups']) for m in merges)} · 남는 행 열림·고침 "
           f"{ok_keep}/{len(merges)} · 채움 {ok_fill}/{len(fills)}")
     return 0
 

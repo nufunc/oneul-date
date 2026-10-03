@@ -2,7 +2,7 @@
 import json
 import os
 
-from judge_date_fit import DINER_VERIFIED, REGION_MISMATCH_VERIFIED, judge
+from judge_date_fit import DINER_VERIFIED, PUBLIC_FACILITY_KEEP, PUBLIC_FACILITY_VERIFIED, REGION_MISMATCH_VERIFIED, judge
 
 
 def row(id, name, category, slot, address, source, event=None):
@@ -134,10 +134,34 @@ def test_described_name():
     assert 5609 not in rules and 1788818285589 not in rules  # 내보내기가 & 뒤와 괄호 꼬리를 지워 2어절이다
 
 
+PUBLIC_ROWS = [
+    row(1788818277759, "강진군도서관", "문화시설", "day", "전남 강진군 강진읍 남문길 10", "tourapi"),
+    row(3131, "별마당도서관 스타필드 수원점", "도서관", "day", "경기 수원시 장안구 수성로 175", "web"),  # 명소 남김
+    row(1788818277908, "농부네 텃밭도서관", "문화시설", "day", "전남 광양시 진상면 청도길 19", "tourapi"),  # 보류
+    row(1791100000002, "새동네 체육센터", "스포츠시설", "day", "서울 관악구", "tourapi"),  # 판정 뒤에 들어온 행
+]
+
+
+def test_public_facility():
+    out = judge(PUBLIC_ROWS)
+    assert {item["id"] for item in out["close"]} == {1788818277759}
+    review = {item["id"] for item in out["review"] if "R17_공공시설_미확인" in item["rules"]}
+    assert review == {1788818277908, 1791100000002}, review  # 보류와 새 행은 검토, 명소는 이름 규칙에서 뺀다
+    # 닫는 목록이 결과 파일의 close_ids와 같고 명소 남김, 보류, 범위 밖 행과 겹치지 않는다
+    with open(os.path.join(os.path.dirname(__file__), "..", "docs", "planning", "public-facility-20261004.json"),
+              encoding="utf-8") as f:
+        result = json.load(f)
+    assert PUBLIC_FACILITY_VERIFIED == set(result["close_ids"]) and len(PUBLIC_FACILITY_VERIFIED) == 98
+    assert PUBLIC_FACILITY_KEEP == set(result["keep_ids"]) == {r["id"] for r in result["keep"]}
+    kept = PUBLIC_FACILITY_KEEP | {r["id"] for r in result["review"]} | {r["id"] for r in result["out_of_scope"]}
+    assert not kept & PUBLIC_FACILITY_VERIFIED, kept & PUBLIC_FACILITY_VERIFIED
+
+
 if __name__ == "__main__":
     test_judge_lists()
     test_described_name()
     test_mall_tenant()
     test_neighborhood_diner()
     test_region_mismatch()
+    test_public_facility()
     print("ok")
