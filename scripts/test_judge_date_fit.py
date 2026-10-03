@@ -17,6 +17,7 @@ ROWS = [
         {"start": "2026-10-09", "end": "2026-10-12"}),
     row(2, "인제 가을꽃축제장", "축제/행사", "day", "강원 인제군", "web"),
     row(1788818276330, "거제자연휴양림캠핑장", "레포츠/체험", "day", "경상남도 거제시 동부면 거제중앙로 325", "tourapi"),
+    row(4905, "북한산 글램핑식당 산들애", "육류,고기", "day", "서울 은평구 대서문길 43-16", "web"),
 ]
 
 
@@ -28,6 +29,7 @@ def test_judge_lists():
     assert 1789885634448 not in lists["close"]  # 동네 식당은 주관 판정이라 기계 규칙으로 닫지 않는다
     assert 1 not in set().union(*lists.values())  # 기간이 있는 행사는 남는다
     assert lists["review"] == {2}  # web 행사는 상설 장소가 섞여 검토로만 간다
+    assert 4905 not in lists["fix"]  # 캠핑어가 붙은 식당은 숙소로 바꾸지 않는다
     assert out["fix"] == [{**out["fix"][0], "id": 1788818276330, "patch": {"slot": "stay"}}]
 
 

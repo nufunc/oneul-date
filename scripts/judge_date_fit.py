@@ -23,6 +23,7 @@ EVENT_WORD = re.compile(r"축제|페스티벌|페스타|문화제|야행|잔치|
 CULTURE_CENTER = re.compile(r"문화원(\(.*\))?$")  # 고성문화원(경남)처럼 괄호 꼬리가 붙은 행도 있다
 SPORTS_FACILITY = re.compile(r"(체육공원|체육관|체육센터|공설운동장|배드민턴장|인라인스케이트장)$")
 CAMPING = re.compile(r"캠핑|글램핑|카라반|야영")
+CAMP_NOT_LODGING = re.compile(r"식당|다이닝|카페|레스토랑|고기")  # 북한산 글램핑식당, 베르테라 캠핑(디저트카페)
 MALL = re.compile(r"백화점|더현대|스타필드|아울렛|아웃렛|롯데월드몰|타임스퀘어|코엑스몰|IFC몰|AK플라자|갤러리아")
 NON_DATE_CATS = {"문화원", "스포츠시설", "도서관", "국공립도서관", "매표소", "공간대여", "주차장", "문화센터"}
 BAR_CATS = {"호프,요리주점", "칵테일바", "일본식주점", "와인바", "술집", "실내포장마차", "바(BAR)", "맥주,호프", "포장마차"}
@@ -79,8 +80,9 @@ RULES = [
      lambda r, c: no_period_event(r) and src_type(r) != "web", None),
     ("R9_tourapi_지방문화원", "close", "출처 tourapi이고 이름이 문화원으로 끝난다(괄호 꼬리 허용). 109곳 전수가 지방문화원",
      lambda r, c: src_type(r) == "tourapi" and bool(CULTURE_CENTER.search((r.get("name") or "").strip())), None),
-    ("R13_캠핑_낮슬롯", "fix", "이름이나 카테고리에 캠핑·글램핑·카라반·야영이 있고 슬롯 day. 표본 교정 2/2",
-     lambda r, c: r.get("slot") == "day" and bool(CAMPING.search(r.get("name") or "") or CAMPING.search(r.get("category") or "")),
+    ("R13_캠핑_낮슬롯", "fix", "이름이나 카테고리에 캠핑·글램핑·카라반·야영이 있고 슬롯 day. 식당·카페는 뺀다. 표본 교정 2/2",
+     lambda r, c: r.get("slot") == "day" and bool(CAMPING.search(r.get("name") or "") or CAMPING.search(r.get("category") or ""))
+     and not CAMP_NOT_LODGING.search(f"{r.get('name') or ''} {r.get('category') or ''}"),
      {"slot": "stay"}),
     ("R4w_기간없는_행사_web", "review", "R4와 같은 조건의 web 행. 상설 장소가 섞여 있다(궁남지 등)",
      lambda r, c: no_period_event(r) and src_type(r) == "web", None),
