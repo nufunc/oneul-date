@@ -14,6 +14,13 @@ def test_similar_names_are_kept():
         assert ok(cat, name, allow_lodging=True)[0], name
 
 
+def test_culture_centers_and_sports_centers_are_rejected():
+    # 사이클 36: 증평문화원(tourapi 문화시설), 국민체력100 목포체력인증센터(auto_discovery), 대전 중구문화원
+    for name, cat in [("증평문화원", "문화시설"), ("대전 중구문화원", "문화,예술>문화원"),
+                      ("국민체력100 목포체력인증센터", "스포츠시설"), ("OO구민 스포츠센터", "스포츠,레저>스포츠센터")]:
+        assert not ok(cat, name, allow_lodging=True)[0], name
+
+
 if __name__ == "__main__":
     for fn in [v for k, v in list(globals().items()) if k.startswith("test_")]:
         fn()

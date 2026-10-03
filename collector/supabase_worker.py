@@ -1050,6 +1050,12 @@ def derive_slot(category, name=""):
 SLOT_CAMP_NAME_RE = re.compile(r"캠프|캠핑|야영|글램핑|카라반")
 
 
+def stay_unflip_vetoed(name):
+    """stay 행을 다른 슬롯으로 되돌릴 때 상호명이 캠핑장이면 True. tourapi 캠핑장의 카테고리(레포츠/체험)는 day로 읽혀
+    재검증이 이름을 믿지 못하면 P-044가 stay로 고친 캠핑장을 낮 슬롯으로 되돌린다(2026-10-03)."""
+    return bool(SLOT_CAMP_NAME_RE.search(name or ""))
+
+
 def stay_flip_vetoed(own_category, name, price=""):
     """네이버 재검증 결과로 slot을 stay로 바꿀 때, 행이 원래 갖던 카테고리가 숙소가 아니라고 분명하면 True.
     상호명이 같은 다른 숙소(메르씨엘 → 호텔, 클래식 → 모텔)가 이름 대조를 통과해 양식·카페 행이 stay가 됐다(2026-10-02).
@@ -1302,6 +1308,8 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
             d_slot = derive_slot(heal_cat, heal_name)
             old_slot = spot.get("slot")
             if d_slot == "stay" and old_slot != "stay" and stay_flip_vetoed(spot.get("category"), heal_name, spot.get("price")):
+                d_slot = None
+            if d_slot and d_slot != "stay" and old_slot == "stay" and stay_unflip_vetoed(heal_name):
                 d_slot = None
             if d_slot and (not old_slot or (d_slot != old_slot and (slot_heal_all or "stay" in (d_slot, old_slot)))):
                 slot_fixed_count += 1

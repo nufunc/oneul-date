@@ -594,6 +594,22 @@ BARE_CITY_HINTS = {
     d[:-1] for d in DISTRICT_NAMES if len(d) >= 3 and d.endswith(("시", "군"))
 } - BARE_HINT_EXCLUDE
 
+# 앱 지역 목록(main.ts)의 동네·상권 이름 → 도로명 주소에 들어가는 시군구. 두 글자 이름은 사전에 없어 힌트가 되지 못했고,
+# 방이시장 영상의 큰집닭강정이 부산 업체로, 잠실 영상의 애주가가 제주 업체로 들어갔다(2026-10-03 사이클 36).
+# 다른 낱말과 겹치는 이름(미사·상수·보문·광교)과 여러 시군구에 걸친 이름(을지로·명동은 중구)은 넣지 않는다.
+AREA_HINTS = {
+    "성수": "성동구", "서울숲": "성동구", "문래": "영등포구", "여의도": "영등포구", "연남": "마포구", "망원": "마포구",
+    "합정": "마포구", "홍대": "마포구", "연희": "서대문구", "한남": "용산구", "이태원": "용산구", "용리단": "용산구",
+    "해방촌": "용산구", "경리단": "용산구", "압구정": "강남구", "청담": "강남구", "가로수길": "강남구", "서촌": "종로구",
+    "북촌": "종로구", "삼청": "종로구", "익선": "종로구", "혜화": "종로구", "대학로": "종로구", "잠실": "송파구",
+    "송리단": "송파구", "방이": "송파구", "석촌": "송파구", "판교": "성남시", "행궁": "수원시", "송도": "연수구",
+    "영종": "영종구", "을왕리": "영종구", "헤이리": "파주시", "평촌": "안양시", "범계": "안양시", "안목": "강릉시",
+    "경포": "강릉시", "주문진": "강릉시", "남이섬": "춘천시", "성안길": "청주시", "수암골": "청주시", "안면도": "태안군",
+    "객리단": "전주시", "돌산": "여수시", "광안리": "수영구", "민락": "수영구", "흰여울": "영도구", "해운대": "해운대구",
+    "서면": "부산진구", "전포": "부산진구", "황리단": "경주시", "영일대": "포항시", "구룡포": "포항시", "애월": "제주시",
+    "협재": "제주시", "구좌": "제주시", "월정리": "제주시", "우도": "제주시", "중문": "서귀포시",
+}
+
 # 여러 시도에 중복 존재해 지역 판별력이 없는 자치구명 — 힌트로 쓰지 않는다.
 AMBIGUOUS_DISTRICTS = {"중구", "남구", "북구", "동구", "서구"}
 
@@ -1581,7 +1597,7 @@ def extract_region_hints(text: str) -> list[str]:
             for end in spots
         )
 
-    metro_hints, local_hints = [], []
+    metro_hints, local_hints, area_hints = [], [], []
     # 한글 어절 덩어리의 앞부분에서 지명을 찾는다 ("서산에서", "청주힐링" 처럼
     # 조사·수식어가 붙어도 잡히도록 — 접미사 필수 정규식이 놓치던 부분)
     tokens = []
@@ -1590,11 +1606,15 @@ def extract_region_hints(text: str) -> list[str]:
             if len(run) < length:
                 continue
             head = run[:length]
-            if head in DISTRICT_NAMES or head in BARE_CITY_HINTS or head in METRO_REGIONS:
+            if head in DISTRICT_NAMES or head in BARE_CITY_HINTS or head in METRO_REGIONS or head in AREA_HINTS:
                 tokens.append(head)
                 break
     for token in tokens:
         if token in AMBIGUOUS_DISTRICTS:
+            continue
+        if token in AREA_HINTS:
+            if not _is_residence(token) and AREA_HINTS[token] not in area_hints:
+                area_hints.append(AREA_HINTS[token])
             continue
         is_local = token in DISTRICT_NAMES or token in BARE_CITY_HINTS
         is_metro = token in METRO_REGIONS
@@ -1608,6 +1628,8 @@ def extract_region_hints(text: str) -> list[str]:
 
     # 시군구 이름이 없고 동네 이름만 있으면 그 동네의 시군구를 힌트로 쓴다
     # ('성북동이 부자 동네라더니'의 길상사가 고양시 길상사로 등록됐다, 2026-09-28)
+    if not local_hints:
+        local_hints = area_hints
     if not local_hints:
         for dong, district in _dong_districts().items():
             if dong in text and not _is_residence(dong) and district not in local_hints:
@@ -1934,7 +1956,7 @@ def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
         if region_hints:
             print(f"  • 지역 힌트({hint_src}): {region_hints} → 검색 결합어 '{region_hint}'")
         else:
-            print(f"  • 지역 힌트 없음 — 상호명 유사도 게이트로만 검증합니다")
+            print(f"  • 지역 힌트 없음 — 지도 링크와 공유 폴더 후보만 받습니다")
 
     for cand in candidates:
         if len(cand) < 2:
@@ -1943,6 +1965,12 @@ def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
         # 네이버/카카오 정밀 로컬 검색 (지역 힌트 결합 우선)
         search_res = []
         link_query = _SHARED_FOLDER_QUERY.get(cand) or map_link_query_for(cand, vinfo.get("description", ""))
+        # 지역 힌트도 지도 링크도 없으면 전국 검색 결과를 이름만으로 받게 되어 다른 지역 동명 업체가 들어온다(2026-10-03 사이클 36)
+        if not region_hints and not link_query:
+            stats["region_mismatch"] += 1
+            if verbose:
+                print(f"    ⏩ '{cand}' — 지역 힌트 없음")
+            continue
         if link_query:
             search_res = search_naver(link_query)
         if not search_res and region_hint and cand not in _SHARED_FOLDER_ADDR:

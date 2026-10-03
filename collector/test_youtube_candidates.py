@@ -261,6 +261,41 @@ def test_naver_shared_folder_places_become_candidates_with_district_query():
     assert y._SHARED_FOLDER_ADDR["윤숲"] == "긴고랑로20길51"
 
 
+def test_area_names_in_title_become_region_hints():
+    # 사이클 36 오매칭 영상: 방이시장 → 부산 큰집닭강정, 잠실 → 제주 애주가, 영종도 → 서울 속초그바람에, 성수 → 울산 시로
+    assert y.extract_region_hints("방이시장 먹방 데이트") == ["송파구"]
+    assert y.extract_region_hints("잠실 데이트 코스") == ["송파구"]
+    assert y.extract_region_hints("영종도 당일치기") == ["영종구"]
+    assert y.extract_region_hints("성수 카페 투어") == ["성동구"]
+    assert y.extract_region_hints("감성 공방이에요") == []
+
+
+def _mine(title, desc, result):
+    calls = []
+    orig = y.search_naver
+    y.search_naver = lambda q: calls.append(q) or [result]
+    try:
+        return y.mine_video_info({"title": title, "description": desc, "videoId": "t"}, "http://127.0.0.1:9", "k",
+                                 dry_run=True, verbose=False), calls
+    finally:
+        y.search_naver = orig
+
+
+BUSAN = {"name": "큰집닭강정", "roadAddress": "부산광역시 부산진구 서면로 10", "category": "치킨,닭강정", "x": "129.0", "y": "35.1"}
+FOOD_DESC = "오늘 먹은 것 정리\n1. 큰집닭강정\n2. 최고집\n시장 구경하고 맛있게 먹었어요 다음에 또 가요"
+
+
+def test_area_hint_rejects_other_region_match():
+    stats, calls = _mine("방이시장 먹방 데이트 브이로그", FOOD_DESC, BUSAN)
+    assert stats["registered"] == 0 and stats["region_mismatch"] == 2, stats
+    assert calls[0] == "송파구 큰집닭강정"
+
+
+def test_candidates_without_region_hint_or_map_link_are_dropped():
+    stats, calls = _mine("시장 먹방 데이트 브이로그", FOOD_DESC, BUSAN)
+    assert calls == [] and stats["region_mismatch"] == 2 and stats["registered"] == 0, (stats, calls)
+
+
 if __name__ == "__main__":
     for fn in [v for k, v in list(globals().items()) if k.startswith("test_")]:
         fn()

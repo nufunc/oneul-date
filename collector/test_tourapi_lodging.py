@@ -1,6 +1,6 @@
 """TourAPI 숙박(contentTypeId=32) 수집 회귀 테스트: python3 test_tourapi_lodging.py 또는 pytest"""
 from category_filter import is_date_spot_category
-from miners.tourapi_miner import DATE_CONTENT_TYPES, is_skipped_lodging
+from miners.tourapi_miner import CAMPSITE_NAME, DATE_CONTENT_TYPES, is_skipped_lodging
 
 
 def test_lodging_type_is_mined_as_stay_slot():
@@ -18,6 +18,14 @@ def test_motels_and_hostels_are_skipped_but_hotels_are_not():
 def test_lodging_category_passes_the_date_spot_filter():
     for title in ("그랜드 하얏트 제주", "글래드 마포", "물결그림"):
         assert is_date_spot_category("숙박", title, allow_lodging=True)[0], title
+
+
+def test_campsites_are_mined_as_stay_slot():
+    """사이클 36 실측 이름. 레포츠/체험 유형 기본 슬롯 day 대신 stay로 넣는다"""
+    for title in ("거제자연휴양림캠핑장", "민트글램핑", "원산도 오션카라반", "OO야영장"):
+        assert CAMPSITE_NAME.search(title), title
+    for title in ("삼락강변체육공원인라인스케이트장", "캠프그리브스"):
+        assert not CAMPSITE_NAME.search(title), title
 
 
 if __name__ == "__main__":

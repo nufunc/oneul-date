@@ -43,6 +43,8 @@ DATE_CONTENT_TYPES = [
 # 숙박 중 데이트 코스로 추천하지 않는 저가 단기 숙박: 모텔·여관·호스텔(category_filter의 숙박 예외와 같은 기준).
 # TourAPI 분류(cat3)는 쓰지 않는다. 포도호텔이 모텔(B02010900)로 분류돼 있어 좋은 곳까지 걸러진다(2026-09-30)
 LODGING_SKIP_NAME = re.compile(r"모텔|여관|호스텔|hostel", re.IGNORECASE)
+# 레포츠/체험 유형의 캠핑장은 기본 슬롯 day로 들어가 낮 코스에 섞였다(2026-10-03 사이클 36: 215곳). 숙소로 둔다
+CAMPSITE_NAME = re.compile(r"캠핑|글램핑|카라반|야영")
 
 
 def is_skipped_lodging(item: dict) -> bool:
@@ -302,7 +304,7 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                 new_spot = {
                     "id": spot_id,
                     "name": title,
-                    "slot": default_slot,
+                    "slot": "stay" if CAMPSITE_NAME.search(title) else default_slot,
                     "region": region,
                     "area": area,
                     "address": addr1,
