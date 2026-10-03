@@ -4532,13 +4532,13 @@ function getSpotFallbackIcon(spot: Spot, slot: SlotKey): string {
   // 요약문은 수집기 템플릿이라 '카페'·'와인' 같은 낱말이 업종과 무관하게 들어 있다. 카테고리와 이름만 본다
   const combined = `${cat} ${name}`;
 
-  if (combined.includes('루지') || combined.includes('서핑') || combined.includes('요트') || combined.includes('패러글라이딩') || combined.includes('짚라인') || combined.includes('케이블카') || combined.includes('클라이밍') || combined.includes('카약') || combined.includes('방탈출') || combined.includes('천문대') || combined.includes('관광열차') || combined.includes('레일바이크') || combined.includes('테마파크') || combined.includes('승마') || combined.includes('보드게임') || combined.includes('액티비티') || combined.includes('레저') || combined.includes('스포츠') || combined.includes('카트')) {
+  if ((cat.includes('레포츠') && slot !== 'stay' && !/펜션|캠핑|글램핑|카라반/.test(name)) || combined.includes('루지') || combined.includes('서핑') || combined.includes('요트') || combined.includes('패러글라이딩') || combined.includes('짚라인') || combined.includes('케이블카') || combined.includes('클라이밍') || combined.includes('카약') || combined.includes('방탈출') || combined.includes('천문대') || combined.includes('관광열차') || combined.includes('레일바이크') || combined.includes('테마파크') || combined.includes('승마') || combined.includes('보드게임') || combined.includes('액티비티') || combined.includes('레저') || combined.includes('스포츠') || combined.includes('카트')) {
     return LUCIDE_ICONS.compass;
   }
   if (combined.includes('바(bar)') || combined.includes('와인') || combined.includes('칵테일') || combined.includes('주점') || combined.includes('펍') || combined.includes('호프') || combined.includes('이자카야') || combined.includes('위스키') || combined.includes('포차')) {
     return LUCIDE_ICONS.wine;
   }
-  if (combined.includes('호텔') || combined.includes('숙박') || combined.includes('펜션') || combined.includes('리조트') || combined.includes('스테이') || slot === 'stay') {
+  if (combined.includes('호텔') || combined.includes('숙박') || combined.includes('펜션') || combined.includes('리조트') || /스테이(?!크|트)/.test(combined) || slot === 'stay') {
     return LUCIDE_ICONS.bed;
   }
   if (combined.includes('시장') || combined.includes('서점') || combined.includes('팝업') || combined.includes('의류') || combined.includes('소품') || combined.includes('잡화') || combined.includes('패션') || combined.includes('편집숍') || combined.includes('편집샵') || combined.includes('쇼룸') || combined.includes('플래그십') || combined.includes('부티크') || combined.includes('라이프스타일')) {
@@ -4671,11 +4671,11 @@ function getSpotImageUrl(spot: Spot, slot: SlotKey, usedImages?: Set<string>): s
 
   let pool: string[];
 
-  if (combined.includes('루지') || combined.includes('서핑') || combined.includes('요트') || combined.includes('패러글라이딩') || combined.includes('짚라인') || combined.includes('케이블카') || combined.includes('클라이밍') || combined.includes('카약') || combined.includes('방탈출') || combined.includes('보드게임') || combined.includes('액티비티') || combined.includes('레저') || combined.includes('스포츠') || combined.includes('카트')) {
+  if ((cat.includes('레포츠') && slot !== 'stay' && !/펜션|캠핑|글램핑|카라반/.test(name)) || combined.includes('루지') || combined.includes('서핑') || combined.includes('요트') || combined.includes('패러글라이딩') || combined.includes('짚라인') || combined.includes('케이블카') || combined.includes('클라이밍') || combined.includes('카약') || combined.includes('방탈출') || combined.includes('보드게임') || combined.includes('액티비티') || combined.includes('레저') || combined.includes('스포츠') || combined.includes('카트')) {
     pool = CURATED_CATEGORY_IMAGES.activity;
   } else if (combined.includes('바(bar)') || combined.includes('와인') || combined.includes('칵테일') || combined.includes('주점') || combined.includes('펍') || combined.includes('호프') || combined.includes('이자카야') || combined.includes('위스키') || combined.includes('포차')) {
     pool = CURATED_CATEGORY_IMAGES.bar;
-  } else if (combined.includes('호텔') || combined.includes('숙박') || combined.includes('펜션') || combined.includes('리조트') || combined.includes('스테이') || slot === 'stay') {
+  } else if (combined.includes('호텔') || combined.includes('숙박') || combined.includes('펜션') || combined.includes('리조트') || /스테이(?!크|트)/.test(combined) || slot === 'stay') {
     pool = CURATED_CATEGORY_IMAGES.stay;
   } else if (combined.includes('소품') || combined.includes('잡화') || combined.includes('패션') || combined.includes('편집숍') || combined.includes('편집샵') || combined.includes('쇼룸') || combined.includes('플래그십') || combined.includes('부티크') || combined.includes('라이프스타일')) {
     pool = CURATED_CATEGORY_IMAGES.shopping;
