@@ -64,6 +64,18 @@ MALL_ROADS_CLOSED = frozenset({
     "서울 강남구 압구정로 165", "서울 강서구 하늘길 38", "서울 금천구 디지털로10길 9", "서울 금천구 벚꽃로 266", "서울 서초구 사평대로 205",
     "서울 서초구 신반포로 176", "서울 송파구 올림픽로 300", "서울 양천구 목동동로 257", "서울 영등포구 여의대로 108", "서울 은평구 통일로 1050",
     "서울 종로구 종로 33", "서울 중구 세종대로 136", "서울 중구 을지로 30"})
+# P-048 동네 식당. 네이버 리뷰 수와 사람 판정은 docs/planning/neighborhood-restaurant-20261003.json
+DINER_WORD = re.compile(r"밥집|백반|기사식당|김밥|국밥|해장국|순대국|감자탕|도시락|분식")
+DINER_CATS = {"분식", "국밥", "순대", "해장국", "도시락", "김밥", "기사식당", "백반"}
+# 규칙 조건(밀도 20 미만, 네이버 방문자 리뷰 500 미만·블로그 3,000 미만)에 걸린 40곳에서 사람이 남긴 2곳(경모네젓갈백반, 달콤언니)을 뺀 38곳
+DINER_VERIFIED = frozenset({
+    1788633487519, 1788640891090, 1788770926445, 1788820160901, 1789087394161, 1789167095870, 1789206855782,
+    1789309007164, 1789500794466, 1789604190343, 1789613219376, 1789675658198, 1789699375367, 1789775546470,
+    1789797243933, 1789828135555, 1789885634448, 1789983155559, 1790031216411, 1790060020333, 1790121644060,
+    1790163826601, 1790366260323, 1790481379597, 1790486545422, 1790486545943, 1790487092939, 1790489171300,
+    1790491270644, 1790499399998, 1790502068725, 1790543264271, 1790552284788, 1790617417106, 1790716549046,
+    1790727280198, 1790727282649, 1791020195793})
+DINER_MEASURED_MAX_ID = 1791020195793  # 네이버로 잰 열린 행의 마지막 id. 이보다 뒤에 들어온 행은 측정값이 없다
 
 
 def src_type(row):
@@ -133,6 +145,13 @@ def mall_tenant(row, ctx):
     return "name" if by_name else "address"
 
 
+def neighborhood_diner(row):
+    """동네 식당 패턴(밥집·김밥·국밥 등 이름이나 분식·국밥 등 카테고리)에 걸리는 web 밖 행. 햄버거와 초밥은 뺀다."""
+    name, cat = row.get("name") or "", row.get("category") or ""
+    return (bool(DINER_WORD.search(name) or cat in DINER_CATS) and "햄버거" not in f"{name} {cat}" and "초밥" not in name
+            and src_type(row) != "web")
+
+
 def no_period_event(row):
     return (row.get("category") in EVENT_CATS and not (row.get("source") or {}).get("event")
             and bool(EVENT_WORD.search(row.get("name") or "")))
@@ -148,6 +167,9 @@ RULES = [
      lambda r, c: bool(EMOJI.search(r.get("name") or "") or COURSE_ONLY.match((r.get("name") or "").strip())), None),
     ("R6c_몰_입점매장", "close", "이름에 몰 낱말이 있고 몰 이름을 지워도 상호가 남는 입점 매장 가운데 카카오로 몰 안임을 확인한 36곳. 판정 36곳 정밀도 100%",
      lambda r, c: mall_tenant(r, c) == "name" and r["id"] in MALL_TENANT_VERIFIED, None),
+    ("R15_동네_식당", "close", "밥집·김밥·국밥 등 일상 식사 패턴에 걸리고 500m 안 열린 행 20곳 미만, 네이버 방문자 리뷰 500·블로그 3,000 미만인 "
+     "web 밖 행 가운데 사람이 동네 식당으로 판정한 38곳. 정밀도 38/40(95.0%)",
+     lambda r, c: neighborhood_diner(r) and r["id"] in DINER_VERIFIED, None),
     ("R13_캠핑_낮슬롯", "fix", "이름이나 카테고리에 캠핑·글램핑·카라반·야영이 있고 슬롯 day. 식당·카페는 뺀다. 표본 교정 2/2",
      lambda r, c: r.get("slot") == "day" and bool(CAMPING.search(r.get("name") or "") or CAMPING.search(r.get("category") or ""))
      and not CAMP_NOT_LODGING.search(f"{r.get('name') or ''} {r.get('category') or ''}"),
@@ -160,6 +182,8 @@ RULES = [
      lambda r, c: bool(MALL.search(r.get("name") or "") or MALL.search(r.get("address") or "")), None),
     ("R6c_몰_입점매장_미확인", "review", "R6c 조건의 이름 규칙 행 가운데 카카오로 확인하지 못한 행과 주소로만 몰에 걸린 행. 주소로만 걸린 23곳은 판정 14곳 중 7곳이 몰 밖",
      lambda r, c: mall_tenant(r, c) is not None and r["id"] not in MALL_TENANT_VERIFIED, None),
+    ("R15_동네_식당_미측정", "review", "R15 패턴에 걸리지만 네이버 리뷰 수를 재기 전에 들어온 행",
+     lambda r, c: neighborhood_diner(r) and r["id"] > DINER_MEASURED_MAX_ID, None),
     ("R3_같은주소_5행이상", "review", "도로명 주소(번지까지)가 같은 열린 행이 5곳 이상. 보충 25%",
      lambda r, c: road_key(r) is not None and c["road"][road_key(r)] >= 5, None),
     ("R8_시장", "review", "카테고리 시장. 보충 25%, 주관 판정", lambda r, c: r.get("category") == "시장", None),

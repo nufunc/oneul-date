@@ -1,5 +1,8 @@
 """judge_date_fit 규칙 회귀 테스트: python3 scripts/test_judge_date_fit.py 또는 pytest. 행은 2026-10-03 라이브 행의 값이다."""
-from judge_date_fit import judge
+import json
+import os
+
+from judge_date_fit import DINER_VERIFIED, judge
 
 
 def row(id, name, category, slot, address, source, event=None):
@@ -30,9 +33,9 @@ ROWS = [
 def test_judge_lists():
     out = judge(ROWS)
     lists = {k: {item["id"] for item in v} for k, v in out.items()}
-    assert lists["close"] == {1790532212259, 1789060176209, 1788681699939, 1790258774490, 1790311914590, 7199}, lists["close"]
+    assert lists["close"] == {1789885634448, 1790532212259, 1789060176209, 1788681699939, 1790258774490, 1790311914590, 7199}, lists["close"]
     assert 3858 not in set().union(*lists.values())  # 명동교자는 어느 목록에도 들지 않고 남는다
-    assert 1789885634448 not in lists["close"]  # 동네 식당은 주관 판정이라 기계 규칙으로 닫지 않는다
+    assert 1789885634448 in lists["close"]  # 곤드레밥집 중동점은 P-048 동네 식당으로 닫는다
     assert 1 not in set().union(*lists.values())  # 기간이 있는 행사는 남는다
     assert 2 in lists["review"]  # web 행사는 상설 장소가 섞여 검토로만 간다
     assert not {3, 4, 5} & lists["close"]  # 성심당문화원(빵집), 알파인코스터, ➔ 경로 표기는 닫지 않는다
@@ -68,7 +71,33 @@ def test_mall_tenant():
     assert not keep & {item["id"] for v in out.values() for item in v if any(x.startswith("R6c") for x in item["rules"])}
 
 
+DINER_ROWS = [
+    row(1789885634448, "곤드레밥집 중동점", "한식", "evening", "경기 부천시 원미구 신흥로 140", "blog_mining"),
+    row(1789342066290, "경모네젓갈백반", "한식", "day", "충남 논산시 강경읍 옥녀봉로27번길 12", "youtube_vlog"),  # 오탐
+    row(1789275924820, "달콤언니", "분식", "day", "부산 수영구 수영로554번길 7", "youtube_vlog"),  # 경계
+    row(1788633358697, "모두랑", "분식", "day", "서울 광진구 자양로28길 24", "youtube_vlog"),  # 노포
+    row(1791100000000, "새동네김밥", "분식", "day", "서울 관악구", "blog_mining"),  # 측정 뒤에 들어온 행
+    row(1791100000001, "새동네초밥", "일식", "day", "서울 관악구", "blog_mining"),
+]
+
+
+def test_neighborhood_diner():
+    out = judge(DINER_ROWS)
+    assert {item["id"] for item in out["close"]} == {1789885634448}
+    review = {item["id"] for item in out["review"] if "R15_동네_식당_미측정" in item["rules"]}
+    assert review == {1791100000000}, review  # 네이버 측정값이 없는 새 행은 검토로만 간다
+    # 닫는 목록이 결과 파일의 close_ids와 같고 남김 목록(명동교자 본점, 오탐, 경계 포함)과 겹치지 않는다
+    with open(os.path.join(os.path.dirname(__file__), "..", "docs", "planning", "neighborhood-restaurant-20261003.json"),
+              encoding="utf-8") as f:
+        result = json.load(f)
+    assert DINER_VERIFIED == set(result["close_ids"])
+    kept = {r["id"] for v in result["keep"].values() for r in v} | {r["id"] for r in result["keep_web_curated"]["rows"]}
+    kept |= {r["id"] for r in result["review_not_closed"]["rows"]} | {3858, 1789342066290, 1789275924820}
+    assert not kept & DINER_VERIFIED, kept & DINER_VERIFIED
+
+
 if __name__ == "__main__":
     test_judge_lists()
     test_mall_tenant()
+    test_neighborhood_diner()
     print("ok")
