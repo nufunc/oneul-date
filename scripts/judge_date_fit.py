@@ -123,7 +123,8 @@ def judge(rows):
     return out
 
 
-def fetch_open_db():
+def connect():
+    """라이브 DB 주소와 헤더. OCI 호스트에서 COLLECTOR_DIR의 .env를 읽는다."""
     collector = os.environ.get("COLLECTOR_DIR") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "collector")
     env = {}
     with open(os.path.join(collector, ".env"), encoding="utf-8") as f:
@@ -135,7 +136,11 @@ def fetch_open_db():
     # 수집기 .env는 컨테이너용 주소라 호스트에서는 127.0.0.1의 중계 서버로 간다
     base = env["SUPABASE_URL"].replace("host.docker.internal", "127.0.0.1").rstrip("/")
     key = env["SUPABASE_SERVICE_KEY"]
-    headers = {"apikey": key, "Authorization": f"Bearer {key}"}
+    return base, {"apikey": key, "Authorization": f"Bearer {key}", "Content-Type": "application/json"}
+
+
+def fetch_open_db():
+    base, headers = connect()
     rows, last = [], 0
     while True:
         url = f"{base}/rest/v1/spots?select=*&is_closed=eq.false&order=id.asc&id=gt.{last}&limit=1000"
