@@ -45,6 +45,9 @@ DATE_CONTENT_TYPES = [
 LODGING_SKIP_NAME = re.compile(r"모텔|여관|호스텔|hostel", re.IGNORECASE)
 # 레포츠/체험 유형의 캠핑장은 기본 슬롯 day로 들어가 낮 코스에 섞였다(2026-10-03 사이클 36: 215곳). 숙소로 둔다
 CAMPSITE_NAME = re.compile(r"캠핑|글램핑|카라반|야영")
+# 문화시설 유형의 지방문화원·평생학습관·교육원·시민회관은 강좌·행정 시설이다(2026-10-03 사이클 36: 121곳).
+# 공용 필터에 넣으면 다른 수집기의 성심당문화원(빵집)까지 막혀 이 유형에서만 거른다. 정독도서관 같은 명소가 있어 도서관은 막지 않는다
+PUBLIC_FACILITY_NAME = re.compile(r"(문화원|평생학습관|교육원|시민회관)(\(.*\))?$")
 
 
 def is_skipped_lodging(item: dict) -> bool:
@@ -233,6 +236,8 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                 # 콘텐츠 유형은 화이트리스트 밖이 많아 '화이트리스트외'만 통과시키고, 상호명 패턴(어린이 시설, 주식회사 등)과
                 # 숙박업종은 다른 마이너처럼 버린다. 전에는 '블랙리스트'만 버려 울산어린이천문대가 들어왔다
                 if ctype_id == "32" and is_skipped_lodging(item):
+                    continue
+                if ctype_id == "14" and PUBLIC_FACILITY_NAME.search(title.strip()):
                     continue
                 is_valid, reason = is_date_spot_category(ctype_name, title, allow_lodging=True)
                 if not is_valid and not reason.startswith("화이트리스트외"):

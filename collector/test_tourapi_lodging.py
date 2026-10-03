@@ -1,6 +1,6 @@
 """TourAPI 숙박(contentTypeId=32) 수집 회귀 테스트: python3 test_tourapi_lodging.py 또는 pytest"""
 from category_filter import is_date_spot_category
-from miners.tourapi_miner import CAMPSITE_NAME, DATE_CONTENT_TYPES, is_skipped_lodging
+from miners.tourapi_miner import CAMPSITE_NAME, DATE_CONTENT_TYPES, PUBLIC_FACILITY_NAME, is_skipped_lodging
 
 
 def test_lodging_type_is_mined_as_stay_slot():
@@ -26,6 +26,13 @@ def test_campsites_are_mined_as_stay_slot():
         assert CAMPSITE_NAME.search(title), title
     for title in ("삼락강변체육공원인라인스케이트장", "캠프그리브스"):
         assert not CAMPSITE_NAME.search(title), title
+
+
+def test_public_education_facilities_are_skipped_but_libraries_are_not():
+    for title in ("안양문화원", "고성문화원(경남)", "아산시 평생학습관", "화랑교육원", "수원시민회관"):
+        assert PUBLIC_FACILITY_NAME.search(title), title
+    for title in ("정독도서관", "남산도서관", "국립한글박물관"):
+        assert not PUBLIC_FACILITY_NAME.search(title), title
 
 
 if __name__ == "__main__":
