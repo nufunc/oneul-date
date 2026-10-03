@@ -32,12 +32,11 @@ import tempfile
 import urllib.parse
 from datetime import datetime, timezone
 
-from judge_date_fit import connect
+from judge_date_fit import DESCRIBED_MARK as POPULATION_MARK, connect, export_name
 from close_date_fit_spots import fetch_ids, request
 
 COLLECTOR = os.environ.get("COLLECTOR_DIR") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "collector")
 sys.path.insert(0, COLLECTOR)
-from heal_and_verify_spots import clean_spot_name, is_place_name_only, strip_address_tail  # noqa: E402
 from youtube_vlog_miner import BARE_CITY_NAMES, DISTRICT_NAMES, METRO_REGIONS  # noqa: E402
 
 PROPOSAL = "P-049"
@@ -48,7 +47,6 @@ VENUE_FIELDS = ("mood", "mood_tags", "date_contexts")  # 소속 명소로 합칠
 SEOULDAL_ID, SEOULDAL_KAKAO = 1790337550212, "273193967"
 SEOULDAL_PATCH = {"area": "영등포구", "location": "서울 영등포구", "category": "전망대", "image_url": None}
 
-POPULATION_MARK = re.compile(r"[&·+/]|\s및\s|\sin\s")
 NAVER_RADIUS_M = 500
 MERGE_RADIUS_M = 300
 ROAD_NUM = re.compile(r"(\S+(?:로|길))\s*(\d+)")  # 여의공원로 68-1 → (여의공원로, 68)
@@ -77,13 +75,6 @@ def dist_m(lat1, lng1, lat2, lng2):
     dy = (lat1 - lat2) * 111000
     dx = (lng1 - lng2) * 111000 * math.cos(math.radians(lat1))
     return math.hypot(dx, dy)
-
-
-def export_name(row):
-    """sync_live_spots 내보내기가 화면에 내는 이름(heal_all_spots의 상호명 정제와 같다)."""
-    name, address = row.get("name") or "", row.get("address") or ""
-    cleaned = strip_address_tail(clean_spot_name(name), address)
-    return name if is_place_name_only(cleaned, address) else cleaned
 
 
 def is_region(tok, address):
@@ -141,9 +132,9 @@ def addr_keys(text):
     return {("road", *m) for m in ROAD_NUM.findall(text)} | {("jibun", *m) for m in JIBUN_NUM.findall(text)}
 
 
-def rename_body(row, new_name, stamp, now):
+def rename_body(row, new_name, stamp, now, proposal=PROPOSAL):
     source = dict(row.get("source") or {})
-    source["note"] = f"{(source.get('note') or '').strip()} | renamed: {PROPOSAL} {row['name']} ({stamp[:8]})".lstrip(" |")
+    source["note"] = f"{(source.get('note') or '').strip()} | renamed: {proposal} {row['name']} ({stamp[:8]})".lstrip(" |")
     body = {"name": new_name, "source": source, "updated_at": now}
     links = dict(row.get("social_links") or {})
     km = links.get("kakaomap") or {}

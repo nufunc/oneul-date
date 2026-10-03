@@ -20,6 +20,7 @@ from datetime import datetime
 
 sys.path.insert(0, os.environ.get("COLLECTOR_DIR") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "collector"))
 from youtube_vlog_miner import METRO_REGIONS, extract_region_hints  # noqa: E402
+from heal_and_verify_spots import clean_spot_name, is_place_name_only, strip_address_tail  # noqa: E402
 
 EVENT_CATS = {"축제/행사", "페스티벌"}
 EVENT_WORD = re.compile(r"축제|페스티벌|페스타|문화제|야행|잔치|마라톤|박람회|한마당|놀이마당|문화대전|페스트")
@@ -86,6 +87,20 @@ REGION_MISMATCH_VERIFIED = frozenset({
     1791020198770, 1791020201766})
 HINT_COMPOUND = re.compile(r"성수기|세종마을|안양천|안산자락길|민락2지구|송도암남")  # 힌트 사전이 앞부분을 지명으로 읽는 낱말
 INCHEON_REORG = {"중구": "제물포구", "동구": "제물포구"}  # 2026 인천 개편 뒤 주소를 힌트 사전이 모른다
+# P-049 설명형 이름 모집단: 내보낸 이름이 3어절 이상이거나 이 표시를 담는다
+DESCRIBED_MARK = re.compile(r"[&·+/]|\s및\s|\sin\s")
+
+
+def export_name(row):
+    """sync_live_spots 내보내기가 화면에 내는 이름(heal_all_spots의 상호명 정제와 같다)."""
+    name, address = row.get("name") or "", row.get("address") or ""
+    cleaned = strip_address_tail(clean_spot_name(name), address)
+    return name if is_place_name_only(cleaned, address) else cleaned
+
+
+def described_name(row):
+    name = export_name(row)
+    return len(name.split()) >= 3 or bool(DESCRIBED_MARK.search(name))
 
 
 def src_type(row):
@@ -230,8 +245,9 @@ RULES = [
      lambda r, c: src_type(r) == "tourapi" and bool(SPORTS_FACILITY.search((r.get("name") or "").strip())), None),
     ("R1_비데이트_카테고리", "review", "카테고리가 문화원·스포츠시설·도서관·매표소·공간대여 등. 대부분 카테고리만 틀린 명소",
      lambda r, c: r.get("category") in NON_DATE_CATS, None),
-    ("R5_설명형_이름", "review", "이름에 ·나 &가 있거나 4어절 이상. 대부분 이름 교정 후보",
-     lambda r, c: "·" in (r.get("name") or "") or "&" in (r.get("name") or "") or len((r.get("name") or "").split()) >= 4, None),
+    ("R5_설명형_이름", "review", "내보낸 이름이 3어절 이상이거나 &·+/, 및, in을 담는다. 자동 이름 교정은 하지 않는다(P-049 드라이런 정밀도 2/5). "
+     "핵심 이름이 500m 안에 없는 행은 R16 지도 검색 불가 검사(check_map_unfindable.py)로 넘긴다",
+     lambda r, c: described_name(r), None),
     ("R11_술집_낮슬롯", "review", "주점류 카테고리인데 슬롯 day", lambda r, c: r.get("category") in BAR_CATS and r.get("slot") == "day", None),
     ("R12_카페_밤슬롯", "review", "카페류 카테고리인데 슬롯 night", lambda r, c: r.get("category") in CAFE_CATS and r.get("slot") == "night", None),
 ]

@@ -123,8 +123,20 @@ def test_region_mismatch():
     assert not kept & REGION_MISMATCH_VERIFIED, kept & REGION_MISMATCH_VERIFIED
 
 
+def test_described_name():
+    rules = {item["id"]: item["rules"] for items in judge([
+        row(4251, "서울달 계류식 가스기구", "회", "day", "서울 영등포구 여의공원로 68", "web"),
+        row(363, "KT&G 상상마당 홍대", "공연장", "day", "서울 마포구 양화로 175", "web"),
+        row(1788818285589, "선산5일장 (2, 7일)", "쇼핑/소품", "day", "경상북도 구미시 선산읍 단계동길 24", "tourapi"),
+        row(5609, "당현천 달빛산책로 & 음악분수", "자연·산책", "day", "서울특별시 노원구 중계동 507-1", "web"),
+    ]).values() for item in items}
+    assert "R5_설명형_이름" in rules[4251] and "R5_설명형_이름" in rules[363]  # 내보낸 이름 3어절, & 포함
+    assert 5609 not in rules and 1788818285589 not in rules  # 내보내기가 & 뒤와 괄호 꼬리를 지워 2어절이다
+
+
 if __name__ == "__main__":
     test_judge_lists()
+    test_described_name()
     test_mall_tenant()
     test_neighborhood_diner()
     test_region_mismatch()
