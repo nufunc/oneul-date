@@ -10,6 +10,7 @@ TourAPI 행의 contentid는 detailIntro2가 빈 응답을 돌려줘(10-03 수집
 OCI 호스트에서 돌린다. LOG_DIR는 수집기 컨테이너와 같은 TourAPI 사용량 파일을 쓰게 하고, 그 파일이 root 소유라 sudo로 돈다:
 sudo COLLECTOR_DIR=/mnt/data/git/oneul-date/collector LOG_DIR=/mnt/data/git/oneul-date/collector/data/logs \\
   python3 close_date_fit_spots.py date-fit-20261003.json --backup-dir /home/opc/oneul-backups [--festival-lookup] [--apply]
+수작업 목록은 판정 파일 대신 --ids 1,2,3 --reason "영상 오매칭"으로 닫는다.
 """
 import argparse
 import json
@@ -63,7 +64,9 @@ def fetch_festivals(year):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("judged", help="date-fit-YYYYMMDD.json")
+    ap.add_argument("judged", nargs="?", help="date-fit-YYYYMMDD.json")
+    ap.add_argument("--ids", help="판정 파일 대신 닫을 id 목록(쉼표 구분). 판정을 다시 거치지 않고 열린 행만 닫는다")
+    ap.add_argument("--reason", default="수작업 목록", help="--ids로 닫을 때 source.note에 남길 사유")
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--backup-dir", default=os.path.expanduser("~/oneul-backups"))
     ap.add_argument("--festival-lookup", action="store_true",
@@ -73,14 +76,21 @@ def main():
         assert os.path.exists(tourapi_quota.USAGE_FILE), f"TourAPI 사용량 파일이 없다: {tourapi_quota.USAGE_FILE} (LOG_DIR 확인)"
 
     base, headers = connect()
-    judged = json.load(open(args.judged, encoding="utf-8"))
-    planned = {item["id"]: ("close", item) for item in judged["close"]}
-    planned.update({item["id"]: ("fix", item) for item in judged["fix"]})
+    if args.ids:
+        # 규칙 밖 수작업 목록(사이클 36 영상 오매칭 등). 사유를 규칙 이름 자리에 넣어 아래 닫기 경로를 그대로 쓴다
+        planned = {int(i): ("close", {"rules": ["_" + args.reason]}) for i in args.ids.split(",")}
+    else:
+        judged = json.load(open(args.judged, encoding="utf-8"))
+        planned = {item["id"]: ("close", item) for item in judged["close"]}
+        planned.update({item["id"]: ("fix", item) for item in judged["fix"]})
     current = fetch_ids(base, headers, list(planned))
     by_id = {r["id"]: r for r in current}
-    # 지금 행으로 다시 판정해 같은 목록에 드는 행만 남긴다(close·fix 규칙은 전체 행 문맥을 쓰지 않는다)
-    now_judged = judge([r for r in current if not r.get("is_closed")])
-    still = {item["id"]: (action, item) for action in ("close", "fix") for item in now_judged[action]}
+    if args.ids:
+        still = {i: planned[i] for i, r in by_id.items() if not r.get("is_closed")}
+    else:
+        # 지금 행으로 다시 판정해 같은 목록에 드는 행만 남긴다(close·fix 규칙은 전체 행 문맥을 쓰지 않는다)
+        now_judged = judge([r for r in current if not r.get("is_closed")])
+        still = {item["id"]: (action, item) for action in ("close", "fix") for item in now_judged[action]}
     excluded = {i: ("행 없음" if i not in by_id else "닫힘" if by_id[i].get("is_closed") else "조건 바뀜")
                 for i, (action, _) in planned.items() if i not in still or still[i][0] != action}
 
