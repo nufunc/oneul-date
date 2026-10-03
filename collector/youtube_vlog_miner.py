@@ -1369,6 +1369,8 @@ def _collect_title_candidates(title: str) -> list[str]:
 
 # 네이버 공유 폴더에서 읽은 상호명 -> '구 상호명' 검색어. 같은 상호의 다른 지점이 잡히지 않게 mine_video_info가 먼저 쓴다.
 _SHARED_FOLDER_QUERY: dict[str, str] = {}
+# 상호명 -> 폴더에 저장된 도로명 주소. 검색 결과 가운데 이 주소와 같은 지점만 채택한다.
+_SHARED_FOLDER_ADDR: dict[str, str] = {}
 
 
 def _naver_shared_folder_names(share_id: str) -> list[str]:
@@ -1390,6 +1392,7 @@ def _naver_shared_folder_names(share_id: str) -> list[str]:
         addr = (b.get("address") or "").split()
         if len(addr) >= 2:
             _SHARED_FOLDER_QUERY[name] = f"{addr[1]} {name}"
+            _SHARED_FOLDER_ADDR[name] = "".join(addr[2:])
     return names
 
 
@@ -1462,6 +1465,10 @@ def extract_spot_candidates_verbose(title: str, description: str, video_id: str 
     def _gate(raw_list: list[str]) -> tuple[list[str], list[tuple[str, str]]]:
         passed, rejected = [], []
         for r in raw_list:
+            if r in _SHARED_FOLDER_ADDR:  # 사용자가 지도에 저장한 실제 상호라 이름 형태 검사를 하지 않는다
+                if r not in passed:
+                    passed.append(r)
+                continue
             ok, name, reason = passes_spot_name_gate(r)
             if ok:
                 if name not in passed:
@@ -1938,10 +1945,14 @@ def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
         link_query = _SHARED_FOLDER_QUERY.get(cand) or map_link_query_for(cand, vinfo.get("description", ""))
         if link_query:
             search_res = search_naver(link_query)
-        if not search_res and region_hint:
+        if not search_res and region_hint and cand not in _SHARED_FOLDER_ADDR:
             search_res = search_naver(f"{region_hint} {cand}")
         if not search_res:
             search_res = search_naver(cand)
+        folder_addr = _SHARED_FOLDER_ADDR.get(cand)
+        if folder_addr:
+            search_res = [p for p in search_res
+                          if folder_addr in "".join((p.get("roadAddress") or "").split()[2:])]
         if not search_res:
             stats["no_search_result"] += 1
             if verbose:
@@ -1950,7 +1961,8 @@ def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
 
         # 검색 결과 중 영상 지역 힌트와 부합하는 최적 결과 선택
         top = search_res[0]
-        if region_hints:
+        cand_region_hints = [] if folder_addr else region_hints  # 폴더 후보는 저장된 주소로 이미 지점을 가렸다
+        if cand_region_hints:
             matched_place = next(
                 (p for p in search_res if any(rh in (p.get("roadAddress") or "") for rh in region_hints)),
                 None
@@ -1972,8 +1984,8 @@ def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
             continue
 
         # 지역 불일치 검증
-        if region_hints and not any(rh in road_addr for rh in region_hints) \
-                and not any(rh in official_name for rh in region_hints):
+        if cand_region_hints and not any(rh in road_addr for rh in cand_region_hints) \
+                and not any(rh in official_name for rh in cand_region_hints):
             stats["region_mismatch"] += 1
             if verbose:
                 print(f"    ⏩ '{cand}' → {official_name} — 지역 불일치 ({road_addr[:20]})")

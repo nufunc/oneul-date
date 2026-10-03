@@ -258,6 +258,7 @@ def test_naver_shared_folder_places_become_candidates_with_district_query():
     finally:
         y.urllib.request.urlopen = orig
     assert y._SHARED_FOLDER_QUERY["윤숲"] == "광진구 윤숲"
+    assert y._SHARED_FOLDER_ADDR["윤숲"] == "긴고랑로20길51"
 
 
 if __name__ == "__main__":
