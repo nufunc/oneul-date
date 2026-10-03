@@ -5,12 +5,15 @@
 목표 지점이 이미 DB에 열린 행으로 있으면 옮기지 않고 병합 규약대로 합친다: 이 행을 닫고 source.note에 merged_into:{id}를 남기며,
 남는 행의 빈 필드만 이 행의 장소와 무관한 값(영상, 분위기)으로 채운다. 주소, 사진, 영업시간은 옛 지점 값이라 옮기지 않는다.
 목표 지점이 닫힌 행으로만 있거나 조회가 실패하면 건드리지 않고 보고한다.
-없으면 이름, 주소, 좌표, 시군구, 카카오 장소 번호와 링크를 바꾸고 옛 지점 사진을 비운다(수집기 재검증이 새 지점 사진을 채운다).
-카테고리는 바꾸지 않는다(병합 규약: 검수 뒤에만).
+없으면 이름, 주소, 좌표, 시군구, 카카오 장소 번호와 링크를 바꾸고 옛 지점 사진과 지점 고유 값(영업시간, 휴무일, 가격)을 비운다
+(수집기 재검증이 새 지점 값을 채운다). 카테고리는 바꾸지 않는다(병합 규약: 검수 뒤에만).
+--followup은 이동을 마친 백업 파일을 받아, 아직 옛 지점 값 그대로인 지점 고유 값을 비우고 --category-ids 행의 카테고리를
+백업에 남긴 카카오 카테고리의 마지막 단계로 바꾼다(사이클 39 리드 결정: 미크, 산스). 카카오를 부르지 않는다.
 
 OCI 호스트에서 돌린다:
 COLLECTOR_DIR=/mnt/data/git/oneul-date/collector python3 relocate_region_mismatch_spots.py region-mismatch-20261003.json \\
   --backup-dir /home/opc/oneul-backups [--apply]
+후속: ... relocate_region_mismatch_spots.py --followup p050_relocate_YYYYMMDD-HHMMSS.json --category-ids 1,2 [--apply]
 """
 import argparse
 import json
@@ -28,6 +31,9 @@ from supabase_worker import _find_duplicate  # noqa: E402
 
 PROPOSAL = "P-050"
 MERGE_FIELDS = ("mood", "mood_tags", "date_contexts")  # 장소와 무관한 값. 영상은 social_links.youtube로 따로 옮긴다
+# 옛 지점 값이라 옮길 때 비우는 지점 고유 필드와 빈 값. 평점과 리뷰 수는 social_links.kakaomap을 새로 쓰며 버린다
+PLACE_FIELDS = {"business_hours": {}, "break_time": {}, "closed_days": [], "is_24h": False, "price": None, "price_tier": None,
+                "avg_price_per_person": None}
 
 
 def kakao_key():
@@ -43,12 +49,50 @@ def kakao_place(query, road_addr, key):
     return next((d for d in docs if d.get("road_address_name") == road_addr), None)
 
 
+def followup(args, base, headers):
+    """이동 백업 이후에도 옛 값 그대로인 지점 고유 필드를 비우고, 지정한 행의 카테고리를 새 지점 카카오 카테고리로 바꾼다."""
+    moved = json.load(open(args.followup, encoding="utf-8"))
+    old = {r["id"]: r for r in moved["rows"]}
+    kakao_cat = {p["id"]: p["kakao"]["category_name"].split(" > ")[-1] for p in moved["plan"] if p["do"] == "move"}
+    cat_ids = {int(i) for i in args.category_ids.split(",")} if args.category_ids else set()
+    current = {r["id"]: r for r in fetch_ids(base, headers, list(kakao_cat))}
+    patches = {}
+    for i, row in current.items():
+        body = {k: v for k, v in PLACE_FIELDS.items() if row.get(k) != v and row.get(k) == old[i].get(k)}
+        if i in cat_ids and row.get("category") != kakao_cat[i]:
+            body["category"] = kakao_cat[i]
+        if body and not row.get("is_closed"):
+            patches[i] = body
+            print(f"  {i} {row['name']}: " + ", ".join(f"{k} {row.get(k)!r} → {v!r}" for k, v in body.items()))
+    print(f"이동 행 {len(current)} · 고칠 행 {len(patches)}")
+    if not args.apply:
+        print("드라이런: DB에 쓰지 않았다")
+        return 0
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    backup = os.path.join(args.backup_dir, f"p050_followup_{stamp}.json")
+    with open(backup, "w", encoding="utf-8") as f:
+        json.dump({"rows": [current[i] for i in patches], "patches": {str(i): b for i, b in patches.items()}}, f, ensure_ascii=False, indent=1)
+    print(f"백업: {backup}")
+    now = datetime.now(timezone.utc).isoformat()
+    rep = {**headers, "Prefer": "return=representation"}
+    failed = [i for i, body in patches.items()
+              if len(request(f"{base}/rest/v1/spots?id=eq.{i}&is_closed=eq.false", rep, "PATCH", {**body, "updated_at": now}) or []) != 1]
+    after = {r["id"]: r for r in fetch_ids(base, headers, list(patches))}
+    ok = sum(all(after[i].get(k) == v for k, v in body.items()) for i, body in patches.items())
+    print(f"실패 {failed} · 쓰기 뒤 DB 재조회: 반영 {ok}/{len(patches)}")
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("result", help="region-mismatch-YYYYMMDD.json")
+    ap.add_argument("result", nargs="?", help="region-mismatch-YYYYMMDD.json")
+    ap.add_argument("--followup", help="이동 백업 파일(p050_relocate_*.json). 주면 이동 대신 후속 정리만 한다")
+    ap.add_argument("--category-ids", help="--followup에서 카테고리를 새 지점 카카오 카테고리로 바꿀 id(쉼표 구분)")
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--backup-dir", default=os.path.expanduser("~/oneul-backups"))
     args = ap.parse_args()
+    if args.followup:
+        return followup(args, *connect())
 
     result = json.load(open(args.result, encoding="utf-8"))
     labeled = {r["id"]: r for r in result["rows"]}
@@ -123,7 +167,8 @@ def main():
             links["kakaomap"] = {"url": pl["place_url"].replace("http://", "https://")}  # 평점·리뷰 수는 옛 지점 값이라 버린다
             body = {"name": pl["place_name"], "address": pl["road_address_name"], "lat": p["lat"], "lng": p["lng"], "area": area,
                     "location": f"{row.get('region') or ''} {area}".strip(), "image_url": None, "social_links": links,
-                    "provider_ids": {**(row.get("provider_ids") or {}), "kakao": pl["id"]}, "source": source, "updated_at": now}
+                    "provider_ids": {**(row.get("provider_ids") or {}), "kakao": pl["id"]}, "source": source, "updated_at": now,
+                    **PLACE_FIELDS}
             ok = len(request(f"{base}/rest/v1/spots?id=eq.{row['id']}&is_closed=eq.false", rep, "PATCH", body) or []) == 1
         if ok:
             done[p["do"]] += 1
