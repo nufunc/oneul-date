@@ -34,6 +34,36 @@ SIDO = {"서울": "서울", "부산": "부산", "대구": "대구", "인천": "�
         "경기": "경기", "강원": "강원", "충청북": "충북", "충북": "충북", "충청남": "충남", "충남": "충남", "전라북": "전북", "전북": "전북",
         "전라남": "전남", "전남": "전남", "경상북": "경북", "경북": "경북", "경상남": "경남", "경남": "경남", "제주": "제주"}
 ROAD_ADDR = re.compile(r"^(.*?(?:로|길)\s*\d+(?:-\d+)?)(?![\d가-힣-])")  # 돈화문로11길 30, 11가길 3을 돈화문로11에서 끊지 않는다
+# P-047 몰 입점 매장. 낱말 근거와 행별 카카오 판정은 docs/planning/mall-tenant-20261003.json
+MALL_WORD = re.compile(r"백화점|더현대|스타필드|아울렛|아웃렛|롯데월드몰|롯데몰|타임스퀘어|코엑스몰|IFC몰|IFC부산|AK플라자|갤러리아|신세계|"
+                       r"현대시티몰|아이파크몰|엔터식스|센트럴시티|파미에스테이션|디큐브|NC[가-힣]*점|NC백화점|뉴코아|커넥트현대|타임빌라스|"
+                       r"복합쇼핑몰|그랑서울|SFC몰")
+MALL_LANDMARK = re.compile(r"컨벤션|파크(?!몰)|아쿠아|별마당|도서관|스몹|뮤지엄|미술관|갤러리|전시|팝업|ALT\.1|아이스링크|스케이트|트램폴린|"
+                           r"바운스|레이싱|카트|클라이밍|클라임|서핑|플레이|동물원|주렁주렁|레전드히어로즈|볼링|스파|찜질|CGV|메가박스|시네마|"
+                           r"콘서트홀|전망대|서울스카이|공원|서점|아크앤북|교보|영풍|하늘정원|라이티움|CH 1985|문화센터|에비뉴엘 리빙관|마켓")
+MALL_LANDMARK_CATS = {"아쿠아리움", "서점", "미술관", "전망대", "워터테마파크", "스케이트장"}
+MALL_HOTEL = re.compile(r"호텔|메리어트|페어몬트|콘래드|시그니엘|웨스틴|하얏트|JW")
+MALL_BRAND = re.compile(r"롯데|현대|신세계|갤러리아|NC|AK|대백|동아|세이브존|뉴코아|그랜드")
+# 몰 이름을 이루는 낱말(몰 낱말, 그룹명, 관 이름, ~점, 지명). 지우고 남는 상호가 없으면 몰 자체다
+MALL_SELF = re.compile(r"코엑스|스페이스원|마리오|롯데월드몰|롯데월드타워|롯데몰|롯데|현대|신세계|사이먼|프리미엄|아울렛|아웃렛|백화점|스타필드|"
+                       r"롯데월드|쇼핑몰|더현대|빌리지|시티|타워|&|명품관|본관|별관|리빙관|에비뉴엘|글라스빌|타임빌라스|타임스퀘어|센트럴시티|"
+                       r"아이파크몰|IFC몰|NC|갤러리아|커넥트현대|파미에스테이션|디큐브|\(.*?\)|\S+점(?=\s|$)|서울|부산|대구|대전|광주|인천|"
+                       r"수원|하남|고양|안성|위례|부천|운정|군산|기흥|파주|김포|은평|건대|스타시티|본점|센텀|시흥|의왕|김해|송도|가산|동탄|"
+                       r"용산|고척|명동|잠실|여의도|판교|목동|압구정|청담|강남|반포|순천|용인|기장|공항")
+# 카카오로 몰 안 매장임을 확인한 36곳만 닫는다. 이름 규칙에 걸려도 확인하지 못한 행은 검토로 보낸다(사이클 38 리드 승인)
+MALL_TENANT_VERIFIED = frozenset({
+    249, 1750, 2051, 2558, 5155, 6513, 8008, 8530, 1788641038739, 1788789462195, 1788818358733, 1788971737054,
+    1788980750753, 1789029388505, 1789096167977, 1789154480008, 1789190572892, 1789219237022, 1789266857586,
+    1789415062814, 1789604136098, 1789820868963, 1790121587600, 1790164033747, 1790375337001, 1790393878716,
+    1790463094036, 1790474302468, 1790489185704, 1790499422236, 1790618786208, 1790818470427, 1790858489169,
+    1790887193036, 1790926387626, 1791012616792})
+# 위 36곳의 도로명 주소. 닫힌 뒤에도 같은 주소의 입점 매장(SFC몰의 쇼코엘 등)이 주소 검토에 남게 한다
+MALL_ROADS_CLOSED = frozenset({
+    "경기 수원시 권선구 세화로 134", "경기 안양시 만안구 만안로 232", "경기 의왕시 바라산로 1", "경기 파주시 와석순환로515번길 70",
+    "경기 하남시 미사대로 750", "경기 화성시 동탄구 동탄역로 160", "대전광역시 유성구 테크노중앙로 123", "서울 강남구 도산대로 442",
+    "서울 강남구 압구정로 165", "서울 강서구 하늘길 38", "서울 금천구 디지털로10길 9", "서울 금천구 벚꽃로 266", "서울 서초구 사평대로 205",
+    "서울 서초구 신반포로 176", "서울 송파구 올림픽로 300", "서울 양천구 목동동로 257", "서울 영등포구 여의대로 108", "서울 은평구 통일로 1050",
+    "서울 종로구 종로 33", "서울 중구 세종대로 136", "서울 중구 을지로 30"})
 
 
 def src_type(row):
@@ -71,6 +101,38 @@ def road_key(row):
     return m.group(1) if m else None
 
 
+def building_part(row):
+    """도로명 번지 뒤의 건물·층 표기."""
+    a, k = row.get("address") or "", road_key(row)
+    return a[len(k):] if k and a.startswith(k) else a
+
+
+def is_mall_road(row):
+    return bool(road_key(row) and (MALL_WORD.search(row.get("name") or "") or MALL_WORD.search(building_part(row))))
+
+
+def mall_tenant(row, ctx):
+    """몰 입점 매장이면 걸린 근거('name'이나 'address'), 몰 자체·몰 안 목적지·호텔·몰 밖 상호면 None."""
+    name = row.get("name") or ""
+    by_name, by_bldg = bool(MALL_WORD.search(name)), bool(MALL_WORD.search(building_part(row)))
+    if not (by_name or by_bldg or road_key(row) in ctx["mall_road"]):
+        return None
+    if re.search(r"(뒤|앞|옆|근처)\s", name) or (by_name and re.search(r"[가-힣]백화점", name) and not MALL_BRAND.search(name)):
+        return None  # 롯데백화점 뒤 미식야장거리, 안주백화점
+    rest = name
+    for _ in range(3):
+        rest = MALL_SELF.sub(" ", rest)
+    if not re.sub(r"[\s\d·,\-]+", "", rest):
+        return None  # 몰 자체
+    if MALL_LANDMARK.search(name) or row.get("category") in MALL_LANDMARK_CATS:
+        return None
+    if MALL_HOTEL.search(f"{name} {row.get('address') or ''}"):
+        return None
+    if not by_name and not by_bldg and "타워" in (row.get("address") or ""):
+        return None  # 롯데월드타워 식당은 몰이 아니다
+    return "name" if by_name else "address"
+
+
 def no_period_event(row):
     return (row.get("category") in EVENT_CATS and not (row.get("source") or {}).get("event")
             and bool(EVENT_WORD.search(row.get("name") or "")))
@@ -84,6 +146,8 @@ RULES = [
      lambda r, c: src_type(r) == "tourapi" and bool(CULTURE_CENTER.search((r.get("name") or "").strip())), None),
     ("R14_제목줄_코스번호", "close", "이름에 이모지가 있거나 이름이 코스 번호뿐이다. 6곳 전수에 장소 이름이 없다",
      lambda r, c: bool(EMOJI.search(r.get("name") or "") or COURSE_ONLY.match((r.get("name") or "").strip())), None),
+    ("R6c_몰_입점매장", "close", "이름에 몰 낱말이 있고 몰 이름을 지워도 상호가 남는 입점 매장 가운데 카카오로 몰 안임을 확인한 36곳. 판정 36곳 정밀도 100%",
+     lambda r, c: mall_tenant(r, c) == "name" and r["id"] in MALL_TENANT_VERIFIED, None),
     ("R13_캠핑_낮슬롯", "fix", "이름이나 카테고리에 캠핑·글램핑·카라반·야영이 있고 슬롯 day. 식당·카페는 뺀다. 표본 교정 2/2",
      lambda r, c: r.get("slot") == "day" and bool(CAMPING.search(r.get("name") or "") or CAMPING.search(r.get("category") or ""))
      and not CAMP_NOT_LODGING.search(f"{r.get('name') or ''} {r.get('category') or ''}"),
@@ -94,6 +158,8 @@ RULES = [
      lambda r, c: bool(source_sidos(r)) and sido_of_address(r) is not None and sido_of_address(r) not in source_sidos(r), None),
     ("R6_백화점_몰_입점", "review", "이름이나 주소에 백화점·더현대·스타필드·아울렛 등. 보충 58%, 별마당도서관 같은 명소가 섞임",
      lambda r, c: bool(MALL.search(r.get("name") or "") or MALL.search(r.get("address") or "")), None),
+    ("R6c_몰_입점매장_미확인", "review", "R6c 조건의 이름 규칙 행 가운데 카카오로 확인하지 못한 행과 주소로만 몰에 걸린 행. 주소로만 걸린 23곳은 판정 14곳 중 7곳이 몰 밖",
+     lambda r, c: mall_tenant(r, c) is not None and r["id"] not in MALL_TENANT_VERIFIED, None),
     ("R3_같은주소_5행이상", "review", "도로명 주소(번지까지)가 같은 열린 행이 5곳 이상. 보충 25%",
      lambda r, c: road_key(r) is not None and c["road"][road_key(r)] >= 5, None),
     ("R8_시장", "review", "카테고리 시장. 보충 25%, 주관 판정", lambda r, c: r.get("category") == "시장", None),
@@ -111,7 +177,7 @@ ACTION_ORDER = {"close": 0, "fix": 1, "review": 2}
 
 def judge(rows):
     """열린 행 목록을 판정해 {'close': [...], 'fix': [...], 'review': [...]}를 돌려준다."""
-    ctx = {"road": Counter(k for k in map(road_key, rows) if k)}
+    ctx = {"road": Counter(k for k in map(road_key, rows) if k), "mall_road": MALL_ROADS_CLOSED | {road_key(r) for r in rows if is_mall_road(r)}}
     out = {"close": [], "fix": [], "review": []}
     for row in rows:
         hits = [rule for rule in RULES if rule[3](row, ctx)]

@@ -40,6 +40,35 @@ def test_judge_lists():
     assert out["fix"] == [{**out["fix"][0], "id": 1788818276330, "patch": {"slot": "stay"}}]
 
 
+MALL_ROWS = [
+    row(1789415062814, "상춘재 더현대서울", "한식", "evening", "서울 영등포구 여의대로 108", "youtube_vlog"),
+    row(6515, "슈퍼말차 더현대서울", None, "day", "서울 영등포구 여의대로 108 더현대서울 지하1층", "web"),
+    row(87, "시나루", "디자인문구", "day", "서울 영등포구 여의대로 108", "web"),
+    row(1790683586837, "쇼코엘 광화문점", "카페", "day", "서울 중구 세종대로 136", "web"),  # 같은 주소의 몰 이름 행은 P-047로 닫혔다
+]
+MALL_KEEP = [  # 몰 자체, 몰 안 목적지, 호텔, 몰 밖 상호
+    row(3131, "별마당도서관 스타필드 수원점", "도서관", "day", "경기 수원시 장안구 수성로 175", "web"),
+    row(1789545765162, "별마당도서관 스타필드코엑스몰", "도서관", "day", "서울 강남구 삼성동 159-9 지하1층-1층", "youtube_vlog"),
+    row(1790292415240, "스타필드 하남", "쇼핑/소품", "day", "경기도 하남시 미사대로 750 (신장동)", "tourapi"),
+    row(1788818282373, "갤러리아백화점 명품관", "쇼핑/소품", "day", "서울특별시 강남구 압구정로 343 (압구정동)", "tourapi"),
+    row(364, "더현대 서울 ALT.1", "전시관", "day", "서울 영등포구 여의대로 108", "web"),
+    row(8180, "페어몬트 앰배서더 서울 마리포사", "양식", "evening", "서울 영등포구 여의대로 108", "web"),
+    row(1790758680673, "안주백화점", "실내포장마차", "night", "서울 관악구 남부순환로 1592", "youtube_vlog"),
+    row(4826, "부천 중동 롯데백화점 뒤 미식야장거리", "선거관리위원회", "night", "경기 부천시 원미구 중동로248번길 52", "web"),
+]
+
+
+def test_mall_tenant():
+    out = judge(MALL_ROWS + MALL_KEEP)
+    assert {item["id"] for item in out["close"]} == {1789415062814}  # 카카오로 입점을 확인한 행만 닫는다
+    review = {item["id"] for item in out["review"] if "R6c_몰_입점매장_미확인" in item["rules"]}
+    assert review == {6515, 87, 1790683586837}, review  # 확인 못 한 이름 규칙 행과 주소로만 걸린 행은 검토
+    keep = {r["id"] for r in MALL_KEEP}
+    assert not keep & {item["id"] for item in out["close"]}
+    assert not keep & {item["id"] for v in out.values() for item in v if any(x.startswith("R6c") for x in item["rules"])}
+
+
 if __name__ == "__main__":
     test_judge_lists()
+    test_mall_tenant()
     print("ok")

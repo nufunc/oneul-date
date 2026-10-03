@@ -5,7 +5,7 @@
 기간 없는 행사(R4)는 --festival-lookup이면 닫기 전에 TourAPI searchFestival2로 올해 행사 목록을 한 번 받아 이름(공백·기호·연도 제외)이
 같은 행사를 찾는다. 종료일이 오늘 이후면 열어 두고 source.event만 채운다(앱이 종료일 뒤에 숨긴다).
 TourAPI 행의 contentid는 detailIntro2가 빈 응답을 돌려줘(10-03 수집기 11단계: 기간 없음 48) event_period.py로는 채울 수 없다.
-닫는 행은 source.note에 closed: P-044를 남겨 recover_naver_captcha_closures.py가 되열지 않게 한다.
+닫는 행은 source.note에 closed: P-044(--proposal로 바꾼다)를 남겨 recover_naver_captcha_closures.py가 되열지 않게 한다.
 
 OCI 호스트에서 돌린다. LOG_DIR는 수집기 컨테이너와 같은 TourAPI 사용량 파일을 쓰게 하고, 그 파일이 root 소유라 sudo로 돈다:
 sudo COLLECTOR_DIR=/mnt/data/git/oneul-date/collector LOG_DIR=/mnt/data/git/oneul-date/collector/data/logs \\
@@ -67,6 +67,7 @@ def main():
     ap.add_argument("judged", nargs="?", help="date-fit-YYYYMMDD.json")
     ap.add_argument("--ids", help="판정 파일 대신 닫을 id 목록(쉼표 구분). 판정을 다시 거치지 않고 열린 행만 닫는다")
     ap.add_argument("--reason", default="수작업 목록", help="--ids로 닫을 때 source.note에 남길 사유")
+    ap.add_argument("--proposal", default="P-044", help="source.note의 closed: 표시와 백업 파일 이름에 쓸 원장 제안 번호")
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--backup-dir", default=os.path.expanduser("~/oneul-backups"))
     ap.add_argument("--festival-lookup", action="store_true",
@@ -134,7 +135,7 @@ def main():
         return 0
 
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    backup = os.path.join(args.backup_dir, f"p044_date_fit_{stamp}.json")
+    backup = os.path.join(args.backup_dir, f"{args.proposal.lower().replace('-', '')}_date_fit_{stamp}.json")
     with open(backup, "w", encoding="utf-8") as f:
         json.dump({"rows": current, "plan": [{k: v for k, v in p.items() if k != "row"} for p in plan], "excluded": excluded},
                   f, ensure_ascii=False, indent=1)
@@ -147,7 +148,7 @@ def main():
     for p in plan:
         row, source = p["row"], dict(p["row"].get("source") or {})
         if p["do"] == "close":
-            source["note"] = f"{(source.get('note') or '').strip()} | closed: P-044 {p['reason']} ({stamp[:8]})".lstrip(" |")
+            source["note"] = f"{(source.get('note') or '').strip()} | closed: {args.proposal} {p['reason']} ({stamp[:8]})".lstrip(" |")
             body, cond = {"is_closed": True, "source": source, "updated_at": now}, ""
         elif p["do"] == "event":
             body, cond = {"source": {**source, "event": p["event"]}, "updated_at": now}, ""
@@ -161,7 +162,7 @@ def main():
     print(f"닫음 {done['close']} · 기간 채움 {done['event']} · 슬롯 교정 {done['fix']} · 실패 {failed}")
 
     after = {r["id"]: r for r in fetch_ids(base, headers, [p["id"] for p in plan])}
-    check = {"close": sum(after[p["id"]]["is_closed"] and "closed: P-044" in (after[p["id"]]["source"].get("note") or "")
+    check = {"close": sum(after[p["id"]]["is_closed"] and f"closed: {args.proposal}" in (after[p["id"]]["source"].get("note") or "")
                           for p in plan if p["do"] == "close"),
              "event": sum(not after[p["id"]]["is_closed"] and bool(after[p["id"]]["source"].get("event"))
                           for p in plan if p["do"] == "event"),
