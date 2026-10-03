@@ -4529,10 +4529,10 @@ const LUCIDE_ICONS = {
 function getSpotFallbackIcon(spot: Spot, slot: SlotKey): string {
   const cat = (spot.category || '').toLowerCase();
   const name = (spot.name || '').toLowerCase();
-  const summary = (spot.summary || '').toLowerCase();
-  const combined = `${cat} ${name} ${summary}`;
+  // 요약문은 수집기 템플릿이라 '카페'·'와인' 같은 낱말이 업종과 무관하게 들어 있다. 카테고리와 이름만 본다
+  const combined = `${cat} ${name}`;
 
-  if (combined.includes('루지') || combined.includes('서핑') || combined.includes('요트') || combined.includes('패러글라이딩') || combined.includes('짚라인') || combined.includes('케이블카') || combined.includes('클라이밍') || combined.includes('카약') || combined.includes('방탈출') || combined.includes('보드게임') || combined.includes('액티비티') || combined.includes('레저') || combined.includes('스포츠') || combined.includes('카트')) {
+  if (combined.includes('루지') || combined.includes('서핑') || combined.includes('요트') || combined.includes('패러글라이딩') || combined.includes('짚라인') || combined.includes('케이블카') || combined.includes('클라이밍') || combined.includes('카약') || combined.includes('방탈출') || combined.includes('천문대') || combined.includes('관광열차') || combined.includes('레일바이크') || combined.includes('테마파크') || combined.includes('승마') || combined.includes('보드게임') || combined.includes('액티비티') || combined.includes('레저') || combined.includes('스포츠') || combined.includes('카트')) {
     return LUCIDE_ICONS.compass;
   }
   if (combined.includes('바(bar)') || combined.includes('와인') || combined.includes('칵테일') || combined.includes('주점') || combined.includes('펍') || combined.includes('호프') || combined.includes('이자카야') || combined.includes('위스키') || combined.includes('포차')) {
@@ -4541,19 +4541,19 @@ function getSpotFallbackIcon(spot: Spot, slot: SlotKey): string {
   if (combined.includes('호텔') || combined.includes('숙박') || combined.includes('펜션') || combined.includes('리조트') || combined.includes('스테이') || slot === 'stay') {
     return LUCIDE_ICONS.bed;
   }
-  if (combined.includes('소품') || combined.includes('잡화') || combined.includes('패션') || combined.includes('편집숍') || combined.includes('편집샵') || combined.includes('쇼룸') || combined.includes('플래그십') || combined.includes('부티크') || combined.includes('라이프스타일')) {
+  if (combined.includes('시장') || combined.includes('서점') || combined.includes('팝업') || combined.includes('의류') || combined.includes('소품') || combined.includes('잡화') || combined.includes('패션') || combined.includes('편집숍') || combined.includes('편집샵') || combined.includes('쇼룸') || combined.includes('플래그십') || combined.includes('부티크') || combined.includes('라이프스타일')) {
     return LUCIDE_ICONS.shoppingBag;
   }
-  if (combined.includes('미술관') || combined.includes('전시') || combined.includes('박물관') || combined.includes('갤러리') || combined.includes('공연') || combined.includes('영화') || combined.includes('공방') || combined.includes('체험') || combined.includes('도예') || combined.includes('도자기') || combined.includes('골동품') || combined.includes('원데이') || combined.includes('클래스') || combined.includes('아틀리에')) {
+  if (combined.includes('음악감상실') || combined.includes('사진관') || combined.includes('미술,공예') || combined.includes('문화시설') || combined.includes('미술관') || combined.includes('전시') || combined.includes('박물관') || combined.includes('갤러리') || combined.includes('공연') || combined.includes('영화') || combined.includes('공방') || combined.includes('체험') || combined.includes('도예') || combined.includes('도자기') || combined.includes('골동품') || combined.includes('원데이') || combined.includes('클래스') || combined.includes('아틀리에')) {
     return LUCIDE_ICONS.palette;
   }
-  if (combined.includes('공원') || combined.includes('산책') || combined.includes('자연') || combined.includes('전망') || combined.includes('뷰') || combined.includes('숲') || combined.includes('호수') || combined.includes('해변') || combined.includes('해수욕장') || combined.includes('수목원') || combined.includes('휴양림')) {
+  if (combined.includes('관광지') || combined.includes('관광,명소') || combined.includes('봉우리') || combined.includes('사찰') || combined.includes('성곽') || combined.includes('국가정원') || combined.includes('생태') || combined.includes('유람선') || combined.includes('공원') || combined.includes('산책') || combined.includes('자연') || combined.includes('전망') || combined.includes('뷰') || combined.includes('숲') || combined.includes('호수') || combined.includes('해변') || combined.includes('해수욕장') || combined.includes('수목원') || combined.includes('휴양림')) {
     return LUCIDE_ICONS.trees;
   }
   if (combined.includes('카페') || combined.includes('커피') || combined.includes('베이커리') || combined.includes('제과') || combined.includes('빵') || combined.includes('디저트') || combined.includes('빙수') || combined.includes('찻집') || combined.includes('티하우스') || combined.includes('로스터리') || combined.includes('에스프레소')) {
     return LUCIDE_ICONS.coffee;
   }
-  if (combined.includes('식당') || combined.includes('맛집') || combined.includes('다이닝') || combined.includes('비스트로') || combined.includes('양식') || combined.includes('한식') || combined.includes('일식') || combined.includes('중식') || combined.includes('고기') || combined.includes('육류') || combined.includes('레스토랑') || combined.includes('파스타') || combined.includes('스테이크') || combined.includes('국수') || combined.includes('면요리') || combined.includes('초밥') || combined.includes('스시') || combined.includes('오마카세') || combined.includes('샤브샤브') || combined.includes('돈까스') || combined.includes('피자') || combined.includes('버거') || combined.includes('치킨') || combined.includes('갈비') || combined.includes('삼겹살') || combined.includes('곱창') || combined.includes('바베큐') || combined.includes('찌개') || combined.includes('덮밥') || combined.includes('칼국수') || combined.includes('냉면')) {
+  if (combined.includes('먹자골목') || combined.includes('분식') || combined.includes('해물') || combined.includes('이탈리안') || combined.includes('양꼬치') || combined.includes('식당') || combined.includes('맛집') || combined.includes('다이닝') || combined.includes('비스트로') || combined.includes('양식') || combined.includes('한식') || combined.includes('일식') || combined.includes('중식') || combined.includes('고기') || combined.includes('육류') || combined.includes('레스토랑') || combined.includes('파스타') || combined.includes('스테이크') || combined.includes('국수') || combined.includes('면요리') || combined.includes('초밥') || combined.includes('스시') || combined.includes('오마카세') || combined.includes('샤브샤브') || combined.includes('돈까스') || combined.includes('피자') || combined.includes('버거') || combined.includes('치킨') || combined.includes('갈비') || combined.includes('삼겹살') || combined.includes('곱창') || combined.includes('바베큐') || combined.includes('찌개') || combined.includes('덮밥') || combined.includes('칼국수') || combined.includes('냉면')) {
     return LUCIDE_ICONS.utensils;
   }
   
