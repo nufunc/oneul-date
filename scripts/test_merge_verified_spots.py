@@ -1,5 +1,5 @@
 """merge_verified_spots 계획 회귀 테스트: python3 scripts/test_merge_verified_spots.py 또는 pytest. 값은 2026-10-04 라이브 행을 줄인 것이다."""
-from merge_verified_spots import keep_fix_patch, plan
+from merge_verified_spots import fix_body, keep_fix_patch, plan
 
 
 def test_keep_fix_patch():
@@ -29,7 +29,21 @@ def test_plan_skips_closed_and_changed():
     assert fills == []
 
 
+def test_fix_body_kakao_address_category():
+    row = {"id": 518, "name": "울트라마린", "address": "제주특별자치도 제주시 한경면 판포리 1611-3", "area": "제주시",
+           "category": "카페", "provider_ids": {}, "source": {"note": "n"}, "social_links": {}}
+    body = fix_body(row, {"name": "우투아", "category": "카페", "kakao": "1697574060", "address": "제주특별자치도 제주시 한경면 일주서로 4611",
+                          "lat": 33.36, "lng": 126.2}, "20261004-090000", "now", "P-056")
+    assert body["name"] == "우투아" and body["provider_ids"] == {"kakao": "1697574060"} and (body["lat"], body["lng"]) == (33.36, 126.2)
+    assert body["social_links"] == {"kakaomap": {"url": "https://place.map.kakao.com/1697574060"}}
+    assert body["source"]["note"] == ("n | renamed: P-056 울트라마린 (20261004) | fixed: P-056 kakao None→1697574060, address "
+                                      "제주특별자치도 제주시 한경면 판포리 1611-3→제주특별자치도 제주시 한경면 일주서로 4611 (20261004)"
+                                      " | fixed: P-056 category 카페→카페, lat None→33.36, lng None→126.2 (20261004)")
+    assert fix_body(row, {"category": "중식"}, "20261004-090000", "now", "P-055")["category"] == "중식"  # P-055 꼴은 그대로
+
+
 if __name__ == "__main__":
     test_keep_fix_patch()
     test_plan_skips_closed_and_changed()
+    test_fix_body_kakao_address_category()
     print("ok")

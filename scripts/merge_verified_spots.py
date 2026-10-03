@@ -6,6 +6,8 @@ P-053: 결과 파일(duplicate-merge-YYYYMMDD.json)의 merge 묶음을 병합 �
   주소를 바꾸면 area를 새 주소로 다시 계산한다.
 P-051, P-054: MERGES와 FILLS 표의 행만 쓴다. 닫기는 close_date_fit_spots.py --ids로 따로 한다.
 P-055: FIXES 표의 값으로 카테고리, 사진, 이름을 바꾼다(앞 제안의 판단할 지점에 대한 리드 결정). 이미 값이 있어도 바꾼다.
+P-056: 남은 행 판정(leftover-20261004.json)의 병합 15곳은 MERGES, 교정 7곳은 FIXES 표로 쓴다. 교정의 장소 번호와 주소는 KEEP_FIX와 같게 바꾸고,
+  병합으로 남길 행(518, 1273)의 교정은 채움 값 위에서 계산해 남길 행 patch에 합친다.
 병합은 닫는 행 source.note에 merged_into를 남기고 남는 행의 빈 필드만 채운다(category는 옮기지 않는다). 소속 명소로 합치는 행(야경, 공연)은
 영업시간과 가격이 명소의 값이 아니어서 분위기 값만 옮긴다. 쓰기 직전에 다시 읽어 지금도 열려 있고 이름이 결과 파일 때와 같은 행만 고친다.
 
@@ -60,6 +62,23 @@ MERGES = {
         4793: ("옥경이네복맥어", 6704, "same"),
         1661: ("부첼리피아체", 259, "same"),
     },
+    "P-056": {  # leftover-20261004.json merge. 포룡정(4422), 수성못 수변데크(4436)는 지도에 따로 있어 남긴다
+        1024: ("남산타워뷰 오리올", 583, "same"),
+        1435: ("싱글핀 디스트릭트", 1788858173349, "same"),
+        4552: ("울트라마린 제주 판포", 518, "same"),  # 울트라마린은 지금 우투아
+        5792: ("울진 죽변해안스카イレール 죽변승차장", 1273, "same"),
+        1815: ("보르고 한남 도산", 4997, "same"),
+        1624: ("조천 방선문계곡", 1790459405125, "same"),
+        657: ("송도센트럴파크 문보트", 6042, "venue"),
+        6313: ("인천 송도 센트럴파크 문보트 & 야경", 6042, "venue"),
+        1240: ("쏠비치 삼척 산토리니 광장", 1789994825466, "venue"),
+        4470: ("제주 산지천 음악분수 & 탑동광장", 4669, "venue"),
+        3014: ("송도 케이슨24 솔트비어 탭룸", 4384, "venue"),
+        5544: ("구름에 온", 1788630026682, "venue"),
+        3812: ("안동 구름에리조트 북카페 구름에 온", 1788630026682, "venue"),
+        4081: ("양양 하조대 무인등대 & 스카이워크", 5739, "venue"),
+        2690: ("양양 하조대 무인등대 & 스카이워크", 5739, "venue"),
+    },
 }
 # 카테고리 채움: id: (지금 이름, 카테고리, 바꿀 이름). 카테고리는 카카오 경로의 저장 단계(kakao_category_from_path)다.
 # 카카오에 없고 네이버에만 있는 행은 네이버 분류의 마지막 단계를 쓴다. 797 인천 개항장 문화지구는 검색 카테고리가 없어 뺐다
@@ -98,6 +117,19 @@ FIXES = {
         858: ("포크너 고잔점", {"name": "포크너 안산고잔점"}),
         # 958 킨토토 갈마본점, 1202 지리산 뱀사골 힐링트레킹, 4024 비밀의화원 다운타운 홍대점은 같은 주소의 상호를 찾지 못해 두었다
     },
+    "P-056": {  # leftover-20261004.json keep_fix
+        1270: ("만항재 쉼터 산상의화원", {"name": "산상의화원", "category": "공원", "kakao": "1867225574",
+                                          "address": "강원특별자치도 정선군 고한읍 고한리 산 215-3"}),
+        1273: ("죽변 해안스카イレール", {"name": "죽변해안스카이레일"}),  # 이름의 일본 문자
+        654: ("까치화방 판교플래그십", {"name": "까치화방 판교점", "category": "테마카페", "kakao": "1572962342",
+                                     "address": "경기 성남시 분당구 판교역로 152"}),
+        1034: ("카르마 경리단", {"name": "까르마", "category": "칵테일바", "kakao": "894609108", "address": "서울 용산구 신흥로 28"}),
+        4541: ("오クター브 전포", {"name": "옥타브뮤직바", "category": "호프,요리주점", "kakao": "1037764699",
+                                "address": "부산 부산진구 중앙대로680번가길 82"}),
+        1169: ("합송구뜨", {"name": "합송리994", "category": "카페", "kakao": "38981585"}),
+        518: ("울트라마린", {"name": "우투아", "category": "카페", "kakao": "1697574060", "address": "제주특별자치도 제주시 한경면 일주서로 4611",
+                          "lat": 33.3694259963321, "lng": 126.206064803739}),
+    },
 }
 
 
@@ -114,8 +146,9 @@ def fix_list(proposal, rows, skipped):
 
 
 def fix_body(row, patch, stamp, now, proposal):
-    body = rename_body(row, patch["name"], stamp, now, proposal) if "name" in patch else {}
-    rest = {k: v for k, v in patch.items() if k != "name"}
+    keyed = ("name", "kakao", "address")  # 장소 번호와 주소는 링크와 area를 함께 바꾼다
+    body = keep_fix_patch(row, {k: v for k, v in patch.items() if k in keyed}, stamp, now, proposal)
+    rest = {k: v for k, v in patch.items() if k not in keyed}
     if rest:
         source = dict(body.get("source") or row.get("source") or {})
         text = ", ".join(f"{k} {row.get(k)}→{v}" if v is not None else f"{k} 비움" for k, v in rest.items())
@@ -194,7 +227,7 @@ def plan(proposal, result, rows):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("proposal", choices=["P-053", "P-051", "P-054", "P-055"])
+    ap.add_argument("proposal", choices=["P-053", "P-051", "P-054", "P-055", "P-056"])
     ap.add_argument("--result", help="P-053 결과 파일(duplicate-merge-YYYYMMDD.json)")
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--backup-dir", default=os.path.expanduser("~/oneul-backups"))
@@ -225,8 +258,14 @@ def main():
             skipped[f["row"]["id"]] = f"이름 그대로(300m 안 같은 이름 열린 행 {dup})"
             fixes.remove(f)
             continue
-        f["body"] = fix_body(f["row"], f["patch"], stamp, now, args.proposal)
         print(f"  교정 {f['row']['id']} {f['row']['name']} · {f['patch']}")
+        # 병합으로 남길 행은 두 번 쓰면 교정이 채움 값을 덮으므로 채운 행 위에서 계산해 남길 행 patch에 합친다
+        if m := next((m for m in merges if m["keep"]["id"] == f["row"]["id"]), None):
+            m["fix"] = f["patch"]
+            m["patch"].update(fix_body({**m["keep"], **m["fill"]}, f["patch"], stamp, now, args.proposal))
+            fixes.remove(f)
+            continue
+        f["body"] = fix_body(f["row"], f["patch"], stamp, now, args.proposal)
     unfixed = set(KEEP_FIX) - {m["keep"]["id"] for m in merges} if args.proposal == "P-053" else set()
     print(f"병합 {sum(len(m['dups']) for m in merges)}행 → {len(merges)}행 · 남길 행 교정 {sum(bool(m['fix']) for m in merges)}"
           f"(못 함 {sorted(unfixed)}) · 채움 {len(fills)} · 교정 {len(fixes)} · 제외 {len(skipped)} {skipped}")
