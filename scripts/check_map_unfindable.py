@@ -6,7 +6,7 @@
 판정은 두 단계다.
   네이버: 앱 검색어(main.ts mapQuery)와 변형 4종(앱이 붙인 지역어를 뗀 이름, 마지막 어절을 뗀 이름, 3자 이상 마지막 어절, 띄어쓰기를 뺀 이름)의
     결과 상위 5위에 이름 바이그램 겹침 0.5 이상이고 행 좌표 3km 안인 장소가 있으면 남긴다(검색됨).
-  카카오: 네이버로 못 찾은 행만 핵심 이름으로 행 좌표 2km 검색을 하고, 없으면 도로명 주소 키워드 검색을 한다. 어느 쪽에든 이름이 비슷한
+  카카오: 네이버로 못 찾은 행만 핵심 이름과 그 첫 어절(2자 이상)로 행 좌표 2km 검색을 하고, 없으면 도로명 주소 키워드 검색을 한다. 어느 쪽에든 이름이 비슷한
     장소가 있으면 남긴다(카카오 검색됨). 주소 검색에 다른 업장만 있으면 닫기 후보, 주소 검색이 0건이면 검토로 보낸다(카카오 0건만으로 닫지 않는다).
 닫기 후보는 사람이 표본을 다시 본 뒤 close_date_fit_spots.py --ids ... --proposal P-052로 닫는다.
 네이버 캡차가 나오면 멈추고 그때까지의 판정을 쓴다(종료 코드 2). 카카오는 --kakao-max에서 멈춘다.
@@ -25,13 +25,12 @@ import urllib.parse
 import urllib.request
 from datetime import datetime
 
-from judge_date_fit import described_name, export_name, src_type
+from judge_date_fit import described_name, export_name, road_key, src_type
 from fix_described_names import COLLECTOR, bigrams, core_name, dist_m, norm, run_naver
 
 NAVER_RADIUS_M = 3000
 KAKAO_RADIUS_M = 2000
 KAKAO_PLACE = re.compile(r"place\.map\.kakao\.com/\d+")
-ROAD = re.compile(r"^(.*?(?:로|길)\s*\d+(?:-\d+)?)")
 EXTRA_REASON = "500m 안에 같은 이름 결과 없음"
 
 
@@ -75,10 +74,13 @@ def app_queries(rows):
 
 
 class Kakao:
-    def __init__(self, limit):
+    """카카오 키워드 검색. 응답은 cache 파일에 남겨 다시 돌릴 때 부르지 않는다. limit은 이번 실행의 새 호출 수다."""
+
+    def __init__(self, limit, cache):
         with open(os.path.join(COLLECTOR, ".env"), encoding="utf-8") as f:
             self.key = next(line.split("=", 1)[1].strip().strip('"').strip("'") for line in f if line.startswith("KAKAO_REST_API_KEY="))
-        self.limit, self.calls, self.cache = limit, 0, {}
+        self.limit, self.calls, self.path = limit, 0, cache
+        self.cache = json.load(open(cache, encoding="utf-8")) if os.path.exists(cache) else {}
 
     def search(self, **q):
         k = json.dumps(q, sort_keys=True, ensure_ascii=False)
@@ -90,6 +92,8 @@ class Kakao:
             with urllib.request.urlopen(urllib.request.Request(url, headers={"Authorization": f"KakaoAK {self.key}"}), timeout=15) as res:
                 self.cache[k] = [{"name": d["place_name"], "cat": d["category_name"].split(" > ")[-1], "addr": d["road_address_name"]
                                   or d["address_name"], "dist": d.get("distance"), "id": d["id"]} for d in json.loads(res.read())["documents"]]
+            with open(self.path, "w", encoding="utf-8") as f:
+                json.dump(self.cache, f, ensure_ascii=False)
         return self.cache[k]
 
 
@@ -101,6 +105,7 @@ def main():
     ap.add_argument("--extra", help="P-049 드라이런 파일. 핵심 이름이 500m 안에 없던 행 가운데 모집단 조건에 드는 행을 더한다")
     ap.add_argument("--kakao-max", type=int, default=120)
     ap.add_argument("--cache", help="네이버 응답 캐시(기본은 OUT.naver.json)")
+    ap.add_argument("--kakao-cache", help="카카오 응답 캐시(기본은 OUT.kakao.json)")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
@@ -136,7 +141,7 @@ def main():
         if captcha:
             break
 
-    kakao = Kakao(args.kakao_max)
+    kakao = Kakao(args.kakao_max, args.kakao_cache or args.out + ".kakao.json")
     out = {}
     for i in target:
         r = by_id[i]
@@ -148,15 +153,24 @@ def main():
             out[i] = ("확인 못 함", {**naver, "why": "캡차로 멈춤" if captcha else "네이버 응답 없음"})
             continue
         name = core_name(export_name(r), r.get("address"))
-        near = kakao.search(query=name, x=r["lng"], y=r["lat"], radius=KAKAO_RADIUS_M, sort="distance")
-        m = ROAD.match(re.sub(r"\s+", " ", r.get("address") or "").strip())
-        at = kakao.search(query=m.group(1)) if m and near is not None and not any(similar(p["name"], name) for p in near) else []
-        ev = {**naver, "kakao_q": name, "kakao_near": (near or [])[:5], "road": m and m.group(1), "kakao_at_address": (at or [])[:8]}
+        # 첫 어절도 찾는다. 뒤 어절이 지명이나 설명이면 핵심 이름 그대로는 0건이다(울트라마린 제주 판포 → 울트라마린 주차장 21m)
+        first = name.split()[0] if len(name.split()) >= 2 and len(norm(name.split()[0])) >= 2 else None
+        names = [name] + ([first] if first else [])
+        hit = lambda ps: any(similar(p["name"], n) for p in ps for n in names)
+        near = []
+        for q in names:
+            got = kakao.search(query=q, x=r["lng"], y=r["lat"], radius=KAKAO_RADIUS_M, sort="distance")
+            near = None if got is None else near + got
+            if near is None or hit(near):
+                break
+        road = road_key(r)  # 서현로 210번길 16을 서현로 210에서 끊지 않는다
+        at = kakao.search(query=road) if road and near is not None and not hit(near) else []
+        ev = {**naver, "kakao_q": names, "kakao_near": (near or [])[:5], "road": road, "kakao_at_address": (at or [])[:8]}
         if near is None or at is None:
             out[i] = ("확인 못 함", {**ev, "why": "카카오 한도로 멈춤"})
-        elif any(similar(p["name"], name) for p in near + at):
+        elif hit(near + at):
             out[i] = ("카카오 검색됨", ev)
-        elif not m:
+        elif not road:
             out[i] = ("검토", {**ev, "why": "도로명 주소 없음"})
         elif not at:
             out[i] = ("검토", {**ev, "why": "주소 검색 0건"})
