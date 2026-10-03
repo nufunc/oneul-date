@@ -4979,6 +4979,16 @@ function cardSpotSummary(spot: Spot): string {
   return (summaryTemplateCache.counts.get(summaryTemplateKey(spot, text)) ?? 0) >= SUMMARY_TEMPLATE_MIN_REPEATS ? '' : text;
 }
 
+/** 요약 줄이 빠진 탐색 카드에 대신 보일 사실 한 줄. 금액이나 무료가 적힌 가격 문구를 먼저, 없으면 카카오 원래 평점을 보인다.
+ * 단위 없는 숫자('60000')나 '공연 별로 상이함'은 정보가 되지 않아 가격으로 쓰지 않는다 */
+function cardFactLine(spot: Spot, ratingShown: boolean): string {
+  const price = (spot.price || '').trim();
+  if (/\d\s*(만\s*)?원|₩|무료/.test(price)) return price;
+  const km = spot.social_links?.kakaomap;
+  if (ratingShown || !km?.rating) return '';
+  return `★${km.rating.toFixed(1)}${km.review_count ? ` (리뷰 ${km.review_count.toLocaleString()})` : ''}`;
+}
+
 function cleanSpotSummary(spot: Spot): string {
   // 도입구와 본문이 같은 구절로 시작해 '소중한 사람과 함께, 소중한 사람과 함께 둘만의 …'처럼 겹친 요약(열린 26곳)은 한 번만 남긴다
   const raw = (spot.summary || '').trim().replace(/^(.{4,30}?),\s*\1(?=\s)/, '$1');
@@ -6360,6 +6370,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
   const eventLabel = cols === 5 ? '' : eventPeriodLabel(spot);
   const eventBadge = eventLabel ? `<span class="discovery-badge-event">${escapeHtml(eventLabel)}</span>` : '';
   const sum = cardSpotSummary(spot);
+  const fact = sum ? '' : cardFactLine(spot, Boolean(ratingBadge));
 
   const bookingUrl = spot.booking_info?.url || getCatchtableUrl(spot);
   const yt = spot.social_links?.youtube;
@@ -6417,7 +6428,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
             <h4 class="discovery-card-title discovery-name"><button type="button" class="discovery-name-link" data-detail-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 상세 보기">${escapeHtml(spot.name)}</button></h4>
             <span class="discovery-card-category discovery-category">${escapeHtml(spot.category || '데이트 스팟')}</span>
           </div>
-          ${sum ? `<p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>` : ''}
+          ${sum ? `<p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>` : fact ? `<p class="discovery-card-fact">${escapeHtml(fact)}</p>` : ''}
           <div class="discovery-card-actions">
             <button class="btn-discovery-save ${isSaved ? 'is-saved' : ''}" data-spot-id="${spot.id}" aria-label="${isSaved ? '보관함에서 제외' : '보관함에 담기'}" title="${isSaved ? '보관함에서 제외' : '보관함에 담기'}">${isSaved ? '❤️' : '🤍'}</button>
             <button class="btn-build-anchor-course btn-discovery-action-build with-label" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">🚀 코스</button>
@@ -6446,7 +6457,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
       <div class="discovery-card-body">
         <h4 class="discovery-card-title discovery-name"><button type="button" class="discovery-name-link" data-detail-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 상세 보기">${escapeHtml(spot.name)}</button></h4>
         <span class="discovery-card-category discovery-category">${escapeHtml(spot.category || '데이트 스팟')}</span>
-        ${sum ? `<p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>` : ''}
+        ${sum ? `<p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>` : fact ? `<p class="discovery-card-fact">${escapeHtml(fact)}</p>` : ''}
         <div class="discovery-card-actions">
           <button class="btn-discovery-save ${isSaved ? 'is-saved' : ''}" data-spot-id="${spot.id}" aria-label="${isSaved ? '보관함에서 제외' : '보관함에 담기'}" title="${isSaved ? '보관함에서 제외' : '보관함에 담기'}">${isSaved ? '❤️' : '🤍'}</button>
           <button class="btn-build-anchor-course btn-discovery-action-build" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">🚀</button>

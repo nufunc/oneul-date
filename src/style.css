@@ -4430,6 +4430,18 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   word-break: keep-all;
 }
 
+/* 요약 줄이 빠진 카드의 가격·평점 한 줄. 요약이 아니므로 인용 스타일이 아닌 보조 줄로 둔다 */
+.discovery-card-fact {
+  font-size: 0.68rem;
+  color: var(--color-text-faint);
+  line-height: 1.35;
+  margin: 0 0 var(--space-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
 .discovery-card-summary,
 .discovery-quote {
   font-family: var(--font-sans);
