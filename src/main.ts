@@ -4745,8 +4745,9 @@ function isSuperHotSpot(spot: Spot): boolean {
   else if (isBlueRibbon) curationScore = 90;
 
   // 3. 🗺️ 지도 평점 채널 점수 (0~100)
+  // 인기순·인증·평점순과 같이 리뷰 수로 보정한 평점을 쓴다. 원점수면 리뷰 0~4개짜리 ★5.0도 🔥였다
   let mapScore = 0;
-  const rating = spot.social_links?.kakaomap?.rating;
+  const rating = trustedRating(spot);
   if (rating) {
     if (rating >= 4.8) mapScore = 100;
     else if (rating >= 4.6) mapScore = 85;
