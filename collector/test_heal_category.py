@@ -25,7 +25,11 @@ def test_stay_flip_is_vetoed_only_for_clear_non_stay_category():
     assert w.stay_flip_vetoed("카페", "클래식")
     assert w.stay_flip_vetoed("쇼핑/소품", "옥천장 (5, 10일)")
     assert not w.stay_flip_vetoed("레포츠/체험", "대가야캠프타운")
-    assert not w.stay_flip_vetoed("일본식주점", "모노 풀빌라")
+    assert w.stay_flip_vetoed("프랑스음식", "스테이", "디너 STAY Passion 코스 1인 210,000원~260,000원")
+    assert w.stay_flip_vetoed("프랑스음식", "시그니엘 서울 스테이")
+    assert w.stay_flip_vetoed("칵테일바", "JW 메리어트 호텔 모보 바")
+    assert not w.stay_flip_vetoed("일본식주점", "모노 풀빌라", "1박 40만 ~ 72만 원대 / 네이버 예약.")
+    assert not w.stay_flip_vetoed("카페", "파주 글로우 글램핑")
     assert not w.stay_flip_vetoed("", "어느 호텔")
     assert not w.stay_flip_vetoed(None, "클래식")
 
