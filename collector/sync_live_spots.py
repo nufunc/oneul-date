@@ -34,6 +34,10 @@ TARGET_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "pub
 MIN_EXPECTED_SPOTS = 9000  # 비정상 데이터 누락 방지 안전 가드
 CLIENT_UNUSED_KEYS = {"metrics", "created_at", "updated_at", "provider_ids", "reservation_type", "fail_count"}
 ALIAS_FILE = os.path.join(os.path.dirname(TARGET_FILE), "spot_aliases.json")
+# 첫 방문자가 spots.json을 받는 동안 보이는 번들 샘플. 실제 id로 다시 써야 그동안 찜한 스팟이 도착 뒤에도 남는다
+SAMPLE_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src", "data", "spots.sample.json"))
+SAMPLE_MAX_COUNT = 480
+SAMPLE_MAX_BYTES = 305_000  # 2026-09-13 샘플 크기(305,327B). 번들이 이보다 커지지 않게 한다
 
 def get_with_retry(params, attempts=6, wait_sec=10):
     """18088은 my-stock-score의 API 컨테이너가 oneul-api로 중계하는 주소라, 그쪽 배포로 컨테이너가 재생성되는
@@ -122,6 +126,26 @@ def fetch_merge_aliases(active_ids):
     return aliases
 
 
+def pick_sample(out_spots, max_count=SAMPLE_MAX_COUNT, max_bytes=SAMPLE_MAX_BYTES):
+    """이미지가 있는 열린 스팟을 지역마다 hot_score 순으로 줄 세워 한 곳씩 돌아가며 뽑는다.
+    입력이 같으면 결과가 같고, 개수와 직렬화 크기가 상한을 넘기 전에 멈춘다"""
+    queues = {}
+    for sp in sorted(out_spots, key=lambda x: (-(x.get("hot_score") or 0), x["id"])):
+        if sp.get("image_url") and not sp.get("is_closed"):
+            queues.setdefault(sp.get("region") or "", []).append(sp)
+    picked, size = [], 2  # 대괄호 두 글자
+    for rank in range(max_count):
+        for region in sorted(queues):
+            if rank >= len(queues[region]):
+                continue
+            row = len(json.dumps(queues[region][rank], ensure_ascii=False, separators=(",", ":")).encode()) + 1
+            if len(picked) >= max_count or size + row > max_bytes:
+                return picked
+            picked.append(queues[region][rank])
+            size += row
+    return picked
+
+
 def main():
     spots = fetch_all_active_spots()
     total = len(spots)
@@ -159,6 +183,15 @@ def main():
     with open(ALIAS_FILE, "w", encoding="utf-8") as f:
         json.dump(aliases, f, separators=(",", ":"), sort_keys=True)
     logger.info(f"병합 별칭 {len(aliases)}건 기록: {ALIAS_FILE}")
+
+    sample = pick_sample(out_spots)
+    sample_bytes = json.dumps(sample, ensure_ascii=False, separators=(",", ":")).encode()
+    out_ids = {sp["id"] for sp in out_spots}
+    assert sample and all(sp["id"] in out_ids for sp in sample), "샘플 id가 spots.json에 없다"
+    assert len(sample) <= SAMPLE_MAX_COUNT and len(sample_bytes) <= SAMPLE_MAX_BYTES, "샘플이 상한을 넘었다"
+    with open(SAMPLE_FILE, "wb") as f:
+        f.write(sample_bytes)
+    logger.info(f"번들 샘플 {len(sample)}곳 기록: {SAMPLE_FILE} ({len(sample_bytes):,}B)")
 
     file_size_mb = os.path.getsize(TARGET_FILE) / (1024 * 1024)
     logger.info(f"동기화 완료: {TARGET_FILE} ({total}개 스팟, {file_size_mb:.2f} MB)")

@@ -6208,8 +6208,10 @@ function renderSpotDiscovery(): void {
           <span class="pill-title">${escapeHtml(regLabel.title)}</span>
           <span class="pill-arrow" aria-hidden="true">▾</span>
         </button>
-        <span class="status-count-badge">${totalCount.toLocaleString('ko-KR')}</span>
-        <span class="status-text">개 스팟</span>
+        ${loadedRegionKeys.has('ALL') ? `
+          <span class="status-count-badge">${totalCount.toLocaleString('ko-KR')}</span>
+          <span class="status-text">개 스팟</span>
+        ` : '<span class="status-text" role="status">전체 스팟 불러오는 중</span>'}
         ${isFiltered ? `
           <button class="btn-discovery-filter-reset" id="btn-reset-discovery-filters" title="검색 및 필터 초기화" aria-label="검색 및 필터 초기화">
             <span class="reset-icon">↺</span>

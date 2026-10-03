@@ -38,8 +38,8 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git status
-          if [ -n "$(git status --porcelain public/data/spots.json public/data/spot_aliases.json)" ]; then
-            git add public/data/spots.json public/data/spot_aliases.json
+          if [ -n "$(git status --porcelain public/data/spots.json public/data/spot_aliases.json src/data/spots.sample.json)" ]; then
+            git add public/data/spots.json public/data/spot_aliases.json src/data/spots.sample.json
             git commit -m "chore(data): auto-sync latest spots from OCI PostgreSQL"
             git push origin main
           else
