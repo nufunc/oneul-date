@@ -20,7 +20,9 @@ from datetime import datetime
 
 EVENT_CATS = {"축제/행사", "페스티벌"}
 EVENT_WORD = re.compile(r"축제|페스티벌|페스타|문화제|야행|잔치|마라톤|박람회|한마당|놀이마당|문화대전|페스트")
-CULTURE_CENTER = re.compile(r"문화원(\(.*\))?$")  # 고성문화원(경남)처럼 괄호 꼬리가 붙은 행도 있다
+CULTURE_CENTER = re.compile(r"(문화원|평생학습관|교육원|시민회관)(\(.*\))?$")  # 고성문화원(경남)처럼 괄호 꼬리가 붙은 행도 있다
+COURSE_ONLY = re.compile(r"^(\[[^\]]*\]\s*)?([가-힣]{0,3}형\s*)?\d*\s*코스(\s*\d+\s*구간)?$")  # [하영올레] 1코스, 하천형코스
+EMOJI = re.compile("[\U0001F000-\U0001FAFF\u2600-\u26FF]")  # 🥃 서울 지역 같은 목록 제목 줄. ➔(U+2794)는 경로 표기라 뺀다
 SPORTS_FACILITY = re.compile(r"(체육공원|체육관|체육센터|공설운동장|배드민턴장|인라인스케이트장)$")
 CAMPING = re.compile(r"캠핑|글램핑|카라반|야영")
 CAMP_NOT_LODGING = re.compile(r"식당|다이닝|카페|레스토랑|고기")  # 북한산 글램핑식당, 베르테라 캠핑(디저트카페)
@@ -78,8 +80,10 @@ def no_period_event(row):
 RULES = [
     ("R4_기간없는_행사", "close", "축제/행사·페스티벌 카테고리이고 source.event가 없으며 이름에 행사어가 있다(web 제외). 43/43 기간 한정 행사",
      lambda r, c: no_period_event(r) and src_type(r) != "web", None),
-    ("R9_tourapi_지방문화원", "close", "출처 tourapi이고 이름이 문화원으로 끝난다(괄호 꼬리 허용). 109곳 전수가 지방문화원",
+    ("R9_tourapi_지방문화원", "close", "출처 tourapi이고 이름이 문화원·평생학습관·교육원·시민회관으로 끝난다(괄호 꼬리 허용). 121곳 전수가 해당 시설",
      lambda r, c: src_type(r) == "tourapi" and bool(CULTURE_CENTER.search((r.get("name") or "").strip())), None),
+    ("R14_제목줄_코스번호", "close", "이름에 이모지가 있거나 이름이 코스 번호뿐이다. 6곳 전수에 장소 이름이 없다",
+     lambda r, c: bool(EMOJI.search(r.get("name") or "") or COURSE_ONLY.match((r.get("name") or "").strip())), None),
     ("R13_캠핑_낮슬롯", "fix", "이름이나 카테고리에 캠핑·글램핑·카라반·야영이 있고 슬롯 day. 식당·카페는 뺀다. 표본 교정 2/2",
      lambda r, c: r.get("slot") == "day" and bool(CAMPING.search(r.get("name") or "") or CAMPING.search(r.get("category") or ""))
      and not CAMP_NOT_LODGING.search(f"{r.get('name') or ''} {r.get('category') or ''}"),

@@ -2,14 +2,14 @@
 """P-044 일회성 교정: judge_date_fit.py 결과의 소프트 삭제 목록을 닫고 교정 목록의 슬롯을 바꾼다. 기본은 드라이런이고 --apply일 때만 쓴다.
 
 라이브 DB에서 대상 행을 다시 읽어 지금도 열려 있고 같은 규칙에 걸리는 행만 고친다(그사이 바뀐 행은 제외).
-기간 없는 행사(R4)는 닫기 전에 TourAPI searchFestival2로 올해 행사 목록을 한 번 받아 이름(공백·기호·연도 제외)이
+기간 없는 행사(R4)는 --festival-lookup이면 닫기 전에 TourAPI searchFestival2로 올해 행사 목록을 한 번 받아 이름(공백·기호·연도 제외)이
 같은 행사를 찾는다. 종료일이 오늘 이후면 열어 두고 source.event만 채운다(앱이 종료일 뒤에 숨긴다).
 TourAPI 행의 contentid는 detailIntro2가 빈 응답을 돌려줘(10-03 수집기 11단계: 기간 없음 48) event_period.py로는 채울 수 없다.
 닫는 행은 source.note에 closed: P-044를 남겨 recover_naver_captcha_closures.py가 되열지 않게 한다.
 
 OCI 호스트에서 돌린다. LOG_DIR는 수집기 컨테이너와 같은 TourAPI 사용량 파일을 쓰게 하고, 그 파일이 root 소유라 sudo로 돈다:
 sudo COLLECTOR_DIR=/mnt/data/git/oneul-date/collector LOG_DIR=/mnt/data/git/oneul-date/collector/data/logs \\
-  python3 close_date_fit_spots.py date-fit-20261003.json --backup-dir /home/opc/oneul-backups [--apply]
+  python3 close_date_fit_spots.py date-fit-20261003.json --backup-dir /home/opc/oneul-backups [--festival-lookup] [--apply]
 """
 import argparse
 import json
@@ -66,8 +66,11 @@ def main():
     ap.add_argument("judged", help="date-fit-YYYYMMDD.json")
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--backup-dir", default=os.path.expanduser("~/oneul-backups"))
+    ap.add_argument("--festival-lookup", action="store_true",
+                    help="기간 없는 행사를 닫기 전에 searchFestival2로 기간을 찾는다(TourAPI 호출). 없으면 바로 닫는다")
     args = ap.parse_args()
-    assert os.path.exists(tourapi_quota.USAGE_FILE), f"TourAPI 사용량 파일이 없다: {tourapi_quota.USAGE_FILE} (LOG_DIR 확인)"
+    if args.festival_lookup:
+        assert os.path.exists(tourapi_quota.USAGE_FILE), f"TourAPI 사용량 파일이 없다: {tourapi_quota.USAGE_FILE} (LOG_DIR 확인)"
 
     base, headers = connect()
     judged = json.load(open(args.judged, encoding="utf-8"))
@@ -84,7 +87,7 @@ def main():
     today = datetime.now(KST).strftime("%Y-%m-%d")
     events = [i for i, (a, item) in still.items() if a == "close" and "R4_기간없는_행사" in item["rules"] and i not in excluded]
     festivals = {}
-    if events:
+    if events and args.festival_lookup:
         before = tourapi_quota.usage_today()
         for f in fetch_festivals(today[:4]):
             festivals.setdefault(norm_title(f.get("title")), f)

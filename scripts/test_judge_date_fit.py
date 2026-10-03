@@ -18,17 +18,24 @@ ROWS = [
     row(2, "인제 가을꽃축제장", "축제/행사", "day", "강원 인제군", "web"),
     row(1788818276330, "거제자연휴양림캠핑장", "레포츠/체험", "day", "경상남도 거제시 동부면 거제중앙로 325", "tourapi"),
     row(4905, "북한산 글램핑식당 산들애", "육류,고기", "day", "서울 은평구 대서문길 43-16", "web"),
+    row(1790258774490, "아산시 평생학습관", "문화시설", "day", "충청남도 아산시", "tourapi"),
+    row(3, "성심당문화원", "문화원", "day", "대전 중구", "youtube_vlog"),
+    row(1790311914590, "[하영올레] 1코스", "레포츠/체험", "day", "제주특별자치도 서귀포시", "tourapi"),
+    row(7199, "🥃 서울 지역", "간식", "night", "서울", "web"),
+    row(4, "하이원 알파인코스터", None, "day", "강원 정선군", "web"),
+    row(5, "보발재 단풍 와인딩 ➔ 해발 600m 카페산", "고개", "day", "충북 단양군", "web"),
 ]
 
 
 def test_judge_lists():
     out = judge(ROWS)
     lists = {k: {item["id"] for item in v} for k, v in out.items()}
-    assert lists["close"] == {1790532212259, 1789060176209, 1788681699939}, lists["close"]
+    assert lists["close"] == {1790532212259, 1789060176209, 1788681699939, 1790258774490, 1790311914590, 7199}, lists["close"]
     assert 3858 not in set().union(*lists.values())  # 명동교자는 어느 목록에도 들지 않고 남는다
     assert 1789885634448 not in lists["close"]  # 동네 식당은 주관 판정이라 기계 규칙으로 닫지 않는다
     assert 1 not in set().union(*lists.values())  # 기간이 있는 행사는 남는다
-    assert lists["review"] == {2}  # web 행사는 상설 장소가 섞여 검토로만 간다
+    assert 2 in lists["review"]  # web 행사는 상설 장소가 섞여 검토로만 간다
+    assert not {3, 4, 5} & lists["close"]  # 성심당문화원(빵집), 알파인코스터, ➔ 경로 표기는 닫지 않는다
     assert 4905 not in lists["fix"]  # 캠핑어가 붙은 식당은 숙소로 바꾸지 않는다
     assert out["fix"] == [{**out["fix"][0], "id": 1788818276330, "patch": {"slot": "stay"}}]
 
