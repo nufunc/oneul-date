@@ -4161,8 +4161,9 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   font-size: 0.58rem;
   padding: 1px 4px;
 }
+/* 5열 사진 폭이 65px이라 거리 배지(46px)와 같은 줄에 두면 147px² 겹쳤다(P-046). 3열처럼 둘째 줄로 내린다 */
 .discovery-card.cols-5 .badge-card-curation {
-  top: 4px;
+  top: 23px;
   right: 4px;
   font-size: 0.60rem;
   padding: 1px 4px;
