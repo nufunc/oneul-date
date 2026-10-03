@@ -1,6 +1,6 @@
 """tour_fee·가격 등급 파생 회귀 테스트: python3 test_tour_fee.py 또는 pytest"""
 from supabase_worker import derive_price_tier_from_text as derive
-from tour_fee import fee_fields, parse_closed_days
+from tour_fee import fee_fields, hours_fields, parse_closed_days
 
 
 def test_usefee_uses_highest_amount_and_strips_html():
@@ -46,6 +46,12 @@ def test_closed_days_skips_what_is_not_a_weekly_rule():
     assert parse_closed_days("매주 화요일, 공휴일이면 다음날") == []
     # 2026-09-30 충현박물관 원문. 7일 전부는 매일 휴관이 아니라 개관 요일을 적은 것이다
     assert parse_closed_days("매주 월요일~일요일 / 1월 1일 / 설·추석 연휴") == []
+
+
+def test_hours_under_non_weekday_key():
+    # 요일 키로 넣으면 앱의 오늘 휴무 판정이 이 값을 읽는다
+    assert hours_fields("09:00~18:00<br>(입장마감 17:00)") == {"이용시간": "09:00~18:00 / (입장마감 17:00)"}
+    assert hours_fields("") is None and hours_fields(None) is None
 
 
 if __name__ == "__main__":

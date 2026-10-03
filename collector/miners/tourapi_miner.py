@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from supabase_worker import load_env, derive_region_area, find_duplicate_spot, normalize_spot_address, sanitize_spot, new_spot_id, insert_spots
 from category_filter import is_date_spot_category
 from event_period import fetch_event_period
-from tour_fee import fee_fields, fetch_intro, parse_closed_days
+from tour_fee import fee_fields, fetch_intro, hours_fields, parse_closed_days
 from tourapi_quota import TourApiFetchFailed, TourApiRateLimited, tour_get_json, usage_today
 
 KST = timezone(timedelta(hours=9))
@@ -279,13 +279,14 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                         continue
 
                 # 문화시설은 detailIntro의 이용요금(usefee)을 실제 가격으로 쓴다. 없으면 가격을 비워 둔다.
-                # 같은 응답의 휴관 요일(restdateculture)도 closed_days로 받는다
-                fee, closed_days = None, []
+                # 같은 응답의 휴관 요일(restdateculture)은 closed_days로, 이용시간(usetimeculture)은 business_hours로 받는다
+                fee, closed_days, hours = None, [], None
                 if ctype_id == "14":
                     try:
                         intro = fetch_intro(clean_api_key, content_id)
                         fee = fee_fields(intro.get("usefee"))
                         closed_days = parse_closed_days(intro.get("restdateculture"))
+                        hours = hours_fields(intro.get("usetimeculture"))
                     except TourApiRateLimited:
                         rate_limited = True
                         page_by_combo[combo_key] = prev_page  # 이 페이지의 남은 항목을 다음 회차에 다시 본다
@@ -314,6 +315,7 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                     "summary": f"{title} — 한국관광공사 인증 {ctype_name} 명소 ({area})",
                     "category": ctype_name,
                     **({"closed_days": closed_days} if closed_days else {}),
+                    **({"business_hours": hours} if hours else {}),
                     "image_url": first_img,
                     "lat": lat_val,
                     "lng": lng_val,

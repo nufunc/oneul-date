@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""TourAPI 문화시설(contentTypeId=14)의 이용요금(usefee)을 price에, 휴관 요일(restdateculture)을 closed_days에 적재한다.
+"""TourAPI 문화시설(contentTypeId=14)의 이용요금(usefee)을 price에, 휴관 요일(restdateculture)을 closed_days에,
+이용시간(usetimeculture)을 business_hours에 적재한다.
 기본은 드라이런, --apply일 때만 쓴다.
 관광지(12)·쇼핑(38)은 detailIntro2에 요금 필드가 없고 레포츠(28)는 상세가 비어 와서 대상이 아니다(2026-09-27 확인).
 
@@ -7,7 +8,8 @@
 - price_tier·avg_price_per_person: 가장 높은 금액(대개 성인 요금)으로 derive_price_tier_from_text를 부른다.
   금액이 없고 '무료'라고만 적힌 경우만 FREE다. 빈 값을 무료로 읽지 않는다.
 - closed_days: restdateculture가 '매주 월요일'처럼 매주 반복하는 요일일 때만 채운다. 매월 몇째 주나 시설별 예외는 넣지 않는다.
-- 이미 price나 closed_days가 있는 칸은 건드리지 않는다. 쓰기 전에 바꿀 행을 백업한다.
+- business_hours: {"이용시간": usetimeculture 원문}. 요일 키가 아니라서 앱의 오늘 휴무 판정에는 쓰이지 않는다.
+- 이미 price나 closed_days나 business_hours가 있는 칸은 건드리지 않는다. 쓰기 전에 바꿀 행을 백업한다.
 
 사용: python3 tour_fee.py [--apply] [--backup-dir DIR]
 """
@@ -46,6 +48,12 @@ def fee_fields(raw):
         return {"price": price, "price_tier": "₩", "avg_price_per_person": max(amounts)}
     tier, avg = derive_price_tier_from_text(f"{max(amounts):,}원" if amounts else price)
     return {"price": price, "price_tier": tier, "avg_price_per_person": avg}
+
+
+def hours_fields(raw):
+    """usetimeculture 원문 → {"이용시간": ...}. 비어 있으면 None."""
+    text = clean_usefee(raw)
+    return {"이용시간": text} if text else None
 
 
 WEEKDAYS = "월화수목금토일"
@@ -114,7 +122,7 @@ def run_fee_backfill(apply=False, log=print, backup_dir=None, limit=None):
 
     rows, last = [], 0
     while True:
-        q = urllib.parse.urlencode({"select": "id,name,price,price_tier,avg_price_per_person,closed_days,source,updated_at",
+        q = urllib.parse.urlencode({"select": "id,name,price,price_tier,avg_price_per_person,closed_days,business_hours,source,updated_at",
                                     "source->>type": "eq.tourapi", "source->>note": "eq.TourAPI 4.0 문화시설",
                                     "is_closed": "eq.false", "order": "id.asc", "id": f"gt.{last}", "limit": 1000})
         page = _request(f"{base_url}/rest/v1/spots?{q}", headers)
@@ -124,7 +132,7 @@ def run_fee_backfill(apply=False, log=print, backup_dir=None, limit=None):
         last = page[-1]["id"]
         if len(page) < 1000:
             break
-    targets = [r for r in rows if not r.get("price") or not r.get("closed_days")]
+    targets = [r for r in rows if not r.get("price") or not r.get("closed_days") or not r.get("business_hours")]
     # TourAPI 하루 한도(개발 계정 약 1,000회)를 수집기와 나눠 쓰므로 한 번에 limit행까지만 조회한다
     todo = targets[:limit] if limit else targets
     plans, failed = [], 0
@@ -145,16 +153,20 @@ def run_fee_backfill(apply=False, log=print, backup_dir=None, limit=None):
         closed = parse_closed_days(intro.get("restdateculture")) if not r.get("closed_days") else []
         if closed:
             fields = {**fields, "closed_days": closed}
+        hours = hours_fields(intro.get("usetimeculture")) if not r.get("business_hours") else None
+        if hours:
+            fields = {**fields, "business_hours": hours}
         if fields:
             plans.append((r, fields))
     fees = [f for _, f in plans if f.get("price")]
     free = sum(1 for f in fees if f["price_tier"] == "FREE")
     priced = sum(1 for f in fees if f["avg_price_per_person"])
     closed_n = sum(1 for _, f in plans if f.get("closed_days"))
-    log(f"문화시설 {len(rows)}행 · price나 closed_days가 빈 행 {len(targets)} · 이번 조회 {len(todo)} · 조회 실패 {failed} · "
-        f"요금 받음 {len(fees)}(금액 {priced}, 무료 {free}, 등급 없음 {len(fees) - priced - free}) · 휴관 요일 받음 {closed_n}")
+    hours_n = sum(1 for _, f in plans if f.get("business_hours"))
+    log(f"문화시설 {len(rows)}행 · price나 closed_days나 business_hours가 빈 행 {len(targets)} · 이번 조회 {len(todo)} · 조회 실패 {failed} · "
+        f"요금 받음 {len(fees)}(금액 {priced}, 무료 {free}, 등급 없음 {len(fees) - priced - free}) · 휴관 요일 받음 {closed_n} · 이용시간 받음 {hours_n}")
     for r, f in plans[:12]:
-        log(f"  {r['id']} {r['name']} | {(f.get('price') or '')[:50]} | {f.get('price_tier')} {f.get('avg_price_per_person')} | {f.get('closed_days')}")
+        log(f"  {r['id']} {r['name']} | {(f.get('price') or '')[:50]} | {f.get('price_tier')} {f.get('avg_price_per_person')} | {f.get('closed_days')} | {f.get('business_hours')}")
     if not apply or not plans:
         if not apply:
             log("드라이런: DB에 쓰지 않았다. 실제 반영은 --apply")
