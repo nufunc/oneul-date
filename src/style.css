@@ -4326,6 +4326,12 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   color: #ffffff;
 }
 
+/* 상세 시트에만 붙는다. 배경이 없어 사진 위에서 글씨가 보이지 않았다 */
+.badge-card-curation.tourapi {
+  background: #15803d; /* 흰 글씨 5.02:1 */
+  color: #ffffff;
+}
+
 .discovery-card-img,
 .discovery-img {
   position: absolute;
@@ -5255,14 +5261,16 @@ html[data-theme-resolved="dark"] .btn-discovery-chip-action.btn-discovery-yt {
 }
 
 .spot-detail-hero-img {
+  position: relative; /* 아래 대체 아이콘(absolute)보다 뒤 순서라 그 위에 그려진다 */
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
+/* 일반 흐름에 두면 뒤의 사진을 히어로 아래로 밀어내 사진 대신 아이콘만 보였다. 탐색 카드 .thumb-fallback-box처럼 사진 아래에 깐다 */
 .spot-detail-hero-fallback {
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -5277,6 +5285,12 @@ html[data-theme-resolved="dark"] .btn-discovery-chip-action.btn-discovery-yt {
   flex-wrap: wrap;
   gap: 6px;
   z-index: 2;
+}
+
+/* 탐색 카드용 absolute 배치를 그대로 쓰면 폭 0인 이 상자의 바깥 왼쪽으로 밀려 반원만 보였다 */
+.spot-detail-hero-badges .badge-card-curation {
+  position: static;
+  white-space: nowrap;
 }
 
 /* 타이틀 섹션 */
