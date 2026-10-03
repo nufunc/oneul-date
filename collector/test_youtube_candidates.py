@@ -246,6 +246,20 @@ def test_truncated_description_links_are_restored_from_command_runs():
     assert y.map_link_query_for("담솥", out) == "담솥 종로"
 
 
+def test_naver_shared_folder_places_become_candidates_with_district_query():
+    import io, json
+    body = json.dumps({"bookmarkList": [
+        {"name": "윤숲", "type": "place", "address": "서울 광진구 긴고랑로20길 51"},
+        {"name": "메모", "type": "memo", "address": ""}]}).encode()
+    orig = y.urllib.request.urlopen
+    y.urllib.request.urlopen = lambda *a, **k: io.BytesIO(body)
+    try:
+        assert y._naver_shared_folder_names("0" * 32) == ["윤숲"]
+    finally:
+        y.urllib.request.urlopen = orig
+    assert y._SHARED_FOLDER_QUERY["윤숲"] == "광진구 윤숲"
+
+
 if __name__ == "__main__":
     for fn in [v for k, v in list(globals().items()) if k.startswith("test_")]:
         fn()

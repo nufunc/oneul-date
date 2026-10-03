@@ -1367,6 +1367,32 @@ def _collect_title_candidates(title: str) -> list[str]:
     return raw
 
 
+# 네이버 공유 폴더에서 읽은 상호명 -> '구 상호명' 검색어. 같은 상호의 다른 지점이 잡히지 않게 mine_video_info가 먼저 쓴다.
+_SHARED_FOLDER_QUERY: dict[str, str] = {}
+
+
+def _naver_shared_folder_names(share_id: str) -> list[str]:
+    """네이버 지도 공유 폴더(naver.me가 sharedPlace/folder로 풀리는 링크)에 담긴 장소의 상호명을 돌려준다."""
+    url = ("https://pages.map.naver.com/save-pages/api/maps-bookmark/v3/shares/"
+           f"{share_id}/bookmarks?start=0&limit=50&sort=lastUseTime")
+    try:
+        req = urllib.request.Request(url, headers={**HEADERS, "Referer": "https://map.naver.com/"})
+        with urllib.request.urlopen(req, timeout=8) as res:
+            data = json.loads(res.read().decode('utf-8', errors='ignore'))
+    except Exception:
+        return []
+    names = []
+    for b in data.get("bookmarkList") or []:
+        name = (b.get("displayName") or b.get("name") or "").strip()
+        if not name or b.get("type") != "place":
+            continue
+        names.append(name)
+        addr = (b.get("address") or "").split()
+        if len(addr) >= 2:
+            _SHARED_FOLDER_QUERY[name] = f"{addr[1]} {name}"
+    return names
+
+
 def _extract_shortlink_candidates(text: str) -> list[str]:
     """설명란에 포함된 naver.me, map.naver.com, place.map.kakao.com, kko.to, catchtable 링크를 추적하여 상호명 추출"""
     if not text:
@@ -1401,6 +1427,10 @@ def _extract_shortlink_candidates(text: str) -> list[str]:
             req = urllib.request.Request(short_url, headers=HEADERS)
             with urllib.request.urlopen(req, timeout=5) as res:
                 final_url = res.geturl()
+                f_match = re.search(r'/sharedPlace/folder/([0-9a-f]{32})', final_url)
+                if f_match:
+                    candidates.extend(_naver_shared_folder_names(f_match.group(1)))
+                    continue
                 p_match = re.search(r'/place/(\d+)', final_url)
                 if p_match:
                     pid = p_match.group(1)
@@ -1905,7 +1935,7 @@ def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
 
         # 네이버/카카오 정밀 로컬 검색 (지역 힌트 결합 우선)
         search_res = []
-        link_query = map_link_query_for(cand, vinfo.get("description", ""))
+        link_query = _SHARED_FOLDER_QUERY.get(cand) or map_link_query_for(cand, vinfo.get("description", ""))
         if link_query:
             search_res = search_naver(link_query)
         if not search_res and region_hint:
