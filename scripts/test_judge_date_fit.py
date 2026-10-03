@@ -2,7 +2,7 @@
 import json
 import os
 
-from judge_date_fit import DINER_VERIFIED, judge
+from judge_date_fit import DINER_VERIFIED, REGION_MISMATCH_VERIFIED, judge
 
 
 def row(id, name, category, slot, address, source, event=None):
@@ -96,8 +96,36 @@ def test_neighborhood_diner():
     assert not kept & DINER_VERIFIED, kept & DINER_VERIFIED
 
 
+def video(id, name, address, title):
+    return {**row(id, name, "카페", "day", address, "youtube_vlog"), "source": {"type": "youtube_vlog", "note": f"채널 유튜브 ({title}"}}
+
+
+REGION_ROWS = [
+    video(1788820160544, "잔치떡집", "부산 연제구 쌍미천로73번길 57", "부산 토박이 서면여행📍 ㅣ 부전시장 노포부터 전포 편집샵까지 다 털었습니다"),
+    video(1788971886289, "젠젠 성수점", "서울 성동구 연무장11길 10", "81개월 근속 퇴사 브이로그 1탄 | 잠실 맛집"),  # 교정 대상
+    video(11, "오뚜기칼국수", "강원 동해시 일출로 1", "성수기가 끝나야 진짜가 보이는 끝판왕 코스"),  # 성수기를 성동구로 읽는다
+    video(12, "해운대 달맞이빵 명지점", "부산 강서구 명지국제7로 1", "해운대달맞이빵 명지점"),  # 힌트가 상호 안에 있다
+    video(13, "어느카페", "경기 가평군 북면 1", "서울 근교 드라이브 코스"),  # 출발지 표현
+]
+
+
+def test_region_mismatch():
+    out = judge(REGION_ROWS)
+    assert {item["id"] for item in out["close"]} == {1788820160544}
+    review = {item["id"] for item in out["review"] if "R2_출처지역_불일치" in item["rules"]}
+    assert review == {1788971886289}, review
+    # 닫는 목록이 결과 파일의 close_ids와 같고 오탐, 유지, 교정, 판정 못함 표본과 겹치지 않는다
+    with open(os.path.join(os.path.dirname(__file__), "..", "docs", "planning", "region-mismatch-20261003.json"),
+              encoding="utf-8") as f:
+        result = json.load(f)
+    assert REGION_MISMATCH_VERIFIED == set(result["close_ids"])
+    kept = {r["id"] for r in result["rows"] if r["verdict"] != "폐기"} | {r["id"] for r in result["keep_notes"]}
+    assert not kept & REGION_MISMATCH_VERIFIED, kept & REGION_MISMATCH_VERIFIED
+
+
 if __name__ == "__main__":
     test_judge_lists()
     test_mall_tenant()
     test_neighborhood_diner()
+    test_region_mismatch()
     print("ok")

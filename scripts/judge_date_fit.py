@@ -18,6 +18,9 @@ import urllib.request
 from collections import Counter
 from datetime import datetime
 
+sys.path.insert(0, os.environ.get("COLLECTOR_DIR") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "collector"))
+from youtube_vlog_miner import METRO_REGIONS, extract_region_hints  # noqa: E402
+
 EVENT_CATS = {"축제/행사", "페스티벌"}
 EVENT_WORD = re.compile(r"축제|페스티벌|페스타|문화제|야행|잔치|마라톤|박람회|한마당|놀이마당|문화대전|페스트")
 CULTURE_CENTER = re.compile(r"(문화원|평생학습관|교육원|시민회관)(\(.*\))?$")  # 고성문화원(경남)처럼 괄호 꼬리가 붙은 행도 있다
@@ -76,6 +79,13 @@ DINER_VERIFIED = frozenset({
     1790491270644, 1790499399998, 1790502068725, 1790543264271, 1790552284788, 1790617417106, 1790716549046,
     1790727280198, 1790727282649, 1791020195793})
 DINER_MEASURED_MAX_ID = 1791020195793  # 네이버로 잰 열린 행의 마지막 id. 이보다 뒤에 들어온 행은 측정값이 없다
+# P-050 출처 지역 오매칭. 행별 카카오 판정은 docs/planning/region-mismatch-20261003.json
+# 카카오로 출처 장소가 아님을 확인한 9곳. 기계 조건 정밀도가 95%에 못 미쳐(최고 93%) id 목록으로 닫는다
+REGION_MISMATCH_VERIFIED = frozenset({
+    1788820160544, 1789974245787, 1790499400846, 1790716559054, 1790734822167, 1790758673091, 1791020195793,
+    1791020198770, 1791020201766})
+HINT_COMPOUND = re.compile(r"성수기|세종마을|안양천|안산자락길|민락2지구|송도암남")  # 힌트 사전이 앞부분을 지명으로 읽는 낱말
+INCHEON_REORG = {"중구": "제물포구", "동구": "제물포구"}  # 2026 인천 개편 뒤 주소를 힌트 사전이 모른다
 
 
 def src_type(row):
@@ -95,17 +105,42 @@ def sido_of_address(row):
 
 
 def source_sidos(row):
-    """출처 메모의 검색어(캐치테이블)나 영상 제목(괄호 안)에 나온 시·도. 광주는 경기 광주와 겹쳐 뺀다."""
-    t = src_type(row)
-    text = note(row)
-    if t == "catchtable_miner":
-        text = text.split("query:", 1)[-1]
-    elif t == "youtube_vlog":
-        m = re.search(r"\((.*)", text)
-        text = m.group(1) if m else ""
-    else:
+    """캐치테이블 출처 메모의 검색어에 나온 시·도. 광주는 경기 광주와 겹쳐 뺀다."""
+    if src_type(row) != "catchtable_miner":
         return set()
+    text = note(row).split("query:", 1)[-1]
     return {v for k, v in SIDO.items() if k != "광주" and re.search(rf"(^|[\s(]){k}", text)}
+
+
+def video_title(row):
+    """영상 전체 제목. social_links.youtube가 출처 영상이면 그 제목, 아니면 note의 잘린 제목."""
+    yt, s = (row.get("social_links") or {}).get("youtube") or {}, row.get("source") or {}
+    if yt.get("title") and yt.get("url") == s.get("url"):
+        return yt["title"]
+    m = re.search(r"유튜브 \((.*)", note(row))
+    return m.group(1).split(") | ")[0] if m else ""  # 뒤에 덧붙은 처리 기록(| relocated: ...)은 제목이 아니다
+
+
+def hint_matches(hint, row):
+    a = row.get("address") or ""
+    if hint in METRO_REGIONS:
+        return sido_of_address(row) == hint or hint in a or (hint == "광주" and sido_of_address(row) == "전남")
+    if hint == "영종구":
+        return "영종구" in a or bool(re.search(r"인천 중구 (운서|운남|운북|중산|을왕|남북|덕교)동", a))
+    return hint in a or (a.startswith("인천") and hint in INCHEON_REORG and INCHEON_REORG[hint] in a)
+
+
+def video_region_mismatch(row):
+    """영상 제목의 지역 힌트(수집기 extract_region_hints)가 주소의 시·도와 시군구 어디에도 맞지 않는 youtube_vlog 행.
+    힌트 사전이 다른 낱말의 앞부분을 읽은 제목과 힌트가 상호 안에 있는 행은 뺀다."""
+    if src_type(row) != "youtube_vlog":
+        return False
+    text = video_title(row)
+    hints = extract_region_hints(text) if text else []
+    if not hints or any(hint_matches(h, row) for h in hints) or HINT_COMPOUND.search(text):
+        return False
+    name = row.get("name") or ""
+    return not any(h in name or (len(h) > 2 and h[-1] in "시군구" and h[:-1] in name) for h in hints)
 
 
 def road_key(row):
@@ -170,14 +205,18 @@ RULES = [
     ("R15_동네_식당", "close", "밥집·김밥·국밥 등 일상 식사 패턴에 걸리고 500m 안 열린 행 20곳 미만, 네이버 방문자 리뷰 500·블로그 3,000 미만인 "
      "web 밖 행 가운데 사람이 동네 식당으로 판정한 38곳. 정밀도 38/40(95.0%)",
      lambda r, c: neighborhood_diner(r) and r["id"] in DINER_VERIFIED, None),
+    ("R2c_출처지역_오매칭", "close", "영상 제목이나 검색어의 지역과 주소가 다르고 카카오로 출처 장소가 아님을 확인한 9곳. 판정 9/9",
+     lambda r, c: r["id"] in REGION_MISMATCH_VERIFIED, None),
     ("R13_캠핑_낮슬롯", "fix", "이름이나 카테고리에 캠핑·글램핑·카라반·야영이 있고 슬롯 day. 식당·카페는 뺀다. 표본 교정 2/2",
      lambda r, c: r.get("slot") == "day" and bool(CAMPING.search(r.get("name") or "") or CAMPING.search(r.get("category") or ""))
      and not CAMP_NOT_LODGING.search(f"{r.get('name') or ''} {r.get('category') or ''}"),
      {"slot": "stay"}),
     ("R4w_기간없는_행사_web", "review", "R4와 같은 조건의 web 행. 상설 장소가 섞여 있다(궁남지 등)",
      lambda r, c: no_period_event(r) and src_type(r) == "web", None),
-    ("R2_출처지역_불일치", "review", "캐치테이블 검색어나 영상 제목의 시·도가 주소의 시·도와 다르다. 전수 판정 74%",
-     lambda r, c: bool(source_sidos(r)) and sido_of_address(r) is not None and sido_of_address(r) not in source_sidos(r), None),
+    ("R2_출처지역_불일치", "review", "캐치테이블 검색어의 시·도가 주소의 시·도와 다르거나, 영상 제목의 지역 힌트가 주소와 맞지 않는다. "
+     "영상 44곳 판정에서 출처 장소가 아닌 행 39%",
+     lambda r, c: (bool(source_sidos(r)) and sido_of_address(r) is not None
+                   and sido_of_address(r) not in source_sidos(r)) or video_region_mismatch(r), None),
     ("R6_백화점_몰_입점", "review", "이름이나 주소에 백화점·더현대·스타필드·아울렛 등. 보충 58%, 별마당도서관 같은 명소가 섞임",
      lambda r, c: bool(MALL.search(r.get("name") or "") or MALL.search(r.get("address") or "")), None),
     ("R6c_몰_입점매장_미확인", "review", "R6c 조건의 이름 규칙 행 가운데 카카오로 확인하지 못한 행과 주소로만 몰에 걸린 행. 주소로만 걸린 23곳은 판정 14곳 중 7곳이 몰 밖",
