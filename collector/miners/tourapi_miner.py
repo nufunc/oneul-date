@@ -73,7 +73,8 @@ def is_non_date_leisure_or_monument(ctype_id: str, title: str) -> bool:
     """레포츠/체험의 골프장·낚시터와 관광지의 단독 유물이면 True"""
     title = title.strip()
     if ctype_id == "28":
-        return bool(GOLF_NAME.search(title) or FISHING_NAME.search(title))
+        # 실내낚시터는 도심 데이트 장소라 통과시킨다(P-063 드림바다실내낚시터)
+        return bool(GOLF_NAME.search(title) or (FISHING_NAME.search(title) and "실내" not in title))
     if ctype_id == "12":
         return bool(MONUMENT_NAME.search(title)) and not MONUMENT_KEEP.search(title)
     return False

@@ -28,12 +28,15 @@ CULTURE_CENTER = re.compile(r"(문화원|평생학습관|교육원|시민회관)
 COURSE_ONLY = re.compile(r"^(\[[^\]]*\]\s*)?([가-힣]{0,3}형\s*)?\d*\s*코스(\s*\d+\s*구간)?$")  # [하영올레] 1코스, 하천형코스
 EMOJI = re.compile("[\U0001F000-\U0001FAFF\u2600-\u26FF]")  # 🥃 서울 지역 같은 목록 제목 줄. ➔(U+2794)는 경로 표기라 뺀다
 SPORTS_FACILITY = re.compile(r"(체육공원|체육관|체육센터|공설운동장|배드민턴장|인라인스케이트장)$")
-# P-057: 수집기 tourapi 관문과 같은 이름 규칙(collector/miners/tourapi_miner.py). 이미 들어온 행은 검토로만 올린다
+# P-057: 수집기 tourapi 관문과 같은 이름 규칙(collector/miners/tourapi_miner.py).
+# P-063: 열린 행 251곳 판정(docs/planning/golf-fishing-relic-20261004.json)으로 닫기로 올리고 애매한 행만 검토에 남긴다
 GOLF = re.compile(r"(?<!미니)골프|컨트리\s*클럽|(CC|GC|C\.C)(?![A-Za-z])", re.IGNORECASE)
 FISHING = re.compile(r"낚시|피싱|좌대")
 MONUMENT = re.compile(r"(비|비석|비각|묘|고인돌|당간지주|귀부 및 이수|각서석|남근석|정려각|효각|열녀문|홍살문|당산|부도|석장승|석등|"
                       r"충혼탑|기념탑)(\s*\(.*\))?$")
 MONUMENT_KEEP = re.compile(r"^(종묘|문묘|동묘)$|나비$|갈비$|도깨비$|바람개비$")
+GOLF_RELIC_KEEP = frozenset({1790667560577, 1790456834079, 1790307190897})  # 리베라CC, 서산수골프앤리조트, 경주 김유신묘
+FISHING_KEEP = re.compile(r"실내|바다낚시터|좌대|캠핑")  # 실내낚시터는 데이트, 관리형 바다낚시터·좌대·캠핑장은 애매
 CAMPING = re.compile(r"캠핑|글램핑|카라반|야영")
 LEISURE_CAMP = re.compile(r"캠프|펜션")  # P-057: tourapi 레포츠/체험 유형만. 캠프그리브스(관광지), 소금강행복펜션마트(쇼핑)는 다른 유형
 CAMP_NOT_LODGING = re.compile(r"식당|다이닝|카페|레스토랑|고기")  # 북한산 글램핑식당, 베르테라 캠핑(디저트카페)
@@ -242,6 +245,20 @@ def neighborhood_diner(row):
             and src_type(row) != "web")
 
 
+def tourapi_golf(row):
+    return src_type(row) == "tourapi" and row.get("category") == "레포츠/체험" and bool(GOLF.search(row.get("name") or ""))
+
+
+def tourapi_fishing(row):
+    return src_type(row) == "tourapi" and row.get("category") == "레포츠/체험" and bool(FISHING.search(row.get("name") or ""))
+
+
+def tourapi_monument(row):
+    name = (row.get("name") or "").strip()
+    return (src_type(row) == "tourapi" and row.get("category") == "관광지" and bool(MONUMENT.search(name))
+            and not MONUMENT_KEEP.search(name))
+
+
 def no_period_event(row):
     return (row.get("category") in EVENT_CATS and not (row.get("source") or {}).get("event")
             and bool(EVENT_WORD.search(row.get("name") or "")))
@@ -264,6 +281,15 @@ RULES = [
      lambda r, c: r["id"] in REGION_MISMATCH_VERIFIED, None),
     ("R17_공공시설", "close", "동네 공공도서관과 체육·주민·교육·복지 공공시설 가운데 사람이 판정하고 카카오로 확인한 98곳. 판정 98/98",
      lambda r, c: r["id"] in PUBLIC_FACILITY_VERIFIED, None),
+    ("R18_tourapi_골프장", "close", "출처 tourapi, 유형 레포츠/체험이고 이름에 골프·CC·GC·컨트리클럽이 있다(미니골프 제외). "
+     "열린 행 전수 판정 96/98(P-063), 애매 2곳은 R18 보류로 뺀다",
+     lambda r, c: tourapi_golf(r) and r["id"] not in GOLF_RELIC_KEEP, None),
+    ("R19_tourapi_낚시터", "close", "출처 tourapi, 유형 레포츠/체험이고 이름에 낚시·피싱·좌대가 있으며 실내·바다낚시터·좌대·캠핑은 없다. "
+     "열린 행 전수 판정 70/70(P-063)",
+     lambda r, c: tourapi_fishing(r) and not FISHING_KEEP.search(r.get("name") or ""), None),
+    ("R20_tourapi_단독유물", "close", "출처 tourapi, 유형 관광지이고 이름이 비·묘·당간지주·고인돌·충혼탑 등으로 끝난다(석탑·석불 제외, "
+     "종묘 등 제외). 열린 행 전수 판정 73/74(P-063), 애매 1곳은 R20 보류로 뺀다",
+     lambda r, c: tourapi_monument(r) and r["id"] not in GOLF_RELIC_KEEP, None),
     ("R13_캠핑_낮슬롯", "fix", "이름이나 카테고리에 캠핑·글램핑·카라반·야영이 있거나 tourapi 레포츠/체험 이름에 캠프·펜션이 있고 슬롯 day. "
      "식당·카페는 뺀다. 표본 교정 2/2",
      lambda r, c: r.get("slot") == "day" and bool(CAMPING.search(r.get("name") or "") or CAMPING.search(r.get("category") or "")
@@ -292,14 +318,12 @@ RULES = [
     ("R8_시장", "review", "카테고리 시장. 보충 25%, 주관 판정", lambda r, c: r.get("category") == "시장", None),
     ("R10_tourapi_체육시설", "review", "출처 tourapi이고 이름이 체육공원·체육관·공설운동장 등으로 끝난다. 공원형이 섞임",
      lambda r, c: src_type(r) == "tourapi" and bool(SPORTS_FACILITY.search((r.get("name") or "").strip())), None),
-    ("R18_tourapi_골프장", "review", "출처 tourapi, 유형 레포츠/체험이고 이름에 골프·CC·GC·컨트리클럽이 있다(미니골프 제외). 카카오 표본 20곳 중 골프장 17과 부속 3",
-     lambda r, c: src_type(r) == "tourapi" and r.get("category") == "레포츠/체험" and bool(GOLF.search(r.get("name") or "")), None),
-    ("R19_tourapi_낚시터", "review", "출처 tourapi, 유형 레포츠/체험이고 이름에 낚시·피싱·좌대가 있다. 카카오 표본 20곳 중 낚시터 16과 이름 검색 0건 3",
-     lambda r, c: src_type(r) == "tourapi" and r.get("category") == "레포츠/체험" and bool(FISHING.search(r.get("name") or "")), None),
-    ("R20_tourapi_단독유물", "review", "출처 tourapi, 유형 관광지이고 이름이 비·묘·당간지주·고인돌·충혼탑 등으로 끝난다(석탑·석불 제외, 종묘 등 제외). "
-     "정밀도를 재지 않았다",
-     lambda r, c: src_type(r) == "tourapi" and r.get("category") == "관광지" and bool(MONUMENT.search((r.get("name") or "").strip()))
-     and not MONUMENT_KEEP.search((r.get("name") or "").strip()), None),
+    ("R18_tourapi_골프장_보류", "review", "R18 조건이지만 사람이 애매로 판정한 2곳(리베라CC, 서산수골프앤리조트)",
+     lambda r, c: tourapi_golf(r) and r["id"] in GOLF_RELIC_KEEP, None),
+    ("R19_tourapi_낚시터_제외", "review", "R19 조건이지만 이름에 실내·바다낚시터·좌대·캠핑이 있다. 판정 9곳 중 데이트 1, 애매 8",
+     lambda r, c: tourapi_fishing(r) and bool(FISHING_KEEP.search(r.get("name") or "")), None),
+    ("R20_tourapi_단독유물_보류", "review", "R20 조건이지만 사람이 애매로 판정한 1곳(경주 김유신묘)",
+     lambda r, c: tourapi_monument(r) and r["id"] in GOLF_RELIC_KEEP, None),
     ("R1_비데이트_카테고리", "review", "카테고리가 문화원·스포츠시설·도서관·매표소·공간대여 등. 대부분 카테고리만 틀린 명소",
      lambda r, c: r.get("category") in NON_DATE_CATS, None),
     ("R5_설명형_이름", "review", "내보낸 이름이 3어절 이상이거나 &·+/, 및, in을 담는다. 자동 이름 교정은 하지 않는다(P-049 드라이런 정밀도 2/5). "

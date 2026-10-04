@@ -57,7 +57,7 @@ def test_golf_fishing_and_lone_monuments_are_skipped():
 
 
 def test_similar_names_are_not_skipped():
-    for title in ("보광미니골프장", "하늘그린캠프", "카누글램핑펜션"):
+    for title in ("보광미니골프장", "하늘그린캠프", "카누글램핑펜션", "드림바다실내낚시터", "실내낚시카페 피싱파크"):
         assert not is_non_date_leisure_or_monument("28", title), title
     for title in ("종묘", "묘적사계곡", "묘각사(영천)", "골굴사 마애여래좌상", "경주 정혜사지 십삼층석탑", "캠프그리브스", "아트센터나비"):
         assert not is_non_date_leisure_or_monument("12", title), title

@@ -2,7 +2,7 @@
 import json
 import os
 
-from judge_date_fit import DINER_VERIFIED, PUBLIC_FACILITY_KEEP, PUBLIC_FACILITY_VERIFIED, REGION_MISMATCH_VERIFIED, judge
+from judge_date_fit import DINER_VERIFIED, GOLF_RELIC_KEEP, PUBLIC_FACILITY_KEEP, PUBLIC_FACILITY_VERIFIED, REGION_MISMATCH_VERIFIED, judge
 
 
 def row(id, name, category, slot, address, source, event=None):
@@ -158,7 +158,7 @@ def test_public_facility():
 
 
 def test_tourapi_golf_fishing_monument():
-    """P-057 신규 유입 이름. 검토로만 올리고 닫지 않는다"""
+    """P-057 신규 유입 이름. P-063부터 닫고 애매한 행만 검토로 남긴다"""
     rows = [row(11, "솔트베이GC", "레포츠/체험", "day", "인천", "tourapi"), row(12, "송전지 낚시터", "레포츠/체험", "day", "경기", "tourapi"),
             row(13, "어제 달천 충렬사비", "관광지", "day", "충북", "tourapi"), row(14, "보성 문익점 부조묘", "관광지", "day", "전남", "tourapi"),
             row(21, "보광미니골프장", "레포츠/체험", "day", "강원", "tourapi"), row(22, "종묘", "관광지", "day", "서울", "tourapi"),
@@ -169,9 +169,25 @@ def test_tourapi_golf_fishing_monument():
     out = judge(rows)
     assert [item["id"] for item in out["fix"]] == [31]  # 캠프·펜션은 tourapi 레포츠/체험만 stay로 고친다
     review = {item["id"]: item["rules"] for item in out["review"]}
-    assert {11, 12, 13, 14} <= set(review) and not out["close"]
+    assert {item["id"] for item in out["close"]} == {11, 12, 13, 14}
     assert not {21, 22, 23, 25} & set(review), review
     assert not any(r.startswith(("R18", "R19", "R20")) for r in review.get(24, []))
+
+
+def test_golf_fishing_relic_keep():
+    """P-063 애매 3곳과 이름 제외 낚시터는 닫지 않고 검토로 남긴다"""
+    rows = [row(1790667560577, "리베라컨트리클럽", "레포츠/체험", "day", "경기", "tourapi"),
+            row(1790307190897, "경주 김유신묘", "관광지", "day", "경북", "tourapi"),
+            row(41, "드림바다실내낚시터", "레포츠/체험", "day", "서울", "tourapi"), row(42, "소래바다낚시터", "레포츠/체험", "day", "인천", "tourapi"),
+            row(43, "만정바다좌대낚시터", "레포츠/체험", "day", "경기", "tourapi"), row(44, "방길낚시캠핑장", "레포츠/체험", "stay", "충남", "tourapi")]
+    out = judge(rows)
+    assert not out["close"], out["close"]
+    assert {item["id"] for item in out["review"]} == {r["id"] for r in rows}
+    with open(os.path.join(os.path.dirname(__file__), "..", "docs", "planning", "golf-fishing-relic-20261004.json"),
+              encoding="utf-8") as f:
+        result = json.load(f)
+    assert GOLF_RELIC_KEEP == set(result["keep_review_ids"]["golf"]) | set(result["keep_review_ids"]["relic"])
+    assert sum(len(v) for v in result["close_ids"].values()) == 239
 
 
 if __name__ == "__main__":
@@ -182,4 +198,5 @@ if __name__ == "__main__":
     test_region_mismatch()
     test_public_facility()
     test_tourapi_golf_fishing_monument()
+    test_golf_fishing_relic_keep()
     print("ok")
