@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """P-052 R16 지도 검색 불가 검사. DB에 쓰지 않고 판정 파일만 낸다. 로컬에서 돈다.
 
-모집단: 출처 web, 카카오 장소 id 없음(provider_ids.kakao가 없고 kakaomap 링크가 place.map.kakao.com/<숫자>가 아님)이고 verified=false이거나
-설명형 이름(judge_date_fit R5)인 열린 행. R5 행은 verified와 무관하게 넣는다(P-058 층 E와 F). --extra로 P-049 드라이런에서 핵심 이름이 500m 안에 없던 행 가운데 앞의 세 조건에 드는 행을 더한다.
+모집단: 출처 web, 카카오 장소 id 없음(provider_ids.kakao가 없고 kakaomap 링크가 place.map.kakao.com/<숫자>가 아님)인 열린 행.
+verified와 설명형 이름(judge_date_fit R5)은 보지 않는다. R5 행(P-058 층 E와 F)에 이어 verified=true이고 R5가 아닌 행도 넣었다(P-064,
+10-04 361곳. 몽까페, 까치식당처럼 행 좌표가 다른 업장인 지도 없음 행이 나왔다). --extra로 P-049 드라이런에서 핵심 이름이 500m 안에 없던 행 가운데 앞의 조건에 드는 행을 더한다.
 판정은 두 단계다.
   네이버: 앱 검색어(main.ts mapQuery)와 변형 4종(앱이 붙인 지역어를 뗀 이름, 마지막 어절을 뗀 이름, 3자 이상 마지막 어절, 띄어쓰기를 뺀 이름)의
     결과 상위 5위에 이름 바이그램 겹침 0.5 이상이고 행 좌표 3km 안인 장소가 있으면 남긴다(검색됨).
@@ -25,7 +26,7 @@ import urllib.parse
 import urllib.request
 from datetime import datetime
 
-from judge_date_fit import described_name, export_name, road_key, src_type
+from judge_date_fit import export_name, road_key, src_type
 from fix_described_names import COLLECTOR, bigrams, core_name, dist_m, norm, run_naver
 
 NAVER_RADIUS_M = 3000
@@ -40,8 +41,7 @@ def no_kakao_id(row):
 
 
 def in_group(row):
-    return (src_type(row) == "web" and no_kakao_id(row) and (not row.get("verified") or described_name(row))
-            and row.get("lat") and row.get("lng"))
+    return src_type(row) == "web" and no_kakao_id(row) and row.get("lat") and row.get("lng")
 
 
 def similar(a, b):

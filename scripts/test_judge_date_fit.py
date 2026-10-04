@@ -2,7 +2,8 @@
 import json
 import os
 
-from judge_date_fit import DINER_VERIFIED, GOLF_RELIC_KEEP, PUBLIC_FACILITY_KEEP, PUBLIC_FACILITY_VERIFIED, REGION_MISMATCH_VERIFIED, judge
+from judge_date_fit import (DINER_VERIFIED, GOLF_RELIC_KEEP, PUBLIC_FACILITY_KEEP, PUBLIC_FACILITY_VERIFIED, R3_SAME_ADDRESS_EXEMPT,
+                            REGION_MISMATCH_VERIFIED, judge)
 
 
 def row(id, name, category, slot, address, source, event=None):
@@ -190,6 +191,21 @@ def test_golf_fishing_relic_keep():
     assert sum(len(v) for v in result["close_ids"].values()) == 239
 
 
+def test_same_address_exempt():
+    rows = [row(2, "스타필드 고양", "쇼핑", "day", "경기 고양시 덕양구 고양대로 1955", "web")] + [
+        row(1791100000010 + i, f"새 매장 {i}", "카페", "day", "경기 고양시 덕양구 고양대로 1955 1층", "web") for i in range(4)]
+    rules = {item["id"]: item["rules"] for items in judge(rows).values() for item in items}
+    assert "R3_같은주소_5행이상" not in rules.get(2, [])  # 사람이 남긴 행은 그때 주소 그대로면 빠진다
+    assert all("R3_같은주소_5행이상" in rules[1791100000010 + i] for i in range(4))  # 같은 주소에 새로 든 행은 그대로 걸린다
+    moved = judge([{**rows[0], "address": "경기 고양시 덕양구 고양대로 1957"}] + [
+        {**r, "address": "경기 고양시 덕양구 고양대로 1957"} for r in rows[1:]])
+    assert any(item["id"] == 2 and "R3_같은주소_5행이상" in item["rules"] for item in moved["review"])  # 주소가 바뀌면 다시 걸린다
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs", "planning", "review-rule-20261004.json"),
+              encoding="utf-8") as f:
+        keep = set(json.load(f)["full_scan_outside_r16"]["reviewed_keep_ids"])
+    assert set(R3_SAME_ADDRESS_EXEMPT) == keep - {1788908665523, 1790823926129}  # 둘은 P-063으로 닫혀 뺐다
+
+
 if __name__ == "__main__":
     test_judge_lists()
     test_described_name()
@@ -199,4 +215,5 @@ if __name__ == "__main__":
     test_public_facility()
     test_tourapi_golf_fishing_monument()
     test_golf_fishing_relic_keep()
+    test_same_address_exempt()
     print("ok")

@@ -128,6 +128,9 @@ DESCRIBED_MARK = re.compile(r"[&·+/]|\s및\s|\sin\s")
 # P-058 층 A: 카카오 장소 이름이 내보낸 이름과 같고 300m 안인 398곳과 그때의 내보낸 이름. 이름이 바뀐 행은 다시 R5로 간다
 with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "r5_map_name_exempt.json"), encoding="utf-8") as _f:
     R5_MAP_NAME_EXEMPT = {int(k): v for k, v in json.load(_f)["rows"].items()}
+# P-064: R3 같은 주소 전수에서 사람이 남긴 116곳과 그때의 도로명 주소. 주소가 바뀐 행과 새로 든 행은 다시 R3로 간다
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "r3_same_address_exempt.json"), encoding="utf-8") as _f:
+    R3_SAME_ADDRESS_EXEMPT = {int(k): v for k, v in json.load(_f)["rows"].items()}
 
 
 def export_name(row):
@@ -313,8 +316,9 @@ RULES = [
      "R17 닫기와 남김 목록에 없는 행. 이름 규칙 정밀도 90.7%",
      lambda r, c: bool(PUBLIC_FACILITY.search((r.get("name") or "").strip()))
      and r["id"] not in PUBLIC_FACILITY_VERIFIED and r["id"] not in PUBLIC_FACILITY_KEEP, None),
-    ("R3_같은주소_5행이상", "review", "도로명 주소(번지까지)가 같은 열린 행이 5곳 이상. 보충 25%",
-     lambda r, c: road_key(r) is not None and c["road"][road_key(r)] >= 5, None),
+    ("R3_같은주소_5행이상", "review", "도로명 주소(번지까지)가 같은 열린 행이 5곳 이상. 보충 25%. "
+     "사람이 지도로 보고 남긴 116곳(P-064, r3_same_address_exempt.json)은 그때 주소 그대로면 뺀다",
+     lambda r, c: road_key(r) is not None and c["road"][road_key(r)] >= 5 and R3_SAME_ADDRESS_EXEMPT.get(r["id"]) != road_key(r), None),
     ("R8_시장", "review", "카테고리 시장. 보충 25%, 주관 판정", lambda r, c: r.get("category") == "시장", None),
     ("R10_tourapi_체육시설", "review", "출처 tourapi이고 이름이 체육공원·체육관·공설운동장 등으로 끝난다. 공원형이 섞임",
      lambda r, c: src_type(r) == "tourapi" and bool(SPORTS_FACILITY.search((r.get("name") or "").strip())), None),
