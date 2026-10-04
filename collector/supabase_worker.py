@@ -1047,7 +1047,7 @@ def derive_slot(category, name=""):
     return verdict
 
 
-SLOT_CAMP_NAME_RE = re.compile(r"캠프|캠핑|야영|글램핑|카라반")
+SLOT_CAMP_NAME_RE = re.compile(r"캠프|캠핑|야영|글램핑|카라반|펜션")  # 펜션: P-057이 stay로 고친 쇠꼴마을고고펜션(레포츠/체험)
 
 
 def stay_unflip_vetoed(name):

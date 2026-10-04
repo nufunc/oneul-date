@@ -28,6 +28,12 @@ CULTURE_CENTER = re.compile(r"(문화원|평생학습관|교육원|시민회관)
 COURSE_ONLY = re.compile(r"^(\[[^\]]*\]\s*)?([가-힣]{0,3}형\s*)?\d*\s*코스(\s*\d+\s*구간)?$")  # [하영올레] 1코스, 하천형코스
 EMOJI = re.compile("[\U0001F000-\U0001FAFF\u2600-\u26FF]")  # 🥃 서울 지역 같은 목록 제목 줄. ➔(U+2794)는 경로 표기라 뺀다
 SPORTS_FACILITY = re.compile(r"(체육공원|체육관|체육센터|공설운동장|배드민턴장|인라인스케이트장)$")
+# P-057: 수집기 tourapi 관문과 같은 이름 규칙(collector/miners/tourapi_miner.py). 이미 들어온 행은 검토로만 올린다
+GOLF = re.compile(r"(?<!미니)골프|컨트리\s*클럽|(CC|GC|C\.C)(?![A-Za-z])", re.IGNORECASE)
+FISHING = re.compile(r"낚시|피싱|좌대")
+MONUMENT = re.compile(r"(비|비석|비각|묘|고인돌|당간지주|귀부 및 이수|각서석|남근석|정려각|효각|열녀문|홍살문|당산|부도|석장승|석등|"
+                      r"충혼탑|기념탑)(\s*\(.*\))?$")
+MONUMENT_KEEP = re.compile(r"^(종묘|문묘|동묘)$|나비$|갈비$|도깨비$|바람개비$")
 CAMPING = re.compile(r"캠핑|글램핑|카라반|야영")
 CAMP_NOT_LODGING = re.compile(r"식당|다이닝|카페|레스토랑|고기")  # 북한산 글램핑식당, 베르테라 캠핑(디저트카페)
 MALL = re.compile(r"백화점|더현대|스타필드|아울렛|아웃렛|롯데월드몰|타임스퀘어|코엑스몰|IFC몰|AK플라자|갤러리아")
@@ -275,6 +281,14 @@ RULES = [
     ("R8_시장", "review", "카테고리 시장. 보충 25%, 주관 판정", lambda r, c: r.get("category") == "시장", None),
     ("R10_tourapi_체육시설", "review", "출처 tourapi이고 이름이 체육공원·체육관·공설운동장 등으로 끝난다. 공원형이 섞임",
      lambda r, c: src_type(r) == "tourapi" and bool(SPORTS_FACILITY.search((r.get("name") or "").strip())), None),
+    ("R18_tourapi_골프장", "review", "출처 tourapi, 유형 레포츠/체험이고 이름에 골프·CC·GC·컨트리클럽이 있다(미니골프 제외). 카카오 표본 20곳 중 골프장 17과 부속 3",
+     lambda r, c: src_type(r) == "tourapi" and r.get("category") == "레포츠/체험" and bool(GOLF.search(r.get("name") or "")), None),
+    ("R19_tourapi_낚시터", "review", "출처 tourapi, 유형 레포츠/체험이고 이름에 낚시·피싱·좌대가 있다. 카카오 표본 20곳 중 낚시터 16과 이름 검색 0건 3",
+     lambda r, c: src_type(r) == "tourapi" and r.get("category") == "레포츠/체험" and bool(FISHING.search(r.get("name") or "")), None),
+    ("R20_tourapi_단독유물", "review", "출처 tourapi, 유형 관광지이고 이름이 비·묘·당간지주·고인돌·충혼탑 등으로 끝난다(석탑·석불 제외, 종묘 등 제외). "
+     "정밀도를 재지 않았다",
+     lambda r, c: src_type(r) == "tourapi" and r.get("category") == "관광지" and bool(MONUMENT.search((r.get("name") or "").strip()))
+     and not MONUMENT_KEEP.search((r.get("name") or "").strip()), None),
     ("R1_비데이트_카테고리", "review", "카테고리가 문화원·스포츠시설·도서관·매표소·공간대여 등. 대부분 카테고리만 틀린 명소",
      lambda r, c: r.get("category") in NON_DATE_CATS, None),
     ("R5_설명형_이름", "review", "내보낸 이름이 3어절 이상이거나 &·+/, 및, in을 담는다. 자동 이름 교정은 하지 않는다(P-049 드라이런 정밀도 2/5). "

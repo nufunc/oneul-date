@@ -48,10 +48,35 @@ CAMPSITE_NAME = re.compile(r"캠핑|글램핑|카라반|야영")
 # 문화시설 유형의 지방문화원·평생학습관·교육원·시민회관은 강좌·행정 시설이다(2026-10-03 사이클 36: 121곳).
 # 공용 필터에 넣으면 다른 수집기의 성심당문화원(빵집)까지 막혀 이 유형에서만 거른다. 정독도서관 같은 명소가 있어 도서관은 막지 않는다
 PUBLIC_FACILITY_NAME = re.compile(r"(문화원|평생학습관|교육원|시민회관)(\(.*\))?$")
+# 레포츠/체험 유형의 캠프·펜션도 숙소다(2026-10-04 P-057: 하늘그린캠프, 학마을캠프펜션이 day로 들어옴).
+# 다른 유형에는 캠프그리브스(관광지), 소금강행복펜션마트(쇼핑)가 있어 이 유형에서만 본다
+LEISURE_LODGING_NAME = re.compile(r"캠프|펜션")
+# 데이트 코스로 추천하지 않는 레포츠/체험 유형: 골프장, 낚시터(P-057 열린 행 96곳, 77곳). 보광미니골프장은 남긴다
+GOLF_NAME = re.compile(r"(?<!미니)골프|컨트리\s*클럽|(CC|GC|C\.C)(?![A-Za-z])", re.IGNORECASE)
+FISHING_NAME = re.compile(r"낚시|피싱|좌대")
+# 관광지 유형의 단독 비석·묘·당간지주 같은 유물(P-057). 석탑·석불은 골굴사 마애여래좌상 같은 명소가 섞여 거르지 않는다.
+# 이름 끝만 보므로 묘적사·묘각사 같은 사찰은 걸리지 않고, 종묘·문묘·동묘는 명소라 남긴다
+MONUMENT_NAME = re.compile(r"(비|비석|비각|묘|고인돌|당간지주|귀부 및 이수|각서석|남근석|정려각|효각|열녀문|홍살문|당산|부도|석장승|석등|"
+                           r"충혼탑|기념탑)(\s*\(.*\))?$")
+MONUMENT_KEEP = re.compile(r"^(종묘|문묘|동묘)$|나비$|갈비$|도깨비$|바람개비$")
 
 
 def is_skipped_lodging(item: dict) -> bool:
     return bool(LODGING_SKIP_NAME.search(item.get("title") or ""))
+
+
+def is_campsite(ctype_id: str, title: str) -> bool:
+    return bool(CAMPSITE_NAME.search(title) or (ctype_id == "28" and LEISURE_LODGING_NAME.search(title)))
+
+
+def is_non_date_leisure_or_monument(ctype_id: str, title: str) -> bool:
+    """레포츠/체험의 골프장·낚시터와 관광지의 단독 유물이면 True"""
+    title = title.strip()
+    if ctype_id == "28":
+        return bool(GOLF_NAME.search(title) or FISHING_NAME.search(title))
+    if ctype_id == "12":
+        return bool(MONUMENT_NAME.search(title)) and not MONUMENT_KEEP.search(title)
+    return False
 
 
 # 전국 8대 권역별 TourAPI areaCode 매핑
@@ -239,6 +264,8 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                     continue
                 if ctype_id == "14" and PUBLIC_FACILITY_NAME.search(title.strip()):
                     continue
+                if is_non_date_leisure_or_monument(ctype_id, title):
+                    continue
                 is_valid, reason = is_date_spot_category(ctype_name, title, allow_lodging=True)
                 if not is_valid and not reason.startswith("화이트리스트외"):
                     continue
@@ -309,7 +336,7 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                 new_spot = {
                     "id": spot_id,
                     "name": title,
-                    "slot": "stay" if CAMPSITE_NAME.search(title) else default_slot,
+                    "slot": "stay" if is_campsite(ctype_id, title) else default_slot,
                     "region": region,
                     "area": area,
                     "address": addr1,

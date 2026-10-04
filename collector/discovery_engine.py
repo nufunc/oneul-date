@@ -196,6 +196,23 @@ HEADERS = {
     "Origin": "https://map.naver.com"
 }
 
+# 자동 등록한 4곳이 모두 블루리본 맛집 쿼리와 무관한 박람회·국밥·사진관·팝업이었다(2026-10-04 P-057).
+# 기본은 후보 파일로만 쌓고, DISCOVERY_AUTO_INSERT=1이면 예전처럼 DB에 넣는다
+DISCOVERY_AUTO_INSERT = os.getenv("DISCOVERY_AUTO_INSERT", "").strip().lower() in ("1", "true", "yes")
+CANDIDATE_FILE = os.path.join(os.path.dirname(os.environ["LOG_DIR"]) if os.environ.get("LOG_DIR")
+                              else os.path.dirname(os.path.abspath(__file__)), "discovery_candidates.jsonl")
+
+
+def query_area_mismatch(query_text: str, area: str, road_addr: str) -> bool:
+    """검색어가 가리키는 시군구가 주소에 하나도 없으면 True(다른 지역의 동명 업장).
+    권역(영남·인천)만 대조해 남해다랭이마을 쿼리로 대구 다랭이마을밥상이, 부평역 쿼리로 청라 백년집이 들어왔다(2026-10-04 P-057).
+    검색어에서 시군구를 못 찾으면 쿼리의 area를 쓴다(울산/경남처럼 묶인 이름은 나눈다). 여러 시도에 있는 자치구명은 쓰지 않는다."""
+    from youtube_vlog_miner import AMBIGUOUS_DISTRICTS, METRO_REGIONS, extract_region_hints
+    hints = [h for h in extract_region_hints(query_text) if h not in METRO_REGIONS]
+    hints = hints or [a for a in (area or "").split("/") if a and a not in AMBIGUOUS_DISTRICTS and a not in ("전국", "전체")]
+    return bool(hints) and not any(h in road_addr for h in hints)
+
+
 def infer_slot(category: str, name: str) -> str:
     cat = (category or "").lower()
     nm = name.lower()
@@ -342,6 +359,9 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
                 if region not in ("전국", "전체"):
                     rej["권역불일치"] += 1
                     continue
+            if query_area_mismatch(query_text, area, road_addr):
+                rej["시군구불일치"] += 1
+                continue
 
             real_reg = derived_reg or region
             real_area = derived_area or area
@@ -378,6 +398,18 @@ def run_discovery(supabase_url: str, service_key: str, groq_key: str = "", max_d
             break
 
     print(f"📊 [신규 핫플 탐색 거절 사유] 후보 통과 {len(discovered_spots)}건 · " + (", ".join(f"{k} {v}" for k, v in rej.most_common()) or "거절 없음"))
+    if discovered_spots and not DISCOVERY_AUTO_INSERT:
+        discovered_spots = [sanitize_spot(s) for s in discovered_spots]
+        seen = set()
+        if os.path.exists(CANDIDATE_FILE):
+            with open(CANDIDATE_FILE, encoding="utf-8") as f:
+                seen = {(c.get("name"), c.get("address")) for c in map(json.loads, f)}
+        fresh = [s for s in discovered_spots if (s.get("name"), s.get("address")) not in seen]
+        with open(CANDIDATE_FILE, "a", encoding="utf-8") as f:
+            for s in fresh:
+                f.write(json.dumps({"found_at": time.strftime("%Y-%m-%dT%H:%M:%S"), **s}, ensure_ascii=False) + "\n")
+        print(f"🗂️ [신규 핫플 탐색] 자동 등록 꺼짐: 후보 {len(discovered_spots)}곳 중 새 후보 {len(fresh)}곳을 {CANDIDATE_FILE}에 쌓음")
+        return 0
     if discovered_spots:
         discovered_spots = [sanitize_spot(s) for s in discovered_spots]
         try:

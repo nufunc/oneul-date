@@ -18,6 +18,8 @@ services:
       - CHECK_INTERVAL_MINUTES=${CHECK_INTERVAL_MINUTES:-60}
       - CHECK_INTERVAL_HOURS=${CHECK_INTERVAL_HOURS:-}
       - DISCOVERY_LIMIT=${DISCOVERY_LIMIT:-150}
+      # 포털 자율 발굴(2단계)은 기본으로 후보 파일(/mnt/data/discovery_candidates.jsonl)에만 쌓는다. 1이면 DB에 바로 넣는다
+      - DISCOVERY_AUTO_INSERT=${DISCOVERY_AUTO_INSERT:-}
       - BATCH_LIMIT=${BATCH_LIMIT:-200}
       # 슬롯 자동교정(Slot Healing) 안전장치
       #   SLOT_HEAL_DRYRUN=1 : 로그만 남기고 slot 을 DB 에 쓰지 않는다

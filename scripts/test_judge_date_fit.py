@@ -157,6 +157,20 @@ def test_public_facility():
     assert not kept & PUBLIC_FACILITY_VERIFIED, kept & PUBLIC_FACILITY_VERIFIED
 
 
+def test_tourapi_golf_fishing_monument():
+    """P-057 신규 유입 이름. 검토로만 올리고 닫지 않는다"""
+    rows = [row(11, "솔트베이GC", "레포츠/체험", "day", "인천", "tourapi"), row(12, "송전지 낚시터", "레포츠/체험", "day", "경기", "tourapi"),
+            row(13, "어제 달천 충렬사비", "관광지", "day", "충북", "tourapi"), row(14, "보성 문익점 부조묘", "관광지", "day", "전남", "tourapi"),
+            row(21, "보광미니골프장", "레포츠/체험", "day", "강원", "tourapi"), row(22, "종묘", "관광지", "day", "서울", "tourapi"),
+            row(23, "골굴사 마애여래좌상", "관광지", "day", "경북", "tourapi"), row(24, "아덴힐리조트&골프", "숙박", "stay", "경기", "tourapi"),
+            row(25, "송추CC", "레포츠/체험", "day", "경기", "web")]
+    out = judge(rows)
+    review = {item["id"]: item["rules"] for item in out["review"]}
+    assert {11, 12, 13, 14} <= set(review) and not out["close"]
+    assert not {21, 22, 23, 25} & set(review), review
+    assert not any(r.startswith(("R18", "R19", "R20")) for r in review.get(24, []))
+
+
 if __name__ == "__main__":
     test_judge_lists()
     test_described_name()
@@ -164,4 +178,5 @@ if __name__ == "__main__":
     test_neighborhood_diner()
     test_region_mismatch()
     test_public_facility()
+    test_tourapi_golf_fishing_monument()
     print("ok")

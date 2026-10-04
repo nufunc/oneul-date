@@ -32,6 +32,7 @@ def test_stay_flip_is_vetoed_only_for_clear_non_stay_category():
     assert not w.stay_flip_vetoed("카페", "파주 글로우 글램핑")
     assert not w.stay_flip_vetoed("", "어느 호텔")
     assert w.stay_unflip_vetoed("거제자연휴양림캠핑장") and w.stay_unflip_vetoed("민트글램핑")
+    assert w.stay_unflip_vetoed("쇠꼴마을고고펜션") and w.stay_unflip_vetoed("하늘그린캠프")
     assert not w.stay_unflip_vetoed("어느 호텔")
     assert not w.stay_flip_vetoed(None, "클래식")
 
