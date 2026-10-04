@@ -31,6 +31,7 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 
+from state_io import open_new
 from supabase_worker import (load_env, normalize_spot_address, normalize_spot_name, spot_core_name,
                              LODGING_PRODUCT_RE, place_name_matches)
 
@@ -330,12 +331,12 @@ def run_merge(apply=False, backup_dir=None, report_path=None, log=print, skip_ad
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     os.makedirs(backup_dir, exist_ok=True)
     backup_path = os.path.join(backup_dir, f"merge_duplicates_{stamp}.json")
-    with open(backup_path, "w", encoding="utf-8") as f:
+    with open_new(backup_path) as f:
         # 바꿀 행 전부(남길 행과 닫을 행)의 원래 값을 남긴다. 종전에는 정규화 이름·주소 그룹만 저장해
         # 같은 좌표 그룹으로 닫은 행과 채운 남길 행의 원본이 빠졌다(2026-09-27 262행)
         json.dump({"rows": [r for k, ds, _ in plans for r in [k, *ds]],
                    "id_map": {str(d["id"]): k["id"] for k, ds, _ in plans for d in ds}}, f, ensure_ascii=False, indent=2)
-    log(f"백업과 id 매핑: {backup_path}")
+    log(f"백업과 id 매핑: {f.name}")
 
     now = datetime.now(timezone.utc).isoformat()
     closed = 0

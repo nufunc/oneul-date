@@ -30,6 +30,7 @@ from fix_map_links import area_patch
 
 sys.path.insert(0, os.environ.get("COLLECTOR_DIR") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "collector"))
 from merge_duplicates import plan_merge  # noqa: E402
+from state_io import open_new  # noqa: E402
 
 # P-053 남길 행 교정(duplicate-merge-20261004.json keep_fix). kakao가 None이면 장소 번호를 비운다
 KEEP_FIX = {
@@ -307,14 +308,14 @@ def main():
         return 0
 
     backup = os.path.join(args.backup_dir, f"{args.proposal.lower().replace('-', '')}_merge_{stamp}.json")
-    with open(backup, "w", encoding="utf-8") as fp:
+    with open_new(backup) as fp:
         json.dump({"rows": [r for m in merges for r in (m["keep"], *m["dups"])] + [f["row"] for f in fills] + [f["row"] for f in fixes],
                    "id_map": {str(d["id"]): m["keep"]["id"] for m in merges for d in m["dups"]},
                    "patches": {str(m["keep"]["id"]): m["patch"] for m in merges},
                    "fills": {str(f["row"]["id"]): [f["category"], f["name"]] for f in fills},
                    "fixes": {str(f["row"]["id"]): f["body"] for f in fixes}, "skipped": skipped},
                   fp, ensure_ascii=False, indent=1)
-    print(f"백업: {backup}")
+    print(f"백업: {fp.name}")
 
     rep = {**headers, "Prefer": "return=representation"}
     failed = []

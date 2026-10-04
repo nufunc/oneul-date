@@ -37,6 +37,7 @@ from close_date_fit_spots import fetch_ids, request
 
 COLLECTOR = os.environ.get("COLLECTOR_DIR") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "collector")
 sys.path.insert(0, COLLECTOR)
+from state_io import open_new  # noqa: E402
 from youtube_vlog_miner import BARE_CITY_NAMES, DISTRICT_NAMES, METRO_REGIONS  # noqa: E402
 
 PROPOSAL = "P-049"
@@ -154,9 +155,9 @@ def same_name_open(base, headers, name, row):
 def write_backup(args, kind, payload):
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     path = os.path.join(args.backup_dir, f"p049_{kind}_{stamp}.json")
-    with open(path, "w", encoding="utf-8") as f:
+    with open_new(path) as f:
         json.dump(payload, f, ensure_ascii=False, indent=1)
-    print(f"백업: {path}")
+    print(f"백업: {f.name}")
     return stamp
 
 

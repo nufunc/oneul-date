@@ -22,6 +22,7 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timedelta, timezone
 
+from state_io import open_new
 from supabase_worker import load_env
 from tourapi_quota import TourApiFetchFailed, TourApiRateLimited, tour_get_json, usage_today
 
@@ -178,10 +179,10 @@ def run_event_sync(apply=False, log=print, backup_dir=None):
         os.makedirs(backup_dir, exist_ok=True)
         by_id = {r["id"]: r for r in rows}
         path = os.path.join(backup_dir, f"event_period_{datetime.now(KST).strftime('%Y%m%d-%H%M%S')}.json")
-        with open(path, "w", encoding="utf-8") as f:
+        with open_new(path) as f:
             json.dump({"rows": [by_id[p["id"]] for p in changed],
                        "actions": {str(p["id"]): p["action"] or "period" for p in changed}}, f, ensure_ascii=False, indent=2)
-        log(f"백업: {path}")
+        log(f"백업: {f.name}")
 
     now = datetime.now(timezone.utc).isoformat()
     for p in changed:

@@ -23,6 +23,7 @@ from close_date_fit_spots import fetch_ids, request
 from fix_described_names import VENUE_FIELDS, rename_body
 
 sys.path.insert(0, os.environ.get("COLLECTOR_DIR") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "collector"))
+from state_io import open_new  # noqa: E402
 from supabase_worker import derive_region_area  # noqa: E402
 
 PROPOSAL = "P-052"
@@ -137,12 +138,12 @@ def main():
 
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     backup = os.path.join(args.backup_dir, f"p052_map_links_{stamp}.json")
-    with open(backup, "w", encoding="utf-8") as f:
+    with open_new(backup) as f:
         json.dump({"rows": [t["row"] for t in todo] + [t["keep"] for t in todo if t["do"] == "merge"],
                    "plan": [{k: v for k, v in t.items() if k not in ("row", "keep")} for t in todo],
                    "id_map": {str(t["id"]): t["keep"]["id"] for t in todo if t["do"] == "merge"}, "skipped": skipped},
                   f, ensure_ascii=False, indent=1)
-    print(f"백업: {backup}")
+    print(f"백업: {f.name}")
 
     now = datetime.now(timezone.utc).isoformat()
     rep = {**headers, "Prefer": "return=representation"}

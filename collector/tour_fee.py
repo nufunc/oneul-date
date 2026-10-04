@@ -23,6 +23,7 @@ import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta, timezone
 
+from state_io import open_new
 from supabase_worker import derive_price_tier_from_text, load_env
 from event_period import TOUR_API_BASE, _request, _tour_api_key
 from tourapi_quota import TourApiFetchFailed, TourApiRateLimited, tour_get_json, usage_today
@@ -175,9 +176,9 @@ def run_fee_backfill(apply=False, log=print, backup_dir=None, limit=None):
     backup_dir = backup_dir or os.path.expanduser("~/oneul-backups")
     os.makedirs(backup_dir, exist_ok=True)
     path = os.path.join(backup_dir, f"tour_fee_{datetime.now(KST).strftime('%Y%m%d-%H%M%S')}.json")
-    with open(path, "w", encoding="utf-8") as fp:
+    with open_new(path) as fp:
         json.dump([r for r, _ in plans], fp, ensure_ascii=False, indent=2)
-    log(f"백업: {path}")
+    log(f"백업: {fp.name}")
     now = datetime.now(timezone.utc).isoformat()
     for r, f in plans:
         body = {k: v for k, v in f.items() if v is not None}

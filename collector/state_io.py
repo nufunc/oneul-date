@@ -4,6 +4,7 @@
 읽는 쪽이 파싱 실패를 빈 값으로 받아 그대로 저장하면 이력 2,000개가 한 번에 사라진다(2026-09-27 감사).
 - atomic_dump: 같은 폴더의 임시 파일에 쓰고 fsync한 뒤 os.replace로 바꾼다
 - load_json: 파일이 없으면 기본값, 있는데 파싱에 실패하면 .corrupt-타임스탬프로 복사해 두고 StateCorrupt를 올린다
+- open_new: 백업처럼 덮어쓰면 안 되는 파일을 새로 연다. 같은 이름이 있으면 -2, -3을 붙인다
 - locked: 파일 옆 .lock에 flock을 건다. 같은 프로세스 안에서는 다시 걸어도 기다리지 않는다
 """
 import contextlib
@@ -47,6 +48,18 @@ def load_json(path, default):
         print(f"  ⛔ [상태 파일 손상] {os.path.basename(path)}을 읽지 못해 덮어쓰지 않고 멈춥니다. 원본 사본: {backup} ({e})",
               flush=True)
         raise StateCorrupt(path) from e
+
+
+def open_new(path):
+    # 초 단위 이름의 백업을 같은 초에 두 번 쓰면 앞 백업이 덮였다(P-064). 'x'로 새 파일만 만든다
+    stem, ext = os.path.splitext(path)
+    n = 1
+    while True:
+        try:
+            return open(path, "x", encoding="utf-8")
+        except FileExistsError:
+            n += 1
+            path = f"{stem}-{n}{ext}"
 
 
 _held = {}

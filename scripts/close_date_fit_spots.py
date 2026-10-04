@@ -25,6 +25,7 @@ from judge_date_fit import connect, judge
 
 sys.path.insert(0, os.environ.get("COLLECTOR_DIR") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "collector"))
 import tourapi_quota  # noqa: E402
+from state_io import open_new  # noqa: E402
 from event_period import TOUR_API_BASE, _tour_api_key, _ymd  # noqa: E402
 
 KST = timezone(timedelta(hours=9))
@@ -136,10 +137,10 @@ def main():
 
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     backup = os.path.join(args.backup_dir, f"{args.proposal.lower().replace('-', '')}_date_fit_{stamp}.json")
-    with open(backup, "w", encoding="utf-8") as f:
+    with open_new(backup) as f:
         json.dump({"rows": current, "plan": [{k: v for k, v in p.items() if k != "row"} for p in plan], "excluded": excluded},
                   f, ensure_ascii=False, indent=1)
-    print(f"백업: {backup}")
+    print(f"백업: {f.name}")
 
     now = datetime.now(timezone.utc).isoformat()
     rep = {**headers, "Prefer": "return=representation"}

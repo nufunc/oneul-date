@@ -27,6 +27,7 @@ from judge_date_fit import connect
 from close_date_fit_spots import fetch_ids, request
 
 sys.path.insert(0, os.environ.get("COLLECTOR_DIR") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "collector"))
+from state_io import open_new  # noqa: E402
 from supabase_worker import _find_duplicate  # noqa: E402
 
 PROPOSAL = "P-050"
@@ -70,9 +71,9 @@ def followup(args, base, headers):
         return 0
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     backup = os.path.join(args.backup_dir, f"p050_followup_{stamp}.json")
-    with open(backup, "w", encoding="utf-8") as f:
+    with open_new(backup) as f:
         json.dump({"rows": [current[i] for i in patches], "patches": {str(i): b for i, b in patches.items()}}, f, ensure_ascii=False, indent=1)
-    print(f"백업: {backup}")
+    print(f"백업: {f.name}")
     now = datetime.now(timezone.utc).isoformat()
     rep = {**headers, "Prefer": "return=representation"}
     failed = [i for i, body in patches.items()
@@ -134,12 +135,12 @@ def main():
 
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     backup = os.path.join(args.backup_dir, f"p050_relocate_{stamp}.json")
-    with open(backup, "w", encoding="utf-8") as f:
+    with open_new(backup) as f:
         json.dump({"rows": [r for p in plan for r in (p["row"], p.get("into")) if r],
                    "id_map": {str(p["row"]["id"]): p["into"]["id"] for p in plan if p["do"] == "merge"},
                    "plan": [{"id": p["row"]["id"], "do": p["do"], "kakao": p["place"]} for p in plan], "skipped": skipped},
                   f, ensure_ascii=False, indent=1)
-    print(f"백업과 id 매핑: {backup}")
+    print(f"백업과 id 매핑: {f.name}")
 
     now = datetime.now(timezone.utc).isoformat()
     rep = {**headers, "Prefer": "return=representation"}

@@ -30,6 +30,17 @@ def test_atomic_dump_replaces_whole_file():
     assert json.load(open(p)) == {"y": 2} and not glob.glob(p + ".*.tmp")
 
 
+def test_backups_with_same_name_both_survive():
+    p = _tmp("p064_date_fit_20261004-173714.json")  # 같은 초에 두 번 돌리면 이름이 같다
+    for n in (1, 2, 3):
+        with s.open_new(p) as f:
+            json.dump({"run": n}, f)
+    names = sorted(glob.glob(p[:-5] + "*.json"))
+    assert [os.path.basename(x) for x in names] == [
+        "p064_date_fit_20261004-173714-2.json", "p064_date_fit_20261004-173714-3.json", "p064_date_fit_20261004-173714.json"]
+    assert json.load(open(p)) == {"run": 1}
+
+
 def test_lock_is_reentrant_in_process():
     p = _tmp("v.json")
     with s.locked(p):

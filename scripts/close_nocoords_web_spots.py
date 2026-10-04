@@ -23,6 +23,7 @@ from datetime import datetime, timezone
 
 COLLECTOR_DIR = os.environ.get("COLLECTOR_DIR") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "collector")
 sys.path.insert(0, COLLECTOR_DIR)
+from state_io import open_new  # noqa: E402
 from supabase_worker import normalize_spot_name, LODGING_PRODUCT_RE  # noqa: E402
 
 KAKAO_PLACE_RE = re.compile(r"place\.map\.kakao\.com/\d+")
@@ -162,11 +163,11 @@ def main():
 
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     backup = os.path.join(args.backup_dir, f"p041_close_nocoords_web_{stamp}.json")
-    with open(backup, "w", encoding="utf-8") as f:
+    with open_new(backup) as f:
         # 대상 563행 전체(제외 행 포함)와 빈 필드를 채울 남길 행의 원본, id 매핑을 남긴다
         json.dump({"rows": current, "keep_rows": [p["keep"] for p in plan if p["fill"]],
                    "id_map": {str(p["row"]["id"]): p["keep"]["id"] for p in merged}}, f, ensure_ascii=False, indent=1)
-    print(f"백업: {backup}")
+    print(f"백업: {f.name}")
 
     now = datetime.now(timezone.utc).isoformat()
     rep = {**headers, "Prefer": "return=representation"}
