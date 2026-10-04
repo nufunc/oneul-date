@@ -20,6 +20,7 @@ def test_in_group():
     assert not in_group({**base, "social_links": {"kakaomap": {"url": "https://place.map.kakao.com/273193967"}}})
     assert in_group({**base, "social_links": {"kakaomap": {"url": "https://map.kakao.com/link/search/%EC%84%9C"}}})
     assert not in_group({**base, "verified": True})
+    assert in_group({**base, "verified": True, "name": "애월 한담해변 산책로"})  # R5 행은 verified와 무관하다(P-058)
     assert not in_group({**base, "source": {"type": "tourapi"}})
 
 

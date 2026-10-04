@@ -122,6 +122,9 @@ PUBLIC_FACILITY = re.compile(r"도서관(\(.*\))?$|체육센터|체육관|공설
                              r"복지회관|여성회관|노인회|주민센터|연수원")
 # P-049 설명형 이름 모집단: 내보낸 이름이 3어절 이상이거나 이 표시를 담는다
 DESCRIBED_MARK = re.compile(r"[&·+/]|\s및\s|\sin\s")
+# P-058 층 A: 카카오 장소 이름이 내보낸 이름과 같고 300m 안인 398곳과 그때의 내보낸 이름. 이름이 바뀐 행은 다시 R5로 간다
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "r5_map_name_exempt.json"), encoding="utf-8") as _f:
+    R5_MAP_NAME_EXEMPT = {int(k): v for k, v in json.load(_f)["rows"].items()}
 
 
 def export_name(row):
@@ -134,6 +137,10 @@ def export_name(row):
 def described_name(row):
     name = export_name(row)
     return len(name.split()) >= 3 or bool(DESCRIBED_MARK.search(name))
+
+
+def map_name_exempt(row):
+    return R5_MAP_NAME_EXEMPT.get(row["id"]) == export_name(row)
 
 
 def src_type(row):
@@ -296,8 +303,9 @@ RULES = [
     ("R1_비데이트_카테고리", "review", "카테고리가 문화원·스포츠시설·도서관·매표소·공간대여 등. 대부분 카테고리만 틀린 명소",
      lambda r, c: r.get("category") in NON_DATE_CATS, None),
     ("R5_설명형_이름", "review", "내보낸 이름이 3어절 이상이거나 &·+/, 및, in을 담는다. 자동 이름 교정은 하지 않는다(P-049 드라이런 정밀도 2/5). "
-     "핵심 이름이 500m 안에 없는 행은 R16 지도 검색 불가 검사(check_map_unfindable.py)로 넘긴다",
-     lambda r, c: described_name(r), None),
+     "핵심 이름이 500m 안에 없는 행은 R16 지도 검색 불가 검사(check_map_unfindable.py)로 넘긴다. "
+     "카카오 장소 이름과 같은 398곳(P-058 층 A, r5_map_name_exempt.json)은 뺀다",
+     lambda r, c: described_name(r) and not map_name_exempt(r), None),
     ("R11_술집_낮슬롯", "review", "주점류 카테고리인데 슬롯 day", lambda r, c: r.get("category") in BAR_CATS and r.get("slot") == "day", None),
     ("R12_카페_밤슬롯", "review", "카페류 카테고리인데 슬롯 night", lambda r, c: r.get("category") in CAFE_CATS and r.get("slot") == "night", None),
 ]

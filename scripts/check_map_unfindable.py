@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """P-052 R16 지도 검색 불가 검사. DB에 쓰지 않고 판정 파일만 낸다. 로컬에서 돈다.
 
-모집단: 출처 web, 카카오 장소 id 없음(provider_ids.kakao가 없고 kakaomap 링크가 place.map.kakao.com/<숫자>가 아님), verified=false이고
-설명형 이름(judge_date_fit R5) 밖인 열린 행. --extra로 P-049 드라이런에서 핵심 이름이 500m 안에 없던 행 가운데 앞의 세 조건에 드는 행을 더한다.
+모집단: 출처 web, 카카오 장소 id 없음(provider_ids.kakao가 없고 kakaomap 링크가 place.map.kakao.com/<숫자>가 아님)이고 verified=false이거나
+설명형 이름(judge_date_fit R5)인 열린 행. R5 행은 verified와 무관하게 넣는다(P-058 층 E와 F). --extra로 P-049 드라이런에서 핵심 이름이 500m 안에 없던 행 가운데 앞의 세 조건에 드는 행을 더한다.
 판정은 두 단계다.
   네이버: 앱 검색어(main.ts mapQuery)와 변형 4종(앱이 붙인 지역어를 뗀 이름, 마지막 어절을 뗀 이름, 3자 이상 마지막 어절, 띄어쓰기를 뺀 이름)의
     결과 상위 5위에 이름 바이그램 겹침 0.5 이상이고 행 좌표 3km 안인 장소가 있으면 남긴다(검색됨).
@@ -40,7 +40,8 @@ def no_kakao_id(row):
 
 
 def in_group(row):
-    return src_type(row) == "web" and no_kakao_id(row) and not row.get("verified") and row.get("lat") and row.get("lng")
+    return (src_type(row) == "web" and no_kakao_id(row) and (not row.get("verified") or described_name(row))
+            and row.get("lat") and row.get("lng"))
 
 
 def similar(a, b):
@@ -111,7 +112,7 @@ def main():
 
     rows = [r for r in json.load(open(args.input, encoding="utf-8")) if not r.get("is_closed")]
     by_id = {r["id"]: r for r in rows}
-    pop = sorted(r["id"] for r in rows if in_group(r) and not described_name(r))
+    pop = sorted(r["id"] for r in rows if in_group(r))
     target = pop[args.offset:args.offset + args.limit] if args.limit else pop[args.offset:]
     extra = []
     if args.extra:

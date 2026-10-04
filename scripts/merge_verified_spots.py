@@ -8,6 +8,8 @@ P-051, P-054: MERGES와 FILLS 표의 행만 쓴다. 닫기는 close_date_fit_spo
 P-055: FIXES 표의 값으로 카테고리, 사진, 이름을 바꾼다(앞 제안의 판단할 지점에 대한 리드 결정). 이미 값이 있어도 바꾼다.
 P-056: 남은 행 판정(leftover-20261004.json)의 병합 15곳은 MERGES, 교정 7곳은 FIXES 표로 쓴다. 교정의 장소 번호와 주소는 KEEP_FIX와 같게 바꾸고,
   병합으로 남길 행(518, 1273)의 교정은 채움 값 위에서 계산해 남길 행 patch에 합친다.
+P-058: R5 층 B(--result r5-strata-YYYYMMDD.json의 rules.R5B_fix)의 rename은 카카오 장소 이름으로 바꾸고 merge는 into 행으로 합친다.
+  목록의 이름은 내보낸 이름이라 지금 행의 이름이나 내보낸 이름 가운데 하나가 같으면 바뀌지 않은 것으로 본다.
 병합은 닫는 행 source.note에 merged_into를 남기고 남는 행의 빈 필드만 채운다(category는 옮기지 않는다). 소속 명소로 합치는 행(야경, 공연)은
 영업시간과 가격이 명소의 값이 아니어서 분위기 값만 옮긴다. 쓰기 직전에 다시 읽어 지금도 열려 있고 이름이 결과 파일 때와 같은 행만 고친다.
 
@@ -20,7 +22,7 @@ import os
 import sys
 from datetime import datetime, timezone
 
-from judge_date_fit import connect
+from judge_date_fit import connect, export_name
 from close_date_fit_spots import fetch_ids, request
 from fix_described_names import VENUE_FIELDS, rename_body, same_name_open
 from fix_map_links import area_patch
@@ -107,6 +109,8 @@ FILLS = {
         1112: ("루프탑 G 서교", "바(BAR)", "루프탑 G 길리건스"),  # 네이버
     },
 }
+# P-058 병합 가운데 소속 명소로 합쳐 분위기 값만 옮기는 행: 대왕암공원 온실카페, 오이도 빨강등대 앞 포차거리, 시우어게인 VIP 루프탑 대관
+P058_VENUE = {2631, 4831, 8139}
 
 # 남은 교정: id: (지금 이름, 바꿀 값). 이름을 바꾸면 note에 renamed를 남긴다
 FIXES = {
@@ -133,12 +137,22 @@ FIXES = {
 }
 
 
-def fix_list(proposal, rows, skipped):
-    """FIXES 가운데 지금도 열려 있고 이름이 같은 행."""
+def name_changed(row, name):
+    return name not in (row["name"], export_name(row))
+
+
+def fix_table(proposal, result):
+    if proposal == "P-058":
+        return {x["id"]: (x["export_name"], {"name": x["new_name"]}) for x in result["rules"]["R5B_fix"]["items"] if x["action"] == "rename"}
+    return FIXES.get(proposal, {})
+
+
+def fix_list(proposal, result, rows, skipped):
+    """교정 표 가운데 지금도 열려 있고 이름이 같은 행."""
     fixes = []
-    for i, (name, patch) in FIXES.get(proposal, {}).items():
+    for i, (name, patch) in fix_table(proposal, result).items():
         row = rows.get(i)
-        if not row or row.get("is_closed") or row["name"] != name:
+        if not row or row.get("is_closed") or name_changed(row, name):
             skipped[i] = "행 없음" if not row else "닫힘" if row.get("is_closed") else f"이름 바뀜: {row['name']}"
         else:
             fixes.append({"row": row, "patch": patch})
@@ -161,6 +175,9 @@ def merge_list(proposal, result):
     """(닫을 id, 지금 이름, 남길 id, 남길 행 이름 또는 None, 옮길 값)."""
     if proposal == "P-053":
         return [(m["id"], m["name"], g["keep"]["id"], g["keep"]["name"], "same") for g in result["merge"] for m in g["merge"]]
+    if proposal == "P-058":
+        return [(x["id"], x["export_name"], x["into"], None, "venue" if x["id"] in P058_VENUE else "same")
+                for x in result["rules"]["R5B_fix"]["items"] if x["action"] == "merge"]
     return [(i, name, into, None, kind) for i, (name, into, kind) in MERGES.get(proposal, {}).items()]
 
 
@@ -197,7 +214,7 @@ def plan(proposal, result, rows):
     groups, skipped = {}, {}
     for i, name, into, into_name, kind in merge_list(proposal, result):
         row, keep = rows.get(i), rows.get(into)
-        if not row or row.get("is_closed") or row["name"] != name:
+        if not row or row.get("is_closed") or name_changed(row, name):
             skipped[i] = "행 없음" if not row else "닫힘" if row.get("is_closed") else f"이름 바뀜: {row['name']}"
         elif not keep or keep.get("is_closed") or (into_name and keep["name"] != into_name):
             skipped[i] = f"남길 행 {into} " + ("닫힘" if keep and keep.get("is_closed") else "이름 바뀜" if keep else "없음")
@@ -227,20 +244,20 @@ def plan(proposal, result, rows):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("proposal", choices=["P-053", "P-051", "P-054", "P-055", "P-056"])
-    ap.add_argument("--result", help="P-053 결과 파일(duplicate-merge-YYYYMMDD.json)")
+    ap.add_argument("proposal", choices=["P-053", "P-051", "P-054", "P-055", "P-056", "P-058"])
+    ap.add_argument("--result", help="P-053 결과 파일(duplicate-merge-YYYYMMDD.json), P-058 층 파일(r5-strata-YYYYMMDD.json)")
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--backup-dir", default=os.path.expanduser("~/oneul-backups"))
     args = ap.parse_args()
-    assert args.proposal != "P-053" or args.result, "P-053은 --result가 필요하다"
+    assert args.proposal not in ("P-053", "P-058") or args.result, f"{args.proposal}은 --result가 필요하다"
 
     result = json.load(open(args.result, encoding="utf-8")) if args.result else {}
     ids = {x for i, _, into, _, _ in merge_list(args.proposal, result) for x in (i, into)} | set(FILLS.get(args.proposal, {}))
-    ids |= set(FIXES.get(args.proposal, {}))
+    ids |= set(fix_table(args.proposal, result))
     base, headers = connect()
     rows = {r["id"]: r for r in fetch_ids(base, headers, sorted(ids))}
     merges, fills, skipped = plan(args.proposal, result, rows)
-    fixes = fix_list(args.proposal, rows, skipped)
+    fixes = fix_list(args.proposal, result, rows, skipped)
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     now = datetime.now(timezone.utc).isoformat()
     for m in merges:
