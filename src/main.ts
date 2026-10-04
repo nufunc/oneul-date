@@ -2007,6 +2007,7 @@ const BIZ_SUFFIX = /(카페|맛집|술집|와인바|펍|호텔|펜션|베이커�
  * 네이버 지도 검색어 고도화 정제.
  */
 function mapQuery(spot: Spot): string {
+  const SUB_AREA_RE = /(영종도|을왕리|월미도|송도|청라|행궁동|성수|한남|연남|서촌|북촌|익선|송리단|문래|대부도|제부도|안목|경포|초당|해운대|광안리|전포)/;
   const rawName = (spot.name || '').trim();
 
   const bracketHints: string[] = [];
@@ -2079,13 +2080,27 @@ function mapQuery(spot: Spot): string {
     /\s+(VIP|VVIP|프리미엄|명품|수제|원데이클래스|원데이\s*클래스|클래스|아틀리에|가죽\s*아틀리에|도예\s*아틀리에|갤러리|스튜디오|살롱|공방|옻칠|나전칠기|도자기|가죽공방|도예공방|체험장|체험관|투어|산책로|산책코스|야시장|먹거리|거리|골목|본점|직영점|요트|보트|샴페인|라운지|바베큐|바베큐장|테라스|그릴|다이닝|루프탑|루프탑가든|디너|런치|오마카세|코스요리|패키지|렌탈|이용권|피크닉|캠크닉|캠핑|글램핑|스파|사우나|감성|칵테일|와인|위스키|주점|호프|데이트|핫플|분위기좋은|분위기|추천|맛집|셀프사진관|놀거리|커피디저트|글래스하우스|프라이빗|온실|파빌리온|럭셔리\s*카바나|카바나|한옥스테이|피제리아|파인다이닝|두피\s*라운지|심레이싱\s*라운지|분재\s*갤러리|티하우스|도예\s*스튜디오|인피니티|풀빌라|아쿠아\s*빌라|샬레|롯지|전망길|야장\s*골목).*$/i;
   if (descriptorRegex.test(cleanName)) {
     const trimmed = cleanName.replace(descriptorRegex, '').trim();
-    if (trimmed.length >= 2) {
+    // P-061: 지역어만 남으면('태안 풀빌라 케럿'→'태안') 수식어 어절 뒤의 상호를 붙인다('태안 케럿'). 뒤가 없으면 자르지 않는다
+    // 주소 끝의 건물 이름('아라마리나 클럽하우스')이 걸리지 않게 행정구역 어절과 그 어간만 지역어로 본다
+    const adminWords = new Set([
+      spot.region,
+      ...`${spot.area || ''} ${spot.address || ''}`
+        .split(/\s+/)
+        .filter((a) => /..(시|군|구|동|읍|면)$/.test(a))
+        .flatMap((a) => [a, a.slice(0, -1)]),
+    ]);
+    const isRegionWord = (w: string) => FAMOUS_AREAS.includes(w) || w.match(SUB_AREA_RE)?.[1] === w || adminWords.has(w);
+    const rest = cleanName.slice(trimmed.length).trim().split(/\s+/).slice(1);
+    if (trimmed.length >= 2 && !trimmed.split(/\s+/).every(isRegionWord)) {
       cleanName = trimmed;
+    } else if (trimmed.length >= 2 && !rest.every(isRegionWord)) {
+      cleanName = `${trimmed} ${rest.join(' ')}`;
     }
   }
 
-  // 7. 특수기호 제거 (알파벳, 한글, 숫자, 공백, 온점, 하이픈 외)
+  // 7. 특수기호 제거 (알파벳, 한글, 숫자, 공백, 온점, 하이픈 외). 숫자 사이 가운뎃점은 네이버 표기대로 온점으로 둔다('2·28'→'2.28', P-061)
   cleanName = cleanName
+    .replace(/(\d)\s*·\s*(\d)/g, '$1.$2')
     .replace(/[^\w\s가-힣0-9.-]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -2117,7 +2132,7 @@ function mapQuery(spot: Spot): string {
 
   // 10-0. spot.location 내 주요 명소/핵심 지명 우선 추출 (예: '영종도', '성수', '한남', '해운대')
   if (spot.location) {
-    const subLocMatch = spot.location.match(/(영종도|을왕리|월미도|송도|청라|행궁동|성수|한남|연남|서촌|북촌|익선|송리단|문래|대부도|제부도|안목|경포|초당|해운대|광안리|전포)/);
+    const subLocMatch = spot.location.match(SUB_AREA_RE);
     if (subLocMatch) {
       candidateArea = subLocMatch[1];
     }
