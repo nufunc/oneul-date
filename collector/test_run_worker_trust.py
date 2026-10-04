@@ -135,6 +135,24 @@ def test_other_province_name_hit_is_not_trusted():
     assert _run([right], spot).get("region") == "호남"
 
 
+def test_ids_targets_only_those_rows_without_cooldown():
+    # 지점을 옮긴 행을 다음 순환까지 기다리지 않고 바로 보강한다(P-065)
+    urls = []
+
+    def fake_urlopen(req, timeout=None, **kw):
+        if getattr(req, "method", "GET") != "PATCH":
+            urls.append(req.full_url)
+        return _Res(b"[]")
+
+    orig = w.urllib.request.urlopen
+    w.urllib.request.urlopen = fake_urlopen
+    try:
+        w.run_worker("http://db", "key", ids=[11, 22])
+    finally:
+        w.urllib.request.urlopen = orig
+    assert "id=in.(11,22)" in urls[0] and "updated_at.lt" not in urls[0] and "is_closed=eq.false" in urls[0]
+
+
 if __name__ == "__main__":
     for fn in [v for k, v in list(globals().items()) if k.startswith("test_")]:
         fn()

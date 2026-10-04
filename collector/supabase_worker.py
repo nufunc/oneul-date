@@ -1080,7 +1080,7 @@ def _env_flag(name, env=None):
     return str(raw or "").strip().lower() in ("1", "true", "yes", "y", "on")
 
 
-def run_worker(supabase_url: str, service_key: str, limit: int = 50):
+def run_worker(supabase_url: str, service_key: str, limit: int = 50, ids=None):
     if not supabase_url or not service_key:
         print("❌ Supabase 환경변수가 설정되지 않았습니다 (SUPABASE_URL, SUPABASE_SERVICE_KEY).")
         return
@@ -1110,6 +1110,9 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50):
     cutoff_24h = (datetime.now(timezone.utc) - timedelta(hours=24)).strftime('%Y-%m-%dT%H:%M:%SZ')
     or_clause = urllib.parse.quote(f"(updated_at.is.null,updated_at.lt.{cutoff_24h})")
     query_url = f"{supabase_url}/rest/v1/spots?select=*&is_closed=eq.false&or={or_clause}&order=updated_at.asc.nullsfirst,id.asc&limit={limit}"
+    # ids를 주면 순서와 쿨다운을 건너뛰고 그 행만 돈다(지점을 옮긴 행처럼 다음 순환을 기다릴 수 없는 행)
+    if ids:
+        query_url = f"{supabase_url}/rest/v1/spots?select=*&is_closed=eq.false&id=in.({','.join(str(i) for i in ids)})&order=id.asc"
     req = urllib.request.Request(query_url, headers=api_headers)
 
     try:
@@ -1444,6 +1447,7 @@ if __name__ == "__main__":
     parser.add_argument("--url", default=default_url, help="Supabase Project URL")
     parser.add_argument("--key", default=default_key, help="Supabase Service Role Key")
     parser.add_argument("--limit", type=int, default=50, help="Number of spots to check")
+    parser.add_argument("--ids", type=lambda v: [int(x) for x in v.split(",") if x.strip()], help="쉼표로 나눈 id만 검증한다(--limit와 24시간 쿨다운 무시)")
     args = parser.parse_args()
 
-    run_worker(args.url, args.key, args.limit)
+    run_worker(args.url, args.key, args.limit, ids=args.ids)
