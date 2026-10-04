@@ -1,5 +1,5 @@
 """check_map_unfindable 회귀 테스트: python3 scripts/test_check_map_unfindable.py 또는 pytest. 값은 2026-10-03 라이브 행과 앱 검색어다."""
-from check_map_unfindable import app_queries, in_group, similar, variants
+from check_map_unfindable import TYPE_WORDS, app_queries, in_group, similar, similar_k, stale_naver, variants
 
 
 def test_variants():
@@ -11,6 +11,21 @@ def test_variants():
 def test_similar():
     assert similar("싱글핀에일웍스 성수", "싱글핀에일웍스")
     assert not similar("로에베퍼퓸 성수", "도치피자")
+
+
+def test_similar_k():
+    # 지점 꼬리만 겹치는 다른 업장은 같지 않다(P-062 2903). 같은 상호의 다른 지점은 같다
+    assert similar("그믐달셀프스튜디오 전주신시가지점", "잼클라이밍 전주신시가지점")
+    assert not similar_k("그믐달셀프스튜디오 전주신시가지점", "잼클라이밍 전주신시가지점")
+    assert similar_k("잼클라이밍 전주점", "잼클라이밍 전주신시가지점")
+    assert similar_k("본점", "본점")  # 떼고 2자 미만이면 그대로 견준다
+    assert "책방" in TYPE_WORDS and "바" in TYPE_WORDS  # 책방 이음, 바 무사의 첫 어절은 카카오로 찾지 않는다
+
+
+def test_stale_naver():
+    hits = {"1#0": {"q": "서른책방 영통구"}, "1#1": {"q": "서른 책방"}, "2#0": {"q": "터칭북스"}, "3#0": {"q": "다른 행"}}
+    plan_q = {1: ["서른책방 영통구", "서른책방"], 2: ["터칭북스"]}
+    assert stale_naver(hits, plan_q) == ["1#1"]  # 이번 대상이 아닌 3#0은 건드리지 않는다
 
 
 def test_in_group():
@@ -36,6 +51,8 @@ def test_app_queries():
 if __name__ == "__main__":
     test_variants()
     test_similar()
+    test_similar_k()
+    test_stale_naver()
     test_in_group()
     test_app_queries()
     print("ok")

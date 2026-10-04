@@ -7,7 +7,7 @@ verified와 설명형 이름(judge_date_fit R5)은 보지 않는다. R5 행(P-05
 판정은 두 단계다.
   네이버: 앱 검색어(main.ts mapQuery)와 변형 4종(앱이 붙인 지역어를 뗀 이름, 마지막 어절을 뗀 이름, 3자 이상 마지막 어절, 띄어쓰기를 뺀 이름)의
     결과 상위 5위에 이름 바이그램 겹침 0.5 이상이고 행 좌표 3km 안인 장소가 있으면 남긴다(검색됨).
-  카카오: 네이버로 못 찾은 행만 핵심 이름과 그 첫 어절(2자 이상)로 행 좌표 2km 검색을 하고, 없으면 도로명 주소 키워드 검색을 한다. 어느 쪽에든 이름이 비슷한
+  카카오: 네이버로 못 찾은 행만 핵심 이름과 그 첫 어절(2자 이상, 업종 낱말 제외)로 행 좌표 2km 검색을 하고, 없으면 도로명 주소 키워드 검색을 한다. 어느 쪽에든 이름이 비슷한
     장소가 있으면 남긴다(카카오 검색됨). 주소 검색에 다른 업장만 있으면 닫기 후보, 주소 검색이 0건이면 검토로 보낸다(카카오 0건만으로 닫지 않는다).
 닫기 후보는 사람이 표본을 다시 본 뒤 close_date_fit_spots.py --ids ... --proposal P-052로 닫는다.
 네이버 캡차가 나오면 멈추고 그때까지의 판정을 쓴다(종료 코드 2). 카카오는 --kakao-max에서 멈춘다.
@@ -33,6 +33,11 @@ NAVER_RADIUS_M = 3000
 KAKAO_RADIUS_M = 2000
 KAKAO_PLACE = re.compile(r"place\.map\.kakao\.com/\d+")
 EXTRA_REASON = "500m 안에 같은 이름 결과 없음"
+# 업종 낱말. 핵심 이름의 첫 어절이 이것이면 카카오 첫 어절 검색을 하지 않는다(책방 이음 → 근처 책방 전부와 겹친다, P-062)
+TYPE_WORDS = {"카페", "까페", "커피", "디저트", "브런치", "베이커리", "빵집", "제과", "식당", "레스토랑", "키친", "다이닝", "비스트로", "펍", "바",
+              "와인바", "술집", "주점", "포차", "호프", "이자카야", "갤러리", "미술관", "책방", "서점", "북카페", "스튜디오", "사진관", "공방",
+              "꽃집", "플라워", "펜션", "글램핑", "캠핑장", "게스트하우스", "호텔", "숙소", "체험관", "전시관", "공원"}
+BRANCH = re.compile(r"\s+\S{2,}점$")
 
 
 def no_kakao_id(row):
@@ -47,6 +52,17 @@ def in_group(row):
 def similar(a, b):
     A, B = bigrams(norm(a)), bigrams(norm(b))
     return bool(A and B) and len(A & B) / min(len(A), len(B)) >= 0.5
+
+
+def similar_k(a, b):
+    """카카오 결과 대조. 마지막 어절이 지점(~점)이면 떼고 견준다(잼클라이밍 전주신시가지점 ↔ 그믐달셀프스튜디오 전주신시가지점, P-062)."""
+    strip = lambda s: BRANCH.sub("", s.strip()) if len(norm(BRANCH.sub("", s.strip()))) >= 2 else s
+    return similar(strip(a), strip(b))
+
+
+def stale_naver(hits, plan_q):
+    """검색어가 바뀐 행(P-058 이름 교정, P-061 mapQuery 수정)의 캐시 키. 키가 id#단계라 그대로 두면 옛 응답을 다시 쓴다."""
+    return [f"{i}#{s}" for i, qs in plan_q.items() for s, q in enumerate(qs) if f"{i}#{s}" in hits and hits[f"{i}#{s}"].get("q") != q]
 
 
 def variants(app_q, name, area):
@@ -125,6 +141,13 @@ def main():
     plan_q = {i: [app_q[i]] + variants(app_q[i], export_name(by_id[i]), by_id[i].get("area")) for i in target}
     cache = args.cache or args.out + ".naver.json"
     hits = json.load(open(cache, encoding="utf-8")) if os.path.exists(cache) else {}
+    stale = stale_naver(hits, plan_q)
+    if stale:  # naver_place_search.mjs는 캐시에 있는 키를 건너뛰므로 파일에서 지운다
+        for k in stale:
+            del hits[k]
+        with open(cache, "w", encoding="utf-8") as f:
+            json.dump(hits, f, ensure_ascii=False)
+    print(f"네이버 캐시에서 검색어가 바뀐 응답 {len(stale)}건을 버렸다")
     found, captcha = {}, False
     for step in range(max(map(len, plan_q.values()), default=0)):
         todo = [{"key": f"{i}#{step}", "q": qs[step], "lng": by_id[i]["lng"], "lat": by_id[i]["lat"]}
@@ -156,8 +179,9 @@ def main():
         name = core_name(export_name(r), r.get("address"))
         # 첫 어절도 찾는다. 뒤 어절이 지명이나 설명이면 핵심 이름 그대로는 0건이다(울트라마린 제주 판포 → 울트라마린 주차장 21m)
         first = name.split()[0] if len(name.split()) >= 2 and len(norm(name.split()[0])) >= 2 else None
+        first = None if first in TYPE_WORDS else first
         names = [name] + ([first] if first else [])
-        hit = lambda ps: any(similar(p["name"], n) for p in ps for n in names)
+        hit = lambda ps: any(similar_k(p["name"], n) for p in ps for n in names)
         near = []
         for q in names:
             got = kakao.search(query=q, x=r["lng"], y=r["lat"], radius=KAKAO_RADIUS_M, sort="distance")
