@@ -35,6 +35,7 @@ MONUMENT = re.compile(r"(비|비석|비각|묘|고인돌|당간지주|귀부 및
                       r"충혼탑|기념탑)(\s*\(.*\))?$")
 MONUMENT_KEEP = re.compile(r"^(종묘|문묘|동묘)$|나비$|갈비$|도깨비$|바람개비$")
 CAMPING = re.compile(r"캠핑|글램핑|카라반|야영")
+LEISURE_CAMP = re.compile(r"캠프|펜션")  # P-057: tourapi 레포츠/체험 유형만. 캠프그리브스(관광지), 소금강행복펜션마트(쇼핑)는 다른 유형
 CAMP_NOT_LODGING = re.compile(r"식당|다이닝|카페|레스토랑|고기")  # 북한산 글램핑식당, 베르테라 캠핑(디저트카페)
 MALL = re.compile(r"백화점|더현대|스타필드|아울렛|아웃렛|롯데월드몰|타임스퀘어|코엑스몰|IFC몰|AK플라자|갤러리아")
 NON_DATE_CATS = {"문화원", "스포츠시설", "도서관", "국공립도서관", "매표소", "공간대여", "주차장", "문화센터"}
@@ -256,8 +257,11 @@ RULES = [
      lambda r, c: r["id"] in REGION_MISMATCH_VERIFIED, None),
     ("R17_공공시설", "close", "동네 공공도서관과 체육·주민·교육·복지 공공시설 가운데 사람이 판정하고 카카오로 확인한 98곳. 판정 98/98",
      lambda r, c: r["id"] in PUBLIC_FACILITY_VERIFIED, None),
-    ("R13_캠핑_낮슬롯", "fix", "이름이나 카테고리에 캠핑·글램핑·카라반·야영이 있고 슬롯 day. 식당·카페는 뺀다. 표본 교정 2/2",
-     lambda r, c: r.get("slot") == "day" and bool(CAMPING.search(r.get("name") or "") or CAMPING.search(r.get("category") or ""))
+    ("R13_캠핑_낮슬롯", "fix", "이름이나 카테고리에 캠핑·글램핑·카라반·야영이 있거나 tourapi 레포츠/체험 이름에 캠프·펜션이 있고 슬롯 day. "
+     "식당·카페는 뺀다. 표본 교정 2/2",
+     lambda r, c: r.get("slot") == "day" and bool(CAMPING.search(r.get("name") or "") or CAMPING.search(r.get("category") or "")
+                                                  or (src_type(r) == "tourapi" and r.get("category") == "레포츠/체험"
+                                                      and LEISURE_CAMP.search(r.get("name") or "")))
      and not CAMP_NOT_LODGING.search(f"{r.get('name') or ''} {r.get('category') or ''}"),
      {"slot": "stay"}),
     ("R4w_기간없는_행사_web", "review", "R4와 같은 조건의 web 행. 상설 장소가 섞여 있다(궁남지 등)",

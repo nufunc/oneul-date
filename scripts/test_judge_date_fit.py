@@ -164,7 +164,10 @@ def test_tourapi_golf_fishing_monument():
             row(21, "보광미니골프장", "레포츠/체험", "day", "강원", "tourapi"), row(22, "종묘", "관광지", "day", "서울", "tourapi"),
             row(23, "골굴사 마애여래좌상", "관광지", "day", "경북", "tourapi"), row(24, "아덴힐리조트&골프", "숙박", "stay", "경기", "tourapi"),
             row(25, "송추CC", "레포츠/체험", "day", "경기", "web")]
+    rows += [row(31, "하늘그린캠프", "레포츠/체험", "day", "경기", "tourapi"), row(32, "캠프그리브스", "관광지", "day", "경기", "tourapi"),
+             row(33, "소금강행복펜션마트", "쇼핑/소품", "day", "강원", "tourapi"), row(34, "가평 캠프통아일랜드 수상레저", "수상스포츠", "day", "경기", "web")]
     out = judge(rows)
+    assert [item["id"] for item in out["fix"]] == [31]  # 캠프·펜션은 tourapi 레포츠/체험만 stay로 고친다
     review = {item["id"]: item["rules"] for item in out["review"]}
     assert {11, 12, 13, 14} <= set(review) and not out["close"]
     assert not {21, 22, 23, 25} & set(review), review
