@@ -304,7 +304,7 @@ RULES = [
      lambda r, c: r.get("category") in NON_DATE_CATS, None),
     ("R5_설명형_이름", "review", "내보낸 이름이 3어절 이상이거나 &·+/, 및, in을 담는다. 자동 이름 교정은 하지 않는다(P-049 드라이런 정밀도 2/5). "
      "핵심 이름이 500m 안에 없는 행은 R16 지도 검색 불가 검사(check_map_unfindable.py)로 넘긴다. "
-     "카카오 장소 이름과 같은 398곳(P-058 층 A, r5_map_name_exempt.json)은 뺀다",
+     "카카오 장소 이름과 같은 403곳(P-058 층 A 398곳과 교정 뒤 조건에 맞은 5곳, r5_map_name_exempt.json)은 뺀다",
      lambda r, c: described_name(r) and not map_name_exempt(r), None),
     ("R11_술집_낮슬롯", "review", "주점류 카테고리인데 슬롯 day", lambda r, c: r.get("category") in BAR_CATS and r.get("slot") == "day", None),
     ("R12_카페_밤슬롯", "review", "카페류 카테고리인데 슬롯 night", lambda r, c: r.get("category") in CAFE_CATS and r.get("slot") == "night", None),
