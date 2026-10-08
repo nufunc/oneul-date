@@ -41,6 +41,11 @@ CONFUCIAN = re.compile(r"(서원|향교|서당|영당|재실|종택|사당|묘�
 CONFUCIAN_NOT = re.compile(r"의사당(\s*\(.*\))?$")  # 국회의사당
 with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "r21_confucian_close_ids.json"), encoding="utf-8") as _f:
     R21_VERIFIED = frozenset(int(k) for k in json.load(_f)["rows"])
+# P-071 도매 시설·전문 상가. 카카오 패널과 네이버 수치로 판정한 25곳을 id 목록으로 닫고, 이름 조건만 맞는 나머지(경계 3곳과 찾아가는 도매시장)는 검토로 보낸다
+WHOLESALE = re.compile(r"도매시장|농산물|농수산물|청과|축산물|화훼|집하장|유통단지|도매상가|상가(\s*\(.*\))?$")
+WHOLESALE_NOT = re.compile(r"지하도상가|고미술|악기|전자|세운")
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "r24_wholesale_close_ids.json"), encoding="utf-8") as _f:
+    R24_VERIFIED = frozenset(int(k) for k in json.load(_f)["rows"])
 GOLF_RELIC_KEEP = frozenset({1790667560577, 1790456834079, 1790307190897})  # 리베라CC, 서산수골프앤리조트, 경주 김유신묘
 FISHING_KEEP = re.compile(r"실내|바다낚시터|좌대|캠핑")  # 실내낚시터는 데이트, 관리형 바다낚시터·좌대·캠핑장은 애매
 CAMPING = re.compile(r"캠핑|글램핑|카라반|야영")
@@ -297,6 +302,12 @@ def solo_confucian(row, ctx):
             and ctx["near"].get(row["id"], 1) == 0)
 
 
+def tourapi_wholesale(row):
+    name = (row.get("name") or "").strip()
+    return (src_type(row) == "tourapi" and row.get("category") == "쇼핑/소품" and bool(WHOLESALE.search(name))
+            and not WHOLESALE_NOT.search(name))
+
+
 def tourapi_golf(row):
     return src_type(row) == "tourapi" and row.get("category") == "레포츠/체험" and bool(GOLF.search(row.get("name") or ""))
 
@@ -346,6 +357,10 @@ RULES = [
      "500m 안 다른 열린 행이 0곳이고, 카카오 장소 패널이 사진 400장 미만·카카오맵 후기 5건 미만·블로그 후기 30건 미만인 165곳(P-067). "
      "표본 60곳 오탐 0",
      lambda r, c: solo_confucian(r, c) and r["id"] in R21_VERIFIED, None),
+    ("R24_도매시설_전문상가", "close", "출처 tourapi, 유형 쇼핑/소품이고 이름이 도매시장·농산물·농수산물·청과·축산물·화훼·집하장·유통단지·도매상가나 상가로 끝나며"
+     "(지하도상가·고미술·악기·전자·세운 제외), 카카오 패널이 있으면 블로그 후기 30건 미만·사진 400장 미만이고 네이버 같은 이름 장소의 "
+     "방문자 리뷰 100건 미만·블로그 리뷰 500건 미만인 25곳(P-071). 28곳 전수 판정 오탐 0, 경계 3곳은 뺀다",
+     lambda r, c: tourapi_wholesale(r) and r["id"] in R24_VERIFIED, None),
     ("R13_캠핑_낮슬롯", "fix", "이름이나 카테고리에 캠핑·글램핑·카라반·야영이 있거나 tourapi 레포츠/체험 이름에 캠프·펜션이 있고 슬롯 day. "
      "식당·카페는 뺀다. 표본 교정 2/2",
      lambda r, c: r.get("slot") == "day" and bool(CAMPING.search(r.get("name") or "") or CAMPING.search(r.get("category") or "")
@@ -388,6 +403,9 @@ RULES = [
     ("R21_단독_유교시설_미확인", "review", "R21 조건이지만 카카오 장소 패널 수치로 확인한 165곳 밖이다. 패널이 없는 41곳은 인기를 모르고 "
      "광주향교·도남서원·예연서원은 사진이나 후기가 많아 뺐다(P-067)",
      lambda r, c: solo_confucian(r, c) and r["id"] not in R21_VERIFIED, None),
+    ("R24_도매시설_전문상가_미확인", "review", "R24 이름 조건이지만 닫은 25곳 밖이다. 경계 3곳(남포동건어물도매시장·동대문종합시장 한복상가·신사상가)과 "
+     "네이버 방문자나 카카오 후기가 많아 뺀 도매시장 20곳(가락농수산물종합도매시장·노량진수산물도매시장 등)과 새로 든 행(P-071)",
+     lambda r, c: tourapi_wholesale(r) and r["id"] not in R24_VERIFIED, None),
     ("R1_비데이트_카테고리", "review", "카테고리가 문화원·스포츠시설·도서관·매표소·공간대여 등. 대부분 카테고리만 틀린 명소",
      lambda r, c: r.get("category") in NON_DATE_CATS, None),
     ("R5_설명형_이름", "review", "내보낸 이름이 3어절 이상이거나 &·+/, 및, in을 담는다. 자동 이름 교정은 하지 않는다(P-049 드라이런 정밀도 2/5). "

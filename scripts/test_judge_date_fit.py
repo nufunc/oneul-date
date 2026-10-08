@@ -3,7 +3,7 @@ import json
 import os
 
 from judge_date_fit import (DINER_VERIFIED, GOLF_RELIC_KEEP, PUBLIC_FACILITY_KEEP, PUBLIC_FACILITY_VERIFIED, R3_SAME_ADDRESS_EXEMPT,
-                            R21_VERIFIED, REGION_MISMATCH_VERIFIED, judge)
+                            R21_VERIFIED, R24_VERIFIED, REGION_MISMATCH_VERIFIED, judge)
 
 
 def row(id, name, category, slot, address, source, event=None):
@@ -250,6 +250,32 @@ def test_solo_confucian():
     assert len(R21_VERIFIED) == 165 and R21_VERIFIED == set(result["close_ids"]) and not R21_VERIFIED & set(result["review_ids"])
 
 
+def test_wholesale():
+    """P-071 R24: 패널과 네이버로 확인한 25곳만 닫고, 이름 조건만 맞는 나머지는 검토로 보낸다"""
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs", "planning", "p071-wholesale-20261009.json"),
+              encoding="utf-8") as f:
+        result = json.load(f)
+    boundary = {r["id"] for r in result["close"] if "경계" in r["verdict"]}
+    assert len(R24_VERIFIED) == 25 and len(boundary) == 3 and R24_VERIFIED == {r["id"] for r in result["close"]} - boundary
+    verified = sorted(R24_VERIFIED)[0]
+    def shop(id, name, category="쇼핑/소품", source="tourapi"):
+        return row(id, name, category, "day", "경상남도 김해시 주촌면 서부로1403번길 23-40", source)
+    def hits(rows, action, rule):
+        return {i["id"] for i in judge(rows)[action] if rule in i["rules"]}
+    rows = [shop(verified, "부경축산물주촌도매시장"),
+            shop(2, "신사상가"),  # 목록 밖(경계)이라 검토
+            shop(3, "가락농수산물종합도매시장"),  # 목록 밖(찾아가는 곳)이라 검토
+            shop(4, "남대문 종합상가(본관)"),  # 괄호 꼬리 허용, 목록 밖이라 검토
+            shop(5, "명동 지하도상가"),  # 지하도상가 제외
+            shop(6, "세운전자상가"),  # 전자·세운 제외
+            shop(7, "웹도매시장", source="web"),
+            shop(8, "상가 건물 카페", category="카페"),  # 이름이 상가로 끝나지 않는다
+            shop(9, "도매시장 카페", category="카페")]  # 쇼핑/소품 밖
+    assert hits(rows, "close", "R24_도매시설_전문상가") == {verified}
+    assert hits(rows, "review", "R24_도매시설_전문상가_미확인") == {2, 3, 4}
+    assert not boundary & hits([shop(i, "신사상가") for i in boundary], "close", "R24_도매시설_전문상가")  # 경계 3곳 id는 닫지 않는다
+
+
 def test_same_address_exempt():
     rows = [row(2, "스타필드 고양", "쇼핑", "day", "경기 고양시 덕양구 고양대로 1955", "web")] + [
         row(1791100000010 + i, f"새 매장 {i}", "카페", "day", "경기 고양시 덕양구 고양대로 1955 1층", "web") for i in range(4)]
@@ -276,5 +302,6 @@ if __name__ == "__main__":
     test_golf_fishing_relic_keep()
     test_everyday_diner_sparse()
     test_solo_confucian()
+    test_wholesale()
     test_same_address_exempt()
     print("ok")
