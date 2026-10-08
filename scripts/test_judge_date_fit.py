@@ -3,7 +3,7 @@ import json
 import os
 
 from judge_date_fit import (DINER_VERIFIED, GOLF_RELIC_KEEP, PUBLIC_FACILITY_KEEP, PUBLIC_FACILITY_VERIFIED, R3_SAME_ADDRESS_EXEMPT,
-                            R21_VERIFIED, R23_VERIFIED, R24_VERIFIED, REGION_MISMATCH_VERIFIED, judge)
+                            R21_VERIFIED, R23_VERIFIED, R24_VERIFIED, R25_VERIFIED, REGION_MISMATCH_VERIFIED, judge)
 
 
 def fixture(name):
@@ -296,6 +296,30 @@ def test_wholesale():
     assert not boundary & hits([shop(i, "신사상가") for i in boundary], "close", "R24_도매시설_전문상가")  # 경계 3곳 id는 닫지 않는다
 
 
+def test_solo_pier():
+    """P-079 R25: 확인한 12곳만 닫고, 이름 조건만 맞는 나머지(경계 3곳 포함)는 검토로 보낸다"""
+    result = fixture("p079_pier")
+    boundary = set(result["boundary_ids"])
+    assert len(R25_VERIFIED) == 12 and len(boundary) == 3 and R25_VERIFIED == set(result["close_ids"]) and not R25_VERIFIED & boundary
+    verified = sorted(R25_VERIFIED)[0]
+    def pier(id, name, category="관광지", source="tourapi"):
+        return row(id, name, category, "day", "경상남도 거제시 사등면 가조로2길 62", source)
+    def hits(rows, action, rule):
+        return {i["id"] for i in judge(rows)[action] if rule in i["rules"]}
+    rows = [pier(verified, "가조도선착장"),
+            pier(2, "삼목선착장"),  # 목록 밖(수치로 뺌)이라 검토
+            pier(3, "인천항 국제여객터미널", category="레포츠/체험"),  # 레포츠/체험도 이름 조건에 든다
+            pier(4, "넛출선착장(영흥)"),  # 괄호 꼬리 허용, 목록 밖이라 검토
+            pier(5, "인천국제공항 제2여객터미널"),  # 공항 제외
+            pier(6, "선착장 앞 횟집", category="음식점"),  # 이름이 선착장으로 끝나지 않는다
+            pier(7, "한강버스 마곡선착장", source="youtube_vlog"),  # tourapi 밖
+            pier(8, "이크루즈 여의도선착장", category="카페")]  # 관광지·레포츠/체험 밖
+    assert hits(rows, "close", "R25_단독_선착장") == {verified}
+    assert hits(rows, "review", "R25_단독_선착장_미확인") == {2, 3, 4}
+    assert not boundary & hits([pier(i, "두리선착장") for i in boundary], "close", "R25_단독_선착장")  # 경계 3곳 id는 닫지 않는다
+    assert hits([pier(i, "두리선착장") for i in boundary], "review", "R25_단독_선착장_미확인") == boundary
+
+
 def test_same_address_exempt():
     rows = [row(2, "스타필드 고양", "쇼핑", "day", "경기 고양시 덕양구 고양대로 1955", "web")] + [
         row(1791100000010 + i, f"새 매장 {i}", "카페", "day", "경기 고양시 덕양구 고양대로 1955 1층", "web") for i in range(4)]
@@ -322,5 +346,6 @@ if __name__ == "__main__":
     test_solo_confucian()
     test_solo_village()
     test_wholesale()
+    test_solo_pier()
     test_same_address_exempt()
     print("ok")
