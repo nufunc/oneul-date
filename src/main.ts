@@ -5526,6 +5526,7 @@ function swapStep(index: number, refocus = false): void {
   // 🔄는 마음에 들 때까지 연달아 누르는 버튼이라, 교체 전에 이 카드 안에 포커스가 있었으면 새 카드의 🔄로 옮긴다
   const hadFocus = refocus || targetCard.contains(document.activeElement);
   targetCard.replaceWith(newCard);
+  refreshTransitDividers();
 
   const newSwapBtn = newCard.querySelector<HTMLButtonElement>('.btn-swap, .btn-swap-icon');
   if (newSwapBtn) {
@@ -5562,6 +5563,18 @@ function swapStep(index: number, refocus = false): void {
       briefingEl.innerHTML = `“${normalizeEditorialTone(generateCourseStory(currentCourse, spotById, mood, true))}”`;
     }
   }
+}
+
+/** 스팟 교체 뒤 카드 사이 이동 띠와 출발 띠를 현재 state.course 기준으로 다시 그린다 */
+function refreshTransitDividers(): void {
+  const course = state.course;
+  const list = document.querySelector('.step-list');
+  if (!course || !list) return;
+  const origin = list.querySelector<HTMLElement>(':scope > .origin-start');
+  if (origin) origin.outerHTML = renderUserOriginTransitDivider(course[0]);
+  list.querySelectorAll<HTMLElement>(':scope > .step-transit-divider:not(.origin-start)').forEach((el, i) => {
+    el.outerHTML = renderStepTransitDivider(course[i], course[i + 1]);
+  });
 }
 
 /** 동일 조건 스냅샷으로 모든 스텝 재생성 (체감 랜덤 보정 적용) */
