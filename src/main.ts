@@ -5229,6 +5229,49 @@ function cleanSpotSummary(spot: Spot): string {
   return masterDefaultPool[idHash % masterDefaultPool.length];
 }
 
+/** 틀 문장 대신 보일 사실 한 줄을 만든다. 재료는 카카오 평점(리뷰 10건 이상, 3.8점 이상)과 검증을 통과한 유튜브 영상(yt)뿐이고,
+ * 가격은 시트와 코스 카드의 가격 칸과 겹쳐 쓰지 않는다. 재료가 없으면 빈 값이다. 문형은 id로 골라 같은 곳은 항상 같은 문장이 나온다 */
+function buildFactSentence(spot: Spot, yt: { title?: string; views?: number } | null): string {
+  const km = spot.social_links?.kakaomap;
+  const rating = Number(km?.rating) || 0;
+  const reviews = Number(km?.review_count) || 0;
+  const area = (spot.area || spot.region || '').trim();
+  const v = Math.abs(spot.id) % 3;
+
+  const ratingText = rating >= 3.8 && reviews >= 10 ? `카카오맵 평점 ${rating.toFixed(1)}점(리뷰 ${reviews.toLocaleString()}개)` : '';
+  let title = (yt?.title || '')
+    .replace(/#\S+/g, ' ')
+    .replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, '')
+    .split(/\s*\|\s*|\s+-\s+/)[0]
+    .replace(/['‘’]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (title.length < 4 || title.length > 30 || /[ㅋㅎ]{2,}/.test(title)) title = '';
+  const views = Number(yt?.views) || 0;
+  const videoText = yt ? (title ? `유튜브 '${title}'` : views >= 10000 ? `유튜브 영상(조회 ${(views / 10000).toFixed(1)}만)` : '') : '';
+
+  if (ratingText) {
+    const first = !area ? `${ratingText}를 받은 곳이에요.`
+      : [`${area}에서 ${ratingText}를 받은 곳이에요.`, `${ratingText}를 기록한 ${area}의 장소예요.`, `${area}에 있고, ${ratingText}이에요.`][v];
+    return videoText ? `${first} ${videoText}에도 나와요.` : first;
+  }
+  if (!videoText) return '';
+  if (!area) return `${videoText}에서 소개된 장소예요.`;
+  return [`${videoText}에서 소개된 ${area}의 장소예요.`, `${area}의 장소로, ${videoText}에서 다뤘어요.`, `${area}에 있고, ${videoText}에 나와요.`][v];
+}
+
+/** 코스 카드와 시트에 보일 문장. 보이는 문장이 생성기 틀 문장(cardSpotSummary가 빈 값)이고 사실 재료가 있을 때만 사실 한 줄로 바꾼다.
+ * isFact가 참이면 편집 코멘트가 아니라 근거 한 줄이므로 호출처가 따옴표와 에디토리얼 라벨을 붙이지 않는다 */
+function displaySpotSummary(spot: Spot, fallback = ''): { text: string; isFact: boolean } {
+  const text = cleanSpotSummary(spot);
+  if (text && !cardSpotSummary(spot)) {
+    const yt = spot.social_links?.youtube;
+    const fact = buildFactSentence(spot, isValidYoutubeHotclip(yt) && youtubeTitleNamesSpot(spot, yt) ? yt! : null);
+    if (fact) return { text: fact, isFact: true };
+  }
+  return { text: text || fallback, isFact: false };
+}
+
 /** 카드에 표시될 위치 정보 정제 (address / area / region 기반 정합성 보장) */
 function getDisplayLocation(spot: Spot): string {
   const addr = (spot.address || '').trim();
@@ -5374,8 +5417,9 @@ function renderStepCard(
           ${curationBadges.length > 0 ? `<div class="step-curation-row">${curationBadges.join('')}</div>` : ''}
           <p class="step-location">📍 ${escapeHtml(getDisplayLocation(spot))}</p>
           ${(() => {
-            const sum = cleanSpotSummary(spot);
-            return sum ? `<blockquote class="step-quote">“${escapeHtml(sum)}”</blockquote>` : '';
+            const { text: sum, isFact } = displaySpotSummary(spot);
+            if (!sum) return '';
+            return `<blockquote class="step-quote">${isFact ? escapeHtml(sum) : `“${escapeHtml(sum)}”`}</blockquote>`;
           })()}
           ${metaBadges.length > 0 ? `<div class="step-meta-row">${metaBadges.join('')}</div>` : ''}
           ${spot.price ? `<p class="step-price">${escapeHtml(spot.price)}</p>` : ''}
@@ -7482,7 +7526,7 @@ function renderOverlayContent(): void {
     const slotKey = (spot.slot as SlotKey) || 'day';
     const targetImgUrl = getSpotImageUrl(spot, slotKey);
     const fallbackIcon = getSpotFallbackIcon(spot, slotKey);
-    const sum = cleanSpotSummary(spot) || spot.ai_summary_editorial || '';
+    const { text: sum, isFact: sumIsFact } = displaySpotSummary(spot, spot.ai_summary_editorial || '');
     const bookingUrl = spot.booking_info?.url || getCatchtableUrl(spot);
     const yt = spot.social_links?.youtube;
     const hasYt = isValidYoutubeHotclip(yt) && yt?.url;
@@ -7570,8 +7614,8 @@ function renderOverlayContent(): void {
 
           <!-- 3. AI 에디토리얼 요약. 보여 줄 문장이 없으면 카드째 뺀다 -->
           ${sum ? `<div class="spot-detail-editorial-card">
-            <span class="editorial-sparkle">✨ 오늘 데이트 에디토리얼</span>
-            <blockquote class="editorial-text">“${escapeHtml(sum)}”</blockquote>
+            <span class="editorial-sparkle">${sumIsFact ? '📍 한눈에 보기' : '✨ 오늘 데이트 에디토리얼'}</span>
+            <blockquote class="editorial-text">${sumIsFact ? escapeHtml(sum) : `“${escapeHtml(sum)}”`}</blockquote>
           </div>` : ''}
 
           <!-- 4. 실용 정보 그리드 (영업시간, 주차, 가격, 메뉴 등) -->
