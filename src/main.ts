@@ -4586,9 +4586,6 @@ const CURATED_CATEGORY_IMAGES: Record<string, string[]> = {
     'https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=500&q=80&auto=format&fit=crop', // 서핑 & 파도
     'https://images.unsplash.com/photo-1540946485063-a40da27545f8?w=500&q=80&auto=format&fit=crop', // 오션 요트 세일링
     'https://images.unsplash.com/photo-1522163182402-834f871fd851?w=500&q=80&auto=format&fit=crop', // 볼더링 클라이밍
-    'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=500&q=80&auto=format&fit=crop', // 에메랄드 카약 투어
-    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500&q=80&auto=format&fit=crop', // 패러글라이딩 스카이
-    'https://images.unsplash.com/photo-1517649763962-0c623266ddc0?w=500&q=80&auto=format&fit=crop', // 아웃도어 스포츠 레저
   ],
   cafe: [
     'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=500&q=80&auto=format&fit=crop', // 브루잉 커피
@@ -4618,7 +4615,6 @@ const CURATED_CATEGORY_IMAGES: Record<string, string[]> = {
     'https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=500&q=80&auto=format&fit=crop', // 위스키 온더락
     'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=500&q=80&auto=format&fit=crop', // 네온 바 칵테일
     'https://images.unsplash.com/photo-1560512823-829485b8bf24?w=500&q=80&auto=format&fit=crop', // 샴페인 토스트
-    'https://images.unsplash.com/photo-1527061011665-3652c757a4d4?w=500&q=80&auto=format&fit=crop', // 무드 펍 테라스
   ],
   stay: [
     'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=500&q=80&auto=format&fit=crop', // 부티크 호텔
@@ -4634,9 +4630,7 @@ const CURATED_CATEGORY_IMAGES: Record<string, string[]> = {
     'https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=500&q=80&auto=format&fit=crop', // 모던 갤러리
     'https://images.unsplash.com/photo-1536924940846-227afb31e2a5?w=500&q=80&auto=format&fit=crop', // 미술관 전시 감상
     'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=500&q=80&auto=format&fit=crop', // 아트 스페이스
-    'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=500&q=80&auto=format&fit=crop', // 도자기 공방 & 작업실
     'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=500&q=80&auto=format&fit=crop', // 페인팅 아뜰리에
-    'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&q=80&auto=format&fit=crop', // 클래식 콘서트 홀
   ],
   shopping: [
     'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=500&q=80&auto=format&fit=crop', // 감성 부티크 & 쇼룸
@@ -4663,6 +4657,28 @@ function isValidImageUrl(url?: string | null): boolean {
   return true;
 }
 
+/** 업종 키워드로 큐레이션 풀을 고른다. 정해지지 않으면 null */
+function pickImagePool(text: string, cat: string, name: string, slot: SlotKey, useSlot: boolean): string[] | null {
+  if ((cat.includes('레포츠') && slot !== 'stay' && !/펜션|캠핑|글램핑|카라반/.test(name)) || text.includes('루지') || text.includes('서핑') || text.includes('요트') || text.includes('패러글라이딩') || text.includes('짚라인') || text.includes('케이블카') || text.includes('클라이밍') || text.includes('카약') || text.includes('방탈출') || text.includes('보드게임') || text.includes('액티비티') || text.includes('레저') || text.includes('스포츠') || text.includes('카트')) {
+    return CURATED_CATEGORY_IMAGES.activity;
+  } else if (text.includes('바(bar)') || text.includes('와인') || text.includes('칵테일') || text.includes('주점') || text.includes('펍') || text.includes('호프') || text.includes('이자카야') || text.includes('위스키') || text.includes('포차')) {
+    return CURATED_CATEGORY_IMAGES.bar;
+  } else if (text.includes('호텔') || text.includes('숙박') || text.includes('펜션') || text.includes('리조트') || /스테이(?!크|트)/.test(text) || (useSlot && slot === 'stay')) {
+    return CURATED_CATEGORY_IMAGES.stay;
+  } else if (text.includes('소품') || text.includes('잡화') || text.includes('패션') || text.includes('편집숍') || text.includes('편집샵') || text.includes('쇼룸') || text.includes('플래그십') || text.includes('부티크') || text.includes('라이프스타일')) {
+    return CURATED_CATEGORY_IMAGES.shopping;
+  } else if (text.includes('미술관') || text.includes('전시') || text.includes('박물관') || text.includes('갤러리') || text.includes('공방') || text.includes('문화') || text.includes('도예') || text.includes('도자기') || text.includes('원데이') || text.includes('클래스') || text.includes('아틀리에')) {
+    return CURATED_CATEGORY_IMAGES.culture;
+  } else if (text.includes('공원') || text.includes('산책') || text.includes('자연') || text.includes('전망') || text.includes('야경') || text.includes('숲') || text.includes('호수') || text.includes('해변') || text.includes('해수욕장') || text.includes('수목원') || text.includes('휴양림')) {
+    return CURATED_CATEGORY_IMAGES.nature;
+  } else if (text.includes('카페') || text.includes('커피') || text.includes('베이커리') || text.includes('제과') || text.includes('빵') || text.includes('디저트') || text.includes('빙수') || text.includes('찻집') || text.includes('티하우스') || text.includes('로스터리')) {
+    return CURATED_CATEGORY_IMAGES.cafe;
+  } else if (text.includes('양식') || text.includes('한식') || text.includes('일식') || text.includes('중식') || text.includes('음식점') || text.includes('레스토랑') || text.includes('다이닝') || text.includes('비스트로') || text.includes('파스타') || text.includes('스테이크') || text.includes('국수') || text.includes('면요리') || text.includes('초밥') || text.includes('스시') || text.includes('오마카세') || text.includes('샤브샤브') || text.includes('돈까스') || text.includes('피자') || text.includes('버거') || text.includes('치킨') || text.includes('고기') || text.includes('육류') || text.includes('갈비') || text.includes('삼겹살') || text.includes('곱창') || text.includes('바베큐') || text.includes('찌개') || text.includes('덮밥') || text.includes('칼국수') || text.includes('냉면') || text.includes('식당') || text.includes('맛집')) {
+    return CURATED_CATEGORY_IMAGES.dining;
+  }
+  return null;
+}
+
 /**
  * 장소의 고화질 이미지 결정 (카테고리·업종 정밀 매칭 및 중복 방지 usedImages 세트 지원)
  */
@@ -4678,31 +4694,11 @@ function getSpotImageUrl(spot: Spot, slot: SlotKey, usedImages?: Set<string>): s
     }
   }
 
-  // 2. 카테고리/슬롯 기반 큐레이션 풀 선택 (정밀 업종 키워드 매칭)
+  // 2. 카테고리/슬롯 기반 큐레이션 풀 선택. category로 풀이 정해지지 않을 때만 name을 본다(summary는 생성 문구라 쓰지 않는다)
   const cat = (spot.category || '').toLowerCase();
   const name = (spot.name || '').toLowerCase();
-  const summary = (spot.summary || '').toLowerCase();
-  const combined = `${cat} ${name} ${summary}`;
-
-  let pool: string[];
-
-  if ((cat.includes('레포츠') && slot !== 'stay' && !/펜션|캠핑|글램핑|카라반/.test(name)) || combined.includes('루지') || combined.includes('서핑') || combined.includes('요트') || combined.includes('패러글라이딩') || combined.includes('짚라인') || combined.includes('케이블카') || combined.includes('클라이밍') || combined.includes('카약') || combined.includes('방탈출') || combined.includes('보드게임') || combined.includes('액티비티') || combined.includes('레저') || combined.includes('스포츠') || combined.includes('카트')) {
-    pool = CURATED_CATEGORY_IMAGES.activity;
-  } else if (combined.includes('바(bar)') || combined.includes('와인') || combined.includes('칵테일') || combined.includes('주점') || combined.includes('펍') || combined.includes('호프') || combined.includes('이자카야') || combined.includes('위스키') || combined.includes('포차')) {
-    pool = CURATED_CATEGORY_IMAGES.bar;
-  } else if (combined.includes('호텔') || combined.includes('숙박') || combined.includes('펜션') || combined.includes('리조트') || /스테이(?!크|트)/.test(combined) || slot === 'stay') {
-    pool = CURATED_CATEGORY_IMAGES.stay;
-  } else if (combined.includes('소품') || combined.includes('잡화') || combined.includes('패션') || combined.includes('편집숍') || combined.includes('편집샵') || combined.includes('쇼룸') || combined.includes('플래그십') || combined.includes('부티크') || combined.includes('라이프스타일')) {
-    pool = CURATED_CATEGORY_IMAGES.shopping;
-  } else if (combined.includes('미술관') || combined.includes('전시') || combined.includes('박물관') || combined.includes('갤러리') || combined.includes('공방') || combined.includes('문화') || combined.includes('도예') || combined.includes('도자기') || combined.includes('원데이') || combined.includes('클래스') || combined.includes('아틀리에')) {
-    pool = CURATED_CATEGORY_IMAGES.culture;
-  } else if (combined.includes('공원') || combined.includes('산책') || combined.includes('자연') || combined.includes('전망') || combined.includes('야경') || combined.includes('숲') || combined.includes('호수') || combined.includes('해변') || combined.includes('해수욕장') || combined.includes('수목원') || combined.includes('휴양림')) {
-    pool = CURATED_CATEGORY_IMAGES.nature;
-  } else if (combined.includes('카페') || combined.includes('커피') || combined.includes('베이커리') || combined.includes('제과') || combined.includes('빵') || combined.includes('디저트') || combined.includes('빙수') || combined.includes('찻집') || combined.includes('티하우스') || combined.includes('로스터리')) {
-    pool = CURATED_CATEGORY_IMAGES.cafe;
-  } else if (combined.includes('양식') || combined.includes('한식') || combined.includes('일식') || combined.includes('중식') || combined.includes('음식점') || combined.includes('레스토랑') || combined.includes('다이닝') || combined.includes('비스트로') || combined.includes('파스타') || combined.includes('스테이크') || combined.includes('국수') || combined.includes('면요리') || combined.includes('초밥') || combined.includes('스시') || combined.includes('오마카세') || combined.includes('샤브샤브') || combined.includes('돈까스') || combined.includes('피자') || combined.includes('버거') || combined.includes('치킨') || combined.includes('고기') || combined.includes('육류') || combined.includes('갈비') || combined.includes('삼겹살') || combined.includes('곱창') || combined.includes('바베큐') || combined.includes('찌개') || combined.includes('덮밥') || combined.includes('칼국수') || combined.includes('냉면') || combined.includes('식당') || combined.includes('맛집')) {
-    pool = CURATED_CATEGORY_IMAGES.dining;
-  } else {
+  const pool = pickImagePool(cat, cat, name, slot, false) || pickImagePool(`${cat} ${name}`, cat, name, slot, true);
+  if (!pool) {
     // 업종을 알 수 없으면 식당 사진을 대신 보이지 않는다(공간대여·시장·골프장에 음식 사진이 붙던 약 1,000곳). 빈 값이면 카드가 아이콘을 보인다
     return '';
   }
