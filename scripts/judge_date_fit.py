@@ -46,6 +46,11 @@ WHOLESALE = re.compile(r"도매시장|농산물|농수산물|청과|축산물|�
 WHOLESALE_NOT = re.compile(r"지하도상가|고미술|악기|전자|세운")
 with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "r24_wholesale_close_ids.json"), encoding="utf-8") as _f:
     R24_VERIFIED = frozenset(int(k) for k in json.load(_f)["rows"])
+# P-076 단독 체험마을. 카카오 패널과 네이버 수치로 판정한 135곳에서 경계 6곳을 뺀 129곳을 id 목록으로 닫고, 이름과 고립 조건만 맞는 나머지는 검토로 보낸다
+VILLAGE = re.compile(r"마을(\s*\(.*\))?$")
+VILLAGE_NOT = re.compile(r"벽화|한옥|민속|영화|동화|책마을|예술")
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "r23_village_close_ids.json"), encoding="utf-8") as _f:
+    R23_VERIFIED = frozenset(int(k) for k in json.load(_f)["rows"])
 GOLF_RELIC_KEEP = frozenset({1790667560577, 1790456834079, 1790307190897})  # 리베라CC, 서산수골프앤리조트, 경주 김유신묘
 FISHING_KEEP = re.compile(r"실내|바다낚시터|좌대|캠핑")  # 실내낚시터는 데이트, 관리형 바다낚시터·좌대·캠핑장은 애매
 CAMPING = re.compile(r"캠핑|글램핑|카라반|야영")
@@ -302,6 +307,13 @@ def solo_confucian(row, ctx):
             and ctx["near"].get(row["id"], 1) == 0)
 
 
+def solo_village(row, ctx):
+    """R23: 출처 tourapi, 유형 관광지이고 이름이 마을로 끝나며(벽화·한옥·민속·영화·동화·책마을·예술 제외) 500m 안에 다른 열린 행이 없다. 좌표가 없는 행은 걸리지 않는다."""
+    name = (row.get("name") or "").strip()
+    return (src_type(row) == "tourapi" and row.get("category") == "관광지" and bool(VILLAGE.search(name)) and not VILLAGE_NOT.search(name)
+            and ctx["near"].get(row["id"], 1) == 0)
+
+
 def tourapi_wholesale(row):
     name = (row.get("name") or "").strip()
     return (src_type(row) == "tourapi" and row.get("category") == "쇼핑/소품" and bool(WHOLESALE.search(name))
@@ -357,6 +369,10 @@ RULES = [
      "500m 안 다른 열린 행이 0곳이고, 카카오 장소 패널이 사진 400장 미만·카카오맵 후기 5건 미만·블로그 후기 30건 미만인 165곳(P-067). "
      "표본 60곳 오탐 0",
      lambda r, c: solo_confucian(r, c) and r["id"] in R21_VERIFIED, None),
+    ("R23_단독_체험마을", "close", "출처 tourapi, 유형 관광지이고 이름이 마을로 끝나며(벽화·한옥·민속·영화·동화·책마을·예술 제외) "
+     "500m 안 다른 열린 행이 0곳이고, 카카오 패널이 있으면 사진 400장 미만·카카오맵 후기 5건 미만·블로그 후기 30건 미만, 네이버 같은 이름 장소가 "
+     "있으면 방문자 리뷰 100건 미만·블로그 리뷰 200건 미만인 129곳(P-076). 표본 60곳 오탐 0, 경계 6곳은 뺀다",
+     lambda r, c: solo_village(r, c) and r["id"] in R23_VERIFIED, None),
     ("R24_도매시설_전문상가", "close", "출처 tourapi, 유형 쇼핑/소품이고 이름이 도매시장·농산물·농수산물·청과·축산물·화훼·집하장·유통단지·도매상가나 상가로 끝나며"
      "(지하도상가·고미술·악기·전자·세운 제외), 카카오 패널이 있으면 블로그 후기 30건 미만·사진 400장 미만이고 네이버 같은 이름 장소의 "
      "방문자 리뷰 100건 미만·블로그 리뷰 500건 미만인 25곳(P-071). 28곳 전수 판정 오탐 0, 경계 3곳은 뺀다",
@@ -403,6 +419,9 @@ RULES = [
     ("R21_단독_유교시설_미확인", "review", "R21 조건이지만 카카오 장소 패널 수치로 확인한 165곳 밖이다. 패널이 없는 41곳은 인기를 모르고 "
      "광주향교·도남서원·예연서원은 사진이나 후기가 많아 뺐다(P-067)",
      lambda r, c: solo_confucian(r, c) and r["id"] not in R21_VERIFIED, None),
+    ("R23_단독_체험마을_미확인", "review", "R23 조건이지만 닫은 129곳 밖이다. 경계 6곳(유수암마을·동자북마을·고포마을·송계어촌체험휴양마을·"
+     "대도어촌체험마을·울산 신화마을)과 인기 수치로 뺀 찾아가는 마을(강주 해바라기마을·광양 매화마을 등)과 새로 든 행(P-076)",
+     lambda r, c: solo_village(r, c) and r["id"] not in R23_VERIFIED, None),
     ("R24_도매시설_전문상가_미확인", "review", "R24 이름 조건이지만 닫은 25곳 밖이다. 경계 3곳(남포동건어물도매시장·동대문종합시장 한복상가·신사상가)과 "
      "네이버 방문자나 카카오 후기가 많아 뺀 도매시장 20곳(가락농수산물종합도매시장·노량진수산물도매시장 등)과 새로 든 행(P-071)",
      lambda r, c: tourapi_wholesale(r) and r["id"] not in R24_VERIFIED, None),

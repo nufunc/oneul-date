@@ -3,7 +3,7 @@ import json
 import os
 
 from judge_date_fit import (DINER_VERIFIED, GOLF_RELIC_KEEP, PUBLIC_FACILITY_KEEP, PUBLIC_FACILITY_VERIFIED, R3_SAME_ADDRESS_EXEMPT,
-                            R21_VERIFIED, R24_VERIFIED, REGION_MISMATCH_VERIFIED, judge)
+                            R21_VERIFIED, R23_VERIFIED, R24_VERIFIED, REGION_MISMATCH_VERIFIED, judge)
 
 
 def row(id, name, category, slot, address, source, event=None):
@@ -250,6 +250,36 @@ def test_solo_confucian():
     assert len(R21_VERIFIED) == 165 and R21_VERIFIED == set(result["close_ids"]) and not R21_VERIFIED & set(result["review_ids"])
 
 
+def test_solo_village():
+    """P-076 R23: 확인한 129곳만 닫고 경계 6곳과 목록 밖은 검토로 보낸다"""
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs", "planning", "p076-village-20261009.json"),
+              encoding="utf-8") as f:
+        result = json.load(f)
+    boundary = {s["id"] for s in result["sample"] if s["borderline"]}
+    assert len(R23_VERIFIED) == 129 and len(boundary) == 6 and R23_VERIFIED == set(result["ids"]) - boundary
+    verified = sorted(R23_VERIFIED)[0]
+    def site(id, name, lat, category="관광지", source="tourapi"):
+        return {**row(id, name, category, "day", "경상남도 합천군 가야면 야천로 101", source), "lat": lat, "lng": 128.0}
+    def hits(rows, action, rule):
+        return {i["id"] for i in judge(rows)[action] if rule in i["rules"]}
+    rows = [site(verified, "각사산촌생태마을", 35.0),
+            site(2, "신규체험마을(합천)", 35.1),  # 괄호 꼬리는 허용, 목록 밖이라 검토
+            site(3, "마비정 벽화마을", 35.2),  # 벽화 제외
+            site(4, "마을회관", 35.3),  # 이름이 마을로 끝나지 않는다
+            site(5, "안동 마을", 35.4, category="숙박"),
+            site(6, "웹마을", 35.5, source="web"),
+            {**site(7, "좌표없는마을", 0), "lat": None, "lng": None}]
+    assert hits(rows, "close", "R23_단독_체험마을") == {verified}
+    assert hits(rows, "review", "R23_단독_체험마을_미확인") == {2}
+    gap = [site(i, "유수암마을", 36.0 + n * 0.1) for n, i in enumerate(boundary)]
+    assert not hits(gap, "close", "R23_단독_체험마을"), "경계 6곳 id는 닫지 않는다"
+    assert hits(gap, "review", "R23_단독_체험마을_미확인") == boundary
+    near = rows[:1] + [site(8, "이웃 카페", 35.0 + 0.003, category="카페", source="web")]  # 약 333m
+    assert not hits(near, "close", "R23_단독_체험마을"), "500m 안에 열린 행이 있으면 닫지 않는다"
+    far = rows[:1] + [site(8, "먼 카페", 35.0 + 0.006, category="카페", source="web")]  # 약 667m
+    assert hits(far, "close", "R23_단독_체험마을") == {verified}
+
+
 def test_wholesale():
     """P-071 R24: 패널과 네이버로 확인한 25곳만 닫고, 이름 조건만 맞는 나머지는 검토로 보낸다"""
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs", "planning", "p071-wholesale-20261009.json"),
@@ -302,6 +332,7 @@ if __name__ == "__main__":
     test_golf_fishing_relic_keep()
     test_everyday_diner_sparse()
     test_solo_confucian()
+    test_solo_village()
     test_wholesale()
     test_same_address_exempt()
     print("ok")
