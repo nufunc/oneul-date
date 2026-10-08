@@ -2502,6 +2502,28 @@ function hasKoreanBatchim(text: string): boolean {
   return (code - 0xac00) % 28 !== 0;
 }
 
+/** 받침에 맞는 조사를 붙인다. '으로/로'는 ㄹ받침도 받침 없는 말처럼 '로'를 쓴다 */
+const KOREAN_PARTICLES = { '이/가': ['이', '가'], '와/과': ['과', '와'], '으로/로': ['으로', '로'] } as const;
+function withParticle(text: string, pair: keyof typeof KOREAN_PARTICLES): string {
+  const [withBatchim, withoutBatchim] = KOREAN_PARTICLES[pair];
+  const code = text.trim().slice(-1).charCodeAt(0) - 0xac00;
+  const rieul = pair === '으로/로' && code >= 0 && code < 11172 && code % 28 === 8;
+  return `${text}${hasKoreanBatchim(text) && !rieul ? withBatchim : withoutBatchim}`;
+}
+
+/** 마지막 항목을 뺀 항목마다 조사를 붙여 이어 쓴다("A와 B와 C") */
+function joinWithParticle(items: string[], pair: keyof typeof KOREAN_PARTICLES): string {
+  return items.map((item, i) => (i < items.length - 1 ? `${withParticle(item, pair)} ` : item)).join('');
+}
+
+/** 식당·카페·술집 풀(pickImagePool)에 드는 스팟인지. 총평의 미식·티타임·한잔 문구는 이 스팟에만 쓴다 */
+function isFoodVenue(spot: Spot, slot: SlotKey): boolean {
+  const cat = (spot.category || '').toLowerCase();
+  const name = (spot.name || '').toLowerCase();
+  const pool = pickImagePool(cat, cat, name, slot, false) || pickImagePool(`${cat} ${name}`, cat, name, slot, true);
+  return pool !== null && [CURATED_CATEGORY_IMAGES.dining, CURATED_CATEGORY_IMAGES.cafe, CURATED_CATEGORY_IMAGES.bar].includes(pool);
+}
+
 /** 자연스러운 한국어 나열: 마지막 항목 앞에만 접속어(기본 '그리고')를 붙인다 */
 function joinKoreanList(items: string[], conjunction: string = '그리고'): string {
   if (items.length <= 1) return items.join('');
@@ -2534,6 +2556,10 @@ function generateCourseStory(
   const eve = spotMap.get('evening');
   const night = spotMap.get('night');
   const stay = spotMap.get('stay');
+
+  // 업종이 식음일 때만 미식·티타임·한잔 문구를 쓰고, 아니면 업종 중립 문구를 쓴다
+  const food = (s: Spot, slot: SlotKey, foodText: string, neutralText: string) =>
+    isFoodVenue(s, slot) ? foodText : neutralText;
 
   const wrap = (name: string) => (forHtml ? `<strong>${escapeHtml(name)}</strong>` : name);
   const wrapText = (text: string) => (forHtml ? escapeHtml(text) : text);
@@ -2593,7 +2619,7 @@ function generateCourseStory(
     case 0: {
       const parts: string[] = [];
       if (day) parts.push(`${wrap(day.name)}의 여유로운 낮 햇살`);
-      if (eve) parts.push(`${wrap(eve.name)}에서 마주하는 정갈한 미식`);
+      if (eve) parts.push(`${wrap(eve.name)}에서 ${food(eve, 'evening', '마주하는 정갈한 미식', '맞이하는 차분한 저녁 시간')}`);
       if (night) parts.push(`${wrap(night.name)}의 은은한 조명 아래 낭만으로 물드는 밤`);
       if (stay) parts.push(`${wrap(stay.name)}에서 누리는 아늑한 여운`);
       return `${parts.join(', ')}이 조화롭게 어우러져 두 사람의 특별한 하루를 완성하기 좋은 데이트 코스입니다.${metaTip ? metaTip : ''}`;
@@ -2602,13 +2628,13 @@ function generateCourseStory(
     // 1. 에디토리얼 스토리텔링형
     case 1: {
       if (day && eve && night) {
-        return `${wrap(day.name)}에서 나누는 설레는 대화가 ${wrap(eve.name)}의 근사한 테이블로, 그리고 ${wrap(night.name)}의 감미로운 무드로 자연스레 이어져 적극 추천해요!${metaTip}`;
+        return `${wrap(day.name)}에서 나누는 설레는 대화가 ${wrap(eve.name)}의 ${withParticle(food(eve, 'evening', '근사한 테이블', '아늑한 저녁 시간'), '으로/로')}, 그리고 ${wrap(night.name)}의 감미로운 무드로 자연스레 이어져 적극 추천해요!${metaTip}`;
       }
       if (day && eve) {
-        return `${wrap(day.name)}의 여유로운 감성에서 시작해 ${wrap(eve.name)}의 황홀한 맛으로 이어지는 감각적인 데이트 코스예요.${metaTip}`;
+        return `${wrap(day.name)}의 여유로운 감성에서 시작해 ${wrap(eve.name)}의 ${withParticle(food(eve, 'evening', '황홀한 맛', '설레는 저녁 시간'), '으로/로')} 이어지는 감각적인 데이트 코스예요.${metaTip}`;
       }
       if (eve && night) {
-        return `${wrap(eve.name)}의 로맨틱한 식사 뒤에 ${wrap(night.name)}에서 깊어가는 밤의 낭만을 오롯이 맞이할 수 있어요.${metaTip}`;
+        return `${wrap(eve.name)}의 로맨틱한 ${food(eve, 'evening', '식사', '저녁 시간')} 뒤에 ${wrap(night.name)}에서 깊어가는 밤의 낭만을 오롯이 맞이할 수 있어요.${metaTip}`;
       }
       break;
     }
@@ -2617,10 +2643,10 @@ function generateCourseStory(
     case 2: {
       const segments: string[] = [];
       if (day) segments.push(`햇살이 머무는 ${wrap(day.name)}의 여유`);
-      if (eve) segments.push(`${wrap(eve.name)}에서 나누는 특별한 한 끼`);
+      if (eve) segments.push(`${wrap(eve.name)}에서 ${food(eve, 'evening', '나누는 특별한 한 끼', '보내는 특별한 저녁 시간')}`);
       if (night) segments.push(`${wrap(night.name)}에서 이어지는 둘만의 밀도 높은 대화`);
       if (stay) segments.push(`${wrap(stay.name)}에서의 온전한 쉼`);
-      return `${segments.join(', ')}으로 이어져 둘만의 깊은 교감을 나누기에 참 좋아요. ${metaTip ? metaTip.trim() : defaultClosing}`;
+      return `${withParticle(segments.join(', '), '으로/로')} 이어져 둘만의 깊은 교감을 나누기에 참 좋아요. ${metaTip ? metaTip.trim() : defaultClosing}`;
     }
 
     // 3. 시적 계절감 & 빛의 흐름형
@@ -2642,17 +2668,17 @@ function generateCourseStory(
     case 4: {
       const tastes: string[] = [];
       if (day) tastes.push(`${wrap(day.name)}의 감각적인 무드`);
-      if (eve) tastes.push(`${wrap(eve.name)}의 섬세한 요리`);
+      if (eve) tastes.push(`${wrap(eve.name)}의 ${food(eve, 'evening', '섬세한 요리', '차분한 저녁 시간')}`);
       if (night) tastes.push(`${wrap(night.name)}의 아늑한 온기`);
       if (stay) tastes.push(`${wrap(stay.name)}의 편안한 휴식`);
-      return `${tastes.join('와 ')}가 섬세하게 어우러져 두 사람의 취향을 온전히 만족시킬 셀렉션이라 강력 추천해요!${metaTip}`;
+      return `${withParticle(joinWithParticle(tastes, '와/과'), '이/가')} 섬세하게 어우러져 두 사람의 취향을 온전히 만족시킬 셀렉션이라 강력 추천해요!${metaTip}`;
     }
 
     // 5. 일상 탈출 & 몰입형
     case 5: {
       const escapes: string[] = [];
       if (day) escapes.push(`${wrap(day.name)}에서 찾는 작은 쉼`);
-      if (eve) escapes.push(`${wrap(eve.name)}의 깊은 풍미`);
+      if (eve) escapes.push(`${wrap(eve.name)}의 ${food(eve, 'evening', '깊은 풍미', '느긋한 저녁 시간')}`);
       if (night) escapes.push(`${wrap(night.name)}의 은은한 밤공기`);
       if (stay) escapes.push(`${wrap(stay.name)}에서의 하룻밤`);
       return `도심의 번잡함을 벗어나 ${joinKoreanList(escapes)}에 오롯이 빠져보는 낭만적인 시간으로 맞이할 수 있어요.${metaTip}`;
@@ -2667,7 +2693,7 @@ function generateCourseStory(
         return `${wrap(day.name)}에서 빚어낸 미소와 ${wrap(eve.name)}에서의 로맨틱한 순간이 오래도록 기분 좋은 여운으로 어우러질 수 있어요.${metaTip}`;
       }
       if (eve && night) {
-        return `${wrap(eve.name)}의 황홀한 테이블과 ${wrap(night.name)}의 반짝이는 밤 풍경이 한 편의 영화처럼 이어져 추천해요!${metaTip}`;
+        return `${wrap(eve.name)}의 ${food(eve, 'evening', '황홀한 테이블', '로맨틱한 저녁 시간')}과 ${wrap(night.name)}의 반짝이는 밤 풍경이 한 편의 영화처럼 이어져 추천해요!${metaTip}`;
       }
       break;
     }
@@ -2676,7 +2702,7 @@ function generateCourseStory(
     case 7: {
       const spots: string[] = [];
       if (day) spots.push(`둘만의 아지트 같은 ${wrap(day.name)}`);
-      if (eve) spots.push(`정성 어린 요리가 있는 ${wrap(eve.name)}`);
+      if (eve) spots.push(`${food(eve, 'evening', '정성 어린 요리가 있는', '여유로운 저녁을 보내는')} ${wrap(eve.name)}`);
       if (night) spots.push(`시간이 멈춘 듯 아늑한 ${wrap(night.name)}`);
       if (stay) spots.push(`프라이빗한 쉼터 ${wrap(stay.name)}`);
       return `${spots.join(', ')}에서 다른 누구에게도 방해받지 않는 둘만의 따스한 온기를 만끽해보세요.${metaTip}`;
@@ -2685,11 +2711,11 @@ function generateCourseStory(
     // 8. 오감 자극 미식 & 감성형
     case 8: {
       const senses: string[] = [];
-      if (day) senses.push(`${wrap(day.name)}의 향긋한 티타임`);
-      if (eve) senses.push(`${wrap(eve.name)}에서 느껴지는 정갈한 미식`);
-      if (night) senses.push(`${wrap(night.name)}의 감미로운 한잔`);
+      if (day) senses.push(`${wrap(day.name)}의 ${food(day, 'day', '향긋한 티타임', '여유로운 낮 시간')}`);
+      if (eve) senses.push(`${wrap(eve.name)}에서 ${food(eve, 'evening', '느껴지는 정갈한 미식', '보내는 저녁 시간')}`);
+      if (night) senses.push(`${wrap(night.name)}의 ${food(night, 'night', '감미로운 한잔', '깊어가는 밤의 시간')}`);
       if (stay) senses.push(`${wrap(stay.name)}의 포근한 침구`);
-      return `${senses.join('과 ')}으로 두 사람의 하루를 기분 좋게 채워줄 감각적인 코스라 더욱 추천해요 ✨${metaTip}`;
+      return `${withParticle(joinWithParticle(senses, '와/과'), '으로/로')} 두 사람의 하루를 기분 좋게 채워줄 감각적인 코스라 더욱 추천해요 ✨${metaTip}`;
     }
 
     // 9. 기억 & 영원성형
@@ -2697,7 +2723,7 @@ function generateCourseStory(
     default: {
       const memories: string[] = [];
       if (day) memories.push(`${wrap(day.name)}에서 피어난 다정한 미소`);
-      if (eve) memories.push(`${wrap(eve.name)}의 따뜻한 식탁`);
+      if (eve) memories.push(`${wrap(eve.name)}의 ${food(eve, 'evening', '따뜻한 식탁', '따스한 저녁')}`);
       if (night) memories.push(`${wrap(night.name)}의 깊은 밤하늘`);
       if (stay) memories.push(`${wrap(stay.name)}의 고요한 아침`);
       // 이/가는 앞말의 받침 유무로 갈리는데 join('가 ')로 고정하면
