@@ -191,6 +191,39 @@ def test_golf_fishing_relic_keep():
     assert sum(len(v) for v in result["close_ids"].values()) == 239
 
 
+def diner(id, name, category, source, reviews, lat=37.5, lng=127.0):
+    return {**row(id, name, category, "day", "서울 노원구 광운로 1", source), "lat": lat, "lng": lng,
+            "social_links": {"kakaomap": {"review_count": reviews}} if reviews is not None else {}}
+
+
+def test_everyday_diner_sparse():
+    """P-068 R22: 닫는 규칙이 아니라 검토 규칙이다. 조건 다섯 가운데 DB로 재는 네 가지를 하나씩 어긋나게 해 본다"""
+    rows = [diner(1, "미식성", "중식", "blog_mining", 12),
+            diner(2, "추억의옛날통닭", "치킨", "catchtable_miner", 30, 37.6),  # 리뷰 30은 경계 안
+            diner(3, "청평어죽", "한식", "community_miner", 31, 37.7),  # 리뷰 31
+            diner(4, "솔밥", "한식", "web", 5, 37.8),  # web 출처
+            diner(5, "영상식당", "한식", "youtube_vlog", 5, 37.9),  # 영상 출처
+            diner(6, "레스토랑 가온", "이탈리안", "blog_mining", 5, 38.0),  # 일상 식사 18종 밖
+            diner(7, "리뷰없는집", "한식", "blog_mining", None, 38.1),  # 카카오 리뷰 수 없음
+            diner(8, "대흥식당", "한식", "blog_mining", 5, 38.2),  # 이름 패턴 밖의 '식당'은 걸린다
+            diner(9, "곤드레밥집 중동점", "한식", "blog_mining", 5, 38.3),  # R15 이름 패턴
+            diner(10, "좌표없는집", "한식", "blog_mining", 5)]
+    rows[-1]["lat"] = rows[-1]["lng"] = None
+    out = judge(rows)
+    r22 = {item["id"] for items in out.values() for item in items if "R22_일상식당_저밀도_저리뷰" in item["rules"]}
+    assert r22 == {1, 2, 8}, r22
+    assert not any("R22_일상식당_저밀도_저리뷰" in item["rules"] for item in out["close"])
+    crowded = judge([diner(1, "미식성", "중식", "blog_mining", 12)] + [diner(20 + i, f"이웃{i}", "카페", "web", 500) for i in range(10)])
+    assert not [i for i in crowded["review"] if i["id"] == 1 and "R22_일상식당_저밀도_저리뷰" in i["rules"]], crowded  # 이웃 10곳이면 안 걸린다
+    nine = judge([diner(1, "미식성", "중식", "blog_mining", 12)] + [diner(20 + i, f"이웃{i}", "카페", "web", 500) for i in range(9)])
+    assert any(i["id"] == 1 and "R22_일상식당_저밀도_저리뷰" in i["rules"] for i in nine["review"])  # 이웃 9곳은 걸린다
+    # 결과 파일의 닫는 24곳은 라이브 DB에서 이 규칙에 걸렸던 행이다(여기서는 이 규칙이 close가 되지 않는 것만 본다)
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs", "planning", "p068-everyday-diner-20261008.json"),
+              encoding="utf-8") as f:
+        result = json.load(f)
+    assert len(result["close_ids"]) == 24 and not set(result["close_ids"]) & set(result["hold_ids"])
+
+
 def test_same_address_exempt():
     rows = [row(2, "스타필드 고양", "쇼핑", "day", "경기 고양시 덕양구 고양대로 1955", "web")] + [
         row(1791100000010 + i, f"새 매장 {i}", "카페", "day", "경기 고양시 덕양구 고양대로 1955 1층", "web") for i in range(4)]
@@ -215,5 +248,6 @@ if __name__ == "__main__":
     test_public_facility()
     test_tourapi_golf_fishing_monument()
     test_golf_fishing_relic_keep()
+    test_everyday_diner_sparse()
     test_same_address_exempt()
     print("ok")

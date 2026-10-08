@@ -11,6 +11,7 @@ OCI: COLLECTOR_DIR=/mnt/data/git/oneul-date/collector python3 judge_date_fit.py 
 """
 import argparse
 import json
+import math
 import os
 import re
 import sys
@@ -95,6 +96,11 @@ DINER_MEASURED_MAX_ID = 1791020195793  # 네이버로 잰 열린 행의 마지�
 REGION_MISMATCH_VERIFIED = frozenset({
     1788820160544, 1789974245787, 1790499400846, 1790716559054, 1790734822167, 1790758673091, 1791020195793,
     1791020198770, 1791020201766})
+# P-068 일상 식당 저밀도 저리뷰. 사람 판정 35곳(동네 식당 24, 애매 11)과 근거는 docs/planning/p068-everyday-diner-20261008.json
+R22_SOURCES = frozenset({"blog_mining", "catchtable_miner", "auto_discovery", "community_miner"})  # web과 영상 출처는 뺀다
+R22_CATS = frozenset({"한식", "국수", "칼국수", "중식", "중국요리", "돈까스,우동", "곰탕", "설렁탕", "찌개,전골", "불고기,두루치기", "쌈밥",
+                      "닭요리", "냉면", "두부전문점", "매운탕,해물탕", "순대", "치킨", "오리"})
+R22_RADIUS_M, R22_MAX_NEIGHBORS, R22_MAX_KAKAO_REVIEWS = 500, 9, 30
 HINT_COMPOUND = re.compile(r"성수기|세종마을|안양천|안산자락길|민락2지구|송도암남")  # 힌트 사전이 앞부분을 지명으로 읽는 낱말
 INCHEON_REORG = {"중구": "제물포구", "동구": "제물포구"}  # 2026 인천 개편 뒤 주소를 힌트 사전이 모른다
 # P-055 공공시설. 행별 카카오 판정과 남김·보류 목록은 docs/planning/public-facility-20261004.json
@@ -248,6 +254,37 @@ def neighborhood_diner(row):
             and src_type(row) != "web")
 
 
+def kakao_review_count(row):
+    count = ((row.get("social_links") or {}).get("kakaomap") or {}).get("review_count")
+    return count if isinstance(count, int) else None
+
+
+def neighbor_counts(rows, radius_m=R22_RADIUS_M):
+    """행마다 radius_m 안의 다른 행 수. 좌표가 없는 행은 세지도 않고 키도 없다."""
+    step = radius_m / 111_000  # 위도 1도 약 111km. 격자 한 칸이 반경 이상이라 이웃 칸 아홉 개만 본다
+    lng_step = step / 0.77  # 북위 39.6도의 cos. 한반도 북단까지 경도 한 칸이 반경 이상이다
+    grid = {}
+    for r in rows:
+        if r.get("lat") is not None and r.get("lng") is not None:
+            grid.setdefault((int(r["lat"] // step), int(r["lng"] // lng_step)), []).append(r)
+    out = {}
+    for (gy, gx), cell in grid.items():
+        near = [o for dy in (-1, 0, 1) for dx in (-1, 0, 1) for o in grid.get((gy + dy, gx + dx), ())]
+        for r in cell:
+            cos = math.cos(math.radians(r["lat"]))
+            out[r["id"]] = sum(o["id"] != r["id"] and math.hypot((o["lat"] - r["lat"]) * 111_000, (o["lng"] - r["lng"]) * 111_000 * cos)
+                               <= radius_m for o in near)
+    return out
+
+
+def everyday_diner_sparse(row, ctx):
+    """R22: 출처가 큐레이션 밖이고 일상 식사 카테고리이며 R15 이름 패턴 밖이고, 500m 안 열린 행이 적고 카카오 저장 리뷰가 적다."""
+    reviews = kakao_review_count(row)
+    return (src_type(row) in R22_SOURCES and row.get("category") in R22_CATS and not DINER_WORD.search(row.get("name") or "")
+            and ctx["near"].get(row["id"], R22_MAX_NEIGHBORS + 1) <= R22_MAX_NEIGHBORS
+            and reviews is not None and reviews <= R22_MAX_KAKAO_REVIEWS)
+
+
 def tourapi_golf(row):
     return src_type(row) == "tourapi" and row.get("category") == "레포츠/체험" and bool(GOLF.search(row.get("name") or ""))
 
@@ -316,6 +353,10 @@ RULES = [
      "R17 닫기와 남김 목록에 없는 행. 이름 규칙 정밀도 90.7%",
      lambda r, c: bool(PUBLIC_FACILITY.search((r.get("name") or "").strip()))
      and r["id"] not in PUBLIC_FACILITY_VERIFIED and r["id"] not in PUBLIC_FACILITY_KEEP, None),
+    ("R22_일상식당_저밀도_저리뷰", "review", "큐레이션 밖 출처(blog_mining·catchtable_miner·auto_discovery·community_miner)의 일상 식사 카테고리 18종이고 "
+     "R15 이름 패턴 밖이며 500m 안 다른 열린 행 10곳 미만, 카카오 저장 리뷰 30 이하. 네이버 조건이 없어 35곳 중 24곳만 동네 식당이고 "
+     "6곳은 데이트 맞는 식당이 걸린다(P-068). 닫은 24곳 밖은 사람이 본다",
+     everyday_diner_sparse, None),
     ("R3_같은주소_5행이상", "review", "도로명 주소(번지까지)가 같은 열린 행이 5곳 이상. 보충 25%. "
      "사람이 지도로 보고 남긴 116곳(P-064, r3_same_address_exempt.json)은 그때 주소 그대로면 뺀다",
      lambda r, c: road_key(r) is not None and c["road"][road_key(r)] >= 5 and R3_SAME_ADDRESS_EXEMPT.get(r["id"]) != road_key(r), None),
@@ -342,7 +383,7 @@ ACTION_ORDER = {"close": 0, "fix": 1, "review": 2}
 
 def judge(rows):
     """열린 행 목록을 판정해 {'close': [...], 'fix': [...], 'review': [...]}를 돌려준다."""
-    ctx = {"road": Counter(k for k in map(road_key, rows) if k), "mall_road": MALL_ROADS_CLOSED | {road_key(r) for r in rows if is_mall_road(r)}}
+    ctx = {"near": neighbor_counts(rows), "road": Counter(k for k in map(road_key, rows) if k), "mall_road": MALL_ROADS_CLOSED | {road_key(r) for r in rows if is_mall_road(r)}}
     out = {"close": [], "fix": [], "review": []}
     for row in rows:
         hits = [rule for rule in RULES if rule[3](row, ctx)]
