@@ -6,6 +6,13 @@ from judge_date_fit import (DINER_VERIFIED, GOLF_RELIC_KEEP, PUBLIC_FACILITY_KEE
                             R21_VERIFIED, R23_VERIFIED, R24_VERIFIED, REGION_MISMATCH_VERIFIED, judge)
 
 
+def fixture(name):
+    """결과 파일(docs/planning, 추적하지 않는다)에서 테스트에 쓰는 id만 떼어 둔 scripts/fixtures/judge_date_fit/result_ids.json"""
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures", "judge_date_fit", "result_ids.json"),
+              encoding="utf-8") as f:
+        return json.load(f)[name]
+
+
 def row(id, name, category, slot, address, source, event=None):
     return {"id": id, "name": name, "category": category, "slot": slot, "address": address,
             "source": {"type": source, **({"event": event} if event else {})}}
@@ -88,12 +95,9 @@ def test_neighborhood_diner():
     review = {item["id"] for item in out["review"] if "R15_동네_식당_미측정" in item["rules"]}
     assert review == {1791100000000}, review  # 네이버 측정값이 없는 새 행은 검토로만 간다
     # 닫는 목록이 결과 파일의 close_ids와 같고 남김 목록(명동교자 본점, 오탐, 경계 포함)과 겹치지 않는다
-    with open(os.path.join(os.path.dirname(__file__), "..", "docs", "planning", "neighborhood-restaurant-20261003.json"),
-              encoding="utf-8") as f:
-        result = json.load(f)
+    result = fixture("p048_diner")
     assert DINER_VERIFIED == set(result["close_ids"])
-    kept = {r["id"] for v in result["keep"].values() for r in v} | {r["id"] for r in result["keep_web_curated"]["rows"]}
-    kept |= {r["id"] for r in result["review_not_closed"]["rows"]} | {3858, 1789342066290, 1789275924820}
+    kept = set(result["kept_ids"]) | {3858, 1789342066290, 1789275924820}
     assert not kept & DINER_VERIFIED, kept & DINER_VERIFIED
 
 
@@ -116,11 +120,9 @@ def test_region_mismatch():
     review = {item["id"] for item in out["review"] if "R2_출처지역_불일치" in item["rules"]}
     assert review == {1788971886289}, review
     # 닫는 목록이 결과 파일의 close_ids와 같고 오탐, 유지, 교정, 판정 못함 표본과 겹치지 않는다
-    with open(os.path.join(os.path.dirname(__file__), "..", "docs", "planning", "region-mismatch-20261003.json"),
-              encoding="utf-8") as f:
-        result = json.load(f)
+    result = fixture("p050_region")
     assert REGION_MISMATCH_VERIFIED == set(result["close_ids"])
-    kept = {r["id"] for r in result["rows"] if r["verdict"] != "폐기"} | {r["id"] for r in result["keep_notes"]}
+    kept = set(result["kept_ids"])
     assert not kept & REGION_MISMATCH_VERIFIED, kept & REGION_MISMATCH_VERIFIED
 
 
@@ -149,12 +151,10 @@ def test_public_facility():
     review = {item["id"] for item in out["review"] if "R17_공공시설_미확인" in item["rules"]}
     assert review == {1788818277908, 1791100000002}, review  # 보류와 새 행은 검토, 명소는 이름 규칙에서 뺀다
     # 닫는 목록이 결과 파일의 close_ids와 같고 명소 남김, 보류, 범위 밖 행과 겹치지 않는다
-    with open(os.path.join(os.path.dirname(__file__), "..", "docs", "planning", "public-facility-20261004.json"),
-              encoding="utf-8") as f:
-        result = json.load(f)
+    result = fixture("p055_public_facility")
     assert PUBLIC_FACILITY_VERIFIED == set(result["close_ids"]) and len(PUBLIC_FACILITY_VERIFIED) == 98
-    assert PUBLIC_FACILITY_KEEP == set(result["keep_ids"]) == {r["id"] for r in result["keep"]}
-    kept = PUBLIC_FACILITY_KEEP | {r["id"] for r in result["review"]} | {r["id"] for r in result["out_of_scope"]}
+    assert PUBLIC_FACILITY_KEEP == set(result["keep_ids"])
+    kept = PUBLIC_FACILITY_KEEP | set(result["review_ids"]) | set(result["out_of_scope_ids"])
     assert not kept & PUBLIC_FACILITY_VERIFIED, kept & PUBLIC_FACILITY_VERIFIED
 
 
@@ -184,11 +184,9 @@ def test_golf_fishing_relic_keep():
     out = judge(rows)
     assert not out["close"], out["close"]
     assert {item["id"] for item in out["review"]} == {r["id"] for r in rows}
-    with open(os.path.join(os.path.dirname(__file__), "..", "docs", "planning", "golf-fishing-relic-20261004.json"),
-              encoding="utf-8") as f:
-        result = json.load(f)
+    result = fixture("p063_golf_relic")
     assert GOLF_RELIC_KEEP == set(result["keep_review_ids"]["golf"]) | set(result["keep_review_ids"]["relic"])
-    assert sum(len(v) for v in result["close_ids"].values()) == 239
+    assert result["close_count"] == 239
 
 
 def diner(id, name, category, source, reviews, lat=37.5, lng=127.0):
@@ -218,9 +216,7 @@ def test_everyday_diner_sparse():
     nine = judge([diner(1, "미식성", "중식", "blog_mining", 12)] + [diner(20 + i, f"이웃{i}", "카페", "web", 500) for i in range(9)])
     assert any(i["id"] == 1 and "R22_일상식당_저밀도_저리뷰" in i["rules"] for i in nine["review"])  # 이웃 9곳은 걸린다
     # 결과 파일의 닫는 24곳은 라이브 DB에서 이 규칙에 걸렸던 행이다(여기서는 이 규칙이 close가 되지 않는 것만 본다)
-    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs", "planning", "p068-everyday-diner-20261008.json"),
-              encoding="utf-8") as f:
-        result = json.load(f)
+    result = fixture("p068_diner")
     assert len(result["close_ids"]) == 24 and not set(result["close_ids"]) & set(result["hold_ids"])
 
 
@@ -244,18 +240,14 @@ def test_solo_confucian():
     assert not hits(near, "close", "R21_단독_유교시설"), "500m 안에 열린 행이 있으면 닫지 않는다"
     far = rows[:1] + [site(8, "먼 카페", 35.0 + 0.006, category="카페", source="web")]  # 약 667m
     assert hits(far, "close", "R21_단독_유교시설") == {verified}
-    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs", "planning", "p067-confucian-solo-20261008-final.json"),
-              encoding="utf-8") as f:
-        result = json.load(f)
+    result = fixture("p067_confucian")
     assert len(R21_VERIFIED) == 165 and R21_VERIFIED == set(result["close_ids"]) and not R21_VERIFIED & set(result["review_ids"])
 
 
 def test_solo_village():
     """P-076 R23: 확인한 129곳만 닫고 경계 6곳과 목록 밖은 검토로 보낸다"""
-    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs", "planning", "p076-village-20261009.json"),
-              encoding="utf-8") as f:
-        result = json.load(f)
-    boundary = {s["id"] for s in result["sample"] if s["borderline"]}
+    result = fixture("p076_village")
+    boundary = set(result["boundary_ids"])
     assert len(R23_VERIFIED) == 129 and len(boundary) == 6 and R23_VERIFIED == set(result["ids"]) - boundary
     verified = sorted(R23_VERIFIED)[0]
     def site(id, name, lat, category="관광지", source="tourapi"):
@@ -282,11 +274,9 @@ def test_solo_village():
 
 def test_wholesale():
     """P-071 R24: 패널과 네이버로 확인한 25곳만 닫고, 이름 조건만 맞는 나머지는 검토로 보낸다"""
-    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs", "planning", "p071-wholesale-20261009.json"),
-              encoding="utf-8") as f:
-        result = json.load(f)
-    boundary = {r["id"] for r in result["close"] if "경계" in r["verdict"]}
-    assert len(R24_VERIFIED) == 25 and len(boundary) == 3 and R24_VERIFIED == {r["id"] for r in result["close"]} - boundary
+    result = fixture("p071_wholesale")
+    boundary = set(result["boundary_ids"])
+    assert len(R24_VERIFIED) == 25 and len(boundary) == 3 and R24_VERIFIED == set(result["close_ids"]) - boundary
     verified = sorted(R24_VERIFIED)[0]
     def shop(id, name, category="쇼핑/소품", source="tourapi"):
         return row(id, name, category, "day", "경상남도 김해시 주촌면 서부로1403번길 23-40", source)
@@ -315,9 +305,7 @@ def test_same_address_exempt():
     moved = judge([{**rows[0], "address": "경기 고양시 덕양구 고양대로 1957"}] + [
         {**r, "address": "경기 고양시 덕양구 고양대로 1957"} for r in rows[1:]])
     assert any(item["id"] == 2 and "R3_같은주소_5행이상" in item["rules"] for item in moved["review"])  # 주소가 바뀌면 다시 걸린다
-    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs", "planning", "review-rule-20261004.json"),
-              encoding="utf-8") as f:
-        keep = set(json.load(f)["full_scan_outside_r16"]["reviewed_keep_ids"])
+    keep = set(fixture("p064_r3_keep")["reviewed_keep_ids"])
     assert set(R3_SAME_ADDRESS_EXEMPT) == keep - {1788908665523, 1790823926129}  # 둘은 P-063으로 닫혀 뺐다
 
 
