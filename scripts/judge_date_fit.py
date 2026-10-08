@@ -36,6 +36,11 @@ FISHING = re.compile(r"낚시|피싱|좌대")
 MONUMENT = re.compile(r"(비|비석|비각|묘|고인돌|당간지주|귀부 및 이수|각서석|남근석|정려각|효각|열녀문|홍살문|당산|부도|석장승|석등|"
                       r"충혼탑|기념탑)(\s*\(.*\))?$")
 MONUMENT_KEEP = re.compile(r"^(종묘|문묘|동묘)$|나비$|갈비$|도깨비$|바람개비$")
+# P-067 단독 유교 시설. 카카오 장소 패널 수치는 DB 행에 없어 패널을 확인한 165곳을 id 목록으로 닫고 나머지는 검토로 보낸다
+CONFUCIAN = re.compile(r"(서원|향교|서당|영당|재실|종택|사당|묘각)(\s*\(.*\))?$")
+CONFUCIAN_NOT = re.compile(r"의사당(\s*\(.*\))?$")  # 국회의사당
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "r21_confucian_close_ids.json"), encoding="utf-8") as _f:
+    R21_VERIFIED = frozenset(int(k) for k in json.load(_f)["rows"])
 GOLF_RELIC_KEEP = frozenset({1790667560577, 1790456834079, 1790307190897})  # 리베라CC, 서산수골프앤리조트, 경주 김유신묘
 FISHING_KEEP = re.compile(r"실내|바다낚시터|좌대|캠핑")  # 실내낚시터는 데이트, 관리형 바다낚시터·좌대·캠핑장은 애매
 CAMPING = re.compile(r"캠핑|글램핑|카라반|야영")
@@ -285,6 +290,13 @@ def everyday_diner_sparse(row, ctx):
             and reviews is not None and reviews <= R22_MAX_KAKAO_REVIEWS)
 
 
+def solo_confucian(row, ctx):
+    """R21: 출처 tourapi, 유형 관광지이고 이름이 서원·향교 등으로 끝나며 500m 안에 다른 열린 행이 없다. 좌표가 없는 행은 걸리지 않는다."""
+    name = (row.get("name") or "").strip()
+    return (src_type(row) == "tourapi" and row.get("category") == "관광지" and bool(CONFUCIAN.search(name)) and not CONFUCIAN_NOT.search(name)
+            and ctx["near"].get(row["id"], 1) == 0)
+
+
 def tourapi_golf(row):
     return src_type(row) == "tourapi" and row.get("category") == "레포츠/체험" and bool(GOLF.search(row.get("name") or ""))
 
@@ -330,6 +342,10 @@ RULES = [
     ("R20_tourapi_단독유물", "close", "출처 tourapi, 유형 관광지이고 이름이 비·묘·당간지주·고인돌·충혼탑 등으로 끝난다(석탑·석불 제외, "
      "종묘 등 제외). 열린 행 전수 판정 73/74(P-063), 애매 1곳은 R20 보류로 뺀다",
      lambda r, c: tourapi_monument(r) and r["id"] not in GOLF_RELIC_KEEP, None),
+    ("R21_단독_유교시설", "close", "출처 tourapi, 유형 관광지이고 이름이 서원·향교·서당·영당·재실·종택·사당·묘각으로 끝나며(의사당 제외) "
+     "500m 안 다른 열린 행이 0곳이고, 카카오 장소 패널이 사진 400장 미만·카카오맵 후기 5건 미만·블로그 후기 30건 미만인 165곳(P-067). "
+     "표본 60곳 오탐 0",
+     lambda r, c: solo_confucian(r, c) and r["id"] in R21_VERIFIED, None),
     ("R13_캠핑_낮슬롯", "fix", "이름이나 카테고리에 캠핑·글램핑·카라반·야영이 있거나 tourapi 레포츠/체험 이름에 캠프·펜션이 있고 슬롯 day. "
      "식당·카페는 뺀다. 표본 교정 2/2",
      lambda r, c: r.get("slot") == "day" and bool(CAMPING.search(r.get("name") or "") or CAMPING.search(r.get("category") or "")
@@ -369,6 +385,9 @@ RULES = [
      lambda r, c: tourapi_fishing(r) and bool(FISHING_KEEP.search(r.get("name") or "")), None),
     ("R20_tourapi_단독유물_보류", "review", "R20 조건이지만 사람이 애매로 판정한 1곳(경주 김유신묘)",
      lambda r, c: tourapi_monument(r) and r["id"] in GOLF_RELIC_KEEP, None),
+    ("R21_단독_유교시설_미확인", "review", "R21 조건이지만 카카오 장소 패널 수치로 확인한 165곳 밖이다. 패널이 없는 41곳은 인기를 모르고 "
+     "광주향교·도남서원·예연서원은 사진이나 후기가 많아 뺐다(P-067)",
+     lambda r, c: solo_confucian(r, c) and r["id"] not in R21_VERIFIED, None),
     ("R1_비데이트_카테고리", "review", "카테고리가 문화원·스포츠시설·도서관·매표소·공간대여 등. 대부분 카테고리만 틀린 명소",
      lambda r, c: r.get("category") in NON_DATE_CATS, None),
     ("R5_설명형_이름", "review", "내보낸 이름이 3어절 이상이거나 &·+/, 및, in을 담는다. 자동 이름 교정은 하지 않는다(P-049 드라이런 정밀도 2/5). "

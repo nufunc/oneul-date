@@ -3,7 +3,7 @@ import json
 import os
 
 from judge_date_fit import (DINER_VERIFIED, GOLF_RELIC_KEEP, PUBLIC_FACILITY_KEEP, PUBLIC_FACILITY_VERIFIED, R3_SAME_ADDRESS_EXEMPT,
-                            REGION_MISMATCH_VERIFIED, judge)
+                            R21_VERIFIED, REGION_MISMATCH_VERIFIED, judge)
 
 
 def row(id, name, category, slot, address, source, event=None):
@@ -224,6 +224,32 @@ def test_everyday_diner_sparse():
     assert len(result["close_ids"]) == 24 and not set(result["close_ids"]) & set(result["hold_ids"])
 
 
+def test_solo_confucian():
+    """P-067 R21: 카카오 패널로 확인한 id만 닫고, 같은 조건의 나머지는 검토로 보낸다"""
+    verified = sorted(R21_VERIFIED)[0]
+    def site(id, name, lat, category="관광지", source="tourapi"):
+        return {**row(id, name, category, "day", "경상남도 진주시 이반성면 용암길 59-2", source), "lat": lat, "lng": 128.0}
+    def hits(rows, action, rule):
+        return {i["id"] for i in judge(rows)[action] if rule in i["rules"]}
+    rows = [site(verified, "가호서원", 35.0),
+            site(2, "고부향교(전북)", 35.1),  # 괄호 꼬리는 허용, 패널 확인 목록 밖이라 검토
+            site(3, "국회의사당", 35.2),  # 의사당 제외
+            site(4, "종택한옥", 35.3),  # 이름이 끝나지 않는다
+            site(5, "안동 종택", 35.4, category="숙박"),
+            site(6, "웹서원", 35.5, source="web"),
+            {**site(7, "좌표없는서원", 0), "lat": None, "lng": None}]
+    assert hits(rows, "close", "R21_단독_유교시설") == {verified}
+    assert hits(rows, "review", "R21_단독_유교시설_미확인") == {2}
+    near = rows[:1] + [site(8, "이웃 카페", 35.0 + 0.003, category="카페", source="web")]  # 약 333m
+    assert not hits(near, "close", "R21_단독_유교시설"), "500m 안에 열린 행이 있으면 닫지 않는다"
+    far = rows[:1] + [site(8, "먼 카페", 35.0 + 0.006, category="카페", source="web")]  # 약 667m
+    assert hits(far, "close", "R21_단독_유교시설") == {verified}
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs", "planning", "p067-confucian-solo-20261008-final.json"),
+              encoding="utf-8") as f:
+        result = json.load(f)
+    assert len(R21_VERIFIED) == 165 and R21_VERIFIED == set(result["close_ids"]) and not R21_VERIFIED & set(result["review_ids"])
+
+
 def test_same_address_exempt():
     rows = [row(2, "스타필드 고양", "쇼핑", "day", "경기 고양시 덕양구 고양대로 1955", "web")] + [
         row(1791100000010 + i, f"새 매장 {i}", "카페", "day", "경기 고양시 덕양구 고양대로 1955 1층", "web") for i in range(4)]
@@ -249,5 +275,6 @@ if __name__ == "__main__":
     test_tourapi_golf_fishing_monument()
     test_golf_fishing_relic_keep()
     test_everyday_diner_sparse()
+    test_solo_confucian()
     test_same_address_exempt()
     print("ok")
