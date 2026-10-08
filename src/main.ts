@@ -4680,6 +4680,15 @@ function pickImagePool(text: string, cat: string, name: string, slot: SlotKey, u
 }
 
 /**
+ * 코스 카드 썸네일용 주소: 카카오·다음 CDN 원본을 같은 회사의 리사이즈 주소(400px)로 바꾼다. 그 밖의 주소는 그대로 둔다
+ */
+function toCardThumbUrl(url: string): string {
+  return /^https?:\/\/t1\.(kakaocdn|daumcdn)\.net\//.test(url)
+    ? `https://img1.daumcdn.net/thumb/R400x400/?fname=${encodeURIComponent(url)}`
+    : url;
+}
+
+/**
  * 장소의 고화질 이미지 결정 (카테고리·업종 정밀 매칭 및 중복 방지 usedImages 세트 지원)
  */
 function getSpotImageUrl(spot: Spot, slot: SlotKey, usedImages?: Set<string>): string {
@@ -5386,7 +5395,7 @@ function renderStepCard(
       ${isHot ? `<span class="badge-hot-floating">🔥 핫플</span>` : ''}
       ${isClosedToday ? `<span class="badge-closed-floating">⚠️ 오늘 휴무</span>` : ''}
       <div class="step-fallback-box">${fallbackIcon}</div>
-      ${targetImgUrl ? `<img class="step-thumb-img" src="${escapeHtml(targetImgUrl)}" alt="${escapeHtml(spot.name)}" loading="lazy" referrerpolicy="no-referrer" onload="this.classList.add('is-loaded');" onerror="this.classList.add('is-hidden'); this.previousElementSibling?.classList.add('is-active');" />` : ''}
+      ${targetImgUrl ? `<img class="step-thumb-img" src="${escapeHtml(toCardThumbUrl(targetImgUrl))}"${toCardThumbUrl(targetImgUrl) !== targetImgUrl ? ` data-orig="${escapeHtml(targetImgUrl)}"` : ''} alt="${escapeHtml(spot.name)}" loading="lazy" fetchpriority="low" decoding="async" referrerpolicy="no-referrer" onload="this.classList.add('is-loaded');" onerror="var o=this.dataset.orig; if(o){this.dataset.orig=''; this.src=o; return;} this.classList.add('is-hidden'); this.previousElementSibling?.classList.add('is-active');" />` : ''}
     </div>`;
 
   return `
