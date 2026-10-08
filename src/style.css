@@ -911,6 +911,11 @@ button {
   -webkit-appearance: none;
 }
 
+.search-input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  display: none;
+}
+
 .search-input::placeholder {
   color: var(--color-text-faint);
   font-weight: 400;
