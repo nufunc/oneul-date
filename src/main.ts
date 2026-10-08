@@ -5260,8 +5260,8 @@ function buildFactSentence(spot: Spot, yt: { title?: string; views?: number } | 
   const videoText = yt ? (title ? `유튜브 '${title}'` : views >= 10000 ? `유튜브 영상(조회 ${(views / 10000).toFixed(1)}만)` : '') : '';
 
   if (ratingText) {
-    const first = !area ? `${ratingText}를 받은 곳이에요.`
-      : [`${area}에서 ${ratingText}를 받은 곳이에요.`, `${ratingText}를 기록한 ${area}의 장소예요.`, `${area}에 있고, ${ratingText}이에요.`][v];
+    const first = !area ? `${ratingText}을 받은 곳이에요.`
+      : [`${area}에서 ${ratingText}을 받은 곳이에요.`, `${ratingText}을 기록한 ${area}의 장소예요.`, `${area}에 있고, ${ratingText}이에요.`][v];
     return videoText ? `${first} ${videoText}에도 나와요.` : first;
   }
   if (!videoText) return '';

@@ -11,17 +11,17 @@ const build = new Function(`${ts.transpile(src.slice(start, end), { target: 'es2
 
 const spot = (id, km, area = '마포구') => ({ id, area, region: '서울', social_links: km ? { kakaomap: km } : {} });
 const CASES = [
-  ['평점 문형 0', spot(3, { rating: 4.6, review_count: 1625 }), null, '마포구에서 카카오맵 평점 4.6점(리뷰 1,625개)를 받은 곳이에요.'],
-  ['평점 문형 1', spot(4, { rating: 4.2, review_count: 10 }), null, '카카오맵 평점 4.2점(리뷰 10개)를 기록한 마포구의 장소예요.'],
+  ['평점 문형 0', spot(3, { rating: 4.6, review_count: 1625 }), null, '마포구에서 카카오맵 평점 4.6점(리뷰 1,625개)을 받은 곳이에요.'],
+  ['평점 문형 1', spot(4, { rating: 4.2, review_count: 10 }), null, '카카오맵 평점 4.2점(리뷰 10개)을 기록한 마포구의 장소예요.'],
   ['평점 문형 2', spot(5, { rating: 3.8, review_count: 58 }), null, '마포구에 있고, 카카오맵 평점 3.8점(리뷰 58개)이에요.'],
   ['리뷰 9건은 제외', spot(3, { rating: 4.8, review_count: 9 }), null, ''],
   ['3.7점은 제외', spot(3, { rating: 3.7, review_count: 500 }), null, ''],
   ['재료 없음', spot(3, null), null, ''],
-  ['지역 없음', spot(3, { rating: 4.0, review_count: 20 }, ''), null, '서울에서 카카오맵 평점 4.0점(리뷰 20개)를 받은 곳이에요.'],
+  ['지역 없음', spot(3, { rating: 4.0, review_count: 20 }, ''), null, '서울에서 카카오맵 평점 4.0점(리뷰 20개)을 받은 곳이에요.'],
   ['영상 제목 정리', spot(3), { title: '🔥부산 여행의 꽃 청사포 도희네 조개구이 | 맛집 #부산 #맛집', views: 500 }, "유튜브 '부산 여행의 꽃 청사포 도희네 조개구이'에서 소개된 마포구의 장소예요."],
   ['제목 ㅋㅋ는 조회수로', spot(4), { title: '대박이다 ㅋㅋㅋ', views: 72000 }, '마포구의 장소로, 유튜브 영상(조회 7.2만)에서 다뤘어요.'],
   ['제목도 조회수도 부족', spot(3), { title: 'ㅋㅋ', views: 9000 }, ''],
-  ['평점과 영상', spot(3, { rating: 4.2, review_count: 54 }), { title: '최애산 등극 가야산' }, "마포구에서 카카오맵 평점 4.2점(리뷰 54개)를 받은 곳이에요. 유튜브 '최애산 등극 가야산'에도 나와요."],
+  ['평점과 영상', spot(3, { rating: 4.2, review_count: 54 }), { title: '최애산 등극 가야산' }, "마포구에서 카카오맵 평점 4.2점(리뷰 54개)을 받은 곳이에요. 유튜브 '최애산 등극 가야산'에도 나와요."],
 ];
 
 let failed = 0;
@@ -32,5 +32,18 @@ for (const [label, s, yt, expected] of CASES) {
     console.error(`FAIL ${label}: ${JSON.stringify(actual)} != ${JSON.stringify(expected)}`);
   }
 }
+// 조사 검사: 평점 문구는 `점`으로 끝나 받침이 있으므로 뒤에 `를`이 아니라 `을`이나 `이에요`가 와야 한다.
+// 영상 문구 뒤 조사(에서, 에도, 에)는 받침과 무관하다. 문형 셋(id % 3)과 지역 유무와 영상 유무를 모두 돈다
+for (let id = 0; id < 3; id++) {
+  for (const area of ['마포구', '']) {
+    for (const yt of [null, { title: '최애산 등극 가야산' }, { title: 'ㅋㅋ', views: 72000 }]) {
+      const out = build(spot(id, { rating: 4.3, review_count: 68 }, area), yt);
+      if (/\)를/.test(out) || !/점\(리뷰 68개\)(을|이에요)/.test(out)) {
+        failed++;
+        console.error(`FAIL 조사 id=${id} area=${JSON.stringify(area)} yt=${JSON.stringify(yt)}: ${JSON.stringify(out)}`);
+      }
+    }
+  }
+}
 if (failed) process.exit(1);
-console.log(`ok ${CASES.length}`);
+console.log(`ok ${CASES.length} + 조사 18`);
