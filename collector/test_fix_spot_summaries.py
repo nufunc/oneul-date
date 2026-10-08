@@ -1,4 +1,4 @@
-"""풀 선택과 과대 문장 회귀 테스트(P-074): python3 test_fix_spot_summaries.py 또는 pytest"""
+"""풀 선택과 과대 문장 회귀 테스트(P-074, P-080): python3 test_fix_spot_summaries.py 또는 pytest"""
 import re
 
 import fix_spot_summaries as f
@@ -44,6 +44,31 @@ def test_name_used_only_when_category_empty():
     assert _is_never_bar("바다회사랑", "")
     # 카테고리가 있으면 이름의 카페 낱말을 보지 않는다
     assert _is_never_bar("어느 바 카페", "관광지")
+
+# 만들기(공방) 풀 문장과 그 풀에서만 쓰는 도입구(P-080)
+_MAKER_OPENERS = set(f.OPENER_BANK["creative"]) - set(f.OPENER_BANK["exhibit"])
+_MAKER_CLAIM = re.compile(r"공방|원데이 클래스|만들어가는|만든 작품|손끝에서 완성|손수 만든|빚어내며|작업대")
+
+
+def _summaries(name, cat, n=200):
+    return [f.generate_curated_summary(name, cat, "서울", "", None, spot_id=i) for i in range(1, n + 1)]
+
+
+def _has_maker_claim(text):
+    return bool(_MAKER_CLAIM.search(text)) or any(text.startswith(o) for o in _MAKER_OPENERS)
+
+
+def test_non_workshop_places_do_not_get_maker_sentences():
+    # 라이브에서 레일바이크와 조각미술관이 만들기 문장을 받았다
+    for name, cat in [("영종 씨사이드파크 레일바이크", "레포츠/체험"), ("바우지움조각미술관", "문화시설"),
+                      ("바우지움조각미술관", "미술관"), ("국립중앙박물관", "박물관"), ("좋아하는서점", "서점"),
+                      ("경주화백컨벤션센터", "문화시설"), ("청도 레일바이크", "체험여행"), ("어느 공연장", "공연")]:
+        assert not any(_has_maker_claim(t) for t in _summaries(name, cat)), (name, cat)
+
+
+def test_workshop_category_still_gets_maker_pool():
+    for cat in ["공방", "도자기공방", "가죽공예", "향수", "원데이클래스"]:
+        assert any(_has_maker_claim(t) for t in _summaries("어느 가게", cat, 40)), cat
 
 
 def test_no_unsupported_popularity_claims():
