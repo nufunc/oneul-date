@@ -11,6 +11,7 @@ P-056: 남은 행 판정(leftover-20261004.json)의 병합 15곳은 MERGES, 교�
 P-058: R5 층 B(--result r5-strata-YYYYMMDD.json의 rules.R5B_fix)의 rename은 카카오 장소 이름으로 바꾸고 merge는 into 행으로 합친다.
   목록의 이름은 내보낸 이름이라 지금 행의 이름이나 내보낸 이름 가운데 하나가 같으면 바뀌지 않은 것으로 본다.
 P-064: R3 같은 주소 전수(review-rule-20261004.json)의 병합 3곳은 MERGES, 교정 5곳과 남길 행 이름 2곳은 FIXES 표로 쓴다.
+P-101: 접두어만 다른 같은 주소 중복(--result p101_duplicate_suffix_pairs.json)의 merge 쌍을 close 행에서 keep 행으로 합친다.
 병합은 닫는 행 source.note에 merged_into를 남기고 남는 행의 빈 필드만 채운다(category는 옮기지 않는다). 소속 명소로 합치는 행(야경, 공연)은
 영업시간과 가격이 명소의 값이 아니어서 분위기 값만 옮긴다. 쓰기 직전에 다시 읽어 지금도 열려 있고 이름이 결과 파일 때와 같은 행만 고친다.
 
@@ -195,6 +196,9 @@ def merge_list(proposal, result):
     if proposal == "P-058":
         return [(x["id"], x["export_name"], x["into"], None, "venue" if x["id"] in P058_VENUE else "same")
                 for x in result["rules"]["R5B_fix"]["items"] if x["action"] == "merge"]
+    if proposal == "P-101":
+        names = [{r["id"]: r["name"] for r in p["rows"]} for p in result["merge"]]
+        return [(p["close"], n[p["close"]], p["keep"], n[p["keep"]], "same") for p, n in zip(result["merge"], names)]
     return [(i, name, into, None, kind) for i, (name, into, kind) in MERGES.get(proposal, {}).items()]
 
 
@@ -261,12 +265,12 @@ def plan(proposal, result, rows):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("proposal", choices=["P-053", "P-051", "P-054", "P-055", "P-056", "P-058", "P-064"])
-    ap.add_argument("--result", help="P-053 결과 파일(duplicate-merge-YYYYMMDD.json), P-058 층 파일(r5-strata-YYYYMMDD.json)")
+    ap.add_argument("proposal", choices=["P-053", "P-051", "P-054", "P-055", "P-056", "P-058", "P-064", "P-101"])
+    ap.add_argument("--result", help="P-053 결과 파일(duplicate-merge-YYYYMMDD.json), P-058 층 파일(r5-strata-YYYYMMDD.json), P-101 쌍 파일")
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--backup-dir", default=os.path.expanduser("~/oneul-backups"))
     args = ap.parse_args()
-    assert args.proposal not in ("P-053", "P-058") or args.result, f"{args.proposal}은 --result가 필요하다"
+    assert args.proposal not in ("P-053", "P-058", "P-101") or args.result, f"{args.proposal}은 --result가 필요하다"
 
     result = json.load(open(args.result, encoding="utf-8")) if args.result else {}
     ids = {x for i, _, into, _, _ in merge_list(args.proposal, result) for x in (i, into)} | set(FILLS.get(args.proposal, {}))

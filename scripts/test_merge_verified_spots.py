@@ -29,6 +29,18 @@ def test_plan_skips_closed_and_changed():
     assert fills == []
 
 
+def test_plan_p101_pairs():
+    result = {"merge": [{"keep": 3905, "close": 4821, "rows": [{"id": 3905, "name": "진미통닭"}, {"id": 4821, "name": "수원 행궁동 통닭거리 진미통닭"}]},
+                        {"keep": 1331, "close": 9501, "rows": [{"id": 1331, "name": "카페 포"}, {"id": 9501, "name": "여수카페포"}]}]}
+    rows = {3905: {"id": 3905, "name": "진미통닭", "is_closed": False, "category": "치킨", "hours": None},
+            4821: {"id": 4821, "name": "수원 행궁동 통닭거리 진미통닭", "is_closed": False, "category": "한식", "hours": "12:00"},
+            1331: {"id": 1331, "name": "카페 포", "is_closed": True},
+            9501: {"id": 9501, "name": "여수카페포", "is_closed": False}}
+    merges, _, skipped = plan("P-101", result, rows)
+    assert [(m["keep"]["id"], [d["id"] for d in m["dups"]]) for m in merges] == [(3905, [4821])]
+    assert merges[0]["fill"] == {"hours": "12:00"} and skipped == {9501: "남길 행 1331 닫힘"}
+
+
 def test_fix_body_kakao_address_category():
     row = {"id": 518, "name": "울트라마린", "address": "제주특별자치도 제주시 한경면 판포리 1611-3", "area": "제주시",
            "category": "카페", "provider_ids": {}, "source": {"note": "n"}, "social_links": {}}
@@ -45,5 +57,6 @@ def test_fix_body_kakao_address_category():
 if __name__ == "__main__":
     test_keep_fix_patch()
     test_plan_skips_closed_and_changed()
+    test_plan_p101_pairs()
     test_fix_body_kakao_address_category()
     print("ok")
