@@ -3,7 +3,8 @@ import json
 import os
 
 from judge_date_fit import (DINER_VERIFIED, GOLF_RELIC_KEEP, PUBLIC_FACILITY_KEEP, PUBLIC_FACILITY_VERIFIED, R3_SAME_ADDRESS_EXEMPT,
-                            R21_VERIFIED, R23_VERIFIED, R24_VERIFIED, R25_VERIFIED, R26_VERIFIED, REGION_MISMATCH_VERIFIED, judge)
+                            R21_VERIFIED, R23_VERIFIED, R24_VERIFIED, R25_VERIFIED, R26_VERIFIED, R27_VERIFIED,
+                            REGION_MISMATCH_VERIFIED, judge)
 
 
 def fixture(name):
@@ -347,6 +348,34 @@ def test_solo_stone_relic():
     assert not hits(near, "close", "R26_단독_석조유물"), "500m 안에 열린 행이 있으면 닫지 않는다"
 
 
+def test_solo_reservoir():
+    """P-089 R27: 확인한 12곳만 닫고, 이름과 고립 조건만 맞는 나머지(경계 12곳, 패널 불일치 1곳 포함)는 검토로 보낸다"""
+    result = fixture("p089_reservoir")
+    boundary, mismatch = set(result["boundary_ids"]), set(result["mismatch_ids"])
+    assert len(R27_VERIFIED) == 12 and len(boundary) == 12 and R27_VERIFIED == set(result["close_ids"])
+    assert not R27_VERIFIED & (boundary | mismatch)
+    verified = sorted(R27_VERIFIED)[0]
+    def pond(id, name, lat, category="관광지", source="tourapi"):
+        return {**row(id, name, category, "day", "충청남도 아산시 인주면 문방리", source), "lat": lat, "lng": 127.0}
+    def hits(rows, action, rule):
+        return {i["id"] for i in judge(rows)[action] if rule in i["rules"]}
+    rows = [pond(verified, "대덕저수지", 35.0, category="레포츠/체험"),
+            pond(2, "예당저수지", 35.1, category="레포츠/체험"),  # 목록 밖(수치로 뺌)이라 검토
+            pond(3, "기산저수지(공주)", 35.2),  # 괄호 꼬리 허용, 목록 밖이라 검토
+            pond(4, "잠홍 저수지(상홍지)", 35.3),  # 띄어 쓴 이름도 든다
+            pond(5, "저수지공원", 35.4),  # 이름이 저수지로 끝나지 않는다
+            pond(6, "저수지 카페", 35.5, category="카페"),  # 관광지·레포츠 밖
+            pond(7, "마둔저수지", 35.6, source="web"),  # tourapi 밖
+            {**pond(8, "좌표없는 저수지", 0), "lat": None, "lng": None}]
+    assert hits(rows, "close", "R27_단독_저수지") == {verified}
+    assert hits(rows, "review", "R27_단독_저수지_미확인") == {2, 3, 4}
+    gap = [pond(i, "고풍저수지", 36.0 + n * 0.1) for n, i in enumerate(sorted(boundary | mismatch))]
+    assert not hits(gap, "close", "R27_단독_저수지"), "경계 12곳과 불일치 1곳 id는 닫지 않는다"
+    assert hits(gap, "review", "R27_단독_저수지_미확인") == boundary | mismatch
+    near = rows[:1] + [pond(9, "이웃 카페", 35.0 + 0.003, category="카페", source="web")]  # 약 333m
+    assert not hits(near, "close", "R27_단독_저수지"), "500m 안에 열린 행이 있으면 닫지 않는다"
+
+
 def test_same_address_exempt():
     rows = [row(2, "스타필드 고양", "쇼핑", "day", "경기 고양시 덕양구 고양대로 1955", "web")] + [
         row(1791100000010 + i, f"새 매장 {i}", "카페", "day", "경기 고양시 덕양구 고양대로 1955 1층", "web") for i in range(4)]
@@ -375,5 +404,6 @@ if __name__ == "__main__":
     test_wholesale()
     test_solo_pier()
     test_solo_stone_relic()
+    test_solo_reservoir()
     test_same_address_exempt()
     print("ok")
