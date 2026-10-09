@@ -149,6 +149,22 @@ for (const region of REGIONS) {
   }
 }
 
+// 블로그 매거진 페이지를 sitemap에 등록
+sitemapUrls.push(`${SITE_URL}/blog/`);
+const blogPublicDir = path.resolve('public', 'blog');
+let blogPosts = ['gongju', 'gunsan', 'gyeongju', 'gangneung', 'seochon'];
+if (fs.existsSync(blogPublicDir)) {
+  const discovered = fs.readdirSync(blogPublicDir, { withFileTypes: true })
+    .filter((d) => d.isDirectory() && fs.existsSync(path.join(blogPublicDir, d.name, 'index.html')))
+    .map((d) => d.name);
+  if (discovered.length > 0) {
+    blogPosts = Array.from(new Set([...blogPosts, ...discovered]));
+  }
+}
+for (const post of blogPosts) {
+  sitemapUrls.push(`${SITE_URL}/blog/${post}/`);
+}
+
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${sitemapUrls.map((u) => `  <url><loc>${u}</loc></url>`).join('\n')}

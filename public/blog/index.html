@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>오늘 데이트 매거진 | 공개 데이터로 고른 데이트·여행 코스</title>
+  <meta name="description" content="공개 데이터로 고른 데이트·여행 코스 가이드. 공주·군산·경주·강릉·서촌부터 성수 우중 실내, 수원 반려견 동반 코스까지 감성 코스와 주차·웨이팅 팁, 예상 정산표를 만나보세요.">
+  <link rel="canonical" href="https://nufunc.github.io/oneul-date/blog/">
+  <meta property="og:url" content="https://nufunc.github.io/oneul-date/blog/">
+  
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="오늘 데이트 매거진 | 공개 데이터로 고른 데이트·여행 코스">
+  <meta property="og:description" content="공개 데이터로 고른 데이트·여행 코스 가이드. 공주·군산·경주·강릉·서촌부터 성수 우중 실내, 수원 반려견 동반 코스까지 감성 코스와 주차·웨이팅 팁, 예상 정산표를 만나보세요.">
+  <meta property="og:image" content="https://tong.visitkorea.or.kr/cms/resource/62/2612562_image2_1.jpg">
+  
+  <!-- Pretendard 웹폰트 -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  "name": "오늘 데이트 매거진",
+  "description": "공개 데이터로 고른 데이트·여행 코스 가이드. 공주·군산·경주·강릉·서촌부터 성수 우중 실내, 수원 반려견 동반 코스까지 감성 코스와 주차·웨이팅 팁, 예상 정산표를 만나보세요.",
+  "url": "https://nufunc.github.io/oneul-date/blog/",
+  "inLanguage": "ko",
+  "publisher": {
+    "@type": "Organization",
+    "name": "오늘 데이트 (Oneul Date)",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://nufunc.github.io/oneul-date/icon-192.png"
+    }
+  }
+}
+  </script>
+
+  <style>
+    :root {
+      --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      --bg-page: #fbf9f5;
+      --bg-card: #ffffff;
+      --color-primary: #1c1917;
+      --color-accent: #ff5a5f;
+      --color-text-main: #292524;
+      --color-text-sub: #57534e;
+      --color-text-faint: #78716c;
+      --color-border: #e7e5e4;
+      --max-width: 1080px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--bg-page);
+      color: var(--color-text-main);
+      line-height: 1.7;
+      letter-spacing: -0.02em;
+      word-break: keep-all;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* 헤더 */
+    .site-header {
+      background: rgba(255, 255, 255, 0.95);
+      border-bottom: 1px solid var(--color-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+    .header-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-logo {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--color-primary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .header-logo span { color: var(--color-accent); }
+    .header-link {
+      font-size: 13.5px;
+      color: var(--color-text-sub);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      background: #f5f5f4;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .header-link:hover { background: #e7e5e4; }
+
+    /* 히어로 섹션 */
+    .hero-section {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 48px 24px 32px 24px;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: #fff1f2;
+      color: #e11d48;
+      border: 1px solid #fecdd3;
+      font-size: 12.5px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 16px;
+    }
+    .hero-title {
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--color-primary);
+      line-height: 1.35;
+      margin-bottom: 14px;
+    }
+    .hero-desc {
+      font-size: 16px;
+      color: var(--color-text-sub);
+      max-width: 640px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* 포스트 그리드 */
+    .posts-container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 16px 24px 64px 24px;
+    }
+    .posts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 28px;
+    }
+
+    /* 카드 */
+    .post-card {
+      background: var(--bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    }
+    .post-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
+    }
+
+    .card-thumb-wrap {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+      background: #f5f5f4;
+    }
+    .card-thumb {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s;
+    }
+    .post-card:hover .card-thumb {
+      transform: scale(1.04);
+    }
+
+    .card-region-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(15, 23, 42, 0.85);
+      color: #ffffff;
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      backdrop-filter: blur(4px);
+    }
+    .card-badge-tag {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      background: rgba(255, 255, 255, 0.95);
+      color: #0f172a;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    .card-body {
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+    .card-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--color-primary);
+      line-height: 1.45;
+      margin-bottom: 10px;
+    }
+    .card-snippet {
+      font-size: 14px;
+      color: var(--color-text-sub);
+      line-height: 1.6;
+      margin-bottom: 16px;
+      flex-grow: 1;
+    }
+    .card-meta-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--color-border);
+      padding-top: 14px;
+      font-size: 12.5px;
+      color: var(--color-text-faint);
+    }
+    .card-cost {
+      font-weight: 700;
+      color: #059669;
+    }
+
+    /* 푸터 */
+    .site-footer {
+      border-top: 1px solid var(--color-border);
+      background: #ffffff;
+      padding: 36px 24px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--color-text-faint);
+    }
+    .site-footer a {
+      color: var(--color-text-main);
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="./" class="header-logo">
+        📖 오늘 데이트 <span>매거진</span>
+      </a>
+      <a href="../" class="header-link">
+        📱 오늘 데이트 앱 바로가기 ↗
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero-section">
+      <span class="hero-badge">공개 데이터 기반 에디토리얼</span>
+      <h1 class="hero-title">주말 데이트를 위한<br>로컬 여행 코스 가이드</h1>
+      <p class="hero-desc">
+        한국관광공사 공개 데이터로 고른 장소로 짠 데이트·여행 코스 가이드입니다.<br>
+        시간대별 최적 동선부터 알짜 주차·웨이팅 팁, 2인 기준 예상 정산표까지 모두 담았습니다.
+      </p>
+    </section>
+
+    <section class="posts-container">
+      <div class="posts-grid">
+
+        <!-- 1. [공주] 조용해서 더 완벽했던 제민천 힐링 코스 -->
+        <a href="gongju/" class="post-card">
+          <div class="card-thumb-wrap">
+            <img src="https://tong.visitkorea.or.kr/cms/resource/74/3038474_image2_1.JPG" alt="[공주] 조용해서 더 완벽했던 제민천 힐링 코스" class="card-thumb" loading="lazy" />
+            <span class="card-region-badge">충남 공주</span>
+            <span class="card-badge-tag">1박 2일 힐링</span>
+          </div>
+          <div class="card-body">
+            <h2 class="card-title">[공주] 조용해서 더 완벽했던 제민천 힐링 코스</h2>
+            <p class="card-snippet">
+              맷돌에 직접 간 100% 순메밀 막국수, 토종 곡물 카페 곡물집, 공주 알밤모찌부터 독채 한옥 자쿠지 쉼과 원조 김피탕 야식까지.
+            </p>
+            <div class="card-meta-bar">
+              <span>매향·곡물집·호담·김피탕</span>
+              <span class="card-cost">2인 39.6만 원</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- 2. [군산] 시내만 보고 오면 50%만 본 거예요! -->
+        <a href="gunsan/" class="post-card">
+          <div class="card-thumb-wrap">
+            <img src="https://tong.visitkorea.or.kr/cms/resource/39/3350739_image2_1.jpg" alt="[군산] 시내만 보고 오면 50%만 본 거예요!" class="card-thumb" loading="lazy" />
+            <span class="card-region-badge">전북 군산</span>
+            <span class="card-badge-tag">당일치기 횡단</span>
+          </div>
+          <div class="card-body">
+            <h2 class="card-title">[군산] 시내만 보고 오면 50%만 본 거예요!</h2>
+            <p class="card-snippet">
+              복성루 짬뽕과 이성당 단팥빵, 초원사진관 레트로 골목을 거쳐 새만금 33.9km 지평선 드라이브와 대장봉 다도해 뷰, 옥돌슈퍼 노을 삼겹살.
+            </p>
+            <div class="card-meta-bar">
+              <span>복성루·철길마을·선유도·대장봉</span>
+              <span class="card-cost">2인 14.1만 원</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- 3. [경주] 황리단길 인파를 벗어난 고요한 한옥 쉼 -->
+        <a href="gyeongju/" class="post-card">
+          <div class="card-thumb-wrap">
+            <img src="https://tong.visitkorea.or.kr/cms/resource/62/2612562_image2_1.jpg" alt="[경주] 황리단길 인파를 벗어난 고요한 한옥 쉼" class="card-thumb" loading="lazy" />
+            <span class="card-region-badge">경북 경주</span>
+            <span class="card-badge-tag">1박 2일 한옥쉼</span>
+          </div>
+          <div class="card-body">
+            <h2 class="card-title">[경주] 황리단길 인파를 벗어난 고요한 한옥 쉼</h2>
+            <p class="card-snippet">
+              40년 노포 평양면옥 순메밀면, 봉황대 고분길 독립서점, 100년 한옥 찻집 빛꾸리, 서악동 자쿠지 독채 한옥과 밤에 즐기는 따뜻한 콩국 야식.
+            </p>
+            <div class="card-meta-bar">
+              <span>평양면옥·빛꾸리·스테이묘화·콩국</span>
+              <span class="card-cost">2인 48.1만 원</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- 4. [강릉] 소나무 숲과 푸른 바다 사이, 고요한 쉼표 -->
+        <a href="gangneung/" class="post-card">
+          <div class="card-thumb-wrap">
+            <img src="https://tong.visitkorea.or.kr/cms/resource/58/4075958_image2_1.jpg" alt="[강릉] 소나무 숲과 푸른 바다 사이, 고요한 쉼표" class="card-thumb" loading="lazy" />
+            <span class="card-region-badge">강원 강릉</span>
+            <span class="card-badge-tag">1박 2일 솔향바다</span>
+          </div>
+          <div class="card-body">
+            <h2 class="card-title">[강릉] 소나무 숲과 푸른 바다 사이, 고요한 쉼표</h2>
+            <p class="card-snippet">
+              얼큰한 장칼국수, 오죽헌 솔숲 산책, 초당 한옥 티하우스, 중앙시장 닭강정 포장과 자쿠지 숙소, 엄지네 꼬막무침비빔밥 야식과 몽글순두부 해장.
+            </p>
+            <div class="card-meta-bar">
+              <span>현대장칼국수·초당티하우스·엄지네</span>
+              <span class="card-cost">2인 41.5만 원</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- 5. [서촌] 비 오는 날 더 좋은 인왕산 자락 골목 산책 -->
+        <a href="seochon/" class="post-card">
+          <div class="card-thumb-wrap">
+            <img src="https://tong.visitkorea.or.kr/cms/resource/98/3487598_image2_1.jpg" alt="[서촌] 비 오는 날 더 좋은 인왕산 자락 골목 산책" class="card-thumb" loading="lazy" />
+            <span class="card-region-badge">서울 종로</span>
+            <span class="card-badge-tag">당일 뚜벅이</span>
+          </div>
+          <div class="card-body">
+            <h2 class="card-title">[서촌] 비 오는 날 더 좋은 인왕산 자락 골목 산책</h2>
+            <p class="card-snippet">
+              누하동 정갈한 만둣국, 이상의 집과 대오서점 레트로 골목, 한옥 서까래 티 살롱, 통인시장 기름떡볶이, 수성동계곡과 서촌 내추럴 와인바.
+            </p>
+            <div class="card-meta-bar">
+              <span>취천루·대오서점·통인시장·와인바</span>
+              <span class="card-cost">2인 11.2만 원</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- 6. [성수] 비 오는 날 더 로맨틱한 우중 실내 뚜벅이 완벽 코스 -->
+        <a href="seongsu-rainy/" class="post-card">
+          <div class="card-thumb-wrap">
+            <img src="https://tong.visitkorea.or.kr/cms/resource/66/3494066_image2_1.jpg" alt="[성수] 비 오는 날 더 로맨틱한 우중 실내 뚜벅이 완벽 코스" class="card-thumb" loading="lazy" />
+            <span class="card-region-badge">서울 성수</span>
+            <span class="card-badge-tag">비오는날 감성</span>
+          </div>
+          <div class="card-body">
+            <h2 class="card-title">[성수] 비 오는 날 더 로맨틱한 우중 실내 뚜벅이 코스</h2>
+            <p class="card-snippet">
+              붉은 벽돌 아케이드 성수연방과 대림창고, 비 내리는 서울숲 실내 온실 식물원, 빗소리와 함께 즐기는 1인 1LP 청음 바이닐 성수, 뚝섬 감성 내추럴 와인바.
+            </p>
+            <div class="card-meta-bar">
+              <span>중앙감속기·대림창고·바이닐성수·어치</span>
+              <span class="card-cost">2인 17.0만 원</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- 7. [수원] 화성 성곽길부터 방화수류정 피크닉, 댕댕이와 함께한 하루 -->
+        <a href="suwon-haenggung/" class="post-card">
+          <div class="card-thumb-wrap">
+            <img src="https://tong.visitkorea.or.kr/cms/resource/50/2662050_image2_1.jpg" alt="[수원] 화성 성곽길부터 방화수류정 피크닉, 댕댕이와 함께한 하루" class="card-thumb" loading="lazy" />
+            <span class="card-region-badge">경기 수원</span>
+            <span class="card-badge-tag">반려견 동반</span>
+          </div>
+          <div class="card-body">
+            <h2 class="card-title">[수원] 화성 성곽길부터 방화수류정 피크닉, 댕댕이와 함께</h2>
+            <p class="card-snippet">
+              반려견 동반 숲속 브런치, 화서문 잔디마당과 성곽길 바람 산책, 방화수류정 용연 연못 돗자리 쉼, 화홍문 테라스 카페 멍푸치노, 통닭거리 야외 야장 야식.
+            </p>
+            <div class="card-meta-bar">
+              <span>슬리핑테이블·방화수류정·정지영커피·진미통닭</span>
+              <span class="card-cost">2인+1견 9.6만 원</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- 8. [전주] 한옥마을 인파를 벗어나 만난 완판본 골목과 온수 쉼표 -->
+        <a href="jeonju/" class="post-card">
+          <div class="card-thumb-wrap">
+            <img src="https://tong.visitkorea.or.kr/cms/resource/06/2685506_image2_1.jpg" alt="[전주] 한옥마을 인파를 벗어나 만난 완판본 골목과 온수 쉼표" class="card-thumb" loading="lazy" />
+            <span class="card-region-badge">전북 전주</span>
+            <span class="card-badge-tag">1박 2일 한옥쉼</span>
+          </div>
+          <div class="card-body">
+            <h2 class="card-title">[전주] 한옥마을 인파를 벗어나 만난 완판본 골목과 온수 쉼표</h2>
+            <p class="card-snippet">
+              토렴식 남부시장 콩나물국밥, 고즈넉한 경기전 돌담길과 완판본 목판 인쇄 체험, 한옥 마당 찻집 차경, 서학동 프라이빗 온수 자쿠지 숙소 연우헌, 피순대 야식과 베테랑 들깨칼국수 해장까지.
+            </p>
+            <div class="card-meta-bar">
+              <span>현대옥·경기전·차경·연우헌·피순대</span>
+              <span class="card-cost">2인 41.2만 원</span>
+            </div>
+          </div>
+        </a>
+
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>본 콘텐츠는 한국관광공사 TourAPI 공공누리 제1유형 실제 사진을 활용하여 합법적으로 제작되었습니다.</p>
+    <p style="margin-top: 8px;">
+      <a href="../">오늘 데이트 홈으로 가기</a> •
+      <a href="https://github.com/nufunc/oneul-date" target="_blank" rel="noopener">GitHub</a>
+    </p>
+    <p style="margin-top: 8px; font-size: 12px; color: #a8a29e;">
+      Copyright © 2026 오늘 데이트 (Oneul Date). All rights reserved.
+    </p>
+  </footer>
+
+</body>
+</html>
