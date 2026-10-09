@@ -89,7 +89,7 @@ const MAX_TEXT_LENGTH = 150;
 
 function fitBriefingLength(text: string): string | null {
   const flat = text.replace(/\s*\n+\s*/g, ' ').replace(/\s{2,}/g, ' ').trim();
-  if (flat.length <= MAX_TEXT_LENGTH) return flat;
+  if (flat.length <= MAX_TEXT_LENGTH) return /[.!?요다]$/.test(flat) ? flat : null;
   const head = flat.slice(0, MAX_TEXT_LENGTH + 1);
   let cut = -1;
   for (const m of head.matchAll(/[.!?](?=\s|$)/g)) cut = m.index! + 1;
