@@ -1279,6 +1279,16 @@ function inBroadRegion(spot: Spot, key: string): boolean {
   return (BROAD_REGION_ALIASES[key] ?? [key]).some((alias) => placeText.includes(alias));
 }
 
+const DISTRICT_END = /[구군]$/;
+
+/** '대구'가 해운대구에, '남구'가 강남구에 걸리지 않게 구·군 검색어는 이름에 들었거나 주소 단어가 그 말로 시작할 때만 통과시킨다 */
+function matchesDistrictQuery(spot: Spot, query: string): boolean {
+  return (
+    (spot.name || '').toLowerCase().includes(query) ||
+    [spot.location, spot.area, spot.address].join(' ').toLowerCase().split(/\s+/).some((w) => w.startsWith(query))
+  );
+}
+
 function matchesSearchQuery(spot: Spot, query: string): boolean {
   if (!query || !query.trim()) return true;
 
@@ -1307,6 +1317,8 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
     if (!rest.replace(PLACE_SUFFIX, '').trim()) return matchesSearchQuery(spot, place);
     if (rest && inPlace) {
       if (matchesSearchQuery(spot, rest)) return true;
+      // '일산동구'는 '일산'+'동구'로 나뉘지만 '동구'만으로는 이제 일산동구에 일치하지 않는다. 붙여 친 전체 말로 한 번 더 본다
+      if (DISTRICT_END.test(rest) && matchesDistrictQuery(spot, cleanQ.replace(/\s+/g, ''))) return true;
       // '성수동카페', '서면역카페', '홍대입구 카페'처럼 지역어에 붙은 동·역·입구·시를 떼고 한 번 더 본다.
       // 떼기 전에 먼저 보므로 '대전동물원'은 '물원'으로 잘리지 않는다
       const bare = rest.replace(PLACE_SUFFIX, '').trim();
@@ -1421,6 +1433,8 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
 
   // 단일 토큰이면 부분 일치 검사
   if (tokens.length === 1) {
+    // 아래 띄어쓰기 제거 비교로 새지 않게 구·군 검색어는 여기서 반환한다
+    if (tokens[0].length >= 2 && DISTRICT_END.test(tokens[0])) return matchesDistrictQuery(spot, tokens[0]);
     // 한 글자('역')는 부분 일치에 쓰지 않는다. '역'이 이름에 든 면역공방·역사의서재 1,065곳이 걸렸다
     if (tokens[0].length >= 2 && hasKeyword(targetText, tokens[0])) return true;
   } else {
