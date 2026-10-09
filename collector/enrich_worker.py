@@ -103,10 +103,12 @@ def run_social_enrichment(supabase_url: str, service_key: str, batch_size: int =
 
             # 2. 카카오맵 평점 탐색
             # 권역 이름('호남 동구')보다 주소 앞 두 단어('광주 동구')가 검색과 시·도 대조에 맞다
-            kakao_data = search_kakaomap_place(name, " ".join((s.get("address") or "").split()[:2]) or location)
+            # 사람이 고정한 링크(kakaomap.locked)는 검색하지 않고 그대로 둔다. 이름 포함 판정이 지운 식당 링크를 다시 붙였다(P-093)
+            existing_social = s.get("social_links") or {}
+            kakao_locked = isinstance(existing_social.get("kakaomap"), dict) and existing_social["kakaomap"].get("locked") is True
+            kakao_data = None if kakao_locked else search_kakaomap_place(name, " ".join((s.get("address") or "").split()[:2]) or location)
             time.sleep(0.5)
 
-            existing_social = s.get("social_links") or {}
             # 이번 조회가 실패(None)해도 calculate_hot_score는 무조건 "영상
             # 없음" 기준으로 hot_score·metrics를 재계산해 덮어썼다. 네트워크
             # 오류 등 일시적 실패와 "실제로 영상이 없음"을 구분 못 해, 이미

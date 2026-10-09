@@ -64,6 +64,10 @@ with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "r26_stone_re
 RESERVOIR = re.compile(r"저수지(\s*\(.*\))?$")
 with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "r27_reservoir_close_ids.json"), encoding="utf-8") as _f:
     R27_VERIFIED = frozenset(int(k) for k in json.load(_f)["rows"])
+# P-093 장소 이름, 다른 업소 주소. 식음 카테고리 장소형 이름 56곳을 카카오·네이버로 전수 판정해 9곳을 id 목록으로 닫고, 이름 조건만 맞는 나머지는 검토로 보낸다
+PLACE_TAIL = re.compile(r"(길|거리|골목|코스|공방|아틀리에|스튜디오|풀빌라|글램핑|카라반|투어|마켓|공원|정원|스테이)$")
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "r29_place_name_other_business_close_ids.json"), encoding="utf-8") as _f:
+    R29_VERIFIED = frozenset(int(k) for k in json.load(_f)["rows"])
 GOLF_RELIC_KEEP = frozenset({1790667560577, 1790456834079, 1790307190897})  # 리베라CC, 서산수골프앤리조트, 경주 김유신묘
 FISHING_KEEP = re.compile(r"실내|바다낚시터|좌대|캠핑")  # 실내낚시터는 데이트, 관리형 바다낚시터·좌대·캠핑장은 애매
 CAMPING = re.compile(r"캠핑|글램핑|카라반|야영")
@@ -367,6 +371,14 @@ def food_cat_nonfood_name(row):
             and bool(NON_FOOD_NAME.search(row.get("name") or "") or "1박" in (row.get("price") or "")))
 
 
+def food_cat_place_name(row):
+    """R29: 출처 web, 카테고리가 식음(R28과 같은 범위)이고 이름 끝 어절이 길·거리·코스·공방·스튜디오·풀빌라·투어·마켓 등 장소형이다."""
+    cat = row.get("category") or ""
+    words = (row.get("name") or "").split()
+    return (src_type(row) == "web" and bool(FOOD_CAT.search(cat)) and not FOOD_CAT_NOT.search(cat)
+            and bool(words) and bool(PLACE_TAIL.search(words[-1])))
+
+
 def tourapi_golf(row):
     return src_type(row) == "tourapi" and row.get("category") == "레포츠/체험" and bool(GOLF.search(row.get("name") or ""))
 
@@ -436,6 +448,10 @@ RULES = [
      "카카오 패널 이름이 행 이름과 같고 사진 100장 미만·카카오맵 후기 5건 미만·블로그 후기 10건 미만, 반경 500m 카페·음식점 합계 9곳 이하인 12곳(P-089). "
      "52곳 전수 판정 오탐 0, 경계 12곳과 패널 이름 불일치 1곳은 뺀다",
      lambda r, c: solo_reservoir(r, c) and r["id"] in R27_VERIFIED, None),
+    ("R29_장소이름_다른업소주소", "close", "이름은 공방·풀빌라·글램핑·투어·마켓 같은 장소인데 카카오 전국·네이버 이름 검색에 그 장소가 없고, "
+     "카카오 주소·좌표 검색에서 그 자리에 다른 업소가 있는 9곳(P-093). 식음 카테고리 장소형 이름 56곳 전수 판정 오탐 0, "
+     "주소 교정 3곳과 경계 3곳(1882·5212·3174)은 뺀다",
+     lambda r, c: r["id"] in R29_VERIFIED, None),
     ("R13_캠핑_낮슬롯", "fix", "이름이나 카테고리에 캠핑·글램핑·카라반·야영이 있거나 tourapi 레포츠/체험 이름에 캠프·펜션이 있고 슬롯 day. "
      "식당·카페는 뺀다. 표본 교정 2/2",
      lambda r, c: r.get("slot") == "day" and bool(CAMPING.search(r.get("name") or "") or CAMPING.search(r.get("category") or "")
@@ -497,6 +513,9 @@ RULES = [
      "가격 칸에 1박이 있다. 열린 행 50곳 중 P-088 충돌 41곳, 맛공방·아틀리에 카페처럼 실제 식음인 곳이 섞인다. 카카오로 비식음 확인한 29곳은 "
      "카테고리를 고쳤고, 식당·카페로 확인된 12곳과 확인하지 못한 16곳은 남겼다(P-088, 닫지 않는다)",
      lambda r, c: food_cat_nonfood_name(r), None),
+    ("R29_장소이름_다른업소주소_미확인", "review", "R29 이름 조건(web, 식음 카테고리, 장소형 끝 어절)이지만 닫은 9곳 밖이다. 이름의 장소가 행 위치에 있는 20곳, "
+     "거리 안 업소 주소를 쓰는 테마거리 5곳, 경계 3곳, 같은 이름 식당이 주소에 있는 7곳이 섞인다(P-093, 닫지 않는다)",
+     lambda r, c: food_cat_place_name(r) and r["id"] not in R29_VERIFIED, None),
     ("R1_비데이트_카테고리", "review", "카테고리가 문화원·스포츠시설·도서관·매표소·공간대여 등. 대부분 카테고리만 틀린 명소",
      lambda r, c: r.get("category") in NON_DATE_CATS, None),
     ("R5_설명형_이름", "review", "내보낸 이름이 3어절 이상이거나 &·+/, 및, in을 담는다. 자동 이름 교정은 하지 않는다(P-049 드라이런 정밀도 2/5). "

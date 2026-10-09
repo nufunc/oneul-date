@@ -3,7 +3,7 @@ import json
 import os
 
 from judge_date_fit import (DINER_VERIFIED, GOLF_RELIC_KEEP, PUBLIC_FACILITY_KEEP, PUBLIC_FACILITY_VERIFIED, R3_SAME_ADDRESS_EXEMPT,
-                            R21_VERIFIED, R23_VERIFIED, R24_VERIFIED, R25_VERIFIED, R26_VERIFIED, R27_VERIFIED,
+                            R21_VERIFIED, R23_VERIFIED, R24_VERIFIED, R25_VERIFIED, R26_VERIFIED, R27_VERIFIED, R29_VERIFIED,
                             REGION_MISMATCH_VERIFIED, judge)
 
 
@@ -398,6 +398,29 @@ def test_food_cat_nonfood_name():
     assert not any(rule in i["rules"] for action in ("close", "fix") for i in judge(rows)[action]), "닫지도 고치지도 않는다"
 
 
+def test_place_name_other_business():
+    """P-093 R29: 전수 판정한 9곳만 닫고, 경계 3곳과 열어 둔 행은 장소형 이름이어도 검토로만 보낸다"""
+    result = fixture("p093_place_name")
+    boundary, relocate = set(result["boundary_ids"]), set(result["relocate_ids"])
+    assert len(R29_VERIFIED) == 9 and R29_VERIFIED == set(result["close_ids"]) and not R29_VERIFIED & (boundary | relocate)
+    rows = [row(1048, "순라길예술가방", "양식", "day", "서울 종로구 서순라길 117 1층", "web"),
+            row(7272, "모노 풀빌라", "일본식주점", "stay", "경북 경주시 한빛길10번길 37-1", "web"),
+            row(7083, "영종도 마리나 샴페인 선셋 투어", None, "evening", "인천 영종구 하늘중앙로 272", "web"),
+            row(1882, "담다 도자기공방 수원행궁", "한정식", "day", "경기 수원시 팔달구 화서문로32번길 21 2층", "web"),  # 경계: 공예점이 이름을 바꿨을 수 있다
+            row(5212, "오브젝트 대구삼덕점", "커피전문점", "day", "대구 중구 달구벌대로443길 45 1층", "web"),  # 경계: 이름만 고쳐 남길 수 있다
+            row(3174, "망원시장 앞 포은로 골목 플리마켓", "카페", "day", "서울 마포구 포은로 106", "web"),  # 경계: 정기 행사
+            row(292, "서촌·순라길", "해물,생선", "evening", "서울 종로구 서순라길 141", "web"),  # 주소의 같은 이름 식당
+            row(687, "일산 밤리단길", "양식", "evening", "경기 고양시 일산동구 일산로380번길 5", "web"),  # 실재 거리 안 좌표
+            row(5603, "망원한강공원 마포나루", "공원", "day", "서울특별시 마포구 마포나루길 467", "web"),  # 비식음 카테고리
+            row(9, "공방길", "한식", "day", "서울 종로구", "blog_mining")]  # web 밖
+    out = judge(rows)
+    close = {i["id"] for i in out["close"] if "R29_장소이름_다른업소주소" in i["rules"]}
+    review = {i["id"] for i in out["review"] if "R29_장소이름_다른업소주소_미확인" in i["rules"]}
+    assert close == {1048, 7272, 7083}, close
+    assert review == {3174, 292, 687}, review  # 1882(수원행궁)와 5212(삼덕점)는 끝 어절이 장소형이 아니라 R29에 들지 않는다
+    assert not (boundary | {292, 687, 5603, 9}) & {i["id"] for i in out["close"]}, "경계와 열어 둔 행은 닫지 않는다"
+
+
 def test_same_address_exempt():
     rows = [row(2, "스타필드 고양", "쇼핑", "day", "경기 고양시 덕양구 고양대로 1955", "web")] + [
         row(1791100000010 + i, f"새 매장 {i}", "카페", "day", "경기 고양시 덕양구 고양대로 1955 1층", "web") for i in range(4)]
@@ -428,5 +451,6 @@ if __name__ == "__main__":
     test_solo_stone_relic()
     test_solo_reservoir()
     test_food_cat_nonfood_name()
+    test_place_name_other_business()
     test_same_address_exempt()
     print("ok")
