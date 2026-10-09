@@ -65,8 +65,8 @@
 const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODELS_CASCADE = [
   'qwen/qwen3.8-27b',     // 1순위: 0.44초 초고속 & 한국어 에디토리얼 품질 최상위
-  'groq/compound-mini',   // 2순위: 초경량 컴파운드
-  'groq/compound',        // 3순위: 대용량 컴파운드
+  'openai/gpt-oss-20b',   // 2순위: qwen 한도 소진 시 폴백
+  'openai/gpt-oss-120b',  // 3순위: 대용량 폴백
 ];
 const DEFAULT_GROQ_MODEL = GROQ_MODELS_CASCADE[0];
 const GROQ_TEMPERATURE = 0.72;
@@ -586,6 +586,7 @@ async function callGroq(apiKey: string, spots: SpotInput[], mood: string): Promi
           continue;
         }
 
+        console.log(`[ai-briefing] model ${targetModel} ok`);
         return { ok: true, text: cleanText };
       } catch (innerErr) {
         if (innerErr instanceof DOMException && innerErr.name === 'AbortError') {
