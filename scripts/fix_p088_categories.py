@@ -6,6 +6,9 @@
 
 OCI 호스트에서 돈다(judge_date_fit.py와 r*_ids.json을 같은 폴더에 둔다):
 COLLECTOR_DIR=/mnt/data/git/oneul-date/collector python3 fix_p088_categories.py --backup-dir /home/opc/oneul-backups [--apply]
+
+P-092: 확인 뒤 DB 값이 빈 값이나 화장실로 바뀌어 건너뛴 3곳은 --only와 --from-category로 지금 값을 조건으로 건다:
+... fix_p088_categories.py --only 5450,5611,6423 --from-category '' --from-category 화장실 [--apply]
 """
 import argparse
 import json
@@ -20,14 +23,14 @@ from close_date_fit_spots import fetch_ids, request
 IDS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "p088_category_fix_ids.json")
 
 
-def plan_patches(ids, by_id):
+def plan_patches(ids, by_id, also_old=()):
     """{id: patch}와 {id: 건너뛴 사유}. 같은 행에 카테고리와 링크가 함께 걸리면 patch 하나로 묶는다"""
     plan, skipped = {}, {}
     for key, item in ids["rows"].items():
         row = by_id.get(int(key))
         if row is None or row.get("is_closed"):
             skipped[int(key)] = "행 없음" if row is None else "닫힘"
-        elif row.get("category") != item["old_category"]:
+        elif row.get("category") != item["old_category"] and (row.get("category") or "") not in also_old:
             skipped[int(key)] = f"카테고리 바뀜: {row.get('category')}"
         else:
             plan[int(key)] = {"category": item["new_category"], **({"slot": item["new_slot"]} if item.get("new_slot") else {})}
@@ -48,13 +51,18 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--backup-dir", default=os.path.expanduser("~/oneul-backups"))
+    ap.add_argument("--only", help="쉼표로 나눈 id만 고친다")
+    ap.add_argument("--from-category", action="append", default=[], help="확인 때 값 대신 받는 지금 값. 빈 문자열은 빈 값이다")
     args = ap.parse_args()
 
     ids = json.load(open(IDS_FILE, encoding="utf-8"))
+    if args.only:
+        only = set(args.only.split(","))
+        ids = {k: {i: v for i, v in ids[k].items() if i in only} for k in ("rows", "kakaomap_removed")}
     targets = sorted({int(k) for k in ids["rows"]} | {int(k) for k in ids["kakaomap_removed"]})
     base, headers = connect()
     current = fetch_ids(base, headers, targets)
-    plan, skipped = plan_patches(ids, {r["id"]: r for r in current})
+    plan, skipped = plan_patches(ids, {r["id"]: r for r in current}, args.from_category)
     print(f"대상 {len(targets)} · 고칠 행 {len(plan)} · 건너뜀 {len(skipped)} {skipped}")
     for i, patch in sorted(plan.items()):
         print(f"  {i}: {', '.join(k if k == 'social_links' else f'{k}={v}' for k, v in patch.items())}")
@@ -73,7 +81,8 @@ def main():
     by_id = {r["id"]: r for r in current}
     done, failed = 0, []
     for i, patch in plan.items():
-        cond = f"&category=eq.{quote(by_id[i]['category'], safe='')}" if "category" in patch else ""
+        old = by_id[i].get("category")
+        cond = "" if "category" not in patch else "&category=is.null" if old is None else f"&category=eq.{quote(old, safe='')}"
         res = request(f"{base}/rest/v1/spots?id=eq.{i}&is_closed=eq.false{cond}", rep, "PATCH", {**patch, "updated_at": now})
         done += len(res or []) == 1
         if len(res or []) != 1:

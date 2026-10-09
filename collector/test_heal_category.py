@@ -19,6 +19,20 @@ def test_summary_template_words_do_not_decide_category():
     assert heal(spot)[0] != "칵테일·위스키바"
 
 
+def test_specific_note_theme_wins_over_generic_substring():
+    # 구체 테마가 Food·Dining·Gourmet·Park·Forest·Spa(Space) 일반 패턴보다 먼저 걸린다(P-092)
+    def note(name, theme):
+        return heal({"name": name, "slot": "day",
+                     "source": {"note": f"Live_Research_2026_Theme_{theme}_Part16.md"}})[0]
+    assert note("기장 해녀촌 0번 해녀할매집", "Seafood_Pocha") == "한식·미식"
+    assert note("경원재 수라", "Hanok_FineDining") == "한식·미식"
+    assert note("만족오향족발 시청본점", "Heritage_Gourmet") == "한식·미식"
+    assert note("하이원 알파인코스터", "Amusement_ThemePark") == "레포츠/체험"
+    assert note("휘닉스 아일랜드 블루캐니언", "Spa_Waterpark") == "스파·힐링"
+    assert note("드리머스 가좌", "Upcycling_CulturalSpace") is None
+    assert note("마담파이", "Forest_Bakery") == "감성카페"
+
+
 def test_stay_flip_is_vetoed_only_for_clear_non_stay_category():
     import supabase_worker as w
     assert w.stay_flip_vetoed("양식", "메르씨엘")
@@ -41,5 +55,6 @@ if __name__ == "__main__":
     test_no_evidence_keeps_category_empty()
     test_valid_category_kept()
     test_summary_template_words_do_not_decide_category()
+    test_specific_note_theme_wins_over_generic_substring()
     test_stay_flip_is_vetoed_only_for_clear_non_stay_category()
     print("ok")

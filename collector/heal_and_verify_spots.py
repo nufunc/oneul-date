@@ -117,17 +117,24 @@ POLLUTED_CATEGORIES = {
 
 # 3. 소스 노트 테마 매핑
 NOTE_THEME_MAP = [
+    # 구체 테마는 일반 패턴보다 먼저 둔다. 뒤에 있으면 Food·Dining·Gourmet·Park·Forest·Spa(Space)가 부분 문자열로
+    # 먼저 걸려 62곳이 이탈리안·양식, 자연·산책, 스파·힐링을 받았다(2026-10-09, P-092). Upcycling은 근거가 없어 비워 둔다
+    (r'Heritage_Gourmet|Hanok_FineDining|Seafood_Pocha', '한식·미식'),
+    (r'Amusement_ThemePark', '레포츠/체험'),
+    (r'Spa_Waterpark', '스파·힐링'),
+    (r'Forest_Bakery', '감성카페'),
+    (r'Upcycling_CulturalSpace', None),
     (r'MediaArt|Exhibition|Museum|ArtFair', '전시·문화'),
     (r'Night_Bar|Midnight_Bar', '칵테일·위스키바'),
     (r'Craft_Brewery|Brewery|Pub', '펍·요리주점'),
     (r'Wine|Bistro', '와인바'),
     (r'Activity_Craft|Craft|Workshop', '공방·체험'),
     (r'Botanical_Garden|Forest|Trail|Park|Nature', '자연·산책'),
-    (r'Amusement_ThemePark|ThemePark|Aquarium', '공방·체험'),
+    (r'ThemePark|Aquarium', '공방·체험'),
     (r'Spa|HotSpring|Sauna', '스파·힐링'),
     (r'Stay|Hotel|Resort|Pension|Glamping', '호텔·감성숙소'),
     (r'Gourmet|Dining|Restaurant|Food', '이탈리안·양식'),
-    (r'Heritage_Gourmet|KoreanFood', '한식·미식'),
+    (r'KoreanFood', '한식·미식'),
     (r'Bakery|Cafe|Dessert', '감성카페'),
     # 2026-09-26: 빈 카테고리 1,109곳의 출처 메모 테마(Live_Research_2026_Theme_*). 지역만 담긴 메모와, 표본에서 테마와
     # 가게가 어긋난 드라이브(카페)·야시장(술집)·기념일 사진(빵집) 메모는 넣지 않는다. 캠핑 BBQ는 실내 콘셉트 식당이 많아 바베큐로 둔다
