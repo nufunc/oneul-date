@@ -81,8 +81,8 @@ def get_groq_api_key():
 
 GROQ_MODELS_CASCADE = [
     "qwen/qwen3.8-27b",      # 1순위: 0.4초 초고속 & 한국어 감성 최상위 (실측 검증 완료)
-    "groq/compound-mini",     # 2순위: 초경량 컴파운드
-    "groq/compound",          # 3순위: 대용량 컴파운드
+    "openai/gpt-oss-20b",     # 2순위: qwen 한도 소진 시 폴백
+    "openai/gpt-oss-120b",    # 3순위: 대용량 폴백
 ]
 DEFAULT_MODEL = GROQ_MODELS_CASCADE[0]
 
