@@ -4,7 +4,7 @@ import os
 
 from judge_date_fit import (DINER_VERIFIED, GOLF_RELIC_KEEP, PUBLIC_FACILITY_KEEP, PUBLIC_FACILITY_VERIFIED, R3_SAME_ADDRESS_EXEMPT,
                             R21_VERIFIED, R23_VERIFIED, R24_VERIFIED, R25_VERIFIED, R26_VERIFIED, R27_VERIFIED, R29_VERIFIED,
-                            REGION_MISMATCH_VERIFIED, judge)
+                            REGION_MISMATCH_VERIFIED, judge, judge_both)
 
 
 def fixture(name):
@@ -434,6 +434,22 @@ def test_same_address_exempt():
     assert set(R3_SAME_ADDRESS_EXEMPT) == keep - {1788908665523, 1790823926129}  # 둘은 P-063으로 닫혀 뺐다
 
 
+
+def test_judge_both_seen_on():
+    """P-096: DB 행과 heal_all_spots를 거친 내보내기 행을 각각 판정해 규칙마다 어느 값에서 걸렸는지 남긴다"""
+    rows = [row(4480, "미닛뮤트 아틀리에 카페 삼청", None, "day", "서울 종로구 삼청로 100", "web"),  # 내보내기가 감성카페로 채운다
+            row(10, "마담파이 팔당점", "주차장", "day", "경기 남양주시 조안면 북한강로 1", "web"),  # 오염 카테고리는 내보내기에서 비워진다
+            row(8752, "김녕 해맞이 프라이빗 카라반", "해물,생선", "evening", "제주 제주시 구좌읍", "web"),  # 내보내기 이름은 김녕 해맞이
+            row(1788681699939, "청도반시축제", "축제/행사", "evening", "경상북도 청도군 화양읍 청려로 1846", "tourapi")]
+    out = judge_both(rows)
+    items = {i["id"]: i for items in out.values() for i in items}
+    assert items[4480]["seen_on"]["R28_식음카테고리_비식음이름"] == "export" and items[4480]["export_category"] == "감성카페"
+    assert items[10]["seen_on"] == {"R1_비데이트_카테고리": "db"}  # 화면에 없는 값으로만 걸린 행은 db로 구분된다
+    assert items[8752]["seen_on"]["R29_장소이름_다른업소주소_미확인"] == "db"  # 정제로 줄어든 원본 이름의 단서를 잃지 않는다
+    assert [i["id"] for i in out["close"]] == [1788681699939] and items[1788681699939]["seen_on"]["R4_기간없는_행사"] == "both"
+    assert {i["id"] for v in judge(rows).values() for i in v} <= set(items), "DB만 판정한 목록이 빠지지 않는다"
+
+
 if __name__ == "__main__":
     test_judge_lists()
     test_described_name()
@@ -453,4 +469,5 @@ if __name__ == "__main__":
     test_food_cat_nonfood_name()
     test_place_name_other_business()
     test_same_address_exempt()
+    test_judge_both_seen_on()
     print("ok")

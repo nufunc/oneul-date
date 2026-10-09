@@ -4,6 +4,7 @@
 규칙은 RULES 목록에 둔다. 규칙을 더할 때는 이 목록에 한 줄을 더한다. action이 close인 규칙은 표본 정밀도가
 95% 이상인 것만 둔다(사이클 36 표). 한 행이 여러 규칙에 걸리면 close > fix > review 순으로 한 목록에만 넣고
 걸린 규칙 id를 모두 남긴다. fix 규칙은 patch(바꿀 필드)를 함께 둔다.
+DB 행과 동기화 내보내기(heal_all_spots)를 거친 행을 각각 판정해 합치고, 규칙마다 seen_on(db, export, both)을 남긴다(P-096).
 
 읽기는 라이브 DB(OCI 호스트에서 COLLECTOR_DIR의 .env, 127.0.0.1 중계 서버)나 --input의 JSON 행 목록이다.
 OCI: COLLECTOR_DIR=/mnt/data/git/oneul-date/collector python3 judge_date_fit.py --out date-fit-20261003.json
@@ -21,7 +22,7 @@ from datetime import datetime
 
 sys.path.insert(0, os.environ.get("COLLECTOR_DIR") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "collector"))
 from youtube_vlog_miner import METRO_REGIONS, extract_region_hints  # noqa: E402
-from heal_and_verify_spots import clean_spot_name, is_place_name_only, strip_address_tail  # noqa: E402
+from heal_and_verify_spots import clean_spot_name, heal_all_spots, is_place_name_only, strip_address_tail  # noqa: E402
 
 EVENT_CATS = {"축제/행사", "페스티벌"}
 EVENT_WORD = re.compile(r"축제|페스티벌|페스타|문화제|야행|잔치|마라톤|박람회|한마당|놀이마당|문화대전|페스트")
@@ -546,6 +547,38 @@ def judge(rows):
     return out
 
 
+def judge_both(rows):
+    """P-096: DB 행과 그 행을 sync_live_spots처럼 heal_all_spots에 넣은 내보내기 행을 각각 판정해 id별로 규칙을 합친다.
+    seen_on은 규칙마다 어느 값에서 걸렸는지(db, export, both)다. 내보내기에서 닫힌 행은 내보내기 쪽 판정에서 빠진다."""
+    healed = [r for r in heal_all_spots(rows)[0] if not r.get("is_closed")]
+    by_id = {}
+    for side, judged in (("db", judge(rows)), ("export", judge(healed))):
+        for item in (i for items in judged.values() for i in items):
+            by_id.setdefault(item["id"], {})[side] = item
+    export_rows = {r["id"]: r for r in healed}
+    rule_index = {rule[0]: (n, rule) for n, rule in enumerate(RULES)}
+    out = {"close": [], "fix": [], "review": []}
+    for sides in by_id.values():
+        db, ex = sides.get("db"), sides.get("export")
+        seen = {}
+        for side, item in sides.items():
+            for rule in item["rules"]:
+                seen[rule] = "both" if rule in seen else side
+        rules = sorted(seen, key=lambda r: (ACTION_ORDER[rule_index[r][1][1]], rule_index[r][0]))
+        action = rule_index[rules[0]][1][1]
+        item = {**{k: v for k, v in (db or ex).items() if k not in ("rules", "patch")}, "rules": rules,
+                "seen_on": {r: seen[r] for r in rules}}
+        exported = export_rows.get(item["id"])
+        if exported and (exported.get("name"), exported.get("category")) != (item["name"], item["category"]):
+            item["export_name"], item["export_category"] = exported.get("name"), exported.get("category")
+        if action == "fix":
+            item["patch"] = {k: v for r in rules if rule_index[r][1][1] == "fix" for k, v in rule_index[r][1][4].items()}
+        out[action].append(item)
+    for items in out.values():
+        items.sort(key=lambda i: i["id"])
+    return out
+
+
 def connect():
     """라이브 DB 주소와 헤더. OCI 호스트에서 COLLECTOR_DIR의 .env를 읽는다."""
     collector = os.environ.get("COLLECTOR_DIR") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "collector")
@@ -585,7 +618,7 @@ def main():
         rows = [r for r in json.load(open(args.input, encoding="utf-8")) if not r.get("is_closed")]
     else:
         rows = fetch_open_db()
-    out = judge(rows)
+    out = judge_both(rows)
     counts = Counter(rule for items in out.values() for item in items for rule in item["rules"])
     result = {
         "generated": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
@@ -593,6 +626,7 @@ def main():
         "open_rows": len(rows),
         "rules": [{"id": r[0], "action": r[1], "desc": r[2], "hits": counts[r[0]]} for r in RULES],
         "counts": {k: len(v) for k, v in out.items()},
+        "seen_on_counts": Counter(s for items in out.values() for item in items for s in item["seen_on"].values()),
         **out,
     }
     with open(args.out, "w", encoding="utf-8") as f:
