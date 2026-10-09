@@ -376,6 +376,28 @@ def test_solo_reservoir():
     assert not hits(near, "close", "R27_단독_저수지"), "500m 안에 열린 행이 있으면 닫지 않는다"
 
 
+def test_food_cat_nonfood_name():
+    """P-088 R28: 식음 카테고리에 비식음 시설 이름이나 1박 가격이면 검토로만 보내고, 고친 29곳은 비식음 카테고리라 걸리지 않는다"""
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "p088_category_fix_ids.json"), encoding="utf-8") as f:
+        ids = json.load(f)
+    fixed, food, unknown = (set(ids[k]) for k in ("rows", "food_confirmed", "unconfirmed"))
+    assert (len(fixed), len(food), len(unknown)) == (29, 12, 16) and not (fixed & food or fixed & unknown or food & unknown)
+    assert set(ids["kakaomap_removed"]) == {"5994", "5603", "8568", "687"}
+    rule = "R28_식음카테고리_비식음이름"
+    rows = [row(1, "안양 강변 산책로", "술집", "day", "경기 안양시 만안구 석수로 6", "web"),
+            row(2, "여수 하멜등대", "컴포즈커피", "night", "전남 여수시 하멜로 96", "web"),
+            row(3, "파주 글로우 글램핑", "카페", "stay", "경기 파주시 탄현면 약산로 23", "web"),
+            row(4, "모노 풀빌라", "일본식주점", "stay", "경북 경주시 한빛길10번길 37-1", "web"),
+            {**row(5, "김녕 해맞이", "해물,생선", "evening", "제주 제주시 구좌읍", "web"), "price": "1박 16만 원 ~ 30만 원"},  # 가격 칸 숙박
+            row(6, "안양 강변 산책로", "자연·산책", "day", "경기 안양시 만안구 석수로 6", "web"),  # 고친 뒤 카테고리
+            row(7, "공방카페 담", "카페", "day", "서울 종로구", "web"),  # 공방이 어절 끝이 아니다
+            row(8, "도심 공원", "방탈출", "day", "서울 마포구", "web"),  # 식음에서 뺀 카테고리
+            row(9, "앞산카페거리 골목아트장터", "카페거리", "day", "대구 남구", "web")]
+    review = {i["id"] for i in judge(rows)["review"] if rule in i["rules"]}
+    assert review == {1, 2, 3, 4, 5}
+    assert not any(rule in i["rules"] for action in ("close", "fix") for i in judge(rows)[action]), "닫지도 고치지도 않는다"
+
+
 def test_same_address_exempt():
     rows = [row(2, "스타필드 고양", "쇼핑", "day", "경기 고양시 덕양구 고양대로 1955", "web")] + [
         row(1791100000010 + i, f"새 매장 {i}", "카페", "day", "경기 고양시 덕양구 고양대로 1955 1층", "web") for i in range(4)]
@@ -405,5 +427,6 @@ if __name__ == "__main__":
     test_solo_pier()
     test_solo_stone_relic()
     test_solo_reservoir()
+    test_food_cat_nonfood_name()
     test_same_address_exempt()
     print("ok")
