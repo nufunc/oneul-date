@@ -5686,3 +5686,10 @@ html[data-theme-resolved="dark"] .spot-link-btn.kakao {
   font-size: var(--font-sm);
   color: var(--color-text-sub);
 }
+
+/* 앱 전용 스킴(T맵·카카오 T)은 마우스 기기에서 열리지 않으므로 숨긴다(P-090) */
+@media (hover: hover) and (pointer: fine) {
+  .spot-link-btn.tmap,
+  .spot-link-btn.taxi,
+  .step-navi-chip { display: none; }
+}

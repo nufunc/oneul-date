@@ -3224,7 +3224,7 @@ function tmapUrl(spot: Spot): string {
 /** 카카오내비 길안내 딥링크 */
 function kakaoNaviUrl(spot: Spot): string {
   if (typeof spot.lat === 'number' && typeof spot.lng === 'number') {
-    return `kakaonavi://navigate?name=${encodeURIComponent(spot.name)}&x=${spot.lng}&y=${spot.lat}&coord_type=wgs84`;
+    return `https://map.kakao.com/link/to/${encodeURIComponent(spot.name)},${spot.lat},${spot.lng}`;
   }
   return `https://map.kakao.com/link/to/${encodeURIComponent(spot.name)},${spot.lat || ''},${spot.lng || ''}`;
 }
@@ -7760,7 +7760,7 @@ function renderOverlayContent(): void {
             ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn book" aria-label="캐치테이블 실시간 예약" title="캐치테이블 실시간 예약"><span>📅 예약</span></a>` : ''}
             ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn yt" aria-label="${youtubeTitleNamesSpot(spot, yt) ? '유튜브 핫클립 시청' : '동네 코스 영상 시청'}" title="${youtubeTitleNamesSpot(spot, yt) ? '유튜브 핫클립 시청' : '동네 코스 영상 시청'}"><span>▶️ ${youtubeLinkLabel(spot, yt)}</span></a>` : ''}
             <a href="${escapeHtml(tmapUrl(spot))}" target="_blank" rel="noopener noreferrer" class="spot-link-btn tmap" aria-label="T맵 길안내" title="T맵 길안내"><span>🧭 T맵</span></a>
-            <a href="${escapeHtml(kakaoNaviUrl(spot))}" target="_blank" rel="noopener noreferrer" class="spot-link-btn navi" aria-label="카카오내비 길안내" title="카카오내비 길안내"><span>🧭 카카오내비</span></a>
+            <a href="${escapeHtml(kakaoNaviUrl(spot))}" target="_blank" rel="noopener noreferrer" class="spot-link-btn navi" aria-label="카카오맵 길찾기" title="카카오맵 길찾기"><span>🧭 카카오맵 길찾기</span></a>
             <a href="${escapeHtml(kakaoTaxiUrl(spot))}" target="_blank" rel="noopener noreferrer" class="spot-link-btn taxi" aria-label="카카오 T 택시 호출" title="카카오 T 택시 호출"><span>🚕 카카오 T</span></a>
             ${guideUrl ? `<a href="${escapeHtml(guideUrl)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn guide" aria-label="공식 가이드 평가" title="공식 가이드 평가"><span>🎀 가이드</span></a>` : ''}
             ${instaUrl ? `<a href="${escapeHtml(instaUrl)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn insta" aria-label="인스타그램 공식 피드" title="인스타그램 공식 피드"><span>📸 인스타</span></a>` : ''}
