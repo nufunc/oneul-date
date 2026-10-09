@@ -4733,14 +4733,12 @@ function toCardThumbUrl(url: string): string {
  * 장소의 고화질 이미지 결정 (카테고리·업종 정밀 매칭 및 중복 방지 usedImages 세트 지원)
  */
 function getSpotImageUrl(spot: Spot, slot: SlotKey, usedImages?: Set<string>): string {
-  // 1. 기존 DB image_url이 유효하고, 네이버 차단 도메인(pstatic.net)이 아닌 경우
+  // 1. 기존 DB image_url이 유효한 경우(pstatic.net은 Referer가 없을 때만 열리므로 모든 img가 referrerpolicy="no-referrer"를 갖는다)
   if (isValidImageUrl(spot.image_url)) {
     const raw = spot.image_url!.trim();
-    if (!raw.includes('pstatic.net')) {
-      if (!usedImages || !usedImages.has(raw)) {
-        usedImages?.add(raw);
-        return raw;
-      }
+    if (!usedImages || !usedImages.has(raw)) {
+      usedImages?.add(raw);
+      return raw;
     }
   }
 
