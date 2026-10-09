@@ -1078,17 +1078,25 @@ function spotArea(spot: Spot | undefined): string | null {
   return null;
 }
 
+/** 주소 첫 단어의 시·도 약칭. 7개 광역시에 같은 이름인 '북구'·'중구'를 시·도로 구분한다('경상남도'와 '경남'은 같다) */
+function spotSido(spot: Spot): string {
+  const w = (spot.address || '').split(/\s/)[0];
+  const m = w.match(/^(충청|전라|경상)([북남])도/);
+  return m ? m[1][0] + m[2] : w.slice(0, 2);
+}
+
 /**
  * 앵커 스폿 기준 스마트 근접 랜덤 선택 (물리적 거리 + 동일 자치구 클러스터링).
  * 1순위: 앵커와 물리적 거리 5km 이내 초근접 스폿 (실제 데이트 도보/대중교통 최적 동선)
  * 2순위: 앵커와 동일 자치구/행정구역 스폿 (예: 둘 다 영등포구, 마포구, 성동구 등)
  * 3순위: 앵커와 물리적 거리 10km 이내 인접 생활권 스폿
- * 4순위: 전체 조건 통과 후보 폴백
+ * 4순위: 전체 조건 통과 후보 폴백 (지역어 검색이면 검색 지역 안을 먼저 본다)
  */
 function pickNearRandom(
   candidates: Spot[],
   anchor: Spot | null | undefined,
   rng: () => number = Math.random,
+  scope: ((s: Spot) => boolean) | null = null,
 ): Spot | undefined {
   if (!anchor || candidates.length === 0) {
     return pickRandom(candidates, rng);
@@ -1107,7 +1115,7 @@ function pickNearRandom(
   // 2순위: 동일 자치구/행정구역
   const aArea = spotArea(anchor);
   if (aArea !== null) {
-    const sameArea = candidates.filter((s) => spotArea(s) === aArea);
+    const sameArea = candidates.filter((s) => spotArea(s) === aArea && spotSido(s) === spotSido(anchor));
     if (sameArea.length > 0) {
       return pickRandom(sameArea, rng);
     }
@@ -1124,8 +1132,10 @@ function pickNearRandom(
   }
 
   // 4순위: 앵커와 동일 광역(region) 내에서 최단 거리 상위 후보 선별 (무제한 전국 난입 완전 차단)
+  // 영남 권역 전체로 넓히면 울산 검색에 통영·영천이 붙었다. 지역어 검색이면 검색 지역 안을 먼저 쓴다
+  const inScope = scope ? candidates.filter(scope) : [];
   const sameRegion = candidates.filter((s) => s.region === anchor.region);
-  const pool = sameRegion.length > 0 ? sameRegion : candidates;
+  const pool = inScope.length > 0 ? inScope : sameRegion.length > 0 ? sameRegion : candidates;
 
   if (anchor.lat != null && anchor.lng != null) {
     const withDist = pool
@@ -1688,6 +1698,13 @@ function isUnpricedDining(spot: Spot): boolean {
 /** 예산 칩을 켠 탐색 목록에서 가격 정보 없는 식음료를 함께 보여 줄지. 칩을 끄면 다시 뺀다 */
 let includeUnpricedDining = false;
 
+/** 지역어 하나만 친 검색(대구·울산·해운대·성수)의 범위: 주소·지역 단어가 그 말로 시작하는 곳. 이름에만 든 '울산다찌'(통영)는 범위 밖이다 */
+function placeScopeOf(query: string | undefined): ((s: Spot) => boolean) | null {
+  const q = (query ?? '').trim().toLowerCase();
+  if (q.length < 2 || /\s/.test(q) || !(FAMOUS_AREAS.includes(q) || DISTRICT_END.test(q))) return null;
+  return (s) => [s.location, s.area, s.address].join(' ').toLowerCase().split(/\s+/).some((w) => w.startsWith(q));
+}
+
 /**
  * 앵커 기반 근접 코스 생성 (물리적 거리 및 자치구 클러스터링).
  * 1) 검색어(searchQuery)가 있는 경우 해당 키워드 매칭 스팟을 앵커로 최우선 선정
@@ -1717,6 +1734,12 @@ function generateCourse(
   // 4,000원 떡볶이집이 앵커가 됐다. 필터와 검색어가 함께 맞는 곳이 없으면 아래 일반 앵커로 넘어간다
   // filterByMoodPreset은 0건이면 원래 목록을 돌려줘 앵커에서는 프리셋이 무시됐으므로 엄격 판정을 쓴다
   const applyChipFilters = (list: Spot[]) => filterByBudget(strictMoodPresetFilter(list, moodPreset), budgetFilter);
+  // 지역어 검색이면 그 지역 안 스팟만 앵커 후보로 쓴다. 이름에만 '전주'가 든 서울 전주전집이 앵커가 되면 코스 전체가 서울이 됐다
+  const scope = placeScopeOf(query);
+  const inScopeFirst = (list: Spot[]) => {
+    const inScope = scope ? list.filter(scope) : [];
+    return inScope.length > 0 ? inScope : list;
+  };
 
   // 1. 검색어가 있는 경우: 검색어 매칭 스팟을 보유한 슬롯 중 앵커 후보 최우선 탐색 (분위기 제약 완화)
   if (query) {
@@ -1724,7 +1747,7 @@ function generateCourse(
     for (const slot of slotsOn) {
       // 검색어가 있을 때는 mood 제약 없이 해당 지역/존의 스팟 풀에서 폭넓게 검색
       const candidates = excludeRecent(getCandidates(all, slot, regionKeys, 'ALL', [], zoneKeys, null, isIndoor), avoid);
-      const matched = applyChipFilters(candidates.filter((s) => matchesSearchQuery(s, query)));
+      const matched = inScopeFirst(applyChipFilters(candidates.filter((s) => matchesSearchQuery(s, query))));
       if (matched.length > 0 && (anchorSlot === null || matched.length < anchorPool.length)) {
         anchorSlot = slot;
         anchorPool = matched;
@@ -1735,7 +1758,7 @@ function generateCourse(
     if (anchorPool.length === 0) {
       for (const slot of SLOT_ORDER) {
         const candidates = excludeRecent(getCandidates(all, slot, regionKeys, 'ALL', [], zoneKeys, null, isIndoor), avoid);
-        const matched = applyChipFilters(candidates.filter((s) => matchesSearchQuery(s, query)));
+        const matched = inScopeFirst(applyChipFilters(candidates.filter((s) => matchesSearchQuery(s, query))));
         if (matched.length > 0 && (anchorSlot === null || matched.length < anchorPool.length)) {
           anchorSlot = slot;
           anchorPool = matched;
@@ -1814,7 +1837,7 @@ function generateCourse(
     const diverseCandidates = candidates.filter((s) => !pickedGenres.has(getSpotGenre(s)));
     const finalCandidates = diverseCandidates.length > 0 ? diverseCandidates : candidates;
 
-    const chosen = pickNearRandom(finalCandidates, anchorSpot, rng);
+    const chosen = pickNearRandom(finalCandidates, anchorSpot, rng, scope);
     if (chosen) {
       picked.push(chosen.id);
       pickedSpots.push(chosen);
