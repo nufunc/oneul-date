@@ -51,10 +51,20 @@ def test_stay_flip_is_vetoed_only_for_clear_non_stay_category():
     assert not w.stay_flip_vetoed(None, "클래식")
 
 
+def test_keyword_does_not_match_inside_other_words_or_branch_names():
+    # 부분 문자열 일치로 틀린 카테고리를 주지 않는다(P-097)
+    assert heal({"name": "스테이블디 에스프레소바", "slot": "day"})[0] != "일식·오마카세"
+    assert heal({"name": "빌라드스파이시 루프탑 라운지", "slot": "night"})[0] != "스파·힐링"
+    assert heal({"name": "연남장 사운드스테이지", "slot": "day"})[0] != "호텔·감성숙소"
+    assert heal({"name": "파라다이스시티", "slot": "day"})[0] != "일식·오마카세"
+    assert heal({"name": "목탄장 도산공원점", "slot": "evening"})[0] != "자연·산책"
+
+
 if __name__ == "__main__":
     test_no_evidence_keeps_category_empty()
     test_valid_category_kept()
     test_summary_template_words_do_not_decide_category()
     test_specific_note_theme_wins_over_generic_substring()
     test_stay_flip_is_vetoed_only_for_clear_non_stay_category()
+    test_keyword_does_not_match_inside_other_words_or_branch_names()
     print("ok")
