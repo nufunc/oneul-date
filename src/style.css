@@ -2241,6 +2241,20 @@ button {
   flex-wrap: wrap;
 }
 
+/* 360px 이하에서 고정 여백과 100px 썸네일 때문에 글자 칸이 86px까지 줄어 상호명이 음절 가운데서
+   꺾이고 320px에서는 아이콘 줄이 접혔다(P-102). 여백과 썸네일을 줄여 글자 칸을 넓힌다. */
+@media (max-width: 360px) {
+  .step-list { padding-left: 28px; }
+  .step-card { padding: var(--space-4) 14px; }
+  .step-card-split { gap: 12px; }
+  .step-thumb-col {
+    flex: 0 0 80px;
+    width: 80px; min-width: 80px; max-width: 80px;
+    height: 80px; min-height: 80px; max-height: 80px;
+  }
+  .step-actions-bar { gap: 6px; }
+}
+
 /* 모든 플랫폼 미니멀 동일 크기 원형 아이콘 버튼 (32x32px 시각적 크기 + 44x44px 터치 히트 영역) */
 .btn-action-icon {
   width: 32px;
