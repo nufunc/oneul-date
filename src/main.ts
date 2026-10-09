@@ -3550,6 +3550,12 @@ function getThemeModeLabel(mode: ThemeMode): string {
   }
 }
 
+// 좁은 화면에서 낱말만 숨기도록 아이콘과 낱말을 나눈다
+function getThemeModeHtml(mode: ThemeMode): string {
+  const [icon, word] = getThemeModeLabel(mode).split(' ');
+  return `<span aria-hidden="true">${icon}</span><span class="topbar-label">${word}</span>`;
+}
+
 function applyTheme(mode: ThemeMode, notify = false): void {
   state.themeMode = mode;
   // setItem 실패(저장공간 초과 등)로 아래 화면 갱신까지 멈추지 않게 분리한다.
@@ -3569,7 +3575,7 @@ function applyTheme(mode: ThemeMode, notify = false): void {
 
   const themeBtn = document.getElementById('btn-theme-toggle');
   if (themeBtn) {
-    themeBtn.textContent = getThemeModeLabel(mode);
+    themeBtn.innerHTML = getThemeModeHtml(mode);
     // 고정 aria-label이 보이는 문구를 가려 스크린리더에는 현재 테마가 전해지지 않았다
     themeBtn.setAttribute('aria-label', `테마 변경, 현재 ${getThemeModeLabel(mode)}`);
   }
@@ -3613,7 +3619,8 @@ function renderShell(): void {
     <header class="topbar">
       <h1 class="app-title"><a href="#" class="app-title-link" id="brand-home-link" aria-label="오늘 데이트 홈으로 이동">오늘 데이트</a></h1>
       <div class="topbar-actions">
-        <button class="btn-theme-toggle" id="btn-theme-toggle" aria-label="테마 변경, 현재 ${getThemeModeLabel(state.themeMode)}">${getThemeModeLabel(state.themeMode)}</button>
+        <button class="btn-theme-toggle" id="btn-theme-toggle" aria-label="테마 변경, 현재 ${getThemeModeLabel(state.themeMode)}">${getThemeModeHtml(state.themeMode)}</button>
+        <a class="btn-saved btn-magazine" id="btn-open-magazine" href="./blog/" aria-label="여행 매거진" title="오늘 데이트 여행 매거진 열기"><span aria-hidden="true">📖</span><span class="topbar-label">매거진</span></a>
         <button class="btn-saved" id="btn-open-saved">저장한 코스</button>
       </div>
     </header>
@@ -6925,7 +6932,7 @@ function renderReceiverView(steps: CourseStep[]): void {
     <header class="topbar">
       <h1 class="app-title"><a href="#" class="app-title-link" id="receiver-home-link" aria-label="오늘 데이트 홈으로 이동">오늘 데이트</a></h1>
       <div class="topbar-actions">
-        <button class="btn-theme-toggle" id="btn-theme-toggle" aria-label="테마 변경, 현재 ${getThemeModeLabel(state.themeMode)}">${getThemeModeLabel(state.themeMode)}</button>
+        <button class="btn-theme-toggle" id="btn-theme-toggle" aria-label="테마 변경, 현재 ${getThemeModeLabel(state.themeMode)}">${getThemeModeHtml(state.themeMode)}</button>
       </div>
     </header>
     <section class="receiver-view">
