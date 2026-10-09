@@ -227,6 +227,7 @@ const ZONE_CENTERS: Record<string, { lat: number; lng: number }> = {
 
 const STORAGE_KEY = 'oneul_saved_courses';
 const RECENT_KEY = 'oneul_recent_spots';
+const LAST_COURSE_STORAGE_KEY = 'oneul_last_course';
 import { loadSpots, getCachedSpots, mergeSpots, loadSpotAliases } from './supabase';
 
 const RECENT_MAX = 100;
@@ -4398,6 +4399,23 @@ function notifyRelaxedSlots(): void {
 /** 첫 화면 진입 시 오늘 날짜 추천 코스를 기본 제공 (공유 링크 및 검색 중이 아닐 때) */
 function applyDailyCourseIfEmpty(): void {
   if (state.course || location.hash.startsWith('#c=') || spots.length === 0) return;
+  // 새로 고침·뒤로 오기에서 이 탭이 만든 코스를 되살린다. 번들 샘플엔 없는 id가 많아 전체 데이터를 받은 뒤 판정한다
+  let last: { ids: number[]; conditions: NonNullable<AppState['courseConditions']> } | null = null;
+  try {
+    last = JSON.parse(sessionStorage.getItem(LAST_COURSE_STORAGE_KEY) ?? 'null');
+  } catch {}
+  if (last) {
+    if (!loadedRegionKeys.has('ALL')) return;
+    const steps = buildSharedSteps(last.ids);
+    if (steps.length > 0 && steps.length === last.ids.length) {
+      state.course = steps;
+      state.courseConditions = last.conditions;
+      renderConditions();
+      renderResults();
+      return;
+    }
+    try { sessionStorage.removeItem(LAST_COURSE_STORAGE_KEY); } catch {} // 닫힌 스팟이 섞였으면 버리고 오늘 추천으로
+  }
   if (state.searchQuery || state.subZones.length > 0) return;
   const daily = buildDailyRecommendedCourse(spots);
   if (daily) {
@@ -4477,6 +4495,12 @@ function renderResults(): void {
   const refocusSelector = area && active && area.contains(active) ? focusSelectorFor(active) : null;
   renderResultsContent();
   if (area) restoreFocusIn(area, refocusSelector, '#btn-regenerate');
+  if (state.course && state.courseConditions) {
+    const ids = state.course.map((s) => s.spotId).filter((id): id is number => id !== null);
+    try {
+      sessionStorage.setItem(LAST_COURSE_STORAGE_KEY, JSON.stringify({ ids, conditions: state.courseConditions }));
+    } catch {}
+  }
 }
 
 function renderResultsContent(): void {
