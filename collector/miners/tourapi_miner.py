@@ -17,7 +17,8 @@ from datetime import datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from supabase_worker import load_env, derive_region_area, find_duplicate_spot, normalize_spot_address, sanitize_spot, new_spot_id, insert_spots
+from supabase_worker import (load_env, derive_region_area, find_duplicate_spot, normalize_spot_address, sanitize_spot, new_spot_id,
+                             insert_spots, _near_fn, KAKAO_REST_API_KEY)
 from category_filter import is_date_spot_category
 from event_period import fetch_event_period
 from tour_fee import fee_fields, fetch_intro, hours_fields, parse_closed_days
@@ -78,6 +79,101 @@ def is_non_date_leisure_or_monument(ctype_id: str, title: str) -> bool:
     if ctype_id == "12":
         return bool(MONUMENT_NAME.search(title)) and not MONUMENT_KEEP.search(title)
     return False
+
+
+# 관광지 유형의 단독 유교 시설 관문(P-075). 이름 기준은 scripts/judge_date_fit.py R21과 같다.
+# 500m 안에 열린 행이 없고 카카오 장소 패널이 인기(P-067 임곗값)로 보이지 않으면 버리지 않고 닫힌 채 넣는다
+CONFUCIAN_NAME = re.compile(r"(서원|향교|서당|영당|재실|종택|사당|묘각)(\s*\(.*\))?$")
+CONFUCIAN_NOT = re.compile(r"의사당(\s*\(.*\))?$")
+CONFUCIAN_NEIGHBOR_METERS = 500
+POPULAR_PHOTOS, POPULAR_KAKAO_REVIEWS, POPULAR_BLOG_REVIEWS = 400, 5, 30
+KAKAO_PANEL_URL = "https://place-api.map.kakao.com/places/panel3/{}"
+KAKAO_KEYWORD_URL = "https://dapi.kakao.com/v2/local/search/keyword.json"
+
+
+def is_confucian_facility(ctype_id: str, title: str) -> bool:
+    title = title.strip()
+    return ctype_id == "12" and bool(CONFUCIAN_NAME.search(title)) and not CONFUCIAN_NOT.search(title)
+
+
+def kakao_query_names(title: str) -> list:
+    """카카오 키워드 검색어 후보. 괄호를 떼고, 앞 낱말이 지역어인 이름(옥천 청산향교)은 그 낱말을 뗀 것도 시도한다"""
+    name = re.sub(r"\s*\(.*?\)", "", title).strip()
+    words = name.split()
+    return [name] + ([" ".join(words[1:])] if len(words) > 1 else [])
+
+
+def is_popular_panel(panel) -> bool:
+    """카카오 장소 패널 수치가 P-067 임곗값(사진 400장, 후기 5건, 블로그 30건) 중 하나 이상이면 True. 패널이 없으면 False"""
+    if not panel:
+        return False
+    return ((panel.get("photos") or 0) >= POPULAR_PHOTOS or (panel.get("kreview") or 0) >= POPULAR_KAKAO_REVIEWS
+            or (panel.get("blog") or 0) >= POPULAR_BLOG_REVIEWS)
+
+
+def should_close_confucian(ctype_id: str, title: str, neighbor_count, panel) -> bool:
+    """단독 유교 시설이면서 인기가 확인되지 않으면 True. neighbor_count가 None(조회 실패)이면 고립으로 보고,
+    panel이 None(검색·조회 실패)이면 인기 아님으로 본다: 어느 쪽이든 닫힌 채 넣고 사람이 되열 수 있다"""
+    if not is_confucian_facility(ctype_id, title) or neighbor_count:
+        return False
+    return not is_popular_panel(panel)
+
+
+def _open_neighbor_count(supabase_url, headers, lat, lng):
+    """좌표 반경 안의 열린 행 수. 좌표가 없거나 조회가 실패하면 None"""
+    near = _near_fn(lat, lng, CONFUCIAN_NEIGHBOR_METERS)
+    if near is None:
+        return None
+    dlat, dlng = 0.006, 0.0075  # 500m를 덮는 상자(위도 약 670m, 경도 약 600m 이상)
+    lat0, lng0 = float(lat), float(lng)
+    url = (f"{supabase_url}/rest/v1/spots?select=lat,lng&is_closed=eq.false"
+           f"&lat=gte.{lat0 - dlat}&lat=lte.{lat0 + dlat}&lng=gte.{lng0 - dlng}&lng=lte.{lng0 + dlng}&limit=200")
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=8) as res:
+            return sum(1 for row in json.loads(res.read().decode("utf-8")) if near(row))
+    except Exception:
+        return None
+
+
+def _fetch_kakao_panel(title, lat, lng):
+    """카카오 키워드 검색(REST)으로 장소를 찾고 장소 패널(REST 한도 밖)에서 사진·후기·블로그 수를 읽는다. 어느 단계든 실패하면 None"""
+    if not KAKAO_REST_API_KEY:
+        return None
+    for query in kakao_query_names(title):
+        compact = re.sub(r"\s", "", query)
+        params = {"query": query, "x": lng, "y": lat, "radius": 2000, "sort": "distance", "size": 5}
+        try:
+            req = urllib.request.Request(f"{KAKAO_KEYWORD_URL}?{urllib.parse.urlencode(params)}",
+                                         headers={"Authorization": f"KakaoAK {KAKAO_REST_API_KEY}"})
+            with urllib.request.urlopen(req, timeout=8) as res:
+                docs = json.loads(res.read().decode("utf-8")).get("documents", [])
+        except Exception:
+            return None
+        # 향교 주차장 같은 부속 장소가 아니라 같은 시설을 가리키는 결과만 인정한다
+        hit = next((d for d in docs if CONFUCIAN_NAME.search(d.get("place_name", ""))
+                    and compact in re.sub(r"\s", "", d["place_name"])), None)
+        if not hit:
+            continue
+        try:
+            req = urllib.request.Request(KAKAO_PANEL_URL.format(hit["id"]),
+                                         headers={"User-Agent": "Mozilla/5.0", "pf": "web", "Referer": "https://map.kakao.com/"})
+            with urllib.request.urlopen(req, timeout=10) as res:
+                p = json.loads(res.read().decode("utf-8"))
+            return {"blog": (p.get("blog_review") or {}).get("review_count"),
+                    "kreview": ((p.get("kakaomap_review") or {}).get("score_set") or {}).get("review_count"),
+                    "photos": ((p.get("photos") or {}).get("counts") or {}).get("total")}
+        except Exception:
+            return None
+    return None
+
+
+def confucian_gate_closes(supabase_url, headers, ctype_id, title, lat, lng) -> bool:
+    """입수 직전 관문. 이름이 맞는 행에서만 이웃 조회와 카카오 조회를 부른다"""
+    if not is_confucian_facility(ctype_id, title):
+        return False
+    neighbors = _open_neighbor_count(supabase_url, headers, lat, lng)
+    panel = None if neighbors else _fetch_kakao_panel(title, lat, lng)
+    return should_close_confucian(ctype_id, title, neighbors, panel)
 
 
 # 전국 8대 권역별 TourAPI areaCode 매핑
@@ -332,6 +428,10 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                         break
                     time.sleep(0.3)
 
+                gate_closed = confucian_gate_closes(supabase_url, api_headers, ctype_id, title, lat_val, lng_val)
+                if gate_closed:
+                    print(f"  🔒 [TourAPI Miner] 단독 유교 시설 관문: {title} 닫힌 채 입수")
+
                 spot_id = new_spot_id()
 
                 new_spot = {
@@ -370,11 +470,12 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                     "source": {
                         "type": "tourapi",
                         "url": f"https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid={content_id}",
-                        "note": f"TourAPI 4.0 {ctype_name}",
+                        "note": f"TourAPI 4.0 {ctype_name}"
+                                + (f" | closed: P-075 단독 유교 시설 관문 ({datetime.now(KST).strftime('%Y%m%d')})" if gate_closed else ""),
                         **({"event": event_period} if event_period else {}),
                     },
                     "verified": True,
-                    "is_closed": False,
+                    "is_closed": gate_closed,
                     "updated_at": datetime.now(timezone.utc).isoformat()
                 }
 
