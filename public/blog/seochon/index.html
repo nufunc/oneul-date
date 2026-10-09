@@ -224,15 +224,21 @@
       background: #fafaf9;
       border: 1px solid var(--color-border);
       border-radius: 10px;
-      padding: 22px 24px;
+      padding: 18px 20px;
       margin: 24px 0 32px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 13.5px;
-      line-height: 1.75;
+      font-size: 15px;
+      line-height: 1.5;
       color: #334155;
     }
+    .tl-act { font-weight: 700; font-size: 13px; color: #64748b; margin: 18px 0 8px; }
+    .tl-act:first-child { margin-top: 0; }
+    .tl-step { display: flex; gap: 12px; align-items: baseline; padding: 6px 0; }
+    .tl-time { flex: none; min-width: 46px; font-weight: 700; font-variant-numeric: tabular-nums; color: #0f766e; }
+    .tl-place { font-weight: 700; color: #1e293b; }
+    .tl-note { display: block; font-size: 13px; color: #64748b; margin-top: 2px; }
+    .tl-move { font-size: 12.5px; color: #94a3b8; padding: 0 0 0 58px; }
     @media (max-width: 640px) {
-      .timeline-card { padding: 16px 18px; font-size: 12.5px; }
+      .timeline-card { padding: 14px 16px; }
     }
 
     .tip-box {
@@ -367,22 +373,20 @@
 
     <h2>🧭 한눈에 보는 서촌 당일치기 동선</h2>
     <div class="timeline-card">
-[낮 1막: 골목의 미식과 문학적 감성 산책]
-11:30 잘빠진메밀 서촌본점 (100% 순메밀 막국수 & 수육 점심)
-  ↓ 도보 4분
-12:45 이상의 집 & 대오서점 (문학적 사색과 옛 책방 골목 산책)
-  ↓ 도보 6분
-14:00 eert 서촌 (한옥 서까래 아래 3단 디저트 박스와 티 살롱)
-
-[오후 2막: 시장의 활기와 도심 속 자연 쉼]
-15:30 통인시장 (무쇠솥에 바삭하게 지져낸 원조 기름떡볶이 간식)
-  ↓ 도보 12분 (또는 종로09 마을버스 3분)
-16:30 수성동계곡 & 인왕산 자락길 (겸재 정선 그림 속 청량한 숲 쉼)
-
-[저녁 3막: 로맨틱 다이닝과 달빛 돌담길]
-18:30 고치비 (누하동 골목의 이탈리안 레스토랑, 제주 흑돼지 파스타·리조또)
-  ↓ 도보 10분
-20:30 청와대 앞길 & 영추문 돌담길 (도심 속 가장 고요한 달빛 야경 산책)
+      <div class="tl-act">낮 1막: 골목의 미식과 문학적 감성 산책</div>
+      <div class="tl-step"><span class="tl-time">11:30</span><div><span class="tl-place">잘빠진메밀 서촌본점</span><span class="tl-note">100% 순메밀 막국수 & 수육 점심</span></div></div>
+      <div class="tl-move">↓ 도보 4분</div>
+      <div class="tl-step"><span class="tl-time">12:45</span><div><span class="tl-place">이상의 집 & 대오서점</span><span class="tl-note">문학적 사색과 옛 책방 골목 산책</span></div></div>
+      <div class="tl-move">↓ 도보 6분</div>
+      <div class="tl-step"><span class="tl-time">14:00</span><div><span class="tl-place">eert 서촌</span><span class="tl-note">한옥 서까래 아래 3단 디저트 박스와 티 살롱</span></div></div>
+      <div class="tl-act">오후 2막: 시장의 활기와 도심 속 자연 쉼</div>
+      <div class="tl-step"><span class="tl-time">15:30</span><div><span class="tl-place">통인시장</span><span class="tl-note">무쇠솥에 바삭하게 지져낸 원조 기름떡볶이 간식</span></div></div>
+      <div class="tl-move">↓ 도보 12분 (또는 종로09 마을버스 3분)</div>
+      <div class="tl-step"><span class="tl-time">16:30</span><div><span class="tl-place">수성동계곡 & 인왕산 자락길</span><span class="tl-note">겸재 정선 그림 속 청량한 숲 쉼</span></div></div>
+      <div class="tl-act">저녁 3막: 로맨틱 다이닝과 달빛 돌담길</div>
+      <div class="tl-step"><span class="tl-time">18:30</span><div><span class="tl-place">고치비</span><span class="tl-note">누하동 골목의 이탈리안 레스토랑, 제주 흑돼지 파스타·리조또</span></div></div>
+      <div class="tl-move">↓ 도보 10분</div>
+      <div class="tl-step"><span class="tl-time">20:30</span><div><span class="tl-place">청와대 앞길 & 영추문 돌담길</span><span class="tl-note">도심 속 가장 고요한 달빛 야경 산책</span></div></div>
     </div>
 
     <h2>1. 오전 11:30 — 메밀 향 가득한 정갈한 첫 끼, '잘빠진메밀 서촌본점'</h2>

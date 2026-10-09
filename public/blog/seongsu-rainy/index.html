@@ -224,15 +224,21 @@
       background: #fafaf9;
       border: 1px solid var(--color-border);
       border-radius: 10px;
-      padding: 22px 24px;
+      padding: 18px 20px;
       margin: 24px 0 32px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 13.5px;
-      line-height: 1.75;
+      font-size: 15px;
+      line-height: 1.5;
       color: #334155;
     }
+    .tl-act { font-weight: 700; font-size: 13px; color: #64748b; margin: 18px 0 8px; }
+    .tl-act:first-child { margin-top: 0; }
+    .tl-step { display: flex; gap: 12px; align-items: baseline; padding: 6px 0; }
+    .tl-time { flex: none; min-width: 46px; font-weight: 700; font-variant-numeric: tabular-nums; color: #0f766e; }
+    .tl-place { font-weight: 700; color: #1e293b; }
+    .tl-note { display: block; font-size: 13px; color: #64748b; margin-top: 2px; }
+    .tl-move { font-size: 12.5px; color: #94a3b8; padding: 0 0 0 58px; }
     @media (max-width: 640px) {
-      .timeline-card { padding: 16px 18px; font-size: 12.5px; }
+      .timeline-card { padding: 14px 16px; }
     }
 
     .tip-box {
@@ -367,20 +373,18 @@
 
     <h2>🧭 한눈에 보는 비 오는 날 성수·서울숲 추천 동선</h2>
     <div class="timeline-card">
-[낮 1막: 비를 피해 들어선 붉은 벽돌의 미식과 아케이드]
-11:30 뚝섬역 8번 출구 도착 → 중앙감속기 (최현석 셰프의 퓨전 이탈리안·중식 브런치)
-  ↓ 도보 3분
-13:00 성수연방 & 대림창고 (비 맞지 않는 실내 아케이드 문화공간 & 갤러리 카페)
-
-[오후 2막: 촉촉한 빗소리와 이국적인 온실 속 쉼]
-14:30 서울숲 곤충식물원 & 실내 식물원 (통유리 온실 속 열대 식물과 꽃 사이 우중 힐링)
-  ↓ 도보 6분
-16:00 바이닐 성수 (Vinyl Seongsu) (창밖 빗방울을 보며 헤드폰으로 즐기는 1인 1LP 청음 쉼)
-
-[저녁 3막: 빗소리를 배경 삼은 저녁 식사]
-18:30 브리비트 (성수동 상원길 골목의 양식 레스토랑)
-  ↓ 도보 4분
-20:30 뚝섬역 귀가 (역세권 뚜벅이 완벽 마침표)
+      <div class="tl-act">낮 1막: 비를 피해 들어선 붉은 벽돌의 미식과 아케이드</div>
+      <div class="tl-step"><span class="tl-time">11:30</span><div><span class="tl-place">뚝섬역 8번 출구 도착 → 중앙감속기</span><span class="tl-note">최현석 셰프의 퓨전 이탈리안·중식 브런치</span></div></div>
+      <div class="tl-move">↓ 도보 3분</div>
+      <div class="tl-step"><span class="tl-time">13:00</span><div><span class="tl-place">성수연방 & 대림창고</span><span class="tl-note">비 맞지 않는 실내 아케이드 문화공간 & 갤러리 카페</span></div></div>
+      <div class="tl-act">오후 2막: 촉촉한 빗소리와 이국적인 온실 속 쉼</div>
+      <div class="tl-step"><span class="tl-time">14:30</span><div><span class="tl-place">서울숲 곤충식물원 & 실내 식물원</span><span class="tl-note">통유리 온실 속 열대 식물과 꽃 사이 우중 힐링</span></div></div>
+      <div class="tl-move">↓ 도보 6분</div>
+      <div class="tl-step"><span class="tl-time">16:00</span><div><span class="tl-place">바이닐 성수</span><span class="tl-note">Vinyl Seongsu) (창밖 빗방울을 보며 헤드폰으로 즐기는 1인 1LP 청음 쉼</span></div></div>
+      <div class="tl-act">저녁 3막: 빗소리를 배경 삼은 저녁 식사</div>
+      <div class="tl-step"><span class="tl-time">18:30</span><div><span class="tl-place">브리비트</span><span class="tl-note">성수동 상원길 골목의 양식 레스토랑</span></div></div>
+      <div class="tl-move">↓ 도보 4분</div>
+      <div class="tl-step"><span class="tl-time">20:30</span><div><span class="tl-place">뚝섬역 귀가</span><span class="tl-note">역세권 뚜벅이 완벽 마침표</span></div></div>
     </div>
 
     <h2>1. 오전 11:30 — 비 오는 날 더 생각나는 따끈한 퓨전의 맛, '중앙감속기'</h2>

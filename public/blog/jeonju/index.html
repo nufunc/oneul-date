@@ -214,16 +214,21 @@
       background: #fafaf9;
       border: 1px solid var(--color-border);
       border-radius: 10px;
-      padding: 22px 24px;
+      padding: 18px 20px;
       margin: 24px 0 32px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 13.5px;
-      line-height: 1.75;
+      font-size: 15px;
+      line-height: 1.5;
       color: #334155;
-      white-space: pre-wrap;
     }
+    .tl-act { font-weight: 700; font-size: 13px; color: #64748b; margin: 18px 0 8px; }
+    .tl-act:first-child { margin-top: 0; }
+    .tl-step { display: flex; gap: 12px; align-items: baseline; padding: 6px 0; }
+    .tl-time { flex: none; min-width: 46px; font-weight: 700; font-variant-numeric: tabular-nums; color: #0f766e; }
+    .tl-place { font-weight: 700; color: #1e293b; }
+    .tl-note { display: block; font-size: 13px; color: #64748b; margin-top: 2px; }
+    .tl-move { font-size: 12.5px; color: #94a3b8; padding: 0 0 0 58px; }
     @media (max-width: 640px) {
-      .timeline-card { padding: 16px 18px; font-size: 12.5px; }
+      .timeline-card { padding: 14px 16px; }
     }
 
     .tip-box {
@@ -356,17 +361,18 @@
     </div>
 
     <h2>🧭 한눈에 보는 [전주] 한옥마을 인파를 벗어나 만난 완판본 골목과 한옥 쉼표 동선</h2>
-    <div class="timeline-card">[Day 1: 원도심의 깊은 맛과 한옥 쉼]
-12:00 현대옥 남부시장점 (토렴식 남부시장 콩나물국밥 &amp; 삶아 넣은 오징어사리)
-13:10 경기전 돌담길 산책 &amp; 완판본문화관 (울창한 대나무 숲길과 목판 인쇄 체험)
-14:30 차경 (한옥 서까래 아래 즐기는 시원한 오미자차와 수제 곶감말이 디저트)
-16:00 서학동 예술마을 산책 후 한옥마을 안 &#39;사랑나무 한옥펜션&#39; 체크인
-19:30 조점례남문피순대 포장 (잡내 없이 고소한 원조 피순대와 시원한 모주 야식)
-
-[Day 2: 든든한 로컬 면식과 여운]
-11:00 느긋한 체크아웃
-11:30 베테랑분식 본점 (고소한 들깨가루와 김가루 듬뿍, 걸쭉한 온칼국수와 찐만두)
-13:00 자만벽화마을 산책 후 기분 좋은 귀가</div>
+    <div class="timeline-card">
+      <div class="tl-act">Day 1: 원도심의 깊은 맛과 한옥 쉼</div>
+      <div class="tl-step"><span class="tl-time">12:00</span><div><span class="tl-place">현대옥 남부시장점</span><span class="tl-note">토렴식 남부시장 콩나물국밥 &amp; 삶아 넣은 오징어사리</span></div></div>
+      <div class="tl-step"><span class="tl-time">13:10</span><div><span class="tl-place">경기전 돌담길 산책 &amp; 완판본문화관</span><span class="tl-note">울창한 대나무 숲길과 목판 인쇄 체험</span></div></div>
+      <div class="tl-step"><span class="tl-time">14:30</span><div><span class="tl-place">차경</span><span class="tl-note">한옥 서까래 아래 즐기는 시원한 오미자차와 수제 곶감말이 디저트</span></div></div>
+      <div class="tl-step"><span class="tl-time">16:00</span><div><span class="tl-place">서학동 예술마을 산책 후 한옥마을 안 &#39;사랑나무 한옥펜션&#39; 체크인</span></div></div>
+      <div class="tl-step"><span class="tl-time">19:30</span><div><span class="tl-place">조점례남문피순대 포장</span><span class="tl-note">잡내 없이 고소한 원조 피순대와 시원한 모주 야식</span></div></div>
+      <div class="tl-act">Day 2: 든든한 로컬 면식과 여운</div>
+      <div class="tl-step"><span class="tl-time">11:00</span><div><span class="tl-place">느긋한 체크아웃</span></div></div>
+      <div class="tl-step"><span class="tl-time">11:30</span><div><span class="tl-place">베테랑분식 본점</span><span class="tl-note">고소한 들깨가루와 김가루 듬뿍, 걸쭉한 온칼국수와 찐만두</span></div></div>
+      <div class="tl-step"><span class="tl-time">13:00</span><div><span class="tl-place">자만벽화마을 산책 후 기분 좋은 귀가</span></div></div>
+    </div>
 
     <!-- 스팟별 상세 섹션 -->
     

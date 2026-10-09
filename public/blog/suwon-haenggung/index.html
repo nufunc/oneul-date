@@ -224,15 +224,21 @@
       background: #fafaf9;
       border: 1px solid var(--color-border);
       border-radius: 10px;
-      padding: 22px 24px;
+      padding: 18px 20px;
       margin: 24px 0 32px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 13.5px;
-      line-height: 1.75;
+      font-size: 15px;
+      line-height: 1.5;
       color: #334155;
     }
+    .tl-act { font-weight: 700; font-size: 13px; color: #64748b; margin: 18px 0 8px; }
+    .tl-act:first-child { margin-top: 0; }
+    .tl-step { display: flex; gap: 12px; align-items: baseline; padding: 6px 0; }
+    .tl-time { flex: none; min-width: 46px; font-weight: 700; font-variant-numeric: tabular-nums; color: #0f766e; }
+    .tl-place { font-weight: 700; color: #1e293b; }
+    .tl-note { display: block; font-size: 13px; color: #64748b; margin-top: 2px; }
+    .tl-move { font-size: 12.5px; color: #94a3b8; padding: 0 0 0 58px; }
     @media (max-width: 640px) {
-      .timeline-card { padding: 16px 18px; font-size: 12.5px; }
+      .timeline-card { padding: 14px 16px; }
     }
 
     .tip-box {
@@ -367,22 +373,20 @@
 
     <h2>🧭 한눈에 보는 수원 행궁동 반려견 동반 추천 동선</h2>
     <div class="timeline-card">
-[낮 1막: 편리한 주차와 신풍동 브런치]
-11:30 화성행궁 공영주차장 주차 → 슬로우써니사이드 (신풍동 골목 브런치, 반려견 동반은 사전 확인)
-  ↓ 도보 6분
-13:00 화서문 & 장안공원 잔디마당 (넓은 잔디밭에서 가벼운 뛰뛰 & 매너 배변 산책)
-
-[오후 2막: 고즈넉한 성곽길 바람과 방화수류정 용연 힐링]
-14:15 수원화성 성곽 둘레길 (화서문 → 장안문 → 북암문으로 이어지는 바람 솔솔 성곽길 산책)
-  ↓ 도보 5분
-15:30 방화수류정 & 용연 연못 (수양버들 아래 돗자리 펴고 즐기는 연못 멍때리기 쉼)
-  ↓ 도보 4분
-17:00 정지영커피로스터즈 화홍문점 (화홍문 7연수문이 내려다보이는 야외 테라스 & 멍푸치노)
-
-[저녁 3막: 수원 통닭거리 야외 야장 테이블의 낭만]
-18:30 수원 통닭거리 진미통닭 (가마솥에 튀겨낸 바삭한 통닭 & 야외 테이블 반려견 동반 야식)
-  ↓ 도보 8분
-20:00 화성행궁 주차장 복귀 및 편안한 귀가
+      <div class="tl-act">낮 1막: 편리한 주차와 신풍동 브런치</div>
+      <div class="tl-step"><span class="tl-time">11:30</span><div><span class="tl-place">화성행궁 공영주차장 주차 → 슬로우써니사이드</span><span class="tl-note">신풍동 골목 브런치, 반려견 동반은 사전 확인</span></div></div>
+      <div class="tl-move">↓ 도보 6분</div>
+      <div class="tl-step"><span class="tl-time">13:00</span><div><span class="tl-place">화서문 & 장안공원 잔디마당</span><span class="tl-note">넓은 잔디밭에서 가벼운 뛰뛰 & 매너 배변 산책</span></div></div>
+      <div class="tl-act">오후 2막: 고즈넉한 성곽길 바람과 방화수류정 용연 힐링</div>
+      <div class="tl-step"><span class="tl-time">14:15</span><div><span class="tl-place">수원화성 성곽 둘레길</span><span class="tl-note">화서문 → 장안문 → 북암문으로 이어지는 바람 솔솔 성곽길 산책</span></div></div>
+      <div class="tl-move">↓ 도보 5분</div>
+      <div class="tl-step"><span class="tl-time">15:30</span><div><span class="tl-place">방화수류정 & 용연 연못</span><span class="tl-note">수양버들 아래 돗자리 펴고 즐기는 연못 멍때리기 쉼</span></div></div>
+      <div class="tl-move">↓ 도보 4분</div>
+      <div class="tl-step"><span class="tl-time">17:00</span><div><span class="tl-place">정지영커피로스터즈 화홍문점</span><span class="tl-note">화홍문 7연수문이 내려다보이는 야외 테라스 & 멍푸치노</span></div></div>
+      <div class="tl-act">저녁 3막: 수원 통닭거리 야외 야장 테이블의 낭만</div>
+      <div class="tl-step"><span class="tl-time">18:30</span><div><span class="tl-place">수원 통닭거리 진미통닭</span><span class="tl-note">가마솥에 튀겨낸 바삭한 통닭 & 야외 테이블 반려견 동반 야식</span></div></div>
+      <div class="tl-move">↓ 도보 8분</div>
+      <div class="tl-step"><span class="tl-time">20:00</span><div><span class="tl-place">화성행궁 주차장 복귀 및 편안한 귀가</span></div></div>
     </div>
 
     <h2>1. 오전 11:30 — 화성행궁 여유로운 주차 & 신풍동 골목 브런치, '슬로우써니사이드'</h2>

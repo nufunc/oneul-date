@@ -202,11 +202,21 @@
       background: #fafaf9;
       border: 1px solid var(--color-border);
       border-radius: 10px;
-      padding: 20px;
-      margin: 24px 0;
-      font-family: monospace;
-      font-size: 13.5px;
-      line-height: 1.7;
+      padding: 18px 20px;
+      margin: 24px 0 32px;
+      font-size: 15px;
+      line-height: 1.5;
+      color: #334155;
+    }
+    .tl-act { font-weight: 700; font-size: 13px; color: #64748b; margin: 18px 0 8px; }
+    .tl-act:first-child { margin-top: 0; }
+    .tl-step { display: flex; gap: 12px; align-items: baseline; padding: 6px 0; }
+    .tl-time { flex: none; min-width: 46px; font-weight: 700; font-variant-numeric: tabular-nums; color: #0f766e; }
+    .tl-place { font-weight: 700; color: #1e293b; }
+    .tl-note { display: block; font-size: 13px; color: #64748b; margin-top: 2px; }
+    .tl-move { font-size: 12.5px; color: #94a3b8; padding: 0 0 0 58px; }
+    @media (max-width: 640px) {
+      .timeline-card { padding: 14px 16px; }
     }
 
     .table-wrap {
@@ -285,18 +295,17 @@
 
     <h2>🧭 1박 2일 힐링 동선 요약</h2>
     <div class="timeline-card">
-[Day 1: 원도심 골목 산책과 한옥 자쿠지 쉼]
-12:00 매향 (맷돌에 직접 간 100% 순메밀 들기름 막국수 & 편육무침)
-13:10 제민천 천변길 산책 (돌다리 건너며 왜가리 구경)
-13:30 곡물집 GRANARY (토종 곡물 미수 샘플러 & 수수 잭살 밀크티)
-15:00 공주산성시장 부자떡집 (달콤한 알밤모찌 & 호밤시루 포장)
-16:30 독채 한옥 '호담' 체크인 (야외 온수 자쿠지 & 툇마루 다도)
-19:30 북경탕수육 포장 (원조 김치치즈탕수육과 시원한 맥주 야식)
-
-[Day 2: 든든한 로컬 해장과 여운]
-11:00 느긋하게 체크아웃
-11:30 황토촌 (구수한 시골 청국장 & 칼칼한 소곱창전골 해장)
-13:00 제민천 독립서점 구경 후 기분 좋은 귀가
+      <div class="tl-act">Day 1: 원도심 골목 산책과 한옥 자쿠지 쉼</div>
+      <div class="tl-step"><span class="tl-time">12:00</span><div><span class="tl-place">매향</span><span class="tl-note">맷돌에 직접 간 100% 순메밀 들기름 막국수 & 편육무침</span></div></div>
+      <div class="tl-step"><span class="tl-time">13:10</span><div><span class="tl-place">제민천 천변길 산책</span><span class="tl-note">돌다리 건너며 왜가리 구경</span></div></div>
+      <div class="tl-step"><span class="tl-time">13:30</span><div><span class="tl-place">곡물집 GRANARY</span><span class="tl-note">토종 곡물 미수 샘플러 & 수수 잭살 밀크티</span></div></div>
+      <div class="tl-step"><span class="tl-time">15:00</span><div><span class="tl-place">공주산성시장 부자떡집</span><span class="tl-note">달콤한 알밤모찌 & 호밤시루 포장</span></div></div>
+      <div class="tl-step"><span class="tl-time">16:30</span><div><span class="tl-place">독채 한옥 '호담' 체크인</span><span class="tl-note">야외 온수 자쿠지 & 툇마루 다도</span></div></div>
+      <div class="tl-step"><span class="tl-time">19:30</span><div><span class="tl-place">북경탕수육 포장</span><span class="tl-note">원조 김치치즈탕수육과 시원한 맥주 야식</span></div></div>
+      <div class="tl-act">Day 2: 든든한 로컬 해장과 여운</div>
+      <div class="tl-step"><span class="tl-time">11:00</span><div><span class="tl-place">느긋하게 체크아웃</span></div></div>
+      <div class="tl-step"><span class="tl-time">11:30</span><div><span class="tl-place">황토촌</span><span class="tl-note">구수한 시골 청국장 & 칼칼한 소곱창전골 해장</span></div></div>
+      <div class="tl-step"><span class="tl-time">13:00</span><div><span class="tl-place">제민천 독립서점 구경 후 기분 좋은 귀가</span></div></div>
     </div>
 
     <h2>1. 매향 — 맷돌에 직접 간 100% 순메밀, 들기름 막국수의 정석</h2>
