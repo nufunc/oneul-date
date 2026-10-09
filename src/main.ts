@@ -3589,6 +3589,7 @@ function renderShell(): void {
     <header class="topbar">
       <h1 class="app-title"><a href="#" class="app-title-link" id="brand-home-link" aria-label="오늘 데이트 홈으로 이동">오늘 데이트</a></h1>
       <div class="topbar-actions">
+        <a href="./blog/" class="btn-blog-link" id="btn-blog-link" style="text-decoration:none; font-size:12.5px; font-weight:600; padding:6px 10px; border-radius:8px; color:inherit; background:var(--bg-card); border:1px solid var(--border-color); display:inline-flex; align-items:center; gap:4px; height:34px;" title="오늘 데이트 여행 매거진 열기">📖 매거진</a>
         <button class="btn-theme-toggle" id="btn-theme-toggle" aria-label="테마 변경, 현재 ${getThemeModeLabel(state.themeMode)}">${getThemeModeLabel(state.themeMode)}</button>
         <button class="btn-saved" id="btn-open-saved">저장한 코스</button>
       </div>
