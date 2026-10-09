@@ -3,7 +3,7 @@ import json
 import os
 
 from judge_date_fit import (DINER_VERIFIED, GOLF_RELIC_KEEP, PUBLIC_FACILITY_KEEP, PUBLIC_FACILITY_VERIFIED, R3_SAME_ADDRESS_EXEMPT,
-                            R21_VERIFIED, R23_VERIFIED, R24_VERIFIED, R25_VERIFIED, R26_VERIFIED, R27_VERIFIED, R29_VERIFIED,
+                            R21_VERIFIED, R23_VERIFIED, R24_VERIFIED, R25_VERIFIED, R26_VERIFIED, R27_VERIFIED, R29_VERIFIED, R30_VERIFIED,
                             REGION_MISMATCH_VERIFIED, judge, judge_both)
 
 
@@ -376,6 +376,32 @@ def test_solo_reservoir():
     assert not hits(near, "close", "R27_단독_저수지"), "500m 안에 열린 행이 있으면 닫지 않는다"
 
 
+def test_tourapi_sports_park():
+    """P-105 R30: 닫기 규칙은 없고, 체육공원 이름의 tourapi 행 가운데 id 목록 11곳 밖만 검토로 보낸다. 체육관 같은 실내 시설은 R10에만 걸린다"""
+    result = fixture("p105_sports_park")
+    boundary, mismatch, excluded = set(result["boundary_ids"]), set(result["mismatch_ids"]), set(result["excluded_ids"])
+    assert len(R30_VERIFIED) == 11 and R30_VERIFIED == set(result["close_ids"]) and len(boundary | mismatch | excluded) == 25
+    assert not R30_VERIFIED & (boundary | mismatch | excluded)
+    verified = sorted(R30_VERIFIED)[0]
+    def park(id, name, category="관광지", source="tourapi"):
+        return row(id, name, category, "day", "경기도 여주시 가남읍 대명산길 98", source)
+    def hits(rows, action, rule):
+        return {i["id"] for i in judge(rows)[action] if rule in i["rules"]}
+    rows = [park(verified, "가남체육공원"),
+            park(2, "살곶이체육공원"),  # 목록 밖(수치로 뺌)이라 검토
+            park(3, "곡교천시민체육공원", category="레포츠/체험"),
+            park(4, "도원체육공원(인천)"),  # 괄호 꼬리 허용
+            park(5, "장충체육관", category="레포츠/체험"),  # 체육공원이 아니라 R10에만
+            park(6, "체육공원 카페", category="카페"),  # 이름이 체육공원으로 끝나지 않는다
+            park(7, "응봉체육공원", source="web"),  # tourapi 밖
+            park(8, "체육공원카페", category="카페")]  # 관광지·레포츠 밖
+    assert not any(i["rules"][0].startswith("R30") for i in judge(rows)["close"]), "R30은 닫기 규칙이 없다"
+    assert hits(rows, "review", "R30_tourapi_동네체육공원_미확인") == {2, 3, 4}
+    assert {2, 3, 5} <= hits(rows, "review", "R10_tourapi_체육시설"), "R10 검토는 그대로 둔다"
+    gap = [park(i, "석적체육공원") for i in sorted(boundary)]
+    assert hits(gap, "review", "R30_tourapi_동네체육공원_미확인") == boundary, "경계 4곳은 검토로 남는다"
+
+
 def test_food_cat_nonfood_name():
     """P-088 R28: 식음 카테고리에 비식음 시설 이름이나 1박 가격이면 검토로만 보내고, 고친 29곳은 비식음 카테고리라 걸리지 않는다"""
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "p088_category_fix_ids.json"), encoding="utf-8") as f:
@@ -466,6 +492,7 @@ if __name__ == "__main__":
     test_solo_pier()
     test_solo_stone_relic()
     test_solo_reservoir()
+    test_tourapi_sports_park()
     test_food_cat_nonfood_name()
     test_place_name_other_business()
     test_same_address_exempt()

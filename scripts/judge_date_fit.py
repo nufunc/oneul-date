@@ -69,6 +69,10 @@ with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "r27_reservoi
 PLACE_TAIL = re.compile(r"(길|거리|골목|코스|공방|아틀리에|스튜디오|풀빌라|글램핑|카라반|투어|마켓|공원|정원|스테이)$")
 with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "r29_place_name_other_business_close_ids.json"), encoding="utf-8") as _f:
     R29_VERIFIED = frozenset(int(k) for k in json.load(_f)["rows"])
+# P-105 동네 체육공원. R10 검토 36곳을 카카오 패널로 전수 판정해 11곳은 이 id 목록으로 DB에서 닫았고(닫기 규칙은 두지 않는다), 체육공원 이름의 나머지는 검토로 보낸다
+SPORTS_PARK = re.compile(r"체육공원(\s*\(.*\))?$")
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "r30_sports_park_close_ids.json"), encoding="utf-8") as _f:
+    R30_VERIFIED = frozenset(int(k) for k in json.load(_f)["rows"])
 GOLF_RELIC_KEEP = frozenset({1790667560577, 1790456834079, 1790307190897})  # 리베라CC, 서산수골프앤리조트, 경주 김유신묘
 FISHING_KEEP = re.compile(r"실내|바다낚시터|좌대|캠핑")  # 실내낚시터는 데이트, 관리형 바다낚시터·좌대·캠핑장은 애매
 CAMPING = re.compile(r"캠핑|글램핑|카라반|야영")
@@ -365,6 +369,12 @@ def solo_reservoir(row, ctx):
             and bool(RESERVOIR.search((row.get("name") or "").strip())) and ctx["near"].get(row["id"], 1) == 0)
 
 
+def tourapi_sports_park(row):
+    """R30: 출처 tourapi, 유형 관광지·레포츠/체험이고 이름이 체육공원으로 끝난다(괄호 꼬리 허용)."""
+    return (src_type(row) == "tourapi" and row.get("category") in ("관광지", "레포츠/체험")
+            and bool(SPORTS_PARK.search((row.get("name") or "").strip())))
+
+
 def food_cat_nonfood_name(row):
     """R28: 카테고리가 식음(방탈출·보드카페·카페거리 등 제외)인데 이름의 어절이 비식음 시설 낱말로 끝나거나 가격 칸에 1박이 있다."""
     cat = row.get("category") or ""
@@ -517,6 +527,10 @@ RULES = [
     ("R29_장소이름_다른업소주소_미확인", "review", "R29 이름 조건(web, 식음 카테고리, 장소형 끝 어절)이지만 닫은 9곳 밖이다. 이름의 장소가 행 위치에 있는 20곳, "
      "거리 안 업소 주소를 쓰는 테마거리 5곳, 경계 3곳, 같은 이름 식당이 주소에 있는 7곳이 섞인다(P-093, 닫지 않는다)",
      lambda r, c: food_cat_place_name(r) and r["id"] not in R29_VERIFIED, None),
+    ("R30_tourapi_동네체육공원_미확인", "review", "R30 이름 조건(tourapi, 관광지·레포츠/체험, 이름이 체육공원으로 끝남)이지만 id 목록으로 닫은 11곳 밖이다. "
+     "경계 4곳(석적·양천해누리·곡교천시민·원적산체육공원)은 강변 산책이나 벚꽃 글이 있고, 카카오 수치로 뺀 체육공원(남지·신소양·살곶이·응봉 등)과 "
+     "새로 든 행이 섞인다. 체육관·배드민턴장·인라인스케이트장은 R10에만 걸린다(P-105, 닫기 규칙은 두지 않는다)",
+     lambda r, c: tourapi_sports_park(r) and r["id"] not in R30_VERIFIED, None),
     ("R1_비데이트_카테고리", "review", "카테고리가 문화원·스포츠시설·도서관·매표소·공간대여 등. 대부분 카테고리만 틀린 명소",
      lambda r, c: r.get("category") in NON_DATE_CATS, None),
     ("R5_설명형_이름", "review", "내보낸 이름이 3어절 이상이거나 &·+/, 및, in을 담는다. 자동 이름 교정은 하지 않는다(P-049 드라이런 정밀도 2/5). "
