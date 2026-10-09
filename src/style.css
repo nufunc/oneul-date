@@ -2253,6 +2253,19 @@ button {
     height: 80px; min-height: 80px; max-height: 80px;
   }
   .step-actions-bar { gap: 6px; }
+  /* 320px에서 아이콘 7개(260px)가 막대(222px)를 넘어 왼쪽 묶음이 접혔다(P-106). 28px로 줄인다.
+     .step-card 접두가 없으면 .step-map-chip.icon-only가 이긴다. */
+  .step-card .step-actions-bar,
+  .step-card .step-actions-icons,
+  .step-card .step-actions-right { gap: 4px; }
+  .step-card .step-actions-bar .btn-action-icon,
+  .step-card .step-actions-right > a,
+  .step-card .step-actions-right > button {
+    width: 28px; height: 28px; min-width: 28px; min-height: 28px; padding: 0;
+  }
+  /* 칩이 28px로 줄어도 터치 영역을 세로 44px로 두고 가로는 간격 4px의 절반까지만 넓힌다 */
+  .step-card .step-actions-right > a::after,
+  .step-card .step-actions-right > button::after { inset: -9px -3px; }
 }
 
 /* 모든 플랫폼 미니멀 동일 크기 원형 아이콘 버튼 (32x32px 시각적 크기 + 44x44px 터치 히트 영역) */
