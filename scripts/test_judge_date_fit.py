@@ -3,7 +3,7 @@ import json
 import os
 
 from judge_date_fit import (DINER_VERIFIED, GOLF_RELIC_KEEP, PUBLIC_FACILITY_KEEP, PUBLIC_FACILITY_VERIFIED, R3_SAME_ADDRESS_EXEMPT,
-                            R21_VERIFIED, R23_VERIFIED, R24_VERIFIED, R25_VERIFIED, REGION_MISMATCH_VERIFIED, judge)
+                            R21_VERIFIED, R23_VERIFIED, R24_VERIFIED, R25_VERIFIED, R26_VERIFIED, REGION_MISMATCH_VERIFIED, judge)
 
 
 def fixture(name):
@@ -320,6 +320,33 @@ def test_solo_pier():
     assert hits([pier(i, "두리선착장") for i in boundary], "review", "R25_단독_선착장_미확인") == boundary
 
 
+def test_solo_stone_relic():
+    """P-085 R26: 확인한 14곳만 닫고, 이름과 고립 조건만 맞는 나머지(경계 4곳 포함)는 검토로 보낸다"""
+    result = fixture("p085_stone_relic")
+    boundary = set(result["boundary_ids"])
+    assert len(R26_VERIFIED) == 14 and len(boundary) == 4 and R26_VERIFIED == set(result["close_ids"]) and not R26_VERIFIED & boundary
+    verified = sorted(R26_VERIFIED)[0]
+    def relic(id, name, lat, category="관광지", source="tourapi"):
+        return {**row(id, name, category, "day", "충청북도 괴산군 사리면 사담리", source), "lat": lat, "lng": 127.8}
+    def hits(rows, action, rule):
+        return {i["id"] for i in judge(rows)[action] if rule in i["rules"]}
+    rows = [relic(verified, "괴산 봉학사지 오층석탑", 35.0),
+            relic(2, "삼릉계곡마애석가여래좌상", 35.1),  # 목록 밖(수치로 뺌)이라 검토
+            relic(3, "신규 석조여래입상(영주)", 35.2),  # 괄호 꼬리 허용, 목록 밖이라 검토
+            relic(4, "강댕이 미륵불", 35.3),  # 미륵불도 이름 조건에 든다
+            relic(5, "석탑공원", 35.4),  # 이름이 석탑으로 끝나지 않는다
+            relic(6, "마애불 카페", 35.5, category="카페"),  # 관광지 밖
+            relic(7, "석불입상", 35.6, source="web"),  # tourapi 밖
+            {**relic(8, "좌표없는 삼층석탑", 0), "lat": None, "lng": None}]
+    assert hits(rows, "close", "R26_단독_석조유물") == {verified}
+    assert hits(rows, "review", "R26_단독_석조유물_미확인") == {2, 3, 4}
+    gap = [relic(i, "상가리미륵불", 36.0 + n * 0.1) for n, i in enumerate(boundary)]
+    assert not hits(gap, "close", "R26_단독_석조유물"), "경계 4곳 id는 닫지 않는다"
+    assert hits(gap, "review", "R26_단독_석조유물_미확인") == boundary
+    near = rows[:1] + [relic(9, "이웃 카페", 35.0 + 0.003, category="카페", source="web")]  # 약 333m
+    assert not hits(near, "close", "R26_단독_석조유물"), "500m 안에 열린 행이 있으면 닫지 않는다"
+
+
 def test_same_address_exempt():
     rows = [row(2, "스타필드 고양", "쇼핑", "day", "경기 고양시 덕양구 고양대로 1955", "web")] + [
         row(1791100000010 + i, f"새 매장 {i}", "카페", "day", "경기 고양시 덕양구 고양대로 1955 1층", "web") for i in range(4)]
@@ -347,5 +374,6 @@ if __name__ == "__main__":
     test_solo_village()
     test_wholesale()
     test_solo_pier()
+    test_solo_stone_relic()
     test_same_address_exempt()
     print("ok")

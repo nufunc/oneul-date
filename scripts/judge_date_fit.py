@@ -56,6 +56,10 @@ PIER = re.compile(r"(선착장|여객터미널|여객선터미널)(\s*\(.*\))?$"
 PIER_NOT = re.compile(r"공항")
 with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "r25_pier_close_ids.json"), encoding="utf-8") as _f:
     R25_VERIFIED = frozenset(int(k) for k in json.load(_f)["rows"])
+# P-085 단독 석조 유물. 이름과 고립 조건의 34곳을 카카오 패널과 반경 검색으로 전수 판정해 14곳을 id 목록으로 닫고, 나머지(경계 4곳 포함)는 검토로 보낸다
+STONE_RELIC = re.compile(r"(석탑|전탑|석불|불상|미륵불|마애불|좌상|입상)(\s*\(.*\))?$")
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "r26_stone_relic_close_ids.json"), encoding="utf-8") as _f:
+    R26_VERIFIED = frozenset(int(k) for k in json.load(_f)["rows"])
 GOLF_RELIC_KEEP = frozenset({1790667560577, 1790456834079, 1790307190897})  # 리베라CC, 서산수골프앤리조트, 경주 김유신묘
 FISHING_KEEP = re.compile(r"실내|바다낚시터|좌대|캠핑")  # 실내낚시터는 데이트, 관리형 바다낚시터·좌대·캠핑장은 애매
 CAMPING = re.compile(r"캠핑|글램핑|카라반|야영")
@@ -331,6 +335,12 @@ def tourapi_pier(row):
             and not PIER_NOT.search(name))
 
 
+def solo_stone_relic(row, ctx):
+    """R26: 출처 tourapi, 유형 관광지이고 이름이 석탑·석불·마애불·좌상·입상 등으로 끝나며 500m 안에 다른 열린 행이 없다. 좌표가 없는 행은 걸리지 않는다."""
+    return (src_type(row) == "tourapi" and row.get("category") == "관광지" and bool(STONE_RELIC.search((row.get("name") or "").strip()))
+            and ctx["near"].get(row["id"], 1) == 0)
+
+
 def tourapi_golf(row):
     return src_type(row) == "tourapi" and row.get("category") == "레포츠/체험" and bool(GOLF.search(row.get("name") or ""))
 
@@ -392,6 +402,10 @@ RULES = [
      "카카오 리뷰 30건 미만, 반경 500m 관광명소 1곳 이하, 같은 반경 카페·음식점 합계 9곳 이하인 12곳(P-079). "
      "33곳 전수 판정 오탐 0, 경계 3곳(두리선착장·야미도선착장·백야선착장)은 뺀다",
      lambda r, c: tourapi_pier(r) and r["id"] in R25_VERIFIED, None),
+    ("R26_단독_석조유물", "close", "출처 tourapi, 유형 관광지이고 이름이 석탑·전탑·석불·불상·미륵불·마애불·좌상·입상으로 끝나며 500m 안 다른 열린 행이 0곳이고, "
+     "카카오 패널이 있고 사진 100장 미만·카카오맵 후기 5건 미만·블로그 후기 10건 미만, 반경 500m 카페·음식점 합계 9곳 이하인 14곳(P-085). "
+     "34곳 전수 판정 오탐 0, 경계 4곳은 뺀다",
+     lambda r, c: solo_stone_relic(r, c) and r["id"] in R26_VERIFIED, None),
     ("R13_캠핑_낮슬롯", "fix", "이름이나 카테고리에 캠핑·글램핑·카라반·야영이 있거나 tourapi 레포츠/체험 이름에 캠프·펜션이 있고 슬롯 day. "
      "식당·카페는 뺀다. 표본 교정 2/2",
      lambda r, c: r.get("slot") == "day" and bool(CAMPING.search(r.get("name") or "") or CAMPING.search(r.get("category") or "")
@@ -443,6 +457,9 @@ RULES = [
     ("R25_단독_선착장_미확인", "review", "R25 이름 조건이지만 닫은 12곳 밖이다. 경계 3곳(두리선착장·야미도선착장·백야선착장)은 섬 관광 동선일 수 있고, "
      "카카오 수치로 뺀 18곳(삼목선착장·거잠포선착장·목포 연안여객선터미널 등)과 새로 든 행(P-079)",
      lambda r, c: tourapi_pier(r) and r["id"] not in R25_VERIFIED, None),
+    ("R26_단독_석조유물_미확인", "review", "R26 이름과 고립 조건이지만 닫은 14곳 밖이다. 경계 4곳(상가리미륵불·경주 율동 마애여래삼존입상·산청 법계사 삼층석탑·"
+     "아산 평촌리 석조약사여래입상)은 등산로나 여행 일정에 들고, 카카오 패널이 없거나 수치로 뺀 16곳(삼릉계곡마애석가여래좌상 등)과 새로 든 행(P-085)",
+     lambda r, c: solo_stone_relic(r, c) and r["id"] not in R26_VERIFIED, None),
     ("R1_비데이트_카테고리", "review", "카테고리가 문화원·스포츠시설·도서관·매표소·공간대여 등. 대부분 카테고리만 틀린 명소",
      lambda r, c: r.get("category") in NON_DATE_CATS, None),
     ("R5_설명형_이름", "review", "내보낸 이름이 3어절 이상이거나 &·+/, 및, in을 담는다. 자동 이름 교정은 하지 않는다(P-049 드라이런 정밀도 2/5). "
