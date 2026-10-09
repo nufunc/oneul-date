@@ -4717,6 +4717,12 @@ function pickImagePool(text: string, cat: string, name: string, slot: SlotKey, u
   } else if (text.includes('양식') || text.includes('한식') || text.includes('일식') || text.includes('중식') || text.includes('음식점') || text.includes('레스토랑') || text.includes('다이닝') || text.includes('비스트로') || text.includes('파스타') || text.includes('스테이크') || text.includes('국수') || text.includes('면요리') || text.includes('초밥') || text.includes('스시') || text.includes('오마카세') || text.includes('샤브샤브') || text.includes('돈까스') || text.includes('피자') || text.includes('버거') || text.includes('치킨') || text.includes('고기') || text.includes('육류') || text.includes('갈비') || text.includes('삼겹살') || text.includes('곱창') || text.includes('바베큐') || text.includes('찌개') || text.includes('덮밥') || text.includes('칼국수') || text.includes('냉면') || text.includes('식당') || text.includes('맛집')) {
     return CURATED_CATEGORY_IMAGES.dining;
   }
+  // 수집기의 세부 식음 카테고리(이탈리안·한정식·술집 등)는 카테고리만 볼 때 잡는다. 이름까지 합친 둘째 호출에 걸면 고기리계곡·와인터널 같은 비식음이 식음 풀로 간다
+  if (!useSlot) {
+    if (/술집|포장마차/.test(text)) return CURATED_CATEGORY_IMAGES.bar;
+    if (/아이스크림|도넛|초콜릿|토스트|스타벅스|할리스|다방/.test(text)) return CURATED_CATEGORY_IMAGES.cafe;
+    if (/이탈리안|브런치|한정식|분식|해물|생선|조개|대게|국밥|곰탕|설렁탕|해장국|순대|두부전문|닭요리|닭강정|떡볶이|쌈밥|뷔페|양꼬치|장어|족발|보쌈|매운탕|수제비|복어|추어|아구|바닷가재|퓨전요리|철판요리|중국요리|먹자골목|일본식라면|멕시칸|음식$|^(죽|오리|회|굴,전복)$/.test(text)) return CURATED_CATEGORY_IMAGES.dining;
+  }
   return null;
 }
 

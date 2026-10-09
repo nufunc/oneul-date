@@ -59,6 +59,17 @@ const VENUE_CASES = [
   [spot(6, '볼더프렌즈 홍대점', '클라이밍'), 'evening', false],
   [spot(7, '요트탈래 부산본점', '수상스포츠'), 'evening', false],
   [spot(8, '영종진공원', '공원'), 'evening', false],
+  // 수집기의 세부 식음 카테고리(P-087): 카테고리만 볼 때 식음으로 잡고, 이름에서는 새로 잡지 않는다
+  [spot(9, '라 칸티나', '이탈리안'), 'evening', true],
+  [spot(11, '해오름', '한정식'), 'evening', true],
+  [spot(12, '백설대학', '분식'), 'day', true],
+  [spot(13, '청수물회', '회'), 'day', true],
+  [spot(14, '키사', '술집'), 'night', true],
+  [spot(15, '밥도사술도사', '실내포장마차'), 'night', true],
+  [spot(16, '아이스랩', '아이스크림'), 'day', true],
+  [spot(17, '국제시장 먹자골목', '관광지'), 'evening', false],
+  [spot(18, '한정식거리 입구', '관광지'), 'evening', false],
+  [spot(19, '구봉도 노을길', '계곡'), 'day', false],
 ];
 for (const [s, slot, expected] of VENUE_CASES) check(`업종 ${s.name}`, isFoodVenue(s, slot), expected);
 
@@ -108,6 +119,29 @@ for (const slots of SLOT_COMBOS) {
         console.error(`FAIL 업종 어긋남 ${slots} offset=${offset}: ${out}`);
       }
     }
+  }
+}
+// 세부 식음 카테고리의 총평: 같은 풀의 기존 카테고리(한식·칵테일바·카페)와 10패턴 모두에서 같은 문구를 받고, 비식음과는 달라진다(P-087)
+const DETAIL_FOODS = [['이탈리안', 'evening', '한식'], ['한정식', 'evening', '한식'], ['분식', 'day', '한식'], ['술집', 'night', '칵테일바'], ['아이스크림', 'day', '카페']];
+for (const [category, slot, reference] of DETAIL_FOODS) {
+  const otherSlot = slot === 'evening' ? 'day' : 'evening';
+  let differsFromNeutral = 0;
+  for (let offset = 0; offset < 10; offset++) {
+    const story = (cat) => {
+      const steps = [{ slot: otherSlot, spotId: 20 }, { slot, spotId: 100 + offset }];
+      const byId = new Map([[20, spot(20, '도두봉', '관광지')], [100 + offset, spot(100 + offset, '시험 가게', cat)]]);
+      return generateCourseStory(steps, byId, 'romantic', false);
+    };
+    sweeps++;
+    if (story(category) !== story(reference)) {
+      failed++;
+      console.error(`FAIL 식음 문구 어긋남 ${category} offset=${offset}: ${story(category)} != ${story(reference)}`);
+    }
+    if (story(category) !== story('관광지')) differsFromNeutral++;
+  }
+  if (differsFromNeutral === 0) {
+    failed++;
+    console.error(`FAIL 시험이 비어 있음 ${category}: 중립 문구와 다른 패턴이 없다`);
   }
 }
 if (failed) process.exit(1);
