@@ -19,6 +19,15 @@ from miners.kakaomap_miner import search_kakaomap_place
 from score_engine import calculate_hot_score
 from supabase_worker import is_noise_spot_name
 
+
+def keep_place_link(kakao_data: dict | None, existing_kakao) -> dict | None:
+    """검색이 폴백 링크(검색 바로가기)를 돌려줬는데 기존 값이 장소 링크면 기존 값을 그대로 쓴다.
+    검색 한 번의 일시 실패가 넣어 둔 장소 링크를 덮었다(P-123 소수서원 9479775)."""
+    if (isinstance(kakao_data, dict) and "/link/search/" in (kakao_data.get("url") or "")
+            and isinstance(existing_kakao, dict) and "place.map.kakao.com/" in (existing_kakao.get("url") or "")):
+        return existing_kakao
+    return kakao_data
+
 def run_social_enrichment(supabase_url: str, service_key: str, batch_size: int = 15):
     """
     metrics->last_synced_at이 없거나 오래된 스팟을 batch_size만큼 가져와 소셜 데이터를 보강합니다.
@@ -107,6 +116,7 @@ def run_social_enrichment(supabase_url: str, service_key: str, batch_size: int =
             existing_social = s.get("social_links") or {}
             kakao_locked = isinstance(existing_social.get("kakaomap"), dict) and existing_social["kakaomap"].get("locked") is True
             kakao_data = None if kakao_locked else search_kakaomap_place(name, " ".join((s.get("address") or "").split()[:2]) or location)
+            kakao_data = keep_place_link(kakao_data, existing_social.get("kakaomap"))
             time.sleep(0.5)
 
             # 이번 조회가 실패(None)해도 calculate_hot_score는 무조건 "영상
