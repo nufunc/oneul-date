@@ -2268,6 +2268,29 @@ button {
   .step-card .step-actions-right > button::after { inset: -9px -3px; }
 }
 
+/* 왼쪽 아이콘이 4개면(다시 추천 포함) 4+4가 390px에서 300px, 320px에서 252px로 막대를 넘어
+   왼쪽 묶음이 접혔다(P-110). 그 막대만 모든 폭에서 28px, 340px 이하에서 24px로 줄인다. */
+.step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)),
+.step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .step-actions-icons,
+.step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .step-actions-right { gap: 4px; }
+.step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .btn-action-icon,
+.step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .step-actions-right > a,
+.step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .step-actions-right > button {
+  width: 28px; height: 28px; min-width: 28px; min-height: 28px; padding: 0;
+}
+.step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .step-actions-right > a::after,
+.step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .step-actions-right > button::after { inset: -9px -3px; }
+@media (max-width: 340px) {
+  .step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .btn-action-icon,
+  .step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .step-actions-right > a,
+  .step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .step-actions-right > button {
+    width: 24px; height: 24px; min-width: 24px; min-height: 24px;
+  }
+  /* 24px 칩도 터치 영역 세로 44px를 지킨다 */
+  .step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .step-actions-right > a::after,
+  .step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .step-actions-right > button::after { inset: -11px -3px; }
+}
+
 /* 모든 플랫폼 미니멀 동일 크기 원형 아이콘 버튼 (32x32px 시각적 크기 + 44x44px 터치 히트 영역) */
 .btn-action-icon {
   width: 32px;
