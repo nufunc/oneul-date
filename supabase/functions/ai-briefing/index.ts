@@ -488,9 +488,10 @@ function buildSpotDescriptions(spots: SpotInput[]): string {
         const cb = spot.curation_badges;
         if (cb.blue_ribbon) badges.push(`블루리본 서베이(${cb.blue_ribbon})`);
         if (cb.michelin) badges.push(`미쉐린 가이드(${cb.michelin})`);
-        if (cb.tour_api) badges.push('한국관광공사 추천');
         if (cb.catchtable) badges.push('캐치테이블 인기');
         if (badges.length > 0) metaDetails.push(`인증: ${badges.join(', ')}`);
+        // TourAPI 수록은 인증이 아니라 출처라 인증 줄 밖에 둔다
+        if (cb.tour_api) metaDetails.push('출처: 한국관광공사 관광정보 수록');
       }
 
       // 시그니처 메뉴

@@ -2366,12 +2366,15 @@ function youtubeTitleNamesSpot(spot: Spot, yt?: { title?: string } | null): bool
 const youtubeLinkLabel = (spot: Spot, yt?: { title?: string } | null): string =>
   youtubeTitleNamesSpot(spot, yt) ? '영상' : '동네 코스 영상';
 
+// TourAPI 수집기가 이름·분류·지역을 이어 붙인 정형 요약. 옛 문구 '인증'과 새 문구 '관광정보'를 함께 잡는다
+const TOURAPI_TEMPLATE_SUMMARY = / — 한국관광공사 (인증|관광정보) .+ 명소 \(.+\)$/;
+
 /** 복사 텍스트용 스팟 한 줄 소개 정제 (영문 날것 태그 방지 & 한국어 보강) */
 function getCleanSpotSummary(spot: Spot): string {
   if (spot.summary && spot.summary.trim().length > 0) {
     const raw = spot.summary.trim();
-    // 영문 키워드 나열(예: 'trendy, romantic', 'campnic') 형태인지 검사
-    if (!/^[a-zA-Z0-9,\s_-]+$/.test(raw)) {
+    // 영문 키워드 나열(예: 'trendy, romantic', 'campnic') 형태인지, TourAPI 정형 요약인지 검사
+    if (!/^[a-zA-Z0-9,\s_-]+$/.test(raw) && !TOURAPI_TEMPLATE_SUMMARY.test(raw)) {
       return raw;
     }
   }
@@ -5113,9 +5116,9 @@ function cleanSpotSummary(spot: Spot): string {
   const raw = (spot.summary || '').trim().replace(/^(.{4,30}?),\s*\1(?=\s)/, '$1');
   const name = spot.name.trim();
 
-  // TourAPI 수집기가 이름·분류·지역을 이어 붙인 폴백 문장('엠버리조트 — 한국관광공사 인증 숙박 명소 (제주시)')은 이미 화면에 있는
+  // TourAPI 수집기가 이름·분류·지역을 이어 붙인 폴백 문장('엠버리조트 — 한국관광공사 관광정보 숙박 명소 (제주시)')은 이미 화면에 있는
   // 정보만 되풀이한다(열린 2,425곳). 아래 인증 뱃지 문구로 바꾸면 갑천에도 '대표 데이트 명소'가 붙어 과장이라 빈 값을 돌려준다
-  if (/ — 한국관광공사 인증 .+ 명소 \(.+\)$/.test(raw)) return '';
+  if (TOURAPI_TEMPLATE_SUMMARY.test(raw)) return '';
 
   // 비정상 케이스 판별 (영문 태그 나열, 스팟명과 동일, 너무 짧거나 무의미한 텍스트, 과거 단조로운 판박이 템플릿)
   const isBad =
@@ -5165,9 +5168,9 @@ function cleanSpotSummary(spot: Spot): string {
   }
   if (spot.curation_badges?.tour_api) {
     const tourPool = [
-      '한국관광공사가 공식 인증한 사계절 매력 넘치는 대한민국 대표 데이트 명소예요.',
-      '공인된 관광 명소로 언제 찾아도 계절의 아름다움을 오롯이 느낄 수 있는 곳이에요.',
-      '풍부한 문화와 아름다운 풍경을 품어 실패 없는 데이트를 약속하는 인증 스팟이에요.',
+      '한국관광공사 관광정보에 실린 곳으로 사계절 다른 매력을 즐길 수 있어요.',
+      '언제 찾아도 계절의 아름다움을 오롯이 느낄 수 있는 관광 명소예요.',
+      '풍부한 문화와 아름다운 풍경을 품어 함께 걷기 좋은 곳이에요.',
     ];
     return tourPool[idHash % tourPool.length];
   }
@@ -5465,7 +5468,7 @@ function renderStepCard(
     curationBadges.push(`<span class="badge-curation badge-michelin">⭐ 미쉐린</span>`);
   }
   if (spot.curation_badges?.tour_api) {
-    curationBadges.push(`<span class="badge-curation badge-tourapi">🏛️ 관광공사</span>`);
+    curationBadges.push(`<span class="badge-curation badge-tourapi">🏛️ 관광공사 정보</span>`);
   }
   if (spot.curation_badges?.catchtable) {
     curationBadges.push(`<span class="badge-curation badge-catchtable">🍷 캐치테이블</span>`);
@@ -7686,7 +7689,7 @@ function renderOverlayContent(): void {
       spot.curation_badges?.blue_ribbon ? `<span class="badge-card-curation blueribbon">🎀 블루리본 서베이</span>` : '',
       spot.curation_badges?.michelin ? `<span class="badge-card-curation michelin">⭐ 미쉐린 가이드</span>` : '',
       isHot ? `<span class="badge-card-curation hot">🔥 핫플레이스</span>` : '',
-      spot.curation_badges?.tour_api ? `<span class="badge-card-curation tourapi">🏛️ 한국관광공사 인증</span>` : '',
+      spot.curation_badges?.tour_api ? `<span class="badge-card-curation tourapi">🏛️ 관광공사 관광정보</span>` : '',
     ].filter(Boolean).join('');
 
     root.innerHTML = `

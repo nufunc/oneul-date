@@ -447,7 +447,7 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                     # 실제 요금은 detailIntro의 usefee 등에서 받을 수 있으나 지금은 비워 둔다(2026-09-27)
                     "price": (fee or {}).get("price"),
                     **({k: fee[k] for k in ("price_tier", "avg_price_per_person") if fee and fee.get(k) is not None}),
-                    "summary": f"{title} — 한국관광공사 인증 {ctype_name} 명소 ({area})",
+                    "summary": f"{title} — 한국관광공사 관광정보 {ctype_name} 명소 ({area})",
                     "category": ctype_name,
                     **({"closed_days": closed_days} if closed_days else {}),
                     **({"business_hours": hours} if hours else {}),
@@ -460,7 +460,7 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                     # 배열로 넣으면 spot.curation_badges?.tour_api 같은 접근이 전부
                     # undefined가 돼 배지 표시·인기도 점수 계산에서 조용히 빠진다.
                     "curation_badges": {
-                        "tour_api": "한국관광공사 인증",
+                        "tour_api": "한국관광공사 관광정보",
                     },
                     "parking_info": {
                         "type": "free" if "주차" in addr1 else "unknown",
