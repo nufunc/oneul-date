@@ -6610,8 +6610,8 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
           ${sum ? `<p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>` : fact ? `<p class="discovery-card-fact">${escapeHtml(fact)}</p>` : ''}
           <div class="discovery-card-actions">
             <button class="btn-discovery-save ${isSaved ? 'is-saved' : ''}" data-spot-id="${spot.id}" aria-label="${isSaved ? '보관함에서 제외' : '보관함에 담기'}" title="${isSaved ? '보관함에서 제외' : '보관함에 담기'}">${isSaved ? '❤️' : '🤍'}</button>
-            <button class="btn-build-anchor-course btn-discovery-action-build with-label" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">🚀 코스</button>
-            <a href="${escapeHtml(naverMapUrl(spot))}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map with-label" aria-label="${escapeHtml(spot.name)} 지도 열기" title="지도 열기">🗺️ 지도</a>
+            <button class="btn-build-anchor-course btn-discovery-action-build with-label" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">🚀 <span class="action-label">코스</span></button>
+            <a href="${escapeHtml(naverMapUrl(spot))}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map with-label" aria-label="${escapeHtml(spot.name)} 지도 열기" title="지도 열기">🗺️ <span class="action-label">지도</span></a>
             ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-yt" aria-label="${escapeHtml(spot.name)} ${youtubeTitleNamesSpot(spot, yt) ? '유튜브 핫클립' : '동네 코스 영상'}" title="${youtubeTitleNamesSpot(spot, yt) ? '유튜브 핫클립 시청' : '동네 코스 영상 시청'}">▶️</a>` : ''}
             ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-book" aria-label="${escapeHtml(spot.name)} 실시간 예약" title="실시간 예약">📅</a>` : ''}
           </div>
