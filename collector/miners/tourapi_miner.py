@@ -461,7 +461,6 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                     # undefined가 돼 배지 표시·인기도 점수 계산에서 조용히 빠진다.
                     "curation_badges": {
                         "tour_api": "한국관광공사 인증",
-                        **({"certified": ["한국관광 100선"]} if ctype_id == "12" else {}),
                     },
                     "parking_info": {
                         "type": "free" if "주차" in addr1 else "unknown",
