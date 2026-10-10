@@ -152,7 +152,7 @@ for (const region of REGIONS) {
 // 블로그 매거진 페이지를 sitemap에 등록
 sitemapUrls.push(`${SITE_URL}/blog/`);
 const blogPublicDir = path.resolve('public', 'blog');
-let blogPosts = ['gongju', 'gunsan', 'gyeongju', 'gangneung', 'seochon', 'suncheon', 'damyang', 'asan', 'danyang', 'pocheon', 'mungyeong', 'cheongsong'];
+let blogPosts = ['gongju', 'gunsan', 'gyeongju', 'gangneung', 'seochon', 'suncheon', 'damyang', 'asan', 'danyang', 'pocheon', 'mungyeong', 'cheongsong', 'taean'];
 if (fs.existsSync(blogPublicDir)) {
   const discovered = fs.readdirSync(blogPublicDir, { withFileTypes: true })
     .filter((d) => d.isDirectory() && fs.existsSync(path.join(blogPublicDir, d.name, 'index.html')))
