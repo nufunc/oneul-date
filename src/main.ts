@@ -3259,7 +3259,7 @@ interface AppState {
   spotCategory: string;
   /** 스팟 탐색 모드: GPS 반경 거리 필터 (단위: km, 기본 3.0km, 0은 전체) */
   spotDistanceRadius: number;
-  /** 스팟 탐색 모드: 정렬 (distance: 거리순, popular: 인기/핫플순, curation: 인증·평점순) */
+  /** 스팟 탐색 모드: 정렬 (distance: 거리순, popular: 인기/핫플순, curation: 평점순) */
   spotSort: 'distance' | 'popular' | 'curation';
   /** 스팟 탐색 모드: 한 번에 표시할 열(행) 개수 (2, 3, 5개행, 기본값: 3) */
   spotGridCols: 2 | 3 | 5;
@@ -4867,7 +4867,7 @@ function isSuperHotSpot(spot: Spot): boolean {
   else if (isBlueRibbon) curationScore = 90;
 
   // 3. 🗺️ 지도 평점 채널 점수 (0~100)
-  // 인기순·인증·평점순과 같이 리뷰 수로 보정한 평점을 쓴다. 원점수면 리뷰 0~4개짜리 ★5.0도 🔥였다
+  // 인기순·평점순과 같이 리뷰 수로 보정한 평점을 쓴다. 원점수면 리뷰 0~4개짜리 ★5.0도 🔥였다
   let mapScore = 0;
   const rating = trustedRating(spot);
   if (rating) {
@@ -4899,7 +4899,7 @@ function getSpotPopularityScore(spot: Spot): number {
   let score = spot.hot_score || 50;
 
   // 1. 카카오맵 평점 가산
-  // 인증·평점순과 같이 리뷰 수로 보정한 평점을 쓴다. 원점수면 리뷰 1개짜리 ★5가 덕수궁(★4.8, 1,566개)보다 앞섰다
+  // 평점순과 같이 리뷰 수로 보정한 평점을 쓴다. 원점수면 리뷰 1개짜리 ★5가 덕수궁(★4.8, 1,566개)보다 앞섰다
   const rating = spot.social_links?.kakaomap?.rating ? trustedRating(spot) : 0;
   if (rating) {
     if (rating >= 4.7) score += 35;
@@ -6317,7 +6317,7 @@ function renderSpotDiscovery(): void {
     matchedSpots = matchedSpots.filter((s) => passes(s) || (includeUnpricedDining && isUnpricedDining(s)));
   }
 
-  // 4. 정렬 적용 (거리순 / 핫플·인기순 / 인증·평점순)
+  // 4. 정렬 적용 (거리순 / 핫플·인기순 / 평점순)
   if (state.spotSort === 'distance') {
     // 📍 가까운 거리순 (가까운 곳부터, 동일 거리 시 인기 점수순)
     matchedSpots.sort((a, b) => {
@@ -6329,13 +6329,10 @@ function renderSpotDiscovery(): void {
       return getSpotPopularityScore(b) - getSpotPopularityScore(a);
     });
   } else if (state.spotSort === 'curation') {
-    // ⭐ 인증·평점순 (관광공사 인증 + 카카오맵 평점). michelin/blue_ribbon은
-    // 실제로 채우는 수집 경로가 없어 항상 0이라 점수식에서 제외했다.
-    // 평점은 리뷰 수로 보정한 값(trustedRating)을 쓴다. 원점수만 쓰면 리뷰 몇 개짜리 5.0점이 리뷰 수백 개의
-    // 4.6점보다 앞섰다. 인증은 평점이 비슷할 때만 앞서도록 0.2점만 더한다. 종전 +10점은 평점 차이(최대 약 10점)보다 커서
-    // 서울 상위 175위가 모두 인증 공공시설(구민회관 공연장 등)이었고 식당은 상위 50위에 없었다(2026-09-28)
-    const curationScore = (s: Spot) => trustedRating(s) + (s.curation_badges?.tour_api ? 0.2 : 0);
-    matchedSpots.sort((a, b) => curationScore(b) - curationScore(a));
+    // ⭐ 평점순 (카카오맵 평점). 평점은 리뷰 수로 보정한 값(trustedRating)을 쓴다. 원점수만 쓰면 리뷰 몇 개짜리
+    // 5.0점이 리뷰 수백 개의 4.6점보다 앞섰다. 관광공사 수록(tour_api)은 더하지 않는다. 0.2점 가산이 첫 화면 평점 폭
+    // (0.084점)보다 커서 전국 첫 화면 18장 중 16장이 수록 행이었고, 카드 평점으로는 순서를 설명할 수 없었다(P-116)
+    matchedSpots.sort((a, b) => trustedRating(b) - trustedRating(a));
   } else {
     // 🔥 핫플/인기순 (종합 인기도 점수 기준 정렬)
     matchedSpots.sort((a, b) => getSpotPopularityScore(b) - getSpotPopularityScore(a));
@@ -6436,7 +6433,7 @@ function renderSpotDiscovery(): void {
           <select class="discovery-sort-select" id="discovery-sort-select" aria-label="스팟 정렬">
             <option value="distance" ${state.spotSort === 'distance' ? 'selected' : ''}>${userCoords && !discoveryQueryOrigin ? '📍 가까운 거리순' : `📍 ${escapeHtml(discoveryQueryOrigin ?? distanceBasisLabel())} 중심 거리순`}</option>
             <option value="popular" ${state.spotSort === 'popular' ? 'selected' : ''}>🔥 핫플/인기순</option>
-            <option value="curation" ${state.spotSort === 'curation' ? 'selected' : ''}>⭐ 인증·평점순</option>
+            <option value="curation" ${state.spotSort === 'curation' ? 'selected' : ''}>⭐ 평점순</option>
           </select>
         </div>
       </div>
@@ -6538,7 +6535,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
         ? `📍 ${(spot._dist * 1000).toFixed(0)}m`
         : `📍 ${spot._dist.toFixed(1)}km`
       : `📍 ${escapeHtml(spot.area || spot.region || '')}`;
-  // 인증·평점순일 때는 정렬 근거가 보이도록 평점 배지를 따로 단다. 거리 배지에 붙이면 두 줄로 커져
+  // 평점순일 때는 정렬 근거가 보이도록 평점 배지를 따로 단다. 거리 배지에 붙이면 두 줄로 커져
   // 오른쪽 위 핫플 배지에 가려졌다
   const km = spot.social_links?.kakaomap;
   const ratingBadge = state.spotSort === 'curation' && km?.rating
