@@ -431,6 +431,14 @@ def derive_region_area(address):
     return (region, None)
 
 
+def same_region_area(a, b):
+    """derive_region_area 결과 두 개가 같은 곳을 가리키는가. 권역을 정할 수 없으면 같은 곳으로 보고,
+    시군구를 정할 수 없으면 권역만 비교한다. 권역만 비교하면 담양군과 광주 서구가 같은 호남이 된다(P-112)"""
+    if not a[0] or not b[0]:
+        return True
+    return a[0] == b[0] and (not a[1] or not b[1] or a[1] == b[1])
+
+
 _ADDR_TAIL_TOKEN_RE = re.compile(
     r'^(지하)?\d+층$|^B\d+.*$|^\d+호$|^\d+동$|'
     r'^.*(빌딩|타워|센터|플라자|프라자|스퀘어|하우스|맨션|파크|몰|상가)$'
@@ -1176,11 +1184,12 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50, ids=None):
                 return not any(pat.search(str(p.get("category") or "")) for pat in SLOT_NONSPOT_RE)
             # 행 주소의 권역과 다른 권역 결과는 이름이 포함 관계여도 같은 곳으로 보지 않는다. 종전에는 '베르트'(광주 동명동)가
             # 대구 '풀베르트', 'LSC'(광주)가 대전 'lsc공방'에 이어져 좌표·권역·카테고리가 그쪽으로 바뀌었다(2026-09-29 18곳)
-            addr_reg = derive_region_area(fix_garbled_sido_prefix(addr))[0] if addr else None
+            # 같은 권역 안에서도 시군구가 다르면 다른 곳으로 본다(P-112: 담양 서플라이가 광주 서구 카페 좌표를 받았다)
+            addr_ra = derive_region_area(fix_garbled_sido_prefix(addr)) if addr else (None, None)
+            addr_reg = addr_ra[0]
 
             def _same_region(p):
-                p_reg = derive_region_area(fix_garbled_sido_prefix(p.get("roadAddress") or p.get("address")))[0]
-                return not addr_reg or not p_reg or p_reg == addr_reg
+                return same_region_area(addr_ra, derive_region_area(fix_garbled_sido_prefix(p.get("roadAddress") or p.get("address"))))
             matched = next((p for p in places if _spot_like(p) and _same_region(p)
                             and (place_name_matches(name, p.get("name")) or same_place_by_address(name, addr, p))), None)
             best_place = matched or next((p for p in places if _spot_like(p)), None)
@@ -1200,10 +1209,10 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50, ids=None):
                         for rp in retry_places:
                             r_addr = fix_garbled_sido_prefix(rp.get("roadAddress") or rp.get("address"))
                             if r_addr:
-                                r_reg, _ = derive_region_area(r_addr)
+                                r_ra = derive_region_area(r_addr)
                                 # 이름이 맞는 결과로만 바꾼다. 종전에는 권역만 맞으면 이름이 다른 가게로 바꾸고도
                                 # trusted가 True로 남아 그 가게 속성이 옮겨 붙을 수 있었다(2026-09-27 코드 판독)
-                                if r_reg == reg and place_name_matches(name, rp.get("name")):
+                                if r_ra[0] == reg and same_region_area(addr_ra, r_ra) and place_name_matches(name, rp.get("name")):
                                     top = rp
                                     road_addr = r_addr
                                     trusted = True
