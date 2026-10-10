@@ -1287,8 +1287,11 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50, ids=None):
 
             # [Region & Location Healing] 검증된 주소를 근거로 region/area/location 오염을 교정한다.
             # 기존 값이 이미 있어도 주소 근거가 있으면 덮어쓴다(도출 실패 시에만 보존).
-            if road_addr:
-                d_region, d_area = derive_region_area(road_addr)
+            # 근거는 행 주소이고 결과 주소는 행 주소가 없을 때만 쓴다. 결과 주소를 쓰면 같은 권역 다른 시군구의
+            # 같은 이름 장소(부산진구 오리진)로 행 area가 바뀌었다(P-120: 10-06~10-09 24곳)
+            heal_addr = (fix_garbled_sido_prefix(addr) or road_addr) if road_addr else ""
+            if heal_addr:
+                d_region, d_area = derive_region_area(heal_addr)
                 if d_region or d_area:
                     old_region = spot.get("region")
                     old_area = spot.get("area")
@@ -1311,7 +1314,7 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50, ids=None):
                         print(
                             f"  🔧 [Region & Location Fix] id={s_id} "
                             f"'{old_loc or '-'}' → '{calc_loc}' "
-                            f"({road_addr})"
+                            f"({heal_addr})"
                         )
 
             # [Slot Healing] 네이버 공식 카테고리를 근거로 slot 오염 및 누락 교정

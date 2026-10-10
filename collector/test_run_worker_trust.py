@@ -135,6 +135,24 @@ def test_other_province_name_hit_is_not_trusted():
     assert _run([right], spot).get("region") == "호남"
 
 
+def test_same_region_other_area_name_hit_does_not_change_area():
+    # 행 주소가 수영구인데 부산진구 '오리진origin'의 주소로 area가 바뀌었다(P-120: 927 오리진 등 24곳)
+    spot = dict(SPOT, id=927, name="오리진", address="부산 수영구 광안해변로278번길 42", region="영남", area="수영구",
+                location="영남 수영구", category="카페", slot="day")
+    other = {"id": "2", "provider": "kakao", "name": "오리진origin", "roadAddress": "부산 부산진구 전포대로186번길 45",
+             "category": "카페", "x": "129.06", "y": "35.15", "thumUrl": None}
+    patch = _run([other], spot)
+    assert "area" not in patch and "location" not in patch and "verified" not in patch
+    # 매칭 판정이 권역만 비교하던 때(P-112 이전)로 느슨해져도 area는 행 주소를 따른다
+    orig = w.same_region_area
+    w.same_region_area = lambda a, b: not a[0] or not b[0] or a[0] == b[0]
+    try:
+        patch = _run([other], spot)
+    finally:
+        w.same_region_area = orig
+    assert patch.get("verified") is True and "area" not in patch and "location" not in patch, patch
+
+
 def test_ids_targets_only_those_rows_without_cooldown():
     # 지점을 옮긴 행을 다음 순환까지 기다리지 않고 바로 보강한다(P-065)
     urls = []
