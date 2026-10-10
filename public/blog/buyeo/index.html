@@ -179,70 +179,25 @@
     }
 
     /* 코스 요약 박스 */
-    .course-summary-card {
-      background: var(--bg-card);
-      border: 1px solid var(--color-accent-border);
-      border-radius: 14px;
-      padding: 22px;
-      margin-bottom: 38px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    .timeline-card {
+      background: #fafaf9;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin: 24px 0 32px;
+      font-size: 15px;
+      line-height: 1.5;
+      color: #334155;
     }
-    .course-summary-title {
-      font-size: 16px;
-      font-weight: 800;
-      color: var(--color-accent);
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .timeline {
-      list-style: none;
-      position: relative;
-      padding-left: 18px;
-    }
-    .timeline::before {
-      content: "";
-      position: absolute;
-      left: 4px;
-      top: 6px;
-      bottom: 6px;
-      width: 2px;
-      background: var(--color-accent-border);
-    }
-    .timeline-item {
-      position: relative;
-      margin-bottom: 16px;
-      font-size: 14.5px;
-    }
-    .timeline-item:last-child {
-      margin-bottom: 0;
-    }
-    .timeline-item::before {
-      content: "";
-      position: absolute;
-      left: -18px;
-      top: 7px;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--color-accent);
-      border: 2px solid #ffffff;
-      box-shadow: 0 0 0 1px var(--color-accent);
-    }
-    .timeline-time {
-      font-weight: 700;
-      color: var(--color-accent);
-      margin-right: 6px;
-    }
-    .timeline-name {
-      font-weight: 800;
-      color: var(--color-primary);
-    }
-    .timeline-desc {
-      color: var(--color-text-sub);
-      font-size: 13.5px;
-      margin-top: 2px;
+    .tl-act { font-weight: 700; font-size: 13px; color: #64748b; margin: 18px 0 8px; }
+    .tl-act:first-child { margin-top: 0; }
+    .tl-step { display: flex; gap: 12px; align-items: baseline; padding: 6px 0; }
+    .tl-time { flex: none; min-width: 46px; font-weight: 700; font-variant-numeric: tabular-nums; color: #b45309; }
+    .tl-place { font-weight: 700; color: #1e293b; }
+    .tl-note { display: block; font-size: 13px; color: #64748b; margin-top: 2px; }
+    .tl-move { font-size: 12.5px; color: #94a3b8; padding: 0 0 0 58px; }
+    @media (max-width: 640px) {
+      .timeline-card { padding: 14px 16px; }
     }
 
     /* 본문 섹션 */
@@ -416,43 +371,29 @@
 
     <!-- 대표 사진: 백마강 유람선에서 올려다본 낙화암 절벽 파노라마 -->
     <div class="hero-img-wrap">
-      <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/11bcec10885f2ff77ef75bf96f30235428bc4d54?original" alt="백마강 유람선 물길 위에서 올려다본 부소산성 낙화암 수직 기암절벽과 백화정 전경" class="hero-img">
-      <div class="hero-caption">백마강 유람선 물길 위에서 올려다본 부소산성 낙화암 수직 기암절벽과 백화정 전경</div>
+      <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/11bcec10885f2ff77ef75bf96f30235428bc4d54?original" alt="낙화암 절벽과 백마강 전경" class="hero-img">
+      <div class="hero-caption">낙화암 절벽과 백마강 전경</div>
     </div>
 
     <!-- 도입부 -->
     <p>
-      찬란했던 백제 사비 시대의 숨결이 깃든 충남 부여는 10월의 맑은 가을바람과 함께 호젓하게 걷기 좋은 역사와 자연의 도시입니다. 삼국사기에 백제 무왕이 궁궐 남쪽에 못을 파고 버드나무를 심었다는 기록이 남아 있는 궁남지에서 가을 연못 둘레길을 걷고, 사비 도읍기 중심 사찰터인 정림사지에서 국보 오층석탑의 단아한 비례감을 마주해요. 점심으로는 백마강 구드래나루터 앞 구드래돌쌈밥에서 향긋한 연잎밥과 돌판 불고기를 즐긴 뒤, 유네스코 세계유산 부소산성 솔숲 흙길을 걸어 백마강 절벽 위 낙화암과 백화정에 오르는 당일 백제 힐링 코스예요.
+      찬란했던 백제 사비 시대의 숨결이 깃든 충남 부여는 10월의 맑은 가을바람과 함께 호젓하게 걷기 좋은 역사와 자연의 도시입니다. 삼국사기에 백제 무왕이 궁궐 남쪽에 못을 파고 버드나무를 심었다는 기록이 남아 있는 궁남지에서 가을 연못 둘레길을 걷고, 사비 도읍기 중심 사찰터인 정림사지에서 국보 오층석탑의 단아한 비례감을 마주해요. 점심으로는 백마강 구드래나루터 앞 구드래돌쌈밥에서 향긋한 연잎밥과 돌판 요리를 즐긴 뒤, 유네스코 세계유산 부소산성 솔숲 흙길을 걸어 백마강 절벽 위 낙화암과 백화정에 오르는 당일 백제 힐링 코스예요.
     </p>
 
     <!-- 코스 타임라인 요약 카드 -->
-    <section class="course-summary-card">
-      <div class="course-summary-title">
-        🧭 부여 당일치기 가을 백제 힐링 추천 동선
-      </div>
-      <ul class="timeline">
-        <li class="timeline-item">
-          <span class="timeline-time">10:30</span>
-          <span class="timeline-name">부여 궁남지 포룡정 연못 산책</span>
-          <div class="timeline-desc">사적 제135호 • 수양버들과 연못 둘레길, 포룡정 목교 산책 (입장료 및 주차 무료)</div>
-        </li>
-        <li class="timeline-item">
-          <span class="timeline-time">11:40</span>
-          <span class="timeline-name">정림사지 & 오층석탑 관람</span>
-          <div class="timeline-desc">차량 이동 약 2분 (직선거리 약 1.05km) • 국보 제9호 정림사지 오층석탑과 박물관 관람 (무료 입장)</div>
-        </li>
-        <li class="timeline-item">
-          <span class="timeline-time">12:50</span>
-          <span class="timeline-name">구드래돌쌈밥 점심 식사</span>
-          <div class="timeline-desc">차량 이동 약 2분 (직선거리 약 0.76km) • 구드래나루터 앞 연잎밥쌈밥 또는 돌쌈밥 별미</div>
-        </li>
-        <li class="timeline-item">
-          <span class="timeline-time">14:10</span>
-          <span class="timeline-name">부소산성 솔숲길 & 낙화암 조망</span>
-          <div class="timeline-desc">도보 이동 약 6분 (직선거리 약 0.43km) • 사적 제5호 부소산성 숲길 트레킹 및 백마강 낙화암 조망 (성인 2,000원)</div>
-        </li>
-      </ul>
-    </section>
+    <div class="timeline-card">
+      <div class="tl-act">오전 1막: 백제 최초의 인공 연못과 정원 산책</div>
+      <div class="tl-step"><span class="tl-time">10:30</span><div><span class="tl-place">부여 궁남지</span><span class="tl-note">사적 제135호 • 수양버들과 연못 둘레길, 포룡정 목교 산책 (입장료 무료)</span></div></div>
+      <div class="tl-move">↓ 차량 2분 (직선거리 1.05km)</div>
+      <div class="tl-act">오전 2막: 사비 백제의 정수와 국보 석탑</div>
+      <div class="tl-step"><span class="tl-time">11:40</span><div><span class="tl-place">정림사지 & 오층석탑</span><span class="tl-note">국보 제9호 정림사지 오층석탑과 박물관 관람 (관람료 무료)</span></div></div>
+      <div class="tl-move">↓ 차량 2분 (직선거리 0.76km)</div>
+      <div class="tl-act">점심 3막: 구드래나루터 앞 향토 미식</div>
+      <div class="tl-step"><span class="tl-time">12:50</span><div><span class="tl-place">구드래돌쌈밥</span><span class="tl-note">구드래나루터 앞 연잎밥쌈밥정식 또는 돌완자쌈밥정식</span></div></div>
+      <div class="tl-move">↓ 도보 6분 (직선거리 0.43km)</div>
+      <div class="tl-act">오후 4막: 세계유산 솔숲길과 백마강 절경</div>
+      <div class="tl-step"><span class="tl-time">14:10</span><div><span class="tl-place">부소산성 & 낙화암</span><span class="tl-note">사적 제5호 솔숲 흙길 트레킹 및 백마강 낙화암 조망 (성인 2,000원)</span></div></div>
+    </div>
 
     <!-- 1막: 궁남지 -->
     <h2>오전 10:30 — 백제 최초의 인공 정원 연못, 부여 궁남지</h2>
@@ -460,7 +401,7 @@
       부여 여행의 시작은 백제 무왕 35년(634년)에 창건된 우리나라 최고(最古)의 인공 연못 궁남지(사적 제135호)입니다. 경주 안압지(동궁과 월지)보다 약 40년 앞서 조성된 궁남지는 궁궐 남쪽에 20여 리 밖에서 물을 끌어들여 만들었다는 역사적 기록을 간직하고 있어요.
     </p>
     <p>
-      여름철 화려했던 연꽃 축제가 지나간 10월의 궁남지는 한층 차분하고 서정적인 가을 무드로 채워집니다. 연못가를 따라 길게 늘어진 수양버들이 바람에 낭만적으로 흔들리고, 연못 한가운데 뜬 섬 위에는 백제 무왕과 신라 선화공주의 서동요 전설이 깃든 정자 '포룡정'이 자리 잡고 있어요. 목조 구름다리를 건너 포룡정에 앉아 잔잔한 수면에 비치는 가을 하늘과 구름의 반영을 감상하며 여유로운 아침 산책을 즐겨보세요.
+      가을의 궁남지는 한층 차분하고 서정적인 계절 무드로 채워집니다. 연못가를 따라 길게 늘어진 수양버들이 바람에 낭만적으로 흔들리고, 연못 한가운데 뜬 섬 위에는 백제 무왕과 신라 선화공주의 서동요 전설이 깃든 정자 '포룡정'이 자리 잡고 있어요. 목조 구름다리를 건너 포룡정에 앉아 잔잔한 수면에 비치는 가을 하늘과 구름의 반영을 감상하며 여유로운 산책을 즐겨보세요.
     </p>
 
     <!-- 사진: 궁남지 연못 -->
@@ -472,9 +413,9 @@
     <div class="tip-box">
       <strong>💡 궁남지 관람 안내</strong><br>
       • 위치: 충청남도 부여군 부여읍 궁남로 52 (동남리 117 일대)<br>
-      • 입장료: 무료 (24시간 상시 개방)<br>
-      • 주차 안내: 궁남지 동문 및 서문 공영주차장 무료 이용 가능 (서문 주차장이 비교적 여유로움)<br>
-      • 관람 팁: 연못 둘레길 산책로는 평탄한 흙길과 데크로 이루어져 있어 약 40~50분 동안 호젓하게 걷기 좋아요.
+      • 관람료: 무료 (연중무휴, ktriptips 2026 갱신)<br>
+      • 주차 안내: 주차 가능 (무료)<br>
+      • 관람 팁: 연못 둘레길 산책로는 평탄한 흙길과 데크로 이루어져 있어 호젓하게 걷기 좋아요.
     </div>
 
     <div class="map-btn-wrap">
@@ -495,10 +436,9 @@
     <div class="tip-box">
       <strong>💡 정림사지 & 박물관 관람 안내</strong><br>
       • 위치: 충청남도 부여군 부여읍 정림로 83<br>
-      • 관람료: 무료 (현재 경관정비 기간으로 전 관람객 무료 입장 중)<br>
-      • 관람 시간: 하절기(3~10월) 09:00~18:00 (입장 마감 17:00 / 정림사지 야외 구역은 야간 개방)<br>
-      • 휴관 안내: 정림사지박물관은 매주 월요일 휴관 (야외 정림사지 석탑은 연중무휴 개방)<br>
-      • 주차 안내: 정림사지 전용 공영주차장 무료 이용 가능
+      • 관람료: 무료 (ktriptips 2026-03-19 갱신)<br>
+      • 관람 시간: 3~10월 09:00~18:00 / 11~2월 09:00~17:00 (연중무휴)<br>
+      • 주차 안내: 주차 무료 (ktriptips 2026-03-19 갱신)
     </div>
 
     <div class="map-btn-wrap">
@@ -510,10 +450,10 @@
     <!-- 3막: 구드래돌쌈밥 -->
     <h2>오후 12:50 — 구드래나루터 앞 구드래돌쌈밥 연잎밥 정식</h2>
     <p>
-      역사 유적 탐방 후 백마강 구드래나루터 초입(직선거리 약 0.76km)으로 이동해 부여의 대표 향토 미식인 '구드래돌쌈밥'에서 점심 식사를 즐깁니다. 고풍스러운 한옥 인테리어로 꾸며진 이곳은 신선한 쌈 채소와 정갈한 돌솥 요리로 오랜 사랑을 받아온 식당이에요.
+      역사 유적 탐방 후 백마강 구드래나루터 초입(직선거리 약 0.76km)으로 이동해 부여의 대표 향토 미식인 '구드래돌쌈밥'에서 점심 식사를 즐깁니다. 신선한 쌈 채소와 정갈한 돌솥 요리로 오랜 사랑을 받아온 식당이에요.
     </p>
     <p>
-      부여의 상징인 연꽃 잎에 찹쌀, 흑미, 잣, 대추를 넣고 정성스럽게 쪄낸 연잎밥 정식(1인 약 22,000원~28,000원 선)은 은은한 연잎 향과 찰진 밥맛이 일품이에요. 지글지글 끓는 돌판 위에 양념 불고기와 아삭한 부추가 듬뿍 올라간 돌쌈밥(1인 약 18,000원~23,000원 선)도 신선한 유기농 쌈 채소와 함께 푸짐하게 즐길 수 있는 인기 메뉴예요.
+      부여의 상징인 연꽃 잎에 밥을 넣고 정성스럽게 쪄낸 연잎밥쌈밥정식(1인 22,000원)은 은은한 연잎 향과 찰진 밥맛이 일품이에요. 지글지글 끓는 돌판 위에 양념 고기와 아삭한 부추가 듬뿍 올라간 돌완자쌈밥정식(1인 18,000원)도 신선한 쌈 채소와 함께 푸짐하게 즐길 수 있는 인기 메뉴예요.
     </p>
 
     <!-- 사진: 구드래돌쌈밥 요리 -->
@@ -525,9 +465,8 @@
     <div class="tip-box">
       <strong>💡 구드래돌쌈밥 이용 안내</strong><br>
       • 위치: 충청남도 부여군 부여읍 나루터로 31 (구드래나루터 앞)<br>
-      • 대표 메뉴: 돌완자/불고기 돌쌈밥 (1인 약 18,000원~23,000원) / 연잎밥 정식 (1인 약 22,000원~28,000원)<br>
-      • 영업 시간: 11:00~21:00 (라스트 오더 20:00)<br>
-      • 주차 안내: 매장 전용 주차장 및 구드래나루터 공영주차장 무료 이용 가능
+      • 대표 메뉴: 돌완자쌈밥정식 (1인 18,000원) / 연잎밥쌈밥정식 (1인 22,000원) (DB 3915 기준)<br>
+      • 안내 팁: 구드래나루터 선착장 바로 앞에 위치해 식사 후 부소산성이나 강변 산책으로 이어가기 좋아요.
     </div>
 
     <div class="map-btn-wrap">
@@ -542,7 +481,7 @@
       식사를 마친 뒤 걸어서 약 6분(직선거리 약 0.43km) 거리에 있는 부소산성 구문 매표소로 향합니다. 사비 백제의 최후의 보루이자 왕궁의 배후 산성이었던 부소산성(사적 제5호)은 울창한 솔숲 흙길이 잘 가꾸어져 있어 사계절 트레킹 코스로도 명성이 높아요.
     </p>
     <p>
-      매표소를 지나 완만한 능선 숲길을 따라 삼충사, 영일루, 반월루를 거쳐 약 20~25분 걸어 오르면 백마강이 시원하게 굽어보이는 수직 기암절벽 '낙화암(타사암)'에 도달합니다. 절벽 끝 바위 위에는 백제 여인들의 넋을 기리기 위해 1929년에 세워진 육각 정자 '백화정'이 자리 잡고 있어요. 정자 난간에 서면 유유히 흐르는 백마강 물길과 강 건너 평야가 파노라마로 펼쳐지며, 절벽 아래로는 백마강 유람선 황포돛배가 유유히 물살을 가르는 고즈넉한 풍경을 만날 수 있어요.
+      매표소를 지나 완만한 능선 숲길을 따라 삼충사, 영일루, 반월루를 거쳐 걸어 오르면 백마강이 시원하게 굽어보이는 수직 기암절벽 '낙화암(타사암)'에 도달합니다. 절벽 끝 바위 위에는 백제 여인들의 넋을 기리기 위해 1929년에 세워진 육각 정자 '백화정'이 자리 잡고 있어요. 정자 난간에 서면 유유히 흐르는 백마강 물길과 강 건너 평야가 파노라마로 펼쳐지며, 절벽 아래로는 백마강 유람선 황포돛배가 유유히 물살을 가르는 고즈넉한 풍경을 만날 수 있어요.
     </p>
 
     <!-- 사진: 부소산성 매표소 -->
@@ -554,10 +493,10 @@
     <div class="tip-box">
       <strong>💡 부소산성 & 낙화암 관람 안내</strong><br>
       • 위치: 충청남도 부여군 부여읍 부소산로 39 (구문 매표소)<br>
-      • 공식 관람료: 성인 2,000원 / 청소년 1,100원 / 어린이 1,000원<br>
-      • 관람 시간: 하절기(3~10월) 09:00~18:00 (동절기는 17:00까지)<br>
-      • 추천 트레킹 동선: 구문 매표소 → 삼충사 → 영일루 → 반월루 → 사자루 → 낙화암(백화정) → 고란사약수터 (왕복 약 1시간 30분 안팎)<br>
-      • 하산 팁: 낙화암 관람 후 고란사 선착장에서 백마강 유람선(편도 성인 6,000원~7,000원 선)을 타고 구드래나루터로 뱃길 복귀하는 이색 동선도 추천해요.
+      • 공식 관람료: 성인 2,000원 / 청소년 1,100원 / 어린이 1,000원 (ktriptips 2026-02-09 갱신)<br>
+      • 관람 시간: 3~10월 09:00~18:00 / 11~2월 09:00~17:00<br>
+      • 추천 트레킹 동선: 구문 매표소 → 삼충사 → 영일루 → 반월루 → 사자루 → 낙화암(백화정) → 고란사약수터<br>
+      • 백마강 유람선 팁: 낙화암 관람 후 고란사 선착장에서 백마강 유람선(구드래~고란사 성인 편도 7,000원, ktriptips 2025-11-17 갱신)을 타고 구드래나루터로 뱃길 복귀하는 이색 동선도 추천해요.
     </div>
 
     <div class="map-btn-wrap">
@@ -591,41 +530,29 @@
             <td>관람료</td>
             <td>부여 궁남지</td>
             <td>0원 (무료)</td>
-            <td>공원 산책로 상시 무료 개방</td>
-          </tr>
-          <tr>
-            <td>주차료</td>
-            <td>궁남지 공영주차장</td>
-            <td>0원 (무료)</td>
-            <td>동문/서문 공영주차장 무료</td>
+            <td>공원 산책로 무료 개방 (ktriptips 2026 갱신)</td>
           </tr>
           <tr>
             <td>관람료</td>
             <td>부여 정림사지 & 박물관</td>
             <td>0원 (무료)</td>
-            <td>현재 경관정비 기간 무료 관람 중</td>
+            <td>ktriptips 2026-03-19 갱신 기준 무료 관람</td>
           </tr>
           <tr>
             <td>점심 식사</td>
             <td>구드래돌쌈밥</td>
-            <td>약 36,000원 ~ 46,000원</td>
-            <td>돌쌈밥 2인(36,000원) 또는 연잎밥 쌈밥정식 2인(44,000~46,000원)</td>
+            <td>약 36,000원 ~ 44,000원</td>
+            <td>돌완자쌈밥정식 2인(36,000원) ~ 연잎밥쌈밥정식 2인(44,000원) (DB 3915 기준)</td>
           </tr>
           <tr>
             <td>관람료</td>
             <td>부소산성 (낙화암 포함)</td>
             <td>4,000원</td>
-            <td>성인 2인 (1인당 2,000원 공식 요금)</td>
-          </tr>
-          <tr>
-            <td>주차료</td>
-            <td>부소산성 공영주차장</td>
-            <td>0원 (무료)</td>
-            <td>부소산성 입구 공영주차장 무료</td>
+            <td>성인 2인 (1인당 2,000원, ktriptips 2026-02-09 갱신)</td>
           </tr>
           <tr>
             <th colspan="2" style="background:#f5f5f4; font-weight:800;">총 예상 경비 (2인 기준)</th>
-            <th colspan="2" style="background:#f5f5f4; font-weight:800; color:var(--color-accent);">약 40,000원 ~ 50,000원</th>
+            <th colspan="2" style="background:#f5f5f4; font-weight:800; color:var(--color-accent);">약 40,000원 ~ 48,000원</th>
           </tr>
         </tbody>
       </table>

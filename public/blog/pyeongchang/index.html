@@ -179,70 +179,25 @@
     }
 
     /* 코스 요약 박스 */
-    .course-summary-card {
-      background: var(--bg-card);
-      border: 1px solid var(--color-accent-border);
-      border-radius: 14px;
-      padding: 22px;
-      margin-bottom: 38px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    .timeline-card {
+      background: #fafaf9;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin: 24px 0 32px;
+      font-size: 15px;
+      line-height: 1.5;
+      color: #334155;
     }
-    .course-summary-title {
-      font-size: 16px;
-      font-weight: 800;
-      color: var(--color-accent);
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .timeline {
-      list-style: none;
-      position: relative;
-      padding-left: 18px;
-    }
-    .timeline::before {
-      content: "";
-      position: absolute;
-      left: 4px;
-      top: 6px;
-      bottom: 6px;
-      width: 2px;
-      background: var(--color-accent-border);
-    }
-    .timeline-item {
-      position: relative;
-      margin-bottom: 16px;
-      font-size: 14.5px;
-    }
-    .timeline-item:last-child {
-      margin-bottom: 0;
-    }
-    .timeline-item::before {
-      content: "";
-      position: absolute;
-      left: -18px;
-      top: 7px;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--color-accent);
-      border: 2px solid #ffffff;
-      box-shadow: 0 0 0 1px var(--color-accent);
-    }
-    .timeline-time {
-      font-weight: 700;
-      color: var(--color-accent);
-      margin-right: 6px;
-    }
-    .timeline-name {
-      font-weight: 800;
-      color: var(--color-primary);
-    }
-    .timeline-desc {
-      color: var(--color-text-sub);
-      font-size: 13.5px;
-      margin-top: 2px;
+    .tl-act { font-weight: 700; font-size: 13px; color: #64748b; margin: 18px 0 8px; }
+    .tl-act:first-child { margin-top: 0; }
+    .tl-step { display: flex; gap: 12px; align-items: baseline; padding: 6px 0; }
+    .tl-time { flex: none; min-width: 46px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--color-accent); }
+    .tl-place { font-weight: 700; color: #1e293b; }
+    .tl-note { display: block; font-size: 13px; color: #64748b; margin-top: 2px; }
+    .tl-move { font-size: 12.5px; color: #94a3b8; padding: 0 0 0 58px; }
+    @media (max-width: 640px) {
+      .timeline-card { padding: 14px 16px; }
     }
 
     /* 본문 섹션 */
@@ -410,7 +365,7 @@
       </div>
       <h1 class="article-title">[평창] 오대산 월정사 전나무숲길에서 국보 팔각구층석탑, 오대산가마솥식당 산채정식과 대관령 삼양라운드힐 바람의 언덕까지</h1>
       <div class="article-meta">
-        글: 오늘 데이트 에디토리얼 팀 / 사진: 카카오맵 포토 리뷰 (이용자 실사) / 작성일: 2026. 10. 11.
+        글: 오늘 데이트 에디토리얼 팀 / 사진: 한국관광공사 TourAPI &amp; 카카오맵 포토 리뷰
       </div>
     </header>
 
@@ -426,33 +381,46 @@
     </p>
 
     <!-- 코스 타임라인 요약 카드 -->
-    <section class="course-summary-card">
-      <div class="course-summary-title">
-        🧭 평창 당일치기 가을 고원 힐링 추천 동선
+    <div class="timeline-card">
+      <div class="tl-act">오전 1막: 천년 전나무 숲길 산책</div>
+      <div class="tl-step">
+        <span class="tl-time">10:30</span>
+        <div>
+          <span class="tl-place">오대산 월정사 전나무숲길</span>
+          <span class="tl-note">일주문에서 금강교까지 이어지는 약 1km 흙길 산책로 (2023년 5월 이후 무료 입장)</span>
+        </div>
       </div>
-      <ul class="timeline">
-        <li class="timeline-item">
-          <span class="timeline-time">10:30</span>
-          <span class="timeline-name">오대산 월정사 전나무숲길</span>
-          <div class="timeline-desc">일주문에서 금강교까지 이어지는 약 1km 무장애 흙길 산책로 산책 (무료 입장)</div>
-        </li>
-        <li class="timeline-item">
-          <span class="timeline-time">11:30</span>
-          <span class="timeline-name">천년고찰 월정사 경내 관람</span>
-          <div class="timeline-desc">도보 연결 (직선거리 약 0.49km) • 국보 팔각구층석탑과 석조보살좌상, 적광전 관람</div>
-        </li>
-        <li class="timeline-item">
-          <span class="timeline-time">12:45</span>
-          <span class="timeline-name">오대산가마솥식당 점심 식사</span>
-          <div class="timeline-desc">차량 이동 약 3~4분 (직선거리 약 1.94km) • 오대산먹거리마을 산채정식 또는 산채비빔밥 별미</div>
-        </li>
-        <li class="timeline-item">
-          <span class="timeline-time">14:15</span>
-          <span class="timeline-name">대관령 삼양라운드힐 (삼양목장)</span>
-          <div class="timeline-desc">차량 이동 약 22~25분 (직선거리 약 10.44km) • 셔틀버스 순환, 동해전망대와 바람의 언덕 초원 트레킹</div>
-        </li>
-      </ul>
-    </section>
+      <div class="tl-move">도보 연결 (직선거리 약 0.68km)</div>
+
+      <div class="tl-act">오전 2막: 천년고찰과 국보 문화유산</div>
+      <div class="tl-step">
+        <span class="tl-time">11:30</span>
+        <div>
+          <span class="tl-place">월정사 경내 관람</span>
+          <span class="tl-note">국보 제48-1호 팔각구층석탑과 국보 제48-2호 석조보살좌상, 적광전 관람</span>
+        </div>
+      </div>
+      <div class="tl-move">차량 이동 약 3~4분 (직선거리 약 1.94km)</div>
+
+      <div class="tl-act">점심 3막: 오대산 로컬 산채 미식</div>
+      <div class="tl-step">
+        <span class="tl-time">12:45</span>
+        <div>
+          <span class="tl-place">오대산가마솥식당 점심 식사</span>
+          <span class="tl-note">오대산먹거리마을 산채정식 또는 산채비빔밥 별미</span>
+        </div>
+      </div>
+      <div class="tl-move">차량 이동 약 22~25분 (직선거리 약 10.44km)</div>
+
+      <div class="tl-act">오후 4막: 대관령 고원 초원 트레킹</div>
+      <div class="tl-step">
+        <span class="tl-time">14:15</span>
+        <div>
+          <span class="tl-place">대관령 삼양라운드힐 (삼양목장)</span>
+          <span class="tl-note">그린시즌 셔틀버스 순환, 동해전망대와 바람의 언덕 초원 트레킹</span>
+        </div>
+      </div>
+    </div>
 
     <!-- 1막: 오대산 국립공원 월정사 전나무숲길 -->
     <h2>오전 10:30 — 오대산 국립공원 월정사 전나무숲길</h2>
@@ -460,7 +428,7 @@
       평창 여행의 첫 여정은 한국 3대 전나무 숲 가운데 하나로 손꼽히는 오대산 국립공원 월정사 전나무숲길입니다. 일주문부터 금강교를 거쳐 월정사 경내 입구까지 약 1km에 걸쳐 이어지는 이 숲길에는 수령 80년에서 300년이 넘는 아름드리 전나무 1,700여 그루가 하늘을 찌를 듯 빽빽하게 솟아 있어요.
     </p>
     <p>
-      산림청과 국립공원공단 예보 기준에 따르면 오대산은 10월 초순 비로봉 등 고지대부터 단풍이 물들기 시작해 10월 중순경 하부 계곡과 전나무숲길 일대로 가을빛이 번져가요. 숲길 바닥은 고운 마사토 흙길로 평탄하게 정비되어 있어 유모차나 휠체어도 편안하게 이동할 수 있는 무장애 탐방로이며, 맨발 걷기를 즐기는 탐방객들도 쉽게 만날 수 있어요. 2006년 벼락을 맞아 쓰러진 뒤에도 숲의 일부로 자리를 지키는 '할아버지 쓰러진 전나무' 조형물도 인상적인 볼거리예요.
+      10월 중하순 가을이 깊어질수록 고지대부터 번져온 단풍빛이 하부 계곡과 전나무숲길 일대를 포근하게 물들여요. 숲길 바닥은 고운 마사토 흙길로 평탄하게 정비되어 있어 맨발 걷기를 즐기는 탐방객들도 쉽게 만날 수 있어요. 2006년 쓰러진 600년 된 '할아버지 쓰러진 전나무'도 자연의 시간과 순환을 보여주는 인상적인 볼거리예요.
     </p>
 
     <!-- 사진: 전나무숲길 -->
@@ -473,8 +441,8 @@
       <strong>💡 전나무숲길 관람 안내</strong><br>
       • 위치: 강원특별자치도 평창군 진부면 오대산로 374-8 (월정사 일주문~금강교)<br>
       • 입장료: 2023년 5월 문화재관람료 면제 조치 이후 무료 입장<br>
-      • 소요 시간: 일주문에서 월정사까지 편도 약 25~30분 소요 (왕복 약 1시간 안팎)<br>
-      • 주차 안내: 월정사 주차장(승용차 기준 5,000원~6,000원 선) 또는 오대산먹거리마을 인근 공용 주차 공간 이용 가능
+      • 산책로: 일주문에서 월정사까지 여유롭게 걸을 수 있는 평탄한 흙길 산책로<br>
+      • 주차 안내: 월정사 주차장 (중형차 1,000cc 이상 6,000원, 경차·전기차 3,000원, ktriptips 2026-06-19 갱신)
     </div>
 
     <div class="map-btn-wrap">
@@ -489,7 +457,7 @@
       전나무숲길이 끝나는 금강교를 건너면 신라 선덕여왕 12년(643년) 자장율사가 창건한 조계종 제4교구 본사 월정사 경내로 들어서게 됩니다. 오대산 동쪽 만월산 자락에 아늑하게 둘러싸인 월정사는 오랜 세월 불교 문화와 사색의 중심지로 사랑받아온 곳이에요.
     </p>
     <p>
-      경내 중심인 적광전 앞마당에 서면 국보 제48호로 지정된 '월정사 팔각구층석탑'이 웅장한 자태를 드러냅니다. 높이 약 15.2m에 이르는 이 석탑은 고려 전기를 대표하는 다각다층석탑으로, 세련된 조각과 우아한 비례감이 돋보여요. 탑 앞에는 공양을 올리는 형상의 보물 '석조보살좌상'이 마주 보고 있어 고요하면서도 신비로운 사찰의 정취를 더해줍니다.
+      경내 중심인 적광전 앞마당에 서면 국보 제48-1호로 지정된 '월정사 팔각구층석탑'이 웅장한 자태를 드러냅니다. 높이 약 15.2m에 이르는 이 석탑은 고려 전기를 대표하는 다각다층석탑으로, 세련된 조각과 우아한 비례감이 돋보여요. 탑 앞에는 공양을 올리는 형상의 국보 제48-2호 '석조보살좌상'이 마주 보고 있어 고요하면서도 신비로운 사찰의 정취를 더해줍니다.
     </p>
 
     <!-- 사진: 월정사 경내 -->
@@ -502,8 +470,8 @@
       <strong>💡 월정사 관람 안내</strong><br>
       • 위치: 강원특별자치도 평창군 진부면 오대산로 374-8<br>
       • 관람료: 무료 (사찰 경내 개방)<br>
-      • 주요 문화유산: 월정사 팔각구층석탑 (국보 제48호), 석조보살좌상 (보물), 적광전, 용금루<br>
-      • 관람 팁: 경내 찻집 '난다나'에서 오대산 숲을 바라보며 따뜻한 전통차를 즐길 수 있어요.
+      • 주요 문화유산: 월정사 팔각구층석탑 (국보 제48-1호), 석조보살좌상 (국보 제48-2호), 적광전, 용금루<br>
+      • 관람 팁: 경내 마당을 천천히 거닐며 천년 고찰의 고즈넉한 정취와 오대산 숲 풍경을 음미해보세요.
     </div>
 
     <div class="map-btn-wrap">
@@ -518,7 +486,7 @@
       월정사 경내 산책을 마친 뒤에는 차로 약 3~4분(직선거리 약 1.94km) 내려와 오대산먹거리마을에 자리한 '오대산가마솥식당'에서 점심 식사를 즐깁니다. 이곳은 오대산에서 채취한 다양한 제철 산나물과 향토 요리를 전문으로 선보이는 전통 식당이에요.
     </p>
     <p>
-      인기 대표 메뉴인 산채비빔밥(1인 13,000원)은 신선한 오대산 산나물과 볶은 고추장, 구수한 된장찌개가 곁들여져 정갈하고 담백한 풍미를 자랑해요. 조금 더 푸짐한 한 상을 원한다면 더덕구이와 황태구이, 계절 나물 찬이 풍성하게 차려지는 산채정식(1인 25,000원, 2인 이상 주문)을 추천해요. 겉은 바삭하고 속은 쫄깃한 메밀전병(10,000원)도 곁들이기 좋은 강원도 별미예요.
+      인기 대표 메뉴인 산채비빔밥과 더덕구이·황태구이가 함께 차려지는 산채정식 등 오대산의 청정한 계절 나물 반찬을 정갈하고 담백하게 맛볼 수 있어요. 구수한 된장찌개와 나물 요리가 어우러져 산행 후 든든한 한 끼 식사가 되어줘요.
     </p>
 
     <!-- 사진: 오대산가마솥식당 외관 -->
@@ -530,9 +498,8 @@
     <div class="tip-box">
       <strong>💡 오대산가마솥식당 이용 안내</strong><br>
       • 위치: 강원특별자치도 평창군 진부면 오대산로 152 (오대산먹거리마을 내)<br>
-      • 대표 메뉴: 산채비빔밥 13,000원 / 산채정식 25,000원 (더덕·황태구이 포함) / 메밀전병 10,000원<br>
-      • 주차 안내: 오대산먹거리마을 전용 공영 주차장 이용 가능<br>
-      • 식사 팁: 단풍 성수기 주말에는 대기가 발생할 수 있으니 12시 30분 전후 방문을 추천해요.
+      • 대표 메뉴: 산채정식, 산채비빔밥, 황태구이 등 (현장 메뉴 주문 기준)<br>
+      • 주차 안내: 오대산먹거리마을 공용 주차 공간 이용 가능
     </div>
 
     <div class="map-btn-wrap">
@@ -544,18 +511,17 @@
     <!-- 4막: 대관령 삼양라운드힐 -->
     <h2>오후 14:15 — 대관령 삼양라운드힐 (삼양목장) 바람의 언덕</h2>
     <p>
-      든든한 점심 식사 후 영동고속도로나 456번 지방도로를 타고 대관령면으로 약 22~25분(직선거리 약 10.44km) 이동해 '대관령 삼양라운드힐(구 삼양목장)'에 도착합니다. 해발 850m에서 1,470m에 이르는 고원 초지에 조성된 삼양라운드힐은 여의도 면적의 7배가 넘는 약 600만 평 규모를 자랑하는 동양 최대의 초지 목장이에요.
+      든든한 점심 식사 후 영동고속도로나 456번 지방도로를 타고 대관령면으로 약 22~25분(직선거리 약 10.44km) 이동해 '대관령 삼양라운드힐(구 삼양목장)'에 도착합니다. 해발 850m에서 1,470m에 이르는 고원 초지에 조성된 삼양라운드힐은 약 600만 평 규모를 자랑하는 광활한 초지 목장이에요.
     </p>
     <p>
-      5월부터 10월까지 이어지는 그린시즌에는 매표소 광장에서 출발하는 무료 순환 셔틀버스를 타고 정상인 동해전망대(해발 1,140m)까지 편리하게 오를 수 있어요. 동해전망대에 서면 맑은 날 강릉 시내와 푸른 동해 바다 수평선이 한눈에 펼쳐지며, 백두대간 능선을 따라 줄지어 선 거대한 하얀 풍력발전기들이 이국적인 장관을 연출해요. 전망대에서 내려올 때는 셔틀버스를 타거나, '바람의 언덕길'과 '숲속의 발전소길' 등 잘 정비된 목책 산책로를 걸으며 가을 고원의 시원한 바람을 만끽할 수 있어요.
+      5월부터 10월까지 이어지는 그린시즌에는 매표소 광장에서 출발하는 무료 순환 셔틀버스를 타고 정상인 동해전망대(해발 1,140m)까지 편리하게 오를 수 있어요. 단, 셔틀버스는 그린시즌(5~10월)에만 운행하며 우천 시에는 안전을 위해 운행이 중단될 수 있고, 11월부터는 개인 차량으로 목장 정상까지 이동하게 됩니다. 동해전망대에 서면 맑은 날 강릉 시내와 푸른 동해 바다 수평선이 한눈에 펼쳐지며, 백두대간 능선을 따라 줄지어 선 거대한 하얀 풍력발전기들이 이국적인 장관을 연출해요.
     </p>
-
 
     <div class="tip-box">
       <strong>💡 대관령 삼양라운드힐 이용 안내</strong><br>
       • 위치: 강원특별자치도 평창군 대관령면 꽃밭양지길 708-9<br>
-      • 운영 시간: 하절기·가을(5월~10월) 09:00~18:00 (매표 마감 17:00)<br>
-      • 공식 입장료: 대인 12,000원 / 소인 10,000원 (그린시즌 순환 셔틀버스 탑승 포함)<br>
+      • 운영 시간: 그린시즌(5월~10월) 09:00~18:00 (매표 마감 17:00 / 11월부터 화이트시즌 자차 운영)<br>
+      • 공식 입장료: 대인 12,000원 / 소인 10,000원 (그린시즌 순환 셔틀버스 탑승 포함, ktriptips 2026-10-01 갱신)<br>
       • 주차 안내: 목장 광장 전용 주차장 무료 이용 가능<br>
       • 관람 팁: 해발 1,000m 이상의 고지대로 도심보다 기온이 5~10도 낮고 바람이 강하게 불 수 있으므로 바람막이나 따뜻한 겉옷을 꼭 챙기세요.
     </div>
@@ -586,12 +552,12 @@
           <tr>
             <td>주차료</td>
             <td>오대산 국립공원 주차장</td>
-            <td>약 5,000원 ~ 6,000원</td>
-            <td>승용차 기준 (문화재관람료 폐지로 입장료 무료)</td>
+            <td>6,000원</td>
+            <td>중형 승용차 기준 (ktriptips 2026-06-19 갱신 / 문화재관람료 무료)</td>
           </tr>
           <tr>
             <td>관람료</td>
-            <td>오대산 월정사 & 전나무숲길</td>
+            <td>오대산 월정사 &amp; 전나무숲길</td>
             <td>0원 (무료)</td>
             <td>2023년 5월 이후 사찰 및 숲길 무료 관람</td>
           </tr>
@@ -599,7 +565,7 @@
             <td>점심 식사</td>
             <td>오대산가마솥식당</td>
             <td>약 26,000원 ~ 50,000원</td>
-            <td>산채비빔밥 2인(26,000원) 또는 산채정식 2인(50,000원)</td>
+            <td>산채비빔밥 또는 산채정식 2인 (현장 주문 기준)</td>
           </tr>
           <tr>
             <td>입장료</td>
@@ -615,7 +581,7 @@
           </tr>
           <tr>
             <th colspan="2" style="background:#f5f5f4; font-weight:800;">총 예상 경비 (2인 기준)</th>
-            <th colspan="2" style="background:#f5f5f4; font-weight:800; color:var(--color-accent);">약 55,000원 ~ 80,000원</th>
+            <th colspan="2" style="background:#f5f5f4; font-weight:800; color:var(--color-accent);">약 56,000원 ~ 80,000원</th>
           </tr>
         </tbody>
       </table>
@@ -636,14 +602,14 @@
     <!-- 서비스 CTA 배너 -->
     <div class="app-cta-banner">
       <h3>더 많은 로컬 데이트 코스가 궁금하다면?</h3>
-      <p>전국 16,000여 개 엄선 스팟과 취향 맞춤 여행 코스를 실시간으로 만나보세요.</p>
+      <p>전국 17,000여 개 엄선 스팟과 취향 맞춤 여행 코스를 실시간으로 만나보세요.</p>
       <a href="../../" class="app-cta-btn">오늘 데이트 앱 열기 ↗</a>
     </div>
 
     <!-- 아티클 푸터 -->
     <footer class="article-footer">
       <p>
-        본 매거진은 한국관광공사 공개 데이터와 현장 확인 정보를 바탕으로 제작되었습니다.<br>
+        본 매거진은 한국관광공사 공개 데이터와 지자체 관광 안내 정보를 바탕으로 제작되었습니다.<br>
         사진 출처: 카카오맵 포토 리뷰 (공식 등록 이용자 실제 사진)<br>
         © 2026 오늘 데이트 (Oneul Date). All rights reserved.
       </p>
