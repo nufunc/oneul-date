@@ -75,7 +75,7 @@ interface SavedCourse {
   /** region: 현재 포맷은 배열(다중 선택), 과거 저장분은 문자열 — normalizeRegionCond로 복원 */
   conditions: { region: string[] | string; subZones?: string[]; mood: string; slots: SlotKey[] };
   spotIds: number[];
-  /** 저장할 때의 코스 제목('🔍 성수 카페 코스' 등). 예전 저장분과 공유받아 저장한 코스에는 없다 */
+  /** 저장할 때의 코스 제목('🔍 성수 카페 코스' 등). 예전 저장분에는 없다 */
   title?: string;
 }
 
@@ -6930,6 +6930,14 @@ function renderReceiverView(steps: CourseStep[]): void {
   const usedImages = new Set<string>();
   const storyHtml = generateCourseStory(steps, spotById, 'ALL', true);
   const sharedSpotIds = steps.map((s) => s.spotId).filter((id): id is number => id !== null);
+  // 매거진 글의 '앱에서 코스 열기'로 들어오면 referrer가 같은 출처의 /blog/<slug>/다. slug는 외부 입력이라 영숫자와 하이픈만 받는다
+  let blogSlug: string | null = null;
+  try {
+    const ref = document.referrer ? new URL(document.referrer) : null;
+    if (ref && ref.origin === location.origin) blogSlug = ref.pathname.match(/\/blog\/([A-Za-z0-9-]+)\/?$/)?.[1] ?? null;
+  } catch {
+    blogSlug = null;
+  }
 
   app.innerHTML = `
     <header class="topbar">
@@ -6940,9 +6948,13 @@ function renderReceiverView(steps: CourseStep[]): void {
     </header>
     <section class="receiver-view">
       <div class="receiver-hero-card">
-        <span class="receiver-hero-badge">✨ 공유받은 데이트 코스</span>
+        ${blogSlug
+          ? `<span class="receiver-hero-badge">📖 매거진 코스</span>
+        <h2 class="receiver-hero-title">매거진 글에 나온 장소로 만든 코스예요</h2>
+        <p class="receiver-hero-desc"><a href="./blog/${blogSlug}/" id="receiver-blog-back" style="color:inherit">← 글로 돌아가기</a></p>`
+          : `<span class="receiver-hero-badge">✨ 공유받은 데이트 코스</span>
         <h2 class="receiver-hero-title">친구가 보낸 특별한 데이트 코스예요</h2>
-        <p class="receiver-hero-desc">엄선된 스팟과 최적 동선으로 완성된 추천 일정이에요. 함께 즐거운 시간 보내세요!</p>
+        <p class="receiver-hero-desc">엄선된 스팟과 최적 동선으로 완성된 추천 일정이에요. 함께 즐거운 시간 보내세요!</p>`}
         <button class="btn-primary btn-make-own-hero" id="btn-make-own-hero" type="button">🚀 나도 이런 코스 만들기 →</button>
       </div>
 
@@ -6986,16 +6998,21 @@ function renderReceiverView(steps: CourseStep[]): void {
   };
   document.getElementById('receiver-home-link')?.addEventListener('click', goHome);
   document.getElementById('btn-theme-toggle')?.addEventListener('click', cycleThemeMode);
-  // '나도 이런 코스 만들기'는 받은 코스의 지역을 이어받는다. 모든 장소가 한 세부 동네 안이면 그 동네, 아니면 첫 장소의 광역 지역
-  const makeOwn = (e: Event) => {
+  // 받은 코스의 지역. 모든 장소가 한 세부 동네 안이면 그 동네, 아니면 첫 장소의 광역 지역
+  const sharedArea = (): { regions: string[]; subZones: string[] } => {
     const shared = steps.map((st) => (st.spotId ? spotById.get(st.spotId) : undefined)).filter((s): s is Spot => Boolean(s));
     const zone = shared.length > 0 ? POPULAR_ZONES.find((z) => shared.every((s) => matchesZone(s, [z.key]))) : undefined;
     const region = zone
       ? REGIONS.find((r) => r.key === zone.regionKey)
       : REGIONS.find((r) => r.key !== 'ALL' && shared[0]?.region && r.match.includes(shared[0].region));
-    if (region) {
-      state.regions = [region.key];
-      state.subZones = zone ? [zone.key] : [];
+    return region ? { regions: [region.key], subZones: zone ? [zone.key] : [] } : { regions: [], subZones: [] };
+  };
+  // '나도 이런 코스 만들기'는 받은 코스의 지역을 이어받는다
+  const makeOwn = (e: Event) => {
+    const area = sharedArea();
+    if (area.regions.length > 0) {
+      state.regions = area.regions;
+      state.subZones = area.subZones;
     }
     goHome(e);
   };
@@ -7018,16 +7035,18 @@ function renderReceiverView(steps: CourseStep[]): void {
       showToast('저장할 장소가 없어요');
       return;
     }
+    const area = sharedArea();
     const item: SavedCourse = {
       id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
       createdAt: new Date().toISOString(),
       conditions: {
-        region: [],
-        subZones: [],
+        region: area.regions,
+        subZones: area.subZones,
         mood: 'ALL',
         slots: steps.map((st) => st.slot),
       },
       spotIds: sharedSpotIds,
+      title: `${blogSlug ? '📖 매거진 코스 · ' : ''}${regionsLabel(area.regions, area.subZones)} · ${moodLabel('ALL')}`,
     };
     showToast(addSavedCourse(item) ? '💾 내 보관함에 저장했어요' : '이미 저장한 코스라 맨 위로 올렸어요');
   });
