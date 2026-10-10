@@ -6334,8 +6334,11 @@ function renderSpotDiscovery(): void {
     // (0.084점)보다 커서 전국 첫 화면 18장 중 16장이 수록 행이었고, 카드 평점으로는 순서를 설명할 수 없었다(P-116)
     matchedSpots.sort((a, b) => trustedRating(b) - trustedRating(a));
   } else {
-    // 🔥 핫플/인기순 (종합 인기도 점수 기준 정렬)
-    matchedSpots.sort((a, b) => getSpotPopularityScore(b) - getSpotPopularityScore(a));
+    // 🔥 핫플/인기순. 🔥 배지 카드를 먼저 두고 같은 쪽 안에서는 종합 인기도 점수순으로 둔다. 점수만 쓰면 hot_score가
+    // 85에 못 미치고 가산이 큰 비🔥 카드가 🔥 카드 앞에 왔다(라이브 72위 안 62장, P-119)
+    const hot = new Map(matchedSpots.map(s => [s, isSuperHotSpot(s)]));
+    matchedSpots.sort((a, b) => (Number(hot.get(b)) - Number(hot.get(a)))
+      || (getSpotPopularityScore(b) - getSpotPopularityScore(a)));
   }
 
   // 검색어가 있으면 관련도 등급으로 먼저 나눈다. 정렬은 안정적이라 등급 안에서는 위에서 고른 순서가 유지된다.
