@@ -5111,6 +5111,14 @@ function cardFactLine(spot: Spot, ratingShown: boolean): string {
   return `★${km.rating.toFixed(1)}${km.review_count ? ` (리뷰 ${km.review_count.toLocaleString()})` : ''}`;
 }
 
+/** 상세 시트 실용 정보 칸의 카카오맵 평점. 카드(cardFactLine)와 같이 평점이 있으면 보이고,
+ * 요약 자리의 사실 한 줄(factText)이 이미 평점을 담았으면 같은 숫자를 두 번 보이지 않도록 빈 값이다 */
+function sheetRatingText(spot: Spot, factText: string): string {
+  const km = spot.social_links?.kakaomap;
+  if (!km?.rating || factText.includes('카카오맵 평점')) return '';
+  return `★${km.rating.toFixed(1)}${km.review_count ? ` · 리뷰 ${km.review_count.toLocaleString()}개` : ''}`;
+}
+
 function cleanSpotSummary(spot: Spot): string {
   // 도입구와 본문이 같은 구절로 시작해 '소중한 사람과 함께, 소중한 사람과 함께 둘만의 …'처럼 겹친 요약(열린 26곳)은 한 번만 남긴다
   const raw = (spot.summary || '').trim().replace(/^(.{4,30}?),\s*\1(?=\s)/, '$1');
@@ -7692,6 +7700,9 @@ function renderOverlayContent(): void {
     // 가격
     const priceText = spot.avg_price_per_person ? `1인 약 ${spot.avg_price_per_person.toLocaleString()}원` : spot.price || '';
 
+    // 카카오맵 평점
+    const ratingText = sheetRatingText(spot, sumIsFact ? sum : '');
+
     // 대표메뉴
     const signatureItems = spot.signature_items || [];
 
@@ -7779,6 +7790,16 @@ function renderOverlayContent(): void {
                 <div class="meta-item-body">
                   <strong class="meta-item-title">가격대 / 예산</strong>
                   <p class="meta-item-desc">${escapeHtml(priceText)}</p>
+                </div>
+              </div>
+            ` : ''}
+
+            ${ratingText ? `
+              <div class="meta-grid-item">
+                <span class="meta-item-icon">⭐</span>
+                <div class="meta-item-body">
+                  <strong class="meta-item-title">카카오맵 평점</strong>
+                  <p class="meta-item-desc">${escapeHtml(ratingText)}</p>
                 </div>
               </div>
             ` : ''}
