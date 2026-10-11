@@ -136,6 +136,39 @@
       line-height: 1.7;
     }
 
+    /* 지역 필터 칩 */
+    .region-filter-wrap {
+      max-width: var(--max-width);
+      margin: 0 auto 24px auto;
+      padding: 0 24px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .filter-chip {
+      background: #ffffff;
+      border: 1px solid var(--color-border);
+      color: var(--color-text-sub);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+      font-family: inherit;
+    }
+    .filter-chip:hover {
+      border-color: #cbd5e1;
+      color: var(--color-primary);
+    }
+    .filter-chip.active {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: #ffffff;
+    }
+
     /* 포스트 그리드 */
     .posts-container {
       max-width: var(--max-width);
@@ -280,6 +313,16 @@
       </p>
     </section>
 
+    <nav class="region-filter-wrap" aria-label="지역별 필터">
+      <button type="button" class="filter-chip active" data-region="all">전체</button>
+      <button type="button" class="filter-chip" data-region="seoul-gyeonggi">서울·경기</button>
+      <button type="button" class="filter-chip" data-region="gangwon">강원</button>
+      <button type="button" class="filter-chip" data-region="chungcheong">충청</button>
+      <button type="button" class="filter-chip" data-region="jeolla">전라</button>
+      <button type="button" class="filter-chip" data-region="gyeongsang">경상</button>
+      <button type="button" class="filter-chip" data-region="busan">부산</button>
+    </nav>
+
     <section class="posts-container">
       <div class="posts-grid">
 
@@ -316,7 +359,7 @@
             </p>
             <div class="card-meta-bar">
               <span>자라섬·동기간·골든트리·쁘띠프랑스·리버레인</span>
-              <span class="card-cost">2인 실질 약 11.5~13.7만 원</span>
+              <span class="card-cost">2인 약 11.5~13.7만 원</span>
             </div>
           </div>
         </a>
@@ -962,6 +1005,56 @@
       Copyright © 2026 오늘 데이트 (Oneul Date). All rights reserved.
     </p>
   </footer>
+
+  <script>
+    (function() {
+      const chips = document.querySelectorAll('.filter-chip');
+      const cards = document.querySelectorAll('.post-card');
+
+      function matchesRegion(badgeText, region) {
+        if (region === 'all') return true;
+        const text = badgeText.trim();
+        const firstWord = text.split(/\s+/)[0] || '';
+        if (region === 'seoul-gyeonggi') {
+          return firstWord === '서울' || firstWord === '경기' || firstWord.startsWith('서울·경기');
+        }
+        if (region === 'gangwon') {
+          return firstWord === '강원';
+        }
+        if (region === 'chungcheong') {
+          return firstWord === '충남' || firstWord === '충북' || firstWord.startsWith('충청');
+        }
+        if (region === 'jeolla') {
+          return firstWord === '전남' || firstWord === '전북' || firstWord.startsWith('전라');
+        }
+        if (region === 'gyeongsang') {
+          return firstWord === '경북' || firstWord === '경남' || firstWord.startsWith('경상');
+        }
+        if (region === 'busan') {
+          return firstWord === '부산';
+        }
+        return false;
+      }
+
+      chips.forEach(function(chip) {
+        chip.addEventListener('click', function() {
+          const region = chip.getAttribute('data-region');
+          chips.forEach(function(c) { c.classList.remove('active'); });
+          chip.classList.add('active');
+
+          cards.forEach(function(card) {
+            const badge = card.querySelector('.card-region-badge');
+            const badgeText = badge ? badge.textContent : '';
+            if (matchesRegion(badgeText, region)) {
+              card.style.display = 'flex';
+            } else {
+              card.style.display = 'none';
+            }
+          });
+        });
+      });
+    })();
+  </script>
 
 </body>
 </html>
