@@ -7706,6 +7706,11 @@ function renderOverlayContent(): void {
     // 대표메뉴
     const signatureItems = spot.signature_items || [];
 
+    // 짧은 항목은 휴대폰에서도 2열이라, 수가 홀수면 마지막 짧은 항목이 한 줄 전체를 쓴다. :has()는 iOS 15.3 이하 Safari가 몰라 템플릿에서 정한다
+    const shortItems = [hoursText || closedText ? 'hours' : '', parkingText ? 'parking' : '', priceText ? 'price' : '', ratingText ? 'rating' : ''].filter(Boolean);
+    const loneShort = shortItems.length % 2 === 1 ? shortItems[shortItems.length - 1] : '';
+    const shortItemClass = (key: string) => `meta-grid-item${loneShort === key ? ' full-width' : ''}`;
+
     // 분위기 태그
     // mood는 내부 영문 키(romantic 등)라 그대로 찍으면 '#romantic'으로 보였다. MOODS 한글 라벨로 바꾸고 모르는 키는 뺀다
     const moodLabels = (Array.isArray(spot.mood) ? spot.mood : [spot.mood || ''])
@@ -7762,7 +7767,7 @@ function renderOverlayContent(): void {
           <!-- 4. 실용 정보 그리드 (영업시간, 주차, 가격, 메뉴 등) -->
           <div class="spot-detail-meta-grid">
             ${hoursText || closedText ? `
-              <div class="meta-grid-item">
+              <div class="${shortItemClass('hours')}">
                 <span class="meta-item-icon">🕒</span>
                 <div class="meta-item-body">
                   <strong class="meta-item-title">
@@ -7775,7 +7780,7 @@ function renderOverlayContent(): void {
             ` : ''}
 
             ${parkingText ? `
-              <div class="meta-grid-item">
+              <div class="${shortItemClass('parking')}">
                 <span class="meta-item-icon">🚗</span>
                 <div class="meta-item-body">
                   <strong class="meta-item-title">주차 안내</strong>
@@ -7785,7 +7790,7 @@ function renderOverlayContent(): void {
             ` : ''}
 
             ${priceText ? `
-              <div class="meta-grid-item">
+              <div class="${shortItemClass('price')}">
                 <span class="meta-item-icon">💳</span>
                 <div class="meta-item-body">
                   <strong class="meta-item-title">가격대 / 예산</strong>
@@ -7795,7 +7800,7 @@ function renderOverlayContent(): void {
             ` : ''}
 
             ${ratingText ? `
-              <div class="meta-grid-item">
+              <div class="${shortItemClass('rating')}">
                 <span class="meta-item-icon">⭐</span>
                 <div class="meta-item-body">
                   <strong class="meta-item-title">카카오맵 평점</strong>
@@ -7834,7 +7839,7 @@ function renderOverlayContent(): void {
             ${bookingUrl ? `<a href="${escapeHtml(bookingUrl)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn book" aria-label="캐치테이블 실시간 예약" title="캐치테이블 실시간 예약"><span>📅 예약</span></a>` : ''}
             ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn yt" aria-label="${youtubeTitleNamesSpot(spot, yt) ? '유튜브 핫클립 시청' : '동네 코스 영상 시청'}" title="${youtubeTitleNamesSpot(spot, yt) ? '유튜브 핫클립 시청' : '동네 코스 영상 시청'}"><span>▶️ ${youtubeLinkLabel(spot, yt)}</span></a>` : ''}
             <a href="${escapeHtml(tmapUrl(spot))}" target="_blank" rel="noopener noreferrer" class="spot-link-btn tmap" aria-label="T맵 길안내" title="T맵 길안내"><span>🧭 T맵</span></a>
-            <a href="${escapeHtml(kakaoNaviUrl(spot))}" target="_blank" rel="noopener noreferrer" class="spot-link-btn navi" aria-label="카카오맵 길찾기" title="카카오맵 길찾기"><span>🧭 카카오맵 길찾기</span></a>
+            <a href="${escapeHtml(kakaoNaviUrl(spot))}" target="_blank" rel="noopener noreferrer" class="spot-link-btn navi" aria-label="카카오맵 길찾기" title="카카오맵 길찾기"><span>🧭 길찾기</span></a>
             <a href="${escapeHtml(kakaoTaxiUrl(spot))}" target="_blank" rel="noopener noreferrer" class="spot-link-btn taxi" aria-label="카카오 T 택시 호출" title="카카오 T 택시 호출"><span>🚕 카카오 T</span></a>
             ${guideUrl ? `<a href="${escapeHtml(guideUrl)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn guide" aria-label="공식 가이드 평가" title="공식 가이드 평가"><span>🎀 가이드</span></a>` : ''}
             ${instaUrl ? `<a href="${escapeHtml(instaUrl)}" target="_blank" rel="noopener noreferrer" class="spot-link-btn insta" aria-label="인스타그램 공식 피드" title="인스타그램 공식 피드"><span>📸 인스타</span></a>` : ''}

@@ -5701,9 +5701,6 @@ html[data-theme-resolved="dark"] .spot-link-btn.kakao {
 }
 
 @media (max-width: 480px) {
-  .spot-detail-meta-grid {
-    grid-template-columns: 1fr;
-  }
   .spot-detail-hero {
     height: 170px;
   }
