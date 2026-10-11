@@ -200,6 +200,35 @@ AREA_CODE_MAP = {
     "39": ("제주", ["제주"]),
 }
 
+# 관광지(12)는 법정동 시도 코드(lDongRegnCd)로 받는다(P-128). areaCode 목록에는 areacode가 빈 항목(관광지의 약 절반,
+# 소수서원·도산서원 등)이 빠진다. ldongCode2 기준 16개이고 광주·전남은 12(전남광주통합특별시), 세종은 36110이다.
+# 29·46·36은 0건을 돌려준다(2026-10-11 확인). 값의 모양은 AREA_CODE_MAP과 같다
+LDONG_SIDO_MAP = {
+    "11": ("서울", ["서울"]),
+    "12": ("광주·전남", ["호남"]),
+    "26": ("부산", ["영남"]),
+    "27": ("대구", ["영남"]),
+    "28": ("인천", ["인천"]),
+    "30": ("대전", ["충청"]),
+    "31": ("울산", ["영남"]),
+    "36110": ("세종", ["충청"]),
+    "41": ("경기", ["경기"]),
+    "43": ("충북", ["충청"]),
+    "44": ("충남", ["충청"]),
+    "47": ("경북", ["영남"]),
+    "48": ("경남", ["영남"]),
+    "50": ("제주", ["제주"]),
+    "51": ("강원", ["강원"]),
+    "52": ("전북", ["호남"]),
+}
+# 새로 여는 명소 분류(lclsSystm3) 16종: 전망대, 해변, 수목원·정원, 테마파크, 자연휴양림, 국립공원, 고궁, 민속마을, 문화거리,
+# 공원 4종, 관광단지, 산·계곡·폭포. P-128 표본 13건 중 적합 12, 걸러야 함 0이었다. 그 밖 분류는 areacode가 있는 항목만
+# 종전 속도(시도마다 회당 15건)로 보고, areacode가 빈 항목은 아직 들이지 않는다(섬·사당·노거수 등이 섞인다)
+LANDMARK_LCLS = {"VE010200", "NA020900", "NA040700", "VE020100", "NA040600", "NA040100", "HS010100", "HS010600",
+                 "VE040100", "VE030500", "VE050100", "NA010300", "NA010400", "VE030100", "VE030400", "NA010100"}
+LANDMARK_RUN_LIMIT, LANDMARK_DAILY_LIMIT = 17, 100
+LDONG = "ldong"
+
 # 컨테이너 쓰기 레이어(/app)에 두면 배포로 컨테이너가 재생성될 때마다 지워져 이미 적재한 지역 1~4의
 # 1페이지만 반복했다(2026-09-23). LOG_DIR(/mnt/data/logs)이 가리키는 볼륨에 두고, 없으면 종전 위치를 쓴다
 _CHECKPOINT_DIR = (os.path.dirname(os.environ["LOG_DIR"]) if os.environ.get("LOG_DIR")
@@ -234,7 +263,8 @@ def _save_checkpoint(checkpoint: dict) -> None:
         print(f"  ⚠️ TourAPI 체크포인트 저장 실패({CHECKPOINT_PATH}): {e}")
 
 
-def fetch_tourapi_spots(api_key: str, area_code: str = "1", content_type_id: str = "14", num_of_rows: int = 30, page_no: int = 1) -> list[dict]:
+def fetch_tourapi_spots(api_key: str, area_code: str = "1", content_type_id: str = "14", num_of_rows: int = 30, page_no: int = 1,
+                        ldong_regn_cd: str = None) -> list[dict]:
     """TourAPI 4.0 areaBasedList2 / areaBasedList1 호출하여 관광/문화 스팟 목록 수급"""
     if not api_key:
         return []
@@ -250,7 +280,7 @@ def fetch_tourapi_spots(api_key: str, area_code: str = "1", content_type_id: str
         "MobileApp": "OneulDate",
         "_type": "json",
         "arrange": "A",
-        "areaCode": area_code,
+        **({"lDongRegnCd": ldong_regn_cd} if ldong_regn_cd else {"areaCode": area_code}),
         "contentTypeId": content_type_id
     }
 
@@ -269,11 +299,34 @@ def fetch_tourapi_spots(api_key: str, area_code: str = "1", content_type_id: str
     except TourApiRateLimited:
         raise
     except Exception as e:
-        print(f"  ⚠️ TourAPI 호출 오류 (area: {area_code}, type: {content_type_id}): {e}")
+        print(f"  ⚠️ TourAPI 호출 오류 (area: {ldong_regn_cd or area_code}, type: {content_type_id}): {e}")
         # 빈 목록과 구분한다. 빈 목록을 돌려주면 마지막 페이지로 보고 페이지를 1로 되돌렸다
-        raise TourApiFetchFailed(f"list {area_code}:{content_type_id}") from e
+        raise TourApiFetchFailed(f"list {ldong_regn_cd or area_code}:{content_type_id}") from e
 
     return []
+
+
+def ldong_tourist_items(api_key: str, sido_codes: list, page_by_combo: dict) -> list[dict]:
+    """관광지(12) 시도 목록을 시도마다 한 번(numOfRows=2000, 가장 큰 경기 1,539건)씩 받아 들일 순서로 돌려준다.
+    명소 분류는 사진 있는 항목 먼저, modifiedtime 최근 순이다. 그 밖 분류는 areacode가 있는 항목만 시도마다 15건씩
+    쪽을 넘겨 종전 areaCode 경로와 같은 속도로 본다. 한 시도가 실패하면 그 시도만 건너뛰고, 한도 초과는 올린다"""
+    landmarks, others, pages = [], [], {}
+    for code in sido_codes:
+        try:
+            items = fetch_tourapi_spots(api_key, content_type_id="12", num_of_rows=2000, ldong_regn_cd=code)
+        except TourApiFetchFailed:
+            continue
+        landmarks += [it for it in items if it.get("lclsSystm3") in LANDMARK_LCLS]
+        rest = [it for it in items if it.get("lclsSystm3") not in LANDMARK_LCLS and it.get("areacode")]
+        key = f"{LDONG}{code}:12"
+        page = page_by_combo.get(key, 0)
+        others += rest[page * 15:(page + 1) * 15]
+        pages[key] = page + 1 if (page + 1) * 15 < len(rest) else 0
+        time.sleep(0.3)
+    page_by_combo.update(pages)  # 한도 초과로 중간에 끊기면 쪽을 넘기지 않는다
+    landmarks.sort(key=lambda it: it.get("modifiedtime") or "", reverse=True)
+    landmarks.sort(key=lambda it: not (it.get("firstimage") or it.get("firstimage2")))
+    return landmarks + others
 
 def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = None, max_discoveries: int = 15) -> int:
     """한국관광공사 TourAPI 순회 마이닝 실행"""
@@ -321,25 +374,39 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
     start_idx = checkpoint.get("area_index", 0) % len(area_codes)
     selected_codes = [area_codes[(start_idx + i) % len(area_codes)] for i in range(4)]
     page_by_combo = checkpoint.get("page_by_combo", {})
+    # 관광지(12)는 areaCode 4개 대신 법정동 시도 4개를 받는다(호출 수는 같다). 16개를 4회차에 한 바퀴 돈다
+    sido_codes = list(LDONG_SIDO_MAP)
+    ldong_start = checkpoint.get("ldong_index", 0) % len(sido_codes)
+    selected_sidos = [sido_codes[(ldong_start + i) % len(sido_codes)] for i in range(4)]
+    today = datetime.now(KST).strftime("%Y-%m-%d")
+    landmark_today = (checkpoint.get("landmark_daily") or {}).get(today, 0)
+    landmark_cap = max(0, min(LANDMARK_RUN_LIMIT, LANDMARK_DAILY_LIMIT - landmark_today))
+    landmark_ids = set()
 
     # 429(하루 한도 초과)를 받으면 이번 회차의 TourAPI 조회를 멈추고, 이미 모은 행만 넣는다.
     # 종전에는 실패가 조용히 넘어가 요금·기간이 빈 채 적재됐다(2026-09-27)
     rate_limited = False
-    for area_code in selected_codes:
+    for area_code in [LDONG] + selected_codes:
         for ctype_id, ctype_name, default_moods, default_slot in DATE_CONTENT_TYPES:
+            if (area_code == LDONG) != (ctype_id == "12"):
+                continue
             combo_key = f"{area_code}:{ctype_id}"
             prev_page = page_by_combo.get(combo_key, 0)
             page_no = prev_page + 1
             try:
-                items = fetch_tourapi_spots(api_key, area_code, ctype_id, num_of_rows=15, page_no=page_no)
+                if area_code == LDONG:
+                    items = ldong_tourist_items(api_key, selected_sidos, page_by_combo)
+                else:
+                    items = fetch_tourapi_spots(api_key, area_code, ctype_id, num_of_rows=15, page_no=page_no)
             except TourApiRateLimited:
                 rate_limited = True
                 break
             except TourApiFetchFailed:
                 continue  # 페이지 번호를 그대로 두고 다음 회차에 같은 페이지를 다시 받는다
-            # 반환 건수가 요청보다 적으면 마지막 페이지 — 다음 실행은 1페이지부터 다시 돈다
-            page_by_combo[combo_key] = 1 if len(items) < 15 else page_no
-            time.sleep(0.3)
+            if area_code != LDONG:
+                # 반환 건수가 요청보다 적으면 마지막 페이지 — 다음 실행은 1페이지부터 다시 돈다
+                page_by_combo[combo_key] = 1 if len(items) < 15 else page_no
+                time.sleep(0.3)
 
             for item in items:
                 content_id = str(item.get("contentid", ""))
@@ -348,8 +415,13 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                 mapx = item.get("mapx")
                 mapy = item.get("mapy")
                 first_img = item.get("firstimage") or item.get("firstimage2")
+                lcls = item.get("lclsSystm3") or ""
+                is_landmark = area_code == LDONG and lcls in LANDMARK_LCLS
 
                 if not title or not content_id:
+                    continue
+                # 명소 분류는 회당 17건, 하루 100건까지만 들인다. 남은 항목은 다음 회차에 같은 순서로 다시 본다
+                if is_landmark and len(landmark_ids) >= landmark_cap:
                     continue
 
                 if title in batch_seen_names or re.sub(r'\(.*?\)|\[.*?\]', '', title).strip() in batch_seen_names:
@@ -380,7 +452,9 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                 batch_seen_names.add(re.sub(r'\(.*?\)|\[.*?\]', '', title).strip())
 
                 derived_region, derived_area = derive_region_area(addr1)
-                region = derived_region or AREA_CODE_MAP.get(area_code, ("서울", ["서울"]))[1][0]
+                # 주소로 못 읽으면 항목의 법정동 시도 코드를 먼저 본다. 법정동 경로에는 areaCode가 없다
+                fallback = LDONG_SIDO_MAP.get(str(item.get("lDongRegnCd") or "")) or AREA_CODE_MAP.get(area_code, ("서울", ["서울"]))
+                region = derived_region or fallback[1][0]
                 area = derived_area or "전체"
 
                 # TourAPI가 좌표 미보유 항목에 대한민국 영역 밖(예: 19.69/117.99,
@@ -470,6 +544,7 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                         "type": "tourapi",
                         "url": f"https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid={content_id}",
                         "note": f"TourAPI 4.0 {ctype_name}"
+                                + (f" | lclsSystm3: {lcls}" if lcls else "")
                                 + (f" | closed: P-075 단독 유교 시설 관문 ({datetime.now(KST).strftime('%Y%m%d')})" if gate_closed else ""),
                         **({"event": event_period} if event_period else {}),
                     },
@@ -479,6 +554,8 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                 }
 
                 discovered_spots.append(new_spot)
+                if is_landmark:
+                    landmark_ids.add(spot_id)
                 if len(discovered_spots) >= max_discoveries:
                     break
             if len(discovered_spots) >= max_discoveries or rate_limited:
@@ -491,6 +568,7 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
         print(f"  ⚠️ [TourAPI Miner] 한도 초과로 회차 중단(오늘 호출 {usage_today()}회), 모은 {len(discovered_spots)}건만 적재")
     else:
         checkpoint["area_index"] = (start_idx + 4) % len(area_codes)
+        checkpoint["ldong_index"] = (ldong_start + 4) % len(sido_codes)
     checkpoint["page_by_combo"] = page_by_combo
     # 체크포인트는 적재 결과를 받은 뒤에만 저장한다. INSERT 전에 저장하면 적재가 실패해도 지역·페이지가
     # 전진해 그 항목을 한 바퀴 돌 때까지 건너뛰었다(2026-09-24 17:08 회차)
@@ -515,6 +593,7 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
         discovered_spots = [sanitize_spot(s) for s in discovered_spots]
         try:
             inserted = insert_spots(supabase_url, api_headers, discovered_spots)
+            checkpoint["landmark_daily"] = {today: landmark_today + sum(1 for s in inserted if s["id"] in landmark_ids)}
             # 행 단위 실패(제약 위반)는 다시 넣어도 같으므로 전진한다. 네트워크 오류·5xx는 예외라 저장하지 않는다
             _save_checkpoint(checkpoint)
             if inserted:
