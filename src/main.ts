@@ -5379,11 +5379,12 @@ function buildFactSentence(spot: Spot, yt: { title?: string; views?: number } | 
   return [`${videoText}에서 소개된 ${area}의 장소예요.`, `${area}의 장소로, ${videoText}에서 다뤘어요.`, `${area}에 있고, ${videoText}에 나와요.`][v];
 }
 
-/** 코스 카드와 시트에 보일 문장. 보이는 문장이 생성기 틀 문장(cardSpotSummary가 빈 값)이고 사실 재료가 있을 때만 사실 한 줄로 바꾼다.
+/** 코스 카드와 시트에 보일 문장. 보이는 문장이 생성기 틀 문장이거나 TourAPI 폴백 문장이라 빈 값이고(cardSpotSummary가 빈 값)
+ * 사실 재료가 있을 때만 사실 한 줄로 바꾼다.
  * isFact가 참이면 편집 코멘트가 아니라 근거 한 줄이므로 호출처가 따옴표와 에디토리얼 라벨을 붙이지 않는다 */
 function displaySpotSummary(spot: Spot, fallback = ''): { text: string; isFact: boolean } {
   const text = cleanSpotSummary(spot);
-  if (text && !cardSpotSummary(spot)) {
+  if (!cardSpotSummary(spot)) {
     const yt = spot.social_links?.youtube;
     const fact = buildFactSentence(spot, isValidYoutubeHotclip(yt) && youtubeTitleNamesSpot(spot, yt) ? yt! : null);
     if (fact) return { text: fact, isFact: true };
