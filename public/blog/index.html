@@ -321,10 +321,49 @@
       <button type="button" class="filter-chip" data-region="jeolla">전라</button>
       <button type="button" class="filter-chip" data-region="gyeongsang">경상</button>
       <button type="button" class="filter-chip" data-region="busan">부산</button>
+      <button type="button" class="filter-chip" data-region="jeju">제주</button>
     </nav>
 
     <section class="posts-container">
       <div class="posts-grid">
+
+        <!-- [제주 동부 2박 3일] 함덕·조천부터 구좌 비밀의숲, 성산일출봉·섭지코지까지 에메랄드빛 바다와 숲길 힐링 데이트 -->
+        <a href="jeju-east-3d2n/" class="post-card">
+          <div class="card-thumb-wrap">
+            <img src="https://t1.kakaocdn.net/mystore/1A389EF960B54D7F9604A50FA500D27C" alt="[제주 동부] 함덕·조천부터 구좌 비밀의숲, 성산일출봉·섭지코지까지 에메랄드빛 바다와 숲길 힐링 데이트" class="card-thumb" loading="lazy" />
+            <span class="card-region-badge">제주 동부</span>
+            <span class="card-badge-tag">2박 3일 힐링 코스</span>
+          </div>
+          <div class="card-body">
+            <h2 class="card-title">[제주 동부] 함덕·조천부터 구좌 비밀의숲, 성산일출봉·섭지코지까지 에메랄드빛 바다와 숲길 힐링 데이트</h2>
+            <p class="card-snippet">
+              함덕해수욕장과 카페 델문도 오션뷰 테라스 쉼, 닭머르 억새 해안길 노을 산책, 구좌 안돌오름 비밀의숲 편백나무 숲길, 스누피가든 자연 정원과 월정리 카페거리 바다 드라이브, 성산일출봉 분화구와 광치기해변, 섭지코지 붉은 화산 언덕 해안 절경까지 이어지는 동부권 2박 3일 힐링 코스.
+            </p>
+            <div class="card-footer">
+              <span class="card-meta">스팟 8곳 • 2박 3일 코스</span>
+              <span class="card-cost">2인 약 9.0~10.1만 원</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- [제주 서부 2박 3일] 애월 한담부터 협재·신창 풍차 해안, 산방산 원앤온리까지 선셋 힐링 드라이브 -->
+        <a href="jeju-west-3d2n/" class="post-card">
+          <div class="card-thumb-wrap">
+            <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/16e62d99a7b370ce1508a6b8b55e42dbe0caf42b?original" alt="[제주 서부] 애월 한담부터 협재·신창 풍차 해안, 산방산 원앤온리까지 선셋 힐링 드라이브" class="card-thumb" loading="lazy" />
+            <span class="card-region-badge">제주 서부</span>
+            <span class="card-badge-tag">2박 3일 선셋 드라이브</span>
+          </div>
+          <div class="card-body">
+            <h2 class="card-title">[제주 서부] 애월 한담부터 협재·신창 풍차 해안, 산방산 원앤온리까지 선셋 힐링 드라이브</h2>
+            <p class="card-snippet">
+              애월 한담해변 랜디스도넛과 해오반 바다 미식, 곽지해수욕장 노을 산책, 협재해수욕장 비양도 오션뷰, 신창풍차해안도로와 수월봉 엉알길 낙조 드라이브, 안덕 용머리해안 지질 비경과 산방산 아래 원앤온리 카페 쉼까지 이어지는 서부권 2박 3일 완벽 드라이브 코스.
+            </p>
+            <div class="card-footer">
+              <span class="card-meta">스팟 8곳 • 2박 3일 코스</span>
+              <span class="card-cost">2인 약 7.4~9.5만 원</span>
+            </div>
+          </div>
+        </a>
 
         <!-- [청주] 상당산성 가을 성곽 숲길에서 봉용불고기 노포 미식, 문화제조창 전시와 수암골 노을·도심 야경까지 -->
         <a href="cheongju/" class="post-card">
@@ -1146,6 +1185,9 @@
         }
         if (region === 'busan') {
           return firstWord === '부산';
+        }
+        if (region === 'jeju') {
+          return firstWord === '제주' || firstWord.startsWith('제주');
         }
         return false;
       }
