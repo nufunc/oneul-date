@@ -1,6 +1,6 @@
 // 네이버 지도 장소 검색(P-049). 앱 링크와 같은 map.naver.com/p/search 주소를 열어 allSearch 응답의 상위 5곳을 받는다.
 // 입력은 [{key, q, lng, lat}] JSON, 출력은 {key: {q, captcha, total, top}} JSON이고 이미 받은 key는 건너뛴다.
-// 캡차가 나오면 그 자리에서 멈추고 종료 코드 2를 낸다. playwright는 저장소 의존성이 아니므로 npx로 돌린다:
+// 캡차나 접근 제한이 나오면 그 자리에서 멈추고 종료 코드 2를 낸다. playwright는 저장소 의존성이 아니므로 npx로 돌린다:
 //   npx -y -p playwright node scripts/naver_place_search.mjs in.json out.json
 import fs from 'node:fs';
 import path from 'node:path';
@@ -41,7 +41,8 @@ for (const t of todo) {
   await page.goto(`https://map.naver.com/p/search/${encodeURIComponent(t.q)}${coord}`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
   for (let i = 0; i < 20 && !data; i++) await page.waitForTimeout(500);
   page.off('response', onResponse);
-  if (data?.result?.ncaptcha) {
+  // 접근 제한("과도한 접근 요청")이면 result 없이 error만 오므로 0건으로 저장하지 않고 캡차처럼 멈춘다
+  if (data?.result?.ncaptcha || (data && !data.result)) {
     captcha = true;
     break;
   }
