@@ -883,6 +883,26 @@ interface CandidatePool {
 }
 
 /**
+ * 선택한 세부존으로 스팟을 거르는 판정 함수. 세부존이 없으면 null(거르지 않음).
+ * 한 권역의 세부존이 전부 선택됐으면 그 권역은 권역만 고른 것으로 본다(라벨 `서울 전체`와 같은 판정).
+ * 세부존 목록(POPULAR_ZONES) 밖의 구·시가 조용히 빠지는 것을 막고, 일부만 고른 권역은 세부존으로 거른다.
+ */
+function zoneSelectionMatcher(zoneKeys: string[]): ((spot: Spot) => boolean) | null {
+  if (zoneKeys.length === 0) return null;
+  const selected = new Set(zoneKeys);
+  const fullRegions = [...new Set(POPULAR_ZONES.map((z) => z.regionKey))].filter((rk) =>
+    POPULAR_ZONES.filter((z) => z.regionKey === rk).every((z) => selected.has(z.key)),
+  );
+  const partialZones = zoneKeys.filter((zk) => {
+    const zone = POPULAR_ZONES.find((z) => z.key === zk);
+    return !zone || !fullRegions.includes(zone.regionKey);
+  });
+  if (partialZones.length === 0) return (s) => matchesRegion(s, fullRegions);
+  if (fullRegions.length === 0) return (s) => matchesZone(s, partialZones);
+  return (s) => matchesRegion(s, fullRegions) || matchesZone(s, partialZones);
+}
+
+/**
  * 슬롯 + 지역 + 세부존 + 분위기 조건에 맞는 후보 풀 (excludeIds 제외).
  * 존 내 후보가 0건이면 광역으로 넓히되, 넓혔다는 사실을 relaxed로 호출자에게 알린다.
  */
@@ -919,8 +939,9 @@ function getCandidatePool(
             !excludeIds.includes(s.id),
         );
 
-  if (zoneKeys.length === 0) return { spots: effectiveBase, relaxed: false };
-  const zoneFiltered = effectiveBase.filter((s) => matchesZone(s, zoneKeys));
+  const inZone = zoneSelectionMatcher(zoneKeys);
+  if (!inZone) return { spots: effectiveBase, relaxed: false };
+  const zoneFiltered = effectiveBase.filter(inZone);
   if (zoneFiltered.length > 0) return { spots: zoneFiltered, relaxed: false };
   return { spots: effectiveBase, relaxed: true };
 }
@@ -6251,8 +6272,9 @@ function renderSpotDiscovery(): void {
   if (state.regions.length > 0) {
     matchedSpots = matchedSpots.filter((s) => matchesRegion(s, state.regions));
   }
-  if (state.subZones.length > 0) {
-    matchedSpots = matchedSpots.filter((s) => matchesZone(s, state.subZones));
+  const inZone = zoneSelectionMatcher(state.subZones);
+  if (inZone) {
+    matchedSpots = matchedSpots.filter(inZone);
   }
 
   // 스팟 전용 검색어 필터 적용 (스마트 전국 확장 지원)
