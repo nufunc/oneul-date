@@ -2002,7 +2002,7 @@ def mine_video_info(vinfo: dict, supabase_url: str, supabase_key: str,
         # 네이버 응답의 상호명에 <b> 등 태그가 섞이는 경우 제거
         official_name = re.sub(r'<[^>]+>', '', official_name).strip()
         road_addr = top.get("roadAddress") or top.get("address") or ""
-        thum_url = top.get("thumUrl") or vinfo.get("thumbnail") or ""
+        thum_url = top.get("thumUrl") or ""
         category = top.get("category") or ""
         lat = top.get("y")  # 숫자 변환과 범위 검증은 sanitize_spot이 맡는다
         lng = top.get("x")

@@ -1,4 +1,6 @@
 """유튜브 설명란 후보 추출 회귀 테스트: python3 test_youtube_candidates.py 또는 pytest"""
+import json
+
 import youtube_vlog_miner as y
 
 DESC = """우이동 하루코스
@@ -294,6 +296,36 @@ def test_area_hint_rejects_other_region_match():
 def test_candidates_without_region_hint_or_map_link_are_dropped():
     stats, calls = _mine("시장 먹방 데이트 브이로그", FOOD_DESC, BUSAN)
     assert calls == [] and stats["region_mismatch"] == 2 and stats["registered"] == 0, (stats, calls)
+
+
+def test_video_cover_is_not_used_as_place_photo():
+    import io
+    posted = []
+
+    class _Res(io.BytesIO):
+        status = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            pass
+
+    def fake_urlopen(req, timeout=None, **kw):
+        posted.append(json.loads(req.data.decode("utf-8")))
+        return _Res(b"")
+
+    place = {"name": "큰집닭강정", "roadAddress": "서울 송파구 오금로 10", "category": "치킨,닭강정", "x": "127.1", "y": "37.5", "thumUrl": None}
+    vinfo = {"title": "방이시장 먹방 데이트 브이로그", "description": FOOD_DESC, "videoId": "t", "author": "a", "views": 1,
+             "url": "https://youtu.be/t", "thumbnail": "https://i.ytimg.com/vi/t/hqdefault.jpg"}
+    orig = (y.search_naver, y.urllib.request.urlopen, y.time.sleep, y._find_duplicate)
+    y.search_naver, y.urllib.request.urlopen, y.time.sleep = lambda q: [place], fake_urlopen, lambda s: None
+    y._find_duplicate = lambda *a, **kw: (False, None)
+    try:
+        y.mine_video_info(vinfo, "http://db", "k", dry_run=False, verbose=False)
+    finally:
+        y.search_naver, y.urllib.request.urlopen, y.time.sleep, y._find_duplicate = orig
+    assert posted and all(not p["image_url"] for p in posted), posted
 
 
 if __name__ == "__main__":
