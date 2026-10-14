@@ -33,9 +33,10 @@ def _pick_place(places, spot_name, address_or_area):
     return None
 
 
-def search_kakaomap_place(spot_name: str, address_or_area: str = "") -> dict | None:
+def search_kakaomap_place(spot_name: str, address_or_area: str = "", want_address: bool = False) -> dict | None:
     """
     카카오맵 검색(mapsearch/map.daum)을 통해 장소 ID와 실평점, 리뷰 수를 수집합니다.
+    want_address가 참이면 고른 장소의 도로명·지번 주소를 "addresses"로 함께 돌려준다(저장할 값이 아니다).
     """
     clean_name = re.sub(r'\(.*?\)|\[.*?\]', '', spot_name).strip()
     query = f"{address_or_area} {clean_name}" if address_or_area else clean_name
@@ -67,6 +68,8 @@ def search_kakaomap_place(spot_name: str, address_or_area: str = "") -> dict | N
                             place["review_count"] = review_count
                         if bookmark_count > 0:
                             place["bookmark_count"] = bookmark_count
+                        if want_address:
+                            place["addresses"] = [a for a in (best.get("new_address"), best.get("address")) if a]
                         return place
     except Exception:
         pass

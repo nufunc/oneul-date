@@ -12,6 +12,7 @@ import json
 import time
 import sys
 import os
+import re
 from datetime import datetime, timezone, timedelta
 
 from miners.youtube_miner import search_youtube_hotclip
@@ -20,11 +21,41 @@ from score_engine import calculate_hot_score
 from supabase_worker import is_noise_spot_name
 
 
-def keep_place_link(kakao_data: dict | None, existing_kakao) -> dict | None:
-    """검색이 폴백 링크(검색 바로가기)를 돌려줬는데 기존 값이 장소 링크면 기존 값을 그대로 쓴다.
-    검색 한 번의 일시 실패가 넣어 둔 장소 링크를 덮었다(P-123 소수서원 9479775)."""
-    if (isinstance(kakao_data, dict) and "/link/search/" in (kakao_data.get("url") or "")
-            and isinstance(existing_kakao, dict) and "place.map.kakao.com/" in (existing_kakao.get("url") or "")):
+def _address_keys(addr: str) -> tuple[str, str | None, str | None]:
+    """주소에서 시·군·구, 도로명+건물번호, 동·리·가+지번을 뽑는다(없으면 빈 문자열이나 None)."""
+    words = (addr or "").split()
+    sigungu = next((w for w in words[1:] if re.fullmatch(r"[가-힣]+(?:시|군|구)", w)), "")
+    road = re.search(r"([가-힣0-9]+(?:로|길))\s*(\d+(?:-\d+)?)", addr or "")
+    jibun = re.search(r"([가-힣0-9]+(?:동|리|가))\s+(?:산\s*)?(\d+(?:-\d+)?)", addr or "")
+    return sigungu, road and road.groups(), jibun and jibun.groups()
+
+
+def same_address(row_address: str, place_addresses: list[str]) -> bool:
+    """행 주소와 카카오 장소 주소가 같은 시·군·구에서 도로명+건물번호나 지번이 같으면 참.
+    비교할 수 없으면(시·군·구나 번호가 없음) 거짓."""
+    r_sgg, r_road, r_jibun = _address_keys(row_address)
+    for a in place_addresses or []:
+        p_sgg, p_road, p_jibun = _address_keys(a)
+        if r_sgg and r_sgg == p_sgg and ((r_road and r_road == p_road) or (r_jibun and r_jibun == p_jibun)):
+            return True
+    return False
+
+
+def keep_place_link(kakao_data: dict | None, existing_kakao, row_address: str = "") -> dict | None:
+    """기존 값이 장소 링크일 때 검색 결과가 그것을 덮는 경우를 막는다.
+    검색이 폴백 링크(검색 바로가기)를 돌려주면 기존 값을 그대로 쓴다. 검색 한 번의 일시 실패가 넣어 둔 장소 링크를 덮었다(P-123 소수서원 9479775).
+    다른 장소 번호를 돌려주면 그 장소의 주소가 행 주소와 같을 때만 바꾼다. 이름 포함 판정이 '33'을 무주 구천동 33경으로 통과시켜 덮었다(P-135)."""
+    if not isinstance(kakao_data, dict):
+        return kakao_data
+    new_addresses = kakao_data.pop("addresses", None)
+    old_url = existing_kakao.get("url") or "" if isinstance(existing_kakao, dict) else ""
+    if "place.map.kakao.com/" not in old_url:
+        return kakao_data
+    new_url = kakao_data.get("url") or ""
+    if "/link/search/" in new_url:
+        return existing_kakao
+    if "place.map.kakao.com/" in new_url and new_url.rstrip("/").split("/")[-1] != old_url.rstrip("/").split("/")[-1] \
+            and not same_address(row_address, new_addresses):
         return existing_kakao
     return kakao_data
 
@@ -46,7 +77,7 @@ def run_social_enrichment(supabase_url: str, service_key: str, batch_size: int =
 
     # 아직 social_links가 없거나 동기화가 가장 오래된 스팟 우선 순환 조회.
     # summary 등을 읽지 않으면 is_bad_summary("")가 항상 참이라 스팟마다 Groq로 요약을 다시 만들었다(2026-09-26)
-    fetch_url = f"{supabase_url}/rest/v1/spots?select=id,name,location,area,verified,social_links,metrics,summary,category,region,signature_items&is_closed=eq.false&order=metrics->>last_synced_at.asc.nullsfirst,id.asc&limit={batch_size}"
+    fetch_url = f"{supabase_url}/rest/v1/spots?select=id,name,location,area,verified,social_links,metrics,summary,category,region,signature_items,row_address:address&is_closed=eq.false&order=metrics->>last_synced_at.asc.nullsfirst,id.asc&limit={batch_size}"
     
     try:
         req = urllib.request.Request(fetch_url, headers=api_headers)
@@ -115,8 +146,8 @@ def run_social_enrichment(supabase_url: str, service_key: str, batch_size: int =
             # 사람이 고정한 링크(kakaomap.locked)는 검색하지 않고 그대로 둔다. 이름 포함 판정이 지운 식당 링크를 다시 붙였다(P-093)
             existing_social = s.get("social_links") or {}
             kakao_locked = isinstance(existing_social.get("kakaomap"), dict) and existing_social["kakaomap"].get("locked") is True
-            kakao_data = None if kakao_locked else search_kakaomap_place(name, " ".join((s.get("address") or "").split()[:2]) or location)
-            kakao_data = keep_place_link(kakao_data, existing_social.get("kakaomap"))
+            kakao_data = None if kakao_locked else search_kakaomap_place(name, " ".join((s.get("address") or "").split()[:2]) or location, want_address=True)
+            kakao_data = keep_place_link(kakao_data, existing_social.get("kakaomap"), s.get("row_address") or s.get("address") or "")
             time.sleep(0.5)
 
             # 이번 조회가 실패(None)해도 calculate_hot_score는 무조건 "영상
