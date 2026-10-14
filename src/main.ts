@@ -228,7 +228,7 @@ const ZONE_CENTERS: Record<string, { lat: number; lng: number }> = {
 const STORAGE_KEY = 'oneul_saved_courses';
 const RECENT_KEY = 'oneul_recent_spots';
 const LAST_COURSE_STORAGE_KEY = 'oneul_last_course';
-import { loadSpots, getCachedSpots, mergeSpots, loadSpotAliases } from './supabase';
+import { loadSpots, getCachedSpots, mergeSpots, loadSpotAliases, loadStations } from './supabase';
 
 const RECENT_MAX = 100;
 
@@ -1321,6 +1321,41 @@ function matchesDistrictQuery(spot: Spot, query: string): boolean {
   );
 }
 
+/** 도시철도 역 이름 → 역사 좌표([위도, 경도]). public/data/stations.json에서 앱 시작 때 받는다. 받기 전이나 실패하면 비어 있어 기존 검색만 쓴다 */
+let stationCoords: Record<string, [number, number][]> = {};
+const STATION_RADIUS_KM = 1;
+
+/**
+ * 검색어가 역 이름이면 그 이름과 역사 좌표. '건대입구역'·'신촌역'은 주소에 나오지 않아 0건이었다.
+ * '역'을 붙이지 않은 검색어는 이름이 주소 낱말('신촌', '시청')이면 기존 동네 검색에 맡기고, '건대입구'처럼 아닐 때만 역으로 본다
+ */
+function matchStationQuery(cleanQ: string): { name: string; points: [number, number][] } | null {
+  const compact = cleanQ.replace(/\s+/g, '');
+  const name = compact.replace(/^(.{2,})역$/, '$1');
+  const points = Object.hasOwn(stationCoords, name) ? stationCoords[name] : null;
+  if (!points || (name === compact && isPlaceHead(name))) return null;
+  return { name, points };
+}
+
+/** 스팟이 역에서 1km 안인가. 거리순 후보 목록은 좌표 없는 스팟에 지역 중심 좌표를 채우므로(_dist 9999) 그 좌표는 보지 않는다 */
+function isNearStation(spot: Spot, points: [number, number][]): boolean {
+  if (spot.lat == null || spot.lng == null || (spot as { _dist?: number })._dist === 9999) return false;
+  return points.some(([lat, lng]) => getDistanceKm(lat, lng, spot.lat!, spot.lng!) <= STATION_RADIUS_KM);
+}
+
+/**
+ * 검색어가 역 이름일 때 거리순 기준점. 같은 이름 역이 여러 곳이면(시청, 신촌) 내 위치에서 가장 가까운 역을 쓰고,
+ * 위치가 없으면 1km 안 스팟이 가장 많은 역을 쓴다
+ */
+function searchStationCenter(query: string): { label: string; lat: number; lng: number } | null {
+  const station = matchStationQuery(stripSearchStopwords(query.replace(/[#·,/\\]/g, ' ').trim().toLowerCase()));
+  if (!station) return null;
+  const score = ([lat, lng]: [number, number]) =>
+    userCoords ? -getDistanceKm(userCoords.lat, userCoords.lng, lat, lng) : spots.filter((s) => !s.is_closed && isNearStation(s, [[lat, lng]])).length;
+  const [lat, lng] = station.points.reduce((best, p) => (score(p) > score(best) ? p : best));
+  return { label: `${station.name}역`, lat, lng };
+}
+
 function matchesSearchQuery(spot: Spot, query: string): boolean {
   if (!query || !query.trim()) return true;
 
@@ -1329,6 +1364,9 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
   if (!cleanQ) return true;
   // '데이트'만 친 검색은 거를 정보가 없다(모든 장소가 데이트 장소다). 요약 템플릿에서 빼기 전에는 요약에 걸려 사실상 전체였다
   if (cleanQ === '데이트') return true;
+  // 역 이름이면 역에서 1km 안 스팟을 더한다. 기존 결과('성수역'의 성수동 일대)는 줄이지 않으려고 합집합으로 두고 아래로 이어 간다
+  const station = matchStationQuery(cleanQ);
+  if (station && isNearStation(spot, station.points)) return true;
 
   // 지역어로 시작하는 검색어('부산호텔', '강남 와인')는 지역과 나머지를 AND로 묶는다. 동의어 사전이 '호텔'·'와인'만
   // 보고 곧바로 통과시켜 지역이 무시됐고, '성수카페'처럼 사전 밖 조합은 한 덩어리라 0건이었다
@@ -6230,8 +6268,9 @@ function renderSpotDiscovery(): void {
   // 검색어가 지역이면 그 지역 중심이 먼저다. 지역 검색이 성수에서 가까운 순으로 늘어서 제주·부산 검색의 앞이 변두리였다
   let effectiveCoords = userCoords;
   discoveryQueryOrigin = null;
-  const queryHead = searchRegionHead(state.spotSearchQuery);
-  const queryCenter = queryHead ? searchRegionCenter(queryHead) : null;
+  const queryStation = searchStationCenter(state.spotSearchQuery);
+  const queryHead = queryStation?.label ?? searchRegionHead(state.spotSearchQuery);
+  const queryCenter = queryStation ?? (queryHead ? searchRegionCenter(queryHead) : null);
   if (queryHead && queryCenter && (!userCoords || getDistanceKm(userCoords.lat, userCoords.lng, queryCenter.lat, queryCenter.lng) > 30)) {
     effectiveCoords = queryCenter;
     discoveryQueryOrigin = queryHead;
@@ -8109,6 +8148,9 @@ async function init(): Promise<void> {
     for (const [from, to] of Object.entries(aliases)) spotAliasIds.set(Number(from), to);
     spotById = buildSpotIndex(spots);
     canonicalizeSavedSpotIds();
+  });
+  loadStations().then((stations) => {
+    stationCoords = stations;
   });
   if (isSharedLink) await aliasesReady;
 

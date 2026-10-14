@@ -314,6 +314,17 @@ export async function loadSpotAliases(): Promise<Record<string, number>> {
   return {};
 }
 
+/** 도시철도 역 이름 → 역사 좌표([위도, 경도]) (한국철도공사 도시철도역사정보, public/data/stations.json). 실패하면 빈 객체 */
+export async function loadStations(): Promise<Record<string, [number, number][]>> {
+  try {
+    const res = await fetch('./data/stations.json');
+    if (res.ok) return ((await res.json()) as { stations: Record<string, [number, number][]> }).stations;
+  } catch {
+    // 역 좌표가 없어도 앱은 동작한다. 역 이름 검색만 기존 방식으로 처리한다
+  }
+  return {};
+}
+
 /**
  * Supabase DB에서 활성 스팟 목록을 가져옵니다.
  * 특정 regionMatches(예: ['서울'] 또는 ['경기', '인천'])가 지정되면 해당 지역만 우선 경량 조회합니다.
