@@ -1344,6 +1344,28 @@ function isNearStation(spot: Spot, points: [number, number][]): boolean {
   return points.some(([lat, lng]) => getDistanceKm(lat, lng, spot.lat!, spot.lng!) <= STATION_RADIUS_KM);
 }
 
+/** 역명 질의 코스의 앵커 후보 수 하한. 역 1km 안 스팟이 이보다 적으면 역에서 가까운 순으로 이만큼까지 넓힌다 */
+const STATION_ANCHOR_MIN = 15;
+
+/** 역사 좌표 중 가장 가까운 곳까지의 거리(km). 좌표가 없거나 지역 중심 좌표(_dist 9999)를 채운 스팟은 Infinity */
+function stationDistanceKm(spot: Spot, points: [number, number][]): number {
+  if (spot.lat == null || spot.lng == null || (spot as { _dist?: number })._dist === 9999) return Infinity;
+  return Math.min(...points.map(([lat, lng]) => getDistanceKm(lat, lng, spot.lat!, spot.lng!)));
+}
+
+/**
+ * 역명 질의 코스의 앵커 후보 반경(km). 역 1km 안 스팟이 15곳 이상이면 1km이고, 모자라면 역에서 가까운 순 15번째 스팟까지 넓힌다.
+ * 슬롯마다 따로 넓히면 후보가 적은 슬롯이 먼 스팟으로 채워지므로 슬롯 전체 후보에서 한 번 정한다. 좌표 있는 스팟이 없으면 null
+ */
+function stationAnchorRadiusKm(candidates: Spot[], points: [number, number][]): number | null {
+  const distances = [...new Map(candidates.map((s) => [s.id, s])).values()]
+    .map((s) => stationDistanceKm(s, points))
+    .filter(Number.isFinite)
+    .sort((a, b) => a - b);
+  if (distances.length === 0) return null;
+  return Math.max(STATION_RADIUS_KM, distances[Math.min(distances.length, STATION_ANCHOR_MIN) - 1]);
+}
+
 /**
  * 검색어가 역 이름일 때 거리순 기준점. 같은 이름 역이 여러 곳이면(시청, 신촌) 내 위치에서 가장 가까운 역을 쓰고,
  * 위치가 없으면 1km 안 스팟이 가장 많은 역을 쓴다
@@ -1799,18 +1821,31 @@ function generateCourse(
   const applyChipFilters = (list: Spot[]) => filterByBudget(strictMoodPresetFilter(list, moodPreset), budgetFilter);
   // 지역어 검색이면 그 지역 안 스팟만 앵커 후보로 쓴다. 이름에만 '전주'가 든 서울 전주전집이 앵커가 되면 코스 전체가 서울이 됐다
   const scope = placeScopeOf(query);
+  // 역명 검색('서면역')은 역 주변 스팟을 앵커로 쓴다. 지역어 범위와 달리 역 이름이 주소에 없어 지명 낱말 일치만으로는 역에서 먼 곳이 앵커가 됐다
+  const station = query ? matchStationQuery(stripSearchStopwords(query.replace(/[#·,/\\]/g, ' ').trim().toLowerCase())) : null;
   const inScopeFirst = (list: Spot[]) => {
     const inScope = scope ? list.filter(scope) : [];
     return inScope.length > 0 ? inScope : list;
+  };
+  // 슬롯별 앵커 후보: 검색어에 맞는 스팟에 칩 필터와 범위를 걸고 최근 노출을 뺀다.
+  // 최근 노출 제외는 검색어 판정 뒤에 건다. 앞에서 빼면 맞는 스팟이 모두 이력에 든 검색어가 앵커를 잃고 전국 무작위 코스가 됐다
+  const anchorPoolsBySlot = (slots: SlotKey[]): Spot[][] => {
+    const matched = slots.map((slot) =>
+      applyChipFilters(getCandidates(all, slot, regionKeys, 'ALL', [], zoneKeys, null, isIndoor).filter((s) => matchesSearchQuery(s, query!))),
+    );
+    const radius = station ? stationAnchorRadiusKm(matched.flat(), station.points) : null;
+    return matched.map((list) =>
+      excludeRecent(radius === null ? inScopeFirst(list) : list.filter((s) => stationDistanceKm(s, station!.points) <= radius), avoid),
+    );
   };
 
   // 1. 검색어가 있는 경우: 검색어 매칭 스팟을 보유한 슬롯 중 앵커 후보 최우선 탐색 (분위기 제약 완화)
   if (query) {
     // 1-1. 현재 활성화된 슬롯 중에서 매칭 스팟 탐색
-    for (const slot of slotsOn) {
+    const pools = anchorPoolsBySlot(slotsOn);
+    for (const [i, slot] of slotsOn.entries()) {
       // 검색어가 있을 때는 mood 제약 없이 해당 지역/존의 스팟 풀에서 폭넓게 검색
-      const candidates = excludeRecent(getCandidates(all, slot, regionKeys, 'ALL', [], zoneKeys, null, isIndoor), avoid);
-      const matched = inScopeFirst(applyChipFilters(candidates.filter((s) => matchesSearchQuery(s, query))));
+      const matched = pools[i];
       if (matched.length > 0 && (anchorSlot === null || matched.length < anchorPool.length)) {
         anchorSlot = slot;
         anchorPool = matched;
@@ -1819,9 +1854,9 @@ function generateCourse(
 
     // 1-2. 현재 활성 슬롯에서 못 찾았으나 전체 슬롯(stay 포함) 중 매칭 스팟이 있는 경우
     if (anchorPool.length === 0) {
-      for (const slot of SLOT_ORDER) {
-        const candidates = excludeRecent(getCandidates(all, slot, regionKeys, 'ALL', [], zoneKeys, null, isIndoor), avoid);
-        const matched = inScopeFirst(applyChipFilters(candidates.filter((s) => matchesSearchQuery(s, query))));
+      const allPools = anchorPoolsBySlot(SLOT_ORDER);
+      for (const [i, slot] of SLOT_ORDER.entries()) {
+        const matched = allPools[i];
         if (matched.length > 0 && (anchorSlot === null || matched.length < anchorPool.length)) {
           anchorSlot = slot;
           anchorPool = matched;
