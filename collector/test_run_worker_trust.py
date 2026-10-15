@@ -171,6 +171,39 @@ def test_ids_targets_only_those_rows_without_cooldown():
     assert "id=in.(11,22)" in urls[0] and "updated_at.lt" not in urls[0] and "is_closed=eq.false" in urls[0]
 
 
+def _patch_urls(spot, places):
+    urls = []
+
+    def fake_urlopen(req, timeout=None, **kw):
+        if getattr(req, "method", "GET") == "PATCH":
+            urls.append(req.full_url)
+            return _Res(b"")
+        return _Res(json.dumps([dict(spot)]).encode("utf-8"))
+
+    orig = (w.urllib.request.urlopen, w.search_naver, w.time.sleep)
+    w.urllib.request.urlopen, w.search_naver, w.time.sleep = fake_urlopen, lambda q, limit=3: places, lambda s: None
+    try:
+        w.run_worker("http://db", "key", limit=1)
+    finally:
+        w.urllib.request.urlopen, w.search_naver, w.time.sleep = orig
+    return urls
+
+
+def test_patch_is_guarded_against_rows_changed_after_read():
+    # 읽은 뒤 병합이 닫거나 번호를 비운 행을 읽어 둔 값으로 되돌려 쓰지 않는다(2026-10-15 P-145 3행·영흥도)
+    spot = dict(SPOT, updated_at="2026-10-15T21:03:09.123456+09:00")
+    matched = dict(HEALTH_CENTER, name="양평 샬레 트리", category="펜션")
+    for places in ([matched], [HEALTH_CENTER], []):
+        url = _patch_urls(spot, places)[0]
+        assert "&is_closed=eq.false" in url, url
+        assert "&updated_at=eq.2026-10-15T21%3A03%3A09.123456%2B09%3A00" in url, url
+
+
+def test_patch_guard_matches_null_updated_at():
+    assert w.spot_patch_guard({"id": 1, "updated_at": None}).endswith("updated_at=is.null")
+    assert w.spot_patch_guard({"id": 1}).startswith("&is_closed=eq.false&")
+
+
 if __name__ == "__main__":
     for fn in [v for k, v in list(globals().items()) if k.startswith("test_")]:
         fn()

@@ -1175,6 +1175,19 @@ def _env_flag(name, env=None):
     return str(raw or "").strip().lower() in ("1", "true", "yes", "y", "on")
 
 
+def spot_patch_guard(spot: dict) -> str:
+    """run_worker가 읽은 행을 되돌려 쓰지 않게 PATCH URL에 붙이는 조건(P-145b).
+
+    한 번에 500행을 읽고 행마다 외부 검색을 거쳐 쓰므로 읽은 뒤 몇 분 사이에 다른 쓰기(병합으로 닫음, 번호 비움)가
+    들어올 수 있다. 종전에는 그 행을 읽어 둔 값으로 덮어 닫힌 행이 `is_closed=False`로 다시 열리고 비운 번호가 되돌아왔다
+    (2026-10-15 병합 95행 중 3행, 영흥도 1행). 읽은 뒤 행이 바뀌었으면(updated_at 불일치) 닫혔어도 0행이 갱신돼
+    쓰기를 건너뛰고, 다음 순환이 새 값으로 다시 읽는다.
+    """
+    updated_at = spot.get("updated_at")
+    stamp = f"eq.{updated_at}" if updated_at else "is.null"
+    return "&is_closed=eq.false&updated_at=" + urllib.parse.quote(stamp, safe="")
+
+
 def run_worker(supabase_url: str, service_key: str, limit: int = 50, ids=None):
     if not supabase_url or not service_key:
         print("❌ Supabase 환경변수가 설정되지 않았습니다 (SUPABASE_URL, SUPABASE_SERVICE_KEY).")
@@ -1519,7 +1532,7 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50, ids=None):
         # Supabase UPDATE (컬럼 부재 시 자동 복구 재시도)
         if patch_data:
             patch_data = sanitize_spot(patch_data)
-            patch_url = f"{supabase_url}/rest/v1/spots?id=eq.{s_id}"
+            patch_url = f"{supabase_url}/rest/v1/spots?id=eq.{s_id}{spot_patch_guard(spot)}"
             patch_bytes = json.dumps(patch_data).encode('utf-8')
             patch_req = urllib.request.Request(patch_url, data=patch_bytes, headers=api_headers, method='PATCH')
             try:
