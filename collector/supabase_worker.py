@@ -1155,6 +1155,18 @@ def stay_flip_vetoed(own_category, name, price=""):
     return not (any(p.search(nm) for p in SLOT_LODGING_NAME_RE) or SLOT_CAMP_NAME_RE.search(nm))
 
 
+TOUR_TYPE_LABELS = {"문화시설", "관광지", "레포츠/체험", "쇼핑/소품", "축제/행사"}
+
+
+def stay_category_patch(own_category, naver_category):
+    """slot을 stay로 바꾸는 행의 category가 TourAPI 유형명이면 네이버 숙박 카테고리로 맞춘다. 아니면 None.
+    유형명이 남으면 앱의 숙박 판정이 이름 끝 '캠핑장'류만 인정해 stay 행이 거부된다(P-144)."""
+    own = (own_category or "").strip()
+    if own in TOUR_TYPE_LABELS and derive_slot(naver_category) == "stay":
+        return naver_category
+    return None
+
+
 def _env_flag(name, env=None):
     """환경변수(또는 .env) 값이 truthy 인지 판별"""
     raw = os.getenv(name)
@@ -1412,6 +1424,8 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50, ids=None):
                 )
                 if not slot_heal_dryrun:
                     patch_data["slot"] = d_slot
+                    if d_slot == "stay" and (new_cat := stay_category_patch(spot.get("category"), heal_cat)):
+                        patch_data["category"] = new_cat
 
             # 2026-09-21 제거: [Lodging Quarantine]이 숙박/펜션/호텔/글램핑 업소를
             # 무조건 is_closed=True로 자동 격리했다. stay가 아직 정식 슬롯이 아니던

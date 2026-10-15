@@ -70,6 +70,13 @@ def is_campsite(ctype_id: str, title: str) -> bool:
     return bool(CAMPSITE_NAME.search(title) or (ctype_id == "28" and LEISURE_LODGING_NAME.search(title)))
 
 
+def stay_category(ctype_id: str, title: str, ctype_name: str) -> str:
+    """is_campsite가 stay로 넣는 행의 category. 유형명(레포츠/체험)을 그대로 두면 앱의 숙박 판정이 이름 끝 '캠핑장'류만 인정해 거부한다(P-144)"""
+    if not is_campsite(ctype_id, title):
+        return ctype_name
+    return "펜션" if "펜션" in title else "야영,캠핑장"
+
+
 def is_non_date_leisure_or_monument(ctype_id: str, title: str) -> bool:
     """레포츠/체험의 골프장·낚시터와 관광지의 단독 유물이면 True"""
     title = title.strip()
@@ -522,7 +529,7 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                     "price": (fee or {}).get("price"),
                     **({k: fee[k] for k in ("price_tier", "avg_price_per_person") if fee and fee.get(k) is not None}),
                     "summary": f"{title} — 한국관광공사 관광정보 {ctype_name} 명소 ({area})",
-                    "category": ctype_name,
+                    "category": stay_category(ctype_id, title, ctype_name),
                     **({"closed_days": closed_days} if closed_days else {}),
                     **({"business_hours": hours} if hours else {}),
                     "image_url": first_img,
