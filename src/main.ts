@@ -512,10 +512,10 @@ function hasLodgingPrice(price: string | null | undefined): boolean {
 
 /** 목차·리스티클·문서 섹션 항목 (실제 장소가 아닌 원본 노트의 제목 줄) */
 const LISTICLE_NAME_PATTERNS: RegExp[] = [
-  /[0-9]+\s*선(?!착)/,
+  /[0-9]+\s*선(?![착가-힣])/,
   /상세\s*(분석|명세)/,
   /트렌드\s*분석/,
-  /마크다운|아카이브/,
+  /마크다운/,
   /\bpart\s*[0-9]/i,
   /\bchapter\s*[0-9]/i,
   /카테고리\s*[0-9]/,
@@ -604,11 +604,12 @@ function isPollutedMediaChannelDummy(spot: Spot): boolean {
   const name = (spot.name || '').trim();
   if (name.length === 0) return true;
   const indicators = [
-    '또간집', '풍자', '먹을텐데', '성시경', '줄서는식당', '줄 서는 식당', 
+    '또간집', '먹을텐데', '성시경', '줄서는식당', '줄 서는 식당', 
     '맛있는녀석들', '맛있는 녀석들', '놀라운토요일', '수요미식회', '골목식당', '백종원',
     '생활의달인', '전현무계획', '최자로드', '유튜브', '브이로그', 'vlog', 'shorts'
   ];
-  return indicators.some((ind) => name.includes(ind));
+  // '풍자'는 '청풍자연농원'처럼 다른 낱말 속에 든 경우가 있어 낱말로 따로 본다
+  return indicators.some((ind) => name.includes(ind)) || /(^|\s)풍자(\s|$)/.test(name);
 }
 
 /** 코스 후보로 올릴 수 있는 스폿인지 — 생성·공유복원·저장복원 전 경로가 공유하는 단일 관문 */
@@ -1358,6 +1359,8 @@ function searchStationCenter(query: string): { label: string; lat: number; lng: 
 
 function matchesSearchQuery(spot: Spot, query: string): boolean {
   if (!query || !query.trim()) return true;
+  // 이름을 그대로 친 검색은 늘 찾는다. '군산항'(지역어 + 한 글자)과 '결'(한 글자 이름)은 아래 규칙이 모두 닫았다
+  if ((spot.name || '').trim().toLowerCase() === query.trim().toLowerCase()) return true;
 
   // 1. # 및 구분자(·, /, , 등) 정제
   const cleanQ = stripSearchStopwords(query.replace(/[#·,/\\]/g, ' ').trim().toLowerCase());
@@ -8151,6 +8154,8 @@ async function init(): Promise<void> {
   });
   loadStations().then((stations) => {
     stationCoords = stations;
+    // 역 이름 검색은 좌표가 있어야 걸리므로, 검색어가 먼저 입력됐으면 좌표가 도착한 뒤 다시 그린다
+    if (state.mainMode === 'spots' && state.spotSearchQuery.trim()) renderSpotDiscovery();
   });
   if (isSharedLink) await aliasesReady;
 
