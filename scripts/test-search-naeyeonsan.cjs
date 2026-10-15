@@ -34,6 +34,10 @@ for (const q of ['장가계', '포항 장가계']) {
   for (const s of [falls, view, park]) assert.strictEqual(m.matchesSearchQuery(s, q), true, `${q} -> ${s.name}`);
   assert.strictEqual(m.matchesSearchQuery(iryeongdae, q), false, `${q}는 영일대에 걸리지 않는다`);
 }
+// 강릉 소금강 행은 걸리지 않는다('소금강'만 동의어로 쓰면 7곳이 걸려 내연산 코스 앵커가 강릉으로 갔다)
+const gangneung = all.find((s) => s.name === '오대산 소금강계곡' && !s.is_closed);
+assert.ok(gangneung, 'spots.json에서 오대산 소금강계곡을 찾지 못했다');
+for (const q of ['내연산', '장가계', '포항 장가계']) assert.strictEqual(m.matchesSearchQuery(gangneung, q), false, `${q}는 강릉 소금강계곡에 걸리지 않는다`);
 // 지역어가 붙으면 그 지역 안에서만 본다
 assert.strictEqual(m.matchesSearchQuery({ ...falls, area: '서울', location: '수도권 서울', address: '서울 중구' }, '포항 장가계'), false);
 // 기존 동의어 동작은 그대로다
