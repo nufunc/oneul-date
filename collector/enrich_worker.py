@@ -18,7 +18,7 @@ from datetime import datetime, timezone, timedelta
 from miners.youtube_miner import search_youtube_hotclip
 from miners.kakaomap_miner import search_kakaomap_place
 from score_engine import calculate_hot_score
-from supabase_worker import is_noise_spot_name
+from supabase_worker import is_noise_spot_name, provider_number_owned_elsewhere
 
 
 def _address_keys(addr: str) -> tuple[str, str | None, str | None]:
@@ -41,14 +41,18 @@ def same_address(row_address: str, place_addresses: list[str]) -> bool:
     return False
 
 
-def keep_place_link(kakao_data: dict | None, existing_kakao, row_address: str = "") -> dict | None:
+def keep_place_link(kakao_data: dict | None, existing_kakao, row_address: str = "", spot_id=None) -> dict | None:
     """기존 값이 장소 링크일 때 검색 결과가 그것을 덮는 경우를 막는다.
     검색이 폴백 링크(검색 바로가기)를 돌려주면 기존 값을 그대로 쓴다. 검색 한 번의 일시 실패가 넣어 둔 장소 링크를 덮었다(P-123 소수서원 9479775).
-    다른 장소 번호를 돌려주면 그 장소의 주소가 행 주소와 같을 때만 바꾼다. 이름 포함 판정이 '33'을 무주 구천동 33경으로 통과시켜 덮었다(P-135)."""
+    다른 장소 번호를 돌려주면 그 장소의 주소가 행 주소와 같을 때만 바꾼다. 이름 포함 판정이 '33'을 무주 구천동 33경으로 통과시켜 덮었다(P-135).
+    행이 아직 갖지 않은 번호를 다른 열린 행이 이미 갖고 있으면 쓰지 않는다(번호 소유 관문, P-145)."""
     if not isinstance(kakao_data, dict):
         return kakao_data
     new_addresses = kakao_data.pop("addresses", None)
     old_url = existing_kakao.get("url") or "" if isinstance(existing_kakao, dict) else ""
+    new_number = kakao_data["url"].rstrip("/").split("/")[-1] if "place.map.kakao.com/" in (kakao_data.get("url") or "") else None
+    if new_number and new_number != old_url.rstrip("/").split("/")[-1] and provider_number_owned_elsewhere("kakao", new_number, spot_id):
+        return existing_kakao
     if "place.map.kakao.com/" not in old_url:
         return kakao_data
     new_url = kakao_data.get("url") or ""
@@ -147,7 +151,7 @@ def run_social_enrichment(supabase_url: str, service_key: str, batch_size: int =
             existing_social = s.get("social_links") or {}
             kakao_locked = isinstance(existing_social.get("kakaomap"), dict) and existing_social["kakaomap"].get("locked") is True
             kakao_data = None if kakao_locked else search_kakaomap_place(name, " ".join((s.get("address") or "").split()[:2]) or location, want_address=True)
-            kakao_data = keep_place_link(kakao_data, existing_social.get("kakaomap"), s.get("row_address") or s.get("address") or "")
+            kakao_data = keep_place_link(kakao_data, existing_social.get("kakaomap"), s.get("row_address") or s.get("address") or "", spot_id)
             time.sleep(0.5)
 
             # 이번 조회가 실패(None)해도 calculate_hot_score는 무조건 "영상

@@ -559,12 +559,29 @@ def normalize_spot_address(address):
     return "".join(tokens)
 
 
-def place_name_matches(name, place_name):
+NAME_CONTAIN_MAX_M = 1000
+
+
+def place_distance_m(spot, place):
+    """스팟 행(lat, lng)과 검색 결과(x=경도, y=위도) 사이 거리(m). 좌표가 없거나 숫자가 아니면 None."""
+    try:
+        lat0, lng0 = float(spot.get("lat")), float(spot.get("lng"))
+        lat1, lng1 = float((place or {}).get("y")), float((place or {}).get("x"))
+    except (TypeError, ValueError):
+        return None
+    dy = (lat1 - lat0) * 111_320
+    dx = (lng1 - lng0) * 111_320 * math.cos(math.radians(lat0))
+    return math.hypot(dx, dy)
+
+
+def place_name_matches(name, place_name, distance_m=None):
     """DB 스팟 이름과 지도 검색 결과 이름이 같은 곳을 가리키는지 느슨하게 본다.
     수집기의 is_name_match에 더해, 정규화 이름 한쪽이 다른 쪽을 포함하면 같은 곳으로 본다
-    ('청주 데어데어 베이커리'/'데어데어'). 지역명이 앞에 붙은 DB 이름을 is_name_match만으로 보면 대부분 떨어진다."""
+    ('청주 데어데어 베이커리'/'데어데어'). 지역명이 앞에 붙은 DB 이름을 is_name_match만으로 보면 대부분 떨어진다.
+    distance_m(스팟과 결과 사이 거리)가 NAME_CONTAIN_MAX_M를 넘으면 포함 판정은 쓰지 않는다. 산·호수·강 이름 행이 4~5km 밖
+    시설의 번호를 받았다('가리왕산'/'정선가리왕산케이블카 숙암역', P-145). 거리를 모르면(None) 종전대로 본다."""
     a, b = normalize_spot_name(name), normalize_spot_name(place_name)
-    if len(a) >= 2 and len(b) >= 2 and (a in b or b in a):
+    if len(a) >= 2 and len(b) >= 2 and (a in b or b in a) and (distance_m is None or distance_m <= NAME_CONTAIN_MAX_M):
         return True
     try:
         from youtube_vlog_miner import is_name_match
@@ -789,6 +806,25 @@ def image_url_used_far_away(url, lat, lng, exclude_id=None) -> bool:
         return False
     return any(str(r.get("id")) != str(exclude_id) and r.get("lat") is not None and r.get("lng") is not None
                and not near(r) for r in rows)
+
+
+def provider_number_owned_elsewhere(provider, number, exclude_id=None) -> bool:
+    """같은 지도 장소 번호를 provider_ids(카카오는 장소 링크도)에 가진 열린 다른 행이 있으면 True(P-145).
+    새 번호를 행에 쓰기 직전의 공통 관문이다. 환경변수가 없거나 조회가 실패하면 False(쓰기를 막지 않는다)."""
+    base = os.environ.get("SUPABASE_URL")
+    key = os.environ.get("SUPABASE_SERVICE_KEY")
+    if not (provider and number and base and key):
+        return False
+    number = urllib.parse.quote(str(number), safe='')
+    clauses = [f"provider_ids->>{provider}.eq.{number}"]
+    if provider == "kakao":
+        clauses.append(f"social_links->kakaomap->>url.like.*place.map.kakao.com%2F{number}")
+    headers = {"apikey": key, "Authorization": f"Bearer {key}"}
+    try:
+        rows = _get_rows(f"{base}/rest/v1/spots?select=id&is_closed=eq.false&or=({','.join(clauses)})&limit=5", headers)
+    except Exception:
+        return False
+    return any(str(r.get("id")) != str(exclude_id) for r in rows)
 
 
 def sanitize_spot(rec: dict) -> dict:
@@ -1230,7 +1266,7 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50, ids=None):
             def _same_region(p):
                 return same_region_area(addr_ra, derive_region_area(fix_garbled_sido_prefix(p.get("roadAddress") or p.get("address"))))
             matched = next((p for p in places if _spot_like(p) and _same_region(p)
-                            and (place_name_matches(name, p.get("name")) or same_place_by_address(name, addr, p))), None)
+                            and (place_name_matches(name, p.get("name"), place_distance_m(spot, p)) or same_place_by_address(name, addr, p))), None)
             best_place = matched or next((p for p in places if _spot_like(p)), None)
             top = best_place if best_place else places[0]
             # 이름이 맞지 않는 결과에서는 존재 확인만 하고 속성(이름·카테고리·장소 번호·이미지·좌표·주소)은 옮기지 않는다
@@ -1251,7 +1287,7 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50, ids=None):
                                 r_ra = derive_region_area(r_addr)
                                 # 이름이 맞는 결과로만 바꾼다. 종전에는 권역만 맞으면 이름이 다른 가게로 바꾸고도
                                 # trusted가 True로 남아 그 가게 속성이 옮겨 붙을 수 있었다(2026-09-27 코드 판독)
-                                if r_ra[0] == reg and same_region_area(addr_ra, r_ra) and place_name_matches(name, rp.get("name")):
+                                if r_ra[0] == reg and same_region_area(addr_ra, r_ra) and place_name_matches(name, rp.get("name"), place_distance_m(spot, rp)):
                                     top = rp
                                     road_addr = r_addr
                                     trusted = True
@@ -1302,8 +1338,11 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50, ids=None):
                 if not isinstance(p_ids, dict):
                     p_ids = {}
                 # 09-21 네이버 차단 뒤로 결과는 카카오라 "naver" 고정 키면 카카오 id가 네이버 칸에 들어간다
-                p_ids[top.get("provider") or "naver"] = str(top_id)
-                patch_data["provider_ids"] = p_ids
+                provider = top.get("provider") or "naver"
+                # 번호 소유 관문(P-145): 이미 가진 번호는 그대로 두고, 새 번호는 다른 열린 행이 갖고 있으면 쓰지 않는다
+                if p_ids.get(provider) == str(top_id) or not provider_number_owned_elsewhere(provider, top_id, s_id):
+                    p_ids[provider] = str(top_id)
+                    patch_data["provider_ids"] = p_ids
 
             # [Auto-Healing] 소제목으로 오염된 상호명을 네이버 공식 상호명으로 자동 치유
             if is_polluted_header_name(name) and trusted:
