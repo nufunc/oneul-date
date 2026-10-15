@@ -756,6 +756,40 @@ def _near_fn(lat, lng, meters=50):
 _CONTROL_CHAR_RE = re.compile(r'[\x00-\x1f\x7f]')
 VALID_SLOTS = {"day", "evening", "night", "stay"}
 
+# 열린 행이 실제로 쓰는 사진 호스트(2026-10-15 라이브 spots.json 실측). 블로그 호스트는 막지 않는다.
+# 이 밖(숙박 예약 yaimg.yanolja.com, 스티커 상점 storep-phinf.pstatic.net, 영상 표지 i.ytimg.com 등)은 장소 사진이 아니다(P-141)
+ALLOWED_IMAGE_HOSTS = {
+    "tong.visitkorea.or.kr", "t1.kakaocdn.net", "t1.daumcdn.net", "postfiles.pstatic.net",
+    "blog.kakaocdn.net", "blogfiles.pstatic.net", "dthumb-phinf.pstatic.net", "phinf.pstatic.net",
+    "cafeptthumb-phinf.pstatic.net", "search.pstatic.net",
+}
+IMAGE_REUSE_METERS = 300
+
+
+def is_allowed_image_host(url) -> bool:
+    try:
+        return (urllib.parse.urlsplit(url).hostname or "").lower() in ALLOWED_IMAGE_HOSTS
+    except ValueError:
+        return False
+
+
+def image_url_used_far_away(url, lat, lng, exclude_id=None) -> bool:
+    """같은 image_url을 쓰는 열린 다른 행이 (lat, lng)에서 300m 넘게 떨어져 있으면 True.
+    다른 장소의 사진이 옮겨 붙은 경우를 거른다(P-141). 환경변수가 없거나 조회가 실패하면 False(사진을 그대로 둔다)."""
+    base = os.environ.get("SUPABASE_URL")
+    key = os.environ.get("SUPABASE_SERVICE_KEY")
+    near = _near_fn(lat, lng, meters=IMAGE_REUSE_METERS)
+    if not (url and base and key and near):
+        return False
+    headers = {"apikey": key, "Authorization": f"Bearer {key}"}
+    try:
+        rows = _get_rows(f"{base}/rest/v1/spots?select=id,lat,lng&is_closed=eq.false"
+                         f"&image_url=eq.{urllib.parse.quote(url, safe='')}&limit=50", headers)
+    except Exception:
+        return False
+    return any(str(r.get("id")) != str(exclude_id) and r.get("lat") is not None and r.get("lng") is not None
+               and not near(r) for r in rows)
+
 
 def sanitize_spot(rec: dict) -> dict:
     """INSERT·PATCH 직전 공통 검증(oneul-date-95734 제안, 2026-09-23).
@@ -786,6 +820,11 @@ def sanitize_spot(rec: dict) -> dict:
             lat_f = lng_f = None
         rec["lat"] = lat_f
         rec["lng"] = lng_f
+
+    # 사진 관문(P-141): 허용 호스트 밖이거나 300m 넘게 떨어진 다른 행이 이미 쓰는 URL이면 쓰지 않는다
+    if rec.get("image_url") and (not is_allowed_image_host(rec["image_url"])
+                                 or image_url_used_far_away(rec["image_url"], rec.get("lat"), rec.get("lng"), rec.get("id"))):
+        rec["image_url"] = None
 
     if "slot" in rec and rec.get("slot") not in VALID_SLOTS:
         rec["slot"] = None
@@ -1342,7 +1381,8 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50, ids=None):
             # 열어뒀다) 이 로직이 그 수집분을 다음 재검증 주기마다 도로 닫아버린다.
             # slot="stay" 태깅은 위 [Slot Healing] 블록이 derive_slot()로 이미 처리한다.
 
-            if thum and not spot.get("image_url"):
+            if thum and not spot.get("image_url") and not image_url_used_far_away(
+                    thum, spot.get("lat") or lat_val, spot.get("lng") or lng_val, s_id):
                 patch_data["image_url"] = thum
                 enriched_count += 1
             if lat_val and lng_val and not spot.get("lat"):
