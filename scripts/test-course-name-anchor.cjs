@@ -17,7 +17,7 @@ for (const st of sf.statements) {
   else if (ts.isVariableStatement(st)) st.declarationList.declarations.forEach((d) => ts.isIdentifier(d.name) && decls.set(d.name.text, st));
 }
 const need = new Set();
-const queue = ['generateCourse'];
+const queue = ['generateCourse', 'zoneKeysForQuery'];
 while (queue.length) {
   const name = queue.pop();
   if (need.has(name)) continue;
@@ -36,7 +36,10 @@ const code = [...new Set([...need].map((n) => decls.get(n)))]
   .replace('function matchesSearchQuery(', 'function matchesSearchQueryUncached(')
   .replace('function getCandidates(', 'function getCandidatesUncached(')
   .replace('function isCourseEligible(', 'function isCourseEligibleUncached(')
+  // 숙박 외 칸 거리를 앵커 기준으로 재려고 마지막에 고른 앵커를 남긴다
+  .replace('anchorSpot = anchor;', 'anchorSpot = anchor; lastAnchor = anchor;')
   .concat(`
+let lastAnchor = null;
 const candidateCache = new Map();
 function getCandidates(all, slot, regionKeys, moodKey, excludeIds, zoneKeys, anchor, indoorOnly) {
   const key = JSON.stringify([slot, regionKeys, moodKey, excludeIds, zoneKeys, anchor && anchor.id, indoorOnly]);
@@ -57,9 +60,9 @@ function matchesSearchQuery(spot, query) {
 
 const { stations } = JSON.parse(fs.readFileSync(path.join(root, 'public', 'data', 'stations.json'), 'utf8'));
 const rawSpots = JSON.parse(fs.readFileSync(path.join(root, 'public', 'data', 'spots.json'), 'utf8'));
-const { generateCourse, isCourseEligible, matchesSearchQuery, setStations } = new Function(
+const { generateCourse, isCourseEligible, matchesSearchQuery, zoneKeysForQuery, zoneSelectionMatcher, getLastAnchor, setStations } = new Function(
   'rawSpotsData',
-  `${ts.transpile(code, { target: 'es2022' })};return { generateCourse, isCourseEligible, matchesSearchQuery, setStations: (s) => { stationCoords = s; } };`,
+  `${ts.transpile(code, { target: 'es2022' })};return { generateCourse, isCourseEligible, matchesSearchQuery, zoneKeysForQuery, zoneSelectionMatcher, getLastAnchor: () => lastAnchor, setStations: (s) => { stationCoords = s; } };`,
 )(rawSpots);
 setStations(stations);
 
@@ -76,15 +79,16 @@ const RECENT_MAX = 100;
 const STAY_ANCHOR_KM = 20;
 
 // 앱처럼 만든 코스의 스팟을 이력 맨 뒤에 더하고 100곳을 넘기면 앞에서 뺀다. 이력은 비우지 않고 이어 간다
-const run = (query, slots, times, seed) => {
+const run = (query, slots, times, seed, zoneKeys = [], zoneFromQuery = false) => {
   const rng = mulberry(seed);
   let recent = [];
   const courses = [];
   for (let i = 0; i < times; i++) {
-    const steps = generateCourse(open, [...slots], [], 'ALL', { rng, avoidIds: new Set(recent), searchQuery: query });
+    const steps = generateCourse(open, [...slots], [], 'ALL', { rng, avoidIds: new Set(recent), searchQuery: query, zoneFromQuery }, zoneKeys);
     const ids = steps.map((st) => st.spotId).filter((id) => id != null);
     assert.ok(ids.length > 0, `${query} ${i + 1}번째 코스가 비었다`);
-    courses.push(steps.map((st) => ({ slot: st.slot, spot: st.spotId == null ? null : spotById.get(st.spotId) })));
+    const anchor = getLastAnchor();
+    courses.push(steps.map((st) => ({ slot: st.slot, anchor: st.spotId === anchor?.id, spot: st.spotId == null ? null : spotById.get(st.spotId) })));
     recent = [...recent.filter((id) => !ids.includes(id)), ...ids].slice(-RECENT_MAX);
   }
   return courses;
@@ -186,6 +190,42 @@ for (const query of ['풀빌라', '캠핑', '글램핑']) {
   assert.ok(total >= 55, `${query} 숙박 칸이 있는 코스가 ${total}개뿐이다`);
   assert.strictEqual(near, total, `${query} 숙박 칸 ${total}곳 중 ${total - near}곳이 앵커에서 ${STAY_ANCHOR_KM}km를 넘는다: ${far.slice(0, 8).join(', ')}km`);
   assert.ok(fit / total >= 0.9, `${query} 숙박 칸이 검색어에 맞는 비율이 ${fit}/${total}이다`);
+}
+
+// (d) 숙박 외 칸도 앵커 20km 안에서 뽑는다. 검색어에서 나온 세부 동네(순천·담양)로만 찾으면 '담양힐링파크' 밤 칸이
+// 61.8km 떨어진 순천만 천문대가 됐다. 반경 안 후보가 없으면 이력을 무시하고, 그래도 없으면 검색어에서 나온 동네를 풀어 찾는다
+for (const query of ['담양힐링파크', '담양']) {
+  const zoneKeys = zoneKeysForQuery(query);
+  assert.ok(zoneKeys.length > 0, `${query}에 세부 동네가 없다`);
+  let total = 0;
+  const far = [];
+  for (let user = 0; user < 4; user++) {
+    for (const course of run(query, ['day', 'evening', 'night'], 10, 152 + user, zoneKeys, true)) {
+      const anchor = course.find((st) => st.anchor)?.spot;
+      if (!anchor || anchor.lat == null) continue;
+      for (const st of course) {
+        if (st.anchor || st.slot === 'stay' || !st.spot || st.spot.lat == null) continue;
+        total++;
+        const d = haversineKm(anchor, st.spot);
+        if (d > STAY_ANCHOR_KM) far.push(`${st.slot} ${st.spot.name} ${Math.round(d)}`);
+      }
+    }
+  }
+  assert.ok(total >= 60, `${query} 숙박 외 칸이 ${total}곳뿐이다`);
+  assert.strictEqual(far.length, 0, `${query} 숙박 외 칸 ${total}곳 중 ${far.length}곳이 앵커에서 ${STAY_ANCHOR_KM}km를 넘는다: ${far.slice(0, 5).join(', ')}km`);
+}
+
+// (e) 지역 시트에서 세부 동네를 직접 고르면 앵커에서 멀어도 그 동네 밖 칸을 넣지 않는다
+{
+  const zoneKeys = zoneKeysForQuery('담양');
+  const inZone = zoneSelectionMatcher(zoneKeys);
+  const outside = [];
+  for (let user = 0; user < 4; user++) {
+    for (const course of run('담양힐링파크', ['day', 'evening', 'night'], 10, 152 + user, zoneKeys)) {
+      for (const st of course) if (st.spot && !inZone(st.spot)) outside.push(`${st.slot} ${st.spot.name}`);
+    }
+  }
+  assert.strictEqual(outside.length, 0, `직접 고른 동네 밖 칸이 ${outside.length}곳이다: ${outside.slice(0, 5).join(', ')}`);
 }
 
 console.log('test-course-name-anchor: 모두 통과');
