@@ -1954,7 +1954,23 @@ function generateCourse(
     // 앵커가 숙박 칸이 아닐 때 숙박 칸은 검색어에 맞는 숙소를 먼저 뽑는다. 검색어를 보지 않아 '캠핑' 검색의 숙박 칸이 호텔이 됐다.
     // 맞는 숙소가 하나도 없으면 종전대로 뽑고, 거리는 아래 pickNearRandom의 근접 순위(5km, 같은 구, 10km, 같은 권역 최단)를 따른다
     const queryStays = query && slot === 'stay' ? candidates.filter((s) => matchesSearchQuery(s, query)) : [];
-    const slotCandidates = queryStays.length > 0 ? queryStays : candidates;
+    // 일치 숙소는 앵커 STAY_ZONE_FALLBACK_RADIUS_KM 안으로 거르고, 안에서는 최근 노출 이력과 무관하게 쓴다.
+    // 이력에서 앵커 가까운 일치 숙소가 빠지면 '풀빌라' 숙박 칸이 76~112km 밖 숙소가 됐다. 반경 안에 하나도 없으면 종전대로 뽑는다
+    let nearStays = queryStays;
+    if (query && slot === 'stay' && geoAnchor && geoAnchor.lat != null && geoAnchor.lng != null) {
+      const stays = filterByBudget(
+        filterByMoodPreset(getCandidates(all, slot, regionKeys, moodKey, picked, zoneKeys, geoAnchor, isIndoor), moodPreset),
+        budgetFilter,
+      ).filter(
+        (s) =>
+          s.lat != null &&
+          s.lng != null &&
+          getDistanceKm(geoAnchor.lat!, geoAnchor.lng!, s.lat!, s.lng!) <= STAY_ZONE_FALLBACK_RADIUS_KM &&
+          matchesSearchQuery(s, query),
+      );
+      if (stays.length > 0) nearStays = stays;
+    }
+    const slotCandidates = nearStays.length > 0 ? nearStays : candidates;
 
     // 종목 중복 방지: 이미 선택된 차수와 동일한 장르(카페-카페, 식사-식사, 바-바) 배제
     const diverseCandidates = slotCandidates.filter((s) => !pickedGenres.has(getSpotGenre(s)));

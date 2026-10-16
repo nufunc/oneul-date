@@ -73,6 +73,7 @@ const mulberry = (a) => () => {
 const spotById = new Map(rawSpots.map((s) => [s.id, s]));
 const open = rawSpots.filter((s) => !s.is_closed);
 const RECENT_MAX = 100;
+const STAY_ANCHOR_KM = 20;
 
 // 앱처럼 만든 코스의 스팟을 이력 맨 뒤에 더하고 100곳을 넘기면 앞에서 뺀다. 이력은 비우지 않고 이어 간다
 const run = (query, slots, times, seed) => {
@@ -156,6 +157,35 @@ for (const query of ['캠핑', '글램핑', '펜션']) {
     .filter(Boolean);
   const fit = stays.filter((s) => matchesSearchQuery(s, query)).length;
   assert.ok(fit / stays.length >= 0.95, `${query} 검색의 숙박 칸이 검색어에 맞는 비율이 ${fit}/${stays.length}이다`);
+}
+
+// (c) 같은 검색어로 코스를 10번 이어 만들어 최근 노출 이력이 쌓여도 숙박 칸은 앵커 근처 일치 숙소다.
+// 이력에서 앵커 가까운 일치 숙소가 빠지면 '풀빌라'의 숙박 칸이 76~112km까지 벌어졌다. 숙박 칸이 아닌 칸 가운데 가장 가까운 칸을 앵커 거리로 본다
+const haversineKm = (a, b) => {
+  const rad = (d) => (d * Math.PI) / 180;
+  const x = Math.sin(rad(b.lat - a.lat) / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(rad(b.lng - a.lng) / 2) ** 2;
+  return 2 * 6371 * Math.asin(Math.sqrt(x));
+};
+for (const query of ['풀빌라', '캠핑', '글램핑']) {
+  let fit = 0;
+  let near = 0;
+  let total = 0;
+  const far = [];
+  for (let user = 0; user < 6; user++) {
+    for (const course of run(query, ['day', 'evening', 'night', 'stay'], 10, 150 + user)) {
+      const stay = course.find((st) => st.slot === 'stay').spot;
+      if (!stay) continue;
+      total++;
+      if (matchesSearchQuery(stay, query)) fit++;
+      const others = course.filter((st) => st.slot !== 'stay' && st.spot && st.spot.lat != null).map((st) => haversineKm(stay, st.spot));
+      const d = Math.min(...others);
+      if (d <= STAY_ANCHOR_KM) near++;
+      else far.push(Math.round(d));
+    }
+  }
+  assert.ok(total >= 55, `${query} 숙박 칸이 있는 코스가 ${total}개뿐이다`);
+  assert.strictEqual(near, total, `${query} 숙박 칸 ${total}곳 중 ${total - near}곳이 앵커에서 ${STAY_ANCHOR_KM}km를 넘는다: ${far.slice(0, 8).join(', ')}km`);
+  assert.ok(fit / total >= 0.9, `${query} 숙박 칸이 검색어에 맞는 비율이 ${fit}/${total}이다`);
 }
 
 console.log('test-course-name-anchor: 모두 통과');
