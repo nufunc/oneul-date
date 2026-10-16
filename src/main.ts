@@ -1844,8 +1844,25 @@ function generateCourse(
 
   // 1. 검색어가 있는 경우: 검색어 매칭 스팟을 보유한 슬롯 중 앵커 후보 최우선 탐색 (분위기 제약 완화)
   if (query) {
+    // 1-0. 이름을 그대로 친 검색은 이름이 같은 스팟을 앵커로 먼저 쓴다. 칸별 풀의 크기로만 정하면 이름이 같은 스팟이 큰 풀에 묻혀
+    // 다른 칸의 작은 풀 스팟이 앵커가 됐다(담양힐링파크, 라비돌 호텔&리조트). 이름이 역 이름과 같은 파라다이스시티도 이 규칙이 먼저다
+    const lowerQuery = query.toLowerCase();
+    for (const slot of SLOT_ORDER) {
+      const exact = applyChipFilters(
+        getCandidates(all, slot, regionKeys, 'ALL', [], zoneKeys, null, isIndoor).filter((s) => (s.name || '').trim().toLowerCase() === lowerQuery),
+      );
+      if (exact.length > 0 && (anchorSlot === null || exact.length < anchorPool.length)) {
+        anchorSlot = slot;
+        anchorPool = exact;
+      }
+    }
+    if (anchorSlot !== null) {
+      anchorPool = excludeRecent(anchorPool, avoid);
+      if (!slotsOn.includes(anchorSlot)) slotsOn.push(anchorSlot);
+    }
+
     // 1-1. 현재 활성화된 슬롯 중에서 매칭 스팟 탐색
-    const pools = anchorPoolsBySlot(slotsOn);
+    const pools = anchorPool.length > 0 ? slotsOn.map((): Spot[] => []) : anchorPoolsBySlot(slotsOn);
     for (const [i, slot] of slotsOn.entries()) {
       // 검색어가 있을 때는 mood 제약 없이 해당 지역/존의 스팟 풀에서 폭넓게 검색
       const matched = pools[i];
@@ -1934,9 +1951,14 @@ function generateCourse(
       budgetFilter,
     );
 
+    // 앵커가 숙박 칸이 아닐 때 숙박 칸은 검색어에 맞는 숙소를 먼저 뽑는다. 검색어를 보지 않아 '캠핑' 검색의 숙박 칸이 호텔이 됐다.
+    // 맞는 숙소가 하나도 없으면 종전대로 뽑고, 거리는 아래 pickNearRandom의 근접 순위(5km, 같은 구, 10km, 같은 권역 최단)를 따른다
+    const queryStays = query && slot === 'stay' ? candidates.filter((s) => matchesSearchQuery(s, query)) : [];
+    const slotCandidates = queryStays.length > 0 ? queryStays : candidates;
+
     // 종목 중복 방지: 이미 선택된 차수와 동일한 장르(카페-카페, 식사-식사, 바-바) 배제
-    const diverseCandidates = candidates.filter((s) => !pickedGenres.has(getSpotGenre(s)));
-    const finalCandidates = diverseCandidates.length > 0 ? diverseCandidates : candidates;
+    const diverseCandidates = slotCandidates.filter((s) => !pickedGenres.has(getSpotGenre(s)));
+    const finalCandidates = diverseCandidates.length > 0 ? diverseCandidates : slotCandidates;
 
     const chosen = pickNearRandom(finalCandidates, anchorSpot, rng, scope);
     if (chosen) {
