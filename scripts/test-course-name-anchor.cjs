@@ -17,7 +17,7 @@ for (const st of sf.statements) {
   else if (ts.isVariableStatement(st)) st.declarationList.declarations.forEach((d) => ts.isIdentifier(d.name) && decls.set(d.name.text, st));
 }
 const need = new Set();
-const queue = ['generateCourse', 'zoneKeysForQuery'];
+const queue = ['generateCourse', 'zoneKeysForQuery', 'searchRelevanceTier'];
 while (queue.length) {
   const name = queue.pop();
   if (need.has(name)) continue;
@@ -60,9 +60,9 @@ function matchesSearchQuery(spot, query) {
 
 const { stations } = JSON.parse(fs.readFileSync(path.join(root, 'public', 'data', 'stations.json'), 'utf8'));
 const rawSpots = JSON.parse(fs.readFileSync(path.join(root, 'public', 'data', 'spots.json'), 'utf8'));
-const { generateCourse, isCourseEligible, matchesSearchQuery, zoneKeysForQuery, zoneSelectionMatcher, getLastAnchor, setStations } = new Function(
+const { generateCourse, getCandidates, isCourseEligible, matchesSearchQuery, searchRelevanceTier, zoneKeysForQuery, zoneSelectionMatcher, getLastAnchor, setStations } = new Function(
   'rawSpotsData',
-  `${ts.transpile(code, { target: 'es2022' })};return { generateCourse, isCourseEligible, matchesSearchQuery, zoneKeysForQuery, zoneSelectionMatcher, getLastAnchor: () => lastAnchor, setStations: (s) => { stationCoords = s; } };`,
+  `${ts.transpile(code, { target: 'es2022' })};return { generateCourse, getCandidates, isCourseEligible, matchesSearchQuery, searchRelevanceTier, zoneKeysForQuery, zoneSelectionMatcher, getLastAnchor: () => lastAnchor, setStations: (s) => { stationCoords = s; } };`,
 )(rawSpots);
 setStations(stations);
 
@@ -226,6 +226,35 @@ for (const query of ['담양힐링파크', '담양']) {
     }
   }
   assert.strictEqual(outside.length, 0, `직접 고른 동네 밖 칸이 ${outside.length}곳이다: ${outside.slice(0, 5).join(', ')}`);
+}
+
+// (f) 키워드 검색은 대표 일치(이름에 검색어, 카테고리에 검색어)가 가장 많은 칸에서 앵커를 뽑는다. 일치 후보가 가장 적은 칸을 쓰던 때는
+// '전시' 앵커가 10번 모두 화천 조경철천문대(밤)였고 '리조트'는 숙박 칸 리조트를 두고 저녁 칸에서 나왔다
+const STAY_QUERY_RE = /호텔|숙소|숙박|호캉스|리조트|펜션|글램핑|스테이|모텔|풀빌라|게스트하우스|캠핑|카라반|료칸|감성숙소/;
+for (const query of ['전시', '글램핑', '리조트', '와인바']) {
+  const q = query.replace(/\s+/g, '').toLowerCase();
+  const rep = (s) => searchRelevanceTier(s, query) <= 1 || String(s.category || '').replace(/\s+/g, '').toLowerCase().includes(q);
+  const slots = ['day', 'evening', 'night', ...(STAY_QUERY_RE.test(query) ? ['stay'] : [])];
+  const anchors = run(query, slots, 10, 154).map((course) => course.find((st) => st.anchor)?.spot).filter(Boolean);
+  assert.strictEqual(anchors.length, 10, `${query} 앵커가 있는 코스가 ${anchors.length}개뿐이다`);
+  const counts = new Map();
+  anchors.forEach((a) => counts.set(a.name, (counts.get(a.name) || 0) + 1));
+  const [topName, top] = [...counts].sort((x, y) => y[1] - x[1])[0];
+  assert.ok(top / anchors.length < 0.5, `${query} 앵커 ${anchors.length}번 중 ${top}번이 ${topName}이다`);
+  const reps = anchors.filter(rep).length;
+  assert.ok(reps / anchors.length >= 0.8, `${query} 앵커가 대표 일치인 비율이 ${reps}/${anchors.length}이다`);
+}
+
+// (g) 지역·동네로 해석되는 검색('담양')은 종전대로 일치 후보가 가장 적은 칸이 앵커 칸이다. 대표 일치가 많은 칸으로 바꾸면 나머지 칸 20km 초과가 0%에서 9%가 됐다
+{
+  const query = '담양';
+  const zoneKeys = zoneKeysForQuery(query);
+  const counts = ['day', 'evening', 'night'].map((slot) => [slot, getCandidates(open, slot, [], 'ALL', [], zoneKeys, null, false).filter((s) => matchesSearchQuery(s, query)).length]);
+  const fewest = counts.filter(([, n]) => n > 0).sort((x, y) => x[1] - y[1])[0][0];
+  for (let user = 0; user < 4; user++) {
+    const slot = run(query, ['day', 'evening', 'night'], 1, 154 + user, zoneKeys, true)[0].find((st) => st.anchor)?.slot;
+    assert.strictEqual(slot, fewest, `${query} 앵커 칸이 ${slot}이다(칸별 일치 후보 ${counts.map((c) => c.join(' ')).join(', ')})`);
+  }
 }
 
 console.log('test-course-name-anchor: 모두 통과');

@@ -1865,12 +1865,25 @@ function generateCourse(
 
     // 1-1. 현재 활성화된 슬롯 중에서 매칭 스팟 탐색
     const pools = anchorPool.length > 0 ? slotsOn.map((): Spot[] => []) : anchorPoolsBySlot(slotsOn);
-    for (const [i, slot] of slotsOn.entries()) {
-      // 검색어가 있을 때는 mood 제약 없이 해당 지역/존의 스팟 풀에서 폭넓게 검색
-      const matched = pools[i];
-      if (matched.length > 0 && (anchorSlot === null || matched.length < anchorPool.length)) {
-        anchorSlot = slot;
-        anchorPool = matched;
+    // 키워드 검색은 대표 일치(이름에 검색어, 카테고리에 검색어)가 가장 많은 칸에서 대표 일치만 앵커 후보로 쓰고, 대표가 없으면 일치 후보가 가장 많은 칸을 쓴다.
+    // 일치 후보가 가장 적은 칸을 쓰면 '전시' 앵커가 늘 밤 칸 1곳(조경철천문대)이었다. 지역·동네 검색('담양')은 아래 종전 규칙을 쓴다
+    if (pools.some((p) => p.length > 0) && !scope && zoneKeysForQuery(query).length === 0) {
+      const compactQuery = lowerQuery.replace(/\s+/g, '');
+      const reps = pools.map((p) =>
+        p.filter((s) => searchRelevanceTier(s, query) <= 1 || (s.category || '').replace(/\s+/g, '').toLowerCase().includes(compactQuery)),
+      );
+      const ranked = reps.some((p) => p.length > 0) ? reps : pools;
+      const best = ranked.reduce((bi, p, i) => (p.length > ranked[bi].length ? i : bi), 0);
+      anchorSlot = slotsOn[best];
+      anchorPool = ranked[best];
+    } else {
+      for (const [i, slot] of slotsOn.entries()) {
+        // 검색어가 있을 때는 mood 제약 없이 해당 지역/존의 스팟 풀에서 폭넓게 검색
+        const matched = pools[i];
+        if (matched.length > 0 && (anchorSlot === null || matched.length < anchorPool.length)) {
+          anchorSlot = slot;
+          anchorPool = matched;
+        }
       }
     }
 
