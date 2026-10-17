@@ -1205,6 +1205,8 @@ interface GenerateOptions {
   moodPreset?: MoodPresetKey | null;
   /** 1-Tap 스마트 예산 필터 (ALL: 전체, BUDGET: 가성비/캐주얼, LUXURY: 스페셜/파인다이닝) */
   budgetFilter?: 'ALL' | 'BUDGET' | 'LUXURY';
+  /** 세부 동네(zoneKeys)를 검색어에서 얻었으면 true. 숙박 외 칸이 앵커 반경 안에서 동네 밖 후보를 쓸 수 있다 */
+  zoneFromQuery?: boolean;
 }
 
 /** 검색어 및 퀵 태그 매칭 헬퍼 (특수문자 정제, 다중 토큰, 동의어 풀 매칭 지원) */
@@ -1863,12 +1865,25 @@ function generateCourse(
 
     // 1-1. 현재 활성화된 슬롯 중에서 매칭 스팟 탐색
     const pools = anchorPool.length > 0 ? slotsOn.map((): Spot[] => []) : anchorPoolsBySlot(slotsOn);
-    for (const [i, slot] of slotsOn.entries()) {
-      // 검색어가 있을 때는 mood 제약 없이 해당 지역/존의 스팟 풀에서 폭넓게 검색
-      const matched = pools[i];
-      if (matched.length > 0 && (anchorSlot === null || matched.length < anchorPool.length)) {
-        anchorSlot = slot;
-        anchorPool = matched;
+    // 키워드 검색은 대표 일치(이름에 검색어, 카테고리에 검색어)가 가장 많은 칸에서 대표 일치만 앵커 후보로 쓰고, 대표가 없으면 일치 후보가 가장 많은 칸을 쓴다.
+    // 일치 후보가 가장 적은 칸을 쓰면 '전시' 앵커가 늘 밤 칸 1곳(조경철천문대)이었다. 지역·동네 검색('담양')은 아래 종전 규칙을 쓴다
+    if (pools.some((p) => p.length > 0) && !scope && zoneKeysForQuery(query).length === 0) {
+      const compactQuery = lowerQuery.replace(/\s+/g, '');
+      const reps = pools.map((p) =>
+        p.filter((s) => searchRelevanceTier(s, query) <= 1 || (s.category || '').replace(/\s+/g, '').toLowerCase().includes(compactQuery)),
+      );
+      const ranked = reps.some((p) => p.length > 0) ? reps : pools;
+      const best = ranked.reduce((bi, p, i) => (p.length > ranked[bi].length ? i : bi), 0);
+      anchorSlot = slotsOn[best];
+      anchorPool = ranked[best];
+    } else {
+      for (const [i, slot] of slotsOn.entries()) {
+        // 검색어가 있을 때는 mood 제약 없이 해당 지역/존의 스팟 풀에서 폭넓게 검색
+        const matched = pools[i];
+        if (matched.length > 0 && (anchorSlot === null || matched.length < anchorPool.length)) {
+          anchorSlot = slot;
+          anchorPool = matched;
+        }
       }
     }
 
@@ -1976,7 +1991,33 @@ function generateCourse(
     const diverseCandidates = slotCandidates.filter((s) => !pickedGenres.has(getSpotGenre(s)));
     const finalCandidates = diverseCandidates.length > 0 ? diverseCandidates : slotCandidates;
 
-    const chosen = pickNearRandom(finalCandidates, anchorSpot, rng, scope);
+    // 숙박 외 칸도 앵커 STAY_ZONE_FALLBACK_RADIUS_KM 안을 먼저 쓴다. 근접 단계 마지막이 거리 상한 없이 골라 '담양힐링파크' 밤 칸이
+    // 61.8km 떨어진 순천만 천문대가 됐다. 반경 안이 없으면 최근 노출 이력을 무시하고, 그래도 없으면 검색어에서 얻은 세부 동네를 풀어
+    // (지역 선택은 유지) 찾는다. 지역 시트에서 고른 동네는 풀지 않는다. 셋 다 없으면 종전대로 뽑는다
+    const nearAnchor = (list: Spot[]) =>
+      anchorSpot && anchorSpot.lat != null && anchorSpot.lng != null
+        ? list.filter(
+            (s) =>
+              s.lat != null &&
+              s.lng != null &&
+              getDistanceKm(anchorSpot.lat!, anchorSpot.lng!, s.lat!, s.lng!) <= STAY_ZONE_FALLBACK_RADIUS_KM,
+          )
+        : [];
+    const nearDiverse = (zones: string[]) => {
+      const near = nearAnchor(
+        filterByBudget(filterByMoodPreset(getCandidates(all, slot, regionKeys, moodKey, picked, zones, geoAnchor, isIndoor), moodPreset), budgetFilter),
+      );
+      const diverse = near.filter((s) => !pickedGenres.has(getSpotGenre(s)));
+      return diverse.length > 0 ? diverse : near;
+    };
+    let nearPool: Spot[] = [];
+    if (slot !== 'stay') {
+      nearPool = nearAnchor(finalCandidates);
+      if (nearPool.length === 0) nearPool = nearAnchor(slotCandidates);
+      if (nearPool.length === 0) nearPool = nearDiverse(zoneKeys);
+      if (nearPool.length === 0 && opts.zoneFromQuery && zoneKeys.length > 0) nearPool = nearDiverse([]);
+    }
+    const chosen = pickNearRandom(nearPool.length > 0 ? nearPool : finalCandidates, anchorSpot, rng, scope);
     if (chosen) {
       picked.push(chosen.id);
       pickedSpots.push(chosen);
@@ -3418,6 +3459,8 @@ interface AppState {
     fromSaved?: boolean;
     /** '이 스팟 중심' 맞춤 코스의 앵커. 다시 추천도 이 스팟 주변에서 뽑는다 */
     anchorId?: number;
+    /** subZones를 검색어에서 얻었다. 다시 추천도 숙박 외 칸에서 이 동네를 풀 수 있다 */
+    zoneFromQuery?: boolean;
   } | null;
   savedOpen: boolean;
   regionSheetOpen: boolean;
@@ -4431,6 +4474,7 @@ function triggerCourseGeneration(): void {
   // '성수', '성수 카페'처럼 세부 동네 이름으로 시작하는 검색은 나머지 칸도 그 동네 안에서 찾는다.
   // 매칭된 한 칸만 성수이고 나머지는 종로·강남으로 넓게 채워졌다. 지역 시트에서 고른 세부 동네가 있으면 그것을 따른다
   const zoneKeys = state.subZones.length > 0 ? state.subZones : zoneKeysForQuery(state.searchQuery);
+  const zoneFromQuery = state.subZones.length === 0 && zoneKeys.length > 0;
   state.course = generateCourse(
     spots,
     slotsOn,
@@ -4443,6 +4487,7 @@ function triggerCourseGeneration(): void {
       indoorOnly: state.indoorOnly,
       moodPreset: state.moodPreset,
       budgetFilter: state.budgetFilter,
+      zoneFromQuery,
     },
     zoneKeys,
   );
@@ -4453,6 +4498,7 @@ function triggerCourseGeneration(): void {
     searchQuery: state.searchQuery,
     indoorOnly: state.indoorOnly,
     budgetFilter: state.budgetFilter,
+    zoneFromQuery,
   };
   addRecentSpotIds(courseSpotIds());
   renderResults();
@@ -4488,6 +4534,7 @@ function triggerCourseGeneration(): void {
           indoorOnly: state.indoorOnly,
           moodPreset: state.moodPreset,
           budgetFilter: state.budgetFilter,
+          zoneFromQuery,
         },
         zoneKeys,
       );
@@ -5902,6 +5949,7 @@ function regenerateCourse(): void {
       indoorOnly: cond.indoorOnly,
       moodPreset: state.moodPreset,
       budgetFilter: cond.budgetFilter,
+      zoneFromQuery: cond.zoneFromQuery,
     },
     cond.subZones,
   );
