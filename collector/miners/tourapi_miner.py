@@ -17,8 +17,8 @@ from datetime import datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from supabase_worker import (load_env, derive_region_area, find_duplicate_spot, normalize_spot_address, sanitize_spot, new_spot_id,
-                             insert_spots, _near_fn, KAKAO_REST_API_KEY)
+from supabase_worker import (load_env, derive_region_area, find_duplicate_spot, normalize_spot_address, normalize_spot_name,
+                             sanitize_spot, new_spot_id, insert_spots, _near_fn, _SIDO_WORDS, KAKAO_REST_API_KEY)
 from category_filter import is_date_spot_category
 from event_period import fetch_event_period
 from tour_fee import fee_fields, fetch_intro, hours_fields, parse_closed_days
@@ -228,11 +228,12 @@ LDONG_SIDO_MAP = {
     "51": ("강원", ["강원"]),
     "52": ("전북", ["호남"]),
 }
-# 새로 여는 명소 분류(lclsSystm3) 16종: 전망대, 해변, 수목원·정원, 테마파크, 자연휴양림, 국립공원, 고궁, 민속마을, 문화거리,
-# 공원 4종, 관광단지, 산·계곡·폭포. P-128 표본 13건 중 적합 12, 걸러야 함 0이었다. 그 밖 분류는 areacode가 있는 항목만
-# 종전 속도(시도마다 회당 15건)로 보고, areacode가 빈 항목은 아직 들이지 않는다(섬·사당·노거수 등이 섞인다)
+# 새로 여는 명소 분류(lclsSystm3) 15종: 전망대, 해변, 수목원·정원, 테마파크, 자연휴양림, 국립공원, 고궁, 민속마을, 문화거리,
+# 공원 3종, 관광단지, 산·계곡·폭포. P-128 표본 13건 중 적합 12, 걸러야 함 0이었다. 그 밖 분류는 areacode가 있는 항목만
+# 종전 속도(시도마다 회당 15건)로 보고, areacode가 빈 항목은 아직 들이지 않는다(섬·사당·노거수 등이 섞인다).
+# VE030400은 10-12~10-18 유입 37행 중 적합 7행이고 14행이 근린공원이라 뺐다(P-159)
 LANDMARK_LCLS = {"VE010200", "NA020900", "NA040700", "VE020100", "NA040600", "NA040100", "HS010100", "HS010600",
-                 "VE040100", "VE030500", "VE050100", "NA010300", "NA010400", "VE030100", "VE030400", "NA010100"}
+                 "VE040100", "VE030500", "VE050100", "NA010300", "NA010400", "VE030100", "NA010100"}
 LANDMARK_RUN_LIMIT, LANDMARK_DAILY_LIMIT = 17, 100
 LDONG = "ldong"
 
@@ -252,6 +253,56 @@ def _cotid_exists(supabase_url, headers, content_id):
             return bool(json.loads(res.read().decode("utf-8")))
     except Exception:
         return True
+
+
+# 산·해변·큰 공원은 같은 곳도 두 출처의 좌표가 50~1,000m 떨어진다(P-159: 10-12~10-18 명소 중복 69행 중 47행)
+LANDMARK_SAME_NAME_METERS = 1000
+
+
+def _region_words(*addresses) -> set:
+    """시도명과 주소 앞 세 낱말(끝의 시·군·구를 뗀 형태 포함). 이름 앞에 붙는 지역어 후보다"""
+    words = set(_SIDO_WORDS)
+    for address in addresses:
+        for t in (address or "").split()[:3]:
+            words |= {normalize_spot_name(t), normalize_spot_name(re.sub(r'(특별자치시|특별자치도|광역시|특별시|시|군|구)$', '', t))}
+    return {w for w in words if len(w) >= 2}
+
+
+def landmark_name_key(name: str, regions: set) -> str:
+    """명소 이름 비교값: 괄호를 떼고 정규화한 뒤 해수욕장을 해변으로 맞추고, 앞에 붙은 지역어 하나를 뗀다.
+    '담양 메타프로방스'/'메타프로방스', '보성비봉공룡공원'/'비봉공룡공원', '세화해수욕장'/'세화해변'이 같은 값이 된다"""
+    key = normalize_spot_name(re.sub(r'\(.*?\)|\[.*?\]', '', name or '')).replace("해수욕장", "해변")
+    for word in sorted(regions, key=len, reverse=True):
+        if key.startswith(word) and len(key) - len(word) >= 3:
+            return key[len(word):]
+    return key
+
+
+def _rows_near(supabase_url, headers, lat, lng):
+    """좌표에서 1km를 덮는 상자 안의 행(닫힌 행 포함). 조회가 실패하면 예외를 올린다"""
+    dlat, dlng = 0.0095, 0.012  # 위도 약 1,050m, 경도 1,000m 이상(북위 38.5도까지)
+    lat0, lng0 = float(lat), float(lng)
+    url = (f"{supabase_url}/rest/v1/spots?select=id,name,address,lat,lng"
+           f"&lat=gte.{lat0 - dlat}&lat=lte.{lat0 + dlat}&lng=gte.{lng0 - dlng}&lng=lte.{lng0 + dlng}&limit=1000")
+    with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=8) as res:
+        return json.loads(res.read().decode("utf-8"))
+
+
+def landmark_name_nearby(supabase_url, headers, title, address, lat, lng) -> bool:
+    """명소 경로 전용 중복 판정: landmark_name_key가 같은 행이 1km 안에 있으면 True. 좌표가 없으면 False,
+    조회가 실패하면 True(find_duplicate_spot처럼 fail-closed). 공용 _find_duplicate의 50m·10m 규칙은 그대로 둔다"""
+    near = _near_fn(lat, lng, LANDMARK_SAME_NAME_METERS)
+    if near is None:
+        return False
+    try:
+        rows = _rows_near(supabase_url, headers, lat, lng)
+    except Exception:
+        return True
+    for row in rows:
+        regions = _region_words(address, row.get("address"))
+        if near(row) and landmark_name_key(row.get("name"), regions) == landmark_name_key(title, regions):
+            return True
+    return False
 
 
 def _load_checkpoint() -> dict:
@@ -452,7 +503,12 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                 if _cotid_exists(supabase_url, api_headers, content_id):
                     continue
 
-                if find_duplicate_spot(supabase_url, api_headers, title, addr1):
+                # 명소는 좌표를 넘겨 50m·10m 규칙을 돌리고, 1km 이름 규칙도 본다. 좌표가 없으면 주소가 달라
+                # 같은 곳이 다시 들어왔다(P-159: 죽녹원 '향교리 산 44'/'죽녹원로 119', 33m)
+                if find_duplicate_spot(supabase_url, api_headers, title, addr1,
+                                       lat=mapy if is_landmark else None, lng=mapx if is_landmark else None):
+                    continue
+                if is_landmark and landmark_name_nearby(supabase_url, api_headers, title, addr1, mapy, mapx):
                     continue
 
                 batch_seen_names.add(title)
