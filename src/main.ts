@@ -6373,66 +6373,9 @@ function searchRegionCenter(head: string): { lat: number; lng: number } | null {
 /** 검색어의 지역 중심을 거리순 기준점으로 쓰고 있으면 그 지역어. 위치가 검색 지역에서 30km 안이면 위치를 그대로 쓴다 */
 let discoveryQueryOrigin: string | null = null;
 
-let lastDiscoveryList: { list: (Spot & { _dist?: number })[]; pageSize: number } | null = null;
-
-function renderSpotDiscovery(): void {
-  const area = document.getElementById('spot-discovery-area');
-  if (!area) return;
-
-  // 1. GPS 위치 자동 획득 (한 번만 시도, 무한 중복 방지)
-  if (!userCoords && !geoRequestedOnce && !isRequestingGeo) {
-    requestUserGeolocation(false);
-  }
-
-  // 활성 검색창 포커스 상태 백업 (비동기 재렌더 시 포커스 보존)
-  const activeEl = document.activeElement as HTMLInputElement | null;
-  const isSearchFocused = activeEl && activeEl.id === 'discovery-search-input';
-  const selStart = isSearchFocused ? activeEl.selectionStart : null;
-  const selEnd = isSearchFocused ? activeEl.selectionEnd : null;
-  const refocusSelector = activeEl && !isSearchFocused && area.contains(activeEl) ? focusSelectorFor(activeEl) : null;
-
-  // 2. 기준 좌표 결정 (GPS 획득 좌표 -> 선택된 지역/세부존 중심 좌표 -> 서울 성수 기본 중심 좌표)
-  // 검색어가 지역이면 그 지역 중심이 먼저다. 지역 검색이 성수에서 가까운 순으로 늘어서 제주·부산 검색의 앞이 변두리였다
-  let effectiveCoords = userCoords;
-  discoveryQueryOrigin = null;
-  const queryStation = searchStationCenter(state.spotSearchQuery);
-  const queryHead = queryStation?.label ?? searchRegionHead(state.spotSearchQuery);
-  const queryCenter = queryStation ?? (queryHead ? searchRegionCenter(queryHead) : null);
-  if (queryHead && queryCenter && (!userCoords || getDistanceKm(userCoords.lat, userCoords.lng, queryCenter.lat, queryCenter.lng) > 30)) {
-    effectiveCoords = queryCenter;
-    discoveryQueryOrigin = queryHead;
-  }
-  if (!effectiveCoords) {
-    if (state.subZones.length > 0 && ZONE_CENTERS[state.subZones[0]]) {
-      effectiveCoords = ZONE_CENTERS[state.subZones[0]];
-    } else if (state.regions.length > 0 && REGION_CENTERS[state.regions[0]]) {
-      effectiveCoords = REGION_CENTERS[state.regions[0]];
-    } else {
-      effectiveCoords = { lat: 37.5413, lng: 127.0564 }; // 성수·서울숲 기본 좌표
-    }
-  }
-
-  // 3. 유효 스팟 필터링 (폐업, 광역 더미 제외 및 상호명/ID 2중 중복 완벽 제거, 좌표 보정 및 거리 주입)
-  // 전체 스팟 중복 제거와 거리 계산이 렌더 비용의 대부분이라(4배 CPU 제한에서 약 0.9초) 입력인
-  // spots 배열과 기준 좌표가 그대로면 재사용한다. 자동 더보기가 페이지마다 멈추지 않게 하려는 것이다
-  const candidateKey = `${effectiveCoords.lat},${effectiveCoords.lng}`;
-  if (discoveryCandidateCache?.source !== spots || discoveryCandidateCache.key !== candidateKey) {
-    const list = deduplicateSpotList(spots.filter((s) => !s.is_closed && isCourseEligible(s)))
-      .map((s) => {
-        const coords = getSpotCoordinates(s);
-        const lat = s.lat || coords.lat;
-        const lng = s.lng || coords.lng;
-        // 좌표 없는 스팟(약 37%)은 세부존·지역 중심 근처의 대체 좌표라 거리가 지어낸 값이 된다.
-        // 거리순 첫 페이지를 차지하고 "84m"처럼 보였으므로 거리 없음(9999)으로 두어 뒤로 보내고 배지는 지역명을 쓴다
-        const hasRealCoords = s.lat != null && s.lng != null;
-        const dist = hasRealCoords ? getDistanceKm(effectiveCoords.lat, effectiveCoords.lng, lat, lng) : 9999;
-        return { ...s, lat, lng, _dist: dist };
-      });
-    discoveryCandidateCache = { source: spots, key: candidateKey, list };
-  }
-  const allCandidateSpots = discoveryCandidateCache.list;
-
-  let matchedSpots = allCandidateSpots;
+/** 탐색 탭의 지역·검색어·카테고리·실내·찜·무드·가격 필터. 0건 화면의 대안 검색어 건수도 이 경로로 센다 */
+function filterDiscoverySpots<T extends Spot>(candidates: T[], q: string): { matchedSpots: T[]; expandedNationwide: boolean; unpricedHidden: number } {
+  let matchedSpots = candidates;
 
   // 지역/세부존 필터 적용 (선택된 지역이 있는 경우 해당 지역 스팟만 선별)
   if (state.regions.length > 0) {
@@ -6444,7 +6387,6 @@ function renderSpotDiscovery(): void {
   }
 
   // 스팟 전용 검색어 필터 적용 (스마트 전국 확장 지원)
-  const q = state.spotSearchQuery.trim();
   let expandedNationwide = false;
   if (q) {
     const inRegionMatched = matchedSpots.filter((s) => matchesSearchQuery(s, q));
@@ -6452,7 +6394,7 @@ function renderSpotDiscovery(): void {
       matchedSpots = inRegionMatched;
     } else {
       // 지역 필터 내 결과가 없으면 전체 스팟 대상 전국 확장 검색
-      const nationwideMatched = allCandidateSpots.filter((s) => matchesSearchQuery(s, q));
+      const nationwideMatched = candidates.filter((s) => matchesSearchQuery(s, q));
       if (nationwideMatched.length > 0) {
         matchedSpots = nationwideMatched;
         // 화면은 계속 선택 지역으로 보여 60km 밖 스팟을 지역 안으로 믿게 했다. 넓혔다고 알린다
@@ -6513,6 +6455,91 @@ function renderSpotDiscovery(): void {
     unpricedHidden = matchedSpots.filter((s) => !passes(s) && isUnpricedDining(s)).length;
     matchedSpots = matchedSpots.filter((s) => passes(s) || (includeUnpricedDining && isUnpricedDining(s)));
   }
+  return { matchedSpots, expandedNationwide, unpricedHidden };
+}
+
+/** 0건 검색어가 지역어로 시작하면('연남 파스타') 지역어만 친 검색과 나머지 말만 친 검색을 건수와 함께 돌려준다. 0건인 갈래는 뺀다.
+ * 0건 화면의 버튼이 검색어와 지역을 모두 지우는 '전체 스팟 다시 보기' 하나뿐이라 0건 질의 41/180이 처음부터 다시 쳐야 했다(P-156) */
+function emptySearchAlternatives<T extends Spot>(candidates: T[], query: string): { query: string; count: number; label: string }[] {
+  const cleanQ = stripSearchStopwords(query.replace(/[#·,/\\]/g, ' ').trim().toLowerCase());
+  const broad = cleanQ.match(BROAD_REGION_PREFIX);
+  const head = broad ? broad[1] : SEARCH_PLACE_PREFIXES.find((p) => cleanQ.startsWith(p) && cleanQ.length > p.length);
+  if (!head) return [];
+  let rest = cleanQ.slice(broad ? broad[0].length : head.length);
+  // '연남동 파스타'의 '동'처럼 지역어에 붙은 접미사는 나머지 말에서 뗀다. 붙여 친 '시장'의 '시'는 떼지 않는다
+  const suffix = rest.match(PLACE_SUFFIX);
+  if (suffix && suffix[0] !== suffix[1]) rest = rest.slice(suffix[0].length);
+  rest = rest.trim();
+  if (!rest.replace(PLACE_SUFFIX, '').trim()) return [];
+  return [head, rest]
+    .map((part, i) => {
+      const count = filterDiscoverySpots(candidates, part).matchedSpots.length;
+      return { query: part, count, label: `'${part}' ${i === 0 ? '스팟 ' : ''}${count.toLocaleString('ko-KR')}곳 보기` };
+    })
+    .filter((alt) => alt.count > 0);
+}
+
+let lastDiscoveryList: { list: (Spot & { _dist?: number })[]; pageSize: number } | null = null;
+
+function renderSpotDiscovery(): void {
+  const area = document.getElementById('spot-discovery-area');
+  if (!area) return;
+
+  // 1. GPS 위치 자동 획득 (한 번만 시도, 무한 중복 방지)
+  if (!userCoords && !geoRequestedOnce && !isRequestingGeo) {
+    requestUserGeolocation(false);
+  }
+
+  // 활성 검색창 포커스 상태 백업 (비동기 재렌더 시 포커스 보존)
+  const activeEl = document.activeElement as HTMLInputElement | null;
+  const isSearchFocused = activeEl && activeEl.id === 'discovery-search-input';
+  const selStart = isSearchFocused ? activeEl.selectionStart : null;
+  const selEnd = isSearchFocused ? activeEl.selectionEnd : null;
+  const refocusSelector = activeEl && !isSearchFocused && area.contains(activeEl) ? focusSelectorFor(activeEl) : null;
+
+  // 2. 기준 좌표 결정 (GPS 획득 좌표 -> 선택된 지역/세부존 중심 좌표 -> 서울 성수 기본 중심 좌표)
+  // 검색어가 지역이면 그 지역 중심이 먼저다. 지역 검색이 성수에서 가까운 순으로 늘어서 제주·부산 검색의 앞이 변두리였다
+  let effectiveCoords = userCoords;
+  discoveryQueryOrigin = null;
+  const queryStation = searchStationCenter(state.spotSearchQuery);
+  const queryHead = queryStation?.label ?? searchRegionHead(state.spotSearchQuery);
+  const queryCenter = queryStation ?? (queryHead ? searchRegionCenter(queryHead) : null);
+  if (queryHead && queryCenter && (!userCoords || getDistanceKm(userCoords.lat, userCoords.lng, queryCenter.lat, queryCenter.lng) > 30)) {
+    effectiveCoords = queryCenter;
+    discoveryQueryOrigin = queryHead;
+  }
+  if (!effectiveCoords) {
+    if (state.subZones.length > 0 && ZONE_CENTERS[state.subZones[0]]) {
+      effectiveCoords = ZONE_CENTERS[state.subZones[0]];
+    } else if (state.regions.length > 0 && REGION_CENTERS[state.regions[0]]) {
+      effectiveCoords = REGION_CENTERS[state.regions[0]];
+    } else {
+      effectiveCoords = { lat: 37.5413, lng: 127.0564 }; // 성수·서울숲 기본 좌표
+    }
+  }
+
+  // 3. 유효 스팟 필터링 (폐업, 광역 더미 제외 및 상호명/ID 2중 중복 완벽 제거, 좌표 보정 및 거리 주입)
+  // 전체 스팟 중복 제거와 거리 계산이 렌더 비용의 대부분이라(4배 CPU 제한에서 약 0.9초) 입력인
+  // spots 배열과 기준 좌표가 그대로면 재사용한다. 자동 더보기가 페이지마다 멈추지 않게 하려는 것이다
+  const candidateKey = `${effectiveCoords.lat},${effectiveCoords.lng}`;
+  if (discoveryCandidateCache?.source !== spots || discoveryCandidateCache.key !== candidateKey) {
+    const list = deduplicateSpotList(spots.filter((s) => !s.is_closed && isCourseEligible(s)))
+      .map((s) => {
+        const coords = getSpotCoordinates(s);
+        const lat = s.lat || coords.lat;
+        const lng = s.lng || coords.lng;
+        // 좌표 없는 스팟(약 37%)은 세부존·지역 중심 근처의 대체 좌표라 거리가 지어낸 값이 된다.
+        // 거리순 첫 페이지를 차지하고 "84m"처럼 보였으므로 거리 없음(9999)으로 두어 뒤로 보내고 배지는 지역명을 쓴다
+        const hasRealCoords = s.lat != null && s.lng != null;
+        const dist = hasRealCoords ? getDistanceKm(effectiveCoords.lat, effectiveCoords.lng, lat, lng) : 9999;
+        return { ...s, lat, lng, _dist: dist };
+      });
+    discoveryCandidateCache = { source: spots, key: candidateKey, list };
+  }
+  const allCandidateSpots = discoveryCandidateCache.list;
+
+  const q = state.spotSearchQuery.trim();
+  const { matchedSpots, expandedNationwide, unpricedHidden } = filterDiscoverySpots(allCandidateSpots, q);
 
   // 4. 정렬 적용 (거리순 / 핫플·인기순 / 평점순)
   if (state.spotSort === 'distance') {
@@ -6666,6 +6693,8 @@ function renderSpotDiscovery(): void {
           <span class="empty-icon">${state.savedOnly ? '❤️' : '🧭'}</span>
           <p class="empty-title">${state.savedOnly ? '아직 보관함에 담은 스팟이 없어요' : '검색 조건에 맞는 스팟을 찾지 못했어요'}</p>
           <p class="empty-desc">${state.savedOnly ? '마음에 드는 스팟 카드의 하트(🤍)를 눌러 나만의 데이트 리스트를 모아보세요!' : '지역명이나 키워드를 변경해보세요!'}</p>
+          ${!state.savedOnly && q ? emptySearchAlternatives(allCandidateSpots, q).map((alt) => `
+          <button type="button" class="btn-empty-reset" data-alt-query="${escapeHtml(alt.query)}">${escapeHtml(alt.label)}</button>`).join('') : ''}
           <button class="btn-empty-reset" id="${state.savedOnly ? 'btn-empty-reset-saved' : 'btn-empty-reset-all'}">${state.savedOnly ? '전체 스팟 둘러보기' : '전체 스팟 다시 보기'}</button>
         </div>`;
       })()}
@@ -6683,6 +6712,12 @@ function renderSpotDiscovery(): void {
   `;
 
   bindDiscoveryEvents(area);
+
+  // 0건 문구와 대안 버튼은 화면에만 있어 스크린리더 사용자는 결과가 없다는 것을 알 수 없었다
+  const emptyLive = area.querySelector('#discovery-live');
+  if (emptyLive && totalCount === 0 && loadedRegionKeys.has('ALL')) {
+    emptyLive.textContent = Array.from(area.querySelectorAll('.spot-empty-state .empty-title, .spot-empty-state button'), (el) => el.textContent?.trim()).join('. ');
+  }
 
   // 포커스 복원
   restoreFocusIn(area, refocusSelector, '#discovery-search-input');
@@ -7066,6 +7101,13 @@ function bindDiscoveryEvents(area: HTMLElement): void {
     ensureSpotsForRegions(['ALL']);
     renderSpotDiscovery();
   });
+
+  // 0건 화면의 지역어·나머지 말 버튼은 검색어만 바꾸고 다른 조건은 둔다. 버튼의 건수를 같은 조건으로 셌다
+  area.querySelectorAll<HTMLButtonElement>('[data-alt-query]').forEach((btn) => btn.addEventListener('click', () => {
+    state.spotSearchQuery = btn.dataset.altQuery ?? '';
+    state.spotPage = 1;
+    renderSpotDiscovery();
+  }));
 
   area.querySelector('#btn-empty-reset-all')?.addEventListener('click', () => {
     state.spotSearchQuery = '';
