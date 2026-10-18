@@ -315,7 +315,8 @@
 
     <nav class="region-filter-wrap" aria-label="지역별 필터">
       <button type="button" class="filter-chip active" data-region="all">전체</button>
-      <button type="button" class="filter-chip" data-region="seoul-gyeonggi">서울·경기</button>
+      <button type="button" class="filter-chip" data-region="seoul">서울</button>
+      <button type="button" class="filter-chip" data-region="gyeonggi">경기</button>
       <button type="button" class="filter-chip" data-region="gangwon">강원</button>
       <button type="button" class="filter-chip" data-region="chungcheong">충청</button>
       <button type="button" class="filter-chip" data-region="jeolla">전라</button>
@@ -1301,8 +1302,11 @@
         if (region === 'all') return true;
         const text = badgeText.trim();
         const firstWord = text.split(/\s+/)[0] || '';
-        if (region === 'seoul-gyeonggi') {
-          return firstWord === '서울' || firstWord === '경기' || firstWord.startsWith('서울·경기');
+        if (region === 'seoul') {
+          return firstWord === '서울' || text.includes('서울');
+        }
+        if (region === 'gyeonggi') {
+          return firstWord === '경기' || text.includes('경기');
         }
         if (region === 'gangwon') {
           return firstWord === '강원';
