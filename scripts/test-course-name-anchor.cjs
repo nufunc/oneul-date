@@ -75,9 +75,9 @@ function matchesSearchQuery(spot, query) {
 
 const { stations } = JSON.parse(fs.readFileSync(path.join(root, 'public', 'data', 'stations.json'), 'utf8'));
 const rawSpots = JSON.parse(fs.readFileSync(path.join(root, 'public', 'data', 'spots.json'), 'utf8'));
-const { generateCourse, getCandidates, isCourseEligible, matchesSearchQuery, searchRelevanceTier, zoneKeysForQuery, zoneSelectionMatcher, swapPick, excludeRecent, dominantAnchorSpot, getLastAnchor, setStations } = new Function(
+const { generateCourse, getCandidates, isCourseEligible, matchesSearchQuery, searchRelevanceTier, zoneKeysForQuery, zoneSelectionMatcher, swapPick, excludeRecent, dominantAnchorSpot, SPOT_EXPLORE_CATEGORIES, getLastAnchor, setStations } = new Function(
   'rawSpotsData',
-  `${ts.transpile(code, { target: 'es2022' })};return { generateCourse, getCandidates, isCourseEligible, matchesSearchQuery, searchRelevanceTier, zoneKeysForQuery, zoneSelectionMatcher, swapPick, excludeRecent, dominantAnchorSpot, getLastAnchor: () => lastAnchor, setStations: (s) => { stationCoords = s; } };`,
+  `${ts.transpile(code, { target: 'es2022' })};return { generateCourse, getCandidates, isCourseEligible, matchesSearchQuery, searchRelevanceTier, zoneKeysForQuery, zoneSelectionMatcher, swapPick, excludeRecent, dominantAnchorSpot, SPOT_EXPLORE_CATEGORIES, getLastAnchor: () => lastAnchor, setStations: (s) => { stationCoords = s; } };`,
 )(rawSpots);
 setStations(stations);
 
@@ -331,6 +331,50 @@ for (const query of ['파스타', '방탈출', '글램핑', '한옥']) {
   }
   assert.ok(checked >= 10, `${query} 20km 안 일치 후보가 있는 🔄가 ${checked}번뿐이다`);
   assert.strictEqual(lost.length, 0, `${query} 🔄 ${checked}번 중 ${lost.length}번이 20km 안 일치 후보를 두고 다른 곳으로 바뀌었다: ${lost.slice(0, 5).join(', ')}`);
+}
+
+// (j) 테마 칩 코스의 테마 일치 칸 🔄는 같은 칸 후보에 기준 스팟 20km 안 테마 일치 후보가 있으면 그중에서 바꾼다. 테마를 보지 않던 때는
+// '오션뷰·물멍' 밤 칸 서피비치 선셋바가 무인등대, 모하나, 나미야 순으로 바뀌어 3번 누르면 테마 코스 72%가 테마 카드를 모두 잃었다
+// 테마 판정은 generateCourse 1-3 단계의 키워드 식을 시험 안에서 따로 적어 앱 함수와 견준다
+for (const categoryKey of ['PUB', 'CULTURE', 'OCEAN', 'HEALING']) {
+  const keywords = SPOT_EXPLORE_CATEGORIES.find((c) => c.key === categoryKey).keywords.map((kw) => kw.toLowerCase());
+  const inTheme = (s) => {
+    const text = [s.name, s.category, s.summary, ...(s.signature_items || []), ...(s.mood_tags || [])].join(' ').toLowerCase();
+    return keywords.some((kw) => text.includes(kw));
+  };
+  let checked = 0;
+  const lost = [];
+  for (let user = 0; user < 4; user++) {
+    const rng = mulberry(163 + user);
+    let recent = [];
+    const remember = (ids) => { recent = [...recent.filter((id) => !ids.includes(id)), ...ids].slice(-RECENT_MAX); };
+    for (let i = 0; i < 10; i++) {
+      const steps = generateCourse(open, ['day', 'evening', 'night'], [], 'ALL', { rng, avoidIds: new Set(recent), categoryKey }, []);
+      remember(steps.map((st) => st.spotId).filter((id) => id != null));
+      const index = steps.findIndex((st) => st.spotId != null && inTheme(spotById.get(st.spotId)));
+      if (index < 0) continue;
+      const state = { course: steps, moodPreset: null, courseConditions: { regions: [], subZones: [], mood: 'ALL', searchQuery: '', categoryKey, indoorOnly: false, budgetFilter: 'ALL' } };
+      const courseSpotIds = () => state.course.filter((st) => st.spotId !== null).map((st) => st.spotId);
+      for (let press = 0; press < 3; press++) {
+        const step = state.course[index];
+        if (!inTheme(spotById.get(step.spotId))) break;
+        const anchor = dominantAnchorSpot(state.course, spotById, index);
+        const near = excludeRecent(getCandidates(open, step.slot, [], 'ALL', courseSpotIds(), [], anchor, false), new Set(recent)).filter(
+          (s) => inTheme(s) && anchor && anchor.lat != null && s.lat != null && haversineKm(anchor, s) <= STAY_ANCHOR_KM,
+        );
+        const chosen = swapPick(state, open, spotById, courseSpotIds, () => new Set(recent), index);
+        assert.ok(chosen, `${categoryKey} ${step.slot} 칸 🔄가 아무 곳도 고르지 못했다`);
+        state.course[index] = { slot: step.slot, spotId: chosen.id };
+        remember([chosen.id]);
+        if (near.length === 0) continue;
+        checked++;
+        const d = haversineKm(anchor, chosen);
+        if (!inTheme(chosen) || d > STAY_ANCHOR_KM) lost.push(`${spotById.get(step.spotId).name} → ${chosen.name} ${Math.round(d)}km`);
+      }
+    }
+  }
+  assert.ok(checked >= 10, `${categoryKey} 20km 안 테마 일치 후보가 있는 🔄가 ${checked}번뿐이다`);
+  assert.strictEqual(lost.length, 0, `${categoryKey} 🔄 ${checked}번 중 ${lost.length}번이 20km 안 테마 일치 후보를 두고 다른 곳으로 바뀌었다: ${lost.slice(0, 5).join(', ')}`);
 }
 
 console.log('test-course-name-anchor: 모두 통과');

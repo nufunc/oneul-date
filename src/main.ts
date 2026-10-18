@@ -1795,6 +1795,12 @@ function placeScopeOf(query: string | undefined): ((s: Spot) => boolean) | null 
   return (s) => [s.location, s.area, s.address].join(' ').toLowerCase().split(/\s+/).some((w) => w.startsWith(q));
 }
 
+/** 테마 칩 키워드 일치 판정. 테마 앵커(generateCourse)와 칸 교체(swapStep)가 함께 쓴다 */
+function matchesCategoryTheme(spot: Spot, keywords: string[]): boolean {
+  const text = [spot.name, spot.category, spot.summary, ...(spot.signature_items || []), ...(spot.mood_tags || [])].join(' ').toLowerCase();
+  return keywords.some((kw) => text.includes(kw.toLowerCase()));
+}
+
 /**
  * 앵커 기반 근접 코스 생성 (물리적 거리 및 자치구 클러스터링).
  * 1) 검색어(searchQuery)가 있는 경우 해당 키워드 매칭 스팟을 앵커로 최우선 선정
@@ -1908,10 +1914,7 @@ function generateCourse(
     // 1-3. 카테고리 칩이 선택된 경우: 카테고리 키워드 매칭 스팟을 보유한 슬롯 앵커 최우선 탐색
     for (const slot of slotsOn) {
       const candidates = excludeRecent(getCandidates(all, slot, regionKeys, moodKey, [], zoneKeys, null, isIndoor), avoid);
-      const matched = applyChipFilters(candidates.filter((s) => {
-        const text = [s.name, s.category, s.summary, ...(s.signature_items || []), ...(s.mood_tags || [])].join(' ').toLowerCase();
-        return categoryDef.keywords!.some((kw) => text.includes(kw.toLowerCase()));
-      }));
+      const matched = applyChipFilters(candidates.filter((s) => matchesCategoryTheme(s, categoryDef.keywords!)));
       if (matched.length > 0 && (anchorSlot === null || matched.length < anchorPool.length)) {
         anchorSlot = slot;
         anchorPool = matched;
@@ -3476,6 +3479,8 @@ interface AppState {
     subZones: string[];
     mood: string;
     searchQuery?: string;
+    /** 맞춤 코스의 테마 칩(courseCategory). 🔄가 테마 일치 칸을 같은 테마 후보로 바꾼다 */
+    categoryKey?: string;
     indoorOnly?: boolean;
     budgetFilter?: 'ALL' | 'BUDGET' | 'LUXURY';
     /** 찜으로 만든 코스. 지역·분위기 선택과 무관하므로 제목을 따로 붙인다 */
@@ -4519,6 +4524,7 @@ function triggerCourseGeneration(): void {
     subZones: [...zoneKeys],
     mood: state.mood,
     searchQuery: state.searchQuery,
+    categoryKey: state.courseCategory,
     indoorOnly: state.indoorOnly,
     budgetFilter: state.budgetFilter,
     zoneFromQuery,
@@ -5836,19 +5842,30 @@ function swapStep(index: number, refocus = false): void {
   );
   // 검색어에 맞는 카드는 같은 칸 일치 후보 가운데 기준 스팟 STAY_ZONE_FALLBACK_RADIUS_KM 안에서 먼저 바꾼다. 검색어를 보지 않아
   // '파스타' 저녁 칸이 스테이크·공원으로 바뀌고, 3번 누르면 검색어 코스 58%가 일치 카드를 모두 잃었다. 남는 곳이 없으면 종전대로 고른다
+  // 테마 칩 코스의 테마 일치 카드도 같은 규칙으로 바꾼다. 검색어 거르기가 남긴 곳이 없을 때만 쓴다
   const query = cond.searchQuery?.trim() ?? '';
+  const themeKeywords =
+    cond.categoryKey && cond.categoryKey !== 'ALL' ? SPOT_EXPLORE_CATEGORIES.find((c) => c.key === cond.categoryKey)?.keywords : undefined;
   const current = step.spotId !== null ? spotById.get(step.spotId) : undefined;
-  const nearMatches =
-    query && current && matchesSearchQuery(current, query) && anchor && anchor.lat != null && anchor.lng != null
-      ? rawCandidates.filter(
-          (s) =>
-            s.lat != null &&
-            s.lng != null &&
-            getDistanceKm(anchor.lat!, anchor.lng!, s.lat!, s.lng!) <= STAY_ZONE_FALLBACK_RADIUS_KM &&
-            matchesSearchQuery(s, query),
+  const nearMatchesBy = (matches: (s: Spot) => boolean): Spot[] =>
+    current && matches(current) && anchor && anchor.lat != null && anchor.lng != null
+      ? filterByBudget(
+          filterByMoodPreset(
+            rawCandidates.filter(
+              (s) =>
+                s.lat != null &&
+                s.lng != null &&
+                getDistanceKm(anchor.lat!, anchor.lng!, s.lat!, s.lng!) <= STAY_ZONE_FALLBACK_RADIUS_KM &&
+                matches(s),
+            ),
+            state.moodPreset,
+          ),
+          cond.budgetFilter,
         )
       : [];
-  const matchCandidates = filterByBudget(filterByMoodPreset(nearMatches, state.moodPreset), cond.budgetFilter);
+  const queryMatches = query ? nearMatchesBy((s) => matchesSearchQuery(s, query)) : [];
+  const matchCandidates =
+    queryMatches.length > 0 || !themeKeywords ? queryMatches : nearMatchesBy((s) => matchesCategoryTheme(s, themeKeywords));
   const candidates =
     matchCandidates.length > 0
       ? matchCandidates
