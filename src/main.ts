@@ -5834,7 +5834,25 @@ function swapStep(index: number, refocus = false): void {
     getCandidates(spots, step.slot, cond.regions, cond.mood, courseSpotIds(), cond.subZones, anchor, cond.indoorOnly ?? false),
     recentSpotIdSet(),
   );
-  const candidates = filterByBudget(filterByMoodPreset(rawCandidates, state.moodPreset), cond.budgetFilter);
+  // 검색어에 맞는 카드는 같은 칸 일치 후보 가운데 기준 스팟 STAY_ZONE_FALLBACK_RADIUS_KM 안에서 먼저 바꾼다. 검색어를 보지 않아
+  // '파스타' 저녁 칸이 스테이크·공원으로 바뀌고, 3번 누르면 검색어 코스 58%가 일치 카드를 모두 잃었다. 남는 곳이 없으면 종전대로 고른다
+  const query = cond.searchQuery?.trim() ?? '';
+  const current = step.spotId !== null ? spotById.get(step.spotId) : undefined;
+  const nearMatches =
+    query && current && matchesSearchQuery(current, query) && anchor && anchor.lat != null && anchor.lng != null
+      ? rawCandidates.filter(
+          (s) =>
+            s.lat != null &&
+            s.lng != null &&
+            getDistanceKm(anchor.lat!, anchor.lng!, s.lat!, s.lng!) <= STAY_ZONE_FALLBACK_RADIUS_KM &&
+            matchesSearchQuery(s, query),
+        )
+      : [];
+  const matchCandidates = filterByBudget(filterByMoodPreset(nearMatches, state.moodPreset), cond.budgetFilter);
+  const candidates =
+    matchCandidates.length > 0
+      ? matchCandidates
+      : filterByBudget(filterByMoodPreset(rawCandidates, state.moodPreset), cond.budgetFilter);
   // 다른 차수와 동일한 종목(장르) 중복 방지
   const otherGenres = new Set<SpotGenre>();
   state.course.forEach((st, idx) => {

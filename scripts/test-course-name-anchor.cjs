@@ -18,6 +18,17 @@ for (const st of sf.statements) {
 }
 const need = new Set();
 const queue = ['generateCourse', 'zoneKeysForQuery', 'searchRelevanceTier'];
+// 🔄(swapStep)는 고를 곳을 정하는 `const chosen`까지만 떼고, 화면 상태와 이력은 인자로 넣는다
+const SWAP_INJECTED = new Set(['state', 'spots', 'spotById', 'courseSpotIds', 'recentSpotIdSet']);
+const swapBody = decls.get('swapStep').body.statements;
+const chosenAt = swapBody.findIndex((st) => ts.isVariableStatement(st) && st.declarationList.declarations[0].name.getText() === 'chosen');
+assert.ok(chosenAt > 0, 'swapStep에서 const chosen을 찾지 못했다');
+const swapStmts = swapBody.slice(0, chosenAt + 1);
+const collect = (n) => {
+  if (ts.isIdentifier(n) && decls.has(n.text) && !SWAP_INJECTED.has(n.text)) queue.push(n.text);
+  ts.forEachChild(n, collect);
+};
+swapStmts.forEach(collect);
 while (queue.length) {
   const name = queue.pop();
   if (need.has(name)) continue;
@@ -39,6 +50,10 @@ const code = [...new Set([...need].map((n) => decls.get(n)))]
   // 숙박 외 칸 거리를 앵커 기준으로 재려고 마지막에 고른 앵커를 남긴다
   .replace('anchorSpot = anchor;', 'anchorSpot = anchor; lastAnchor = anchor;')
   .concat(`
+function swapPick(state, spots, spotById, courseSpotIds, recentSpotIdSet, index) {
+${swapStmts.map((st) => st.getText()).join('\n')}
+return chosen;
+}
 let lastAnchor = null;
 const candidateCache = new Map();
 function getCandidates(all, slot, regionKeys, moodKey, excludeIds, zoneKeys, anchor, indoorOnly) {
@@ -60,9 +75,9 @@ function matchesSearchQuery(spot, query) {
 
 const { stations } = JSON.parse(fs.readFileSync(path.join(root, 'public', 'data', 'stations.json'), 'utf8'));
 const rawSpots = JSON.parse(fs.readFileSync(path.join(root, 'public', 'data', 'spots.json'), 'utf8'));
-const { generateCourse, getCandidates, isCourseEligible, matchesSearchQuery, searchRelevanceTier, zoneKeysForQuery, zoneSelectionMatcher, getLastAnchor, setStations } = new Function(
+const { generateCourse, getCandidates, isCourseEligible, matchesSearchQuery, searchRelevanceTier, zoneKeysForQuery, zoneSelectionMatcher, swapPick, excludeRecent, dominantAnchorSpot, getLastAnchor, setStations } = new Function(
   'rawSpotsData',
-  `${ts.transpile(code, { target: 'es2022' })};return { generateCourse, getCandidates, isCourseEligible, matchesSearchQuery, searchRelevanceTier, zoneKeysForQuery, zoneSelectionMatcher, getLastAnchor: () => lastAnchor, setStations: (s) => { stationCoords = s; } };`,
+  `${ts.transpile(code, { target: 'es2022' })};return { generateCourse, getCandidates, isCourseEligible, matchesSearchQuery, searchRelevanceTier, zoneKeysForQuery, zoneSelectionMatcher, swapPick, excludeRecent, dominantAnchorSpot, getLastAnchor: () => lastAnchor, setStations: (s) => { stationCoords = s; } };`,
 )(rawSpots);
 setStations(stations);
 
@@ -276,6 +291,46 @@ for (const query of ['글램핑', '캠핑', '펜션']) {
   }
   assert.ok(total >= 100, `${query} 숙박 외 칸이 ${total}곳뿐이다`);
   assert.strictEqual(far.length, 0, `${query} 숙박 외 칸 ${total}곳 중 ${far.length}곳이 앵커에서 ${STAY_ANCHOR_KM}km를 넘는다: ${far.slice(0, 5).join(', ')}km`);
+}
+
+// (i) 검색어 일치 칸의 🔄는 같은 칸 후보에 기준 스팟 20km 안 일치 후보가 있으면 그중에서 바꾼다. 검색어를 보지 않던 때는
+// '파스타' 저녁 칸이 스테이크1번가, 해수풀장, 공원 순으로 바뀌어 3번 누르면 검색어 코스 58%가 일치 카드를 모두 잃었다
+for (const query of ['파스타', '방탈출', '글램핑', '한옥']) {
+  const slots = query === '글램핑' ? ['day', 'evening', 'night', 'stay'] : ['day', 'evening', 'night'];
+  const zoneKeys = zoneKeysForQuery(query);
+  let checked = 0;
+  const lost = [];
+  for (let user = 0; user < 4; user++) {
+    const rng = mulberry(161 + user);
+    let recent = [];
+    const remember = (ids) => { recent = [...recent.filter((id) => !ids.includes(id)), ...ids].slice(-RECENT_MAX); };
+    for (let i = 0; i < 10; i++) {
+      const steps = generateCourse(open, [...slots], [], 'ALL', { rng, avoidIds: new Set(recent), searchQuery: query, zoneFromQuery: zoneKeys.length > 0 }, zoneKeys);
+      remember(steps.map((st) => st.spotId).filter((id) => id != null));
+      const index = steps.findIndex((st) => st.spotId != null && matchesSearchQuery(spotById.get(st.spotId), query));
+      if (index < 0) continue;
+      const state = { course: steps, moodPreset: null, courseConditions: { regions: [], subZones: zoneKeys, mood: 'ALL', searchQuery: query, indoorOnly: false, budgetFilter: 'ALL', zoneFromQuery: zoneKeys.length > 0 } };
+      const courseSpotIds = () => state.course.filter((st) => st.spotId !== null).map((st) => st.spotId);
+      for (let press = 0; press < 3; press++) {
+        const step = state.course[index];
+        if (!matchesSearchQuery(spotById.get(step.spotId), query)) break;
+        const anchor = dominantAnchorSpot(state.course, spotById, index);
+        const near = excludeRecent(getCandidates(open, step.slot, [], 'ALL', courseSpotIds(), zoneKeys, anchor, false), new Set(recent)).filter(
+          (s) => matchesSearchQuery(s, query) && anchor && anchor.lat != null && s.lat != null && haversineKm(anchor, s) <= STAY_ANCHOR_KM,
+        );
+        const chosen = swapPick(state, open, spotById, courseSpotIds, () => new Set(recent), index);
+        assert.ok(chosen, `${query} ${step.slot} 칸 🔄가 아무 곳도 고르지 못했다`);
+        state.course[index] = { slot: step.slot, spotId: chosen.id };
+        remember([chosen.id]);
+        if (near.length === 0) continue;
+        checked++;
+        const d = haversineKm(anchor, chosen);
+        if (!matchesSearchQuery(chosen, query) || d > STAY_ANCHOR_KM) lost.push(`${spotById.get(step.spotId).name} → ${chosen.name} ${Math.round(d)}km`);
+      }
+    }
+  }
+  assert.ok(checked >= 10, `${query} 20km 안 일치 후보가 있는 🔄가 ${checked}번뿐이다`);
+  assert.strictEqual(lost.length, 0, `${query} 🔄 ${checked}번 중 ${lost.length}번이 20km 안 일치 후보를 두고 다른 곳으로 바뀌었다: ${lost.slice(0, 5).join(', ')}`);
 }
 
 console.log('test-course-name-anchor: 모두 통과');
