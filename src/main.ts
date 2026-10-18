@@ -1820,6 +1820,7 @@ function generateCourse(
 
   let anchorSlot: SlotKey | null = null;
   let anchorPool: Spot[] = [];
+  let keywordAnchor = false;
   // 검색어·카테고리 앵커에도 가성비·스페셜·무드 프리셋을 건다. 빠져 있어 스페셜 칩을 켠 채 '떡볶이'를 치면
   // 4,000원 떡볶이집이 앵커가 됐다. 필터와 검색어가 함께 맞는 곳이 없으면 아래 일반 앵커로 넘어간다
   // filterByMoodPreset은 0건이면 원래 목록을 돌려줘 앵커에서는 프리셋이 무시됐으므로 엄격 판정을 쓴다
@@ -1862,6 +1863,7 @@ function generateCourse(
       anchorPool = excludeRecent(anchorPool, avoid);
       if (!slotsOn.includes(anchorSlot)) slotsOn.push(anchorSlot);
     }
+    const exactAnchor = anchorPool.length > 0;
 
     // 1-1. 현재 활성화된 슬롯 중에서 매칭 스팟 탐색
     const pools = anchorPool.length > 0 ? slotsOn.map((): Spot[] => []) : anchorPoolsBySlot(slotsOn);
@@ -1901,6 +1903,7 @@ function generateCourse(
         }
       }
     }
+    keywordAnchor = !exactAnchor && anchorPool.length > 0 && !scope && zoneKeysForQuery(query).length === 0;
   } else if (categoryDef && categoryDef.keywords) {
     // 1-3. 카테고리 칩이 선택된 경우: 카테고리 키워드 매칭 스팟을 보유한 슬롯 앵커 최우선 탐색
     for (const slot of slotsOn) {
@@ -1931,6 +1934,26 @@ function generateCourse(
         anchorPool = candidates;
       }
     }
+  }
+
+  // 키워드 검색 앵커는 앵커 칸 밖의 숙박 외 칸마다 STAY_ZONE_FALLBACK_RADIUS_KM 안 후보가 있는 곳만 쓴다. 그 칸 후보가 근처에 없는
+  // 외진 숙소가 앵커가 되면 아래 반경 단계가 모두 비어 '글램핑' 밤 칸이 59.8km 떨어진 루프탑이 됐다. 남는 곳이 없으면 종전대로 뽑는다.
+  // 이름 일치 앵커와 지역·동네 검색은 거르지 않는다
+  if (keywordAnchor) {
+    const nearLists = slotsOn
+      .filter((s) => s !== anchorSlot && s !== 'stay')
+      .map((slot) =>
+        filterByBudget(filterByMoodPreset(getCandidates(all, slot, regionKeys, moodKey, [], zoneKeys, null, isIndoor), moodPreset), budgetFilter).filter(
+          (s) => s.lat != null && s.lng != null,
+        ),
+      );
+    const feasible = anchorPool.filter(
+      (a) =>
+        a.lat != null &&
+        a.lng != null &&
+        nearLists.every((list) => list.some((s) => getDistanceKm(a.lat!, a.lng!, s.lat!, s.lng!) <= STAY_ZONE_FALLBACK_RADIUS_KM)),
+    );
+    if (feasible.length > 0) anchorPool = feasible;
   }
 
   const picked: number[] = [];

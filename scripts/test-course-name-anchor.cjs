@@ -257,4 +257,25 @@ for (const query of ['전시', '글램핑', '리조트', '와인바']) {
   }
 }
 
+// (h) 숙박 낱말 키워드 검색은 숙박 외 칸이 모두 앵커 20km 안이다. 앵커 근처에 그 칸 후보가 없는 외진 숙소가 앵커가 되면
+// 반경 단계가 모두 비어 '글램핑' 밤 칸이 59.8km 떨어진 루프탑이 됐다
+for (const query of ['글램핑', '캠핑', '펜션']) {
+  let total = 0;
+  const far = [];
+  for (let user = 0; user < 4; user++) {
+    for (const course of run(query, ['day', 'evening', 'night', 'stay'], 10, 158 + user)) {
+      const anchor = course.find((st) => st.anchor)?.spot;
+      if (!anchor || anchor.lat == null) continue;
+      for (const st of course) {
+        if (st.anchor || st.slot === 'stay' || !st.spot || st.spot.lat == null) continue;
+        total++;
+        const d = haversineKm(anchor, st.spot);
+        if (d > STAY_ANCHOR_KM) far.push(`${anchor.name} → ${st.slot} ${st.spot.name} ${Math.round(d)}`);
+      }
+    }
+  }
+  assert.ok(total >= 100, `${query} 숙박 외 칸이 ${total}곳뿐이다`);
+  assert.strictEqual(far.length, 0, `${query} 숙박 외 칸 ${total}곳 중 ${far.length}곳이 앵커에서 ${STAY_ANCHOR_KM}km를 넘는다: ${far.slice(0, 5).join(', ')}km`);
+}
+
 console.log('test-course-name-anchor: 모두 통과');
