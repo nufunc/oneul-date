@@ -11,6 +11,7 @@ import urllib.request
 import urllib.parse
 import re
 import json
+import unicodedata
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
@@ -18,12 +19,27 @@ HEADERS = {
     "Referer": "https://map.kakao.com/",
 }
 
+# 주차장·화장실·편의점 같은 부속 시설 이름. 이름 포함 판정만으로는 '덕하시장'에 '덕하시장 공중화장실'이 붙었다(P-164).
+# 케이블카 정류장·승강장과 휴게소는 그 자체가 장소인 행이 있어 넣지 않는다. 끝의 '점'을 떼면 '서울대입구점'이 걸리므로 떼지 않는다
+ACCESSORY_PLACE_RE = re.compile(
+    r'(주차장?\d*|주차장분기점|출입구|\d+번출구|입구|관리실|관리사무소|화장실|매표소|주유소|충전소|역\d+호선|사무실)$'
+    r'|^(gs25|cu|세븐일레븐|이마트24|미니스톱)|carzone|쏘카존')
+
+
+def _is_accessory_name(name):
+    return bool(ACCESSORY_PLACE_RE.search(re.sub(r'[^0-9a-z가-힣]', '', unicodedata.normalize('NFKC', name or '').lower())))
+
+
 def _pick_place(places, spot_name, address_or_area):
     """이름이 맞고, 주소가 있으면 시·도까지 같은 첫 결과. 종전에는 1위 결과를 대조 없이 써서
-    '베르트'(광주)에 부천 '베르트', '성수 대림창고'에 옆 갤러리의 평점이 붙었다(2026-09-29)."""
+    '베르트'(광주)에 부천 '베르트', '성수 대림창고'에 옆 갤러리의 평점이 붙었다(2026-09-29).
+    행 이름은 부속 시설이 아닌데 후보 이름이 부속 시설이면 건너뛴다."""
     from supabase_worker import place_name_matches, derive_region_area
     want_reg = derive_region_area(address_or_area)[0]
+    spot_is_accessory = _is_accessory_name(spot_name)
     for p in places:
+        if not spot_is_accessory and _is_accessory_name(p.get("name")):
+            continue
         if not place_name_matches(spot_name, p.get("name")):
             continue
         p_reg = derive_region_area(p.get("new_address") or p.get("address"))[0]
