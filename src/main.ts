@@ -7222,6 +7222,36 @@ function clearCourseHash(): void {
   history.replaceState(null, '', location.pathname + location.search);
 }
 
+/**
+ * 캐시 없이 받은 링크를 열면 전체 spots.json이 와야 받은 코스를 그린다(Slow 4G 22초).
+ * 그사이 홈 셸을 그리면 코스를 만들어 받은 코스를 잃었으므로 수신자 머리 카드와 자리표시만 그리고 홈 진입을 두지 않는다
+ */
+function receiverLoadingHtml(): string {
+  return `
+    <header class="topbar">
+      <h1 class="app-title">오늘 데이트</h1>
+      <div class="topbar-actions">
+        <button class="btn-theme-toggle" id="btn-theme-toggle" aria-label="테마 변경, 현재 ${getThemeModeLabel(state.themeMode)}">${getThemeModeHtml(state.themeMode)}</button>
+      </div>
+    </header>
+    <section class="receiver-view" id="receiver-loading">
+      <div class="receiver-hero-card">
+        <span class="receiver-hero-badge">✨ 공유받은 데이트 코스</span>
+        <h2 class="receiver-hero-title">친구가 보낸 특별한 데이트 코스예요</h2>
+        <p class="receiver-hero-desc" role="status" aria-live="polite">
+          <span aria-hidden="true" style="display:inline-block;width:14px;height:14px;margin-right:8px;vertical-align:-2px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite"></span>공유받은 코스를 불러오는 중이에요
+        </p>
+      </div>
+    </section>
+  `;
+}
+
+function renderReceiverLoading(): void {
+  applyTheme(state.themeMode, false);
+  app.innerHTML = receiverLoadingHtml();
+  document.getElementById('btn-theme-toggle')?.addEventListener('click', cycleThemeMode);
+}
+
 /** 조건 영역·오늘의코스·교체 없이 코스 카드만 + [나만의 코스 만들기] CTA + 실전 공유/저장/길찾기 액션 */
 function renderReceiverView(steps: CourseStep[]): void {
   const usedImages = new Set<string>();
@@ -8420,7 +8450,8 @@ async function init(): Promise<void> {
           spotById = buildSpotIndex(spots);
           canonicalizeSavedSpotIds();
           loadedRegionKeys.add('ALL');
-          if (isSharedLink && (!state.course || state.course.length === 0)) {
+          // 자리표시가 아직 떠 있을 때만 받은 코스를 그린다. 사용자가 해시를 바꿔 다른 화면으로 갔으면 덮지 않는다
+          if (isSharedLink && document.getElementById('receiver-loading')) {
             handleRoute();
           } else if (state.mainMode === 'spots') {
             renderSpotDiscovery();
@@ -8428,9 +8459,14 @@ async function init(): Promise<void> {
             renderTodayCourse(); // 첫 티커는 정적 샘플로 그려져 거리가 비므로 전체 데이터로 다시 그린다
             applyDailyCourseIfEmpty();
           }
+        } else if (document.getElementById('receiver-loading')) {
+          renderShell();
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        // 받지 못하면 자리표시에 머물지 않고 홈 셸로 떨어진다
+        if (document.getElementById('receiver-loading')) renderShell();
+      });
   } else {
     // 이미 캐시가 있는 경우: 백그라운드에서 최신 전체 데이터 동기화
     setTimeout(() => {
@@ -8454,13 +8490,13 @@ async function init(): Promise<void> {
   // 영구 제거된다(clearCourseHash) — 공유 링크의 실사용 대상이 정확히
   // 이 "캐시 없는 첫 방문자"라 사실상 공유 기능이 상시 실패했다
   // (2026-09-23 발견). 라이브 데이터가 아직 없으면 실패 판정을 미루고
-  // 빈 셸만 보여준다. 실제 판정은 위 loadSpots().then() 콜백이
+  // 수신자 자리표시만 보여준다. 실제 판정은 위 loadSpots().then() 콜백이
   // 라이브 데이터로 다시 handleRoute()를 부를 때 이뤄진다.
   if (isSharedLink && (!state.course || state.course.length === 0)) {
     if (hasCachedData) {
       handleRoute();
     } else {
-      renderShell();
+      renderReceiverLoading();
     }
   }
 
