@@ -21,7 +21,8 @@ def test_activity_and_market_names_are_not_nature():
     assert _cat("시흥 배곧생명공원 해수체험 수상레저", "Yacht_WaterLeisure") == "수상스포츠"
     assert _cat("동해 어달해변 해양투어", "Yacht_WaterLeisure") == "수상스포츠"
     assert _cat("포천 산정호수 하동 루지체험장", "Racing_Luge") == "레포츠/체험"
-    assert _cat("강릉 안목해변 아라나비 짚라인", "Cablecar_Cruise") == "케이블카·유람선"
+    # 이 행은 P-173에서 짚라인 이름으로 레포츠/체험을 받는다
+    assert _cat("강릉 안목해변 아라나비 짚라인", "Cablecar_Cruise") == "레포츠/체험"
     assert _cat("인천 송도 솔찬공원 케이슨24", "Midnight_Drive") is None
     assert heal({"name": "왕송호수공원 레일바이크", "slot": "day",
                  "source": {"note": "Live_Research_2026_Gyeonggi_Incheon_Ultimate_Part2.md"}})[0] is None

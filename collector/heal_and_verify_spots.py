@@ -160,6 +160,13 @@ NOTE_THEME_MAP = [
     (r'Traditional_Market', '전통시장'),
 ]
 
+# 출처 메모 테마 값을 붙이려면 이름에 있어야 하는 낱말. 없으면 클라이밍은 레포츠/체험, 나머지는 비운다(P-173)
+NOTE_THEME_NAME_GATE = {
+    '클라이밍': r'클라이밍|클라임|볼더링',
+    '케이블카·유람선': r'케이블카|곤돌라|유람선|크루즈|선착장|여객터미널',
+    '관광열차': r'열차|모노레일|레일|기차|사이클',
+}
+
 # 4. 정밀 키워드 카테고리 매핑 규칙
 # 전후방 탐색은 낱말 안 부분 일치를 막는다: 스파이시, 에스프레소바, 파라다이스시티, 사운드스테이지, 스테이블(P-097)
 KEYWORD_RULES = [
@@ -321,6 +328,9 @@ def heal_category_and_slot(spot: Dict[str, Any]) -> Tuple[str, str]:
             if re.search(pat, note, re.I):
                 # 별 보기 조사 묶음의 계곡·광장·전망데크도 천문대를 받아 14행 중 11행이 틀렸다(P-170)
                 cat = None if cname == '천문대' and '천문' not in text else cname
+                # 활동 묶음 메모도 실내 스포츠 전반·짚라인·다리·전망대를 담아 41행 중 25행이 틀렸다(P-173)
+                if cat in NOTE_THEME_NAME_GATE and not re.search(NOTE_THEME_NAME_GATE[cat], text):
+                    cat = '레포츠/체험' if cat == '클라이밍' or re.search(r'짚라인|짚와이어|카약', text) else None
                 break
                 
     # 3. 근거가 없으면 비워 둔다. 종전에는 시간대로 감성카페·이탈리안·칵테일바를 지어 넣어 동기화마다
