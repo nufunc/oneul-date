@@ -303,6 +303,96 @@ export async function loadStaticSpots(): Promise<Spot[]> {
   return normalizeSpots(rawSpotsData as Spot[]);
 }
 
+// 받은 링크 첫 방문은 전체 spots.json(gzip 3.7MB, Slow 4G 21초)이 와야 수신자 화면을 그렸다. 공유 id 행만 Range 요청으로 찾는다.
+// spots.json이 id 오름차순이고 행마다 `{"id":`로 시작한다는 전제에 기댄다(collector/sync_live_spots.py가 쓰기 전에 assert한다)
+const RANGE_URL = './data/spots.json';
+const ROW_HEAD = [0x7b, 0x22, 0x69, 0x64, 0x22, 0x3a]; // {"id":
+const RANGE_PROBE_BYTES = 2048; // 행 최대 1,838B(2026-10-20)보다 커야 조각마다 행 머리가 하나 들어 있다
+const RANGE_PROBES = 7;
+const RANGE_FINAL_BYTES = 16384;
+const RANGE_MAX_REQUESTS = 300; // 공유 3곳에 88건(라운드 4번)이다
+const RANGE_TIMEOUT_MS = 6000;
+
+/** 조각에서 from 이후 첫 행 머리의 바이트 위치와 id. 문자열로 디코드해 세면 다중 바이트 문자에서 위치가 어긋나 바이트로 센다 */
+export function findRowHead(buf: Uint8Array, from = 0): { pos: number; id: number } | null {
+  outer: for (let i = from; i + ROW_HEAD.length < buf.length; i++) {
+    for (let j = 0; j < ROW_HEAD.length; j++) if (buf[i + j] !== ROW_HEAD[j]) continue outer;
+    let k = i + ROW_HEAD.length;
+    let id = 0;
+    while (k < buf.length && buf[k] >= 0x30 && buf[k] <= 0x39) id = id * 10 + (buf[k++] - 0x30);
+    // 숫자가 없거나 조각 끝에서 잘렸으면 id를 믿을 수 없다
+    if (k === i + ROW_HEAD.length || k === buf.length) return null;
+    return { pos: i, id };
+  }
+  return null;
+}
+
+/** 조각에서 id 행을 꺼낸다. 행 끝은 다음 행 머리 앞이나 배열 끝 `]` 앞의 마지막 `}`다 */
+export function extractRow(buf: Uint8Array, id: number): Spot | null {
+  let head = findRowHead(buf);
+  while (head && head.id !== id) head = findRowHead(buf, head.pos + 1);
+  if (!head) return null;
+  const next = findRowHead(buf, head.pos + 1);
+  let end = next ? next.pos : buf.length;
+  while (end > head.pos && buf[end - 1] !== 0x7d) end--;
+  try {
+    const row = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(buf.subarray(head.pos, end)));
+    return row && row.id === id ? (row as Spot) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * spots.json에서 ids 행을 Range 요청 k분 탐색으로 찾는다. 하나라도 못 찾았거나 아래 조건에 걸리면 빈 배열이고 호출부는 전체 파일을 기다린다.
+ * 206이 아님, content-encoding 있음(압축본 기준 조각), 응답마다 전체 크기가 다름(탐색 중 동기화), 요청 수 상한, 6초 초과
+ */
+export async function findSpotsByRange(ids: number[]): Promise<Spot[]> {
+  if (ids.length === 0) return [];
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), RANGE_TIMEOUT_MS);
+  let total = -1;
+  let requests = 0;
+  const get = async (from: number, to: number): Promise<Uint8Array> => {
+    if (++requests > RANGE_MAX_REQUESTS) throw new Error('range: too many requests');
+    const res = await fetch(RANGE_URL, { headers: { Range: `bytes=${from}-${to - 1}` }, cache: 'no-store', signal: ctrl.signal });
+    if (res.status !== 206 || res.headers.get('content-encoding')) throw new Error(`range: status ${res.status}`);
+    const m = /^bytes (\d+)-\d+\/(\d+)$/.exec(res.headers.get('content-range') || '');
+    if (!m || Number(m[1]) !== from || (total >= 0 && Number(m[2]) !== total)) throw new Error('range: content-range');
+    total = Number(m[2]);
+    return new Uint8Array(await res.arrayBuffer());
+  };
+  const find = async (id: number): Promise<Spot | null> => {
+    let lo = 0;
+    let hi = total;
+    while (hi - lo > RANGE_FINAL_BYTES) {
+      const offs = Array.from({ length: RANGE_PROBES }, (_, i) => Math.floor(lo + ((hi - lo) * (i + 1)) / (RANGE_PROBES + 1)));
+      const heads = await Promise.all(
+        offs.map(async (o) => {
+          const h = findRowHead(await get(o, Math.min(o + RANGE_PROBE_BYTES, total)));
+          return h && { pos: o + h.pos, id: h.id };
+        }),
+      );
+      for (const h of heads) {
+        if (!h) continue;
+        if (h.id <= id) lo = Math.max(lo, h.pos);
+        else hi = Math.min(hi, h.pos);
+      }
+    }
+    return extractRow(await get(lo, hi), id);
+  };
+  try {
+    await get(0, 1); // 전체 크기를 먼저 안다
+    const rows = await Promise.all(ids.map(find));
+    return rows.every(Boolean) ? normalizeSpots(rows as Spot[]) : [];
+  } catch {
+    return [];
+  } finally {
+    clearTimeout(timer);
+    ctrl.abort(); // 실패했을 때 남은 요청을 끊는다
+  }
+}
+
 /** 병합으로 닫힌 스팟의 옛 id → 남은 id (동기화가 public/data/spot_aliases.json으로 내보낸다). 실패하면 빈 객체 */
 export async function loadSpotAliases(): Promise<Record<string, number>> {
   try {

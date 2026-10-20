@@ -228,7 +228,7 @@ const ZONE_CENTERS: Record<string, { lat: number; lng: number }> = {
 const STORAGE_KEY = 'oneul_saved_courses';
 const RECENT_KEY = 'oneul_recent_spots';
 const LAST_COURSE_STORAGE_KEY = 'oneul_last_course';
-import { loadSpots, getCachedSpots, mergeSpots, loadSpotAliases, loadStations } from './supabase';
+import { loadSpots, getCachedSpots, mergeSpots, loadSpotAliases, loadStations, findSpotsByRange } from './supabase';
 
 const RECENT_MAX = 100;
 
@@ -8441,6 +8441,16 @@ async function init(): Promise<void> {
 
   // 3. 백그라운드 비동기 최적화 로딩
   if (!hasCachedData) {
+    // 받은 링크는 공유 id 행만 Range 요청으로 먼저 찾아 그린다. 전체 파일은 아래에서 함께 받는다
+    if (isSharedLink) {
+      const sharedIds = [...new Set((parseCourseHash(location.hash) || []).map((id) => spotAliasIds.get(id) ?? id))];
+      findSpotsByRange(sharedIds).then((found) => {
+        // 일부만 찾았으면 그리지 않는다: 못 찾은 곳을 뺐다는 알림이 잘못 뜬다. 전체 데이터가 오면 아래 콜백이 그린다
+        if (found.length === 0 || found.length !== sharedIds.length || !document.getElementById('receiver-loading')) return;
+        spotById = buildSpotIndex([...spots, ...found]);
+        handleRoute();
+      });
+    }
     // 캐시가 없는 첫 방문 시: 전국 전체 스팟 로드
     loadSpots()
       .then((firstSpots) => {

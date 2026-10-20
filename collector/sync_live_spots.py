@@ -170,9 +170,16 @@ def main():
     # 화면이 이 값을 쓰게 되면 여기서 빼야 한다
     drop_keys = empty_keys | CLIENT_UNUSED_KEYS
     out_spots = [{k: v for k, v in sp.items() if k not in drop_keys} for sp in healed_spots]
+    # 앱의 받은 링크 Range 탐색(src/supabase.ts findSpotsByRange)이 id 오름차순과 행마다 하나뿐인 `{"id":` 머리에 기댄다
+    out_text = json.dumps(out_spots, ensure_ascii=False, separators=(",", ":"))
+    out_ids = [sp["id"] for sp in out_spots]
+    assert all(isinstance(i, int) for i in out_ids), "spots.json id가 정수가 아니다"
+    assert all(a < b for a, b in zip(out_ids, out_ids[1:])), "spots.json이 id 오름차순이 아니다"
+    assert all(next(iter(sp)) == "id" for sp in out_spots), "spots.json 행이 id로 시작하지 않는다"
+    assert out_text.count('{"id":') == len(out_spots), "spots.json 행 안에 행 머리 {\"id\": 가 있다"
     tmp_file = f"{TARGET_FILE}.tmp"
     with open(tmp_file, "w", encoding="utf-8") as f:
-        json.dump(out_spots, f, ensure_ascii=False, separators=(",", ":"))
+        f.write(out_text)
 
     if os.path.exists(TARGET_FILE):
         os.remove(TARGET_FILE)
