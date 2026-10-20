@@ -112,7 +112,8 @@ POLLUTED_CATEGORIES = {
     '화장실', '소프트웨어', '컴퓨터판매', '주방가구,싱크대판매', '시몬스', '글라스박스',
     '가정,생활', '이마트24', '사당,제단', '공원관리운영', '관광지관리운영', '필라테스',
     '신분당선', '등산정보', '사회복지시설', '입출구', '무장애나눔길', '식품판매',
-    '인테리어', '한살림', '모즈토리'
+    '인테리어', '한살림', '모즈토리',
+    '공영주차장', '매표소', '관광안내소', '건물관리사무소', 'GS25'
 }
 
 # 3. 소스 노트 테마 매핑
@@ -292,7 +293,9 @@ def derive_export_price_tier(price: str) -> Optional[str]:
 def heal_category_and_slot(spot: Dict[str, Any]) -> Tuple[str, str]:
     """스팟의 카테고리 결측치/오염을 보정하고 적합한 슬롯(day/evening/night/stay)을 도출"""
     cat = spot.get("category")
-    if cat in POLLUTED_CATEGORIES:
+    # 계층형 값('교통,수송 > 교통시설 > 주차장 > 공영주차장')은 마지막 마디로 본다. 종전 완전 일치는 계층형 값과
+    # 공영주차장·매표소를 그대로 내보내 라이브 9행이 부속 시설 category로 나왔다(P-166)
+    if cat and cat.split('>')[-1].strip() in POLLUTED_CATEGORIES:
         cat = None
         
     # 주소까지 붙이면 도로명이 카테고리를 정한다('고기로' 주소 → 한식·미식, '광안해변로' 카페 → 자연·산책)
