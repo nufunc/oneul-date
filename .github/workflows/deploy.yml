@@ -15,8 +15,9 @@ permissions:
   pages: write
   id-token: write
 
+# 성공하지 않은 workflow_run은 job을 건너뛰므로 실행별 그룹에 둬 돌던 배포를 취소하지 않게 한다
 concurrency:
-  group: pages
+  group: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'success' && format('pages-skip-{0}', github.run_id) || 'pages' }}
   cancel-in-progress: true
 
 jobs:
