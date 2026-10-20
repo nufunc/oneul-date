@@ -4356,9 +4356,10 @@ function renderConditions(): void {
 
       <!-- 5. 코스 완성하기 버튼군: 맞춤 생성 + 오늘의 추천 + 찜한 코스 -->
       <div class="course-generate-btn-group">
-        <button class="btn-primary btn-generate" id="btn-generate">
-          🚀 맞춤 데이트 코스 완성하기
+        <button class="btn-primary btn-generate" id="btn-generate"${courseWaitingForSpots ? ' disabled aria-busy="true"' : ''}>
+          ${courseWaitingForSpots ? '스팟 불러오는 중…' : '🚀 맞춤 데이트 코스 완성하기'}
         </button>
+        ${courseWaitingForSpots ? '<span class="sr-only" role="status">스팟 불러오는 중…</span>' : ''}
         <button class="btn-daily-recommend" id="btn-daily-recommend" type="button" title="오늘 날짜 기반 에디터 추천 코스 바로 보기">
           🎁 오늘의 코스
         </button>
@@ -4485,6 +4486,31 @@ function zoneKeysForQuery(query: string): string[] {
   return zone ? [zone.key] : [];
 }
 
+// 캐시 없는 첫 방문은 전체 spots.json이 오기 전까지 spots가 번들 샘플 220곳이라(서울 밤 칸 1곳) 그사이 만든 코스가 샘플에서 나오고
+// 데이터가 온 뒤에도 남았다. 그사이 누른 코스 만들기는 기다렸다가 데이터가 오면 그때의 조건으로 한 번 만든다
+let fullSpotsPending = false;
+let courseWaitingForSpots = false;
+
+/** 전체 데이터를 기다려야 하면 버튼을 대기 상태로 그리고 true */
+function waitForFullSpots(): boolean {
+  if (!fullSpotsPending) return false;
+  if (!courseWaitingForSpots) {
+    courseWaitingForSpots = true;
+    renderConditions();
+  }
+  return true;
+}
+
+/** 전체 데이터 로드가 끝나면(실패면 loadStaticSpots가 돌려준 샘플로) 기다리던 코스를 만든다. 다른 화면으로 갔으면 덮지 않는다 */
+function resolveWaitingCourse(): void {
+  fullSpotsPending = false;
+  if (!courseWaitingForSpots) return;
+  courseWaitingForSpots = false;
+  if (state.mainMode !== 'course' || location.hash.startsWith('#c=') || !document.getElementById('btn-generate')) return;
+  renderConditions();
+  triggerCourseGeneration();
+}
+
 function triggerCourseGeneration(): void {
   // 숙박 키워드(호텔, 숙소, 호캉스, 리조트, 펜션, 글램핑) 검색 시 stay 슬롯 자동 활성화
   if (state.searchQuery && /호텔|숙소|숙박|호캉스|리조트|펜션|글램핑|스테이|모텔|풀빌라|게스트하우스|캠핑|카라반|료칸|감성숙소/.test(state.searchQuery)) {
@@ -4499,6 +4525,7 @@ function triggerCourseGeneration(): void {
     showToast('시간대를 하나 이상 선택해 주세요');
     return;
   }
+  if (waitForFullSpots()) return;
   // '성수', '성수 카페'처럼 세부 동네 이름으로 시작하는 검색은 나머지 칸도 그 동네 안에서 찾는다.
   // 매칭된 한 칸만 성수이고 나머지는 종로·강남으로 넓게 채워졌다. 지역 시트에서 고른 세부 동네가 있으면 그것을 따른다
   const zoneKeys = state.subZones.length > 0 ? state.subZones : zoneKeysForQuery(state.searchQuery);
@@ -8452,6 +8479,7 @@ async function init(): Promise<void> {
       });
     }
     // 캐시가 없는 첫 방문 시: 전국 전체 스팟 로드
+    fullSpotsPending = true;
     loadSpots()
       .then((firstSpots) => {
         if (firstSpots && firstSpots.length > 0) {
@@ -8467,7 +8495,7 @@ async function init(): Promise<void> {
             renderSpotDiscovery();
           } else if (state.mainMode === 'course') {
             renderTodayCourse(); // 첫 티커는 정적 샘플로 그려져 거리가 비므로 전체 데이터로 다시 그린다
-            applyDailyCourseIfEmpty();
+            if (!courseWaitingForSpots) applyDailyCourseIfEmpty();
           }
         } else if (document.getElementById('receiver-loading')) {
           renderShell();
@@ -8476,7 +8504,8 @@ async function init(): Promise<void> {
       .catch(() => {
         // 받지 못하면 자리표시에 머물지 않고 홈 셸로 떨어진다
         if (document.getElementById('receiver-loading')) renderShell();
-      });
+      })
+      .finally(resolveWaitingCourse);
   } else {
     // 이미 캐시가 있는 경우: 백그라운드에서 최신 전체 데이터 동기화
     setTimeout(() => {
