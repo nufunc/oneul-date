@@ -152,7 +152,7 @@ for (const region of REGIONS) {
 // 블로그 매거진 페이지를 sitemap에 등록
 sitemapUrls.push(`${SITE_URL}/blog/`);
 const blogPublicDir = path.resolve('public', 'blog');
-let blogPosts = ['gongju', 'gunsan', 'gyeongju', 'gangneung', 'seochon', 'suncheon', 'damyang', 'asan', 'danyang', 'pocheon', 'mungyeong', 'cheongsong', 'taean', 'jeonju', 'jeonju-autumn', 'sangam', 'boeun', 'namwon', 'jeongeup', 'yeongju', 'jecheon', 'pyeongchang', 'buyeo', 'sokcho', 'chuncheon', 'andong', 'gapyeong', 'wonju', 'cheorwon', 'hadong', 'gurye', 'goesan', 'yesan', 'cheongju', 'jeju-east-3d2n', 'jeju-west-3d2n', 'jeju-south-3d2n', 'jeju-center-3d2n', 'gochang', 'yeongwol', 'yangpyeong', 'paju', 'pohang', 'seocheon', 'namyangju-drive', 'incheon-openport'];
+let blogPosts = ['gongju', 'gunsan', 'gyeongju', 'gangneung', 'seochon', 'suncheon', 'damyang', 'asan', 'danyang', 'pocheon', 'mungyeong', 'cheongsong', 'taean', 'jeonju', 'jeonju-autumn', 'sangam', 'boeun', 'namwon', 'jeongeup', 'yeongju', 'jecheon', 'pyeongchang', 'buyeo', 'sokcho', 'chuncheon', 'andong', 'gapyeong', 'wonju', 'cheorwon', 'hadong', 'gurye', 'goesan', 'yesan', 'cheongju', 'jeju-east-3d2n', 'jeju-west-3d2n', 'jeju-south-3d2n', 'jeju-center-3d2n', 'gochang', 'yeongwol', 'yangpyeong', 'paju', 'pohang', 'seocheon', 'namyangju-drive', 'incheon-openport', 'goseong'];
 if (fs.existsSync(blogPublicDir)) {
   const discovered = fs.readdirSync(blogPublicDir, { withFileTypes: true })
     .filter((d) => d.isDirectory() && fs.existsSync(path.join(blogPublicDir, d.name, 'index.html')))
