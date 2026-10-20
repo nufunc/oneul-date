@@ -328,6 +328,25 @@
     <section class="posts-container">
       <div class="posts-grid">
 
+        <!-- [인천 개항장 뚜벅이 코스] 차이나타운 만다복 하얀짜장부터 대불호텔 전시관, 신포국제시장 닭강정과 자유공원 서해 노을까지 100년 시간 여행 데이트 -->
+        <a href="incheon-openport/" class="post-card">
+          <div class="card-thumb-wrap">
+            <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/99c34dbcd22fef227647872087128e58ac9a44d2?original" alt="[인천 개항장] 차이나타운 만다복 하얀짜장부터 대불호텔 전시관, 신포국제시장 닭강정과 자유공원 서해 노을까지 100년 시간 여행 데이트" class="card-thumb" loading="lazy" />
+            <span class="card-region-badge">인천 개항장</span>
+            <span class="card-badge-tag">100년 근대 골목 & 뚜벅이 데이트</span>
+          </div>
+          <div class="card-body">
+            <h2 class="card-title">[인천 개항장] 차이나타운 만다복 하얀짜장부터 대불호텔 전시관, 신포국제시장 닭강정과 자유공원 서해 노을까지 100년 시간 여행 데이트</h2>
+            <p class="card-snippet">
+              지하철 인천역에서 시작하는 100% 뚜벅이 시간 여행: 차이나타운 붉은 홍등 골목 산책부터 100년 전통 만다복 하얀백년짜장 점심, 한국 최초 서양식 호텔 대불호텔 전시관과 레트로 중구생활사전시관, 40년 전통 매콤달콤 원조신포닭강정, 그리고 대한민국 최초 서구식 공원인 자유공원 석정루에서 감상하는 서해 낙조 피날레까지 이어지는 당일 뚜벅이 코스.
+            </p>
+            <div class="card-footer">
+              <span class="card-meta">스팟 5곳 • 뚜벅이 코스</span>
+              <span class="card-cost">2인 약 6.1~6.8만 원</span>
+            </div>
+          </div>
+        </a>
+
         <!-- [경기 남양주 드라이브 코스] 물의정원부터 북한강 통창 뷰 라온숨, 한강 노을 엠키친앤카페와 심야 불멍 포러데이 팔당까지 가을 리버뷰 힐링 데이트 -->
         <a href="namyangju-drive/" class="post-card">
           <div class="card-thumb-wrap">
@@ -1344,7 +1363,7 @@
           return firstWord === '서울' || text.includes('서울');
         }
         if (region === 'gyeonggi') {
-          return firstWord === '경기' || text.includes('경기');
+          return firstWord === '경기' || text.includes('경기') || firstWord === '인천' || text.includes('인천');
         }
         if (region === 'gangwon') {
           return firstWord === '강원';
