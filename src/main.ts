@@ -5770,9 +5770,7 @@ function renderStepCard(
         ${thumbHtml}
         <div class="step-content-col">
           <h3 class="step-name">
-            ${swappable
-              ? `<button type="button" class="step-name-link" data-detail-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 상세 보기">${escapeHtml(spot.name)}</button>`
-              : `<span>${escapeHtml(spot.name)}</span>`}
+            <button type="button" class="step-name-link" data-detail-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 상세 보기">${escapeHtml(spot.name)}</button>
             ${spot.verified ? `<span class="icon-verified-badge" aria-label="엄선한 데이트 장소">${ICON_VERIFIED_CHECK_SVG}</span>` : ''}
           </h3>
           ${curationBadges.length > 0 ? `<div class="step-curation-row">${curationBadges.join('')}</div>` : ''}
@@ -7343,6 +7341,7 @@ function renderReceiverView(steps: CourseStep[]): void {
       <p class="footer-copy">오늘 데이트 <span class="footer-version">${APP_VERSION}</span></p>
       <p class="footer-sub">엄선한 스팟만 골라 담은 오늘의 데이트 코스</p>
     </footer>
+    <div class="overlay-root" id="overlay-root"></div>
   `;
 
   const goHome = (e: Event) => {
@@ -8239,7 +8238,15 @@ function renderOverlayContent(): void {
 
     // 코스 짜기 버튼
     root.querySelector('#btn-detail-build-anchor')?.addEventListener('click', () => {
+      // 받은 링크에서는 홈 셸로 바꾼 뒤 코스를 짠다. 닫힘의 history.back()이 #c= 항목으로 돌아가면 받은 코스가 다시 그려지므로
+      // 시트 항목을 소비하지 않고 홈 주소로 바꿔 쓴다. 뒤로 가기는 받은 코스로 돌아간다
+      const fromReceiver = location.hash.startsWith('#c=');
+      if (fromReceiver) overlayHistoryPushed = false;
       closeOverlay(() => {
+        if (fromReceiver) {
+          clearCourseHash();
+          renderShell();
+        }
         const steps = buildAnchorCourse(spot);
         state.course = steps;
         // 앵커는 이름 검색이 아니라 id로 남긴다. 숙소 앵커는 이름 검색에 잡히지 않아 다시 추천에서 빠졌다
