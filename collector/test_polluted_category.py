@@ -11,11 +11,15 @@ NEWLY_POLLUTED = [
     "부동산 > 주거시설 > 아파트 > 아파트 동", "가정,생활 > 식품판매", "가정,생활 > 미용 > 화장품",
 ]
 STILL_POLLUTED = ["주차장", "화장실", "입출구", "가정,생활", "공원시설물"]
+# 생활 서비스 업종은 P-175에서 오염으로 옮겼다
+P175_POLLUTED = [
+    "가정,생활 > 패션 > 패션잡화점 > 안경,렌즈 > 으뜸50안경", "가정,생활 > 미용 > 미용실", "부동산 > 빌딩",
+    "가정,생활 > 결혼 > 예식장",
+]
 # 같은 표본에서 판정이 바뀌지 않아야 하는 값: 계층형 값과 자주 나오는 값
 KEPT = [
-    "가정,생활 > 패션 > 패션잡화점 > 안경,렌즈 > 으뜸50안경", "서비스,산업 > 식품 > 음료,주류제조",
-    "가정,생활 > 미용 > 미용실", "서비스,산업 > 전문대행 > 공간대여", "부동산 > 빌딩",
-    "가정,생활 > 결혼 > 예식장", "관광지", "카페", "레포츠/체험", "문화시설", "제과,베이커리", "디저트카페",
+    "서비스,산업 > 식품 > 음료,주류제조", "서비스,산업 > 전문대행 > 공간대여",
+    "관광지", "카페", "레포츠/체험", "문화시설", "제과,베이커리", "디저트카페",
 ]
 
 
@@ -25,7 +29,7 @@ def _cat(category):
 
 
 def test_accessory_category_hidden_by_last_segment():
-    for c in NEWLY_POLLUTED + STILL_POLLUTED:
+    for c in NEWLY_POLLUTED + STILL_POLLUTED + P175_POLLUTED:
         assert _cat(c) is None, c
 
 
@@ -38,7 +42,7 @@ def test_nonspot_re_catches_toilet_and_ticket_booth():
     hit = lambda c: any(p.search(c) for p in SLOT_NONSPOT_RE)
     for c in ("화장실", "매표소", "입출구", "주차장"):
         assert hit(c), c
-    for c in KEPT[6:]:
+    for c in KEPT[2:]:
         assert not hit(c), c
 
 
