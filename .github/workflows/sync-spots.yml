@@ -46,8 +46,14 @@ jobs:
           if [ -n "$(git status --porcelain public/data/spots.json public/data/spot_aliases.json src/data/spots.sample.json)" ]; then
             git add public/data/spots.json public/data/spot_aliases.json src/data/spots.sample.json
             git commit -m "chore(data): auto-sync latest spots from OCI PostgreSQL"
-            git pull --rebase origin main
-            git push origin main
+            # sync 밖의 푸시와 겹쳐 거절되면 rebase 뒤 다시 푸시한다. 충돌은 동기화 파일을 누가 고쳤다는 뜻이라 바로 실패한다
+            for i in 1 2 3 4 5; do
+              git pull --rebase origin main || { git rebase --abort; exit 1; }
+              git push origin main && exit 0
+              echo "push rejected (try $i), retrying"
+              sleep $((i * 5))
+            done
+            exit 1
           else
             echo "No changes in spots data. Skipping commit."
           fi
