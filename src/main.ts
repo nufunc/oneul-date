@@ -2670,6 +2670,13 @@ function normalizeEditorialTone(text: string): string {
   return normalized.trim();
 }
 
+/** 네트워크 없이 캐시에 있는 총평만 돌려준다 */
+function cachedAiBriefing(steps: CourseStep[], moodKey: string): string | null {
+  const ids = steps.filter((st) => st.spotId !== null).map((st) => st.spotId);
+  const cached = aiStoryCache.get(`${moodKey}_${ids.join('-')}`);
+  return cached ? normalizeEditorialTone(cached) : null;
+}
+
 async function fetchAiBriefing(
   steps: CourseStep[],
   byId: Map<number, Spot>,
@@ -2679,9 +2686,8 @@ async function fetchAiBriefing(
   if (filled.length === 0) return null;
 
   const cacheKey = `${moodKey}_${filled.map((s) => s.spotId).join('-')}`;
-  if (aiStoryCache.has(cacheKey)) {
-    return normalizeEditorialTone(aiStoryCache.get(cacheKey)!);
-  }
+  const cached = cachedAiBriefing(steps, moodKey);
+  if (cached) return cached;
 
   if (!AI_BRIEFING_ENABLED) {
     return null;
@@ -3007,9 +3013,8 @@ async function formatCourseTextAsync(
   const blocks: string[] = [];
   const regionText = regionsLabel(regionKeys, zoneKeys);
   const moodText = moodLabel(moodKey);
-  const aiStory = await fetchAiBriefing(steps, byId, moodKey);
-  // AI 프록시 실패/타임아웃 시 로컬 템플릿으로 폴백 (복사 텍스트에 null 노출 방지)
-  const story = aiStory || generateCourseStory(steps, byId, moodKey, false);
+  // 복사는 클릭 직후 클립보드에 써야 하므로 총평 요청을 기다리지 않는다. 캐시에 없으면 로컬 템플릿을 쓴다
+  const story = cachedAiBriefing(steps, moodKey) || generateCourseStory(steps, byId, moodKey, false);
 
   blocks.push(`💖 [오늘 데이트 코스] ${regionText} · ${moodText}\n✨ "${story}"`);
 
