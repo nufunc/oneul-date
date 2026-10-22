@@ -3918,11 +3918,10 @@ function renderMainModeNav(): void {
   });
 
   document.getElementById('tab-mode-spots')?.addEventListener('click', () => {
-    state.spotSort = 'distance';
-    state.spotPage = 1;
-    if (!state.spotSearchQuery && state.searchQuery) {
-      state.spotSearchQuery = state.searchQuery;
-    }
+    const next = spotTabEntry(state, state.searchQuery);
+    // 검색어가 새로 옮겨 오면 목록이 달라지므로 떠날 때의 스크롤 위치를 쓰지 않는다
+    if (next.spotSearchQuery !== state.spotSearchQuery) spotScrollY = null;
+    Object.assign(state, next);
     if (!userCoords) {
       requestUserGeolocation(false);
     }
@@ -3935,6 +3934,23 @@ function renderMainModeNav(): void {
   });
 }
 
+// 탐색 탭을 떠날 때의 scrollY. 다른 탭에서 돌아오면 복원한다
+let spotScrollY: number | null = null;
+
+// 탐색 탭을 눌렀을 때의 정렬·페이지·검색어. 탐색 중 다시 누르면 처음으로, 다른 탭에서 돌아오면 유지한다
+function spotTabEntry(
+  s: Pick<AppState, 'mainMode' | 'spotSort' | 'spotPage' | 'spotSearchQuery'>,
+  courseQuery: string,
+): Pick<AppState, 'spotSort' | 'spotPage' | 'spotSearchQuery'> {
+  const reselect = s.mainMode === 'spots';
+  const carry = !s.spotSearchQuery && !!courseQuery;
+  return {
+    spotSort: reselect ? 'distance' : s.spotSort,
+    spotPage: reselect || carry ? 1 : s.spotPage,
+    spotSearchQuery: carry ? courseQuery : s.spotSearchQuery,
+  };
+}
+
 function updateModeView(): void {
   renderMainModeNav();
   const todayArea = document.getElementById('today-area');
@@ -3943,6 +3959,7 @@ function updateModeView(): void {
   const discoveryArea = document.getElementById('spot-discovery-area');
 
   if (state.mainMode === 'course') {
+    if (discoveryArea && discoveryArea.style.display !== 'none') spotScrollY = window.scrollY;
     if (todayArea) todayArea.style.display = '';
     if (conditionsArea) conditionsArea.style.display = '';
     if (resultsArea) resultsArea.style.display = '';
@@ -3956,6 +3973,7 @@ function updateModeView(): void {
     if (resultsArea) resultsArea.style.display = 'none';
     if (discoveryArea) discoveryArea.style.display = '';
     renderSpotDiscovery();
+    if (spotScrollY !== null) window.scrollTo({ top: spotScrollY, behavior: 'instant' });
   }
 }
 
