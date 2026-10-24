@@ -3374,6 +3374,19 @@ function isSpotSaved(spotId: number): boolean {
   return state.savedSpotIds ? state.savedSpotIds.has(spotId) : false;
 }
 
+/** 하트 버튼의 접근성 이름과 title. 같은 카드의 다른 버튼처럼 이름 앞에 스팟 이름을 붙이고 title은 짧게 둔다 */
+function saveButtonLabels(spotName: string, isSaved: boolean): { label: string; title: string } {
+  const title = isSaved ? '보관함에서 제외' : '보관함에 담기';
+  return { label: `${spotName} ${title}`, title };
+}
+
+/** 하트를 누른 뒤 접근성 이름과 title을 바뀐 상태에 맞춘다 */
+function setSaveButtonLabels(btn: HTMLButtonElement, spotId: number, isSaved: boolean): void {
+  const { label, title } = saveButtonLabels(spotById.get(spotId)?.name ?? '', isSaved);
+  btn.setAttribute('aria-label', label.trim());
+  btn.title = title;
+}
+
 /** 스팟 찜 토글 및 실시간 피드백 */
 function toggleSaveSpot(spotId: number): boolean {
   if (!state.savedSpotIds) {
@@ -5732,6 +5745,7 @@ function renderStepCard(
   const isHot = isSuperHotSpot(spot);
   const isClosedToday = isSpotClosedToday(spot);
   const isSaved = isSpotSaved(spot.id);
+  const saveLabels = saveButtonLabels(spot.name, isSaved);
 
   // v4.0 큐레이션 뱃지
   const curationBadges: string[] = [];
@@ -5810,7 +5824,7 @@ function renderStepCard(
       </div>
       <div class="step-actions-bar">
         <div class="step-actions-icons">
-          ${swappable ? `<button class="btn-action-icon btn-swap-icon" data-step-index="${index}" aria-label="다시 추천">${ICON_SWAP_SVG}</button>` : ''}
+          ${swappable ? `<button class="btn-action-icon btn-swap-icon" data-step-index="${index}" aria-label="${escapeHtml(spot.name)} 다시 추천">${ICON_SWAP_SVG}</button>` : ''}
           ${(() => {
             const yt = spot.social_links?.youtube;
             if (!isValidYoutubeHotclip(yt) || !yt?.url) return '';
@@ -5835,7 +5849,7 @@ function renderStepCard(
           })()}
         </div>
         <div class="step-actions-right">
-          <button class="step-save-chip icon-only ${isSaved ? 'is-saved' : ''}" data-spot-id="${spot.id}" aria-label="${isSaved ? '보관함에서 제외' : '보관함에 담기'}" title="${isSaved ? '보관함에서 제외' : '보관함에 담기'}">
+          <button class="step-save-chip icon-only ${isSaved ? 'is-saved' : ''}" data-spot-id="${spot.id}" aria-label="${escapeHtml(saveLabels.label)}" title="${saveLabels.title}">
             <span>${isSaved ? '❤️' : '🤍'}</span>
           </button>
           <a class="step-navi-chip icon-only" href="${escapeHtml(tmapUrl(spot))}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(spot.name)} T맵 길안내" title="T맵 길안내">
@@ -6080,6 +6094,7 @@ function bindResultEvents(area: HTMLElement): void {
       const isSaved = toggleSaveSpot(spotId);
       btn.innerHTML = `<span>${isSaved ? '❤️' : '🤍'}</span>`;
       btn.classList.toggle('is-saved', isSaved);
+      setSaveButtonLabels(btn, spotId, isSaved);
     });
   });
   area.querySelector('#btn-regenerate')?.addEventListener('click', function (this: HTMLButtonElement) {
@@ -6866,6 +6881,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
   const isHot = isSuperHotSpot(spot);
   const isClosedToday = isSpotClosedToday(spot);
   const isSaved = isSpotSaved(spot.id);
+  const saveLabels = saveButtonLabels(spot.name, isSaved);
   const slotKey = (spot.slot as SlotKey) || 'day';
   const targetImgUrl = getSpotImageUrl(spot, slotKey);
   const fallbackIcon = getSpotFallbackIcon(spot, slotKey);
@@ -6948,7 +6964,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
           </div>
           ${sum ? `<p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>` : fact ? `<p class="discovery-card-fact">${escapeHtml(fact)}</p>` : ''}
           <div class="discovery-card-actions">
-            <button class="btn-discovery-save ${isSaved ? 'is-saved' : ''}" data-spot-id="${spot.id}" aria-label="${isSaved ? '보관함에서 제외' : '보관함에 담기'}" title="${isSaved ? '보관함에서 제외' : '보관함에 담기'}">${isSaved ? '❤️' : '🤍'}</button>
+            <button class="btn-discovery-save ${isSaved ? 'is-saved' : ''}" data-spot-id="${spot.id}" aria-label="${escapeHtml(saveLabels.label)}" title="${saveLabels.title}">${isSaved ? '❤️' : '🤍'}</button>
             <button class="btn-build-anchor-course btn-discovery-action-build with-label" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">🚀 <span class="action-label">코스</span></button>
             <a href="${escapeHtml(naverMapUrl(spot))}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map with-label" aria-label="${escapeHtml(spot.name)} 지도 열기" title="지도 열기">🗺️ <span class="action-label">지도</span></a>
             ${hasYt ? `<a href="${escapeHtml(yt!.url!)}" target="_blank" rel="noopener noreferrer" class="btn-discovery-chip-action btn-discovery-yt" aria-label="${escapeHtml(spot.name)} ${youtubeTitleNamesSpot(spot, yt) ? '유튜브 핫클립' : '동네 코스 영상'}" title="${youtubeTitleNamesSpot(spot, yt) ? '유튜브 핫클립 시청' : '동네 코스 영상 시청'}">▶️</a>` : ''}
@@ -6977,7 +6993,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
         <span class="discovery-card-category discovery-category">${escapeHtml(spot.category || '데이트 스팟')}</span>
         ${sum ? `<p class="discovery-card-summary discovery-quote">${escapeHtml(sum)}</p>` : fact ? `<p class="discovery-card-fact">${escapeHtml(fact)}</p>` : ''}
         <div class="discovery-card-actions">
-          <button class="btn-discovery-save ${isSaved ? 'is-saved' : ''}" data-spot-id="${spot.id}" aria-label="${isSaved ? '보관함에서 제외' : '보관함에 담기'}" title="${isSaved ? '보관함에서 제외' : '보관함에 담기'}">${isSaved ? '❤️' : '🤍'}</button>
+          <button class="btn-discovery-save ${isSaved ? 'is-saved' : ''}" data-spot-id="${spot.id}" aria-label="${escapeHtml(saveLabels.label)}" title="${saveLabels.title}">${isSaved ? '❤️' : '🤍'}</button>
           <button class="btn-build-anchor-course btn-discovery-action-build" data-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 중심 코스 짜기" title="이 스팟 중심으로 코스 짜기">🚀</button>
           <a href="${escapeHtml(naverMapUrl(spot))}" target="_blank" rel="noopener noreferrer" class="btn-discovery-map btn-discovery-action-map" aria-label="${escapeHtml(spot.name)} 지도 열기" title="지도 열기">🗺️</a>
         </div>
@@ -7011,6 +7027,7 @@ function bindDiscoveryCardEvents(root: ParentNode, area: HTMLElement): void {
       const isSaved = toggleSaveSpot(spotId);
       btn.textContent = isSaved ? '❤️' : '🤍';
       btn.classList.toggle('is-saved', isSaved);
+      setSaveButtonLabels(btn, spotId, isSaved);
       if (state.savedOnly) {
         // 보관함만 보기에서는 해제한 카드가 목록에서 빠지므로 그 자리에 온 카드의 찜 버튼으로 포커스를 옮긴다
         const index = Array.from(area.querySelectorAll('.btn-discovery-save')).indexOf(btn);
