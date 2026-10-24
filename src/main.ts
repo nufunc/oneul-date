@@ -6086,17 +6086,6 @@ function bindResultEvents(area: HTMLElement): void {
   area.querySelector('#btn-optimize-route')?.addEventListener('click', () => {
     optimizeCourseRoute();
   });
-  area.querySelectorAll<HTMLButtonElement>('.step-save-chip').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const spotId = Number(btn.dataset.spotId);
-      if (!spotId) return;
-      const isSaved = toggleSaveSpot(spotId);
-      btn.innerHTML = `<span>${isSaved ? '❤️' : '🤍'}</span>`;
-      btn.classList.toggle('is-saved', isSaved);
-      setSaveButtonLabels(btn, spotId, isSaved);
-    });
-  });
   area.querySelector('#btn-regenerate')?.addEventListener('click', function (this: HTMLButtonElement) {
     this.classList.add('is-spinning');
     setTimeout(() => {
@@ -8434,6 +8423,18 @@ async function init(): Promise<void> {
     if (!spotId) return;
     state.spotDetailId = spotId;
     renderOverlay();
+  });
+  // 코스 카드 하트도 같은 이유로 문서에 건다. 버튼마다 걸면 🔄로 바꾼 카드와 공유받은 코스 화면의 하트가 빠졌다
+  document.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.step-save-chip');
+    if (!btn) return;
+    e.stopPropagation();
+    const spotId = Number(btn.dataset.spotId);
+    if (!spotId) return;
+    const isSaved = toggleSaveSpot(spotId);
+    btn.innerHTML = `<span>${isSaved ? '❤️' : '🤍'}</span>`;
+    btn.classList.toggle('is-saved', isSaved);
+    setSaveButtonLabels(btn, spotId, isSaved);
   });
   window.addEventListener('keydown', (e) => {
     const overlayOpen = state.savedOpen || state.regionSheetOpen || state.spotDetailId;
