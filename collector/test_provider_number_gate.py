@@ -98,6 +98,14 @@ def test_run_worker_keeps_number_the_row_already_has():
     assert patch["provider_ids"] == {"kakao": "22222"}
 
 
+def test_run_worker_does_not_overwrite_existing_number():
+    # P-196: 기존 번호가 있으면 1위가 다른 빈 번호여도 덮지 않는다(입점 매장, 부속 시설로 바뀌던 40행)
+    spot = dict(SPOT, name="정선가리왕산케이블카 숙암역", provider_ids={"kakao": "7878763"})
+    patch = _with_owners([], lambda: _run_worker([NEAR_CABLE_CAR], spot))
+    assert patch.get("verified") is True
+    assert "provider_ids" not in patch
+
+
 def test_containment_over_1km_is_not_a_name_match():
     assert w.place_name_matches("가리왕산", "정선가리왕산케이블카 숙암역", None)  # 거리를 모르면 종전대로
     assert w.place_name_matches("가리왕산", "정선가리왕산케이블카 숙암역", 900)

@@ -1366,7 +1366,8 @@ def run_worker(supabase_url: str, service_key: str, limit: int = 50, ids=None):
                 # 09-21 네이버 차단 뒤로 결과는 카카오라 "naver" 고정 키면 카카오 id가 네이버 칸에 들어간다
                 provider = top.get("provider") or "naver"
                 # 번호 소유 관문(P-145): 이미 가진 번호는 그대로 두고, 새 번호는 다른 열린 행이 갖고 있으면 쓰지 않는다
-                if p_ids.get(provider) == str(top_id) or not provider_number_owned_elsewhere(provider, top_id, s_id):
+                # 기존 번호가 있으면 다른 번호로 덮지 않는다(P-196: 업종 거름에 본체가 빠져 입점 매장, 부속 시설로 바뀐 40행)
+                if p_ids.get(provider) == str(top_id) or (not p_ids.get(provider) and not provider_number_owned_elsewhere(provider, top_id, s_id)):
                     p_ids[provider] = str(top_id)
                     patch_data["provider_ids"] = p_ids
 
