@@ -19,10 +19,11 @@ class _Res(io.BytesIO):
         return False
 
 
-def _run(existing_kakao, searched, address="경북 영주시 순흥면 소백로 2740"):
+def _run(existing_kakao, searched, address="경북 영주시 순흥면 소백로 2740", provider_ids=None):
     """스팟 한 곳으로 소셜 동기화를 돌리고 DB에 보낸 social_links.kakaomap을 돌려준다."""
     spot = {"id": 1791660755259, "name": "소수서원", "location": "영남 영주시", "row_address": address,
-            "social_links": {"kakaomap": existing_kakao} if existing_kakao else {}, "metrics": {}, "summary": "s"}
+            "social_links": {"kakaomap": existing_kakao} if existing_kakao else {}, "metrics": {}, "summary": "s",
+            "provider_ids": provider_ids}
     patches = []
 
     def urlopen(req, timeout=0):
@@ -71,6 +72,21 @@ def test_other_place_with_same_address_replaces_old():
     assert _run(old, new, "인천 서해구 청라대로 204") == {"url": new["url"], "rating": 4.2}
     # 지번만 같아도 바꾼다
     assert _run(old, new, "인천 서해구 청라동 106-2")["url"] == new["url"]
+
+
+def test_provider_number_link_kept_against_same_building_place():
+    # 서귀포칼호텔: 링크가 provider 번호(호텔)인데 검색이 같은 건물 지하1층 뷔페를 돌려줬다(P-199)
+    old = {"url": "https://place.map.kakao.com/10500084", "rating": 4.0}
+    new = {"url": "https://place.map.kakao.com/21468173", "rating": 4.3,
+           "addresses": ["제주특별자치도 서귀포시 칠십리로 242 지하1층"]}
+    assert _run(old, new, "제주특별자치도 서귀포시 칠십리로 242", {"kakao": "10500084"}) == old
+    # provider 번호가 기존 링크와 다르면 지금처럼 주소 일치로 바꾼다
+    assert _run(old, new, "제주특별자치도 서귀포시 칠십리로 242", {"kakao": "21468173"})["url"] == new["url"]
+
+
+def test_provider_number_link_refreshes_rating():
+    new = {"url": PLACE["url"], "rating": 4.1}
+    assert _run(PLACE, new, provider_ids={"kakao": "9479775"}) == new
 
 
 def test_other_place_kept_when_row_address_missing():

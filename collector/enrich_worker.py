@@ -41,11 +41,12 @@ def same_address(row_address: str, place_addresses: list[str]) -> bool:
     return False
 
 
-def keep_place_link(kakao_data: dict | None, existing_kakao, row_address: str = "", spot_id=None) -> dict | None:
+def keep_place_link(kakao_data: dict | None, existing_kakao, row_address: str = "", spot_id=None, provider_number=None) -> dict | None:
     """기존 값이 장소 링크일 때 검색 결과가 그것을 덮는 경우를 막는다.
     검색이 폴백 링크(검색 바로가기)를 돌려주면 기존 값을 그대로 쓴다. 검색 한 번의 일시 실패가 넣어 둔 장소 링크를 덮었다(P-123 소수서원 9479775).
     다른 장소 번호를 돌려주면 그 장소의 주소가 행 주소와 같을 때만 바꾼다. 이름 포함 판정이 '33'을 무주 구천동 33경으로 통과시켜 덮었다(P-135).
-    행이 아직 갖지 않은 번호를 다른 열린 행이 이미 갖고 있으면 쓰지 않는다(번호 소유 관문, P-145)."""
+    행이 아직 갖지 않은 번호를 다른 열린 행이 이미 갖고 있으면 쓰지 않는다(번호 소유 관문, P-145).
+    기존 링크 번호가 행의 provider_ids.kakao와 같으면 다른 번호로 바꾸지 않는다. 같은 건물 지하 뷔페가 주소 일치로 호텔 링크를 덮었다(P-199)."""
     if not isinstance(kakao_data, dict):
         return kakao_data
     new_addresses = kakao_data.pop("addresses", None)
@@ -59,7 +60,7 @@ def keep_place_link(kakao_data: dict | None, existing_kakao, row_address: str = 
     if "/link/search/" in new_url:
         return existing_kakao
     if "place.map.kakao.com/" in new_url and new_url.rstrip("/").split("/")[-1] != old_url.rstrip("/").split("/")[-1] \
-            and not same_address(row_address, new_addresses):
+            and (not same_address(row_address, new_addresses) or old_url.rstrip("/").split("/")[-1] == str(provider_number or "")):
         return existing_kakao
     return kakao_data
 
@@ -81,7 +82,7 @@ def run_social_enrichment(supabase_url: str, service_key: str, batch_size: int =
 
     # 아직 social_links가 없거나 동기화가 가장 오래된 스팟 우선 순환 조회.
     # summary 등을 읽지 않으면 is_bad_summary("")가 항상 참이라 스팟마다 Groq로 요약을 다시 만들었다(2026-09-26)
-    fetch_url = f"{supabase_url}/rest/v1/spots?select=id,name,location,area,verified,social_links,metrics,summary,category,region,signature_items,row_address:address&is_closed=eq.false&order=metrics->>last_synced_at.asc.nullsfirst,id.asc&limit={batch_size}"
+    fetch_url = f"{supabase_url}/rest/v1/spots?select=id,name,location,area,verified,social_links,metrics,summary,category,region,signature_items,provider_ids,row_address:address&is_closed=eq.false&order=metrics->>last_synced_at.asc.nullsfirst,id.asc&limit={batch_size}"
     
     try:
         req = urllib.request.Request(fetch_url, headers=api_headers)
@@ -151,7 +152,8 @@ def run_social_enrichment(supabase_url: str, service_key: str, batch_size: int =
             existing_social = s.get("social_links") or {}
             kakao_locked = isinstance(existing_social.get("kakaomap"), dict) and existing_social["kakaomap"].get("locked") is True
             kakao_data = None if kakao_locked else search_kakaomap_place(name, " ".join((s.get("address") or "").split()[:2]) or location, want_address=True)
-            kakao_data = keep_place_link(kakao_data, existing_social.get("kakaomap"), s.get("row_address") or s.get("address") or "", spot_id)
+            kakao_data = keep_place_link(kakao_data, existing_social.get("kakaomap"), s.get("row_address") or s.get("address") or "", spot_id,
+                                         (s.get("provider_ids") or {}).get("kakao"))
             time.sleep(0.5)
 
             # 이번 조회가 실패(None)해도 calculate_hot_score는 무조건 "영상
