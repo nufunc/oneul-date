@@ -19,8 +19,8 @@ const code = [
   'function summaryTemplateKey', 'function cardSpotSummary', 'function sheetRatingText', 'function cleanSpotSummary',
   'function buildFactSentence', 'function displaySpotSummary',
 ].map(pick).join('\n');
-const { displaySpotSummary, sheetRatingText } = new Function(
-  `let spots = [];\n${ts.transpile(code, { target: 'es2022' })};return { displaySpotSummary, sheetRatingText };`,
+const { displaySpotSummary, sheetRatingText, cardSpotSummary, setSpots } = new Function(
+  `let spots = [];\n${ts.transpile(code, { target: 'es2022' })};return { displaySpotSummary, sheetRatingText, cardSpotSummary, setSpots: (s) => { spots = s; } };`,
 )();
 
 const fallbackSpot = (km) => ({
@@ -55,5 +55,31 @@ if (sheetRatingText(fallbackSpot({ rating: 4.6, review_count: 9 }), "유튜브 '
   failed++;
   console.error('FAIL 유튜브만 담은 사실 한 줄');
 }
+// 수집기가 앞에 도입구 한 마디를 붙인 같은 틀 문장(P-201): 5행이면 틀로 잡혀 카드는 빈 값, 평점 있는 행은 사실 한 줄이고 4행이면 문장이 남는다
+const OPENERS = ['노을이 물드는 저녁,', '북적이는 인파 속에서도,', '정겨운 간판 불빛 아래,', '손을 꼭 잡고 걷다 보면,', '왁자지껄한 분위기 속에서,'];
+const openerSpots = (n) => OPENERS.slice(0, n).map((opener, i) => {
+  const name = ['고내포구', '황남빵', '협재해변', '애월카페거리', '함덕해수욕장'][i];
+  return {
+    id: 3 * (i + 1), name, area: '제주시', region: '제주', category: 'cafe', curation_badges: {},
+    summary: `${opener} ${name}에서 감각적인 인테리어와 아늑한 분위기를 즐기기 좋아요.`,
+    social_links: i === 0 ? { kakaomap: { rating: 4.5, review_count: 120 } } : {},
+  };
+});
+const OPENER_CASES = [
+  ['도입구+틀 5행: 평점 행', 5, 0, '', { text: '제주시에서 카카오맵 평점 4.5점(리뷰 120개)을 받은 곳이에요.', isFact: true }],
+  ['도입구+틀 5행: 평점 없는 행', 5, 1, '', { text: '북적이는 인파 속에서도, 황남빵에서 감각적인 인테리어와 아늑한 분위기를 즐기기 좋아요.', isFact: false }],
+  ['도입구+틀 4행: 평점 행', 4, 0, '노을이 물드는 저녁, 고내포구에서 감각적인 인테리어와 아늑한 분위기를 즐기기 좋아요.',
+    { text: '노을이 물드는 저녁, 고내포구에서 감각적인 인테리어와 아늑한 분위기를 즐기기 좋아요.', isFact: false }],
+];
+for (const [label, n, i, card, expected] of OPENER_CASES) {
+  const rows = openerSpots(n);
+  setSpots(rows);
+  const actualCard = cardSpotSummary(rows[i]);
+  const actual = displaySpotSummary(rows[i]);
+  if (actualCard !== card || JSON.stringify(actual) !== JSON.stringify(expected)) {
+    failed++;
+    console.error(`FAIL ${label}: ${JSON.stringify(actualCard)} / ${JSON.stringify(actual)}`);
+  }
+}
 if (failed) process.exit(1);
-console.log(`ok ${CASES.length + 1}`);
+console.log(`ok ${CASES.length + 1 + OPENER_CASES.length}`);

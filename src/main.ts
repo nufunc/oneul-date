@@ -5361,7 +5361,8 @@ const SUMMARY_TEMPLATE_MIN_REPEATS = 5;
 let summaryTemplateCache: { source: Spot[]; counts: Map<string, number> } | null = null;
 
 function summaryTemplateKey(spot: Spot, text: string): string {
-  return text.split(spot.name.trim()).join('{N}');
+  // 수집기가 앞에 붙인 도입구 한 마디('노을이 물드는 저녁, ')는 떼고 본다: 도입구만 다른 같은 틀 문장도 틀로 잡는다(P-201)
+  return text.split(spot.name.trim()).join('{N}').replace(/^[^,.]{2,40},\s+/, '');
 }
 
 /** 탐색 카드용 요약. 여러 스팟에 같은 틀로 쓰인 문장은 카드가 길어지기만 하므로 빈 값을 돌려 요약 줄을 뺀다. 상세 시트는 cleanSpotSummary를 그대로 쓴다 */
