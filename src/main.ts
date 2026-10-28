@@ -2242,9 +2242,12 @@ const BIZ_SYNONYMS: Record<string, string[]> = {
 function bizMatches(spot: Spot, biz: string): boolean {
   const syns = BIZ_SYNONYMS[biz];
   if (!syns) return matchesSearchQuery(spot, biz);
-  const text = `${spot.name || ''} ${spot.category || ''}`.toLowerCase();
+  // 한 글자 동의어('바')는 이름 글자(기차바위, 바게트)와 업종 '바위'에 걸리므로 업종 칸 낱말의 끝('칵테일바', '와인바')에서만 찾는다
+  const cat = (spot.category || '').toLowerCase();
+  const catWords = cat.split(/[\s,·]+/);
+  const name = (spot.name || '').toLowerCase();
   // 동의어가 안 맞으면 기존 사전 판정으로도 본다(동네·수식어 AND가 먼저 걸려 있어 넓혀도 새지 않는다)
-  return syns.some((w) => text.includes(w)) || matchesSearchQuery(spot, biz);
+  return syns.some((w) => (w.length >= 2 ? cat.includes(w) || name.includes(w) : catWords.some((c) => c.endsWith(w)))) || matchesSearchQuery(spot, biz);
 }
 /** 붙여 친 검색어 끝의 업종어 */
 const BIZ_SUFFIX = /(카페|맛집|술집|와인바|펍|호텔|펜션|베이커리|빵집|브런치|이자카야|포차)$/;
