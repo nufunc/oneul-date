@@ -1438,7 +1438,7 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
       (bareHead !== head && bareHead.length >= 2) || (head.length >= 3 && /(길|거리)$/.test(head)) || isPlaceHead(head);
     if (looksLikePlace) {
       const placeText = [spot.location, spot.area, spot.address, spot.name].join(' ').toLowerCase();
-      return (placeText.includes(head) || placeText.includes(bareHead)) && bizMatches(spot, bizEarly[0]);
+      return (placeText.includes(head) || (bareHead.length >= 2 && placeText.includes(bareHead))) && bizMatches(spot, bizEarly[0]);
     }
   }
 
