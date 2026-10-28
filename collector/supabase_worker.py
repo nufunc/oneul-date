@@ -484,22 +484,33 @@ def insert_spots(supabase_url, headers, spots):
         with urllib.request.urlopen(req, timeout=10) as r:
             return r.status in (200, 201)
 
-    try:
-        if post(spots):
-            return list(spots)
-    except urllib.error.HTTPError as e:
-        if not 400 <= e.code < 500:
-            raise
-        print(f"  ⚠️ 배치 INSERT 실패(HTTP {e.code}), {len(spots)}건을 한 건씩 다시 넣습니다")
-    inserted = []
-    for s in spots:
+    def insert_batch(batch):
         try:
-            if post([s]):
-                inserted.append(s)
+            if post(batch):
+                return list(batch)
         except urllib.error.HTTPError as e:
             if not 400 <= e.code < 500:
                 raise
-            print(f"  ❌ INSERT 실패 id={s.get('id')} {s.get('name')}: HTTP {e.code}")
+            print(f"  ⚠️ 배치 INSERT 실패(HTTP {e.code}), {len(batch)}건을 한 건씩 다시 넣습니다")
+        inserted = []
+        for s in batch:
+            try:
+                if post([s]):
+                    inserted.append(s)
+            except urllib.error.HTTPError as e:
+                if not 400 <= e.code < 500:
+                    raise
+                print(f"  ❌ INSERT 실패 id={s.get('id')} {s.get('name')}: HTTP {e.code}")
+        return inserted
+
+    # PostgREST 배치는 모든 행의 키가 같아야 한다(PGRST102). TourAPI 문화시설 행만 가격·휴무 키를 가져
+    # 섞인 배치가 400으로 버려지고 한 건씩 다시 들어갔다(2026-09-28~10-12 15번, P-209)
+    groups = {}
+    for s in spots:
+        groups.setdefault(frozenset(s), []).append(s)
+    inserted = []
+    for batch in groups.values():
+        inserted += insert_batch(batch)
     return inserted
 
 

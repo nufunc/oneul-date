@@ -100,6 +100,30 @@ def test_insert_spots_skips_rows_without_category():
 
 
 
+def test_insert_spots_posts_one_batch_per_key_set():
+    # 키 집합이 다른 행을 한 배치로 보내면 PostgREST가 400을 낸다(P-209, TourAPI 문화시설 행)
+    posts = []
+
+    def fake_urlopen(req, timeout=None, **kw):
+        body = json.loads(req.data.decode("utf-8"))
+        if len({frozenset(r) for r in body}) > 1:
+            raise w.urllib.error.HTTPError(req.full_url, 400, "PGRST102", {}, None)
+        posts.append(body)
+        return _Res(b"")
+    rows = [{"id": 1, "name": "박물관", "category": "전시·문화", "price_tier": 1, "closed_days": "월"},
+            {"id": 2, "name": "해변", "category": "자연·산책"},
+            {"id": 3, "name": "미술관", "category": "전시·문화", "price_tier": 2, "closed_days": "화"},
+            {"id": 4, "name": "숲길", "category": "자연·산책"}]
+    orig = w.urllib.request.urlopen
+    w.urllib.request.urlopen = fake_urlopen
+    try:
+        out = w.insert_spots("http://db", {}, rows)
+    finally:
+        w.urllib.request.urlopen = orig
+    assert [[r["id"] for r in b] for b in posts] == [[1, 3], [2, 4]], posts
+    assert sorted(s["id"] for s in out) == [1, 2, 3, 4]
+
+
 def test_enrich_quarantine_uses_same_noise_rule():
     # 5단계도 두 글자 이름을 닫아, run_worker에서 고친 뒤 되살린 행을 다시 닫을 수 있었다(2026-09-27)
     import enrich_worker as e
