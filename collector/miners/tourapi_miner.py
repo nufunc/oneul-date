@@ -599,10 +599,6 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                     "curation_badges": {
                         "tour_api": "한국관광공사 관광정보",
                     },
-                    "parking_info": {
-                        "type": "free" if "주차" in addr1 else "unknown",
-                        "detail": "공영/부설 주차장 완비" if "주차" in addr1 else "인근 공영주차장 이용"
-                    },
                     "source": {
                         "type": "tourapi",
                         "url": f"https://korean.visitkorea.or.kr/detail/ms_detail.do?cotid={content_id}",
