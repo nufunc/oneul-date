@@ -21,7 +21,7 @@ from supabase_worker import (load_env, derive_region_area, find_duplicate_spot, 
                              sanitize_spot, new_spot_id, insert_spots, _near_fn, _SIDO_WORDS, KAKAO_REST_API_KEY)
 from category_filter import is_date_spot_category
 from event_period import fetch_event_period
-from tour_fee import fee_fields, fetch_intro, hours_fields, parse_closed_days
+from tour_fee import PARKING_FIELDS, fee_fields, fetch_intro, hours_fields, parking_fields, parse_closed_days
 from tourapi_quota import TourApiFetchFailed, TourApiRateLimited, tour_get_json, usage_today
 
 KST = timezone(timedelta(hours=9))
@@ -548,13 +548,14 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
 
                 # 문화시설은 detailIntro의 이용요금(usefee)을 실제 가격으로 쓴다. 없으면 가격을 비워 둔다.
                 # 같은 응답의 휴관 요일(restdateculture)은 closed_days로, 이용시간(usetimeculture)은 business_hours로 받는다
-                fee, closed_days, hours = None, [], None
+                fee, closed_days, hours, parking = None, [], None, None
                 if ctype_id == "14":
                     try:
                         intro = fetch_intro(clean_api_key, content_id)
                         fee = fee_fields(intro.get("usefee"))
                         closed_days = parse_closed_days(intro.get("restdateculture"))
                         hours = hours_fields(intro.get("usetimeculture"))
+                        parking = parking_fields(intro, ctype_id)
                     except TourApiRateLimited:
                         rate_limited = True
                         page_by_combo[combo_key] = prev_page  # 이 페이지의 남은 항목을 다음 회차에 다시 본다
@@ -563,6 +564,17 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                         print(f"  ⚠️ {title}: {e} — 이 페이지를 다음 회차로 미룬다")
                         page_by_combo[combo_key] = prev_page
                         break
+                    time.sleep(0.3)
+                elif ctype_id in PARKING_FIELDS:
+                    # 주차 값만 읽으므로 호출이 실패하면 parking_info 없이 넣는다(P-208)
+                    try:
+                        parking = parking_fields(fetch_intro(clean_api_key, content_id, ctype_id), ctype_id)
+                    except TourApiRateLimited:
+                        rate_limited = True
+                        page_by_combo[combo_key] = prev_page
+                        break
+                    except TourApiFetchFailed as e:
+                        print(f"  ⚠️ {title}: {e} — 주차 값 없이 넣는다")
                     time.sleep(0.3)
 
                 gate_closed = confucian_gate_closes(supabase_url, api_headers, ctype_id, title, lat_val, lng_val)
@@ -588,6 +600,7 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                     "category": stay_category(ctype_id, title, ctype_name),
                     **({"closed_days": closed_days} if closed_days else {}),
                     **({"business_hours": hours} if hours else {}),
+                    **({"parking_info": parking} if parking else {}),
                     "image_url": first_img,
                     "lat": lat_val,
                     "lng": lng_val,

@@ -87,10 +87,28 @@ def parse_closed_days(raw):
     return [] if len(days) == len(WEEKDAYS) else [f"{d}요일" for d in WEEKDAYS if d in days]
 
 
-def fetch_intro(api_key, content_id):
+# detailIntro2의 유형별 주차 필드와 요금 필드(2026-10-29 표본 응답 키). 축제(15)에는 주차 필드가 없다
+PARKING_FIELDS = {"12": ("parking",), "14": ("parkingculture", "parkingfee"), "28": ("parkingleports", "parkingfeeleports"),
+                  "32": ("parkinglodging",), "38": ("parkingshopping",)}
+
+
+def parking_fields(intro, content_type_id):
+    """detailIntro 응답 → parking_info. 값이 없거나 읽을 수 없으면 None(DB 기본값 unknown).
+    유료를 무료보다 먼저 보는 것은 '최대 4시간 무료 ... 2,000원'처럼 부분 무료인 곳을 free로 보이지 않기 위해서다(P-208)."""
+    raw = " ".join((intro or {}).get(f) or "" for f in PARKING_FIELDS.get(str(content_type_id), ()))
+    text = re.sub(r'\s+', ' ', re.sub(r'<br\s*/?>', ' ', raw, flags=re.I)).strip()
+    if not text:
+        return None
+    for kind, pattern in (("impossible", r'불가|없음'), ("paid", r'유료|\d\s*원'), ("free", r'무료'), ("available", r'가능|있음')):
+        if re.search(pattern, text):
+            return {"type": kind, "detail": text}
+    return None
+
+
+def fetch_intro(api_key, content_id, content_type_id="14"):
     op = "detailIntro2" if "KorService2" in TOUR_API_BASE else "detailIntro1"
     q = urllib.parse.urlencode({"serviceKey": api_key, "MobileOS": "ETC", "MobileApp": "OneulDate", "_type": "json",
-                                "contentId": str(content_id), "contentTypeId": "14"})
+                                "contentId": str(content_id), "contentTypeId": str(content_type_id)})
     for attempt in range(3):
         try:
             data = tour_get_json(f"{TOUR_API_BASE}/{op}?{q}")
