@@ -1541,7 +1541,10 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
     // 다중 토큰이면 모든 토큰이 포함되거나 첫 번째 주요 토큰이 포함되면 통과
     if (tokens.every((t) => targetText.includes(t))) return true;
     const firstToken = tokens[0];
-    if (firstToken.length >= 2 && targetText.includes(firstToken)) return true;
+    // 끝 토큰이 업종어면 업종도 맞아야 한다('신촌 카페'가 신촌 전체로 새던 것, P-204)
+    const lastToken = tokens[tokens.length - 1];
+    const lastBiz = lastToken.match(BIZ_SUFFIX)?.[0] === lastToken ? lastToken : null;
+    if (firstToken.length >= 2 && targetText.includes(firstToken) && (!lastBiz || bizMatches(spot, lastBiz))) return true;
   }
 
   // 띄어쓰기를 빼고 친 검색어('수원남문통닭')는 위 비교로는 공백 있는 이름에 걸리지 않아 0건이었다.
