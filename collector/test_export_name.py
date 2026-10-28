@@ -29,3 +29,18 @@ for i, (name, _) in enumerate(KEEP):
 for i, (name, _, want) in enumerate(CLEAN):
     assert got[100 + i] == want, (name, got[100 + i], want)
 print("ok", len(KEEP) + len(CLEAN))
+
+# 괄호를 뗀 이름이 다른 열린 행 이름과 같아지면 원래 이름을 쓴다(P-209, 라이브 도림사 3행)
+rows = [
+    {"id": 1, "name": "도림사(곡성)", "address": "전남 곡성군 곡성읍 도림로 175", "category": "명소", "slot": "day"},
+    {"id": 2, "name": "도림사(광주)", "address": "광주 북구 운정동", "category": "명소", "slot": "day"},
+    {"id": 3, "name": "도림사", "address": "충남 공주시 반포면", "category": "명소", "slot": "day"},
+    {"id": 4, "name": "신흥사(속초)", "address": "강원 속초시 설악산로 1137", "category": "명소", "slot": "day"},
+    {"id": 5, "name": "신흥사", "address": "부산 기장군", "category": "명소", "slot": "day", "is_closed": True},
+    {"id": 6, "name": "금산사(김제)", "address": "전북 김제시 금산면 모악15길 1", "category": "명소", "slot": "day"},
+]
+out, stats = heal_all_spots(rows)
+got = {s["id"]: s["name"] for s in out}
+assert got == {1: "도림사(곡성)", 2: "도림사(광주)", 3: "도림사", 4: "신흥사", 5: "신흥사", 6: "금산사"}, got
+assert stats["cleaned_names"] == 2, stats
+print("ok overlap")

@@ -12,6 +12,7 @@
 import re
 import json
 import logging
+from collections import Counter
 from typing import Dict, Any, List, Optional, Tuple
 
 try:
@@ -204,12 +205,15 @@ KEYWORD_RULES = [
 
 
 
+BRACKETS = re.compile(r'\[[^\]]*\]|\([^)]*\)|（[^）]*）|【[^】]*】')
+
+
 def clean_spot_name(name: str) -> str:
     """복합 & 기호, 마케팅 패키지명, 중복 지명 노이즈를 제거하여 지도 검색 100% 매칭 상호명으로 정제"""
     clean = (name or "").strip()
     
     # 1. 괄호 제거
-    clean = re.sub(r'\[[^\]]*\]|\([^)]*\)|（[^）]*）|【[^】]*】', '', clean).strip()
+    clean = BRACKETS.sub('', clean).strip()
 
     # 2. 화살표/경로 표기 분리 (➔, →, ~)
     if re.search(r'[➔→~]', clean):
@@ -435,7 +439,18 @@ def heal_all_spots(spots: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], D
             stats["active_total"] += 1
             
         healed_list.append(s)
-        
+
+    # 괄호를 뗀 이름이 다른 열린 행 이름과 같아지면 원래 이름을 쓴다. 도림사(곡성)와 도림사(광주)가 모두
+    # 도림사가 되어 열린 행 같은 이름 125그룹 273행이 생겼다(2026-10-29, P-209). 지도 검색어는 화면 mapQuery가 괄호를 뗀다
+    open_pairs = [(spot.get("name") or "", s) for spot, s in zip(spots, healed_list) if not s.get("is_closed")]
+    names = Counter()
+    for original_name, s in open_pairs:
+        names.update({original_name, s.get("name") or ""})
+    for original_name, s in open_pairs:
+        if s.get("name") != original_name and BRACKETS.search(original_name) and names[s.get("name") or ""] > 1:
+            s["name"] = original_name
+            stats["cleaned_names"] -= 1
+
     return healed_list, stats
 
 
