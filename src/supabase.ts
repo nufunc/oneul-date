@@ -31,7 +31,7 @@ export interface SpotMetrics {
 }
 
 export interface ParkingInfo {
-  type?: 'free' | 'paid' | 'valet' | 'impossible' | 'unknown';
+  type?: 'free' | 'paid' | 'valet' | 'available' | 'impossible' | 'unknown';
   detail?: string;
   valet_fee?: string;
 }
