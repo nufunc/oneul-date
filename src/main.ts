@@ -758,7 +758,8 @@ function deduplicateSpotList(spots: Spot[]): Spot[] {
 
     const brandCore = extractCoreBrandName(s.name);
     const addrKey = extractRoadAddressKey(s.address || s.location);
-    const areaKey = `${s.region || ''}__${s.area || ''}__${brandCore}`;
+    // 권역 키는 좌표를 보지 않으므로 어근이 아니라 전체 이름으로 묶는다(어근은 대성사(이원)·대성사(옥천), 테라스룸 신사·청담처럼 다른 장소를 합쳤다)
+    const areaKey = `${s.region || ''}__${s.area || ''}__${(s.name || '').replace(/\s+/g, '').toLowerCase()}`;
 
     let matchedIndex: number | undefined = undefined;
 
@@ -771,7 +772,7 @@ function deduplicateSpotList(spots: Spot[]): Spot[] {
       }
     }
 
-    // 2순위: 동일 권역/시·구 + 브랜드 코어 일치 (3글자 이상)
+    // 2순위: 동일 권역/시·구 + 전체 이름 일치 (브랜드 코어 3글자 이상)
     if (matchedIndex === undefined && brandCore.length >= 3) {
       matchedIndex = indexByKey.get(areaKey);
       if (matchedIndex === undefined) {
