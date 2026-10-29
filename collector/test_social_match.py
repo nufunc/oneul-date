@@ -88,6 +88,12 @@ def test_youtube_short_core_name_does_not_match_other_word():
     assert _yt("대흥식당", "대흥역 카페부터 맛집까지 데이트") is None
 
 
+def test_youtube_title_keeps_name_after_60_chars():
+    # 판정한 제목을 그대로 저장한다. 60자로 자르면 61자 뒤 이름이 빠져 화면이 이름 없는 영상으로 본다(P-211)
+    title = "여기 한국 맞아? 나만 알고 싶은 곡성 여행 코스 가볼만한곳 Top5 곡성역, 섬진강 기차마을 증기기관차, 테라밸리, 동화정원, 침실습지 전망대 등!"
+    assert _yt("침실습지", title)["title"] == title
+
+
 if __name__ == "__main__":
     for fn in [v for k_, v in list(globals().items()) if k_.startswith("test_")]:
         fn()

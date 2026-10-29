@@ -198,7 +198,7 @@ def search_youtube_hotclip(spot_name: str, region_or_area: str = "") -> dict | N
                 
                 return {
                     "url": video_url,
-                    "title": title[:60],
+                    "title": title,
                     "channel": channel_name[:40],
                     "views": views,
                     "published_at": published_text,
