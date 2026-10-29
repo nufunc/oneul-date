@@ -1417,13 +1417,14 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
     // '성수역', '홍대입구'처럼 나머지가 역·입구 같은 접미사뿐이면 동네 검색이다. 종전에는 접미사를 뗀 빈 말로 판정해 0건이었다
     if (!rest.replace(PLACE_SUFFIX, '').trim()) return matchesSearchQuery(spot, place);
     if (rest && inPlace) {
-      if (matchesSearchQuery(spot, rest)) return true;
+      // 나머지는 목록 밖 동네처럼 업종 동의어로 본다. 글자만 보면 '성수 술집'이 이름에 '술집'이 든 1곳만 나왔다
+      if (bizMatches(spot, rest)) return true;
       // '일산동구'는 '일산'+'동구'로 나뉘지만 '동구'만으로는 이제 일산동구에 일치하지 않는다. 붙여 친 전체 말로 한 번 더 본다
       if (DISTRICT_END.test(rest) && matchesDistrictQuery(spot, cleanQ.replace(/\s+/g, ''))) return true;
       // '성수동카페', '서면역카페', '홍대입구 카페'처럼 지역어에 붙은 동·역·입구·시를 떼고 한 번 더 본다.
       // 떼기 전에 먼저 보므로 '대전동물원'은 '물원'으로 잘리지 않는다
       const bare = rest.replace(PLACE_SUFFIX, '').trim();
-      return Boolean(bare) && bare !== rest && matchesSearchQuery(spot, bare);
+      return Boolean(bare) && bare !== rest && bizMatches(spot, bare);
     }
     if (rest) return false;
   }
