@@ -11,7 +11,7 @@
 - business_hours: {"이용시간": usetimeculture 원문}. 요일 키가 아니라서 앱의 오늘 휴무 판정에는 쓰이지 않는다.
 - 이미 price나 closed_days나 business_hours가 있는 칸은 건드리지 않는다. 쓰기 전에 바꿀 행을 백업한다.
 
-사용: python3 tour_fee.py [--apply] [--backup-dir DIR]
+사용: python3 tour_fee.py [--apply] [--backup-dir DIR] [--parking --limit N]
 """
 import argparse
 import json
@@ -23,10 +23,10 @@ import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta, timezone
 
-from state_io import open_new
+from state_io import atomic_dump, load_json, open_new
 from supabase_worker import derive_price_tier_from_text, load_env
 from event_period import TOUR_API_BASE, _request, _tour_api_key
-from tourapi_quota import TourApiFetchFailed, TourApiRateLimited, tour_get_json, usage_today
+from tourapi_quota import USAGE_FILE, TourApiFetchFailed, TourApiRateLimited, tour_get_json, usage_today
 
 KST = timezone(timedelta(hours=9))
 
@@ -206,10 +206,92 @@ def run_fee_backfill(apply=False, log=print, backup_dir=None, limit=None):
     return 0
 
 
+# P-208 (b) 관광지 주차 백필의 하루 몫. 수집기와 한도 1,000회를 나눠 쓰므로 그날 사용량이 700 이상이면 쉰다(2026-10-29 사용자 결정)
+PARKING_DAILY_CAP = 300
+PARKING_SKIP_AT = 700
+# 값이 없는 행은 unknown으로 남으므로, 마지막으로 조회한 id를 사용량 파일 옆에 남겨 다음 날 그 뒤부터 본다
+PARKING_STATE = os.path.join(os.path.dirname(USAGE_FILE), ".parking_backfill.json")
+
+
+def run_parking_backfill(apply=False, log=print, backup_dir=None, limit=PARKING_DAILY_CAP):
+    """열린 tourapi 관광지(12) 중 parking_info가 unknown인 행에 detailIntro 주차 값을 채운다.
+    TourAPI 호출은 limit회까지, 분류한 값만 쓴다. 쓰기 전에 그 회차의 대상 행을 p208b_<시각>.json으로 백업하고,
+    그 백업이 그날의 실행 표시라 재기동해도 하루 한 번만 돈다."""
+    backup_dir = backup_dir or os.path.expanduser("~/oneul-backups")
+    day = datetime.now(KST).strftime('%Y%m%d')
+    if apply and os.path.isdir(backup_dir) and any(f.startswith(f"p208b_{day}-") for f in os.listdir(backup_dir)):
+        log(f"주차 백필: 오늘({day}) 이미 돌아 건너뛴다")
+        return 0
+    used = usage_today()
+    if used < 0 or used >= PARKING_SKIP_AT:
+        log(f"주차 백필: 오늘 TourAPI 사용량 {used}회라 건너뛴다(기준 {PARKING_SKIP_AT}회)")
+        return 0
+    env = load_env()
+    base_url = (os.getenv("SUPABASE_URL") or env.get("SUPABASE_URL") or "").rstrip("/")
+    key = os.getenv("SUPABASE_SERVICE_KEY") or env.get("SUPABASE_SERVICE_KEY") or env.get("VITE_SUPABASE_ANON_KEY") or ""
+    api_key = _tour_api_key()
+    if not base_url or not api_key:
+        log("SUPABASE_URL 또는 TourAPI 키가 없어 중단한다")
+        return 1
+    headers = {"Content-Type": "application/json"}
+    if key:
+        headers.update({"apikey": key, "Authorization": f"Bearer {key}"})
+
+    cond = {"is_closed": "eq.false", "source->>type": "eq.tourapi", "parking_info->>type": "eq.unknown"}
+    last = load_json(PARKING_STATE, {}).get("last_id", 0)
+    q = urllib.parse.urlencode({"select": "id,name,parking_info,source,updated_at", **cond, "id": f"gt.{last}",
+                                "source->>note": "like.TourAPI 4.0 관광지*", "order": "id.asc", "limit": limit})
+    todo = _request(f"{base_url}/rest/v1/spots?{q}", headers) or []
+    if apply and todo:
+        os.makedirs(backup_dir, exist_ok=True)
+        with open_new(os.path.join(backup_dir, f"p208b_{datetime.now(KST).strftime('%Y%m%d-%H%M')}.json")) as fp:
+            json.dump([{k: r.get(k) for k in ("id", "name", "parking_info", "updated_at")} for r in todo], fp, ensure_ascii=False, indent=2)
+        log(f"백업: {fp.name}")
+
+    start, plans, failed = usage_today(), [], 0
+    for r in todo:
+        # 재시도도 호출로 세므로 행 수가 아니라 사용량 증가분으로 상한을 본다
+        if usage_today() - start >= limit:
+            break
+        cotid = (r["source"].get("url") or "").rsplit("cotid=", 1)[-1]
+        try:
+            info = parking_fields(fetch_intro(api_key, cotid, "12"), "12") if cotid else None
+        except TourApiRateLimited:
+            log(f"TourAPI 한도 초과로 조회를 멈춘다(오늘 호출 {usage_today()}회)")
+            break
+        except TourApiFetchFailed as e:
+            failed += 1
+            log(f"  조회 실패로 건너뜀: {r['id']} {r['name']} ({e})")
+            last = r["id"]
+            continue
+        last = r["id"]
+        time.sleep(0.3)
+        if info:
+            plans.append((r, info))
+    kinds = {}
+    for _, info in plans:
+        kinds[info["type"]] = kinds.get(info["type"], 0) + 1
+    log(f"주차 백필: 대상 {len(todo)}행 · 호출 {usage_today() - start}회 · 조회 실패 {failed} · 값 있음 {len(plans)} {kinds}")
+    if not apply:
+        log("드라이런: DB에 쓰지 않았다. 실제 반영은 --apply")
+        return 0
+    now = datetime.now(timezone.utc).isoformat()
+    for r, info in plans:
+        q = urllib.parse.urlencode({"id": f"eq.{r['id']}", **cond})
+        _request(f"{base_url}/rest/v1/spots?{q}", {**headers, "Prefer": "return=minimal"}, "PATCH",
+                 {"parking_info": info, "updated_at": now})
+    atomic_dump(PARKING_STATE, {"last_id": last})
+    log(f"반영 완료: {len(plans)}행")
+    return 0
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--apply", action="store_true", help="실제로 DB에 쓴다(기본은 드라이런)")
     ap.add_argument("--backup-dir", default=os.path.expanduser("~/oneul-backups"))
     ap.add_argument("--limit", type=int, help="이번에 조회할 최대 행 수(TourAPI 하루 한도를 나눠 쓸 때)")
+    ap.add_argument("--parking", action="store_true", help="요금 대신 관광지 주차 백필(P-208)을 돌린다")
     args = ap.parse_args()
+    if args.parking:
+        sys.exit(run_parking_backfill(apply=args.apply, backup_dir=args.backup_dir, limit=args.limit or PARKING_DAILY_CAP))
     sys.exit(run_fee_backfill(apply=args.apply, backup_dir=args.backup_dir, limit=args.limit))

@@ -30,6 +30,7 @@ from miners.tourapi_miner import run_tourapi_mining
 from heal_and_verify_spots import heal_all_spots
 from merge_duplicates import run_merge
 from event_period import run_event_sync
+from tour_fee import run_parking_backfill
 from notifier import send_daily_digest
 
 if hasattr(sys.stdout, 'reconfigure'):
@@ -541,6 +542,17 @@ def run_cycle():
             log(f"11단계 행사 기간 동기화 오류: {e}", level="ERROR")
     else:
         log("⏩ 11단계(행사 기간) 대기 중 (24시간 주기 보호)")
+
+    # 12단계: TourAPI 관광지 기존 행 주차 백필(P-208). 하루 300회까지, 그날 사용량 700 이상이면 쉰다 (24시간 주기)
+    if is_step_due("parking_backfill", 24.0):
+        log("▶ 12단계: 관광지 주차 백필")
+        try:
+            run_parking_backfill(apply=True, log=lambda m: log(f"  {m}"),
+                                 backup_dir=os.path.join(os.path.dirname(LOG_DIR), "oneul-backups"))
+        except Exception as e:
+            log(f"12단계 주차 백필 오류: {e}", level="ERROR")
+    else:
+        log("⏩ 12단계(주차 백필) 대기 중 (24시간 주기 보호)")
 
     # 일일 서머리 검사
     check_and_generate_daily_summary()
