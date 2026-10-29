@@ -1211,12 +1211,34 @@ interface GenerateOptions {
 }
 
 /** 검색어 및 퀵 태그 매칭 헬퍼 (특수문자 정제, 다중 토큰, 동의어 풀 매칭 지원) */
+let placeAreaSource: Spot[] | null = null;
+const placeAreaCache = new Map<string, string>();
+/** 그 지역어가 글자로 든 열린 행에서 가장 많은 area. spots가 바뀌면 다시 센다 */
+function mainAreaOfPlace(place: string): string {
+  if (placeAreaSource !== spots) {
+    placeAreaSource = spots;
+    placeAreaCache.clear();
+  }
+  let area = placeAreaCache.get(place);
+  if (area === undefined) {
+    const n = new Map<string, number>();
+    for (const s of spots) {
+      if (s.is_closed || !s.area) continue;
+      if ([s.location, s.area, s.address, s.name].join(' ').toLowerCase().includes(place)) n.set(s.area, (n.get(s.area) || 0) + 1);
+    }
+    area = [...n].sort((a, b) => b[1] - a[1])[0]?.[0] ?? '';
+    placeAreaCache.set(place, area);
+  }
+  return area;
+}
+
 /** 지역어가 스팟의 위치·지역·주소·이름에 있거나, 라벨에 그 지역어가 든 세부동네 존에 속하면 true */
 function spotMatchesPlace(spot: Spot, place: string): boolean {
   const text = [spot.location, spot.area, spot.address, spot.name].join(' ').toLowerCase();
   if (text.includes(place)) return true;
   const zoneKeys = POPULAR_ZONES.filter((z) => z.label.split('·').includes(place)).map((z) => z.key);
-  return zoneKeys.length > 0 && matchesZone(spot, zoneKeys);
+  // 존은 구 둘 이상(서촌은 종로구와 중구)이나 짝 도시(가평과 양평)를 묶으므로, 존으로만 드는 행은 그 동네의 주된 area 안일 때만 센다
+  return zoneKeys.length > 0 && matchesZone(spot, zoneKeys) && spot.area === mainAreaOfPlace(place);
 }
 
 /** 거리 배지에 찍히는 값으로 반올림한 km 값(1km 미만은 1m, 이상은 0.1km) */
