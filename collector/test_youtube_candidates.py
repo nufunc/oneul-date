@@ -328,6 +328,21 @@ def test_video_cover_is_not_used_as_place_photo():
     assert posted and all(not p["image_url"] for p in posted), posted
 
 
+def test_attached_video_keeps_full_title():
+    # 기존 행에 붙이는 영상 제목을 60자로 자르지 않는다. 61자 뒤 이름이 빠지면 화면이 이름 없는 영상으로 본다(P-217)
+    title = "여기 한국 맞아? 나만 알고 싶은 곡성 여행 코스 가볼만한곳 Top5 곡성역, 섬진강 기차마을 증기기관차, 테라밸리, 동화정원, 침실습지 전망대 등!"
+    seen = []
+    orig = y.calculate_hot_score
+    y.calculate_hot_score = lambda video, *a: (seen.append(video), (0, {"youtube": video}, {}))[1]
+    try:
+        assert y.attach_video_to_existing("", {}, {"id": 1, "name": "침실습지", "social_links": {}},
+                                          {"url": "https://www.youtube.com/watch?v=x", "title": title, "views": 10},
+                                          dry_run=True)
+    finally:
+        y.calculate_hot_score = orig
+    assert seen[0]["title"] == title
+
+
 if __name__ == "__main__":
     for fn in [v for k, v in list(globals().items()) if k.startswith("test_")]:
         fn()

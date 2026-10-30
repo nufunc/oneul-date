@@ -1885,7 +1885,7 @@ def attach_video_to_existing(supabase_url, headers, existing, vinfo, dry_run=Fal
         if verbose:
             print(f"    ⏩ [이미 존재, 더 많이 본 영상이 있음] {existing.get('name')}")
         return False
-    video = {"url": vinfo["url"], "title": (vinfo.get("title") or "")[:60], "channel": (vinfo.get("author") or "")[:40],
+    video = {"url": vinfo["url"], "title": vinfo.get("title") or "", "channel": (vinfo.get("author") or "")[:40],
              "views": views, "likes": vinfo.get("likes", 0), "is_shorts": False}
     hot, new_social, metrics = calculate_hot_score(video, social.get("kakaomap"), bool(existing.get("verified")))
     patch = {"social_links": {**social, **new_social}, "hot_score": hot, "metrics": metrics,
