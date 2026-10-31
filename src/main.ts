@@ -3874,6 +3874,7 @@ const app = document.getElementById('app')!;
 function renderShell(): void {
   // 앱 시작 시 테마 즉시 적용 (기본값: light 낮 테마)
   applyTheme(state.themeMode, false);
+  setSharedCourseView(false);
 
   app.innerHTML = `
     <header class="topbar">
@@ -6382,7 +6383,8 @@ function buildCourseFromSavedSpots(): boolean {
   };
   state.mainMode = 'course';
   updateModeView();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // #app 위에 루트 매거진 블록이 있어 0으로 올리면 결과 대신 블록이 보인다
+  app.scrollIntoView({ behavior: 'smooth' });
   showToast(
     farCount > 0
       ? `❤️ 찜한 스팟으로 코스를 만들었어요. 찜 ${farCount}곳은 멀어서 이번 코스에서 뺐어요`
@@ -7308,6 +7310,11 @@ function clearCourseHash(): void {
   history.replaceState(null, '', location.pathname + location.search);
 }
 
+/** 루트 HTML의 정적 매거진 블록(scripts/build_home_magazine.mjs)은 홈 셸에서만 보이고 받은 코스 화면에서는 숨는다 */
+function setSharedCourseView(shared: boolean): void {
+  document.documentElement.toggleAttribute('data-shared-course', shared);
+}
+
 /**
  * 캐시 없이 받은 링크를 열면 전체 spots.json이 와야 받은 코스를 그린다(Slow 4G 22초).
  * 그사이 홈 셸을 그리면 코스를 만들어 받은 코스를 잃었으므로 수신자 머리 카드와 자리표시만 그리고 홈 진입을 두지 않는다
@@ -7334,12 +7341,14 @@ function receiverLoadingHtml(): string {
 
 function renderReceiverLoading(): void {
   applyTheme(state.themeMode, false);
+  setSharedCourseView(true);
   app.innerHTML = receiverLoadingHtml();
   document.getElementById('btn-theme-toggle')?.addEventListener('click', cycleThemeMode);
 }
 
 /** 조건 영역·오늘의코스·교체 없이 코스 카드만 + [나만의 코스 만들기] CTA + 실전 공유/저장/길찾기 액션 */
 function renderReceiverView(steps: CourseStep[]): void {
+  setSharedCourseView(true);
   const usedImages = new Set<string>();
   const storyHtml = generateCourseStory(steps, spotById, 'ALL', true);
   const sharedSpotIds = steps.map((s) => s.spotId).filter((id): id is number => id !== null);
@@ -8319,7 +8328,7 @@ function renderOverlayContent(): void {
         };
         state.mainMode = 'course';
         updateModeView();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        app.scrollIntoView({ behavior: 'smooth' });
         showToast(`✨ '${spot.name}' 중심 맞춤 코스를 완성했어요!`);
       });
     });

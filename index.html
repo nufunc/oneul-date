@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>오늘 데이트</title>
-    <meta name="description" content="조건만 고르면 완성되는 시간대별 데이트 코스" />
+    <title>오늘 데이트 | 지역별 데이트·여행 코스 매거진</title>
+    <meta name="description" content="지역별 데이트·여행 코스를 정리한 매거진 글을 읽고, 조건을 고르면 시간대별 데이트 코스를 바로 만들 수 있습니다." />
     
     <!-- Theme & Status Bar Styling -->
     <script>
@@ -15,6 +15,8 @@
           var resolved = isDark ? 'dark' : 'light';
           document.documentElement.setAttribute('data-theme', mode);
           document.documentElement.setAttribute('data-theme-resolved', resolved);
+          // 받은 코스(#c=) 화면에서는 첫 그리기부터 루트 매거진 블록을 숨긴다. 이후 전환은 src/main.ts가 맡는다
+          if (location.hash.indexOf('#c=') === 0) document.documentElement.setAttribute('data-shared-course', '');
         } catch (e) {}
       })();
     </script>

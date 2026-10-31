@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && node scripts/generate_seo_pages.mjs",
+    "build": "tsc && vite build && node scripts/generate_seo_pages.mjs && node scripts/build_home_magazine.mjs",
     "preview": "vite preview"
   },
   "devDependencies": {
