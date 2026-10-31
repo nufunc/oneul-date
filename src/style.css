@@ -940,6 +940,45 @@ html[data-shared-course] .home-magazine {
   text-decoration: underline;
 }
 
+/* 루트 첫 화면의 지역 랜딩 링크 목록. scripts/build_home_magazine.mjs가 빌드 때 dist/index.html의 #app 뒤에 넣는다 */
+.home-regions {
+  max-width: var(--layout-max);
+  margin: 0 auto;
+  padding: var(--space-6) calc(var(--space-5) + env(safe-area-inset-right, 0px)) calc(var(--space-6) + env(safe-area-inset-bottom, 0px)) calc(var(--space-5) + env(safe-area-inset-left, 0px));
+}
+
+html[data-shared-course] .home-regions {
+  display: none;
+}
+
+.home-regions-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.home-regions-list li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.home-regions-list a {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-sm);
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  text-decoration: none;
+}
+
+.home-regions-list a:hover {
+  text-decoration: underline;
+}
+
 .btn-saved:hover {
   border-color: var(--color-border-strong);
   color: var(--color-text);
