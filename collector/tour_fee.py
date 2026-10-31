@@ -31,11 +31,11 @@ from tourapi_quota import USAGE_FILE, TourApiFetchFailed, TourApiRateLimited, to
 KST = timezone(timedelta(hours=9))
 
 
-def clean_usefee(raw):
+def clean_usefee(raw, limit=100):
     text = re.sub(r'<br\s*/?>', ' / ', raw or '', flags=re.I)
     text = re.sub(r'<[^>]+>', '', text)
     text = re.sub(r'\s+', ' ', text).strip(' /')
-    return text[:100] or None
+    return text[:limit] or None
 
 
 def fee_fields(raw):
@@ -52,8 +52,9 @@ def fee_fields(raw):
 
 
 def hours_fields(raw):
-    """usetimeculture 원문 → {"이용시간": ...}. 비어 있으면 None."""
-    text = clean_usefee(raw)
+    """usetimeculture 원문 → {"이용시간": ...}. 비어 있으면 None.
+    계절별 시간을 적은 원문은 100자를 넘어 끝의 입장마감이 잘렸다(2026-10-31 건청궁 112자). 그래서 300자까지 둔다."""
+    text = clean_usefee(raw, 300)
     return {"이용시간": text} if text else None
 
 

@@ -54,6 +54,14 @@ def test_hours_under_non_weekday_key():
     assert hours_fields("") is None and hours_fields(None) is None
 
 
+def test_hours_keep_seasonal_text_past_100_chars():
+    # 건청궁처럼 계절별 시간을 적은 원문은 100자를 넘고 마지막 입장마감이 잘리면 안 된다
+    raw = ("1~2월, 11~12월 09:00~17:00 (입장마감 16:00)<br>3~5월, 9~10월 09:00~18:00 (입장마감 17:00)"
+           "<br>6~8월 09:00~18:30 (입장마감 17:30)")
+    text = hours_fields(raw)["이용시간"]
+    assert len(text) > 100 and text.endswith("(입장마감 17:30)")
+
+
 if __name__ == "__main__":
     for fn in [v for k, v in list(globals().items()) if k.startswith("test_")]:
         fn()
