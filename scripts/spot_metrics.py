@@ -8,7 +8,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SPOTS = ROOT / "public" / "data" / "spots.json"
 CSV_PATH = ROOT / "docs" / "planning" / "metrics.csv"
-FIELDS = ["date", "total", "closed", "open_no_image", "open_no_coords", "open_no_category", "open_no_price_tier"]
+FIELDS = ["date", "total", "closed", "open_no_image", "open_no_coords", "open_no_category", "open_no_price_tier",
+          "open_no_business_hours", "open_parking_unknown", "spots_json_bytes"]
 
 
 def measure(spots):
@@ -20,6 +21,8 @@ def measure(spots):
         "open_no_coords": sum(1 for s in opened if not s.get("lat") or not s.get("lng")),
         "open_no_category": sum(1 for s in opened if not s.get("category")),
         "open_no_price_tier": sum(1 for s in opened if not s.get("price_tier")),
+        "open_no_business_hours": sum(1 for s in opened if not s.get("business_hours")),
+        "open_parking_unknown": sum(1 for s in opened if (s.get("parking_info") or {}).get("type", "unknown") == "unknown"),
     }
 
 
@@ -27,7 +30,7 @@ def main():
     data = json.loads(SPOTS.read_text(encoding="utf-8"))
     spots = data if isinstance(data, list) else data["spots"]
     today = datetime.now(timezone(timedelta(hours=9))).strftime("%Y-%m-%d")
-    row = {"date": today, **measure(spots)}
+    row = {"date": today, **measure(spots), "spots_json_bytes": SPOTS.stat().st_size}
 
     rows = []
     if CSV_PATH.exists():
