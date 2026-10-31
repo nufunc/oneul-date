@@ -213,8 +213,17 @@ PARKING_SKIP_AT = 700
 PARKING_STATE = os.path.join(os.path.dirname(USAGE_FILE), ".parking_backfill.json")
 
 
+def tourist_fields(intro):
+    """관광지(12) detailIntro 응답 → parking_info, business_hours(usetime), closed_days(restdate) 중 값이 있는 칸(P-221)."""
+    intro = intro or {}
+    fields = {"parking_info": parking_fields(intro, "12"), "business_hours": hours_fields(intro.get("usetime")),
+              "closed_days": parse_closed_days(intro.get("restdate"))}
+    return {k: v for k, v in fields.items() if v}
+
+
 def run_parking_backfill(apply=False, log=print, backup_dir=None, limit=PARKING_DAILY_CAP):
-    """열린 tourapi 관광지(12) 중 parking_info가 unknown인 행에 detailIntro 주차 값을 채운다.
+    """열린 tourapi 관광지(12) 중 parking_info가 unknown이거나 business_hours가 빈 행에 detailIntro의 주차, 이용시간,
+    쉬는 날을 채운다(P-208, P-221). 읽을 때 비어 있던 칸만 쓰고, 읽은 updated_at이 그대로인 행에만 쓴다.
     TourAPI 호출은 limit회까지, 분류한 값만 쓴다. 쓰기 전에 그 회차의 대상 행을 p208b_<시각>.json으로 백업하고,
     그 백업이 그날의 실행 표시라 재기동해도 하루 한 번만 돈다."""
     backup_dir = backup_dir or os.path.expanduser("~/oneul-backups")
@@ -237,15 +246,17 @@ def run_parking_backfill(apply=False, log=print, backup_dir=None, limit=PARKING_
     if key:
         headers.update({"apikey": key, "Authorization": f"Bearer {key}"})
 
-    cond = {"is_closed": "eq.false", "source->>type": "eq.tourapi", "parking_info->>type": "eq.unknown"}
+    cond = {"is_closed": "eq.false", "source->>type": "eq.tourapi"}
     last = load_json(PARKING_STATE, {}).get("last_id", 0)
-    q = urllib.parse.urlencode({"select": "id,name,parking_info,source,updated_at", **cond, "id": f"gt.{last}",
+    q = urllib.parse.urlencode({"select": "id,name,parking_info,business_hours,closed_days,source,updated_at", **cond,
+                                "or": "(parking_info->>type.eq.unknown,business_hours.eq.{})", "id": f"gt.{last}",
                                 "source->>note": "like.TourAPI 4.0 관광지*", "order": "id.asc", "limit": limit})
     todo = _request(f"{base_url}/rest/v1/spots?{q}", headers) or []
     if apply and todo:
         os.makedirs(backup_dir, exist_ok=True)
         with open_new(os.path.join(backup_dir, f"p208b_{datetime.now(KST).strftime('%Y%m%d-%H%M')}.json")) as fp:
-            json.dump([{k: r.get(k) for k in ("id", "name", "parking_info", "updated_at")} for r in todo], fp, ensure_ascii=False, indent=2)
+            json.dump([{k: r.get(k) for k in ("id", "name", "parking_info", "business_hours", "closed_days", "updated_at")} for r in todo],
+                      fp, ensure_ascii=False, indent=2)
         log(f"백업: {fp.name}")
 
     start, plans, failed = usage_today(), [], 0
@@ -255,7 +266,7 @@ def run_parking_backfill(apply=False, log=print, backup_dir=None, limit=PARKING_
             break
         cotid = (r["source"].get("url") or "").rsplit("cotid=", 1)[-1]
         try:
-            info = parking_fields(fetch_intro(api_key, cotid, "12"), "12") if cotid else None
+            got = tourist_fields(fetch_intro(api_key, cotid, "12")) if cotid else {}
         except TourApiRateLimited:
             log(f"TourAPI 한도 초과로 조회를 멈춘다(오늘 호출 {usage_today()}회)")
             break
@@ -266,20 +277,29 @@ def run_parking_backfill(apply=False, log=print, backup_dir=None, limit=PARKING_
             continue
         last = r["id"]
         time.sleep(0.3)
-        if info:
-            plans.append((r, info))
+        # 읽을 때 값이 있던 칸은 덮지 않는다
+        empty = {"parking_info": (r.get("parking_info") or {}).get("type", "unknown") == "unknown",
+                 "business_hours": not r.get("business_hours"), "closed_days": not r.get("closed_days")}
+        fields = {k: v for k, v in got.items() if empty[k]}
+        if fields:
+            plans.append((r, fields))
     kinds = {}
-    for _, info in plans:
-        kinds[info["type"]] = kinds.get(info["type"], 0) + 1
-    log(f"주차 백필: 대상 {len(todo)}행 · 호출 {usage_today() - start}회 · 조회 실패 {failed} · 값 있음 {len(plans)} {kinds}")
+    for _, f in plans:
+        if f.get("parking_info"):
+            kinds[f["parking_info"]["type"]] = kinds.get(f["parking_info"]["type"], 0) + 1
+    hours_n = sum(1 for _, f in plans if f.get("business_hours"))
+    closed_n = sum(1 for _, f in plans if f.get("closed_days"))
+    log(f"주차 백필: 대상 {len(todo)}행 · 호출 {usage_today() - start}회 · 조회 실패 {failed} · 값 있음 {len(plans)} · "
+        f"주차 {kinds} · 이용시간 {hours_n} · 쉬는 날 {closed_n}")
     if not apply:
+        for r, f in plans[:10]:
+            log(f"  {r['id']} {r['name']} | {f}")
         log("드라이런: DB에 쓰지 않았다. 실제 반영은 --apply")
         return 0
     now = datetime.now(timezone.utc).isoformat()
-    for r, info in plans:
-        q = urllib.parse.urlencode({"id": f"eq.{r['id']}", **cond})
-        _request(f"{base_url}/rest/v1/spots?{q}", {**headers, "Prefer": "return=minimal"}, "PATCH",
-                 {"parking_info": info, "updated_at": now})
+    for r, fields in plans:
+        q = urllib.parse.urlencode({"id": f"eq.{r['id']}", **cond, "updated_at": f"eq.{r['updated_at']}"})
+        _request(f"{base_url}/rest/v1/spots?{q}", {**headers, "Prefer": "return=minimal"}, "PATCH", {**fields, "updated_at": now})
     atomic_dump(PARKING_STATE, {"last_id": last})
     log(f"반영 완료: {len(plans)}행")
     return 0

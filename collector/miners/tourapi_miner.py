@@ -21,7 +21,7 @@ from supabase_worker import (load_env, derive_region_area, find_duplicate_spot, 
                              sanitize_spot, new_spot_id, insert_spots, _near_fn, _SIDO_WORDS, KAKAO_REST_API_KEY)
 from category_filter import is_date_spot_category
 from event_period import fetch_event_period
-from tour_fee import PARKING_FIELDS, fee_fields, fetch_intro, hours_fields, parking_fields, parse_closed_days
+from tour_fee import PARKING_FIELDS, fee_fields, fetch_intro, hours_fields, parking_fields, parse_closed_days, tourist_fields
 from tourapi_quota import TourApiFetchFailed, TourApiRateLimited, tour_get_json, usage_today
 
 KST = timezone(timedelta(hours=9))
@@ -566,9 +566,14 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                         break
                     time.sleep(0.3)
                 elif ctype_id in PARKING_FIELDS:
-                    # 주차 값만 읽으므로 호출이 실패하면 parking_info 없이 넣는다(P-208)
+                    # 주차 값과 관광지의 이용시간(usetime)·쉬는 날(restdate)만 읽으므로 호출이 실패하면 그 칸 없이 넣는다(P-208, P-221)
                     try:
-                        parking = parking_fields(fetch_intro(clean_api_key, content_id, ctype_id), ctype_id)
+                        intro = fetch_intro(clean_api_key, content_id, ctype_id)
+                        if ctype_id == "12":
+                            got = tourist_fields(intro)
+                            parking, hours, closed_days = got.get("parking_info"), got.get("business_hours"), got.get("closed_days", [])
+                        else:
+                            parking = parking_fields(intro, ctype_id)
                     except TourApiRateLimited:
                         rate_limited = True
                         page_by_combo[combo_key] = prev_page
