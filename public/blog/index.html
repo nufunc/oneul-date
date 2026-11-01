@@ -153,6 +153,7 @@
       font-size: 14px;
       font-weight: 600;
       padding: 8px 16px;
+      min-height: 44px;
       border-radius: 999px;
       cursor: pointer;
       transition: all 0.2s;
@@ -316,15 +317,15 @@
     </section>
 
     <nav class="region-filter-wrap" aria-label="지역별 필터">
-      <button type="button" class="filter-chip active" data-region="all">전체</button>
-      <button type="button" class="filter-chip" data-region="seoul">서울</button>
-      <button type="button" class="filter-chip" data-region="gyeonggi">경기</button>
-      <button type="button" class="filter-chip" data-region="gangwon">강원</button>
-      <button type="button" class="filter-chip" data-region="chungcheong">충청</button>
-      <button type="button" class="filter-chip" data-region="jeolla">전라</button>
-      <button type="button" class="filter-chip" data-region="gyeongsang">경상</button>
-      <button type="button" class="filter-chip" data-region="busan">부산</button>
-      <button type="button" class="filter-chip" data-region="jeju">제주</button>
+      <button type="button" class="filter-chip active" data-region="all" aria-pressed="true">전체</button>
+      <button type="button" class="filter-chip" aria-pressed="false" data-region="seoul">서울</button>
+      <button type="button" class="filter-chip" aria-pressed="false" data-region="gyeonggi">경기</button>
+      <button type="button" class="filter-chip" aria-pressed="false" data-region="gangwon">강원</button>
+      <button type="button" class="filter-chip" aria-pressed="false" data-region="chungcheong">충청</button>
+      <button type="button" class="filter-chip" aria-pressed="false" data-region="jeolla">전라</button>
+      <button type="button" class="filter-chip" aria-pressed="false" data-region="gyeongsang">경상</button>
+      <button type="button" class="filter-chip" aria-pressed="false" data-region="busan">부산</button>
+      <button type="button" class="filter-chip" aria-pressed="false" data-region="jeju">제주</button>
     </nav>
 
     <section class="posts-container">
@@ -2108,23 +2109,37 @@
         return false;
       }
 
+      function applyRegion(region) {
+        chips.forEach(function(c) {
+          const on = c.getAttribute('data-region') === region;
+          c.classList.toggle('active', on);
+          c.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
+
+        cards.forEach(function(card) {
+          const badge = card.querySelector('.card-region-badge');
+          const badgeText = badge ? badge.textContent : '';
+          if (matchesRegion(badgeText, region)) {
+            card.style.display = 'flex';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      }
+
       chips.forEach(function(chip) {
         chip.addEventListener('click', function() {
           const region = chip.getAttribute('data-region');
-          chips.forEach(function(c) { c.classList.remove('active'); });
-          chip.classList.add('active');
-
-          cards.forEach(function(card) {
-            const badge = card.querySelector('.card-region-badge');
-            const badgeText = badge ? badge.textContent : '';
-            if (matchesRegion(badgeText, region)) {
-              card.style.display = 'flex';
-            } else {
-              card.style.display = 'none';
-            }
-          });
+          applyRegion(region);
+          history.replaceState(null, '', region === 'all' ? location.pathname : '?region=' + region);
         });
       });
+
+      // 새로 고쳐도 고른 칩을 ?region= 값으로 되살린다
+      const saved = new URLSearchParams(location.search).get('region');
+      if (saved && Array.prototype.some.call(chips, function(c) { return c.getAttribute('data-region') === saved; })) {
+        applyRegion(saved);
+      }
     })();
   </script>
 
