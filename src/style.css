@@ -1259,6 +1259,7 @@ html[data-shared-course] .home-regions {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  min-height: 44px;
   padding: 5px 9px;
   border-radius: var(--radius-full);
   border: none;
@@ -2180,6 +2181,7 @@ html[data-shared-course] .home-regions {
 
 /* 상호명은 상세 시트를 여는 버튼이지만 제목 모양은 그대로 둔다 */
 .step-name-link {
+  position: relative;
   padding: 0;
   border: 0;
   background: none;
@@ -2187,6 +2189,17 @@ html[data-shared-course] .home-regions {
   color: inherit;
   text-align: left;
   cursor: pointer;
+}
+
+/* 모양은 그대로 두고 눌리는 영역만 세로 44px로 넓힌다(.btn-action-icon::after와 같은 방식) */
+.step-name-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 44px;
+  transform: translateY(-50%);
 }
 
 .step-name-link:hover {
@@ -4758,6 +4771,7 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  min-height: 44px;
   padding: 6px 12px;
   border-radius: var(--radius-full);
   border: 1px solid var(--color-border);

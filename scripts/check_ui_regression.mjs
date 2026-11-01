@@ -1,4 +1,4 @@
-// 화면 회귀 점검(원장 사이클 35 점검 표). 라이브 390px에서 다섯 값을 재서 JSON 한 줄로 내고, 기준치를 벗어나면 종료 코드 1을 낸다.
+// 화면 회귀 점검(원장 사이클 35 점검 표). 라이브 390px에서 다섯 값과 320·390px 코스 만들기 탭 영역(P-234)을 재서 JSON 한 줄로 내고, 기준치를 벗어나면 종료 코드 1을 낸다.
 // playwright는 저장소 의존성이 아니므로 npx로 받아 돌린다(처음 한 번은 브라우저도 받는다):
 //   npx -y -p playwright playwright install chromium
 //   npx -y -p playwright node scripts/check_ui_regression.mjs
@@ -120,6 +120,37 @@ for (let k = 0; k < 3 && Object.keys(overlap).length < 2; k++) {
   await page.click('#btn-density-cycle');
   await page.waitForTimeout(1200);
 }
+
+// 6. 코스 만들기 경로의 탭 영역(P-234): 320·390px 홈에서 지역 칩과 시간대 토글 높이, 코스를 만든 뒤 상호명 위아래 21px이 그 버튼에 닿는가
+// 같은 문맥의 새 페이지라 spots.json은 HTTP 캐시에서 받는다. 코스 생성이 부르는 AI 브리핑은 막는다
+const tap = {};
+for (const width of [320, 390]) {
+  const p = await ctx.newPage();
+  p.on('pageerror', (e) => errors.push(e.message));
+  await p.route('**/ai-briefing', (r) => r.abort());
+  await p.setViewportSize({ width, height: 800 });
+  await p.goto(`${URL}?v=${Date.now()}`, { waitUntil: 'load' });
+  await p.waitForSelector('#btn-generate:not([disabled])', { timeout: 200000 });
+  const minH = (sel) => p.evaluate((sel) => Math.round(Math.min(...[...document.querySelectorAll(sel)].map((e) => e.getBoundingClientRect().height))), sel);
+  const chip = await minH('.quick-region-chip');
+  const toggle = await minH('.slot-toggle-inline');
+  await p.evaluate(() => [...document.querySelectorAll('button.quick-region-chip')].find((b) => b.textContent.trim() === '서울').click());
+  await p.waitForTimeout(800);
+  await p.click('#btn-generate');
+  await p.waitForSelector('#results-area .step-name-link', { timeout: 30000 });
+  await p.waitForTimeout(1500);
+  const names = await p.evaluate(() => [...document.querySelectorAll('#results-area .step-name-link')].map((b) => {
+    b.scrollIntoView({ block: 'center' });
+    const r = b.getBoundingClientRect();
+    return [-21, 21].every((dy) => {
+      const t = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2 + dy);
+      return Boolean(t) && (t === b || b.contains(t));
+    });
+  }));
+  tap[width] = { chip, toggle, name: `${names.filter(Boolean).length}/${names.length}` };
+  if (shot(`course_${width}`)) await p.screenshot(shot(`course_${width}`));
+  await p.close();
+}
 await browser.close();
 
 const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
@@ -132,6 +163,7 @@ const result = {
   sheetPhoto: `${sheetPhotoOk}/${SHEET_SPOTS.length}`,
   badgeFitPct: { sheet: pct(sheetBadgeFits.filter(Boolean).length, sheetBadgeFits.length), card: pct(cardBadgeFits.filter(Boolean).length, cardBadgeFits.length) },
   overlapPx2: { 'cols-3': Math.round(overlap['cols-3'] ?? -1), 'cols-5': Math.round(overlap['cols-5'] ?? -1) },
+  tap,
   errors: errors.length,
 };
 
@@ -142,6 +174,10 @@ if (hot === 0 || (PREV && (hot <= PREV.hot / 2 || hot >= PREV.hot * 2))) fails.p
 if (sheetPhotoOk !== SHEET_SPOTS.length) fails.push(`sheetPhoto ${result.sheetPhoto}`);
 if (result.badgeFitPct.sheet !== 100 || result.badgeFitPct.card !== 100) fails.push('badgeFit');
 if (result.overlapPx2['cols-3'] !== 0 || result.overlapPx2['cols-5'] !== 0) fails.push('overlap');
+for (const [w, t] of Object.entries(tap)) {
+  const [hit, n] = t.name.split('/').map(Number);
+  if (t.chip < 44 || t.toggle < 44 || n === 0 || hit !== n) fails.push(`tap${w} chip ${t.chip} toggle ${t.toggle} name ${t.name}`);
+}
 result.fails = fails;
 console.log(JSON.stringify(result));
 process.exit(fails.length ? 1 : 0);
