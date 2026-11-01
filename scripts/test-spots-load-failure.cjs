@@ -77,7 +77,13 @@ const cut = (src, from, to) => {
     /if \(isSharedLink && document\.getElementById\('receiver-loading'\)\) \{\s*if \(spotsFellBackToSample\) renderReceiverLoading\(true\);\s*else handleRoute\(\);/.test(initThen),
     '실패한 받은 링크가 handleRoute로 판정된다',
   );
-  assert.ok(/\} else \{\s*if \(spotsFellBackToSample\) showSpotsFailedBanner\(spots\.length\);/.test(initThen), '홈에서 실패 띠를 띄우지 않는다');
+  // 띠의 곳 수는 스팟 탐색 탭 목록과 같은 거르기로 센다. spots.length면 폐업과 코스 제외가 섞여 탭 수와 어긋났다(P-256)
+  const listable = '!s.is_closed && isCourseEligible(s)';
+  assert.ok(
+    initThen.includes(`} else {\n            if (spotsFellBackToSample) showSpotsFailedBanner(spots.filter((s) => ${listable}).length);`),
+    '홈에서 실패 띠를 띄우지 않거나 곳 수를 탐색 탭과 다르게 센다',
+  );
+  assert.ok(cut(main, 'function renderSpotDiscovery(', '\n}\n').includes(`deduplicateSpotList(spots.filter((s) => ${listable}))`), '탐색 탭 후보 거르기가 띠와 달라졌다');
   // 캐시가 있는 재방문에서 받지 못하면 캐시의 전체 데이터를 샘플로 바꾸지 않는다
   const cachedSync = cut(main, '      loadSpots()\n        .then((liveSpots) => {', '\n          }\n');
   assert.ok(cachedSync.includes('!spotsFellBackToSample'), '캐시 동기화가 실패한 샘플로 덮는다');

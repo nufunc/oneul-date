@@ -7689,7 +7689,9 @@ function renderOverlay(): void {
       if (target?.isConnected) target.focus({ preventScroll: true });
     });
   }
-  overlayWasOpen = open;
+  // 찾지 못한 스팟은 열자마자 닫히므로 첫머리 open이 아니라 지금 값으로 둔다. true로 남으면 다음 시트를 연 요소를
+  // 기억하지 않고 닫을 때 앞서 기억한 요소로 초점을 돌렸다(P-256)
+  overlayWasOpen = locked;
 }
 
 function renderOverlayContent(): void {
@@ -8642,7 +8644,7 @@ async function init(): Promise<void> {
             if (spotsFellBackToSample) renderReceiverLoading(true);
             else handleRoute();
           } else {
-            if (spotsFellBackToSample) showSpotsFailedBanner(spots.length);
+            if (spotsFellBackToSample) showSpotsFailedBanner(spots.filter((s) => !s.is_closed && isCourseEligible(s)).length);
             if (state.mainMode === 'spots') {
               renderSpotDiscovery();
             } else if (state.mainMode === 'course') {

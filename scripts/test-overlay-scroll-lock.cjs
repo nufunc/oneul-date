@@ -32,4 +32,8 @@ assert.match(between, /isOverlayOpen\(\)/, '잠금은 renderOverlayContent 뒤�
 assert.match(between, /innerWidth - html\.clientWidth/, '스크롤바 폭을 재지 않는다');
 assert.match(between, /body\.style\.paddingRight/, '스크롤바 폭을 body padding-right로 보정하지 않는다');
 
+// 찾지 못한 스팟은 열자마자 닫힌다. 열림 기억을 첫머리 open으로 두면 true로 남아 다음 시트를 연 요소를 기억하지 않는다(P-256)
+assert.match(body, /\n  overlayWasOpen = locked;$/, 'overlayWasOpen은 renderOverlayContent 뒤의 열림 상태로 갱신한다');
+assert.doesNotMatch(body, /overlayWasOpen = open;/, 'overlayWasOpen을 첫머리 open 값으로 갱신한다');
+
 console.log('ok');
