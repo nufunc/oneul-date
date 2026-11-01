@@ -18,7 +18,7 @@ let sized = 0;
 const unsized = new Set();
 for (const file of files) {
   for (const [tag] of fs.readFileSync(file, 'utf8').matchAll(/<img\b[^>]*>/g)) {
-    const src = tag.match(/\ssrc="([^"]+)"/)?.[1];
+    const src = tag.match(/\sdata-orig="([^"]+)"/)?.[1] ?? tag.match(/\ssrc="([^"]+)"/)?.[1];
     const w = tag.match(/\swidth="([^"]*)"/)?.[1];
     const h = tag.match(/\sheight="([^"]*)"/)?.[1];
     if (w === undefined && h === undefined) { unsized.add(src); continue; }
@@ -31,8 +31,9 @@ const notCached = [...unsized].filter((s) => !cache[s]);
 assert.ok(unsized.size <= notCached.length, `캐시에 있는데 크기가 없는 img 주소가 있다: ${[...unsized].filter((s) => cache[s]).join(', ')}`);
 assert.ok(sized > 0, '크기를 넣은 img가 없다');
 
-// 망 없이 캐시만으로 도는 경로와 받기에 실패하는 경로
-const cached = Object.keys(cache)[0];
+// 망 없이 캐시만으로 도는 경로와 받기에 실패하는 경로. 축소 주소로 바꾸는 호스트는 test-blog-image-thumbs.cjs가 본다
+const cached = Object.keys(cache).find((k) => !/^https?:\/\/(t1\.daumcdn\.net|t1\.kakaocdn\.net|tong\.visitkorea\.or\.kr)\//.test(k));
+assert.ok(cached, '캐시에 축소 대상이 아닌 호스트의 주소가 없다');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'blog-image-sizes-'));
 const page = path.join(tmp, 'dist', 'blog', 'x', 'index.html');
 fs.mkdirSync(path.dirname(page), { recursive: true });

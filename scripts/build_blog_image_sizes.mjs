@@ -1,9 +1,13 @@
-// 빌드 끝에 dist/blog/<slug>/index.html의 <img>마다 실제 사진 크기를 width·height 속성으로 넣는다(P-244).
+// 빌드 끝에 dist/blog/<slug>/index.html과 목록 dist/blog/index.html의 <img>마다 실제 사진 크기를 width·height 속성으로 넣는다(P-244).
 // 크기 없는 사진이 받아지기 전 높이 0으로 그려졌다가 머리를 읽는 순간 커지며 아래 내용을 밀던 첫 방문 흔들림을 막는다.
 // 크기는 scripts/blog_image_sizes.json(주소→[가로, 세로])에서 읽는다. 없는 주소만 앞 64KB를 Range로 받아 PNG, JPEG, WebP, GIF 머리에서 읽고 캐시에 더한다.
 // JPEG는 EXIF 방향이 5~8이면 가로세로를 바꾼다(브라우저가 방향을 적용한 크기로 그린다). 64KB 안에 SOF가 없으면 1MB로 한 번 더 받는다.
 // 망이 없거나 읽지 못한 img는 그대로 두고 빌드를 실패시키지 않는다. BLOG_IMAGE_SIZES_OFFLINE=1이면 망을 쓰지 않는다.
 // 이미 width나 height가 있는 img는 건드리지 않는다. 실행 시점: build_blog_related.mjs 뒤. 원본 public/blog/는 고치지 않는다.
+// 크기를 넣은 뒤 src가 t1.daumcdn.net, t1.kakaocdn.net, tong.visitkorea.or.kr이면 카카오 축소 주소(R800x0 WebP)로 바꾼다(P-247).
+// 원본 PNG가 장당 중앙값 1.2MB라 휴대폰 첫 화면에 1MB 넘게 받는 글이 51편이었다. 원본은 data-orig에 두고 onerror에서 한 번만 되돌린다.
+// width·height는 원본 크기 그대로 둔다(축소는 비율을 지킨다). 이미 onerror가 있는 img는 되돌리기를 덮지 않도록 그대로 둔다.
+// og:image, JSON-LD image처럼 img 태그 밖의 주소는 바꾸지 않는다. 대상은 글 dist/blog/<slug>/index.html과 목록 dist/blog/index.html이다.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,6 +16,9 @@ const cachePath = path.join(path.dirname(fileURLToPath(import.meta.url)), 'blog_
 const blogDir = path.resolve('dist', 'blog');
 const offline = process.env.BLOG_IMAGE_SIZES_OFFLINE === '1';
 const IMG_RE = /<img\b[^>]*>/g;
+const THUMB_HOST_RE = /^https?:\/\/(t1\.daumcdn\.net|t1\.kakaocdn\.net|tong\.visitkorea\.or\.kr)\//;
+const THUMB_PREFIX = 'https://img1.daumcdn.net/thumb/R800x0.fwebp/?fname=';
+const ONERROR = "var o=this.dataset.orig; if(o){this.dataset.orig=''; this.src=o;}";
 
 function jpegSize(b) {
   let orientation = 1;
@@ -81,7 +88,7 @@ if (!fs.existsSync(blogDir)) {
 }
 
 const cache = fs.existsSync(cachePath) ? JSON.parse(fs.readFileSync(cachePath, 'utf-8')) : {};
-const files = fs.readdirSync(blogDir).map((d) => path.join(blogDir, d, 'index.html')).filter((f) => fs.existsSync(f));
+const files = [path.join(blogDir, 'index.html'), ...fs.readdirSync(blogDir).map((d) => path.join(blogDir, d, 'index.html'))].filter((f) => fs.existsSync(f));
 const pages = files.map((file) => ({ file, html: fs.readFileSync(file, 'utf-8') }));
 
 const srcOf = (tag) => tag.match(/\ssrc="(https?:\/\/[^"]+)"/)?.[1];
@@ -116,17 +123,29 @@ if (added) {
 
 let sized = 0;
 let left = 0;
+let thumbed = 0;
+let keptOnerror = 0;
+const addSize = (tag) => {
+  const src = srcOf(tag);
+  if (!src || hasSize(tag)) return tag;
+  const size = cache[src];
+  if (!size) { left++; return tag; }
+  sized++;
+  return tag.replace(/^<img\b/, `<img width="${size[0]}" height="${size[1]}"`);
+};
+const toThumb = (tag) => {
+  const src = srcOf(tag);
+  if (!src || !THUMB_HOST_RE.test(src) || /\sdata-orig=/.test(tag)) return tag;
+  if (/\sonerror=/.test(tag)) { keptOnerror++; return tag; }
+  thumbed++;
+  const thumb = THUMB_PREFIX + encodeURIComponent(src.replace(/&amp;/g, '&'));
+  return tag.replace(` src="${src}"`, () => ` src="${thumb}" data-orig="${src}" onerror="${ONERROR}"`);
+};
 for (const { file, html } of pages) {
-  const out = html.replace(IMG_RE, (tag) => {
-    const src = srcOf(tag);
-    if (!src || hasSize(tag)) return tag;
-    const size = cache[src];
-    if (!size) { left++; return tag; }
-    sized++;
-    return tag.replace(/^<img\b/, `<img width="${size[0]}" height="${size[1]}"`);
-  });
+  const out = html.replace(IMG_RE, (tag) => toThumb(addSize(tag)));
   if (out !== html) fs.writeFileSync(file, out);
 }
 
 console.log(`build_blog_image_sizes: img ${sized}개에 크기를 넣었다 (캐시에 더한 주소 ${added}개, 크기 없이 둔 img ${left}개${offline ? ', 망 끔' : ''})`);
+console.log(`build_blog_image_sizes: img ${thumbed}개를 축소 주소로 바꿨다 (onerror가 있어 둔 img ${keptOnerror}개)`);
 if (failed.length) console.warn(`build_blog_image_sizes: 크기를 읽지 못한 주소 ${failed.length}개\n  ${failed.join('\n  ')}`);
