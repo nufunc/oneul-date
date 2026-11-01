@@ -3537,6 +3537,8 @@ interface AppState {
     anchorId?: number;
     /** subZones를 검색어에서 얻었다. 다시 추천도 숙박 외 칸에서 이 동네를 풀 수 있다 */
     zoneFromQuery?: boolean;
+    /** 검색어에 맞는 곳이 없어 인기 코스(byFilter면 필터 기준)로 대신 짰다. 결과 머리에 안내 줄을 둔다(P-264) */
+    searchFallback?: { query: string; byFilter: boolean };
   } | null;
   savedOpen: boolean;
   regionSheetOpen: boolean;
@@ -4489,6 +4491,8 @@ function bindConditionEvents(area: HTMLElement): void {
       if (e.key === 'Enter') {
         state.searchQuery = searchInput.value.trim();
         triggerCourseGeneration();
+        // 초점이 남으면 휴대폰 키보드가 결과 아래 40%와 결과 토스트를 가렸다(P-264). 데스크톱은 연속 검색을 위해 둔다
+        if (matchMedia('(pointer: coarse)').matches) document.getElementById('search-input')?.blur();
       }
     });
   }
@@ -4659,6 +4663,7 @@ function triggerCourseGeneration(): void {
       return spot ? matchesSearchQuery(spot, q) : false;
     }) ?? false;
   const hasMatchedSpot = !!state.searchQuery && matchesIn(state.searchQuery);
+  const byFilter = state.budgetFilter !== 'ALL' || state.moodPreset !== null || state.indoorOnly;
   state.courseConditions = {
     regions: [...state.regions],
     subZones: [...zoneKeys],
@@ -4669,6 +4674,8 @@ function triggerCourseGeneration(): void {
     indoorOnly: state.indoorOnly,
     budgetFilter: state.budgetFilter,
     zoneFromQuery,
+    // 대체 사실이 2.2초 토스트뿐이라 토스트가 사라지면 검색 결과로 오인했다(P-264)
+    searchFallback: state.searchQuery && !hasMatchedSpot ? { query: state.searchQuery, byFilter } : undefined,
   };
   addRecentSpotIds(courseSpotIds());
   renderResults();
@@ -4702,7 +4709,7 @@ function triggerCourseGeneration(): void {
         zoneKeys,
       );
       if (matchesIn(place)) {
-        if (state.courseConditions) state.courseConditions = { ...state.courseConditions, searchQuery: place };
+        if (state.courseConditions) state.courseConditions = { ...state.courseConditions, searchQuery: place, searchFallback: undefined };
         addRecentSpotIds(courseSpotIds());
         renderResults();
         showToast(`'${place}'에는 '${rest}'에 맞는 곳이 없어 ${place} 코스로 추천했어요`);
@@ -4711,7 +4718,7 @@ function triggerCourseGeneration(): void {
     }
     if (hasMatchedSpot) {
       showToast(`'${state.searchQuery}' 중심 맞춤 코스를 추천했어요`);
-    } else if (state.budgetFilter !== 'ALL' || state.moodPreset !== null || state.indoorOnly) {
+    } else if (byFilter) {
       showToast(`'${state.searchQuery}' 중 켜 둔 필터에 맞는 스팟이 없어 필터 기준으로 추천했어요`);
     } else {
       showToast(`'${state.searchQuery}' 매칭 스팟이 없어 인기 코스로 추천했어요`);
@@ -4908,7 +4915,14 @@ function renderResultsContent(): void {
     initialStoryHtml = `“${normalizeEditorialTone(generateCourseStory(state.course, spotById, cond.mood, true))}”`;
   }
 
+  const fallback = cond.searchFallback;
   area.innerHTML = `
+    ${fallback ? `
+      <div class="search-miss">
+        <p>'${escapeHtml(fallback.query)}'${fallback.byFilter ? ' 중 켜 둔 필터에 맞는 곳을 찾지 못해 필터 기준 코스를' : '에 맞는 곳을 찾지 못해 인기 코스를'} 보여 드려요</p>
+        <button type="button" class="search-miss-btn" id="btn-search-edit">검색어 바꾸기</button>
+      </div>
+    ` : ''}
     <div class="course-head">
       <span class="course-title">${escapeHtml(courseTitle(cond, state.course))}</span>
       <div class="course-head-actions">
@@ -6161,6 +6175,13 @@ function regenerateCourse(): void {
 }
 
 function bindResultEvents(area: HTMLElement): void {
+  area.querySelector('#btn-search-edit')?.addEventListener('click', () => {
+    const input = document.querySelector<HTMLInputElement>('#search-input');
+    if (!input) return;
+    input.scrollIntoView({ block: 'center' });
+    input.focus({ preventScroll: true });
+    input.select();
+  });
   area.querySelectorAll<HTMLButtonElement>('.btn-swap, .btn-swap-icon').forEach((btn) => {
     bindSwapButton(btn);
   });
