@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>[서울 한남·이태원 뚜벅이 데이트] 리움미술관부터 뮤직라이브러리 LP청음, 사운즈한남, 앤틱가구거리와 남산 소월길 하얏트 도심 야경까지</title>
-  <meta name="description" content="지하철 6호선 한강진역과 이태원역을 잇는 서울 도심 대표 감성 뚜벅이 데이트 코스: 세계적 거장 3인이 완성한 리움미술관의 건축 미학, 1만 장의 바이닐을 직접 듣는 현대카드 뮤직 라이브러리, 붉은 벽돌 테라스 사운즈한남 티타임, 유럽 감성 이태원 앤틱가구거리, 남산 소월길과 그랜드 하얏트 앞 서울 도심 야경 피날레까지 상세 안내.">
+  <meta name="description" content="지하철 6호선 한강진역과 이태원역을 잇는 서울 도심 대표 감성 뚜벅이 데이트 코스: 세계적 거장 3인이 완성한 리움미술관의 건축 미학, 1만 장의 바이닐을 직접 듣는 현대카드 뮤직 라이브러리, 회색 벽돌 통로와 테라스 카페가 있는 사운즈한남, 유럽 감성 이태원 앤틱가구거리, 남산 소월길과 그랜드 하얏트 앞 서울 도심 야경 피날레까지 상세 안내.">
   <link rel="canonical" href="https://nufunc.github.io/oneul-date/blog/hannam-itaewon/">
   <meta property="og:url" content="https://nufunc.github.io/oneul-date/blog/hannam-itaewon/">
 
@@ -22,7 +22,7 @@
   "@context": "https://schema.org",
   "@type": "BlogPosting",
   "headline": "[서울 한남·이태원 뚜벅이 데이트] 리움미술관부터 뮤직라이브러리 LP청음, 사운즈한남, 앤틱가구거리와 남산 소월길 하얏트 도심 야경까지",
-  "description": "지하철 6호선 한강진역과 이태원역을 잇는 서울 도심 대표 감성 뚜벅이 데이트 코스: 세계적 거장 3인이 완성한 리움미술관의 건축 미학, 1만 장의 바이닐을 직접 듣는 현대카드 뮤직 라이브러리, 붉은 벽돌 테라스 사운즈한남 티타임, 유럽 감성 이태원 앤틱가구거리, 남산 소월길과 그랜드 하얏트 앞 서울 도심 야경 피날레까지 상세 안내.",
+  "description": "지하철 6호선 한강진역과 이태원역을 잇는 서울 도심 대표 감성 뚜벅이 데이트 코스: 세계적 거장 3인이 완성한 리움미술관의 건축 미학, 1만 장의 바이닐을 직접 듣는 현대카드 뮤직 라이브러리, 회색 벽돌 통로와 테라스 카페가 있는 사운즈한남, 유럽 감성 이태원 앤틱가구거리, 남산 소월길과 그랜드 하얏트 앞 서울 도심 야경 피날레까지 상세 안내.",
   "image": "https://t1.kakaocdn.net/mystore/724E7C5479DB4E5AB77CEC02E10E2219",
   "url": "https://nufunc.github.io/oneul-date/blog/hannam-itaewon/",
   "datePublished": "2026-10-21",
@@ -310,21 +310,13 @@
       margin-bottom: 6px;
     }
 
-    .table-container {
+    .table-wrap {
       background: var(--color-card-bg);
       border: 1px solid var(--color-border);
       border-radius: 16px;
       overflow: hidden;
       margin: 40px 0;
       box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-    }
-    .table-header {
-      background: #f1f5f9;
-      padding: 16px 20px;
-      font-weight: 700;
-      font-size: 1.05rem;
-      color: var(--color-primary);
-      border-bottom: 1px solid var(--color-border);
     }
     table {
       width: 100%;
@@ -346,6 +338,30 @@
       font-weight: 700;
       background: #f8fafc;
       color: var(--color-primary);
+    }
+
+    /* 비용표: 좁은 화면에서는 한 행을 카드 하나로 쌓는다 */
+    @media (max-width: 600px) {
+      .table-wrap { overflow-x: visible; }
+      .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
+      .table-wrap thead { display: none; }
+      .table-wrap tr {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        column-gap: 12px;
+        row-gap: 4px;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--color-border);
+      }
+      .table-wrap tr:last-child { border-bottom: none; }
+      .table-wrap td { padding: 0; border: none; }
+      .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: 0.78rem; font-weight: 700; color: var(--color-text-sub); }
+      .table-wrap td:nth-child(2) { font-weight: 700; }
+      .table-wrap td:nth-child(3) { max-width: 60vw; word-break: keep-all; text-align: right; font-weight: 700; }
+      .table-wrap td:nth-child(4) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
+      .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: inherit; color: inherit; }
+      .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; max-width: 60vw; word-break: keep-all; text-align: right; }
+      .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
     }
 
     .article-footer {
@@ -412,9 +428,10 @@
         <span>발행일: 2026. 10. 21</span>
         <span>추천 계절: 사계절(가을·봄 추천)</span>
         <span>소요 시간: 당일치기 (약 8시간)</span>
+        <span>글: 오늘 데이트 에디토리얼 팀 / 사진: 카카오맵 포토 리뷰, 한국관광공사</span>
       </div>
       <p class="lead-text">
-        지하철 6호선 한강진역과 이태원역을 잇는 서울 도심 대표 감성 뚜벅이 데이트 코스: 세계적 거장 3인이 완성한 리움미술관의 건축 미학과 상설 전시, 1만 장의 바이닐을 직접 듣는 현대카드 뮤직 라이브러리와 바이닐앤플라스틱, 붉은 벽돌 테라스가 아늑한 사운즈한남에서의 여유로운 티타임, 유럽의 골목을 걷는 듯한 이태원 앤틱가구거리, 그리고 노을빛 물드는 소월길과 그랜드 하얏트 앞 전망 데크에서 내려다보는 서울 도심 불빛 야경 피날레까지 상세 일정과 꿀팁을 총정리했습니다.
+        지하철 6호선 한강진역과 이태원역을 잇는 서울 도심 대표 감성 뚜벅이 데이트 코스: 세계적 거장 3인이 완성한 리움미술관의 건축 미학과 상설 전시, 1만 장의 바이닐을 직접 듣는 현대카드 뮤직 라이브러리와 바이닐앤플라스틱, 회색 벽돌 통로와 테라스 카페가 있는 사운즈한남에서의 티타임, 유럽의 골목을 걷는 듯한 이태원 앤틱가구거리, 그리고 노을빛 물드는 소월길과 그랜드 하얏트 앞 전망 데크에서 내려다보는 서울 도심 불빛 야경 피날레까지 상세 일정과 꿀팁을 총정리했습니다.
       </p>
     </header>
 
@@ -424,28 +441,24 @@
       </div>
       <ul class="timeline-list">
         <li class="timeline-item">
-          <span class="timeline-time">10:30 ~ 12:30</span>
+          <span class="timeline-time">10:30 ~ 12:00</span>
           <strong>[스팟 1] 리움미술관</strong> (건축 거장 3인의 공간 미학과 국보급 고미술·현대미술 상설전)
         </li>
         <li class="timeline-item">
-          <span class="timeline-time">12:40 ~ 13:50</span>
-          <strong>[점심 식사] 한남동 골목 미식</strong> (정갈한 파스타 또는 캐주얼 솥밥 다이닝)
-        </li>
-        <li class="timeline-item">
-          <span class="timeline-time">14:00 ~ 15:20</span>
+          <span class="timeline-time">12:15 ~ 13:30</span>
           <strong>[스팟 2] 현대카드 뮤직 라이브러리 & 바이닐앤플라스틱</strong> (턴테이블로 직접 듣는 아날로그 LP 감상)
         </li>
         <li class="timeline-item">
-          <span class="timeline-time">15:35 ~ 16:45</span>
-          <strong>[스팟 3] 사운즈한남</strong> (도심 속 붉은 벽돌 복합문화공간 중정 테라스와 베이커리 카페 쉼)
+          <span class="timeline-time">13:45 ~ 15:00</span>
+          <strong>[스팟 3] 사운즈한남</strong> (회색 벽돌 통로와 테라스 카페에서 쉬어 가기)
+        </li>
+        <li class="timeline-item">
+          <span class="timeline-time">15:15 ~ 16:30</span>
+          <strong>[스팟 4] 이태원 앤틱가구거리</strong> (유럽 빈티지 숍들이 늘어선 골목 산책)
         </li>
         <li class="timeline-item">
           <span class="timeline-time">17:00 ~ 18:00</span>
-          <strong>[스팟 4] 이태원 앤틱가구거리</strong> (80여 개 유럽 빈티지 숍들이 늘어선 이국적인 골목 산책)
-        </li>
-        <li class="timeline-item">
-          <span class="timeline-time">18:20 ~ 19:30</span>
-          <strong>[스팟 5] 남산 소월길 & 그랜드 하얏트 앞 야경</strong> (노을과 도심 빌딩 숲의 황금빛 야경 피날레)
+          <strong>[스팟 5] 남산 소월길 & 그랜드 하얏트 앞 야경</strong> (가을 기준 일몰 30분 전 도착, 노을과 도심 야경)
         </li>
       </ul>
     </section>
@@ -454,8 +467,8 @@
     <article class="spot-section">
       <div class="spot-card">
         <div class="spot-image-wrap">
-          <img src="https://t1.kakaocdn.net/mystore/724E7C5479DB4E5AB77CEC02E10E2219" alt="리움미술관 중앙 로비 원형 채광 돔 건축 전경" loading="lazy">
-          <div class="spot-image-caption">리움미술관 M1 로비에서 천장 채광창을 올려다본 원형 나선 계단과 빛의 파노라마</div>
+          <img src="https://t1.kakaocdn.net/mystore/724E7C5479DB4E5AB77CEC02E10E2219" alt="리움미술관 M1 원형 천장 채광창" loading="lazy">
+          <div class="spot-image-caption">리움미술관 M1 원형 천장 채광창</div>
         </div>
         <div class="spot-body">
           <div class="spot-header-row">
@@ -478,7 +491,7 @@
           </p>
           <div class="tip-box">
             <strong>💡 에디터 추천 팁 & 관람 정보</strong>
-            • 상설전시는 무료 관람이지만 공식 웹사이트에서 14일 전 오전 0시에 오픈되는 사전 예약이 권장됩니다.<br>
+            • 상설전은 무료이고 사전 예약이 필요합니다(오늘 데이트 등록 정보). 운영시간은 화 ~ 일 10:00 ~ 18:00, 매주 월요일 휴관입니다(카카오맵).<br>
             • 야외 조각 데크에는 아니시 카푸어의 대형 은빛 구체 조형물이 설치되어 있어 한남동 하늘을 배경으로 감각적인 사진을 남기기 좋습니다.<br>
             • 미술관 내 물품보관함이 무료로 제공되므로 가벼운 차림으로 전시와 도보 산책을 즐겨보세요.
           </div>
@@ -509,13 +522,13 @@
             리움미술관에서 이태원로 대로변으로 내려오면 시원하게 뚫린 캐노피 구조물이 돋보이는 현대카드 뮤직 라이브러리에 도달합니다. 건축가 최문규가 설계한 건물 사이의 프레임 너머로 한남동 언덕 마을과 하늘이 한 폭의 그림처럼 담기며, 1층 바이닐앤플라스틱과 2층 뮤직 라이브러리가 유기적으로 연결되어 있습니다.
           </p>
           <p class="spot-desc">
-            2층 뮤직 라이브러리는 1950년대부터 현재까지 시대를 뒤흔든 희귀 바이닐 1만여 장과 음악 전문 서적 3천여 권을 보관하는 음악의 성지입니다. 현대카드 회원 또는 DIVE 앱 회원이면 본인 및 동반 1인까지 무료 입장할 수 있으며, 자신이 좋아하는 명반 3장을 골라 턴테이블에 바늘을 올리고 헤드폰으로 따뜻한 아날로그 사운드를 온전히 감상할 수 있습니다. 회원이 아니더라도 1층 바이닐앤플라스틱에서 누구나 자유롭게 최신 LP를 골라 청음할 수 있습니다.
+            2층 뮤직 라이브러리는 1950년대부터 현재까지 시대를 뒤흔든 희귀 바이닐 1만여 장과 음악 전문 서적 3천여 권을 보관하는 음악의 성지입니다. 입장 조건은 방문 전 현대카드 공식 안내에서 확인하고, 자신이 좋아하는 명반 3장을 골라 턴테이블에 바늘을 올리고 헤드폰으로 따뜻한 아날로그 사운드를 온전히 감상할 수 있습니다. 회원이 아니더라도 1층 바이닐앤플라스틱에서 누구나 자유롭게 최신 LP를 골라 청음할 수 있습니다.
           </p>
           <div class="tip-box">
             <strong>💡 에디터 추천 팁 & 청음 안내</strong>
             • 주말 오후에는 턴테이블 청음 대기가 발생할 수 있으므로, 방문 직후 태블릿 웨이팅을 먼저 등록한 뒤 1층 서적과 굿즈를 둘러보는 동선을 추천합니다.<br>
             • 통유리창 바로 앞 바 테이블에 앉아 따뜻한 음악을 들으며 내려다보는 이태원로 풍경은 잊지 못할 힐링의 순간을 선사합니다.<br>
-            • 운영시간: 화~토 12:00 ~ 21:00 / 일 12:00 ~ 18:00 (매주 월요일 정기 휴관)
+            • 운영시간: 화 ~ 토 12:00 ~ 21:00 / 일 12:00 ~ 18:00 (매주 월요일 휴관, 카카오맵)
           </div>
         </div>
       </div>
@@ -525,8 +538,8 @@
     <article class="spot-section">
       <div class="spot-card">
         <div class="spot-image-wrap">
-          <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/c0c3e8be6149fd39b58212b3a74d8ea1f21242f1?original" alt="사운즈한남 붉은 벽돌 중정과 테라스 전경" loading="lazy">
-          <div class="spot-image-caption">사운즈한남 중앙 중정 광장과 따뜻한 붉은 벽돌 테라스 카페 공간</div>
+          <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/c0c3e8be6149fd39b58212b3a74d8ea1f21242f1?original" alt="사운즈한남 회색 벽돌 통로와 카페 테라스" loading="lazy">
+          <div class="spot-image-caption">사운즈한남 회색 벽돌 통로와 카페 테라스 (흐린 날)</div>
         </div>
         <div class="spot-body">
           <div class="spot-header-row">
@@ -541,16 +554,15 @@
             <a href="https://m.taxi.kakao.com/" class="spot-chip" target="_blank" rel="noopener">🚕 카카오T 호출</a>
           </div>
           <p class="spot-desc" style="margin-top: 16px;">
-            이태원로에서 순천향대병원 방향 골목 안쪽으로 접어들면, '도심 속 어반 리조트'를 테마로 지어진 감성 복합문화공간 사운즈한남을 만납니다. 붉은 벽돌 건물 5개 동이 중앙의 아늑한 야외 중정을 감싸 안고 있어, 복잡한 서울 한복판에서도 한적하고 이국적인 휴식을 만끽할 수 있는 곳입니다.
+            이태원로에서 순천향대병원 방향 골목 안쪽으로 접어들면, '도심 속 어반 리조트'를 테마로 지어진 감성 복합문화공간 사운즈한남을 만납니다. 짙은 회색 벽돌 건물 사이로 통로와 야외 자리가 이어져, 복잡한 서울 한복판에서도 한적하게 쉬어 갈 수 있는 곳입니다.
           </p>
           <p class="spot-desc">
-            중정 광장의 야외 파라솔 테이블에 앉아 콰르텟(Quartet) 베이커리의 시그니처 앙버터 브리오슈와 신선한 핸드드립 커피를 즐기며 둘만의 도란도란한 대화를 나누기 좋습니다. 건물 곳곳으로 연결된 야외 계단과 모던한 입면 디자인은 서 있는 곳마다 감성적인 스냅사진 배경이 되어줍니다. 미쉐린 가이드 빕구르망 한식당 일호식과 다이닝, 아트 갤러리도 함께 입점해 있어 문화와 미식을 한자리에서 누릴 수 있습니다.
+            1층 카페르상스 사운즈한남점은 카카오맵 장소 키워드에 테라스가 있는 브런치 카페로 나와 있어, 야외 자리에서 커피를 마시며 둘만의 대화를 나누기 좋습니다. 메뉴는 아메리카노 5,500원, 카페 라떼 6,500원, 리얼 바닐라 크림 라떼 8,500원입니다(카카오맵 메뉴, 2026-09-07 갱신).
           </p>
           <div class="tip-box">
             <strong>💡 에디터 추천 팁 & 이용 안내</strong>
-            • 날씨가 화창한 날에는 중앙 중정 테라스 석이 가장 인기가 많습니다. 자리를 잡은 뒤 콰르텟에서 베이커리와 커피를 주문해 보세요.<br>
-            • 건물 층별로 이동할 수 있는 외부 회랑과 공중 브릿지에서 중정을 내려다보며 찍는 사진이 아주 멋스럽게 나옵니다.<br>
-            • 매장별 운영시간이 상이하나 카페 콰르텟은 매일 09:00 ~ 22:00 운영됩니다.
+            • 카페르상스 사운즈한남점 운영시간: 매일 10:00 ~ 22:00 (라스트오더 21:30, 카카오맵)<br>
+            • 사운즈한남 건물 뒤편 지하 1층 주차장은 유료이고 기본 90분 5,000원입니다(카카오맵). 이 코스는 지하철과 도보로 다니는 편이 낫습니다.
           </div>
         </div>
       </div>
@@ -576,15 +588,14 @@
             <a href="https://m.taxi.kakao.com/" class="spot-chip" target="_blank" rel="noopener">🚕 카카오T 호출</a>
           </div>
           <p class="spot-desc" style="margin-top: 16px;">
-            사운즈한남에서 이태원역 3·4번 출구 방향으로 약 10분 정도 걸어가면, 보광로를 따라 완만한 언덕길로 이어지는 이태원 앤틱가구거리가 펼쳐집니다. 1960년대 인근 미군부대 군인들이 귀국하며 내놓은 가구와 생활용품을 매매하면서 시작된 이 거리는 현재 80여 개에 달하는 전문 앤틱·빈티지 숍들이 모여 있는 국내 유일의 명소입니다.
+            사운즈한남에서 이태원역 3·4번 출구 방향으로 약 10분 정도 걸어가면, 보광로를 따라 완만한 언덕길로 이어지는 이태원 앤틱가구거리가 펼쳐집니다. 1960년대 인근 미군부대 군인들이 귀국하며 내놓은 가구와 생활용품을 매매하면서 시작된 이 거리는 현재 앤틱·빈티지 숍들이 모여 있는 거리입니다.
           </p>
           <p class="spot-desc">
             영국, 프랑스, 독일 등 유럽 각지에서 직접 수입한 고풍스러운 오크 원목 테이블, 반짝이는 황동 샹들리에, 클래식 벽시계, 섬세한 찻잔과 빈티지 소품들이 쇼윈도를 가득 채우고 있습니다. 마치 런던 노팅힐의 포토벨로 마켓이나 파리의 벼룩시장을 걷는 듯한 이국적인 분위기 속에서 취향에 맞는 소품을 구경하며 도란도란 걷기에 좋습니다.
           </p>
           <div class="tip-box">
             <strong>💡 에디터 추천 팁 & 골목 산책 정보</strong>
-            • 거리 산책은 상시 자유롭게 가능하며, 상점들은 통상 오전 11시부터 오후 7시까지 영업합니다.<br>
-            • 매월 둘째·넷째 화요일은 정기 휴무인 점포가 많으므로 주말 또는 평일 오후 방문을 추천합니다.<br>
+            • 거리 산책은 언제든 할 수 있고, 점포 영업시간과 휴무일은 점포별로 다릅니다(TourAPI).<br>
             • 앤틱 숍 외부의 빈티지 벤치와 디스플레이 창가 앞은 감성적인 스냅 샷을 건지기 좋은 숨은 명당입니다.
           </div>
         </div>
@@ -595,8 +606,8 @@
     <article class="spot-section">
       <div class="spot-card">
         <div class="spot-image-wrap">
-          <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/4897a8eaf8503c0c6f57626ebe4961c8cee07fa3?original" alt="남산 소월길 전망 데크에서 바라본 서울 도심 야경" loading="lazy">
-          <div class="spot-image-caption">남산 소월길과 그랜드 하얏트 앞 전망대에서 내려다본 서울 도심의 황금빛 야경</div>
+          <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/4897a8eaf8503c0c6f57626ebe4961c8cee07fa3?original" alt="남산 소월길 은행나무 가로수 차도" loading="lazy">
+          <div class="spot-image-caption">남산 소월길 은행나무 가로수 (가을 낮)</div>
         </div>
         <div class="spot-body">
           <div class="spot-header-row">
@@ -618,7 +629,7 @@
           </p>
           <div class="tip-box">
             <strong>💡 에디터 추천 팁 & 야경 감상 정보</strong>
-            • 일몰 약 30분 전(계절에 따라 18:00~18:30) 전망 데크에 도착하면 주황빛 노을부터 매직아워의 짙푸른 밤하늘, 화려한 도심 야경까지 한 번에 감상할 수 있습니다.<br>
+            • 소월길 일몰은 10월 하순 17:40 안팎, 6월 하순 19:55 안팎입니다(NOAA 계산식). 일몰 30분 전에 도착하면 노을부터 도심 야경까지 볼 수 있으니, 계절에 맞춰 앞 일정을 당기거나 늦추세요.<br>
             • 소월길 언덕길을 오를 때 체력을 아끼고 싶다면 이태원역이나 녹사평역에서 용산03번 마을버스를 타고 하얏트호텔 정류장에서 하차하는 편안한 팁도 있습니다.<br>
             • 산책 후 남산 둘레길을 따라 후암동이나 해방촌 방향으로 내려가 분위기 좋은 펍에서 시원한 맥주 한 잔으로 하루를 마무리해보세요.
           </div>
@@ -627,69 +638,56 @@
     </article>
 
     <!-- 2인 여행 경비표 -->
-    <section class="table-container">
-      <div class="table-header">
-        💰 한남·이태원 뚜벅이 데이트 2인 예상 경비표
-      </div>
+    <h2 class="spot-name" style="margin-top: 48px;">💰 한남·이태원 뚜벅이 데이트 2인 예상 경비표</h2>
+    <div class="table-wrap">
       <table>
         <thead>
           <tr>
             <th>구분</th>
-            <th>스팟 및 항목</th>
-            <th>상세 내용</th>
-            <th>2인 비용</th>
+            <th>장소</th>
+            <th>2인 금액</th>
+            <th>비고</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>예술 전시</td>
-            <td>[스팟 1] 리움미술관</td>
-            <td>고미술·현대미술 상설전 무료 관람 & 디지털 가이드 대여</td>
+            <td>전시</td>
+            <td>리움미술관</td>
             <td>0원</td>
+            <td>상설전 무료, 사전 예약 필요 (오늘 데이트 등록 정보). 기획전은 1인 18,000원 (카카오맵)</td>
           </tr>
           <tr>
-            <td>점심 식사</td>
-            <td>한남동 로컬 미식</td>
-            <td>정갈한 파스타 2인 세트 또는 캐주얼 솥밥 다이닝</td>
-            <td>35,000원</td>
+            <td>음악</td>
+            <td>현대카드 뮤직 라이브러리</td>
+            <td>방문 전 확인</td>
+            <td>입장 조건은 현대카드 공식 안내 확인</td>
           </tr>
           <tr>
-            <td>음악 문화</td>
-            <td>[스팟 2] 뮤직 라이브러리</td>
-            <td>1만여 장 바이닐 턴테이블 청음 (회원 및 동반인 무료)</td>
+            <td>카페</td>
+            <td>카페르상스 사운즈한남점</td>
+            <td>12,000원</td>
+            <td>아메리카노 5,500원 + 카페 라떼 6,500원 (카카오맵 메뉴, 2026-09-07 갱신)</td>
+          </tr>
+          <tr>
+            <td>산책</td>
+            <td>이태원 앤틱가구거리</td>
             <td>0원</td>
+            <td>거리 산책 무료, 점포 영업은 점포별 상이 (TourAPI)</td>
           </tr>
           <tr>
-            <td>감성 카페</td>
-            <td>[스팟 3] 사운즈한남 콰르텟</td>
-            <td>시그니처 앙버터 브리오슈 + 아메리카노 2잔</td>
-            <td>16,000원</td>
-          </tr>
-          <tr>
-            <td>골목 산책</td>
-            <td>[스팟 4] 앤틱가구거리</td>
-            <td>유럽 앤틱 가구 및 빈티지 소품 윈도우 쇼핑</td>
+            <td>야경</td>
+            <td>남산 소월길</td>
             <td>0원</td>
-          </tr>
-          <tr>
-            <td>야경 & 음료</td>
-            <td>[스팟 5] 남산 소월길</td>
-            <td>테이크아웃 따뜻한 차 2잔 곁들인 도심 야경 감상</td>
-            <td>10,000원</td>
-          </tr>
-          <tr>
-            <td>대중교통</td>
-            <td>지하철 & 시내버스</td>
-            <td>6호선 한강진역 도착, 이태원·소월길 도보, 버스 귀가 (2인)</td>
-            <td>약 6,000원</td>
+            <td>거리 산책</td>
           </tr>
           <tr class="sum-row">
-            <td colspan="3"><strong>총 예상 경비 합계</strong></td>
-            <td><strong>약 67,000원</strong></td>
+            <td colspan="2"><strong>2인 합계</strong></td>
+            <td><strong>12,000원</strong></td>
+            <td>1인 6,000원. 식사, 교통비, 뮤직 라이브러리 입장은 별도</td>
           </tr>
         </tbody>
       </table>
-    </section>
+    </div>
 
     <!-- 아티클 푸터 -->
     <div class="app-course-box" style="margin: 40px 0 24px; padding: 20px 22px; background: var(--color-accent-light); border: 1px solid var(--color-border); border-radius: 14px;">
