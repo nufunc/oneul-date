@@ -1,4 +1,4 @@
-// 화면 회귀 점검(원장 사이클 35 점검 표). 라이브 390px에서 다섯 값과 320·390px 코스 만들기 탭 영역(P-234)을 재서 JSON 한 줄로 내고, 기준치를 벗어나면 종료 코드 1을 낸다.
+// 화면 회귀 점검(원장 사이클 35 점검 표). 라이브 390px에서 다섯 값과 320·390px 코스 만들기 탭 영역(P-234)과 잘못된 공유 링크 320px CLS(P-235)를 재서 JSON 한 줄로 내고, 기준치를 벗어나면 종료 코드 1을 낸다.
 // playwright는 저장소 의존성이 아니므로 npx로 받아 돌린다(처음 한 번은 브라우저도 받는다):
 //   npx -y -p playwright playwright install chromium
 //   npx -y -p playwright node scripts/check_ui_regression.mjs
@@ -151,6 +151,21 @@ for (const width of [320, 390]) {
   if (shot(`course_${width}`)) await p.screenshot(shot(`course_${width}`));
   await p.close();
 }
+
+// 7. 모든 id가 풀리지 않는 공유 링크(P-235): 캐시 없는 새 문맥 320px에서 홈으로 떨어질 때까지의 CLS
+const badCtx = await browser.newContext({ viewport: { width: 320, height: 800 }, serviceWorkers: 'block' });
+const bad = await badCtx.newPage();
+bad.on('pageerror', (e) => errors.push(e.message));
+await bad.addInitScript(() => {
+  window.__cls = 0;
+  new PerformanceObserver((l) => { for (const e of l.getEntries()) if (!e.hadRecentInput) window.__cls += e.value; }).observe({ type: 'layout-shift', buffered: true });
+});
+await bad.goto(`${URL}?v=${Date.now()}#c=99999999.88888888`, { waitUntil: 'load' });
+await bad.waitForSelector('#conditions-area', { timeout: 200000 });
+await bad.waitForTimeout(2000);
+const badShare = await bad.evaluate(() => ({ cls: +window.__cls.toFixed(4), hash: location.hash }));
+if (shot('bad_share_320')) await bad.screenshot(shot('bad_share_320'));
+await badCtx.close();
 await browser.close();
 
 const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
@@ -164,6 +179,7 @@ const result = {
   badgeFitPct: { sheet: pct(sheetBadgeFits.filter(Boolean).length, sheetBadgeFits.length), card: pct(cardBadgeFits.filter(Boolean).length, cardBadgeFits.length) },
   overlapPx2: { 'cols-3': Math.round(overlap['cols-3'] ?? -1), 'cols-5': Math.round(overlap['cols-5'] ?? -1) },
   tap,
+  badShare,
   errors: errors.length,
 };
 
@@ -178,6 +194,7 @@ for (const [w, t] of Object.entries(tap)) {
   const [hit, n] = t.name.split('/').map(Number);
   if (t.chip < 44 || t.toggle < 44 || n === 0 || hit !== n) fails.push(`tap${w} chip ${t.chip} toggle ${t.toggle} name ${t.name}`);
 }
+if (badShare.cls >= 0.05 || badShare.hash !== '') fails.push(`badShare cls ${badShare.cls} hash ${badShare.hash}`);
 result.fails = fails;
 console.log(JSON.stringify(result));
 process.exit(fails.length ? 1 : 0);

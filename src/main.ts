@@ -3874,6 +3874,10 @@ const app = document.getElementById('app')!;
 function renderShell(): void {
   // 앱 시작 시 테마 즉시 적용 (기본값: light 낮 테마)
   applyTheme(state.themeMode, false);
+  // 받은 링크의 자리표시에서 사용자 조작 없이 홈으로 떨어지면(전부 무효 id, 데이터 실패) 숨어 있던 매거진 블록이
+  // #app 위에 나타나 화면을 249px 밀었다(CLS 0.31). 아래에서 그만큼 스크롤해 보던 자리를 지킨다. 받은 코스를 보다가 누른 홈 이동은 그대로 둔다(P-235)
+  const keepPlace = document.documentElement.hasAttribute('data-shared-course') && !app.querySelector('.receiver-view:not(#receiver-loading)');
+  const appTopBefore = app.getBoundingClientRect().top;
   setSharedCourseView(false);
 
   app.innerHTML = `
@@ -3930,6 +3934,7 @@ function renderShell(): void {
     if (discoveryArea) discoveryArea.style.display = '';
     renderSpotDiscovery();
   }
+  if (keepPlace) window.scrollBy({ top: app.getBoundingClientRect().top - appTopBefore, behavior: 'instant' });
   renderOverlay();
 }
 
