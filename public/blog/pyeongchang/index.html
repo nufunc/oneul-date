@@ -77,25 +77,24 @@
    -webkit-font-smoothing: antialiased;
   }
 
-  /* 내비게이션 바 */
-  .top-nav {
+  /* 사이트 머리 */
+  .site-header {
+   background: #ffffff;
+   border-bottom: 1px solid var(--color-border);
    position: sticky;
    top: 0;
-   background: rgba(251, 250, 248, 0.94);
-   backdrop-filter: blur(8px);
-   border-bottom: 1px solid var(--color-border);
    z-index: 100;
-   padding: 12px 20px;
   }
-  .nav-inner {
+  .header-inner {
    max-width: var(--max-width);
    margin: 0 auto;
+   padding: 14px 20px;
    display: flex;
    justify-content: space-between;
    align-items: center;
   }
-  .nav-logo {
-   font-size: 15px;
+  .brand-link {
+   font-size: 1.15rem;
    font-weight: 800;
    color: var(--color-primary);
    text-decoration: none;
@@ -103,16 +102,27 @@
    align-items: center;
    gap: 6px;
   }
-  .nav-logo span {
+  .brand-badge {
+   font-size: 0.72rem;
+   font-weight: 600;
    color: var(--color-accent);
+   background: var(--color-accent-light);
+   padding: 2px 7px;
+   border-radius: 12px;
+   border: 1px solid var(--color-accent-border);
   }
-  .nav-link {
-   font-size: 13.5px;
+  .header-nav {
+   display: flex;
+   gap: 16px;
+  }
+  .header-nav a {
+   font-size: 0.9rem;
    font-weight: 600;
    color: var(--color-text-sub);
    text-decoration: none;
+   transition: color 0.15s;
   }
-  .nav-link:hover {
+  .header-nav a:hover {
    color: var(--color-accent);
   }
 
@@ -123,59 +133,47 @@
    padding: 40px 20px 80px 20px;
   }
 
-  /* 헤더 */
-  .article-header {
-   margin-bottom: 32px;
-  }
-  .badge-wrap {
-   display: flex;
-   gap: 8px;
-   margin-bottom: 14px;
-   flex-wrap: wrap;
-  }
-  .badge {
+  /* 글 머리 */
+  .post-badge {
    display: inline-block;
-   font-size: 12px;
+   font-size: 0.8rem;
    font-weight: 700;
-   padding: 4px 10px;
-   border-radius: 999px;
-   background: var(--color-accent-light);
    color: var(--color-accent);
+   background: var(--color-accent-light);
+   padding: 4px 10px;
+   border-radius: 6px;
    border: 1px solid var(--color-accent-border);
+   margin-bottom: 14px;
   }
-  .article-title {
-   font-size: 27px;
-   font-weight: 900;
-   color: var(--color-primary);
+  h1 {
+   font-size: 1.85rem;
+   font-weight: 800;
    line-height: 1.4;
+   color: var(--color-primary);
    margin-bottom: 14px;
    letter-spacing: -0.02em;
   }
-  .article-meta {
-   font-size: 13px;
+  .post-sub-meta {
+   font-size: 0.88rem;
    color: var(--color-text-faint);
+   margin-bottom: 28px;
+   display: flex;
+   flex-wrap: wrap;
+   gap: 8px;
+   align-items: center;
   }
-
-  /* 대표 이미지 */
-  .hero-img-wrap {
-   margin: 28px 0 36px 0;
-   border-radius: 12px;
-   overflow: hidden;
-   border: 1px solid var(--color-border);
-   background: #eae7e3;
-  }
-  .hero-img {
-   width: 100%;
-   height: auto;
-   display: block;
-  }
-  .hero-caption {
-   padding: 10px 14px;
-   font-size: 12.5px;
-   color: var(--color-text-faint);
-   background: #faf8f5;
+  .lead-box {
+   background: #ffffff;
+   border-left: 4px solid var(--color-accent);
    border-top: 1px solid var(--color-border);
-   text-align: center;
+   border-right: 1px solid var(--color-border);
+   border-bottom: 1px solid var(--color-border);
+   padding: 20px 22px;
+   border-radius: 0 10px 10px 0;
+   font-size: 1rem;
+   color: var(--color-text-sub);
+   margin-bottom: 32px;
+   line-height: 1.85;
   }
 
   /* 코스 요약 박스 */
@@ -328,42 +326,67 @@
 }
 
 
+  /* 지도 링크 모음 */
+  .map-links-grid {
+   display: grid;
+   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+   gap: 12px;
+   margin: 24px 0 36px;
+  }
+  .map-link-chip {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   background: #ffffff;
+   border: 1px solid var(--color-border);
+   border-radius: 10px;
+   padding: 12px 16px;
+   text-decoration: none;
+   color: var(--color-primary);
+   font-size: 0.9rem;
+   font-weight: 600;
+   transition: all 0.15s ease;
+  }
+  .map-link-chip:hover {
+   border-color: var(--color-accent);
+   background: var(--color-accent-light);
+   color: var(--color-accent);
+  }
+
   /* 하단 푸터 */
   .article-footer {
    margin-top: 60px;
    padding-top: 28px;
    border-top: 1px solid var(--color-border);
-   font-size: 13px;
+   font-size: 0.85rem;
    color: var(--color-text-faint);
-   line-height: 1.7;
   }
-  .app-cta-banner {
-   background: linear-gradient(135deg, #047857 0%, #065f46 100%);
-   color: #ffffff;
-   padding: 24px 20px;
-   border-radius: 12px;
-   text-align: center;
-   margin: 40px 0;
+  .byline-info {
+   line-height: 1.8;
+   margin-bottom: 18px;
   }
-  .app-cta-banner h3 {
-   color: #ffffff;
-   font-size: 18px;
-   margin: 0 0 8px 0;
+  .footer-nav {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   padding-top: 20px;
+   border-top: 1px dashed var(--color-border);
   }
-  .app-cta-banner p {
-   color: #e5e7eb;
-   font-size: 14px;
-   margin-bottom: 16px;
-  }
-  .app-cta-btn {
-   display: inline-block;
-   background: #ffffff;
-   color: #047857;
-   font-weight: 800;
-   font-size: 14px;
-   padding: 9px 20px;
-   border-radius: 999px;
+  .footer-nav a {
+   color: var(--color-accent);
    text-decoration: none;
+   font-weight: 600;
+  }
+  @media (max-width: 640px) {
+   h1 {
+    font-size: 1.55rem;
+   }
+   .article-wrap {
+    padding: 24px 16px 60px;
+   }
+   .map-links-grid {
+    grid-template-columns: 1fr;
+   }
   }
   header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
   .header-nav a,.header-title a,.blog-tagline a{display:inline-block}
@@ -371,41 +394,34 @@
 </head>
 <body>
 
- <!-- 상단 내비게이션 -->
- <header class="top-nav">
-  <div class="nav-inner">
-   <a href="../" class="nav-logo">
-    📖 오늘 데이트 <span>매거진</span>
+<header class="site-header">
+  <div class="header-inner">
+   <a href="../" class="brand-link">
+    오늘 데이트 <span class="brand-badge">매거진</span>
    </a>
-   <a href="../../" class="nav-link">
-    📱 오늘 데이트 홈 바로가기 ↗
-   </a>
+   <nav class="header-nav">
+    <a href="../">글 목록</a>
+    <a href="../../">추천 코스</a>
+   </nav>
   </div>
  </header>
 
  <main class="article-wrap">
-  <header class="article-header">
-   <div class="badge-wrap">
-    <span class="badge">강원 평창</span>
-    <span class="badge">가을 고원·숲길</span>
-    <span class="badge">오대산 & 대관령 드라이브</span>
-   </div>
-   <h1 class="article-title">[평창] 오대산 월정사 전나무숲길에서 국보 팔각구층석탑, 오대산가마솥식당 산채정식과 대관령 삼양라운드힐 바람의 언덕까지</h1>
-   <div class="article-meta">
-    글: 오늘 데이트 에디토리얼 팀 / 사진: 카카오맵 포토 리뷰
-   </div>
-  </header>
-
-  <!-- 대표 사진: 대관령 삼양라운드힐 초원과 풍력발전기 전경 -->
-  <div class="hero-img-wrap">
-   <img src="https://t1.kakaocdn.net/mystore/1082CFFA170C4A1CB3376B742942D7C9" alt="대관령 삼양라운드힐 고원 능선 산책로와 하얀 풍력발전기가 어우러진 목장 전경" class="hero-img">
-   <div class="hero-caption">대관령 삼양라운드힐(삼양목장) 고원 능선 산책로와 하얀 풍력발전기가 어우러진 목장 전경</div>
+  <span class="post-badge">가을 고원·숲길</span>
+  <h1>[평창] 오대산 월정사 전나무숲길에서 국보 팔각구층석탑, 오대산가마솥식당 산채정식과 대관령 삼양라운드힐 바람의 언덕까지</h1>
+  <div class="post-sub-meta">
+   <span>글: 오늘 데이트 에디토리얼 팀 / 사진: 카카오맵 포토 리뷰, 카카오맵 업체 사진</span>
   </div>
 
-  <!-- 도입부 -->
-  <p>
+  <div class="lead-box">
    가을이 깊어지는 10월, 맑고 서늘한 고원의 바람을 맞으며 울창한 숲과 드넓은 초원을 함께 누릴 수 있는 강원도 평창으로 떠나봅니다. 오대산 국립공원 자락의 천년 숲길인 월정사 전나무숲길에서 부드러운 흙길을 걸으며 피톤치드를 듬뿍 마시고, 국보 팔각구층석탑을 품은 유서 깊은 사찰 월정사 경내를 둘러봐요. 점심으로는 산채정식과 산채비빔밥을 내는 오대산가마솥식당에서 든든하게 배를 채운 뒤, 대관령 고원으로 이동해 삼양라운드힐의 탁 트인 능선과 바람의 언덕 파노라마를 만끽하는 당일 힐링 코스예요.
-  </p>
+  </div>
+
+  <!-- 대표 사진: 대관령 삼양라운드힐 초원과 풍력발전기 전경 -->
+  <div class="real-photo-card">
+   <img src="https://t1.kakaocdn.net/mystore/1082CFFA170C4A1CB3376B742942D7C9" alt="대관령 삼양라운드힐 고원 능선 산책로와 하얀 풍력발전기가 어우러진 목장 전경">
+   <div class="photo-caption">대관령 삼양라운드힐(삼양목장) 고원 능선 산책로와 하얀 풍력발전기가 어우러진 목장 전경</div>
+  </div>
 
   <!-- 코스 타임라인 요약 카드 -->
   <div class="timeline-card">
@@ -548,7 +564,7 @@
   <div class="tip-box">
    <strong>💡 대관령 삼양라운드힐 이용 안내</strong><br>
    • 위치: 강원특별자치도 평창군 대관령면 꽃밭양지길 708-9<br>
-   • 운영 시간: 그린시즌(5월~10월) 09:00~18:00 (매표 마감 17:00) / 11월 1일부터 30분 단축, 카카오맵 표기 09:00~16:30 (2026-11-01 조회, 11월부터 자차 운영)<br>
+   • 운영 시간: 11월~4월 09:00~17:30 (매표 마감 16:30) / 5월~10월 09:00~18:00 (매표 마감 17:00), 삼양라운드힐 공식 누리집 기준 (11월부터 자차 운영)<br>
    • 공식 입장료: 대인 12,000원 / 소인 10,000원 (그린시즌 순환 셔틀버스 탑승 포함)<br>
    • 주차 안내: 목장 광장 전용 주차장 무료 이용 가능<br>
    • 관람 팁: 해발 1,000m 이상의 고지대로 도심보다 기온이 5~10도 낮고 바람이 강하게 불 수 있으므로 바람막이나 따뜻한 겉옷을 꼭 챙기세요.
@@ -620,21 +636,25 @@
   <p>
    모바일 기기에서 각 장소의 상세 위치와 실시간 길 안내를 바로 확인하실 수 있도록 개별 네이버 지도 검색 링크를 준비했어요.
   </p>
-  <ul>
-   <li><a href="https://map.naver.com/p/search/%EC%98%A4%EB%8C%80%EC%82%B0%20%EC%9B%94%EC%A0%95%EC%82%AC%20%EC%A0%84%EB%82%98%EB%AC%B4%EC%88%B2%EA%B8%B8" target="_blank" rel="noopener noreferrer">네이버 지도로 오대산 월정사 전나무숲길 검색</a></li>
-   <li><a href="https://map.naver.com/p/search/%EC%9B%94%EC%A0%95%EC%82%AC" target="_blank" rel="noopener noreferrer">네이버 지도로 월정사 검색</a></li>
-   <li><a href="https://map.naver.com/p/search/%EC%98%A4%EB%8C%80%EC%82%B0%EA%B0%80%EB%A7%88%EC%86%A5%EC%8B%9D%EB%8B%B9" target="_blank" rel="noopener noreferrer">네이버 지도로 오대산가마솥식당 검색</a></li>
-   <li><a href="https://map.naver.com/p/search/%EB%8C%80%EA%B4%80%EB%A0%B9%20%EC%82%BC%EC%96%91%EB%9D%BC%EC%9A%B4%EB%93%9C%ED%9E%90" target="_blank" rel="noopener noreferrer">네이버 지도로 대관령 삼양라운드힐 검색</a></li>
-  </ul>
-
-  <!-- 서비스 CTA 배너 -->
-  <div class="app-cta-banner">
-   <h3>더 많은 로컬 데이트 코스가 궁금하다면?</h3>
-   <p>전국 2만여 개 엄선 스팟과 취향 맞춤 여행 코스를 실시간으로 만나보세요.</p>
-   <a href="../../" class="app-cta-btn">오늘 데이트 앱 열기 ↗</a>
+  <div class="map-links-grid">
+   <a href="https://map.naver.com/p/search/%EC%98%A4%EB%8C%80%EC%82%B0%20%EC%9B%94%EC%A0%95%EC%82%AC%20%EC%A0%84%EB%82%98%EB%AC%B4%EC%88%B2%EA%B8%B8" class="map-link-chip" target="_blank" rel="noopener noreferrer">
+    <span>📍 오대산 월정사 전나무숲길</span>
+    <span>지도 열기 →</span>
+   </a>
+   <a href="https://map.naver.com/p/search/%EC%9B%94%EC%A0%95%EC%82%AC" class="map-link-chip" target="_blank" rel="noopener noreferrer">
+    <span>📍 월정사</span>
+    <span>지도 열기 →</span>
+   </a>
+   <a href="https://map.naver.com/p/search/%EC%98%A4%EB%8C%80%EC%82%B0%EA%B0%80%EB%A7%88%EC%86%A5%EC%8B%9D%EB%8B%B9" class="map-link-chip" target="_blank" rel="noopener noreferrer">
+    <span>📍 오대산가마솥식당</span>
+    <span>지도 열기 →</span>
+   </a>
+   <a href="https://map.naver.com/p/search/%EB%8C%80%EA%B4%80%EB%A0%B9%20%EC%82%BC%EC%96%91%EB%9D%BC%EC%9A%B4%EB%93%9C%ED%9E%90" class="map-link-chip" target="_blank" rel="noopener noreferrer">
+    <span>📍 대관령 삼양라운드힐</span>
+    <span>지도 열기 →</span>
+   </a>
   </div>
 
-  <!-- 아티클 푸터 -->
   <div class="app-course-box" style="margin: 40px 0 24px; padding: 20px 22px; background: var(--color-accent-light); border: 1px solid var(--color-border); border-radius: 14px;">
     <strong style="display: block; font-size: 17px; color: var(--color-text-main); margin-bottom: 6px;">🗺️ 이 코스 오늘 데이트에서 열기</strong>
     <p style="margin: 0 0 14px; font-size: 14.5px; line-height: 1.6; color: var(--color-text-main);">글에 나온 장소 4곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
@@ -642,11 +662,15 @@
   </div>
 
   <footer class="article-footer">
-   <p>
-    본 매거진은 한국관광공사 공개 데이터와 지자체 관광 안내 정보를 바탕으로 제작되었습니다.<br>
-    사진 출처: 카카오맵 포토 리뷰 (공식 등록 이용자 실제 사진)<br>
-    © 2026 오늘 데이트 (Oneul Date). All rights reserved.
-   </p>
+   <div class="byline-info">
+    글: 오늘 데이트 에디토리얼 팀<br>
+    사진: 카카오맵 포토 리뷰, 카카오맵 업체 사진<br>
+    본 매거진은 한국관광공사 공개 데이터와 지자체 관광 안내 정보를 바탕으로 제작되었습니다.
+   </div>
+   <div class="footer-nav">
+    <a href="../">← 매거진 전체 목록으로 돌아가기</a>
+    <a href="../../">오늘 데이트 코스 추천 받기 →</a>
+   </div>
   </footer>
  </main>
 
