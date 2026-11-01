@@ -38,6 +38,12 @@ ALIAS_FILE = os.path.join(os.path.dirname(TARGET_FILE), "spot_aliases.json")
 SAMPLE_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src", "data", "spots.sample.json"))
 SAMPLE_MAX_COUNT = 480
 SAMPLE_MAX_BYTES = 305_000  # 2026-09-13 샘플 크기(305,327B). 번들이 이보다 커지지 않게 한다
+# 앱(src/main.ts)이 source.url과 source.note를 읽는 조건. 앱이 조건을 바꾸면 여기도 바꾼다.
+# scripts/test-spots-slim.cjs가 정규식이 앱 핫 점수 정규식과 같은지 단언한다
+HOT_NOTE_RE = re.compile(r"(분위기|감성|소개팅|핫플|로스터리|와인|오마카세|루프탑)")
+# 2026-11-02 src에서 타입 선언 밖 참조가 0건인 하위 칸(P-251)
+SOURCE_UNUSED_KEYS = {"booking_tips", "platform", "is_blueribbon", "price_tier"}
+SOCIAL_UNUSED_KEYS = {"kakaomap": {"bookmark_count", "locked"}, "youtube": {"is_shorts"}}
 
 def get_with_retry(params, attempts=6, wait_sec=10):
     """18088은 my-stock-score의 API 컨테이너가 oneul-api로 중계하는 주소라, 그쪽 배포로 컨테이너가 재생성되는
@@ -126,6 +132,32 @@ def fetch_merge_aliases(active_ids):
     return aliases
 
 
+def app_reads_source_url(url):
+    """앱이 source.url을 쓰는 세 형식: 네이버 단축 링크, 캐치테이블, 인스타그램"""
+    return url.startswith("https://naver.me/") or "catchtable" in url or "instagram.com/" in url
+
+
+def slim_spot(sp):
+    """앱이 읽지 않는 source와 social_links 하위 칸을 뺀 새 행. 최상위 칸과 칸 순서는 그대로 둔다"""
+    out = dict(sp)
+    src = sp.get("source")
+    if isinstance(src, dict):
+        src = {k: v for k, v in src.items() if k not in SOURCE_UNUSED_KEYS}
+        if not (isinstance(src.get("url"), str) and app_reads_source_url(src["url"])):
+            src.pop("url", None)
+        # 핫 점수(src/main.ts hot 판정)가 note를 읽는 행만 남긴다
+        if not (src.get("type") == "blog_mining" and sp.get("verified") and HOT_NOTE_RE.search(src.get("note") or "")):
+            src.pop("note", None)
+        out["source"] = src
+    social = sp.get("social_links")
+    if isinstance(social, dict):
+        out["social_links"] = {
+            name: {k: v for k, v in link.items() if k not in SOCIAL_UNUSED_KEYS.get(name, ())} if isinstance(link, dict) else link
+            for name, link in social.items()
+        }
+    return out
+
+
 def pick_sample(out_spots, max_count=SAMPLE_MAX_COUNT, max_bytes=SAMPLE_MAX_BYTES):
     """이미지가 있는 열린 스팟을 지역마다 hot_score 순으로 줄 세워 한 곳씩 돌아가며 뽑는다.
     입력이 같으면 결과가 같고, 개수와 직렬화 크기가 상한을 넘기 전에 멈춘다"""
@@ -169,7 +201,7 @@ def main():
     # 앱이 읽지 않는 칸도 뺀다. 2026-09-30 src에서 타입 선언 밖 참조가 0건이었고 이 여섯이 압축 전 4.5MB(23%)였다.
     # 화면이 이 값을 쓰게 되면 여기서 빼야 한다
     drop_keys = empty_keys | CLIENT_UNUSED_KEYS
-    out_spots = [{k: v for k, v in sp.items() if k not in drop_keys} for sp in healed_spots]
+    out_spots = [slim_spot({k: v for k, v in sp.items() if k not in drop_keys}) for sp in healed_spots]
     # 앱의 받은 링크 Range 탐색(src/supabase.ts findSpotsByRange)이 id 오름차순과 행마다 하나뿐인 `{"id":` 머리에 기댄다
     out_text = json.dumps(out_spots, ensure_ascii=False, separators=(",", ":"))
     out_ids = [sp["id"] for sp in out_spots]
