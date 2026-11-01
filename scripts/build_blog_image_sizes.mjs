@@ -5,6 +5,7 @@
 // 망이 없거나 읽지 못한 img는 그대로 두고 빌드를 실패시키지 않는다. BLOG_IMAGE_SIZES_OFFLINE=1이면 망을 쓰지 않는다.
 // 이미 width나 height가 있는 img는 건드리지 않는다. 실행 시점: build_blog_related.mjs 뒤. 원본 public/blog/는 고치지 않는다.
 // 크기를 넣은 뒤 src가 t1.daumcdn.net, t1.kakaocdn.net, tong.visitkorea.or.kr이면 카카오 축소 주소(R800x0 WebP)로 바꾼다(P-247).
+// 네이버 플레이스 업체 사진(ldb-phinf.pstatic.net)은 네이버 검색 축소 주소(w750 JPEG)로 바꾼다(P-253). 원본이 장당 약 2MB다.
 // 원본 PNG가 장당 중앙값 1.2MB라 휴대폰 첫 화면에 1MB 넘게 받는 글이 51편이었다. 원본은 data-orig에 두고 onerror에서 한 번만 되돌린다.
 // width·height는 원본 크기 그대로 둔다(축소는 비율을 지킨다). 이미 onerror가 있는 img는 되돌리기를 덮지 않도록 그대로 둔다.
 // og:image, JSON-LD image처럼 img 태그 밖의 주소는 바꾸지 않는다. 대상은 글 dist/blog/<slug>/index.html과 목록 dist/blog/index.html이다.
@@ -16,8 +17,10 @@ const cachePath = path.join(path.dirname(fileURLToPath(import.meta.url)), 'blog_
 const blogDir = path.resolve('dist', 'blog');
 const offline = process.env.BLOG_IMAGE_SIZES_OFFLINE === '1';
 const IMG_RE = /<img\b[^>]*>/g;
-const THUMB_HOST_RE = /^https?:\/\/(t1\.daumcdn\.net|t1\.kakaocdn\.net|tong\.visitkorea\.or\.kr)\//;
+const THUMB_HOST_RE = /^https?:\/\/(t1\.daumcdn\.net|t1\.kakaocdn\.net|tong\.visitkorea\.or\.kr|ldb-phinf\.pstatic\.net)\//;
 const THUMB_PREFIX = 'https://img1.daumcdn.net/thumb/R800x0.fwebp/?fname=';
+const NAVER_THUMB_PREFIX = 'https://search.pstatic.net/common/?type=w750&src=';
+const thumbPrefix = (src) => (src.includes('//ldb-phinf.pstatic.net/') ? NAVER_THUMB_PREFIX : THUMB_PREFIX);
 const ONERROR = "var o=this.dataset.orig; if(o){this.dataset.orig=''; this.src=o;}";
 
 function jpegSize(b) {
@@ -138,7 +141,7 @@ const toThumb = (tag) => {
   if (!src || !THUMB_HOST_RE.test(src) || /\sdata-orig=/.test(tag)) return tag;
   if (/\sonerror=/.test(tag)) { keptOnerror++; return tag; }
   thumbed++;
-  const thumb = THUMB_PREFIX + encodeURIComponent(src.replace(/&amp;/g, '&'));
+  const thumb = thumbPrefix(src) + encodeURIComponent(src.replace(/&amp;/g, '&'));
   return tag.replace(` src="${src}"`, () => ` src="${thumb}" data-orig="${src}" onerror="${ONERROR}"`);
 };
 for (const { file, html } of pages) {
