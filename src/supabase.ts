@@ -300,7 +300,8 @@ export async function loadStaticSpots(): Promise<Spot[]> {
   } catch {
     // CDN 로드 실패 시 빌드 번들 내장 샘플로 최종 폴백
   }
-  return normalizeSpots(rawSpotsData as Spot[]);
+  // 샘플 JSON의 business_hours가 빈 객체와 {영업시간}, {이용시간}으로 섞이면 TS가 빈 객체를 {영업시간?: undefined}로 추론해 Spot[] 단언이 TS2352로 실패한다. 값은 normalizeSpots가 정리한다
+  return normalizeSpots(rawSpotsData as unknown as Spot[]);
 }
 
 // 받은 링크 첫 방문은 전체 spots.json(gzip 3.7MB, Slow 4G 21초)이 와야 수신자 화면을 그렸다. 공유 id 행만 Range 요청으로 찾는다.
