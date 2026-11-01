@@ -4865,7 +4865,8 @@ function renderResultsContent(): void {
   const hasCachedStory = aiStoryCache.has(cacheKey);
 
   // AI 응답을 기다리는 동안 한 줄짜리 로딩 문구를 두면 문장이 도착할 때 카드가 두세 배로 늘어 아래가 밀린다.
-  // 로컬 문장을 먼저 보여 주고 AI 문장이 오면 그때만 바꾼다
+  // 로컬 문장을 먼저 보여 주고 AI 문장이 오면 그때만 바꾼다. 바뀐 문장은 1~2줄 길이가 달라
+  // 카드가 목록 위에 있으면 보고 있던 목록이 21~42px 밀렸다(P-237). 그래서 카드를 목록 아래에 둔다
   let initialStoryHtml = '';
   if (hasCachedStory) {
     initialStoryHtml = `“${escapeHtml(normalizeEditorialTone(aiStoryCache.get(cacheKey)!))}”`;
@@ -4888,13 +4889,6 @@ function renderResultsContent(): void {
         </button>
       </div>
     </div>
-    <div class="ai-briefing-card" id="ai-briefing-box">
-      <div class="ai-briefing-badge">
-        <span class="ai-sparkle-icon">✨</span>
-        <span>AI 에디터 브리핑</span>
-      </div>
-      <p class="ai-briefing-text" id="ai-briefing-content">${initialStoryHtml}</p>
-    </div>
     <div class="step-list">
       ${state.course.length > 0 ? renderUserOriginTransitDivider(state.course[0]) : ''}
       ${state.course.map((step, i) => {
@@ -4908,6 +4902,13 @@ function renderResultsContent(): void {
         }
         return html;
       }).join('')}
+    </div>
+    <div class="ai-briefing-card" id="ai-briefing-box">
+      <div class="ai-briefing-badge">
+        <span class="ai-sparkle-icon">✨</span>
+        <span>AI 에디터 브리핑</span>
+      </div>
+      <p class="ai-briefing-text" id="ai-briefing-content">${initialStoryHtml}</p>
     </div>
     <div class="result-actions result-actions-3">
       <button class="btn-secondary" id="btn-copy">📋 복사</button>

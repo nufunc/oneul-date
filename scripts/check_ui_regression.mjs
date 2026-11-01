@@ -1,4 +1,4 @@
-// 화면 회귀 점검(원장 사이클 35 점검 표). 라이브 390px에서 다섯 값과 320·390px 코스 만들기 탭 영역(P-234)과 잘못된 공유 링크 320px CLS(P-235)와 화면 아래에 붙인 완성 버튼(P-236)을 재서 JSON 한 줄로 내고, 기준치를 벗어나면 종료 코드 1을 낸다.
+// 화면 회귀 점검(원장 사이클 35 점검 표). 라이브 390px에서 다섯 값과 320·390px 코스 만들기 탭 영역(P-234)과 잘못된 공유 링크 320px CLS(P-235)와 화면 아래에 붙인 완성 버튼(P-236)과 늦게 오는 AI 브리핑 뒤 코스 CLS(P-237)를 재서 JSON 한 줄로 내고, 기준치를 벗어나면 종료 코드 1을 낸다.
 // playwright는 저장소 의존성이 아니므로 npx로 받아 돌린다(처음 한 번은 브라우저도 받는다):
 //   npx -y -p playwright playwright install chromium
 //   npx -y -p playwright node scripts/check_ui_regression.mjs
@@ -201,9 +201,40 @@ for (const [width, height] of [[320, 667], [390, 844]]) {
   if (width === 390) linkMinH = await p.evaluate(() => { const h = [...document.querySelectorAll('.home-regions-list a, #btn-blog-link')].map((e) => e.getBoundingClientRect().height); return h.length ? Math.round(Math.min(...h)) : 0; });
   await p.close();
 }
+// 9. 늦게 오는 AI 브리핑(P-237): 320·390px 어두운 테마에서 코스를 만든 뒤 1.5초에 150자 안팎 브리핑이 오게 흉내 내고,
+// 도착 뒤 2.5초까지의 CLS. 브리핑이 목록 위에 있으면 목록이 21~42px 밀린다(0.017~0.032)
+const LATE_BRIEFING = '저녁 무렵 고즈넉한 궁궐 산책으로 시작해, 골목 안쪽의 따뜻한 한식 다이닝에서 계절 코스를 나누고, 마지막은 조용한 루프탑 바에서 야경을 바라보며 하루를 정리하기 좋은 데이트 코스예요. 이동 거리가 짧아 걷는 시간마저 대화로 채워지고, 주차도 편해 차로 오셔도 부담이 없어요.';
+const lateBriefing = {};
+for (const width of [320, 390]) {
+  const p = await ctx.newPage();
+  p.on('pageerror', (e) => errors.push(e.message));
+  await p.emulateMedia({ colorScheme: 'dark' });
+  await p.route('**/ai-briefing', async (r) => {
+    await new Promise((ok) => setTimeout(ok, 1500));
+    await r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ text: LATE_BRIEFING }) });
+  });
+  await p.addInitScript(() => {
+    window.__shifts = [];
+    new PerformanceObserver((l) => { for (const e of l.getEntries()) if (!e.hadRecentInput) window.__shifts.push(e.value); }).observe({ type: 'layout-shift', buffered: true });
+  });
+  await p.setViewportSize({ width, height: 800 });
+  await p.goto(`${URL}?v=${Date.now()}`, { waitUntil: 'load' });
+  await p.waitForSelector('#btn-generate:not([disabled])', { timeout: 200000 });
+  await p.evaluate(() => [...document.querySelectorAll('button.quick-region-chip')].find((b) => b.textContent.trim() === '서울').click());
+  await p.waitForTimeout(800);
+  const from = await p.evaluate(() => window.__shifts.length);
+  await p.click('#btn-generate');
+  await p.waitForTimeout(4000);
+  lateBriefing[width] = await p.evaluate(({ from, text }) => ({
+    cls: +window.__shifts.slice(from).reduce((a, v) => a + v, 0).toFixed(4),
+    swapped: (document.querySelector('#ai-briefing-content')?.textContent || '').includes(text.slice(0, 20)),
+  }), { from, text: LATE_BRIEFING });
+  if (shot(`late_briefing_${width}`)) await p.screenshot(shot(`late_briefing_${width}`));
+  await p.close();
+}
 await browser.close();
 
-const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
+const pct =(a, b) => (b ? Math.round((a / b) * 100) : 0);
 const result = {
   bundle,
   cards,
@@ -217,6 +248,7 @@ const result = {
   badShare,
   sticky,
   linkMinH,
+  lateBriefing,
   errors: errors.length,
 };
 
@@ -235,6 +267,9 @@ if (badShare.cls >= 0.05 || badShare.hash !== '') fails.push(`badShare cls ${bad
 if (linkMinH < 44) fails.push(`linkMinH ${linkMinH}`);
 for (const [k, s] of Object.entries(sticky)) {
   if (s.genBottom > s.vh || s.focusN === 0 || s.covered !== 0) fails.push(`sticky${k} genBottom ${s.genBottom} focus ${s.covered}/${s.focusN}`);
+}
+for (const [w, l] of Object.entries(lateBriefing)) {
+  if (l.cls >= 0.01 || !l.swapped) fails.push(`lateBriefing${w} cls ${l.cls} swapped ${l.swapped}`);
 }
 result.fails = fails;
 console.log(JSON.stringify(result));
