@@ -79,12 +79,31 @@ function navFor(post) {
   return `<nav class="od-related" aria-label="다른 매거진 글">${STYLE}<h2>다음에 볼 글</h2><ul>${items}</ul><a class="od-related-more" href="../">매거진 전체 보기 →</a></nav>\n`;
 }
 
+// P-240: 글 안 코스 상자가 글 끝 하나뿐이라, 코스 링크(#c=)가 있는 글에는 첫 링크를 복제한 막대를 화면 아래에 붙인다.
+// spacer는 맨 끝 관련 글 링크가 막대에 가리지 않게, scroll-padding-bottom은 Tab 초점이 막대 뒤로 들어가지 않게 둔다.
+const COURSE_STYLE = `<style>
+.od-course-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:50;display:flex;align-items:center;justify-content:center;min-height:48px;padding:0 20px;border-radius:999px;background:#1c1917;color:#fff;font:700 15px/1.2 Pretendard,system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 16px rgba(0,0,0,.25);white-space:nowrap}
+.od-course-bar:focus-visible{outline:3px solid #0284c7;outline-offset:3px}
+.od-course-spacer{height:76px}
+html{scroll-padding-bottom:80px}
+</style>`;
+
+function courseBarFor(html) {
+  const href = html.match(/href="([^"]*#c=[^"]*)"/)?.[1];
+  if (!href) return '';
+  return `${COURSE_STYLE}<div class="od-course-spacer" aria-hidden="true"></div><a class="od-course-bar" href="${href}">🗺️ 이 코스 앱에서 열기</a>\n`;
+}
+
+let barCount = 0;
 for (const post of posts) {
   const file = path.join(blogDir, post.slug, 'index.html');
   const html = fs.readFileSync(file, 'utf-8');
   if (html.includes('class="od-related"')) fail(`${post.slug}에 이미 관련 글 블록이 있다. vite build부터 다시 돌린다.`);
+  if (html.includes('od-course-bar')) fail(`${post.slug}에 이미 코스 막대가 있다. vite build부터 다시 돌린다.`);
   if (html.split(BODY_END).length !== 2) fail(`${post.slug}에 ${BODY_END}가 정확히 하나 있어야 한다.`);
-  fs.writeFileSync(file, html.replace(BODY_END, navFor(post) + BODY_END));
+  const bar = courseBarFor(html);
+  if (bar) barCount++;
+  fs.writeFileSync(file, html.replace(BODY_END, navFor(post) + bar + BODY_END));
 }
 const sameCounts = posts.map((p) => posts.filter((q) => q !== p && p.region && q.region === p.region).length);
-console.log(`build_blog_related: 글 ${posts.length}편에 관련 글 블록을 넣었다 (같은 권역 글 2편 이상 ${sameCounts.filter((n) => n >= 2).length}편, 1편 ${sameCounts.filter((n) => n === 1).length}편, 0편 ${sameCounts.filter((n) => n === 0).length}편)`);
+console.log(`build_blog_related: 글 ${posts.length}편에 관련 글 블록을, ${barCount}편에 코스 막대를 넣었다 (같은 권역 글 2편 이상 ${sameCounts.filter((n) => n >= 2).length}편, 1편 ${sameCounts.filter((n) => n === 1).length}편, 0편 ${sameCounts.filter((n) => n === 0).length}편)`);
