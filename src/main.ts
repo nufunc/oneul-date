@@ -6947,6 +6947,11 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
   const slotKey = (spot.slot as SlotKey) || 'day';
   const targetImgUrl = getSpotImageUrl(spot, slotKey);
   const fallbackIcon = getSpotFallbackIcon(spot, slotKey);
+  // 카드 사진은 원본(장당 최대 수 MB) 대신 축소 주소로 받는다. 축소 주소가 실패하면 원본으로 한 번 다시 받고, 그것도 실패하면 대체 표시로 넘어간다
+  const cardThumbUrl = targetImgUrl ? toCardThumbUrl(targetImgUrl) : '';
+  const cardImg = targetImgUrl
+    ? `<img src="${escapeHtml(cardThumbUrl)}"${cardThumbUrl !== targetImgUrl ? ` data-orig="${escapeHtml(targetImgUrl)}"` : ''} alt="${escapeHtml(spot.name)}" class="discovery-card-img discovery-img" loading="lazy" referrerpolicy="no-referrer" onerror="var o=this.dataset.orig; if(o){this.dataset.orig=''; this.src=o; return;} this.style.display='none'; this.previousElementSibling.style.display='flex';" />`
+    : '';
   // 위치 권한이 없으면 거리는 사용자 위치가 아니라 대체 기준점(세부 동네·지역 중심, 기본 성수)에서 잰 값이다.
   // 그 값을 '📍 25m'로 보이면 부산 사용자에게도 성수 가게가 25m로 보였다. 이때는 지역 이름만 보인다
   const distText =
@@ -6988,11 +6993,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
           ${isClosedToday ? `<span class="discovery-badge-closed">⚠️ 오늘 휴무</span>` : ''}
           ${curationPill}
           <div class="thumb-fallback-box">${fallbackIcon}</div>
-          ${
-            targetImgUrl
-              ? `<img src="${escapeHtml(targetImgUrl)}" alt="${escapeHtml(spot.name)}" class="discovery-card-img discovery-img" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" />`
-              : ''
-          }
+          ${cardImg}
         </div>
         <div class="discovery-card-body compact">
           <h4 class="discovery-card-title discovery-name compact"><button type="button" class="discovery-name-link" data-detail-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 상세 보기">${escapeHtml(spot.name)}</button></h4>
@@ -7013,11 +7014,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
           ${isClosedToday ? `<span class="discovery-badge-closed">⚠️ 오늘 휴무</span>` : ''}
           ${curationPill}
           <div class="thumb-fallback-box">${fallbackIcon}</div>
-          ${
-            targetImgUrl
-              ? `<img src="${escapeHtml(targetImgUrl)}" alt="${escapeHtml(spot.name)}" class="discovery-card-img discovery-img" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" />`
-              : ''
-          }
+          ${cardImg}
         </div>
         <div class="discovery-card-body">
           <div class="discovery-card-header">
@@ -7044,11 +7041,7 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
         ${isClosedToday ? `<span class="discovery-badge-closed">⚠️ 오늘 휴무</span>` : ''}
         ${curationPill}
         <div class="thumb-fallback-box">${fallbackIcon}</div>
-        ${
-          targetImgUrl
-            ? `<img src="${escapeHtml(targetImgUrl)}" alt="${escapeHtml(spot.name)}" class="discovery-card-img discovery-img" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" />`
-            : ''
-        }
+        ${cardImg}
       </div>
       <div class="discovery-card-body">
         <h4 class="discovery-card-title discovery-name"><button type="button" class="discovery-name-link" data-detail-spot-id="${spot.id}" aria-label="${escapeHtml(spot.name)} 상세 보기">${escapeHtml(spot.name)}</button></h4>
