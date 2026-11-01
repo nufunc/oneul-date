@@ -2939,16 +2939,38 @@ html[data-shared-course] .home-regions {
   line-height: 1.45;
 }
 
+/* 매거진에서 연 받은 코스의 '← 글로 돌아가기'가 눌리는 영역 80×16이었다(P-238) */
+#receiver-blog-back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
 .btn-make-own-hero {
   width: 100%;
   margin-top: var(--space-3);
 }
 
+/* 저장·복사·공유 막대가 다섯 장소 카드 아래라 받은 사람이 2.5~3.5화면을 내려야 눌렀다. 화면 아래에 붙이고,
+   문서 끝에서는 카드 목록 아래 제자리로 돌아간다(P-238) */
 .receiver-actions-bar {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-2);
   margin-top: var(--space-3);
+  position: sticky;
+  bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  z-index: 5;
+  padding: 8px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Tab으로 옮긴 초점 요소가 붙은 막대 뒤로 들어가지 않게 그 높이만큼 위에서 멈춘다 */
+.receiver-view :is(a, button) {
+  scroll-margin-bottom: 80px;
 }
 
 .btn-receiver-action {

@@ -1,4 +1,4 @@
-// 화면 회귀 점검(원장 사이클 35 점검 표). 라이브 390px에서 다섯 값과 320·390px 코스 만들기 탭 영역(P-234)과 잘못된 공유 링크 320px CLS(P-235)와 화면 아래에 붙인 완성 버튼(P-236)과 늦게 오는 AI 브리핑 뒤 코스 CLS(P-237)를 재서 JSON 한 줄로 내고, 기준치를 벗어나면 종료 코드 1을 낸다.
+// 화면 회귀 점검(원장 사이클 35 점검 표). 라이브 390px에서 다섯 값과 320·390px 코스 만들기 탭 영역(P-234)과 잘못된 공유 링크 320px CLS(P-235)와 화면 아래에 붙인 완성 버튼(P-236)과 늦게 오는 AI 브리핑 뒤 코스 CLS(P-237)와 받은 코스의 저장 막대(P-238)를 재서 JSON 한 줄로 내고, 기준치를 벗어나면 종료 코드 1을 낸다.
 // playwright는 저장소 의존성이 아니므로 npx로 받아 돌린다(처음 한 번은 브라우저도 받는다):
 //   npx -y -p playwright playwright install chromium
 //   npx -y -p playwright node scripts/check_ui_regression.mjs
@@ -232,6 +232,41 @@ for (const width of [320, 390]) {
   if (shot(`late_briefing_${width}`)) await p.screenshot(shot(`late_briefing_${width}`));
   await p.close();
 }
+// 10. 받은 코스의 저장 막대(P-238): 매거진 안동 글에서 연 공유 링크를 320×667·390×844에서 열어 #btn-receiver-save 아래 끝이
+// 첫 화면 안인가, 머리부터 Tab으로 돌 때 막대 밖 초점 요소가 화면 아래에 붙은 막대와 겹치는 수, '← 글로 돌아가기' 높이
+const RECEIVER_SHARE = '#c=1309.1790734959482.1314.1307.5661';
+const receiver = {};
+for (const [width, height] of [[320, 667], [390, 844]]) {
+  const p = await ctx.newPage();
+  p.on('pageerror', (e) => errors.push(e.message));
+  await p.route('**/ai-briefing', (r) => r.abort());
+  await p.setViewportSize({ width, height });
+  await p.goto(`${URL}?v=${Date.now()}${RECEIVER_SHARE}`, { waitUntil: 'load', referer: `${URL}blog/andong/` });
+  await p.waitForSelector('#btn-receiver-save', { timeout: 200000 });
+  await p.waitForTimeout(1000);
+  const first = await p.evaluate(() => ({
+    saveBottom: Math.round(document.querySelector('#btn-receiver-save').getBoundingClientRect().bottom),
+    backH: Math.round(document.querySelector('#receiver-blog-back')?.getBoundingClientRect().height ?? 0),
+  }));
+  if (shot(`receiver_${width}x${height}`)) await p.screenshot(shot(`receiver_${width}x${height}`));
+  await p.evaluate(() => document.activeElement?.blur());
+  let focusN = 0, covered = 0;
+  for (let i = 0; i < 60; i++) {
+    await p.keyboard.press('Tab');
+    const hit = await p.evaluate(() => {
+      const a = document.activeElement;
+      if (!a || a === document.body || a.closest('.app-footer')) return null;
+      if (a.closest('.receiver-actions-bar')) return false;
+      const r = a.getBoundingClientRect(), s = document.querySelector('.receiver-actions-bar').getBoundingClientRect();
+      return Math.min(r.right, s.right) > Math.max(r.left, s.left) && Math.min(r.bottom, s.bottom) > Math.max(r.top, s.top);
+    });
+    if (hit === null) continue;
+    focusN++;
+    if (hit) covered++;
+  }
+  receiver[`${width}x${height}`] = { ...first, vh: height, focusN, covered };
+  await p.close();
+}
 await browser.close();
 
 const pct =(a, b) => (b ? Math.round((a / b) * 100) : 0);
@@ -249,6 +284,7 @@ const result = {
   sticky,
   linkMinH,
   lateBriefing,
+  receiver,
   errors: errors.length,
 };
 
@@ -270,6 +306,9 @@ for (const [k, s] of Object.entries(sticky)) {
 }
 for (const [w, l] of Object.entries(lateBriefing)) {
   if (l.cls >= 0.01 || !l.swapped) fails.push(`lateBriefing${w} cls ${l.cls} swapped ${l.swapped}`);
+}
+for (const [k, r] of Object.entries(receiver)) {
+  if (r.saveBottom > r.vh || r.backH < 44 || r.focusN === 0 || r.covered !== 0) fails.push(`receiver${k} saveBottom ${r.saveBottom} back ${r.backH} focus ${r.covered}/${r.focusN}`);
 }
 result.fails = fails;
 console.log(JSON.stringify(result));
