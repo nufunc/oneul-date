@@ -1,6 +1,7 @@
 // 루트 매거진 블록 빌드 결과 시험: npm run build 뒤 node scripts/test-home-magazine.cjs
 // dist/index.html에만 블록이 하나 있고 글 링크 4개와 목록 링크 1개가 있는지, 지역 랜딩에는 없는지 본다
 // 지역 랜딩 링크 목록도 루트에만 하나 있고 링크 32개가 모두 dist의 실제 랜딩을 가리키는지 본다
+// 지역 랜딩 32쪽마다 본문이 하나이고 #app 앞에 있는지, 루트와 글에는 없는지 본다
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
@@ -26,4 +27,22 @@ for (const [, region, slot] of regionLinks) {
 }
 assert.ok(root.indexOf('<div id="app"></div>') < root.indexOf('id="home-regions"'), '지역 링크 목록이 #app 뒤에 없다');
 assert.ok(!landing.includes('home-regions'), '지역 랜딩에 지역 링크 목록이 있다');
+
+// 지역 랜딩 본문은 #app 앞에 있어야 앱이 그린 뒤 밀려 내려가지 않는다(P-227, CLS 0.886)
+const landings = fs.readdirSync(dist, { withFileTypes: true })
+  .filter((d) => d.isDirectory())
+  .flatMap((d) => ['day', 'evening', 'night', 'stay'].map((slot) => path.join(dist, d.name, slot, 'index.html')))
+  .filter((f) => fs.existsSync(f));
+assert.strictEqual(landings.length, 32, `지역 랜딩이 32쪽이 아니다: ${landings.length}`);
+for (const f of landings) {
+  const html = fs.readFileSync(f, 'utf8');
+  assert.strictEqual(html.match(/id="seo-landing"/g)?.length, 1, `지역 랜딩 본문이 1개가 아니다: ${f}`);
+  assert.ok(html.indexOf('id="seo-landing"') < html.indexOf('<div id="app">'), `지역 랜딩 본문이 #app 앞에 없다: ${f}`);
+}
+assert.ok(!root.includes('seo-landing'), '루트에 지역 랜딩 본문이 있다');
+const blogDir = path.join(dist, 'blog');
+for (const slug of fs.readdirSync(blogDir)) {
+  const f = path.join(blogDir, slug, 'index.html');
+  if (fs.existsSync(f)) assert.ok(!fs.readFileSync(f, 'utf8').includes('seo-landing'), `글에 지역 랜딩 본문이 있다: ${slug}`);
+}
 console.log('ok home-magazine');

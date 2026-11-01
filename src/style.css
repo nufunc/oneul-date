@@ -5836,12 +5836,12 @@ html[data-theme-resolved="dark"] .spot-link-btn.kakao {
   }
 }
 
-/* SEO 랜딩 페이지(지역×시간대 정적 페이지)의 크롤링용 콘텐츠 영역 */
+/* SEO 랜딩 페이지(지역×시간대 정적 페이지)의 크롤링용 콘텐츠 영역. generate_seo_pages.mjs가 #app 앞에 넣는다(P-227) */
 #seo-landing {
   max-width: var(--layout-max);
   margin: 0 auto;
-  padding: var(--space-6) var(--space-5) calc(80px + env(safe-area-inset-bottom, 0px));
-  border-top: 1px solid var(--color-border);
+  padding: calc(var(--space-4) + env(safe-area-inset-top, 0px)) calc(var(--space-5) + env(safe-area-inset-right, 0px)) var(--space-6) calc(var(--space-5) + env(safe-area-inset-left, 0px));
+  border-bottom: 1px solid var(--color-border);
   font-family: var(--font-sans);
   color: var(--color-text);
 }

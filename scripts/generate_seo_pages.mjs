@@ -115,7 +115,7 @@ function buildPage(region, slot, pageSpots) {
       <p><a href="${SITE_URL}/">오늘 데이트에서 직접 코스 만들기 →</a></p>
     </section>`;
 
-  html = html.replace('<div id="app"></div>', `<div id="app"></div>${seoSection}`);
+  html = html.replace('<div id="app"></div>', `${seoSection}<div id="app"></div>`);
   return html;
 }
 
