@@ -8407,7 +8407,9 @@ function handleRoute(): void {
       if (dropped > 0) showToast(`공유된 ${steps.length + dropped}곳 중 ${dropped}곳은 지금 코스에 넣을 수 없어 뺐어요`);
       return;
     }
-    // 전부 무효 ID → 안내 후 홈으로
+  }
+  // 전부 무효 ID이거나 형식이 틀린 #c= 링크 → 안내 후 홈으로. 해시를 남기면 새로 고침과 재공유가 같은 화면을 되풀이한다
+  if (location.hash.startsWith('#c=')) {
     clearCourseHash();
     showToast('공유된 코스를 찾을 수 없어요');
   }

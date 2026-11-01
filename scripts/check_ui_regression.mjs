@@ -1,4 +1,4 @@
-// 화면 회귀 점검(원장 사이클 35 점검 표). 라이브 390px에서 다섯 값과 320·390px 코스 만들기 탭 영역(P-234)과 잘못된 공유 링크 320px CLS(P-235)와 화면 아래에 붙인 완성 버튼(P-236)과 늦게 오는 AI 브리핑 뒤 코스 CLS(P-237)와 받은 코스의 저장 막대(P-238)를 재서 JSON 한 줄로 내고, 기준치를 벗어나면 종료 코드 1을 낸다.
+// 화면 회귀 점검(원장 사이클 35 점검 표). 라이브 390px에서 다섯 값과 320·390px 코스 만들기 탭 영역(P-234)과 잘못된 공유 링크 320px CLS(P-235)와 형식이 틀린 공유 링크의 해시 지움과 안내(P-239)와 화면 아래에 붙인 완성 버튼(P-236)과 늦게 오는 AI 브리핑 뒤 코스 CLS(P-237)와 받은 코스의 저장 막대(P-238)를 재서 JSON 한 줄로 내고, 기준치를 벗어나면 종료 코드 1을 낸다.
 // playwright는 저장소 의존성이 아니므로 npx로 받아 돌린다(처음 한 번은 브라우저도 받는다):
 //   npx -y -p playwright playwright install chromium
 //   npx -y -p playwright node scripts/check_ui_regression.mjs
@@ -152,20 +152,25 @@ for (const width of [320, 390]) {
   await p.close();
 }
 
-// 7. 모든 id가 풀리지 않는 공유 링크(P-235): 캐시 없는 새 문맥 320px에서 홈으로 떨어질 때까지의 CLS
-const badCtx = await browser.newContext({ viewport: { width: 320, height: 800 }, serviceWorkers: 'block' });
-const bad = await badCtx.newPage();
-bad.on('pageerror', (e) => errors.push(e.message));
-await bad.addInitScript(() => {
-  window.__cls = 0;
-  new PerformanceObserver((l) => { for (const e of l.getEntries()) if (!e.hadRecentInput) window.__cls += e.value; }).observe({ type: 'layout-shift', buffered: true });
-});
-await bad.goto(`${URL}?v=${Date.now()}#c=99999999.88888888`, { waitUntil: 'load' });
-await bad.waitForSelector('#conditions-area', { timeout: 200000 });
-await bad.waitForTimeout(2000);
-const badShare = await bad.evaluate(() => ({ cls: +window.__cls.toFixed(4), hash: location.hash }));
-if (shot('bad_share_320')) await bad.screenshot(shot('bad_share_320'));
-await badCtx.close();
+// 7. 모든 id가 풀리지 않는 공유 링크(P-235)와 형식이 틀린 공유 링크(P-239): 캐시 없는 새 문맥 320px에서 홈으로 떨어질 때까지의 CLS, 남은 해시, 안내 토스트
+async function measureBadShare(hash, shotName) {
+  const badCtx = await browser.newContext({ viewport: { width: 320, height: 800 }, serviceWorkers: 'block' });
+  const bad = await badCtx.newPage();
+  bad.on('pageerror', (e) => errors.push(e.message));
+  await bad.addInitScript(() => {
+    window.__cls = 0;
+    new PerformanceObserver((l) => { for (const e of l.getEntries()) if (!e.hadRecentInput) window.__cls += e.value; }).observe({ type: 'layout-shift', buffered: true });
+  });
+  await bad.goto(`${URL}?v=${Date.now()}${hash}`, { waitUntil: 'load' });
+  await bad.waitForSelector('#conditions-area', { timeout: 200000 });
+  await bad.waitForTimeout(2000);
+  const r = await bad.evaluate(() => ({ cls: +window.__cls.toFixed(4), hash: location.hash, toast: document.querySelector('.toast-msg')?.textContent || '' }));
+  if (shot(shotName)) await bad.screenshot(shot(shotName));
+  await badCtx.close();
+  return r;
+}
+const badShare = await measureBadShare('#c=99999999.88888888', 'bad_share_320');
+const badFormat = await measureBadShare('#c=1,2,3', 'bad_format_320');
 
 // 8. 화면 아래에 붙인 완성 버튼(P-236): 320×667·390×844 홈 첫 화면에 #btn-generate 아래 끝이 들어오는가,
 // 검색창에서 Tab으로 조건 카드를 돌 때 초점 요소가 #btn-generate와 겹치는 수
@@ -281,6 +286,7 @@ const result = {
   overlapPx2: { 'cols-3': Math.round(overlap['cols-3'] ?? -1), 'cols-5': Math.round(overlap['cols-5'] ?? -1) },
   tap,
   badShare,
+  badFormat,
   sticky,
   linkMinH,
   lateBriefing,
@@ -300,6 +306,7 @@ for (const [w, t] of Object.entries(tap)) {
   if (t.chip < 44 || t.toggle < 44 || n === 0 || hit !== n) fails.push(`tap${w} chip ${t.chip} toggle ${t.toggle} name ${t.name}`);
 }
 if (badShare.cls >= 0.05 || badShare.hash !== '') fails.push(`badShare cls ${badShare.cls} hash ${badShare.hash}`);
+if (badFormat.cls >= 0.05 || badFormat.hash.startsWith('#c=') || badFormat.toast !== '공유된 코스를 찾을 수 없어요') fails.push(`badFormat cls ${badFormat.cls} hash ${badFormat.hash} toast ${badFormat.toast}`);
 if (linkMinH < 44) fails.push(`linkMinH ${linkMinH}`);
 for (const [k, s] of Object.entries(sticky)) {
   if (s.genBottom > s.vh || s.focusN === 0 || s.covered !== 0) fails.push(`sticky${k} genBottom ${s.genBottom} focus ${s.covered}/${s.focusN}`);
