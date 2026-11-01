@@ -6063,8 +6063,13 @@ function swapStep(index: number, refocus = false): void {
   );
   // 🔄는 마음에 들 때까지 연달아 누르는 버튼이라, 교체 전에 이 카드 안에 포커스가 있었으면 새 카드의 🔄로 옮긴다
   const hadFocus = refocus || targetCard.contains(document.activeElement);
+  // 🔄는 카드 맨 아래에 있어 새 카드 높이가 다르면 손가락 아래에서 최대 148px 움직였다. 카드 아래끝이 그대로 있도록
+  // 함수 끝에서 스크롤을 보정한다. 등장 애니메이션의 transform이 섞이지 않게 레이아웃 값(offsetTop, offsetHeight)으로 잰다
+  const scrollBefore = window.scrollY;
+  const oldBottom = targetCard.offsetTop + targetCard.offsetHeight;
   targetCard.replaceWith(newCard);
   refreshTransitDividers();
+  const bottomShift = newCard.offsetTop + newCard.offsetHeight - oldBottom;
 
   const newSwapBtn = newCard.querySelector<HTMLButtonElement>('.btn-swap, .btn-swap-icon');
   if (newSwapBtn) {
@@ -6101,6 +6106,10 @@ function swapStep(index: number, refocus = false): void {
       briefingEl.innerHTML = `“${normalizeEditorialTone(generateCourseStory(currentCourse, spotById, mood, true))}”`;
     }
   }
+  // 페이지 맨 아래에서는 카드와 아래 총평 높이가 바뀌는 순간 브라우저가 스크롤을 먼저 당기므로, 상대 이동이 아니라
+  // 바꾸기 전 위치 기준 절대 위치로 맞춘다. 초점 이동이 스크롤을 옮겼어도 같은 자리로 돌아온다
+  const scrollTarget = scrollBefore + bottomShift;
+  if (window.scrollY !== scrollTarget) window.scrollTo({ top: scrollTarget, behavior: 'instant' });
 }
 
 /** 스팟 교체 뒤 카드 사이 이동 띠와 출발 띠를 현재 state.course 기준으로 다시 그린다 */
