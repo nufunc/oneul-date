@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>[경남 남해 오션 드라이브] 독일마을 붉은 지붕부터 원예예술촌 정원, 금산 보리암 절벽 비경, 금산산장과 다랭이마을 계단식 논 일몰까지 남해 힐링 코스</title>
-  <meta name="description" content="푸른 남해 바다와 이국적인 풍경, 기암절벽의 비경이 어우러지는 경남 남해 하루 힐링 드라이브 코스: 주황색 기와지붕과 남해 바다가 한눈에 내려다보이는 남해독일마을, 20여 개국 테마 정원이 꽃피운 원예예술촌, 해발 681m 기암절벽 위에 우뚝 솟은 전국 3대 관음성지 금산 보리암, 벼랑 끝 야외 평상에서 구름과 바다를 바라보는 금산산장, 그리고 108개 층층 계단식 논과 푸른 바다가 맞닿은 국가명승 가천 다랭이마을의 황금빛 일몰 피날레까지 상세 안내.">
+  <meta name="description" content="푸른 남해 바다와 이국적인 풍경, 기암절벽의 비경이 어우러지는 경남 남해 하루 힐링 드라이브 코스: 주황색 기와지붕과 남해 바다가 한눈에 내려다보이는 남해독일마을, 20여 개국 테마 정원이 꽃피운 원예예술촌, 해발 681m 기암절벽 위에 우뚝 솟은 전국 3대 관음성지 금산 보리암, 벼랑 끝 야외 평상에서 구름과 바다를 바라보는 금산산장, 그리고 층층 계단식 논과 푸른 바다가 맞닿은 국가명승 가천 다랭이마을의 황금빛 일몰 피날레까지 상세 안내.">
   <link rel="canonical" href="https://nufunc.github.io/oneul-date/blog/namhae/">
   <meta property="og:url" content="https://nufunc.github.io/oneul-date/blog/namhae/">
 
@@ -22,7 +22,7 @@
   "@context": "https://schema.org",
   "@type": "BlogPosting",
   "headline": "[경남 남해 오션 드라이브] 독일마을 붉은 지붕부터 원예예술촌 정원, 금산 보리암 절벽 비경, 금산산장과 다랭이마을 계단식 논 일몰까지 남해 힐링 코스",
-  "description": "푸른 남해 바다와 이국적인 풍경, 기암절벽의 비경이 어우러지는 경남 남해 하루 힐링 드라이브 코스: 주황색 기와지붕과 남해 바다가 한눈에 내려다보이는 남해독일마을, 20여 개국 테마 정원이 꽃피운 원예예술촌, 해발 681m 기암절벽 위에 우뚝 솟은 전국 3대 관음성지 금산 보리암, 벼랑 끝 야외 평상에서 구름과 바다를 바라보는 금산산장, 그리고 108개 층층 계단식 논과 푸른 바다가 맞닿은 국가명승 가천 다랭이마을의 황금빛 일몰 피날레까지 상세 안내.",
+  "description": "푸른 남해 바다와 이국적인 풍경, 기암절벽의 비경이 어우러지는 경남 남해 하루 힐링 드라이브 코스: 주황색 기와지붕과 남해 바다가 한눈에 내려다보이는 남해독일마을, 20여 개국 테마 정원이 꽃피운 원예예술촌, 해발 681m 기암절벽 위에 우뚝 솟은 전국 3대 관음성지 금산 보리암, 벼랑 끝 야외 평상에서 구름과 바다를 바라보는 금산산장, 그리고 층층 계단식 논과 푸른 바다가 맞닿은 국가명승 가천 다랭이마을의 황금빛 일몰 피날레까지 상세 안내.",
   "image": "https://tong.visitkorea.or.kr/cms/resource/79/3304479_image2_1.jpg",
   "url": "https://nufunc.github.io/oneul-date/blog/namhae/",
   "datePublished": "2026-10-22",
@@ -136,6 +136,7 @@
 
     .meta-bar {
       display: flex;
+      flex-wrap: wrap;
       gap: 16px;
       font-size: 0.85rem;
       color: var(--color-text-sub);
@@ -310,21 +311,13 @@
       margin-bottom: 6px;
     }
 
-    .table-container {
+    .table-wrap {
       background: var(--color-card-bg);
       border: 1px solid var(--color-border);
       border-radius: 16px;
       overflow: hidden;
       margin: 40px 0;
       box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-    }
-    .table-header {
-      background: #f1f5f9;
-      padding: 16px 20px;
-      font-weight: 700;
-      font-size: 1.05rem;
-      color: var(--color-primary);
-      border-bottom: 1px solid var(--color-border);
     }
     table {
       width: 100%;
@@ -346,6 +339,30 @@
       font-weight: 700;
       background: #f8fafc;
       color: var(--color-primary);
+    }
+
+    /* 비용표: 좁은 화면에서는 한 행을 카드 하나로 쌓는다 */
+    @media (max-width: 600px) {
+      .table-wrap { overflow-x: visible; }
+      .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
+      .table-wrap thead { display: none; }
+      .table-wrap tr {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        column-gap: 12px;
+        row-gap: 4px;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--color-border);
+      }
+      .table-wrap tr:last-child { border-bottom: none; }
+      .table-wrap td { padding: 0; border: none; }
+      .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: 0.78rem; font-weight: 700; color: var(--color-text-sub); }
+      .table-wrap td:nth-child(2) { font-weight: 700; }
+      .table-wrap td:nth-child(3) { max-width: 60vw; word-break: keep-all; text-align: right; font-weight: 700; }
+      .table-wrap td:nth-child(4) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
+      .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: inherit; color: inherit; }
+      .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; max-width: 60vw; word-break: keep-all; text-align: right; }
+      .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
     }
 
     .article-footer {
@@ -411,10 +428,11 @@
       <div class="meta-bar">
         <span>발행일: 2026. 10. 22</span>
         <span>추천 계절: 사계절(가을·봄 추천)</span>
-        <span>소요 시간: 당일치기 (약 9시간)</span>
+        <span>소요 시간: 당일치기 (약 8시간)</span>
+        <span>글: 오늘 데이트 에디토리얼 팀 / 사진: 한국관광공사, 카카오맵</span>
       </div>
       <p class="lead-text">
-        푸른 남해 바다와 이국적인 풍경, 기암절벽의 비경이 어우러지는 경남 남해 하루 힐링 드라이브 코스: 주황색 기와지붕과 남해 바다가 한눈에 내려다보이는 남해독일마을, 20여 개국 테마 정원이 꽃피운 원예예술촌, 해발 681m 기암절벽 위에 우뚝 솟은 전국 3대 관음성지 금산 보리암, 벼랑 끝 야외 평상에서 구름과 바다를 바라보는 금산산장, 그리고 108개 층층 계단식 논과 푸른 바다가 맞닿은 국가명승 가천 다랭이마을의 황금빛 일몰 피날레까지 상세 여행 정보를 총정리했습니다.
+        푸른 남해 바다와 이국적인 풍경, 기암절벽의 비경이 어우러지는 경남 남해 하루 힐링 드라이브 코스: 주황색 기와지붕과 남해 바다가 한눈에 내려다보이는 남해독일마을, 20여 개국 테마 정원이 꽃피운 원예예술촌, 해발 681m 기암절벽 위에 우뚝 솟은 전국 3대 관음성지 금산 보리암, 벼랑 끝 야외 평상에서 구름과 바다를 바라보는 금산산장, 그리고 층층 계단식 논과 푸른 바다가 맞닿은 국가명승 가천 다랭이마을의 황금빛 일몰 피날레까지 상세 여행 정보를 총정리했습니다.
       </p>
     </header>
 
@@ -429,7 +447,7 @@
         </li>
         <li class="timeline-item">
           <span class="timeline-time">12:00 ~ 13:00</span>
-          <strong>[점심 식사] 독일마을 로컬 미식</strong> (정통 수제 소시지 플레이트 또는 슈바인학센)
+          <strong>[점심 식사] 완벽한인생브루어리</strong> (독일식 하우스 소시지와 블랙라벨 슈니첼)
         </li>
         <li class="timeline-item">
           <span class="timeline-time">13:10 ~ 14:20</span>
@@ -441,7 +459,7 @@
         </li>
         <li class="timeline-item">
           <span class="timeline-time">17:15 ~ 18:30</span>
-          <strong>[스팟 5] 남해 가천 다랭이마을</strong> (설흘산 비탈 108개 층층 계단식 논과 푸른 바다가 만나는 몽돌 해안 산책로 & 황금빛 일몰)
+          <strong>[스팟 5] 남해 가천 다랭이마을</strong> (설흘산 비탈 층층 계단식 논과 푸른 바다가 만나는 몽돌 해안 산책로 & 황금빛 일몰)
         </li>
       </ul>
     </section>
@@ -450,8 +468,8 @@
     <article class="spot-section">
       <div class="spot-card">
         <div class="spot-image-wrap">
-          <img src="https://tong.visitkorea.or.kr/cms/resource/79/3304479_image2_1.jpg" alt="남해독일마을 주황색 지붕과 푸른 바다가 어우러진 전경" loading="lazy">
-          <div class="spot-image-caption">독일 전통 가옥의 주황색 기와지붕과 남해 바다가 한눈에 내려다보이는 독일마을 전경</div>
+          <img src="https://tong.visitkorea.or.kr/cms/resource/79/3304479_image2_1.jpg" alt="숲 언덕을 따라 주황색 지붕 주택이 늘어선 남해독일마을 전경" loading="lazy">
+          <div class="spot-image-caption">숲 언덕을 따라 주황색 지붕 주택이 늘어선 남해독일마을을 위에서 본 모습</div>
         </div>
         <div class="spot-body">
           <div class="spot-header-row">
@@ -466,16 +484,16 @@
             <a href="https://m.taxi.kakao.com/" class="spot-chip" target="_blank" rel="noopener">🚕 카카오T 호출</a>
           </div>
           <p class="spot-desc" style="margin-top: 16px;">
-            1960년대 대한민국의 산업화를 위해 머나먼 독일로 떠났던 파독 광부와 간호사들이 고국으로 돌아와 보금자리를 꾸밀 수 있도록 남해군이 삼동면 물건리 언덕에 조성한 아름다운 테마 마을입니다. 독일에서 직수입한 건축 자재로 지은 하얀 벽과 붉은 기와지붕의 정통 독일식 가옥 40여 채가 푸른 남해 바다를 향해 계단식으로 늘어서 있어 마치 유럽의 한적한 시골 마을에 온 듯한 이국적인 분위기를 풍깁니다.
+            1960 ~ 70년대 독일로 파견되었던 광부와 간호사들이 고국으로 돌아와 보금자리를 꾸밀 수 있도록 남해군이 삼동면 물건리 언덕에 조성한 아름다운 테마 마을입니다. 붉은 지붕의 독일식 주택들이 언덕을 따라 늘어서 있어 마치 유럽의 한적한 시골 마을에 온 듯한 이국적인 분위기를 풍깁니다.
           </p>
           <p class="spot-desc">
-            마을 가장 높은 곳에 자리 잡은 도이처플라츠(독일 광장) 전망대에 서면 붉은 지붕 군락과 에메랄드빛 물건항 방조어부림 바다가 어우러지는 최고의 파노라마 조망을 만끽할 수 있습니다. 마을 골목을 따라 독일 정통 수제 소시지, 슈바인학센, 프레첼 베이커리와 독일 맥주를 판매하는 개성 넘치는 펍과 카페들이 즐비하여 여유로운 산책과 미식을 동시에 즐기기에 완벽합니다.
+            마을 가장 높은 곳에 자리 잡은 도이처플라츠(독일 광장) 전망대에 서면 붉은 지붕 군락과 에메랄드빛 물건항 방조어부림 바다가 어우러지는 최고의 파노라마 조망을 만끽할 수 있습니다. 마을 골목을 따라 독일 정통 수제 소시지, 슈바인학센, 프레첼 베이커리와 독일 맥주를 판매하는 개성 넘치는 펍과 카페들이 즐비하여 여유로운 산책과 미식을 동시에 즐기기에 완벽합니다. 점심은 마을 아래 독일로 30의 완벽한인생브루어리에서 독일식 하우스 소시지(21,000원)와 블랙라벨 슈니첼(31,000원)을 맛볼 수 있습니다(카카오맵 메뉴, 2024-01-19 갱신). 영업시간은 10:00 ~ 21:00, 금요일과 토요일은 22:00까지입니다(카카오맵).
           </p>
           <div class="tip-box">
             <strong>💡 에디터 추천 팁 & 관람 정보</strong>
-            • 독일 광장 뒤편의 파독전시관(입장료 1,000원)을 둘러보면 광부와 간호사들의 가슴 뭉클한 역사와 편지들을 만날 수 있습니다.<br>
+            • 독일 광장 뒤편의 파독전시관을 둘러보면 광부와 간호사들의 가슴 뭉클한 역사와 편지들을 만날 수 있습니다.<br>
             • 독일마을 상단 주차장에 주차한 뒤, 완만한 내리막 골목을 따라 걸어 내려가며 구경하고 올라오는 동선이 가장 편안합니다.<br>
-            • 주차: 독일광장 전용 대형 주차장 무료 이용 가능
+            • 마을 입장료는 무료이고 주차할 수 있습니다(TourAPI).
           </div>
         </div>
       </div>
@@ -485,8 +503,8 @@
     <article class="spot-section">
       <div class="spot-card">
         <div class="spot-image-wrap">
-          <img src="http://tong.visitkorea.or.kr/cms/resource/76/3399476_image2_1.jpg" alt="원예예술촌 아름다운 꽃길과 정원 주택 풍경" loading="lazy">
-          <div class="spot-image-caption">20여 개국 테마 정원과 아름다운 꽃길이 펼쳐진 남해 원예예술촌 하우스앤가든</div>
+          <img src="https://tong.visitkorea.or.kr/cms/resource/76/3399476_image2_1.jpg" alt="징검돌 길 양옆에 악단 인형 조형물이 선 원예예술촌 정원 주택" loading="lazy">
+          <div class="spot-image-caption">징검돌 길 양옆에 악단 인형 조형물이 선 원예예술촌 정원 주택</div>
         </div>
         <div class="spot-body">
           <div class="spot-header-row">
@@ -510,7 +528,8 @@
             <strong>💡 에디터 추천 팁 & 이용 안내</strong>
             • 독일마을 주차장에 주차한 상태에서 도보 5분 거리의 매표소를 통해 입장할 수 있습니다.<br>
             • 마을 중앙의 글라스하우스 온실과 카페 테라스에서 허브티를 마시며 쉬어가는 것을 추천합니다.<br>
-            • 운영시간: 09:00 ~ 18:00 (매주 화요일 휴무) / 입장료: 성인 6,000원
+            • 운영시간: 09:00 ~ 18:00, 입장 마감 17:00 (매주 화요일 휴무, 공휴일과 성수기 제외, TourAPI)<br>
+            • 입장료: 성인 6,000원 (오늘 데이트 등록 정보)
           </div>
         </div>
       </div>
@@ -539,12 +558,12 @@
             독일마을에서 상주면 방향으로 약 25분 달리면 한려해상국립공원의 유일한 산악공원인 금산 정상부에 도달합니다. 신라 신문왕 때 원효대사가 창건한 천년고찰 보리암은 양양 낙산사, 강화 보문사와 함께 우리나라 3대 관음 기도성지로 손꼽히는 신령스러운 명소입니다.
           </p>
           <p class="spot-desc">
-            해발 681m 깎아지른 바위 절벽 벼랑 끝에 제비집처럼 터를 잡은 보리암 대웅전과 해수관음상 앞에 서면, 발아래로 상주은모래비치의 하얀 백사장과 한려수도의 크고 작은 섬들이 그림처럼 펼쳐집니다. 조선 태조 이성계가 백일기도를 드리고 왕위에 오른 뒤 산 전체를 비단으로 두른다는 뜻으로 이름을 하사한 금산의 신비로운 기암괴석과 남해 바다가 빚어내는 장관은 보는 이의 탄성을 자아냅니다.
+            해발 681m 깎아지른 바위 절벽 벼랑 끝에 제비집처럼 터를 잡은 보리암 대웅전과 해수관음상 앞에 서면, 발아래로 상주은모래비치의 하얀 백사장과 한려수도의 크고 작은 섬들이 그림처럼 펼쳐집니다. 이성계가 이곳에서 백일기도를 하고 조선을 열었다는 이야기에 따라 1660년 현종이 산 이름을 금산으로 바꾼(TourAPI) 이곳의 신비로운 기암괴석과 남해 바다가 빚어내는 장관은 보는 이의 탄성을 자아냅니다.
           </p>
           <div class="tip-box">
             <strong>💡 에디터 추천 팁 & 접근 방법</strong>
-            • 복곡 제1주차장에 차를 대고 셔틀버스(왕복 3,000원)를 이용해 제2주차장(매표소)까지 이동한 뒤, 완만한 포장 숲길을 15분 정도 걸어 오르면 편리합니다.<br>
-            • 문화재관람료 감면 정책으로 보리암 자체 입장료는 전면 무료화되었습니다.<br>
+            • 자동차로는 복곡저수지를 지나 금산 8부 능선까지 올라갈 수 있고, 승용차 주차 요금은 5,000원입니다(TourAPI).<br>
+            • 입장료는 개인 1,000원이고, 만 70세 이상과 미성년자 등은 증빙 서류가 있으면 무료입니다. 이용시간은 03:30 ~ 20:00, 연중무휴입니다(TourAPI).<br>
             • 삼층석탑 앞 난간과 해수관음상 앞마당은 다도해를 배경으로 장엄한 기념사진을 남기기 좋은 명당입니다.
           </div>
         </div>
@@ -574,13 +593,14 @@
             보리암에서 금산 정상 방향으로 이어지는 숲속 오솔길을 따라 약 5~7분(300m) 정도 걸어가면, 깎아지른 기암절벽 끄트머리에 거짓말처럼 자리 잡은 소박한 산장 건물을 만납니다. 남해를 찾는 청춘 여행자들의 버킷리스트로 손꼽히는 전국구 명소 금산산장입니다.
           </p>
           <p class="spot-desc">
-            천 길 낭떠러지 바위 바로 옆에 놓인 야외 평상에 앉으면 발아래로 남해 바다와 몽환적인 운해가 끝없이 펼쳐집니다. 시원한 산바람을 맞으며 기암괴석과 바다를 배경 삼아 따끈한 컵라면과 바삭한 해물파전, 시원한 식혜를 곁들이는 순간은 그 어떤 고급 호텔 라운지에서도 느낄 수 없는 자유롭고 낭만적인 힐링을 선사합니다.
+            천 길 낭떠러지 바위 바로 옆에 놓인 야외 평상에 앉으면 발아래로 남해 바다와 몽환적인 운해가 끝없이 펼쳐집니다. 시원한 산바람을 맞으며 기암괴석과 바다를 배경 삼아 따끈한 컵라면과 바삭한 해물파전을 곁들이는 순간은 그 어떤 고급 호텔 라운지에서도 느낄 수 없는 자유롭고 낭만적인 힐링을 선사합니다.
           </p>
           <div class="tip-box">
             <strong>💡 에디터 추천 팁 & 이용 안내</strong>
-            • 대표메뉴: 컵라면(4,000원), 해물파전(12,000원), 메밀김치전병(6,000원)<br>
+            • 메뉴: 오뚜기 컵라면 4,000원, 더미식 오징어컵라면 5,000원, 해물파전 14,000원 (카카오맵 메뉴, 2026-10-02 갱신)<br>
+            • 영업시간: 07:00 ~ 18:00 (카카오맵)<br>
             • 벼랑 바로 옆 1~3번 야외 평상 자리가 가장 인기가 많습니다. 자리가 비어 있을 때 쟁반을 들고 자리를 잡는 것이 요령입니다.<br>
-            • 주문 후 결제는 계좌이체 또는 카드로 가능하며, 쓰레기는 산장에 되가져다주는 성숙한 매너가 필요합니다.
+            • 다 먹은 뒤 쓰레기는 산장에 되가져다주세요.
           </div>
         </div>
       </div>
@@ -591,7 +611,7 @@
       <div class="spot-card">
         <div class="spot-image-wrap">
           <img src="https://tong.visitkorea.or.kr/cms/resource/88/3302988_image2_1.jpg" alt="설흘산 비탈을 따라 바다로 이어지는 다랭이마을 계단식 논 전경" loading="lazy">
-          <div class="spot-image-caption">국가명승 제15호 설흘산 비탈 108개 계단식 논과 푸른 바다가 맞닿은 다랭이마을</div>
+          <div class="spot-image-caption">국가명승 제15호 설흘산 비탈 계단식 논과 푸른 바다가 맞닿은 다랭이마을</div>
         </div>
         <div class="spot-body">
           <div class="spot-header-row">
@@ -606,85 +626,78 @@
             <a href="https://m.taxi.kakao.com/" class="spot-chip" target="_blank" rel="noopener">🚕 카카오T 호출</a>
           </div>
           <p class="spot-desc" style="margin-top: 16px;">
-            금산에서 내려와 남면 해안도로를 따라 서쪽으로 약 25분 달리면, 설흘산의 가파른 산비탈을 깎아 만든 108개 층층 계단식 논과 쪽빛 바다가 경이롭게 맞닿은 국가명승 제15호 가천 다랭이마을에 도착합니다. 척박한 비탈길에 돌을 쌓아 논을 만든 선조들의 억척스러운 삶의 숨결과 경이로운 풍경이 살아 숨 쉬는 곳입니다.
+            금산에서 내려와 남면 해안도로를 따라 서쪽으로 약 25분 달리면, 설흘산의 가파른 산비탈을 깎아 만든 층층 계단식 논과 쪽빛 바다가 경이롭게 맞닿은 국가명승 제15호 가천 다랭이마을에 도착합니다. 척박한 비탈길에 돌을 쌓아 논을 만든 선조들의 억척스러운 삶의 숨결과 경이로운 풍경이 살아 숨 쉬는 곳입니다.
           </p>
           <p class="spot-desc">
             마을 골목길을 따라 바다 방향으로 내려가면 아기자기한 시골 돌담길과 허브 카페들이 반겨주며, 절벽 끝에는 거친 파도를 건너는 출렁다리와 해안 몽돌 산책로가 시원하게 펼쳐집니다. 해 질 무렵 서쪽 하늘에서 붉게 쏟아지는 노을빛이 계단식 논의 유려한 곡선과 바다를 온통 황금빛으로 물들이는 순간은 남해 오션 드라이브의 가장 로맨틱하고 감동적인 피날레를 완성해 줍니다.
           </p>
           <div class="tip-box">
             <strong>💡 에디터 추천 팁 & 일몰 감상 정보</strong>
-            • 일몰 약 30분 전(계절에 따라 18:00~18:30) 마을 상단 전망대에 도착하면 마을 전체와 노을 바다를 한눈에 내려다볼 수 있습니다.<br>
+            • 다랭이마을 일몰은 10월 22일 17:46, 10월 31일 17:36입니다(NOAA 계산식). 10월 하순에는 17:10 무렵 마을 상단 전망대에 도착하면 마을 전체와 노을 바다를 한눈에 내려다볼 수 있습니다.<br>
             • 마을 바닷가 쪽으로 내려가는 길이 경사가 있으므로 편안한 운동화를 착용하는 것을 권장합니다.<br>
-            • 주차: 마을 입구 관광버스 및 승용차 전용 공영주차장 무료 이용 가능
+            • 주차할 수 있습니다(TourAPI).
           </div>
         </div>
       </div>
     </article>
 
     <!-- 2인 여행 경비표 -->
-    <section class="table-container">
-      <div class="table-header">
-        💰 남해 오션 드라이브 데이트 2인 예상 경비표
-      </div>
+    <h2 class="spot-name" style="margin-top: 48px;">💰 남해 오션 드라이브 데이트 2인 예상 경비표</h2>
+    <div class="table-wrap">
       <table>
         <thead>
           <tr>
             <th>구분</th>
-            <th>스팟 및 항목</th>
-            <th>상세 내용</th>
-            <th>2인 비용</th>
+            <th>장소</th>
+            <th>2인 금액</th>
+            <th>비고</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>이국 마을 산책</td>
-            <td>[스팟 1] 남해독일마을</td>
-            <td>독일광장 전망대 및 전통 독일 가옥 골목 산책</td>
+            <td>산책</td>
+            <td>남해독일마을</td>
             <td>0원</td>
+            <td>입장료 무료 (TourAPI)</td>
           </tr>
           <tr>
-            <td>점심 식사</td>
-            <td>독일마을 로컬 미식</td>
-            <td>수제 소시지 버거 + 슈니첼 + 무알콜 에이드 2잔</td>
-            <td>38,000원</td>
+            <td>점심</td>
+            <td>완벽한인생브루어리</td>
+            <td>52,000원</td>
+            <td>독일식 하우스 소시지 21,000원 + 블랙라벨 슈니첼 31,000원 (카카오맵 메뉴, 2024-01-19 갱신)</td>
           </tr>
           <tr>
-            <td>정원 예술 관람</td>
-            <td>[스팟 2] 원예예술촌</td>
-            <td>20여 개국 테마 정원 산책 입장권 (성인 6,000원 x 2인)</td>
+            <td>정원</td>
+            <td>원예예술촌</td>
             <td>12,000원</td>
+            <td>성인 1인 6,000원 (오늘 데이트 등록 정보)</td>
           </tr>
           <tr>
-            <td>국립공원 명승</td>
-            <td>[스팟 3] 금산 보리암</td>
-            <td>보리암 입장료 무료화 혜택 + 복곡 주차장 셔틀버스 왕복 (2인)</td>
-            <td>6,000원</td>
+            <td>사찰</td>
+            <td>금산 보리암</td>
+            <td>7,000원</td>
+            <td>입장료 개인 1,000원, 승용차 주차 5,000원 (TourAPI)</td>
           </tr>
           <tr>
-            <td>절벽 산장 간식</td>
-            <td>[스팟 4] 남해 금산산장</td>
-            <td>벼랑 끝 야외 평상 뷰: 컵라면 2개 + 해물파전 + 식혜</td>
-            <td>20,000원</td>
+            <td>간식</td>
+            <td>금산산장</td>
+            <td>22,000원</td>
+            <td>오뚜기 컵라면 4,000원 2개 + 해물파전 14,000원 (카카오맵 메뉴, 2026-10-02 갱신)</td>
           </tr>
           <tr>
-            <td>국가명승 일몰</td>
-            <td>[스팟 5] 가천 다랭이마을</td>
-            <td>108개 계단식 논 및 바다 구름다리 산책 & 음료 테이크아웃</td>
-            <td>10,000원</td>
-          </tr>
-          <tr>
-            <td>주차비</td>
-            <td>전 코스 5개 스팟</td>
-            <td>독일마을·다랭이마을 무료 주차 및 보리암 주차료</td>
-            <td>4,000원</td>
+            <td>일몰</td>
+            <td>가천 다랭이마을</td>
+            <td>0원</td>
+            <td>TourAPI 이용 안내에 입장료 항목이 없음. 체험 프로그램은 20명 이상 단체 기준</td>
           </tr>
           <tr class="sum-row">
-            <td colspan="3"><strong>총 예상 경비 합계</strong></td>
-            <td><strong>약 90,000원</strong></td>
+            <td colspan="2"><strong>2인 합계</strong></td>
+            <td><strong>93,000원</strong></td>
+            <td>1인 46,500원. 유류비, 독일마을과 다랭이마을 주차비 별도</td>
           </tr>
         </tbody>
       </table>
-    </section>
+    </div>
 
     <!-- 아티클 푸터 -->
     <div class="app-course-box" style="margin: 40px 0 24px; padding: 20px 22px; background: var(--color-accent-light); border: 1px solid var(--color-border); border-radius: 14px;">
