@@ -1646,10 +1646,20 @@ html[data-shared-course] .home-regions {
   transform: scale(0.97);
 }
 
+/* 조건 카드가 y 478쯤에서 시작해 완성 버튼이 휴대폰과 1280×800 첫 화면 밖이었다. 카드 안에서 화면 아래에 붙이고,
+   카드 아래 끝이 보이면 제자리로 돌아간다(P-236) */
 .course-generate-btn-group {
   display: flex;
   gap: 8px;
   width: 100%;
+  position: sticky;
+  bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  z-index: 5;
+}
+
+/* Tab으로 옮긴 초점 요소가 붙은 버튼 뒤로 들어가지 않게 그 높이만큼 위에서 멈춘다 */
+.conditions-card :is(button, input) {
+  scroll-margin-bottom: 96px;
 }
 
 .course-generate-btn-group .btn-generate {
@@ -1692,17 +1702,25 @@ html[data-shared-course] .home-regions {
 
 /* 좁은 화면에서 한 줄에 두세 버튼을 두면 주 버튼이 320px에서 92px 폭·4줄로 눌렸고, 찜한 스팟이 있어 버튼이
    셋이면 문서가 339px로 넘쳤다. 주 버튼을 한 줄로 올리고 보조 버튼은 아래 줄에 나눠 둔다 */
+/* 버튼군 전체를 붙이면 320×667에서 화면 아래 136px을 가려, 좁은 화면은 버튼군을 풀고 주 버튼만 붙인다(P-236) */
 @media (max-width: 480px) {
   .course-generate-btn-group {
-    flex-wrap: wrap;
+    display: contents;
   }
   .course-generate-btn-group .btn-generate {
-    flex: 1 1 100%;
+    position: sticky;
+    bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    z-index: 5;
   }
   .course-generate-btn-group .btn-daily-recommend,
   .course-generate-btn-group .btn-saved-recommend {
-    flex: 1 1 0;
+    display: inline-flex;
+    width: calc(50% - 6px);
+    margin-top: 8px;
     min-height: 44px;
+  }
+  .course-generate-btn-group .btn-daily-recommend:last-child {
+    width: 100%;
   }
 }
 

@@ -1,4 +1,4 @@
-// 화면 회귀 점검(원장 사이클 35 점검 표). 라이브 390px에서 다섯 값과 320·390px 코스 만들기 탭 영역(P-234)과 잘못된 공유 링크 320px CLS(P-235)를 재서 JSON 한 줄로 내고, 기준치를 벗어나면 종료 코드 1을 낸다.
+// 화면 회귀 점검(원장 사이클 35 점검 표). 라이브 390px에서 다섯 값과 320·390px 코스 만들기 탭 영역(P-234)과 잘못된 공유 링크 320px CLS(P-235)와 화면 아래에 붙인 완성 버튼(P-236)을 재서 JSON 한 줄로 내고, 기준치를 벗어나면 종료 코드 1을 낸다.
 // playwright는 저장소 의존성이 아니므로 npx로 받아 돌린다(처음 한 번은 브라우저도 받는다):
 //   npx -y -p playwright playwright install chromium
 //   npx -y -p playwright node scripts/check_ui_regression.mjs
@@ -166,6 +166,38 @@ await bad.waitForTimeout(2000);
 const badShare = await bad.evaluate(() => ({ cls: +window.__cls.toFixed(4), hash: location.hash }));
 if (shot('bad_share_320')) await bad.screenshot(shot('bad_share_320'));
 await badCtx.close();
+
+// 8. 화면 아래에 붙인 완성 버튼(P-236): 320×667·390×844 홈 첫 화면에 #btn-generate 아래 끝이 들어오는가,
+// 검색창에서 Tab으로 조건 카드를 돌 때 초점 요소가 #btn-generate와 겹치는 수
+const sticky = {};
+for (const [width, height] of [[320, 667], [390, 844]]) {
+  const p = await ctx.newPage();
+  p.on('pageerror', (e) => errors.push(e.message));
+  await p.setViewportSize({ width, height });
+  await p.goto(`${URL}?v=${Date.now()}`, { waitUntil: 'load' });
+  await p.waitForSelector('#btn-generate:not([disabled])', { timeout: 200000 });
+  await p.waitForTimeout(1000);
+  const genBottom = await p.evaluate(() => Math.round(document.querySelector('#btn-generate').getBoundingClientRect().bottom));
+  if (shot(`sticky_${width}x${height}`)) await p.screenshot(shot(`sticky_${width}x${height}`));
+  await p.focus('#search-input');
+  let focusN = 0, covered = 0;
+  for (let i = 0; i < 60; i++) {
+    await p.keyboard.press('Tab');
+    const hit = await p.evaluate(() => {
+      const a = document.activeElement;
+      if (!a || !a.closest('.conditions-card')) return null;
+      const g = document.querySelector('#btn-generate');
+      if (a === g) return false;
+      const r = a.getBoundingClientRect(), s = g.getBoundingClientRect();
+      return Math.min(r.right, s.right) > Math.max(r.left, s.left) && Math.min(r.bottom, s.bottom) > Math.max(r.top, s.top);
+    });
+    if (hit === null) break;
+    focusN++;
+    if (hit) covered++;
+  }
+  sticky[`${width}x${height}`] = { genBottom, vh: height, focusN, covered };
+  await p.close();
+}
 await browser.close();
 
 const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
@@ -180,6 +212,7 @@ const result = {
   overlapPx2: { 'cols-3': Math.round(overlap['cols-3'] ?? -1), 'cols-5': Math.round(overlap['cols-5'] ?? -1) },
   tap,
   badShare,
+  sticky,
   errors: errors.length,
 };
 
@@ -195,6 +228,9 @@ for (const [w, t] of Object.entries(tap)) {
   if (t.chip < 44 || t.toggle < 44 || n === 0 || hit !== n) fails.push(`tap${w} chip ${t.chip} toggle ${t.toggle} name ${t.name}`);
 }
 if (badShare.cls >= 0.05 || badShare.hash !== '') fails.push(`badShare cls ${badShare.cls} hash ${badShare.hash}`);
+for (const [k, s] of Object.entries(sticky)) {
+  if (s.genBottom > s.vh || s.focusN === 0 || s.covered !== 0) fails.push(`sticky${k} genBottom ${s.genBottom} focus ${s.covered}/${s.focusN}`);
+}
 result.fails = fails;
 console.log(JSON.stringify(result));
 process.exit(fails.length ? 1 : 0);
