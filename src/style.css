@@ -3113,6 +3113,22 @@ html[data-shared-course] .home-regions {
   padding: var(--space-6) 0;
 }
 
+/* 저장한 코스 빈 상태의 다음 행동 버튼 둘(P-249). 패널 폭을 가득 채우고 높이는 48px */
+.overlay-empty-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-bottom: var(--space-4);
+}
+
+.overlay-empty-actions > .btn-primary,
+.overlay-empty-actions > .btn-secondary {
+  width: 100%;
+  min-height: 48px;
+  padding-block: 0;
+  text-decoration: none;
+}
+
 .overlay-panel {
   position: fixed;
   left: 50%;

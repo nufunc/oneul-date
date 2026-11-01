@@ -7685,7 +7685,11 @@ function renderOverlayContent(): void {
           </div>` : ''}
           ${
             list.length === 0
-              ? `<div class="overlay-empty">아직 저장한 코스가 없어요. 코스를 만든 뒤 '저장'을 누르면 여기에 모여요</div>`
+              ? `<div class="overlay-empty">아직 저장한 코스가 없어요. 코스를 만든 뒤 '저장'을 누르면 여기에 모여요</div>
+          <div class="overlay-empty-actions">
+            <button type="button" class="btn-primary" id="overlay-empty-make">코스 만들러 가기</button>
+            <a class="btn-secondary" href="./blog/">매거진에서 코스 고르기</a>
+          </div>`
               : list
                   .map((item) => {
                     const date = new Date(item.createdAt);
@@ -7711,6 +7715,19 @@ function renderOverlayContent(): void {
 
     root.querySelector('#overlay-backdrop')!.addEventListener('click', () => closeOverlay());
     root.querySelector('#overlay-close')!.addEventListener('click', () => closeOverlay());
+    // 빈 패널에서 할 수 있는 일이 닫기뿐이었다(P-249). 코스 탭의 첫 지역 칩으로 보내 코스 만들기를 이어 가게 한다
+    root.querySelector('#overlay-empty-make')?.addEventListener('click', () => {
+      closeOverlay(() => {
+        if (state.mainMode !== 'course') {
+          state.mainMode = 'course';
+          updateModeView();
+        }
+        cancelOverlayFocusReturn();
+        const chip = document.querySelector<HTMLElement>('#conditions-area .quick-region-chip');
+        chip?.scrollIntoView({ block: 'center' });
+        chip?.focus({ preventScroll: true });
+      });
+    });
 
     root.querySelectorAll<HTMLButtonElement>('.saved-item-main').forEach((btn) => {
       btn.addEventListener('click', () => {
