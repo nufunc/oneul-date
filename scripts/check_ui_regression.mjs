@@ -170,6 +170,7 @@ await badCtx.close();
 // 8. 화면 아래에 붙인 완성 버튼(P-236): 320×667·390×844 홈 첫 화면에 #btn-generate 아래 끝이 들어오는가,
 // 검색창에서 Tab으로 조건 카드를 돌 때 초점 요소가 #btn-generate와 겹치는 수
 const sticky = {};
+let linkMinH = 0;
 for (const [width, height] of [[320, 667], [390, 844]]) {
   const p = await ctx.newPage();
   p.on('pageerror', (e) => errors.push(e.message));
@@ -196,6 +197,8 @@ for (const [width, height] of [[320, 667], [390, 844]]) {
     if (hit) covered++;
   }
   sticky[`${width}x${height}`] = { genBottom, vh: height, focusN, covered };
+  // 홈 아래 지역 링크와 바닥글 매거진 링크의 가장 낮은 높이(P-236). 390px에서만 재고, 링크가 없으면 0
+  if (width === 390) linkMinH = await p.evaluate(() => { const h = [...document.querySelectorAll('.home-regions-list a, #btn-blog-link')].map((e) => e.getBoundingClientRect().height); return h.length ? Math.round(Math.min(...h)) : 0; });
   await p.close();
 }
 await browser.close();
@@ -213,6 +216,7 @@ const result = {
   tap,
   badShare,
   sticky,
+  linkMinH,
   errors: errors.length,
 };
 
@@ -228,6 +232,7 @@ for (const [w, t] of Object.entries(tap)) {
   if (t.chip < 44 || t.toggle < 44 || n === 0 || hit !== n) fails.push(`tap${w} chip ${t.chip} toggle ${t.toggle} name ${t.name}`);
 }
 if (badShare.cls >= 0.05 || badShare.hash !== '') fails.push(`badShare cls ${badShare.cls} hash ${badShare.hash}`);
+if (linkMinH < 44) fails.push(`linkMinH ${linkMinH}`);
 for (const [k, s] of Object.entries(sticky)) {
   if (s.genBottom > s.vh || s.focusN === 0 || s.covered !== 0) fails.push(`sticky${k} genBottom ${s.genBottom} focus ${s.covered}/${s.focusN}`);
 }

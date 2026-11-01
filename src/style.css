@@ -970,7 +970,11 @@ html[data-shared-course] .home-regions {
   gap: var(--space-2);
 }
 
+/* 링크 높이가 32px이라 탭 영역 44px에 모자랐다(P-236) */
 .home-regions-list a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   padding: var(--space-1) var(--space-3);
   font-size: var(--font-sm);
   color: var(--color-text);
@@ -3782,6 +3786,13 @@ html[data-shared-course] .home-regions {
   font-size: var(--font-xs);
   color: var(--color-text-faint);
   letter-spacing: var(--label-tracking);
+}
+
+/* 바닥글 매거진 링크가 글자 높이 16px뿐이라 탭 영역 44px로 늘린다(P-236) */
+.btn-blog-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
 
 /* ==========================================================================
