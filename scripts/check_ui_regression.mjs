@@ -1,4 +1,4 @@
-// 화면 회귀 점검(원장 사이클 35 점검 표). 라이브 390px에서 다섯 값과 320·390px 코스 만들기 탭 영역(P-234)과 잘못된 공유 링크 320px CLS(P-235)와 형식이 틀린 공유 링크의 해시 지움과 안내(P-239)와 화면 아래에 붙인 완성 버튼(P-236)과 늦게 오는 AI 브리핑 뒤 코스 CLS(P-237)와 받은 코스의 저장 막대(P-238)와 매거진 글의 코스 막대(P-240)를 재서 JSON 한 줄로 내고, 기준치를 벗어나면 종료 코드 1을 낸다.
+// 화면 회귀 점검(원장 사이클 35 점검 표). 라이브 390px에서 다섯 값과 320·390px 코스 만들기 탭 영역(P-234)과 잘못된 공유 링크 320px CLS(P-235)와 형식이 틀린 공유 링크의 해시 지움과 안내(P-239)와 화면 아래에 붙인 완성 버튼(P-236)과 늦게 오는 AI 브리핑 뒤 코스 CLS(P-237)와 받은 코스의 저장 막대(P-238)와 매거진 글의 코스 막대(P-240)와 1100px 이상 두 열 배치(P-242)를 재서 JSON 한 줄로 내고, 기준치를 벗어나면 종료 코드 1을 낸다.
 // playwright는 저장소 의존성이 아니므로 npx로 받아 돌린다(처음 한 번은 브라우저도 받는다):
 //   npx -y -p playwright playwright install chromium
 //   npx -y -p playwright node scripts/check_ui_regression.mjs
@@ -313,6 +313,42 @@ const courseBar = await (async () => {
   await p.close();
   return { ...first, vh: 667, vw: 320, ...related, receiverOk, backHref };
 })();
+// 12. 데스크톱 두 열(P-242): 1100px 이상 홈에서 매거진이 앱 왼쪽 열에 있고 1000px 아래와 문서 끝에서도 화면 안에 붙어 있는가, 첫 로드 CLS,
+// 1099px은 한 열(매거진 아래 끝 ≤ 앱 위 끝), 받은 코스 화면과 매거진 블록이 없는 지역 랜딩은 앱이 가운데(좌우 빈 폭 차이 1px 이하)
+const desktop = {};
+for (const [name, width, height, hash] of [['home1280', 1280, 800, ''], ['home1920', 1920, 1080, ''], ['home1100', 1100, 800, ''], ['home1099', 1099, 800, ''], ['recv1280', 1280, 800, RECEIVER_SHARE], ['landing1280', 1280, 800, 'gangwon/day/']]) {
+  const p = await ctx.newPage();
+  p.on('pageerror', (e) => errors.push(e.message));
+  await p.route('**/ai-briefing', (r) => r.abort());
+  await p.addInitScript(() => {
+    window.__cls = 0;
+    new PerformanceObserver((l) => { for (const e of l.getEntries()) if (!e.hadRecentInput) window.__cls += e.value; }).observe({ type: 'layout-shift', buffered: true });
+  });
+  await p.setViewportSize({ width, height });
+  const landing = name.startsWith('landing');
+  await p.goto(landing ? `${URL}${hash}?v=${Date.now()}` : `${URL}?v=${Date.now()}${hash}`, { waitUntil: 'load' });
+  await p.waitForSelector(hash === RECEIVER_SHARE ? '#btn-receiver-save' : '#btn-generate:not([disabled])', { timeout: 200000 });
+  await p.waitForTimeout(3000);
+  const box = (sel) => p.evaluate((sel) => { const r = document.querySelector(sel)?.getBoundingClientRect(); return r && r.height ? { l: Math.round(r.left), r: Math.round(r.right), t: Math.round(r.top + scrollY), b: Math.round(r.bottom + scrollY) } : null; }, sel);
+  const d = await p.evaluate(() => ({ cls: +window.__cls.toFixed(4), scrollW: document.documentElement.scrollWidth, vw: document.documentElement.clientWidth }));
+  d.vh = height;
+  const app = await box('#app');
+  d.appGap = [app.l, d.vw - app.r];
+  const mag = await box('#home-magazine');
+  if (mag) {
+    d.mag = mag;
+    d.app = app;
+    d.magInView = [];
+    for (const y of [1000, 99999]) {
+      await p.evaluate((y) => window.scrollTo(0, y), y);
+      await p.waitForTimeout(200);
+      d.magInView.push(await p.evaluate(() => { const r = document.querySelector('#home-magazine').getBoundingClientRect(); return Math.round(scrollY) > 0 && r.top >= 0 && r.bottom <= innerHeight; }));
+    }
+  }
+  if (shot(`desktop_${name}`)) { await p.evaluate(() => window.scrollTo(0, 0)); await p.screenshot(shot(`desktop_${name}`)); }
+  desktop[name] = d;
+  await p.close();
+}
 await browser.close();
 
 const pct =(a, b) => (b ? Math.round((a / b) * 100) : 0);
@@ -333,6 +369,7 @@ const result = {
   lateBriefing,
   receiver,
   courseBar,
+  desktop,
   errors: errors.length,
 };
 
@@ -362,6 +399,14 @@ for (const [k, r] of Object.entries(receiver)) {
 const cb = courseBar;
 if (cb.barBottom < 0 || cb.barBottom > cb.vh || cb.barH < 44 || cb.scrollW !== cb.vw || !cb.atEnd || cb.relatedN === 0 || cb.relatedCovered !== 0 || !cb.receiverOk || cb.backHref !== './blog/andong/') {
   fails.push(`courseBar bottom ${cb.barBottom} h ${cb.barH} scrollW ${cb.scrollW} atEnd ${cb.atEnd} related ${cb.relatedCovered}/${cb.relatedN} receiver ${cb.receiverOk} back ${cb.backHref}`);
+}
+for (const [k, d] of Object.entries(desktop)) {
+  const centered = Math.abs(d.appGap[0] - d.appGap[1]) <= 1;
+  let ok = d.scrollW === d.vw;
+  if (k === 'home1099') ok &&= Boolean(d.mag) && d.mag.b <= d.app.t;
+  else if (k.startsWith('home')) ok &&= Boolean(d.mag) && d.mag.r < d.app.l && d.magInView.every(Boolean) && d.cls < 0.01;
+  else ok &&= centered && !d.mag;
+  if (!ok) fails.push(`desktop ${k} ${JSON.stringify(d)}`);
 }
 result.fails = fails;
 console.log(JSON.stringify(result));

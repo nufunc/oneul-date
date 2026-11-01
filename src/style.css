@@ -956,6 +956,50 @@ html[data-shared-course] .home-regions {
   min-height: 100svh;
 }
 
+/* 1100px 이상에서 앱 열 640px 좌우가 50~67% 비고 매거진은 맨 위 249px에만 있었다. 매거진을 왼쪽 360px 열에 붙여 두고 지역 링크는 두 열 아래 전체 폭에 둔다(P-242).
+   받은 코스 화면과 매거진 블록이 없는 지역 랜딩 페이지는 한 열 그대로다 */
+@media (min-width: 1100px) {
+  html:not([data-shared-course]) body:has(> .home-magazine) {
+    display: grid;
+    grid-template-columns: minmax(0, 360px) minmax(0, 640px);
+    justify-content: center;
+    column-gap: 32px;
+    align-items: start;
+  }
+
+  html:not([data-shared-course]) .home-magazine {
+    grid-column: 1;
+    grid-row: 1;
+    margin: 0;
+    max-width: none;
+    position: sticky;
+    top: 0;
+  }
+
+  html:not([data-shared-course]) .home-magazine ~ #app {
+    grid-column: 2;
+    grid-row: 1;
+    margin: 0;
+  }
+
+  html:not([data-shared-course]) .home-regions {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    max-width: 1032px;
+    width: 100%;
+  }
+
+  /* 360px 열에서 한 줄 제목은 41~56%만 보였다 */
+  html:not([data-shared-course]) .home-magazine-list a {
+    white-space: normal;
+  }
+
+  /* 오늘의 코스를 그리기 전 약 1초 결과 영역이 빈 안내 113px뿐이라 바닥글이 첫 화면에 들어왔다 내려갔다(1920×1080 CLS 0.0226) */
+  html:not([data-shared-course]) .home-magazine ~ #app #results-area:has(> .results-empty) {
+    min-height: calc(100svh - 700px);
+  }
+}
+
 .home-regions-list {
   list-style: none;
   margin: 0;
