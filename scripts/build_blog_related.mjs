@@ -1,0 +1,90 @@
+// 빌드 끝에 dist/blog/index.html의 카드를 읽어 dist/blog/<slug>/index.html마다 </body> 앞에 관련 글 링크 블록을 넣는다.
+// 글 89편 모두 다른 글로 가는 링크가 없어 글 끝에서 목록이나 홈으로만 돌아가던 것을 막는다.
+// 고르는 규칙: 같은 권역 글 최대 2편(목록 순서, 자기 제외) + 최신 글로 채워 3편. 목록은 최신 글이 앞이다.
+// 권역은 카드 제목의 [ ] 첫 낱말로 정한다. card-region-badge는 89장 중 88장이 "경남 함안"이라 쓰지 않는다.
+// 실행 시점: build_home_magazine.mjs 뒤. 원본 public/blog/는 고치지 않는다.
+import fs from 'node:fs';
+import path from 'node:path';
+
+const COUNT = 3;
+const SAME_REGION_MAX = 2;
+const blogDir = path.resolve('dist', 'blog');
+const blogIndexPath = path.join(blogDir, 'index.html');
+const BODY_END = '</body>';
+
+// 제목이 시·군 이름으로만 시작하는 글의 권역. 여기 없는 이름은 권역 없이 최신 글로만 채운다.
+const CITY_REGION = {
+  포항: '경북', 안동: '경북', 영주: '경북', 청송: '경북', 문경: '경북', 경주: '경북',
+  하동: '경남', 통영: '경남',
+  파주: '경기', 양평: '경기', 가평: '경기', 포천: '경기', 수원: '경기',
+  영월: '강원', 철원: '강원', 원주: '강원', 춘천: '강원', 속초: '강원', 평창: '강원', 강릉: '강원',
+  청주: '충북', 괴산: '충북', 제천: '충북', 보은: '충북', 단양: '충북',
+  예산: '충남', 부여: '충남', 태안: '충남', 아산: '충남', 홍성: '충남', 공주: '충남',
+  고창: '전북', 정읍: '전북', 남원: '전북', 전주: '전북', 군산: '전북',
+  구례: '전남', 담양: '전남', 순천: '전남', 여수: '전남',
+  상암: '서울', 서촌: '서울', 성수: '서울',
+};
+const PROVINCES = new Set(['서울', '경기', '인천', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '대구', '부산', '제주']);
+
+function fail(message) {
+  console.error(`build_blog_related: ${message}`);
+  process.exit(1);
+}
+
+function regionOf(title) {
+  const word = title.match(/^\[([^\]\s·]+)/)?.[1];
+  if (!word) return null;
+  return PROVINCES.has(word) ? word : CITY_REGION[word] ?? null;
+}
+
+if (!fs.existsSync(blogIndexPath)) fail('dist/blog/index.html이 없다. vite build 이후에 실행해야 한다.');
+
+const posts = [];
+for (const m of fs.readFileSync(blogIndexPath, 'utf-8').matchAll(/<a href="([^"]*)" class="post-card">([\s\S]*?)<\/a>/g)) {
+  const slug = m[1].match(/^([a-z0-9-]+)\/$/)?.[1];
+  const title = m[2].match(/<h2 class="card-title">([\s\S]*?)<\/h2>/)?.[1].replace(/<[^>]*>/g, '').trim();
+  if (!slug || !title) fail(`카드를 읽지 못했다: href="${m[1]}"`);
+  if (!fs.existsSync(path.join(blogDir, slug, 'index.html'))) fail(`카드의 글이 dist에 없다: ${slug}`);
+  posts.push({ slug, title, region: regionOf(title) });
+}
+if (posts.length <= COUNT) fail(`카드 ${posts.length}장만 읽었다(필요 ${COUNT + 1}장 이상).`);
+const unknown = posts.filter((p) => !p.region).map((p) => p.slug);
+if (unknown.length) console.warn(`build_blog_related: 권역을 정하지 못해 최신 글로만 채운 글 ${unknown.length}편 (${unknown.join(', ')})`);
+
+const STYLE = `<style>
+.od-related{box-sizing:border-box;width:calc(100% - 32px);max-width:720px;margin:40px auto;padding:20px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;color:#1f2937;font:16px/1.5 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;text-align:left}
+.od-related h2{margin:0 0 8px;font-size:18px;line-height:1.4;font-weight:700;color:#111827}
+.od-related ul{list-style:none;margin:0;padding:0}
+.od-related li{margin:0;padding:0;border-top:1px solid #e5e7eb}
+.od-related li:first-child{border-top:0}
+.od-related a{display:flex;align-items:center;min-height:44px;padding:10px 0;box-sizing:border-box;color:#1f2937;text-decoration:none;overflow-wrap:anywhere}
+.od-related a:hover{text-decoration:underline}
+.od-related a.od-related-more{justify-content:flex-end;margin-top:4px;color:#be185d;font-weight:600}
+@media (prefers-color-scheme:dark){
+.od-related{background:#111827;border-color:#374151;color:#f3f4f6}
+.od-related h2{color:#f9fafb}
+.od-related li{border-top-color:#374151}
+.od-related a{color:#f3f4f6}
+.od-related a.od-related-more{color:#f9a8d4}
+}
+</style>`;
+
+function navFor(post) {
+  const picked = posts.filter((p) => p !== post && post.region && p.region === post.region).slice(0, SAME_REGION_MAX);
+  for (const p of posts) {
+    if (picked.length === COUNT) break;
+    if (p !== post && !picked.includes(p)) picked.push(p);
+  }
+  const items = picked.map((p) => `<li><a href="../${p.slug}/">${p.title}</a></li>`).join('');
+  return `<nav class="od-related" aria-label="다른 매거진 글">${STYLE}<h2>다음에 볼 글</h2><ul>${items}</ul><a class="od-related-more" href="../">매거진 전체 보기 →</a></nav>\n`;
+}
+
+for (const post of posts) {
+  const file = path.join(blogDir, post.slug, 'index.html');
+  const html = fs.readFileSync(file, 'utf-8');
+  if (html.includes('class="od-related"')) fail(`${post.slug}에 이미 관련 글 블록이 있다. vite build부터 다시 돌린다.`);
+  if (html.split(BODY_END).length !== 2) fail(`${post.slug}에 ${BODY_END}가 정확히 하나 있어야 한다.`);
+  fs.writeFileSync(file, html.replace(BODY_END, navFor(post) + BODY_END));
+}
+const sameCounts = posts.map((p) => posts.filter((q) => q !== p && p.region && q.region === p.region).length);
+console.log(`build_blog_related: 글 ${posts.length}편에 관련 글 블록을 넣었다 (같은 권역 글 2편 이상 ${sameCounts.filter((n) => n >= 2).length}편, 1편 ${sameCounts.filter((n) => n === 1).length}편, 0편 ${sameCounts.filter((n) => n === 0).length}편)`);
