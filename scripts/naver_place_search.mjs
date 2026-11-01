@@ -37,9 +37,10 @@ function place(p) {
   const full = (a) => (!a ? '' : a.startsWith(pre) ? a : `${pre} ${a}`.trim());
   return { name: p.name, cat: p.category || '', road: full(p.roadAddress), jibun: full(p.address), x: p.x, y: p.y };
 }
-// 음식점 목록(restaurant/list로 넘어간다)에는 "영업 중" 필터를 건 placeList가 함께 있어 filter 입력이 없는 목록을 고른다
+// 음식점 목록(restaurant/list로 넘어간다)에는 "영업 중" 필터(filterOpening:"true")를 건 placeList가 함께 있어 필터가 걸리지 않은 목록을 고른다.
+// 관광지 목록(attraction/list)의 키에는 filterCoupon:"false"처럼 빈 filter 입력이 들어 있어 값이 "", "false", false, null인 filter는 걸리지 않은 것으로 본다(P-254)
 function placeList(root) {
-  const key = Object.keys(root).find((k) => k.startsWith('placeList(') && !/"filter[A-Za-z]*":/.test(k));
+  const key = Object.keys(root).find((k) => k.startsWith('placeList(') && !/"filter[A-Za-z]*":(?!""|"false"|false\b|null\b)/.test(k));
   return key && root[key]?.businesses;
 }
 for (const t of todo) {
