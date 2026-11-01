@@ -29,4 +29,15 @@ for (const slug of slugs) {
 for (const page of [['index.html'], ['seoul', 'day', 'index.html'], ['blog', 'index.html']]) {
   assert.ok(!fs.readFileSync(path.join(dist, ...page), 'utf8').includes('od-related'), `${page.join('/')}에 블록이 있다`);
 }
-console.log(`ok blog-related (${slugs.length}편)`);
+// P-232: 머리가 있는 쪽마다 머리 링크 44px 규칙이 1개, gunsan 태그 칩에 죽은 링크가 없다
+const pages = [...fs.readdirSync(blog).map((d) => path.join(blog, d, 'index.html')), path.join(blog, 'index.html')].filter((f) => fs.existsSync(f));
+let headed = 0;
+for (const file of pages) {
+  const html = fs.readFileSync(file, 'utf8');
+  if (!html.includes('<header')) continue;
+  headed++;
+  assert.strictEqual(html.match(/header:not\(\.article-header\) a\{min-height:44px/g)?.length, 1, `${path.relative(dist, file)}: 머리 링크 44px 규칙이 1개가 아니다`);
+}
+assert.ok(headed > 3, '머리가 있는 쪽을 읽지 못했다');
+assert.ok(!fs.readFileSync(path.join(blog, 'gunsan', 'index.html'), 'utf8').includes('href="#"'), 'gunsan에 href="#"이 있다');
+console.log(`ok blog-related (${slugs.length}편, 머리 ${headed}쪽)`);
