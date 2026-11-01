@@ -951,6 +951,11 @@ html[data-shared-course] .home-regions {
   display: none;
 }
 
+/* 앱이 그리기 전 루트 #app에는 정적 h1만 있다. 그동안 #app이 첫 화면 높이를 차지해 뒤의 .home-regions가 처음부터 화면 밖에 있게 한다(P-230) */
+#app:has(> h1.sr-only:only-child) {
+  min-height: 100svh;
+}
+
 .home-regions-list {
   list-style: none;
   margin: 0;
