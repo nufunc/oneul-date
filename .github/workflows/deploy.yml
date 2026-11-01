@@ -25,7 +25,10 @@ jobs:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
+      # 전체 이력으로 받는다: build_blog_dates.mjs가 글마다 git 마지막 커밋 날짜를 dateModified와 lastmod로 쓴다
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
