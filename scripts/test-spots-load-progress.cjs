@@ -116,6 +116,19 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   assert.ok(paint.includes("style.setProperty('--load-pct'"), '채움 비율 CSS 변수를 바꾸지 않는다');
   assert.ok(main.includes(`'<span class="sr-only" role="status">스팟 불러오는 중…</span>'`), 'role=status 문구가 바뀌었다');
 
+  // 6. 탐색 탭 상태 줄(P-258): 알림 영역 문구는 고정하고 비율은 aria-hidden 칸에만 넣는다. 받기가 끝났거나 분모가 0이면 비율을 붙이지 않는다
+  assert.ok(
+    main.includes('<span role="status">전체 스팟 불러오는 중</span><span id="discovery-load-pct" aria-hidden="true">${discoveryLoadPctText()}</span>'),
+    '탐색 탭 상태 줄의 알림 영역에 비율이 들어가거나 비율 칸이 aria-hidden이 아니다',
+  );
+  assert.ok(/getElementById\('discovery-load-pct'\)/.test(paint), '진행 알림이 탐색 탭 상태 글자를 바꾸지 않는다');
+  const discCode = cut(main, 'function spotsLoadPct', 'function paintSpotsProgress').replace('function paintSpotsProgress', '');
+  const disc = (total, bytes, pending) =>
+    new Function('SPOTS_JSON_BYTES', 'spotsBytesReceived', 'fullSpotsPending', `${ts.transpile(discCode, { target: 'es2022' })};return discoveryLoadPctText();`)(total, bytes, pending);
+  assert.strictEqual(disc(1000, 437, true), ' 43%');
+  assert.strictEqual(disc(0, 437, true), '', '분모가 0인데 탐색 탭에 비율을 냈다');
+  assert.strictEqual(disc(1000, 437, false), '', '받기가 끝났는데 탐색 탭에 비율이 남았다');
+
   console.log('test-spots-load-progress: ok');
 })().catch((e) => {
   console.error(e);

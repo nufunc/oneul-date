@@ -4596,14 +4596,25 @@ function spotsWaitLabel(): string {
   return pct === null ? '스팟 불러오는 중…' : `스팟 받는 중 ${pct}%`;
 }
 
-/** 받는 동안 대기 버튼의 글자와 채움 비율만 바꾼다. 화면 전체를 다시 그리지 않고 role=status 알림도 다시 내지 않는다 */
+/** 탐색 탭 상태 줄 뒤에 붙이는 비율 글자. 알림 영역 밖(aria-hidden)에 두어 바뀔 때마다 읽히지 않게 한다(P-258) */
+function discoveryLoadPctText(): string {
+  const pct = fullSpotsPending ? spotsLoadPct() : null;
+  return pct === null ? '' : ` ${pct}%`;
+}
+
+/** 받는 동안 대기 버튼과 탐색 탭 상태 줄의 글자, 버튼 채움 비율만 바꾼다. 화면 전체를 다시 그리지 않고 role=status 알림도 다시 내지 않는다 */
 function paintSpotsProgress(): void {
-  const btn = document.getElementById('btn-generate');
   const pct = spotsLoadPct();
-  if (!btn || btn.getAttribute('aria-busy') !== 'true' || pct === null) return;
-  btn.style.setProperty('--load-pct', `${pct}%`);
-  const label = spotsWaitLabel();
-  if (btn.textContent !== label) btn.textContent = label;
+  if (pct === null) return;
+  const btn = document.getElementById('btn-generate');
+  if (btn && btn.getAttribute('aria-busy') === 'true') {
+    btn.style.setProperty('--load-pct', `${pct}%`);
+    const label = spotsWaitLabel();
+    if (btn.textContent !== label) btn.textContent = label;
+  }
+  const status = document.getElementById('discovery-load-pct');
+  const text = discoveryLoadPctText();
+  if (status && status.textContent !== text) status.textContent = text;
 }
 
 function triggerCourseGeneration(): void {
@@ -6797,7 +6808,7 @@ function renderSpotDiscovery(): void {
         ${loadedRegionKeys.has('ALL') ? `
           <span class="status-count-badge">${totalCount.toLocaleString('ko-KR')}</span>
           <span class="status-text">개 스팟</span>
-        ` : '<span class="status-text" role="status">전체 스팟 불러오는 중</span>'}
+        ` : `<span class="status-text"><span role="status">전체 스팟 불러오는 중</span><span id="discovery-load-pct" aria-hidden="true">${discoveryLoadPctText()}</span></span>`}
         ${isFiltered ? `
           <button class="btn-discovery-filter-reset" id="btn-reset-discovery-filters" title="검색 및 필터 초기화" aria-label="검색 및 필터 초기화">
             <span class="reset-icon">↺</span>
