@@ -291,6 +291,16 @@
     }
     header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
     .header-nav a,.header-title a,.blog-tagline a{display:inline-block}
+
+    /* 글 찾기(P-246): 생성기가 .posts-grid 안만 바꾸므로 이 블록은 그 밖에 둔다 */
+    .od-search{max-width:var(--max-width);margin:0 auto 12px;padding:0 24px}
+    .od-search label{display:block;font-size:14px;font-weight:700;color:var(--color-text-main);margin-bottom:6px}
+    .od-search input{width:100%;min-height:48px;padding:0 16px;font:inherit;font-size:16px;color:var(--color-text-main);background:#fff;border:1px solid var(--color-text-faint);border-radius:12px}
+    .od-search input::placeholder{color:var(--color-text-faint)}
+    .od-search input:focus-visible{outline:3px solid #0284c7;outline-offset:2px}
+    .od-count{max-width:var(--max-width);margin:0 auto 8px;scroll-margin-top:90px;padding:0 24px;font-size:14px;color:var(--color-text-sub)}
+    .od-empty{max-width:var(--max-width);margin:0 auto;padding:24px;text-align:center;font-size:15px;color:var(--color-text-sub)}
+    .od-empty button{margin-top:12px;min-height:44px;padding:0 20px;border-radius:999px;border:1px solid var(--color-border);background:#fff;color:var(--color-text-main);font:inherit;font-weight:700;cursor:pointer}
   </style>
 </head>
 <body>
@@ -316,6 +326,11 @@
       </p>
     </section>
 
+    <div class="od-search" role="search">
+      <label for="od-q">글 찾기</label>
+      <input id="od-q" type="search" placeholder="지역, 장소, 테마 (예: 억새, 뚜벅이, 성수)" autocomplete="off" enterkeyhint="search">
+    </div>
+
     <nav class="region-filter-wrap" aria-label="지역별 필터">
       <button type="button" class="filter-chip active" data-region="all" aria-pressed="true">전체</button>
       <button type="button" class="filter-chip" aria-pressed="false" data-region="seoul">서울</button>
@@ -327,6 +342,12 @@
       <button type="button" class="filter-chip" aria-pressed="false" data-region="busan">부산</button>
       <button type="button" class="filter-chip" aria-pressed="false" data-region="jeju">제주</button>
     </nav>
+
+    <p class="od-count" id="od-count" aria-live="polite"></p>
+    <div class="od-empty" id="od-empty" hidden>
+      <p id="od-empty-msg"></p>
+      <button type="button" id="od-reset">조건 지우고 전체 보기</button>
+    </div>
 
     <section class="posts-container">
       <div class="posts-grid">
@@ -2139,6 +2160,64 @@
       const saved = new URLSearchParams(location.search).get('region');
       if (saved && Array.prototype.some.call(chips, function(c) { return c.getAttribute('data-region') === saved; })) {
         applyRegion(saved);
+      }
+    })();
+  </script>
+
+  <script>
+    // 글 찾기(P-246): 카드 글자를 공백을 빼고 비교해 지역 칩 결과와 AND로 거른다
+    (function() {
+      const q = document.getElementById('od-q');
+      const cards = Array.prototype.slice.call(document.querySelectorAll('.post-card'));
+      const count = document.getElementById('od-count');
+      const empty = document.getElementById('od-empty');
+      const emptyMsg = document.getElementById('od-empty-msg');
+      const norm = function(s) { return (s || '').toLowerCase().replace(/\s+/g, ''); };
+      const text = new Map();
+      const regionOk = new Map();
+
+      function readRegion() {
+        cards.forEach(function(c) { regionOk.set(c, c.style.display !== 'none'); });
+      }
+
+      function apply() {
+        const v = norm(q.value);
+        const chip = document.querySelector('.filter-chip.active');
+        const region = chip ? chip.getAttribute('data-region') : 'all';
+        let n = 0;
+        cards.forEach(function(c) {
+          const on = regionOk.get(c) && (!v || text.get(c).indexOf(v) >= 0);
+          c.style.display = on ? 'flex' : 'none';
+          if (on) n++;
+        });
+        count.textContent = (v || region !== 'all') ? '글 ' + n + '편' : '';
+        empty.hidden = n > 0;
+        emptyMsg.textContent = n ? '' : (v ? "'" + q.value.trim() + "'" : (chip ? chip.textContent.trim() : '')) + '에 맞는 글이 아직 없어요.';
+      }
+
+      cards.forEach(function(c) { text.set(c, norm(c.textContent)); });
+      readRegion();
+
+      // 기존 칩 스크립트가 먼저 등록돼 지역 표시를 바꾼 뒤 이 핸들러가 검색 조건을 함께 건다
+      document.querySelectorAll('.filter-chip').forEach(function(chip) {
+        chip.addEventListener('click', function() { readRegion(); apply(); });
+      });
+      q.addEventListener('input', apply);
+      q.addEventListener('keydown', function(e) {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        q.blur();
+        count.scrollIntoView({ block: 'start' });
+      });
+      document.getElementById('od-reset').addEventListener('click', function() {
+        q.value = '';
+        document.querySelector('.filter-chip[data-region="all"]').click();
+      });
+
+      const initial = new URLSearchParams(location.search).get('q');
+      if (initial) {
+        q.value = initial;
+        apply();
       }
     })();
   </script>
