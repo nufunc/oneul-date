@@ -3340,6 +3340,7 @@ html[data-shared-course] .home-regions {
 }
 
 .saved-item {
+  position: relative;
   display: flex;
   align-items: stretch;
   gap: var(--space-2);
@@ -3367,6 +3368,13 @@ html[data-shared-course] .home-regions {
 }
 
 .saved-item-meta {
+  /* 오른쪽 위 버튼 줄(위 4px + 44px)을 비켜 칩이 그 아래에서 시작하게 한다(P-270).
+     전역 keep-all이라 띄어쓰기 없는 긴 이름은 anywhere가 없으면 머리 줄을 넓혀 버튼 밑으로 들어간다 */
+  min-height: 34px;
+  padding-right: 128px;
+  display: flex;
+  align-items: center;
+  overflow-wrap: anywhere;
   font-size: var(--font-xs);
   font-weight: 700;
   color: var(--color-accent-text);
@@ -3425,15 +3433,19 @@ html[data-shared-course] .home-regions {
 }
 
 .saved-item-actions {
+  position: absolute;
+  top: 4px;
+  right: 4px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 4px;
   flex-shrink: 0;
 }
 
 .saved-action-btn {
   width: 44px;
-  flex: 1;
+  flex: none;
+  height: 44px;
   min-height: 44px;
   display: inline-flex;
   align-items: center;
