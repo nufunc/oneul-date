@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>[충남 보령 바다 드라이브] 대천 스카이바이크부터 죽도 상화원 한옥 회랑길, 개화예술공원 조각숲, 플라워 갤러리 리리스카페와 무창포타워 서해 낙조까지 보령 힐링 코스</title>
-  <meta name="description" content="푸른 서해 바다와 낭만적인 숲길을 동시에 누리는 충남 보령 하루 드라이브 코스: 바다 위 2.3km 레일을 달리는 대천해수욕장 스카이바이크, 섬 전체를 감싼 2km 지붕 회랑과 전통 한옥마을 죽도 상화원, 5만 평 야외 조각숲과 미술관 개화예술공원, 천장 가득 드라이플라워가 수놓인 감성 카페 리리스, 신비의 바닷길과 닭벼슬섬이 한눈에 펼쳐지는 39m 무창포타워 황금빛 일몰 피날레까지 상세 여행 정보 총정리.">
+  <meta name="description" content="푸른 서해 바다와 낭만적인 숲길을 동시에 누리는 충남 보령 하루 드라이브 코스: 바다 위 2.3km 레일을 달리는 대천해수욕장 스카이바이크, 섬 전체를 감싼 2km 지붕 회랑과 전통 한옥마을 죽도 상화원, 5만 평 야외 조각숲과 미술관 개화예술공원, 천장 가득 드라이플라워가 수놓인 감성 카페 리리스, 신비의 바닷길과 닭벼슬섬이 한눈에 펼쳐지는 무창포타워 황금빛 일몰 피날레까지 상세 여행 정보 총정리.">
   <link rel="canonical" href="https://nufunc.github.io/oneul-date/blog/boryeong/">
   <meta property="og:url" content="https://nufunc.github.io/oneul-date/blog/boryeong/">
 
@@ -22,7 +22,7 @@
   "@context": "https://schema.org",
   "@type": "BlogPosting",
   "headline": "[충남 보령 바다 드라이브] 대천 스카이바이크부터 죽도 상화원 한옥 회랑길, 개화예술공원 조각숲, 플라워 갤러리 리리스카페와 무창포타워 서해 낙조까지 보령 힐링 코스",
-  "description": "푸른 서해 바다와 낭만적인 숲길을 동시에 누리는 충남 보령 하루 드라이브 코스: 바다 위 2.3km 레일을 달리는 대천해수욕장 스카이바이크, 섬 전체를 감싼 2km 지붕 회랑과 전통 한옥마을 죽도 상화원, 5만 평 야외 조각숲과 미술관 개화예술공원, 천장 가득 드라이플라워가 수놓인 감성 카페 리리스, 신비의 바닷길과 닭벼슬섬이 한눈에 펼쳐지는 39m 무창포타워 황금빛 일몰 피날레까지 상세 여행 정보 총정리.",
+  "description": "푸른 서해 바다와 낭만적인 숲길을 동시에 누리는 충남 보령 하루 드라이브 코스: 바다 위 2.3km 레일을 달리는 대천해수욕장 스카이바이크, 섬 전체를 감싼 2km 지붕 회랑과 전통 한옥마을 죽도 상화원, 5만 평 야외 조각숲과 미술관 개화예술공원, 천장 가득 드라이플라워가 수놓인 감성 카페 리리스, 신비의 바닷길과 닭벼슬섬이 한눈에 펼쳐지는 무창포타워 황금빛 일몰 피날레까지 상세 여행 정보 총정리.",
   "image": "https://t1.daumcdn.net/local/kakaomapPhoto/review/b14de105da855c62355892fb7fadc35875e8d71d?original",
   "url": "https://nufunc.github.io/oneul-date/blog/boryeong/",
   "datePublished": "2026-10-21",
@@ -361,69 +361,61 @@
       color: var(--color-text-sub);
       margin-bottom: 20px;
     }
-    .cost-table {
+    /* 비용표 */
+    .table-wrap {
+      margin: 32px 0 40px;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #ffffff;
+    }
+    table {
       width: 100%;
       border-collapse: collapse;
       font-size: 0.9rem;
-    }
-    .cost-table th, .cost-table td {
-      padding: 12px 14px;
       text-align: left;
+    }
+    thead {
+      background: #f1f5f9;
+      color: var(--color-primary);
+      font-weight: 700;
+    }
+    th, td {
+      padding: 14px 16px;
       border-bottom: 1px solid var(--color-border);
     }
-    .cost-table th {
-      background: #f8fafc;
-      font-weight: 700;
-      color: var(--color-primary);
-    }
-    .cost-table .num {
-      text-align: right;
-      font-variant-numeric: tabular-nums;
-    }
-    .cost-table tr.total-row {
-      background: #f0fdf4;
-      font-weight: 800;
-      color: #166534;
-    }
-    .cost-table tr.total-row td {
+    tr:last-child td {
       border-bottom: none;
-      font-size: 1rem;
+    }
+
+    .cost-section .table-wrap { margin: 0; }
+
+    /* 비용표: 좁은 화면에서는 한 행을 카드 하나로 쌓는다 */
+    @media (max-width: 600px) {
+      .table-wrap { overflow-x: visible; }
+      .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
+      .table-wrap thead { display: none; }
+      .table-wrap tr {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        column-gap: 12px;
+        row-gap: 4px;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--color-border);
+      }
+      .table-wrap tr:last-child { border-bottom: none; }
+      .table-wrap td { padding: 0; border: none; }
+      .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: 0.78rem; font-weight: 700; color: var(--color-text-sub); }
+      .table-wrap td:nth-child(2) { font-weight: 700; }
+      .table-wrap td:nth-child(3) { max-width: 60vw; word-break: keep-all; text-align: right; font-weight: 700; }
+      .table-wrap td:nth-child(4) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
+      .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: inherit; color: inherit; }
+      .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; max-width: 60vw; word-break: keep-all; text-align: right; }
+      .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
     }
 
     /* 600px 이하 모바일 전용 카드형 렌더링 */
     @media (max-width: 600px) {
-      .cost-table thead { display: none; }
-      .cost-table, .cost-table tbody, .cost-table tr, .cost-table td {
-        display: block;
-        width: 100%;
-      }
-      .cost-table tr {
-        margin-bottom: 14px;
-        border: 1px solid var(--color-border);
-        border-radius: 10px;
-        padding: 12px;
-        background: white;
-      }
-      .cost-table tr.total-row {
-        background: #f0fdf4;
-        border: 2px solid #86efac;
-      }
-      .cost-table td {
-        display: flex;
-        justify-content: space-between;
-        padding: 6px 0;
-        border-bottom: 1px dashed #f1f5f9;
-        text-align: right;
-      }
-      .cost-table td:last-child { border-bottom: none; }
-      .cost-table td::before {
-        content: attr(data-label);
-        font-weight: 700;
-        color: var(--color-text-sub);
-        text-align: left;
-        padding-right: 12px;
-      }
-      .cost-table .num { text-align: right; }
       h1 { font-size: 1.45rem; }
       .spot-title { font-size: 1.18rem; }
       .article-container { padding: 24px 16px 60px; }
@@ -486,45 +478,41 @@
       <div class="meta-info">
         <span>발행일: 2026년 10월 21일</span>
         <span>·</span>
-        <span>작성: 오늘 데이트 에디토리얼 팀</span>
+        <span>글: 오늘 데이트 에디토리얼 팀 / 사진: 카카오맵 포토 리뷰, 한국관광공사</span>
       </div>
     </header>
 
     <div class="intro-box">
-      충남 보령은 시원한 서해 바다와 낭만적인 숲길, 그리고 이국적인 예술 정원을 하루 만에 오롯이 만끽할 수 있는 다채로운 매력의 드라이브 명소입니다. 바다 위 고가 레일을 달리는 대천해수욕장 스카이바이크를 시작으로, 섬 전체를 둘러싼 2km 지붕 회랑길과 전통 한옥이 어우러진 비밀의 섬 죽도 상화원, 5만 평 야외 조각숲과 실내 온실 개화예술공원, 천장을 수놓은 수만 송이 드라이플라워의 향연 카페리리스, 그리고 신비의 바닷길과 닭벼슬섬 위로 붉게 타오르는 39m 무창포타워 황금빛 일몰 피날레까지 가을날 잊지 못할 힐링 코스를 정리했습니다.
+      충남 보령은 시원한 서해 바다와 낭만적인 숲길, 그리고 이국적인 예술 정원을 하루 만에 오롯이 만끽할 수 있는 다채로운 매력의 드라이브 명소입니다. 바다 위 고가 레일을 달리는 대천해수욕장 스카이바이크를 시작으로, 섬 전체를 둘러싼 2km 지붕 회랑길과 전통 한옥이 어우러진 비밀의 섬 죽도 상화원, 5만 평 야외 조각숲과 허브랜드가 있는 개화예술공원, 생화와 드라이플라워로 꾸민 플라워 카페 리리스, 그리고 신비의 바닷길과 닭벼슬섬 위로 붉게 타오르는 무창포타워 황금빛 일몰 피날레까지 가을날 잊지 못할 힐링 코스를 정리했습니다.
     </div>
 
     <section class="overview-card">
       <h2 class="overview-title">🚗 충남 보령 힐링 드라이브 타임라인</h2>
+      <p style="margin: 0 0 12px; font-size: 0.88rem; color: var(--color-text-sub);">상화원은 4 ~ 11월 금·토·일과 법정공휴일에만 열고, 스카이바이크는 매주 월요일에 쉬어요. 이 동선은 4 ~ 11월 금·토·일과 월요일이 아닌 공휴일에만 그대로 돌 수 있어요.</p>
       <div class="route-timeline">
         <div class="timeline-item">
           <span class="timeline-time">10:30 ~ 11:50</span>
           <span class="timeline-name"><strong>[스팟 1] 대천해수욕장 스카이바이크</strong> (바다 위 2.3km 해상 레일바이크 왕복 탑승)</span>
         </div>
         <div class="timeline-item">
-          <span class="timeline-time">12:00 ~ 13:10</span>
-          <span class="timeline-name"><strong>[점심 식사] 대천 해물 미식</strong> (키조개삼합 또는 해물칼국수)</span>
-          <span class="timeline-dist">(대천해수욕장 먹거리 골목)</span>
-        </div>
-        <div class="timeline-item">
-          <span class="timeline-time">13:22 ~ 14:40</span>
+          <span class="timeline-time">12:00 ~ 13:30</span>
           <span class="timeline-name"><strong>[스팟 2] 죽도 상화원</strong> (2km 목재 회랑길 산책 & 한옥마을 쉼)</span>
-          <span class="timeline-dist">(차량 8.5km · 약 12분)</span>
+          <span class="timeline-dist">(차량 6.6km · 약 10분)</span>
         </div>
         <div class="timeline-item">
-          <span class="timeline-time">15:02 ~ 16:00</span>
+          <span class="timeline-time">14:00 ~ 15:20</span>
           <span class="timeline-name"><strong>[스팟 3] 개화예술공원 & 모산조형미술관</strong> (5만 평 야외 조각숲과 허브랜드)</span>
-          <span class="timeline-dist">(차량 17.5km · 약 22분)</span>
+          <span class="timeline-dist">(차량 20.4km · 약 29분)</span>
         </div>
         <div class="timeline-item">
-          <span class="timeline-time">16:00 ~ 17:00</span>
+          <span class="timeline-time">15:20 ~ 16:20</span>
           <span class="timeline-name"><strong>[스팟 4] 보령 카페리리스</strong> (드라이플라워 갤러리 감성 테마 카페)</span>
           <span class="timeline-dist">(공원 내 도보 2분)</span>
         </div>
         <div class="timeline-item">
-          <span class="timeline-time">17:23 ~ 18:20</span>
-          <span class="timeline-name"><strong>[스팟 5] 무창포타워 & 해변 낙조</strong> (39m 타워에서 감상하는 신비의 바닷길 일몰)</span>
-          <span class="timeline-dist">(차량 18.2km · 약 23분)</span>
+          <span class="timeline-time">16:45 ~ 17:50</span>
+          <span class="timeline-name"><strong>[스팟 5] 무창포타워 & 해변 낙조</strong> (타워에서 보는 신비의 바닷길과 일몰)</span>
+          <span class="timeline-dist">(차량 17.8km · 약 24분)</span>
         </div>
       </div>
     </section>
@@ -546,18 +534,18 @@
 
       <div class="spot-image-wrap">
         <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/b14de105da855c62355892fb7fadc35875e8d71d?original" alt="대천해수욕장 스카이바이크 레일과 바다 풍경 실사 사진" class="spot-image" loading="lazy">
-        <div class="image-caption">대천해수욕장 스카이바이크: 서해 바다 위를 가로지르는 고가 레일에서 마주하는 대천 앞바다 절경</div>
+        <div class="image-caption">대천해수욕장 스카이바이크: 서해 바다 위를 가로지르는 고가 레일에서 마주하는 대천 앞바다 절경<span style="display: block; margin-top: 4px;">출처: 카카오맵</span></div>
       </div>
 
       <ul class="spot-info-list">
         <li><span class="spot-info-label">주소</span><span class="spot-info-val">충청남도 보령시 해수욕장10길 75 (신흑동 2209-4)</span></li>
-        <li><span class="spot-info-label">운영시간</span><span class="spot-info-val">매일 10:00 ~ 17:00 (기상 상황에 따라 운행 조정, 연중무휴)</span></li>
-        <li><span class="spot-info-label">이용료</span><span class="spot-info-val">2인 승차권 22,000원</span></li>
-        <li><span class="spot-info-label">주차안내</span><span class="spot-info-val">대천해수욕장 제1·제2 공영주차장 무료 주차</span></li>
+        <li><span class="spot-info-label">운영시간</span><span class="spot-info-val">화 ~ 일 10:00 ~ 16:40, 휴식시간 12:00 ~ 14:00 (매주 월요일과 설·추석 당일 휴무, TourAPI)</span></li>
+        <li><span class="spot-info-label">이용료</span><span class="spot-info-val">일반 성인 2인 23,000원 (공식 예매 누리집)</span></li>
+        <li><span class="spot-info-label">주차안내</span><span class="spot-info-val">무료 주차 (카카오맵)</span></li>
       </ul>
 
       <p class="spot-desc">
-        대천해수욕장 분수광장 인근에서 출발하는 스카이바이크는 바다 위 2~3층 높이의 고가 레일을 타고 대천항 방향으로 왕복 2.3km를 달리는 국내 최초의 해상 레일바이크입니다. 발아래로 시원하게 넘실대는 파도와 넓은 갯바위 절경을 감상하며 바다 위를 둥둥 떠가는 듯한 짜릿한 개방감을 선사합니다.
+        대천해수욕장 분수광장 인근에서 출발하는 스카이바이크는 바다 위 최고 15m 높이의 고가 레일을 타고 대천항 방향으로 왕복 2.3km를 달리는 국내 최초의 해상 레일바이크입니다. 발아래로 시원하게 넘실대는 파도와 넓은 갯바위 절경을 감상하며 바다 위를 둥둥 떠가는 듯한 짜릿한 개방감을 선사합니다.
       </p>
       <p class="spot-desc">
         오르막과 곡선 구간에는 전동 보조 레일이 작동하여 페달을 무리하게 밟지 않아도 부드럽게 주행하므로 둘만의 대화를 나누며 풍경을 감상하기에 안성맞춤입니다. 반환점을 돌며 바라보는 광활한 대천 백사장과 푸른 서해 수평선은 보령 드라이브의 상쾌한 출발점으로 제격입니다.
@@ -583,34 +571,34 @@
             <span class="chip">2km 목재 회랑길</span>
             <span class="chip">한국 전통 한옥마을</span>
             <span class="chip">울창한 해송 숲</span>
-            <span class="chip">떡과 차 무료 제공</span>
+            <span class="chip">33개 해변 연못</span>
           </div>
         </div>
       </div>
 
       <div class="spot-image-wrap">
-        <img src="https://tong.visitkorea.or.kr/cms/resource/75/4099875_image2_1.jpg" alt="죽도 상화원 한옥 회랑길과 바다 풍경 실사 사진" class="spot-image" loading="lazy">
-        <div class="image-caption">죽도 상화원: 섬 전체를 감싸 안은 지붕 회랑길을 따라 걷는 고즈넉한 한국 전통 한옥 정원</div>
+        <img src="https://tong.visitkorea.or.kr/cms/resource/75/4099875_image2_1.jpg" alt="죽도 상화원 지붕 회랑과 연못 실사 사진" class="spot-image" loading="lazy">
+        <div class="image-caption">상화원 지붕 회랑과 연못 (여름 사진)<span style="display: block; margin-top: 4px;">출처: 한국관광공사</span></div>
       </div>
 
       <ul class="spot-info-list">
         <li><span class="spot-info-label">주소</span><span class="spot-info-val">충청남도 보령시 남포면 남포방조제로 408-52 (남포면 월전리 산154-1)</span></li>
-        <li><span class="spot-info-label">운영시간</span><span class="spot-info-val">매주 금·토·일 및 법정공휴일 09:00 ~ 18:00 (동절기 17:00 마감)</span></li>
-        <li><span class="spot-info-label">관람료</span><span class="spot-info-val">성인 7,000원 (2인 14,000원, 전통 떡 + 차/원두커피 1회 무료 제공)</span></li>
-        <li><span class="spot-info-label">이동거리</span><span class="spot-info-val">스카이바이크에서 8.5km (차량 약 12분)</span></li>
-        <li><span class="spot-info-label">주차안내</span><span class="spot-info-val">죽도 상화원 입구 전용 주차장 무료 이용</span></li>
+        <li><span class="spot-info-label">운영시간</span><span class="spot-info-val">4 ~ 11월 금·토·일과 법정공휴일, 하절기 09:00 ~ 18:00 (입장 마감 17:00) / 동절기 09:00 ~ 17:00 (입장 마감 16:00)</span></li>
+        <li><span class="spot-info-label">관람료</span><span class="spot-info-val">일반 7,000원 (2인 14,000원, TourAPI)</span></li>
+        <li><span class="spot-info-label">이동거리</span><span class="spot-info-val">스카이바이크에서 6.6km (차량 약 10분)</span></li>
+        <li><span class="spot-info-label">주차안내</span><span class="spot-info-val">주차 가능 (카카오맵에 유료로 표시, 요금은 방문 전 확인)</span></li>
       </ul>
 
       <p class="spot-desc">
         대천해수욕장에서 남포방조제 도로를 따라 시원하게 달리면 바다 한가운데 떠 있는 비밀의 섬 죽도 상화원에 이릅니다. 조화와 화합을 뜻하는 상화원은 섬 전체의 자연미를 훼손하지 않고 조성된 한국식 전통 휴양 정원입니다.
       </p>
       <p class="spot-desc">
-        섬 전체를 둘러싼 세계 최장 2km 길이의 지붕 있는 목재 회랑길 덕분에 햇살이 강하거나 비가 와도 쾌적하게 바다 숲길을 걸을 수 있습니다. 회랑길을 따라 걷다 보면 전국 각지에서 원형 그대로 이건하여 복원한 전통 한옥마을과 석양 정원, 해변 연못이 차례로 나타납니다. 중간 쉼터인 의곡당에서는 입장권으로 갓 쪄낸 쫄깃한 떡과 따뜻한 커피를 무료로 받아 솔숲 바다를 바라보며 평화로운 휴식을 취할 수 있습니다.
+        섬 전체를 둘러싼 2km 길이의 지붕 있는 목재 회랑길 덕분에 햇살이 강하거나 비가 와도 쾌적하게 바다 숲길을 걸을 수 있습니다. 회랑길을 따라 걷다 보면 전국 각지에서 원형 그대로 이건하여 복원한 전통 한옥마을과 석양 정원, 해변 연못이 차례로 나타납니다.
       </p>
 
       <div class="tip-box">
         <div class="tip-box-title">💡 에디터 방문 팁</div>
-        상화원은 자연 보존을 위해 매주 금·토·일요일과 법정공휴일에만 한정 개방되므로 방문 요일을 꼭 확인해야 합니다. 지붕 회랑길을 천천히 완주하는 데 약 1시간에서 1시간 30분 정도 소요됩니다.
+        상화원은 4월부터 11월까지 매주 금·토·일요일과 법정공휴일에만 개방되므로 방문 요일을 꼭 확인해야 합니다. 지붕 회랑길을 천천히 완주하는 데 약 1시간에서 1시간 30분 정도 소요됩니다.
       </div>
 
       <div class="action-chips">
@@ -627,30 +615,30 @@
           <div class="spot-chips">
             <span class="chip">5만 평 야외 조각숲</span>
             <span class="chip">모산조형미술관</span>
-            <span class="chip">개화허브랜드 실내 식물원</span>
+            <span class="chip">허브랜드</span>
             <span class="chip">오석 예술 조각</span>
           </div>
         </div>
       </div>
 
       <div class="spot-image-wrap">
-        <img src="https://tong.visitkorea.or.kr/cms/resource/92/3560492_image2_1.jpg" alt="개화예술공원 울창한 숲속 야외 조각공원과 미술관 실사 사진" class="spot-image" loading="lazy">
-        <div class="image-caption">개화예술공원: 성주산 자락 울창한 숲속에 조성된 5만 평 규모의 대형 조각공원과 미술관 전경</div>
+        <img src="https://tong.visitkorea.or.kr/cms/resource/92/3560492_image2_1.jpg" alt="개화예술공원 모산미술관 돌 아치와 입구 실사 사진" class="spot-image" loading="lazy">
+        <div class="image-caption">모산미술관 입구<span style="display: block; margin-top: 4px;">출처: 한국관광공사</span></div>
       </div>
 
       <ul class="spot-info-list">
         <li><span class="spot-info-label">주소</span><span class="spot-info-val">충청남도 보령시 성주면 성주산로 673-47 (성주면 개화리 176-1)</span></li>
         <li><span class="spot-info-label">운영시간</span><span class="spot-info-val">매일 09:00 ~ 18:00 (연중무휴)</span></li>
-        <li><span class="spot-info-label">입장료</span><span class="spot-info-val">일반 성인 6,000원 (2인 12,000원, 조각숲·미술관·식물원 통합 관람)</span></li>
-        <li><span class="spot-info-label">이동거리</span><span class="spot-info-val">죽도 상화원에서 17.5km (차량 약 22분)</span></li>
-        <li><span class="spot-info-label">주차안내</span><span class="spot-info-val">개화예술공원 대형 주차장 무료 이용</span></li>
+        <li><span class="spot-info-label">입장료</span><span class="spot-info-val">성인 6,000원 (2인 12,000원, TourAPI)</span></li>
+        <li><span class="spot-info-label">이동거리</span><span class="spot-info-val">죽도 상화원에서 20.4km (차량 약 29분)</span></li>
+        <li><span class="spot-info-label">주차안내</span><span class="spot-info-val">주차 가능 (카카오맵에 유료로 표시, 요금은 방문 전 확인)</span></li>
       </ul>
 
       <p class="spot-desc">
-        상화원에서 내륙 성주산 자락으로 드라이브를 즐기다 보면 5만 평 대지에 펼쳐진 대규모 복합 문화예술 테마공원 개화예술공원을 만납니다. 보령의 특산석인 남포오석으로 빚어낸 1,500여 점의 조각상과 시비가 푸른 잔디와 숲속 연못을 배경으로 끝없이 이어져 낭만적인 산책로를 이룹니다.
+        상화원에서 내륙 성주산 자락으로 드라이브를 즐기다 보면 약 18ha 골짜기에 자리한 개화예술공원을 만납니다. 보령에서 나는 오석으로 빚은 조각 작품과 시인들의 시를 새긴 육필 시비가 푸른 잔디와 숲속 연못을 배경으로 끝없이 이어져 낭만적인 산책로를 이룹니다.
       </p>
       <p class="spot-desc">
-        공원 중심의 모산조형미술관에서는 세계 각국 예술가들의 현대 미술 기획전시를 감상할 수 있으며, 사계절 푸른 식물이 자라는 대형 실내 온실 개화허브랜드에서는 수로를 따라 헤엄치는 비단잉어와 철갑상어, 야자수와 열대 수생식물이 조화를 이루어 숲속 힐링을 극대화합니다.
+        주황색 지붕의 모산조형미술관은 보령 오석으로 지은 건물로 작가들의 작품을 전시하고, 허브 향기 가득한 허브랜드에서는 식사도 할 수 있습니다. 공원 곳곳에 연못 7개와 폭포, 산책로가 이어집니다.
       </p>
 
       <div class="tip-box">
@@ -680,19 +668,19 @@
 
       <div class="spot-image-wrap">
         <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/a376e9ff99da5f456ac14251fe690d03566fbcbc?original" alt="카페리리스 화려한 드라이플라워와 조명 실사 사진" class="spot-image" loading="lazy">
-        <div class="image-caption">보령 카페리리스: 천장 가득 수만 송이의 드라이플라워와 앤티크 조명이 어우러진 동화 속 갤러리 카페</div>
+        <div class="image-caption">카페리리스 천장에 매단 말린 꽃과 조명<span style="display: block; margin-top: 4px;">출처: 카카오맵</span></div>
       </div>
 
       <ul class="spot-info-list">
         <li><span class="spot-info-label">주소</span><span class="spot-info-val">충청남도 보령시 성주면 성주산로 673-47 (개화예술공원 내 플라워 테마 카페)</span></li>
         <li><span class="spot-info-label">운영시간</span><span class="spot-info-val">매일 09:30 ~ 18:00 (연중무휴)</span></li>
-        <li><span class="spot-info-label">대표메뉴</span><span class="spot-info-val">눈꽃 아인슈페너(8,000원), 꽃향기 아메리카노(6,500원), 플라워 에이드(8,500원)</span></li>
+        <li><span class="spot-info-label">대표메뉴</span><span class="spot-info-val">리리스 플라워 와플 (TourAPI 대표메뉴), 아메리카노(6,500원), 바닐라라떼(7,500원)</span></li>
         <li><span class="spot-info-label">이동거리</span><span class="spot-info-val">개화예술공원 내부 도보 약 2분</span></li>
-        <li><span class="spot-info-label">주차안내</span><span class="spot-info-val">개화예술공원 주차장 공동 무료 이용</span></li>
+        <li><span class="spot-info-label">주차안내</span><span class="spot-info-val">개화예술공원 주차장 이용 (카카오맵)</span></li>
       </ul>
 
       <p class="spot-desc">
-        개화예술공원 안쪽 옛 농장 건물과 목욕탕을 재생 건축하여 완성한 카페리리스는 문을 여는 순간 탄성을 자아내게 만듭니다. 천장과 벽면을 가득 채운 알록달록한 수만 송이의 드라이플라워와 은은한 조명, 향기로운 꽃내음이 어우러져 마치 환상적인 동화 속 세상에 들어선 듯한 착각을 불러일으킵니다.
+        개화예술공원 안 오래된 찜질방을 재해석해 만든 플라워 카페 카페리리스는 문을 여는 순간 탄성을 자아내게 만듭니다. 테이블마다 놓인 생화와 프리저브드 플라워, 드라이플라워로 만든 오브제, 은은한 조명이 어우러져 마치 환상적인 동화 속 세상에 들어선 듯한 착각을 불러일으킵니다.
       </p>
       <p class="spot-desc">
         빈티지 욕조, 앤티크 침대, 레이스 커튼으로 섬세하게 연출된 독립 포토존들이 끝없이 이어져 연인들이 서로의 예쁜 모습을 담아주기에 최고의 공간입니다. 찻잔 위로 향긋한 식용 꽃잎이 띄워져 나오는 시그니처 음료와 달콤한 와플을 즐기며 로맨틱한 오후의 여유를 만끽해보세요.
@@ -715,9 +703,9 @@
           <span class="spot-number">SPOT 5</span>
           <h2 class="spot-title">무창포타워 & 무창포해변 낙조</h2>
           <div class="spot-chips">
-            <span class="chip">39m 조망 타워</span>
+            <span class="chip">전망 타워</span>
             <span class="chip">신비의 바닷길 조망</span>
-            <span class="chip">서해 3대 일몰 명소</span>
+            <span class="chip">무창포해수욕장</span>
             <span class="chip">닭벼슬섬 파노라마</span>
           </div>
         </div>
@@ -725,19 +713,19 @@
 
       <div class="spot-image-wrap">
         <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/61a0492f2426f11e1ba9fbfb92c452a33418bad3?original" alt="무창포타워 전망대에서 바라보는 방파제와 바다 전경 실사 사진" class="spot-image" loading="lazy">
-        <div class="image-caption">무창포타워: 39m 높이의 타워 전망대에서 바라보는 무창포항 방파제와 서해 다도해 전경</div>
+        <div class="image-caption">무창포타워 창밖으로 본 방파제와 바다<span style="display: block; margin-top: 4px;">출처: 카카오맵</span></div>
       </div>
 
       <ul class="spot-info-list">
         <li><span class="spot-info-label">주소</span><span class="spot-info-val">충청남도 보령시 웅천읍 열린바다로 295 (웅천읍 관당리 798-6)</span></li>
-        <li><span class="spot-info-label">운영시간</span><span class="spot-info-val">하절기 10:00 ~ 19:00 / 동절기 10:00 ~ 18:00 (매주 월요일 휴관, 해변 상시 개방)</span></li>
-        <li><span class="spot-info-label">입장료</span><span class="spot-info-val">무창포타워 성인 1,000원 (2인 2,000원 / 해변 입장 무료)</span></li>
-        <li><span class="spot-info-label">이동거리</span><span class="spot-info-val">개화예술공원에서 18.2km (차량 약 23분)</span></li>
-        <li><span class="spot-info-label">주차안내</span><span class="spot-info-val">무창포타워 및 해변 공영주차장 무료 주차</span></li>
+        <li><span class="spot-info-label">운영시간</span><span class="spot-info-val">매일 09:00 ~ 18:00 (네이버 플레이스, 해변은 상시 개방)</span></li>
+        <li><span class="spot-info-label">입장료</span><span class="spot-info-val">타워 요금은 공식 안내를 찾지 못해 방문 전 확인 (해변 입장 무료, TourAPI)</span></li>
+        <li><span class="spot-info-label">이동거리</span><span class="spot-info-val">개화예술공원에서 17.8km (차량 약 24분)</span></li>
+        <li><span class="spot-info-label">주차안내</span><span class="spot-info-val">무료 주차 (카카오맵)</span></li>
       </ul>
 
       <p class="spot-desc">
-        오늘 드라이브의 마지막 피날레는 서해안 최고의 낙조 명소로 손꼽히는 무창포해수욕장 언덕 정상의 무창포타워입니다. 지상 39m, 3층 규모의 현대식 전망 타워에 오르면 360도 전면 유리 통창을 통해 무창포 앞바다와 닭벼슬섬, 석대도가 한눈에 시원하게 내려다보입니다.
+        오늘 드라이브의 마지막은 무창포해수욕장 앞 무창포타워입니다. 전망 타워에 오르면 무창포 앞바다와 닭벼슬섬, 석대도가 한눈에 내려다보입니다.
       </p>
       <p class="spot-desc">
         음력 보름과 그믐 무렵이면 바닷물이 갈라져 석대도까지 1.5km의 바닷길이 열리는 신비의 바닷길 노선이 바다 위로 선명하게 드러납니다. 늦은 오후 해 질 무렵 서서히 붉게 타오르는 석양이 잔잔한 서해 바다와 갯벌을 온통 황금빛과 자줏빛으로 물들이는 장관을 바라보며, 보령 드라이브의 가장 로맨틱한 순간을 마음속에 담아보세요.
@@ -745,7 +733,7 @@
 
       <div class="tip-box">
         <div class="tip-box-title">💡 에디터 방문 팁</div>
-        계절에 따라 일몰 시각이 달라지므로, 방문 당일의 일몰 예정 시각을 미리 확인하여 30분 전까지 타워에 도착하면 하늘과 바다가 빚어내는 가장 드라마틱한 석양 그라데이션을 감상할 수 있습니다.
+        계절에 따라 일몰 시각이 달라지므로, 방문 당일의 일몰 예정 시각을 미리 확인하여 30분 전까지 타워에 도착하면 하늘과 바다가 물드는 석양을 감상할 수 있습니다. 10월 31일 무창포 일몰은 약 17:39(NOAA 계산식)라 16:45 도착이면 여유가 있어요. 타워는 18:00에 닫으니 해가 늦게 지는 계절에는 해변에서 노을을 보세요.
       </div>
 
       <div class="action-chips">
@@ -756,68 +744,57 @@
     <!-- 비용 정산표 섹션 -->
     <section class="cost-section">
       <h2 class="cost-title">💰 충남 보령 드라이브 2인 예상 여행 경비표</h2>
-      <p class="cost-sub">해상 스카이바이크, 전통정원 쉼, 미술관, 플라워 카페 및 로컬 미식 식사 포함 정산</p>
+      <p class="cost-sub">관람료와 카페 음료를 더한 2인 기준 금액이에요. 식사와 유류비, 주차비는 넣지 않았어요.</p>
 
-      <table class="cost-table">
-        <thead>
-          <tr>
-            <th>구분</th>
-            <th>스팟 / 항목</th>
-            <th>상세 내용</th>
-            <th class="num">2인 예상 비용</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td data-label="구분">해상 액티비티</td>
-            <td data-label="스팟 / 항목">[스팟 1] 대천 스카이바이크</td>
-            <td data-label="상세 내용">바다 위 2.3km 해상 레일바이크 왕복 탑승권</td>
-            <td data-label="2인 예상 비용" class="num">22,000원</td>
-          </tr>
-          <tr>
-            <td data-label="구분">점심 식사</td>
-            <td data-label="스팟 / 항목">대천 로컬 미식</td>
-            <td data-label="상세 내용">키조개삼합 정식 2인 또는 해물칼국수 + 해물파전</td>
-            <td data-label="2인 예상 비용" class="num">35,000원</td>
-          </tr>
-          <tr>
-            <td data-label="구분">전통 한옥 정원</td>
-            <td data-label="스팟 / 항목">[스팟 2] 죽도 상화원</td>
-            <td data-label="상세 내용">2km 회랑길 관람권 2인 (전통 떡 + 따뜻한 차/커피 무료 제공)</td>
-            <td data-label="2인 예상 비용" class="num">14,000원</td>
-          </tr>
-          <tr>
-            <td data-label="구분">문화예술 탐방</td>
-            <td data-label="스팟 / 항목">[스팟 3] 개화예술공원</td>
-            <td data-label="상세 내용">야외 조각공원 + 모산조형미술관 + 개화허브랜드 통합 입장료 2인</td>
-            <td data-label="2인 예상 비용" class="num">12,000원</td>
-          </tr>
-          <tr>
-            <td data-label="구분">식음료 (카페)</td>
-            <td data-label="스팟 / 항목">[스팟 4] 보령 카페리리스</td>
-            <td data-label="상세 내용">플라워 에이드 + 눈꽃 아인슈페너 + 미니 디저트</td>
-            <td data-label="2인 예상 비용" class="num">16,000원</td>
-          </tr>
-          <tr>
-            <td data-label="구분">일몰 전망대</td>
-            <td data-label="스팟 / 항목">[스팟 5] 무창포타워</td>
-            <td data-label="상세 내용">39m 조망 타워 전망대 입장료 (성인 1,000원 x 2인)</td>
-            <td data-label="2인 예상 비용" class="num">2,000원</td>
-          </tr>
-          <tr>
-            <td data-label="구분">주차비</td>
-            <td data-label="스팟 / 항목">전 코스 5개 스팟</td>
-            <td data-label="상세 내용">대천·상화원·개화예술공원·무창포 전 구역 무료 주차</td>
-            <td data-label="2인 예상 비용" class="num">0원</td>
-          </tr>
-          <tr class="total-row">
-            <td data-label="구분"><strong>합계</strong></td>
-            <td data-label="스팟 / 항목"><strong>2인 총합</strong></td>
-            <td data-label="상세 내용"><strong>해상 바이크 + 한옥정원 쉼 + 미술관 + 플라워카페 + 타워낙조</strong></td>
-            <td data-label="2인 예상 비용" class="num"><strong>약 101,000원</strong></td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>구분</th>
+              <th>장소</th>
+              <th>2인 금액</th>
+              <th>비고</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>해상 바이크</td>
+              <td>대천해수욕장 스카이바이크</td>
+              <td>23,000원</td>
+              <td>일반 성인 2인 승차권 (공식 예매 누리집)</td>
+            </tr>
+            <tr>
+              <td>정원 산책</td>
+              <td>죽도 상화원</td>
+              <td>14,000원</td>
+              <td>일반 7,000원 × 2인 (TourAPI)</td>
+            </tr>
+            <tr>
+              <td>관람</td>
+              <td>개화예술공원</td>
+              <td>12,000원</td>
+              <td>성인 6,000원 × 2인 (TourAPI)</td>
+            </tr>
+            <tr>
+              <td>카페</td>
+              <td>카페리리스</td>
+              <td>14,000원</td>
+              <td>아메리카노 6,500원 + 바닐라라떼 7,500원 (카카오맵 메뉴)</td>
+            </tr>
+            <tr>
+              <td>전망대</td>
+              <td>무창포타워</td>
+              <td>방문 전 확인</td>
+              <td>타워 요금은 공식 안내를 찾지 못했어요. 해변은 입장 무료 (TourAPI)</td>
+            </tr>
+            <tr style="background-color: #f8fafc; font-weight: 700;">
+              <td colspan="2">2인 총 예상 경비 합계</td>
+              <td style="color: var(--color-warm);">63,000원</td>
+              <td>식사, 유류비, 주차비, 무창포타워 요금 별도 (1인 31,500원)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </section>
 
     <!-- 에디터 총평 -->
@@ -827,7 +804,7 @@
         충남 보령은 단순한 여름 해수욕장을 넘어, 사계절 내내 바다와 숲, 문화예술이 조화롭게 어우러진 서해안 최고의 힐링 여행지입니다. 바다 위 레일을 달리는 스카이바이크의 짜릿함부터 지붕 회랑길을 따라 걷는 죽도 상화원의 고즈넉한 휴식, 5만 평 숲속 미술관과 플라워 카페 리리스의 감성, 그리고 황금빛으로 물드는 무창포타워의 석양까지 하루가 모자랄 만큼 풍성한 추억을 선물합니다.
       </p>
       <p>
-        전 스팟에 무료 주차 공간이 잘 마련되어 있어 쾌적한 드라이브가 가능하며, 바다와 숲길을 넘나드는 44km의 여정은 연인에게 잊지 못할 하루를 선사할 것입니다. 이번 주말, 소중한 사람과 함께 서해안의 낭만을 품은 보령으로 감성 드라이브를 떠나보세요!
+        바다와 숲길을 넘나드는 약 45km의 여정은 연인에게 잊지 못할 하루를 선사할 것입니다. 이번 주말, 소중한 사람과 함께 서해안의 낭만을 품은 보령으로 감성 드라이브를 떠나보세요!
       </p>
     </div>
 
