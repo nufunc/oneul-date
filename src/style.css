@@ -4484,6 +4484,19 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   font-size: 0.80rem;
   margin: 0 0 3px;
 }
+/* 3열 칸은 320에서 71px이라 상호명을 두 줄까지 접는다. 2열과 5열은 한 줄 말줄임 그대로 둔다 */
+.discovery-card.cols-3 .discovery-name {
+  display: block;
+  -webkit-line-clamp: unset;
+}
+.discovery-card.cols-3 .discovery-name-link {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
 .discovery-card.cols-3 .discovery-quote,
 .discovery-card.cols-3 .discovery-card-summary {
   font-size: 0.68rem;
