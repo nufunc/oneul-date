@@ -2990,6 +2990,63 @@ html[data-shared-course] .home-regions {
   line-height: 1.45;
 }
 
+/* spots.json을 받지 못했을 때의 다시 받기 버튼과 홈 위 고정 띠(P-255). 띠는 흐름 밖이라 들어와도 화면을 밀지 않는다 */
+.btn-data-retry {
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-size: var(--font-sm);
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+#receiver-loading .btn-data-retry {
+  align-self: flex-start;
+  margin-top: var(--space-2);
+}
+
+.data-failed-banner {
+  position: fixed;
+  top: calc(var(--space-2) + env(safe-area-inset-top, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 2 * var(--space-3));
+  max-width: var(--layout-max);
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text);
+}
+
+.data-failed-text {
+  flex: 1;
+  margin: 0;
+  font-size: var(--font-sm);
+  line-height: 1.4;
+}
+
+.btn-data-dismiss {
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-sub);
+  font-size: var(--font-md);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
 /* 매거진에서 연 받은 코스의 '← 글로 돌아가기'가 눌리는 영역 80×16이었다(P-238) */
 #receiver-blog-back {
   display: inline-flex;

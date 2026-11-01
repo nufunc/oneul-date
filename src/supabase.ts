@@ -286,6 +286,9 @@ export function mergeSpots(base: Spot[], incoming: Spot[]): Spot[] {
  * 정적 CDN (public/data/spots.json)에서 10,000여 개 스팟 데이터를 비동기 로드합니다.
  * Supabase 일시 장애 또는 대역폭 초과 시에도 100% 무중단 서비스를 보장합니다.
  */
+/** 마지막 loadStaticSpots가 spots.json을 받지 못해 번들 샘플을 돌려줬는지. 화면은 이 값으로 실패를 알리고 다시 받기를 보인다(P-255) */
+export let spotsFellBackToSample = false;
+
 export async function loadStaticSpots(): Promise<Spot[]> {
   try {
     const res = await fetch('./data/spots.json');
@@ -294,12 +297,15 @@ export async function loadStaticSpots(): Promise<Spot[]> {
       if (Array.isArray(data) && data.length > 0) {
         const normalized = normalizeSpots(data as Spot[]);
         saveSpotsToCache(normalized);
+        spotsFellBackToSample = false;
         return normalized;
       }
     }
   } catch {
     // CDN 로드 실패 시 빌드 번들 내장 샘플로 최종 폴백
   }
+  // 샘플은 IndexedDB에 저장하지 않는다. 저장하면 다시 받기(새로 고침)가 캐시의 샘플을 먼저 읽어 전체 파일을 다시 요청하지 않는다
+  spotsFellBackToSample = true;
   // 샘플 JSON의 business_hours가 빈 객체와 {영업시간}, {이용시간}으로 섞이면 TS가 빈 객체를 {영업시간?: undefined}로 추론해 Spot[] 단언이 TS2352로 실패한다. 값은 normalizeSpots가 정리한다
   return normalizeSpots(rawSpotsData as unknown as Spot[]);
 }
