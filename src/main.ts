@@ -3270,14 +3270,27 @@ function buildShareUrl(spotIds: number[]): string {
 }
 
 /**
+ * 공유 시트에 주소와 함께 보낼 코스 한 줄. 주소에는 장소 id만 있고 링크 미리보기는 모든 코스가 같아(P-266)
+ * 받는 사람이 열기 전에 코스를 알 수 있게 한다. 찾지 못한 id는 건너뛰고, 하나도 못 찾으면 undefined
+ */
+function courseShareText(spotIds: number[], regionKeys: string[] = [], zoneKeys: string[] = []): string | undefined {
+  const names = spotIds.map((id) => spotById.get(id)?.name).filter((n): n is string => Boolean(n));
+  if (names.length === 0) return undefined;
+  const region = regionKeys.length > 0 || zoneKeys.length > 0 ? `${regionsLabel(regionKeys, zoneKeys)} ` : '';
+  const more = names.length > 4 ? ` 외 ${names.length - 4}곳` : '';
+  return `${region}데이트 코스 ${names.length}곳: ${names.slice(0, 4).join(' → ')}${more}`;
+}
+
+/**
  * 공유 URL을 OS 공유 시트(Web Share API)로 우선 시도하고, 미지원 시 클립보드 복사로 폴백.
  * dropped: 뺀 장소 수. 제외 안내와 완료 안내를 따로 띄우면 뒤의 것이 앞의 것을 덮어 한 번만 알린다
+ * text: 공유 시트에만 싣는 코스 문구. 클립보드는 주소창에 붙여도 열리도록 주소 한 줄만 복사한다
  */
-async function shareOrCopyLink(url: string, dropped = 0): Promise<void> {
+async function shareOrCopyLink(url: string, dropped = 0, text?: string): Promise<void> {
   if (navigator.share) {
     if (dropped > 0) showToast(`${dropped}곳을 빼고 공유해요`);
     try {
-      await navigator.share({ title: '오늘 데이트', url });
+      await navigator.share({ title: '오늘 데이트', text, url });
       return;
     } catch (err) {
       if (err instanceof Error && err.name === 'AbortError') return; // 사용자가 공유 시트를 취소함
@@ -6226,7 +6239,10 @@ function bindResultEvents(area: HTMLElement): void {
       showToast('공유할 장소가 없어요');
       return;
     }
-    shareOrCopyLink(buildShareUrl(ids));
+    // 찜한 코스와 장소 중심 코스는 선택 조건의 지역이 코스와 다를 수 있어 지역을 붙이지 않는다
+    const cond = state.courseConditions;
+    const byArea = cond && !cond.anchorId && !cond.fromSaved;
+    shareOrCopyLink(buildShareUrl(ids), 0, courseShareText(ids, byArea ? cond.regions : [], byArea ? cond.subZones : []));
   });
   area.querySelector('#btn-save')?.addEventListener('click', () => {
     if (!state.course || !state.courseConditions) return;
@@ -7577,7 +7593,8 @@ function renderReceiverView(steps: CourseStep[]): void {
       showToast('공유할 장소가 없어요');
       return;
     }
-    shareOrCopyLink(buildShareUrl(sharedSpotIds));
+    const area = sharedArea();
+    shareOrCopyLink(buildShareUrl(sharedSpotIds), 0, courseShareText(sharedSpotIds, area.regions, area.subZones));
   });
 }
 
@@ -7892,7 +7909,8 @@ function renderOverlayContent(): void {
           showToast('공유할 수 있는 장소가 없어요');
           return;
         }
-        shareOrCopyLink(buildShareUrl(steps.map((st) => st.spotId as number)), dropped);
+        const ids = steps.map((st) => st.spotId as number);
+        shareOrCopyLink(buildShareUrl(ids), dropped, courseShareText(ids));
       });
     });
 
