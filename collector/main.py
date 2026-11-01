@@ -31,6 +31,7 @@ from heal_and_verify_spots import heal_all_spots
 from merge_duplicates import run_merge
 from event_period import run_event_sync
 from tour_fee import run_parking_backfill
+from kakao_detail import run_kakao_detail_backfill
 from notifier import send_daily_digest
 
 if hasattr(sys.stdout, 'reconfigure'):
@@ -553,6 +554,17 @@ def run_cycle():
             log(f"12단계 주차 백필 오류: {e}", level="ERROR")
     else:
         log("⏩ 12단계(주차 백필) 대기 중 (24시간 주기 보호)")
+
+    # 13단계: TourAPI 밖 행 영업시간·정기 휴무를 카카오 장소 패널로 백필(P-226). 하루 500회, 연속 실패 5회면 멈춘다 (24시간 주기)
+    if is_step_due("kakao_detail_backfill", 24.0):
+        log("▶ 13단계: 카카오 영업시간 백필")
+        try:
+            run_kakao_detail_backfill(apply=True, log=lambda m: log(f"  {m}"),
+                                      backup_dir=os.path.join(os.path.dirname(LOG_DIR), "oneul-backups"))
+        except Exception as e:
+            log(f"13단계 카카오 영업시간 백필 오류: {e}", level="ERROR")
+    else:
+        log("⏩ 13단계(카카오 영업시간 백필) 대기 중 (24시간 주기 보호)")
 
     # 일일 서머리 검사
     check_and_generate_daily_summary()
