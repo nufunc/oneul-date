@@ -47,8 +47,17 @@ function makeEnv() {
       querySelector: () => null,
       querySelectorAll: () => [],
       addEventListener: (t, fn) => (listeners.doc[t] = fn),
+      // 뒤 페이지 스크롤 잠금(P-252): 1280 화면에 스크롤바 15px
+      documentElement: {
+        clientWidth: 1265,
+        classList: Object.assign(new Set(), {
+          contains(c) { return this.has(c); },
+          toggle(c, on) { if (on) this.add(c); else this.delete(c); },
+        }),
+      },
+      body: { style: { paddingRight: '' } },
     },
-    window: { addEventListener: (t, fn) => (listeners.win[t] = fn) },
+    window: { innerWidth: 1280, addEventListener: (t, fn) => (listeners.win[t] = fn) },
     history: {
       depth: 1,
       pushState() { this.depth++; },
@@ -58,6 +67,8 @@ function makeEnv() {
     queueMicrotask: (fn) => fn(),
     // 실제 함수처럼 상태를 보고 자리에 시트를 그린다
     renderOverlayContent: () => {
+      // 실제 함수처럼 찾지 못한 스팟이면 상태를 비우고 돌아온다
+      if (state.spotDetailId === 'missing') state.spotDetailId = null;
       if (env.root) env.root.innerHTML = state.spotDetailId ? `sheet:${state.spotDetailId}` : '';
     },
     renderConditions: () => {},
@@ -72,6 +83,8 @@ function makeEnv() {
   env.goHome = () => { env.makeRoot(); env.api.renderOverlay(); };
   // 상태와 화면이 어긋나면(상태만 열림) 그 상태가 홈에서 시트로 나타난다
   env.consistent = () => Boolean(state.spotDetailId) === Boolean(env.root && env.root.innerHTML.startsWith('sheet:'));
+  // 시트가 없으면 뒤 페이지가 잠겨 있지 않고 스크롤바 보정도 없다
+  env.locked = () => env.document.documentElement.classList.has('overlay-locked');
   return env;
 }
 
@@ -117,10 +130,24 @@ function makeEnv() {
   env.makeRoot();
   env.clickName(3);
   assert.strictEqual(env.root.innerHTML, 'sheet:3');
+  assert.ok(env.locked(), '시트가 열렸는데 뒤 페이지가 잠기지 않았다');
+  assert.strictEqual(env.document.body.style.paddingRight, '15px', '스크롤바 폭을 보정하지 않았다');
   env.api.closeOverlay();
   env.flushPop();
   assert.strictEqual(env.root.innerHTML, '');
   assert.ok(env.consistent());
+  assert.ok(!env.locked(), '시트를 닫았는데 뒤 페이지 잠금이 남았다');
+  assert.strictEqual(env.document.body.style.paddingRight, '', '닫은 뒤 스크롤바 보정이 남았다');
+}
+
+// 5. 찾지 못한 스팟: 상세 시트가 상태를 비우고 돌아오면 뒤 페이지를 잠그지 않는다(P-252)
+{
+  const env = makeEnv();
+  env.makeRoot();
+  env.clickName('missing');
+  assert.strictEqual(env.state.spotDetailId, null);
+  assert.ok(!env.locked(), '시트 없이 뒤 페이지가 잠겼다');
+  assert.strictEqual(env.document.body.style.paddingRight, '');
 }
 
 console.log('ok receiver-sheet');

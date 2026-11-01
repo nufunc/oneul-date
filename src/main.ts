@@ -7626,6 +7626,16 @@ function renderOverlay(): void {
     overlayReturnIndex = cls ? Array.from(document.querySelectorAll(`.${cls}`)).indexOf(overlayReturnFocus as Element) : -1;
   }
   renderOverlayContent();
+  // 열린 동안 백드롭 휠·스와이프와 본문 끝 연쇄가 뒤 페이지를 285~400px 움직이고 닫아도 남았다(P-252).
+  // 찾지 못한 스팟이면 renderOverlayContent가 상태를 비우므로 첫머리 open이 아니라 지금 값으로 잠근다.
+  // 잠긴 뒤에는 clientWidth가 넓어져 폭이 0으로 재지므로 상태가 바뀔 때만 스크롤바 폭을 보정한다
+  const html = document.documentElement;
+  const locked = isOverlayOpen();
+  if (locked !== html.classList.contains('overlay-locked')) {
+    const gap = locked ? window.innerWidth - html.clientWidth : 0;
+    document.body.style.paddingRight = gap > 0 ? `${gap}px` : '';
+    html.classList.toggle('overlay-locked', locked);
+  }
   syncOverlayHistory();
   if (!open && overlayWasOpen) {
     // closeOverlay는 이 함수 뒤에 목록을 다시 그리므로(스팟 탐색) 그 작업이 끝난 뒤에 돌려준다. 기억한 버튼이

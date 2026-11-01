@@ -711,6 +711,12 @@ body {
   min-height: 100vh;
 }
 
+/* 시트·패널이 열린 동안 뒤 페이지가 휠·스와이프로 움직이지 않게 잠근다(P-252). 스크롤바 폭은 main.ts가 body padding-right로 보정한다 */
+html.overlay-locked,
+html.overlay-locked body {
+  overflow: hidden;
+}
+
 button, input, select, textarea, optgroup, option {
   font-family: var(--font-sans);
   font-size: inherit;
@@ -3180,6 +3186,7 @@ html[data-shared-course] .home-regions {
 
 .overlay-body {
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: var(--space-3) var(--space-5) calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
@@ -3429,6 +3436,7 @@ html[data-shared-course] .home-regions {
   background: var(--color-surface-sub);
   border-right: 1px solid var(--color-border);
   overflow-y: auto;
+  overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
@@ -3488,6 +3496,7 @@ html[data-shared-course] .home-regions {
   flex: 1 1 auto;
   padding: var(--space-4);
   overflow-y: auto;
+  overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   background: var(--color-surface);
   display: flex;
@@ -5602,6 +5611,7 @@ html[data-theme-resolved="dark"] .btn-discovery-chip-action.btn-discovery-yt {
 .spot-detail-body {
   flex: 1;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 16px 18px 24px;
   -webkit-overflow-scrolling: touch;
 }
