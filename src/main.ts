@@ -7932,9 +7932,18 @@ function renderOverlayContent(): void {
           }, 3000);
           return;
         }
+        // 다시 그리면 목록이 맨 위로, 초점이 ✕로 가서 다음 항목이 화면 밖으로 밀렸다(P-268). 스크롤을 되돌리고
+        // 같은 순번 🗑(마지막이었으면 앞 항목, 비었으면 빈 상태 버튼)에 초점을 준다
+        const scrollTop = root.querySelector('.overlay-body')?.scrollTop ?? 0;
+        const index = Array.from(root.querySelectorAll('.saved-item-delete')).indexOf(btn);
         const next = loadSavedCourses().filter((c) => c.id !== btn.dataset.deleteId);
         persistSavedCourses(next);
         renderOverlay();
+        const body = root.querySelector('.overlay-body');
+        if (body) body.scrollTop = scrollTop;
+        const dels = root.querySelectorAll<HTMLElement>('.saved-item-delete');
+        const target = dels.length > 0 ? dels[Math.min(index, dels.length - 1)] : root.querySelector<HTMLElement>('#overlay-empty-make');
+        target?.focus({ preventScroll: true });
         showToast('삭제했어요');
       });
     });
