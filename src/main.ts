@@ -3104,7 +3104,11 @@ async function formatCourseTextAsync(
 /**
  * 시간대(낮/밤) 및 세션별 다채로운 감성 서술형 검색 플레이스홀더 반환
  */
+// 다시 그릴 때마다 무작위로 바뀌면 칩을 누를 때마다 안내 문구가 달라졌다(P-265). 페이지 수명에 한 번만 고른다
+let searchPlaceholder: string | null = null;
+
 function getDynamicSearchPlaceholder(): string {
+  if (searchPlaceholder) return searchPlaceholder;
   const hour = new Date().getHours();
   const isNight = hour >= 18 || hour < 5;
 
@@ -3127,8 +3131,8 @@ function getDynamicSearchPlaceholder(): string {
   ];
 
   const pool = isNight ? nightPlaceholders : dayPlaceholders;
-  const idx = Math.floor(Math.random() * pool.length);
-  return pool[idx];
+  searchPlaceholder = pool[Math.floor(Math.random() * pool.length)];
+  return searchPlaceholder;
 }
 
 
@@ -4387,9 +4391,10 @@ function renderConditions(): void {
             placeholder="${getDynamicSearchPlaceholder()}" 
             value="${escapeHtml(state.searchQuery)}"
             autocomplete="off"
+            enterkeyhint="search"
             aria-label="데이트 코스 키워드 검색"
           />
-          <button class="search-clear ${state.searchQuery ? 'is-visible' : ''}" id="search-clear" aria-label="검색어 지우기">✕</button>
+          <button type="button" class="search-clear ${state.searchQuery ? 'is-visible' : ''}" id="search-clear" aria-label="검색어 지우기"${state.searchQuery ? '' : ' tabindex="-1" aria-hidden="true"'}>✕</button>
         </div>
       </div>
 
@@ -4484,7 +4489,12 @@ function bindConditionEvents(area: HTMLElement): void {
     searchInput.addEventListener('input', () => {
       state.searchQuery = searchInput.value.trim();
       if (clearBtn) {
-        clearBtn.classList.toggle('is-visible', Boolean(state.searchQuery));
+        // 보이지 않는 지우기 버튼에 Tab 초점과 화면 읽기가 머물지 않게 보일 때만 닿게 한다
+        const visible = Boolean(state.searchQuery);
+        clearBtn.classList.toggle('is-visible', visible);
+        clearBtn.tabIndex = visible ? 0 : -1;
+        if (visible) clearBtn.removeAttribute('aria-hidden');
+        else clearBtn.setAttribute('aria-hidden', 'true');
       }
     });
     searchInput.addEventListener('keydown', (e) => {
@@ -6806,9 +6816,10 @@ function renderSpotDiscovery(): void {
           placeholder="${getDynamicSearchPlaceholder()}" 
           value="${escapeHtml(state.spotSearchQuery)}"
           autocomplete="off"
+          enterkeyhint="search"
           aria-label="스팟 키워드 검색"
         />
-        <button class="search-clear ${state.spotSearchQuery ? 'is-visible' : ''}" id="btn-clear-discovery-search" aria-label="검색어 지우기">✕</button>
+        <button type="button" class="search-clear ${state.spotSearchQuery ? 'is-visible' : ''}" id="btn-clear-discovery-search" aria-label="검색어 지우기"${state.spotSearchQuery ? '' : ' tabindex="-1" aria-hidden="true"'}>✕</button>
       </div>
     </div>
 
