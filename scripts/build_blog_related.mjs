@@ -1,6 +1,6 @@
 // 빌드 끝에 dist/blog/index.html의 카드를 읽어 dist/blog/<slug>/index.html마다 </body> 앞에 관련 글 링크 블록을 넣는다.
 // 글 89편 모두 다른 글로 가는 링크가 없어 글 끝에서 목록이나 홈으로만 돌아가던 것을 막는다.
-// 고르는 규칙: 같은 권역 글 최대 2편(목록 순서, 자기 제외) + 최신 글로 채워 3편. 목록은 최신 글이 앞이다.
+// 고르는 규칙: 같은 권역 글 최대 2편(목록에서 자기와 가까운 순, 자기 제외) + 목록 바로 앞뒤 글로 채워 3편. 목록은 최신 글이 앞이다.
 // 권역은 카드 제목의 [ ] 첫 낱말로 정한다. card-region-badge는 89장 중 88장이 "경남 함안"이라 쓰지 않는다.
 // 실행 시점: build_home_magazine.mjs 뒤. 원본 public/blog/는 고치지 않는다.
 import fs from 'node:fs';
@@ -12,7 +12,7 @@ const blogDir = path.resolve('dist', 'blog');
 const blogIndexPath = path.join(blogDir, 'index.html');
 const BODY_END = '</body>';
 
-// 제목이 시·군 이름으로만 시작하는 글의 권역. 여기 없는 이름은 권역 없이 최신 글로만 채운다.
+// 제목이 시·군 이름으로만 시작하는 글의 권역. 여기 없는 이름은 권역 없이 목록 앞뒤 글로만 채운다.
 const CITY_REGION = {
   포항: '경북', 안동: '경북', 영주: '경북', 청송: '경북', 문경: '경북', 경주: '경북',
   하동: '경남', 통영: '경남',
@@ -49,7 +49,7 @@ for (const m of fs.readFileSync(blogIndexPath, 'utf-8').matchAll(/<a href="([^"]
 }
 if (posts.length <= COUNT) fail(`카드 ${posts.length}장만 읽었다(필요 ${COUNT + 1}장 이상).`);
 const unknown = posts.filter((p) => !p.region).map((p) => p.slug);
-if (unknown.length) console.warn(`build_blog_related: 권역을 정하지 못해 최신 글로만 채운 글 ${unknown.length}편 (${unknown.join(', ')})`);
+if (unknown.length) console.warn(`build_blog_related: 권역을 정하지 못해 목록 앞뒤 글로만 채운 글 ${unknown.length}편 (${unknown.join(', ')})`);
 
 const STYLE = `<style>
 .od-related{box-sizing:border-box;width:calc(100% - 32px);max-width:720px;margin:40px auto;padding:20px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;color:#1f2937;font:16px/1.5 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;text-align:left}
@@ -69,11 +69,17 @@ const STYLE = `<style>
 }
 </style>`;
 
+// P-243: 남은 칸을 최신 글로 채우면 모든 글이 최신 글 한 편을 가리켜, 같은 권역도 남은 칸도 목록에서 자기와 가까운 글로 고른다.
 function navFor(post) {
-  const picked = posts.filter((p) => p !== post && post.region && p.region === post.region).slice(0, SAME_REGION_MAX);
-  for (const p of posts) {
-    if (picked.length === COUNT) break;
-    if (p !== post && !picked.includes(p)) picked.push(p);
+  const i = posts.indexOf(post);
+  const picked = posts
+    .filter((p) => p !== post && post.region && p.region === post.region)
+    .sort((a, b) => Math.abs(posts.indexOf(a) - i) - Math.abs(posts.indexOf(b) - i))
+    .slice(0, SAME_REGION_MAX);
+  for (let k = 1; picked.length < COUNT; k++) {
+    for (const p of [posts[i + k], posts[i - k]]) {
+      if (p && picked.length < COUNT && !picked.includes(p)) picked.push(p);
+    }
   }
   const items = picked.map((p) => `<li><a href="../${p.slug}/">${p.title}</a></li>`).join('');
   return `<nav class="od-related" aria-label="다른 매거진 글">${STYLE}<h2>다음에 볼 글</h2><ul>${items}</ul><a class="od-related-more" href="../">매거진 전체 보기 →</a></nav>\n`;
