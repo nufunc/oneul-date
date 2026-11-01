@@ -123,7 +123,8 @@
     }
     .article-meta {
       display: flex;
-      gap: 16px;
+      flex-wrap: wrap;
+      gap: 4px 16px;
       font-size: 0.88rem;
       color: var(--color-text-sub);
       border-bottom: 1px solid var(--color-border);
@@ -168,49 +169,16 @@
       padding: 24px;
       margin-bottom: 40px;
     }
-    .timeline-title {
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: var(--color-primary);
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .timeline-list {
-      list-style: none;
-      position: relative;
-      padding-left: 20px;
-    }
-    .timeline-list::before {
-      content: '';
-      position: absolute;
-      left: 6px;
-      top: 8px;
-      bottom: 8px;
-      width: 2px;
-      background: #e2e8f0;
-    }
-    .timeline-item {
-      position: relative;
-      margin-bottom: 16px;
-      font-size: 0.95rem;
-    }
-    .timeline-item:last-child { margin-bottom: 0; }
-    .timeline-item::before {
-      content: '';
-      position: absolute;
-      left: -18px;
-      top: 8px;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--color-accent);
-    }
-    .timeline-time {
-      font-weight: 700;
-      color: var(--color-accent);
-      margin-right: 8px;
+    .timeline-title { font-weight: 700; font-size: 1.05rem; color: var(--color-primary); margin-bottom: 12px; }
+    .tl-act { font-weight: 700; font-size: 13px; color: #64748b; margin: 18px 0 8px; }
+    .timeline-title + .tl-act { margin-top: 0; }
+    .tl-step { display: flex; gap: 12px; align-items: baseline; padding: 6px 0; }
+    .tl-time { flex: none; min-width: 46px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--color-accent); }
+    .tl-place { font-weight: 700; color: #1e293b; }
+    .tl-note { display: block; font-size: 13px; color: #64748b; margin-top: 2px; }
+    .tl-move { font-size: 12.5px; color: #94a3b8; padding: 0 0 0 58px; }
+    @media (max-width: 640px) {
+      .timeline-card { padding: 14px 16px; }
     }
 
     .spot-section {
@@ -323,27 +291,59 @@
       color: var(--color-primary);
       margin-bottom: 16px;
     }
-    .budget-table {
+    .table-wrap {
+      overflow-x: auto;
+      margin: 24px 0;
+      border-radius: 12px;
+      border: 1px solid var(--color-border);
+      background: #fff;
+    }
+    .cost-table {
       width: 100%;
       border-collapse: collapse;
+      text-align: left;
       font-size: 0.92rem;
     }
-    .budget-table th, .budget-table td {
-      padding: 12px 14px;
-      text-align: left;
-      border-bottom: 1px solid #f1f5f9;
+    .cost-table th, .cost-table td {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--color-border);
     }
-    .budget-table th {
-      background: #f8fafc;
+    .cost-table th {
+      background: var(--color-bg-page);
       font-weight: 700;
-      color: #475569;
+      color: var(--color-primary);
     }
-    .budget-table tr:last-child td {
+    .cost-table tr:last-child td {
       border-bottom: none;
+    }
+    .cost-total-row {
       font-weight: 800;
+      background: var(--color-accent-light);
       color: var(--color-accent);
-      font-size: 1.02rem;
-      background: #f0fdf4;
+    }
+
+    /* 비용표: 좁은 화면에서는 한 행을 카드 하나로 쌓는다 */
+    @media (max-width: 600px) {
+      .table-wrap { overflow-x: visible; }
+      .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
+      .table-wrap thead { display: none; }
+      .table-wrap tr {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        column-gap: 12px;
+        row-gap: 4px;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--color-border);
+      }
+      .table-wrap tr:last-child { border-bottom: none; }
+      .table-wrap td { padding: 0; border: none; }
+      .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: 0.78rem; font-weight: 700; color: var(--color-text-sub); }
+      .table-wrap td:nth-child(2) { font-weight: 700; }
+      .table-wrap td:nth-child(3) { max-width: 60vw; word-break: keep-all; text-align: right; font-weight: 700; }
+      .table-wrap td:nth-child(4) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
+      .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: inherit; color: inherit; }
+      .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; max-width: 60vw; word-break: keep-all; text-align: right; }
+      .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; max-width: none; text-align: left; font-size: 0.85rem; font-weight: 400; color: var(--color-text-sub); }
     }
 
     .source-notice {
@@ -375,7 +375,6 @@
       .hero-image { height: 240px; }
       .spot-image { height: 210px; }
       .article-container { padding: 20px 16px 60px; }
-      .budget-table th, .budget-table td { padding: 8px 10px; font-size: 0.85rem; }
     }
     header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
     .header-nav a,.header-title a,.blog-tagline a{display:inline-block}
@@ -401,9 +400,9 @@
         <h1 class="article-title">[충북 영동 감성 드라이브] 달도 머무는 월류봉부터 국악체험촌, 옥계폭포, 송호리송림, 강선대까지 금강 상류 힐링 코스</h1>
         <div class="article-meta">
           <span>📅 2026.10.27</span>
-          <span>🚗 총 이동 45.5km</span>
-          <span>💰 2인 약 8.7만 원</span>
-          <span>✍️ 오늘 데이트 에디토리얼 팀</span>
+          <span>🚗 총 이동 약 51km</span>
+          <span>💰 2인 입장료 0원</span>
+          <span>글: 오늘 데이트 에디토리얼 팀 / 사진: 한국관광공사</span>
         </div>
       </header>
 
@@ -413,60 +412,43 @@
       </div>
 
       <div class="prose-intro">
-        달도 아름다운 풍경에 반해 머물다 간다는 월류봉의 깎아지른 수직 절벽부터 3대 악성 박연의 숨결과 세계 최대의 북 천고가 울려 퍼지는 영동국악체험촌, 울창한 숲속 기암괴석 사이로 떨어지는 은빛 옥계폭포, 백 년 수령 소나무 1만 그루가 숲을 이룬 송호국민관광지, 그리고 금강 벼랑 위 정자 강선대에서 마주하는 황혼 노을까지 이어지는 충북 영동 하루 감성 드라이브 코스예요.
+        달이 머물다 가는 봉우리라는 월류봉의 절벽과 초강천에서 출발해, 난계 박연의 탄생지에 자리한 영동국악체험촌의 세계 최대 북 천고, 박연폭포라고도 불리는 옥계폭포, 100년 넘은 소나무 1만여 그루가 선 송호리송림을 거쳐 금강가 바위 위 육각 정자 강선대에서 해 질 녘을 맞는 충북 영동 하루 드라이브 코스예요.
       </div>
 
       <!-- 동선 타임라인 -->
       <section class="timeline-card">
-        <h2 class="timeline-title">🧭 추천 드라이브 타임라인</h2>
-        <ul class="timeline-list">
-          <li class="timeline-item">
-            <span class="timeline-time">10:30</span>
-            <strong>황간면 월류봉 & 월류봉 둘레길</strong> (초강천 기암절벽과 월류정 누각 산책)
-          </li>
-          <li class="timeline-item">
-            <span class="timeline-time">12:15</span>
-            <strong>황간 로컬 별미 점심 식사</strong> (전통 올갱이국밥과 고소한 도리뱅뱅이)
-          </li>
-          <li class="timeline-item">
-            <span class="timeline-time">13:30</span>
-            <strong>심천면 영동국악체험촌 & 난계사</strong> (세계 최대 북 천고와 한국 전통 소리 쉼터)
-          </li>
-          <li class="timeline-item">
-            <span class="timeline-time">14:50</span>
-            <strong>심천면 옥계폭포 (박연폭포)</strong> (협곡 비경과 높이 20m 비단 폭포수 숲길)
-          </li>
-          <li class="timeline-item">
-            <span class="timeline-time">16:15</span>
-            <strong>양산면 송호국민관광지 & 송호리송림</strong> (백 년 수령 1만 그루 솔숲과 출렁다리)
-          </li>
-          <li class="timeline-item">
-            <span class="timeline-time">17:30</span>
-            <strong>양산면 강선대</strong> (양산팔경 제2경, 금강 바위 벼랑 위 육각 정자 노을)
-          </li>
-          <li class="timeline-item">
-            <span class="timeline-time">18:30</span>
-            <strong>영동읍내 로컬 맛집 디너</strong> (영동 특산 버섯전골 또는 영동 한우 불고기)
-          </li>
-        </ul>
+        <h2 class="timeline-title">영동 금강 상류 드라이브 동선</h2>
+        <div class="tl-act">오전: 황간면 초강천</div>
+        <div class="tl-step"><span class="tl-time">10:30</span><div><span class="tl-place">월류봉</span><span class="tl-note">상시 개방, 입장 무료</span></div></div>
+        <div class="tl-move">↓ 점심 뒤 차로 약 27.1km (약 26분)</div>
+        <div class="tl-act">오후: 심천면 국악과 폭포</div>
+        <div class="tl-step"><span class="tl-time">13:20</span><div><span class="tl-place">영동국악체험촌</span><span class="tl-note">09:00~18:00, 법정공휴일 다음날 휴무</span></div></div>
+        <div class="tl-move">↓ 차로 약 4.0km (약 10분)</div>
+        <div class="tl-step"><span class="tl-time">14:30</span><div><span class="tl-place">옥계폭포</span><span class="tl-note">상시 개방, 입장 무료</span></div></div>
+        <div class="tl-move">↓ 차로 약 17.9km (약 31분)</div>
+        <div class="tl-act">해 질 녘: 양산면 금강 변</div>
+        <div class="tl-step"><span class="tl-time">15:40</span><div><span class="tl-place">송호리송림</span><span class="tl-note">상시 개방, 입장 무료</span></div></div>
+        <div class="tl-move">↓ 차로 약 2.4km (약 8분)</div>
+        <div class="tl-step"><span class="tl-time">17:00</span><div><span class="tl-place">강선대</span><span class="tl-note">11월 2일 일몰 17:34, 시민박명 끝 18:00</span></div></div>
+        <div class="tl-move">차량 이동 합계 약 51.4km, 약 75분 (OSRM 경로 계산)</div>
       </section>
 
       <!-- 1. 월류봉 -->
       <section class="spot-section">
         <div class="spot-header">
           <span class="spot-number">01</span>
-          <h2 class="spot-title">월류봉 & 월류봉 둘레길</h2>
+          <h2 class="spot-title">월류봉</h2>
           <span class="spot-tag">한천팔경 제1경</span>
         </div>
         <div class="spot-image-wrap">
           <img src="https://tong.visitkorea.or.kr/cms/resource/60/3543160_image2_1.jpg" alt="충북 영동 월류봉 전경" class="spot-image" loading="lazy" />
-          <p class="image-caption">초강천 깎아지른 절벽과 바위 언덕 위 자리 잡은 월류정</p>
+          <p class="image-caption">초강천 위 절벽과 바위 언덕 위 정자</p>
         </div>
         <p class="spot-desc">
-          영동 여행의 기분 좋은 첫걸음은 한천팔경의 제1경으로 손꼽히는 월류봉(月留峰)에서 시작해요. '달도 아름다운 풍경에 반해 머물다 간다'는 이름처럼, 해발 400m 높이의 깎아지른 다섯 봉우리가 초강천 맑은 물줄기를 병풍처럼 둘러싸고 있는 절경이에요.
+          영동 여행은 황간면의 월류봉(月留峰)에서 시작해요. 달이 머물다 가는 봉우리라는 뜻의 이름처럼 달밤 풍경이 특히 아름답다고 알려진 곳이에요. 깎아지른 절벽산 아래로 맑은 초강천 상류가 휘감아 흐르고, 월류봉 일대의 산수를 가리키는 한천팔경 가운데 제1경이에요.
         </p>
         <p class="spot-desc">
-          주차장에 차를 대고 월류봉 광장 전망 데크에 서면, 굽이치는 초강천 물길 위 뾰족한 바위 언덕 끝에 아담하게 자리 잡은 월류정이 한눈에 들어와요. 절벽의 웅장한 수직 암벽과 맑은 강물, 붉게 물드는 계절의 숲빛이 한 폭의 동양화처럼 어우러져요.
+          우암 송시열이 이곳에 머물며 학문을 연구했고, 월류봉 아래쪽에 그를 기리는 한천정사와 영동 송우암 유허비가 있어요. 봄에는 진달래와 철쭉, 가을에는 단풍이 들고, 코스마다 풍경이 다른 월류봉 둘레길도 있어요.
         </p>
         <div class="spot-chips-row">
           <a href="https://map.naver.com/p/search/%EC%9B%94%EB%A5%98%EB%B4%89" target="_blank" rel="noopener noreferrer" class="spot-chip-btn map-chip">🗺️ 네이버 지도</a>
@@ -475,10 +457,10 @@
         </div>
         <div class="tip-box">
           <div class="tip-box-title">💡 월류봉 방문 팁</div>
-          • 주소: 충청북도 영동군 황간면 원촌리 일원 (월류봉 광장)<br>
-          • 주차/입장료: 넓은 공영 주차장 무료 완비 / 전면 무료 개방<br>
-          • 포토존 안내: 월류봉 광장 정자 쉼터에서 월류정과 기암절벽을 정면으로 담는 구도가 가장 아름다운 포토존이에요.<br>
-          • 주변 로컬 미식: 황간면 소재지에는 맑고 시원한 초강천에서 잡은 올갱이(다슬기)로 끓여내는 40년 전통 올갱이국밥과 고소한 도리뱅뱅이 전문점이 모여 있어 든든한 점심 식사로 제격이에요.
+          • 주소: 충청북도 영동군 황간면 원촌리<br>
+          • 운영: 상시 개방, 연중무휴 (TourAPI)<br>
+          • 입장료: 무료 (TourAPI)<br>
+          • 주차: 주차 가능 (TourAPI). 카카오맵에 월류봉광장 주차장(원촌리 261)이 있어요.
         </div>
       </section>
 
@@ -486,18 +468,18 @@
       <section class="spot-section">
         <div class="spot-header">
           <span class="spot-number">02</span>
-          <h2 class="spot-title">영동국악체험촌 & 난계사</h2>
+          <h2 class="spot-title">영동국악체험촌</h2>
           <span class="spot-tag">세계 최대 북 천고</span>
         </div>
         <div class="spot-image-wrap">
-          <img src="https://tong.visitkorea.or.kr/cms/resource/85/3577285_image2_1.jpg" alt="충북 영동국악체험촌 전경" class="spot-image" loading="lazy" />
-          <p class="image-caption">고즈넉한 한옥 회랑과 잔디마당이 어우러진 영동국악체험촌</p>
+          <img src="https://tong.visitkorea.or.kr/cms/resource/82/3577282_image2_1.jpg" alt="천고각 현판 아래 붉은 기둥 사이에 놓인 용 그림의 큰 북 천고, 충북 영동국악체험촌" class="spot-image" loading="lazy" />
+          <p class="image-caption">천고각 붉은 기둥 사이에 놓인 큰 북 천고</p>
         </div>
         <p class="spot-desc">
-          황간에서 맛있는 점심을 즐긴 뒤 서쪽 심천면으로 이동하면, 우리나라 3대 악성으로 추앙받는 난계 박연 선생의 고향에 자리한 영동국악체험촌을 만나요. 국악의 본고장 영동의 문화적 깊이를 온몸으로 체험할 수 있는 감성 복합 공간이에요.
+          황간에서 점심을 먹은 뒤 서쪽 심천면으로 이동하면, 난계 박연의 탄생지이자 국악의 고장인 고당리에 영동국악체험촌이 있어요. 우리소리관, 국악누리관, 소리창조관, 천고각 네 개 동에서 전통 음악을 보고 듣고 체험할 수 있는 국악 마을이에요.
         </p>
         <p class="spot-desc">
-          국악체험촌의 가장 압도적인 볼거리는 기네스북에 등재된 세계 최대의 북인 '천고(天鼓)'예요. 지름 5.5m, 북 길이 6m, 무게 7톤에 달하는 거대한 북으로, 하늘의 소리를 울려 퍼뜨린다는 상징적인 의미를 지니고 있어요. 넓은 잔디광장과 한옥 건물들이 어우러진 언덕길을 산책하며, 바로 인근에 자리한 난계사와 전통 소리 쉼터를 둘러보는 코스는 여유롭고 차분한 분위기를 전해줘요.
+          천고각에는 소리가 하늘에 닿으면 간절한 소망이 이루어진다는 세계 최대의 북 '천고(天鼓)'가 놓여 있어요. 300석 공연장을 갖춘 우리소리관에서는 매주 토요일 난계국악단의 토요 상설 공연이 열리고, 소리창조관에는 국악기 연주와 명상 체험을 하는 국악체험실이 있어요.
         </p>
         <div class="spot-chips-row">
           <a href="https://map.naver.com/p/search/%EC%98%81%EB%8F%99%EA%B5%AD%EC%95%85%EC%B2%B4%ED%97%98%EC%B4%8C" target="_blank" rel="noopener noreferrer" class="spot-chip-btn map-chip">🗺️ 네이버 지도</a>
@@ -507,9 +489,10 @@
         <div class="tip-box">
           <div class="tip-box-title">💡 영동국악체험촌 이용 팁</div>
           • 주소: 충청북도 영동군 심천면 국악로1길 33<br>
-          • 운영시간: 09:00 ~ 18:00 (매주 월요일 정기 휴관)<br>
-          • 입장료: 국악체험촌 야외 관람 및 정원 산책 무료 (천고 타고 체험료 1인 3,000원)<br>
-          • 데이트 스냅 팁: 국악체험촌 내 고즈넉한 한옥 회랑과 정원 벤치는 사람이 붐비지 않아 한적한 데이트 스냅 사진을 남기기에 참 좋아요.
+          • 운영: 09:00~18:00, 자세한 사항은 전화 문의 043-740-3891 (TourAPI)<br>
+          • 휴무: 1월 1일, 설·추석 연휴, 법정공휴일 다음날 (TourAPI)<br>
+          • 주차: 주차 가능, 주차요금 무료 (TourAPI)<br>
+          • 체험: 전통놀이 체험, 국악의상 체험, 국악기 연주 체험 (TourAPI). 체험 요금은 전화로 확인해요.
         </div>
       </section>
 
@@ -518,17 +501,17 @@
         <div class="spot-header">
           <span class="spot-number">03</span>
           <h2 class="spot-title">옥계폭포 (박연폭포)</h2>
-          <span class="spot-tag">협곡 비경 20m 비단 폭포</span>
+          <span class="spot-tag">높이 20m 절벽 폭포</span>
         </div>
         <div class="spot-image-wrap">
           <img src="https://tong.visitkorea.or.kr/cms/resource/28/4065728_image2_1.jpg" alt="충북 영동 옥계폭포 비경" class="spot-image" loading="lazy" />
           <p class="image-caption">깎아지른 바위 협곡 사이로 시원하게 떨어지는 옥계폭포 물줄기</p>
         </div>
         <p class="spot-desc">
-          국악체험촌에서 차로 7분만 달리면, 깎아지른 바위 협곡 사이에 숨겨진 옥계폭포(박연폭포)에 도착해요. 난계 박연 선생이 바위 위에 앉아 흐르는 물줄기를 바라보며 피리를 불고 음악적 영감을 얻었다고 전해지는 유서 깊은 명소예요.
+          국악체험촌에서 차로 약 10분 가면 옥계폭포에 닿아요. 박연폭포라고도 불리는 옥계폭포는 깎아지른 듯한 절벽에서 20m 높이로 물줄기가 쏟아져 내리는 곳이에요. 난계 박연이 즐겨 찾았고, 예부터 많은 시인이 이곳의 아름다움을 찬탄하는 글을 남겼다고 전해져요.
         </p>
         <p class="spot-desc">
-          주차장에서 폭포로 향하는 진입로는 울창한 숲과 기암괴석이 둘러싸고 있어 마치 깊은 산속 비밀의 화원으로 들어가는 기분이 들어요. 5분 정도 완만한 숲길을 걸어가면 우람한 절벽 틈으로 높이 20m에서 쏟아져 내리는 은빛 폭포수가 시원한 장관을 연출해요. 폭포 아래 연못과 전망 정자 주변에는 음이온과 맑은 피톤치드가 가득 차 있어 잠시 서 있는 것만으로도 가슴 속까지 맑아지는 상쾌함을 느낄 수 있어요.
+          심천면 옥계리로 들어가 천모산 골짜기 산길을 따라 약 1km 들어가면 폭포가 나와요. 폭포에서 떨어진 물이 계곡을 따라 흐르다 잠시 머무는 산중 저수지와 그 뒤로 이어지는 오솔길도 함께 둘러볼 만해요.
         </p>
         <div class="spot-chips-row">
           <a href="https://map.naver.com/p/search/%EC%98%A5%EA%B3%84%ED%8F%AD%ED%8F%AC" target="_blank" rel="noopener noreferrer" class="spot-chip-btn map-chip">🗺️ 네이버 지도</a>
@@ -538,8 +521,9 @@
         <div class="tip-box">
           <div class="tip-box-title">💡 옥계폭포 탐방 팁</div>
           • 주소: 충청북도 영동군 심천면 고당리 산75-1<br>
-          • 주차/입장료: 폭포 입구 공영 주차장 무료 이용 / 전면 무료 입장<br>
-          • 산책 안내: 주차장에서 폭포 정자까지 도보 5분 거리의 평탄한 길이라 편안한 신발로도 충분히 방문할 수 있어요. 비가 온 직후에 찾으면 훨씬 웅장하고 풍성한 수량을 만날 수 있어요.
+          • 운영: 상시 개방, 연중무휴 (TourAPI)<br>
+          • 입장료: 무료 (TourAPI)<br>
+          • 주차: 주차 가능 (TourAPI)
         </div>
       </section>
 
@@ -547,18 +531,18 @@
       <section class="spot-section">
         <div class="spot-header">
           <span class="spot-number">04</span>
-          <h2 class="spot-title">송호국민관광지 & 송호리송림</h2>
-          <span class="spot-tag">1만 그루 아름드리 솔숲</span>
+          <h2 class="spot-title">송호리송림</h2>
+          <span class="spot-tag">소나무 1만여 그루 솔숲</span>
         </div>
         <div class="spot-image-wrap">
           <img src="https://tong.visitkorea.or.kr/cms/resource/88/3572788_image2_1.jpg" alt="충북 영동 송호국민관광지 솔숲" class="spot-image" loading="lazy" />
           <p class="image-caption">금강 물줄기를 끼고 울창하게 펼쳐진 백 년 수령 송호리 솔숲</p>
         </div>
         <p class="spot-desc">
-          오후 햇살이 부드러워질 무렵, 영동의 남쪽 양산면으로 내려가 송호국민관광지 송호리송림을 찾아요. 맑은 금강 물줄기를 끼고 수백 년 된 아름드리 소나무 1만여 그루가 빽빽하게 숲을 이루고 있는 양산팔경의 대표 명소예요.
+          오후에는 영동 남쪽 양산면으로 내려가 송호리송림을 찾아요. 100년이 넘은 소나무 1만여 그루가 심어진 솔숲이고, 숲을 포함한 일대 28만㎡가 송호국민관광지로 지정되어 있어요. 송림 옆으로 금강 상류인 양강이 흘러요.
         </p>
         <p class="spot-desc">
-          솔잎 향기가 은은하게 퍼지는 숲길을 따라 걷다 보면, 강변을 가로지르는 송호금강물빛다리(출렁다리)를 마주해요. 출렁다리 위에서 내려다보는 금강의 잔잔한 윤슬과 솔숲의 조화는 마음을 편안하게 가라앉혀 줘요. 솔숲 사이사이 놓인 벤치에 앉아 따뜻한 음료를 마시며 담소를 나누기에 이보다 더 좋은 장소가 없어요.
+          '양산팔경의 중심'으로 불리고, 양산팔경 가운데 세 곳이 송림 근처에 있어요. 산책로가 잘 조성되어 있고 중간중간 쉬어 갈 편의 시설이 있어요. 카카오맵에는 송림 옆 송호리 410에 송호금강물빛다리가 있어요.
         </p>
         <div class="spot-chips-row">
           <a href="https://map.naver.com/p/search/%EC%86%A1%ED%98%B8%EA%B5%AD%EB%AF%BC%EA%B4%80%EA%B4%91%EC%A7%80" target="_blank" rel="noopener noreferrer" class="spot-chip-btn map-chip">🗺️ 네이버 지도</a>
@@ -567,9 +551,11 @@
         </div>
         <div class="tip-box">
           <div class="tip-box-title">💡 송호국민관광지 이용 팁</div>
-          • 주소: 충청북도 영동군 양산면 송호로 105<br>
-          • 입장료: 성인 2,000원 x 2인 = 4,000원 (넓은 무료 주차장 완비)<br>
-          • 추천 동선: 솔숲 산책로에서 송호금강물빛다리(보도현수교)를 건너 강변 데크 산책로로 이어지는 코스는 약 40분 정도 소요되며 잔잔한 강변 뷰를 감상하기에 가장 좋아요.
+          • 주소: 충청북도 영동군 양산면 송호로 105 (송호국민관광지)<br>
+          • 운영: 상시 개방, 연중무휴 (TourAPI)<br>
+          • 입장료: 무료 (TourAPI)<br>
+          • 주차: 주차 가능 (TourAPI). 문의는 송호관광지 관리사무소 043-740-3228이에요.<br>
+          • 출발 시각: 16:50쯤 송림을 나서면 강선대에 해 지기 전에 닿아요.
         </div>
       </section>
 
@@ -578,17 +564,17 @@
         <div class="spot-header">
           <span class="spot-number">05</span>
           <h2 class="spot-title">강선대 (降仙臺)</h2>
-          <span class="spot-tag">양산팔경 제2경 노을 뷰</span>
+          <span class="spot-tag">양산팔경 금강 변 정자</span>
         </div>
         <div class="spot-image-wrap">
-          <img src="https://tong.visitkorea.or.kr/cms/resource/06/3572806_image2_1.jpg" alt="충북 영동 강선대 누각" class="spot-image" loading="lazy" />
-          <p class="image-caption">금강 변 기암절벽 위에 고즈넉하게 자리 잡은 육각 정자 강선대</p>
+          <img src="https://tong.visitkorea.or.kr/cms/resource/10/3572810_image2_1.jpg" alt="降仙臺 현판을 단 붉은 기둥과 초록 단청의 정자, 소나무와 나무 난간이 둘러싼 충북 영동 강선대" class="spot-image" loading="lazy" />
+          <p class="image-caption">降仙臺 현판을 단 정자와 둘레의 소나무, 나무 난간</p>
         </div>
         <p class="spot-desc">
-          영동 감성 드라이브의 마지막 피날레는 송호관광지에서 차로 5분 거리에 위치한 강선대(降仙臺)예요. 양산팔경 중 가장 아름답다고 손꼽히는 곳으로, 금강 상류 맑은 물가에 우뚝 솟은 기암절벽 위에 고즈넉하게 서 있는 육각 정자예요.
+          마지막은 송호리송림에서 차로 약 8분 거리인 강선대(降仙臺)예요. 양산팔경 가운데 가장 아름답다고 손꼽히는 곳으로, 유유히 흐르는 금강가에 우뚝 솟은 바위 위에 육각 정자가 서 있어요. 멀리서 보면 주변 노송과 어울려 우아한 멋이 있어요.
         </p>
         <p class="spot-desc">
-          '선녀가 하늘에서 내려와 목욕을 하고 수려한 경치에 반해 노닐었다'는 전설이 깃들어 있을 만큼, 정자 위에서 굽어보는 금강의 풍경은 신비롭고 아늑해요. 수백 년 된 노송들이 정자를 포근하게 감싸 안고 있고, 발아래로는 잔잔한 금강물이 벼랑을 감돌아 흘러가요. 서쪽 하늘로 해가 기울며 금강 수면과 바위 벼랑이 붉은빛으로 물드는 황혼 무렵의 강선대는 이번 영동 여행에서 가장 잊지 못할 낭만적인 순간을 선물해 줘요.
+          정자 위에 서면 푸른 강물이 부딪치는 바위 절벽이 아찔하게 내려다보여요. 물과 바위와 소나무가 어울려 삼합을 이룬 곳이라고도 하고, 정자 안에는 조선의 이안눌과 『한우가』로 유명한 임제의 시가 걸려 있어요.
         </p>
         <div class="spot-chips-row">
           <a href="https://map.naver.com/p/search/%EA%B0%95%EC%84%A0%EB%8C%80" target="_blank" rel="noopener noreferrer" class="spot-chip-btn map-chip">🗺️ 네이버 지도</a>
@@ -598,50 +584,66 @@
         <div class="tip-box">
           <div class="tip-box-title">💡 강선대 감상 팁</div>
           • 주소: 충청북도 영동군 양산면 봉곡리 756-1<br>
-          • 주차/입장료: 강선대 입구 무료 주차 공간 마련 / 전면 무료 입장<br>
-          • 관람 안내: 주차장에서 나무 데크 계단을 따라 2분만 오르면 바로 정자에 닿을 수 있어요. 일몰 30분 전 도착해 누각 난간에 기대어 금강으로 떨어지는 노을을 감상해 보세요.
+          • 운영: 상시 개방, 연중무휴 (TourAPI)<br>
+          • 입장료: 무료 (TourAPI)<br>
+          • 주차: 주차 가능 (TourAPI)<br>
+          • 해 질 녘: 11월 2일 강선대의 일몰은 17:34, 시민박명 끝은 18:00이에요. 17:00쯤 도착하면 해가 지기 전에 정자에 오를 수 있어요.
         </div>
       </section>
 
       <!-- 2인 비용 정산표 -->
       <section class="budget-section">
-        <h2 class="budget-title">💰 2인 하루 감성 드라이브 경비 정산표</h2>
-        <table class="budget-table">
-          <thead>
-            <tr>
-              <th>구분</th>
-              <th>세부 내역</th>
-              <th>2인 예상 비용</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>명소 관람</td>
-              <td>월류봉 · 영동국악체험촌 · 옥계폭포 · 강선대 무료 + 송호관광지(2인 4,000원)</td>
-              <td>4,000원</td>
-            </tr>
-            <tr>
-              <td>점심 식사</td>
-              <td>황간 전통 올갱이국밥(2인) & 바삭한 도리뱅뱅이</td>
-              <td>26,000원</td>
-            </tr>
-            <tr>
-              <td>카페 쉼</td>
-              <td>금강 뷰 감성 카페 시그니처 음료 & 디저트</td>
-              <td>16,000원</td>
-            </tr>
-            <tr>
-              <td>저녁 식사</td>
-              <td>영동 로컬 특산 버섯전골 또는 영동 한우 불고기 정식</td>
-              <td>41,000원</td>
-            </tr>
-            <tr>
-              <td>총합계</td>
-              <td>2인 기준 충북 영동 하루 감성 드라이브</td>
-              <td>약 87,000원</td>
-            </tr>
-          </tbody>
-        </table>
+        <h2 class="budget-title">2인 예상 여행 경비</h2>
+        <p>출처에서 확인한 입장 요금만 더한 2인 기준 경비예요.</p>
+        <div class="table-wrap">
+          <table class="cost-table">
+            <thead>
+              <tr>
+                <th>구분</th>
+                <th>장소</th>
+                <th>2인 금액</th>
+                <th>비고</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>산과 강</td>
+                <td>월류봉</td>
+                <td>0원</td>
+                <td>입장 무료, 주차 가능 (TourAPI)</td>
+              </tr>
+              <tr>
+                <td>국악 체험</td>
+                <td>영동국악체험촌</td>
+                <td>확인 필요</td>
+                <td>TourAPI에 입장료 칸이 없어 합계에서 뺐어요. 주차 무료 (TourAPI)</td>
+              </tr>
+              <tr>
+                <td>폭포</td>
+                <td>옥계폭포</td>
+                <td>0원</td>
+                <td>입장 무료, 주차 가능 (TourAPI)</td>
+              </tr>
+              <tr>
+                <td>솔숲</td>
+                <td>송호리송림</td>
+                <td>0원</td>
+                <td>입장 무료, 주차 가능 (TourAPI)</td>
+              </tr>
+              <tr>
+                <td>정자</td>
+                <td>강선대</td>
+                <td>0원</td>
+                <td>입장 무료, 주차 가능 (TourAPI)</td>
+              </tr>
+              <tr class="cost-total-row">
+                <td colspan="2">2인 합계</td>
+                <td>0원</td>
+                <td>국악체험촌 체험 요금, 식사, 음료, 유류비 별도</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <div class="source-notice">
