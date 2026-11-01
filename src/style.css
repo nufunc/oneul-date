@@ -4112,6 +4112,14 @@ html[data-shared-course] .home-regions {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
+  position: relative;
+}
+
+/* 배지 상자(29.4px)는 그대로 두고 눌리는 영역만 위아래 8px씩 넓혀 44px 이상으로 만든다(P-263). 7px은 실측 42px였다. 위아래 카드와는 약 12px 떨어져 있어 겹치지 않는다 */
+.step-transit-badge::before {
+  content: '';
+  position: absolute;
+  inset: -8px 0;
 }
 
 .step-transit-badge:hover {
