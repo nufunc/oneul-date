@@ -1755,6 +1755,20 @@ html[data-shared-course] .home-regions {
   width: 100%;
 }
 
+/* spots.json을 받는 동안 받은 비율(--load-pct, main.ts paintSpotsProgress)만큼 버튼을 채운다. 다크 테마는 배경이 그라디언트라 그 위에 겹친다(P-257)
+   color-mix가 없는 브라우저는 채움 없이 기존 버튼으로 둔다: var가 계산 시점에 무효가 되면 다크 그라디언트까지 지워진다 */
+@supports (color: color-mix(in srgb, red 50%, transparent)) {
+  #btn-generate[aria-busy="true"] {
+    --load-fill: linear-gradient(90deg, color-mix(in srgb, var(--color-on-accent) 22%, transparent) var(--load-pct, 0%), transparent var(--load-pct, 0%));
+    background-image: var(--load-fill);
+    background-repeat: no-repeat;
+  }
+  html[data-theme="dark"] #btn-generate[aria-busy="true"],
+  html[data-theme-resolved="dark"] #btn-generate[aria-busy="true"] {
+    background-image: var(--load-fill), var(--color-accent-gradient);
+  }
+}
+
 /* 좁은 화면에서 한 줄에 두세 버튼을 두면 주 버튼이 320px에서 92px 폭·4줄로 눌렸고, 찜한 스팟이 있어 버튼이
    셋이면 문서가 339px로 넘쳤다. 주 버튼을 한 줄로 올리고 보조 버튼은 아래 줄에 나눠 둔다 */
 /* 버튼군 전체를 붙이면 320×667에서 화면 아래 136px을 가려, 좁은 화면은 버튼군을 풀고 주 버튼만 붙인다(P-236) */

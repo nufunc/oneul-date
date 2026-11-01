@@ -228,7 +228,7 @@ const ZONE_CENTERS: Record<string, { lat: number; lng: number }> = {
 const STORAGE_KEY = 'oneul_saved_courses';
 const RECENT_KEY = 'oneul_recent_spots';
 const LAST_COURSE_STORAGE_KEY = 'oneul_last_course';
-import { loadSpots, getCachedSpots, mergeSpots, loadSpotAliases, loadStations, findSpotsByRange, spotsFellBackToSample } from './supabase';
+import { loadSpots, getCachedSpots, mergeSpots, loadSpotAliases, loadStations, findSpotsByRange, spotsFellBackToSample, spotsBytesReceived, onSpotsProgress } from './supabase';
 
 const RECENT_MAX = 100;
 
@@ -4429,7 +4429,7 @@ function renderConditions(): void {
       <!-- 5. 코스 완성하기 버튼군: 맞춤 생성 + 오늘의 추천 + 찜한 코스 -->
       <div class="course-generate-btn-group">
         <button class="btn-primary btn-generate" id="btn-generate"${courseWaitingForSpots ? ' disabled aria-busy="true"' : ''}>
-          ${courseWaitingForSpots ? '스팟 불러오는 중…' : '🚀 맞춤 데이트 코스 완성하기'}
+          ${courseWaitingForSpots ? spotsWaitLabel() : '🚀 맞춤 데이트 코스 완성하기'}
         </button>
         ${courseWaitingForSpots ? '<span class="sr-only" role="status">스팟 불러오는 중…</span>' : ''}
         <button class="btn-daily-recommend" id="btn-daily-recommend" type="button" title="오늘 날짜 기반 에디터 추천 코스 바로 보기">
@@ -4444,6 +4444,7 @@ function renderConditions(): void {
     </div>
   `;
   bindConditionEvents(area);
+  paintSpotsProgress();
   restoreFocusIn(area, refocusSelector, '#search-input');
 }
 
@@ -4581,6 +4582,28 @@ function resolveWaitingCourse(): void {
   if (state.mainMode !== 'course' || location.hash.startsWith('#c=') || !document.getElementById('btn-generate')) return;
   renderConditions();
   triggerCourseGeneration();
+}
+
+declare const __SPOTS_JSON_BYTES__: number;
+const SPOTS_JSON_BYTES = typeof __SPOTS_JSON_BYTES__ !== 'undefined' ? __SPOTS_JSON_BYTES__ : 0;
+
+/** 대기 버튼 문구. 분모(빌드 때 잰 spots.json 크기)가 없으면 기존 문구를 쓰고, 다 받기 전에 100%를 보이지 않게 99에서 멈춘다(P-257) */
+function spotsLoadPct(): number | null {
+  return SPOTS_JSON_BYTES > 0 ? Math.min(99, Math.floor((spotsBytesReceived / SPOTS_JSON_BYTES) * 100)) : null;
+}
+function spotsWaitLabel(): string {
+  const pct = spotsLoadPct();
+  return pct === null ? '스팟 불러오는 중…' : `스팟 받는 중 ${pct}%`;
+}
+
+/** 받는 동안 대기 버튼의 글자와 채움 비율만 바꾼다. 화면 전체를 다시 그리지 않고 role=status 알림도 다시 내지 않는다 */
+function paintSpotsProgress(): void {
+  const btn = document.getElementById('btn-generate');
+  const pct = spotsLoadPct();
+  if (!btn || btn.getAttribute('aria-busy') !== 'true' || pct === null) return;
+  btn.style.setProperty('--load-pct', `${pct}%`);
+  const label = spotsWaitLabel();
+  if (btn.textContent !== label) btn.textContent = label;
 }
 
 function triggerCourseGeneration(): void {
@@ -8629,6 +8652,7 @@ async function init(): Promise<void> {
       });
     }
     // 캐시가 없는 첫 방문 시: 전국 전체 스팟 로드
+    onSpotsProgress(paintSpotsProgress);
     fullSpotsPending = true;
     loadSpots()
       .then((firstSpots) => {

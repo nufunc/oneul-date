@@ -288,12 +288,42 @@ export function mergeSpots(base: Spot[], incoming: Spot[]): Spot[] {
  */
 /** 마지막 loadStaticSpots가 spots.json을 받지 못해 번들 샘플을 돌려줬는지. 화면은 이 값으로 실패를 알리고 다시 받기를 보인다(P-255) */
 export let spotsFellBackToSample = false;
+/** 전체 spots.json에서 지금까지 받은 풀린 바이트. 버튼을 다시 그릴 때 이 값으로 비율을 잇는다(P-257) */
+export let spotsBytesReceived = 0;
+let spotsProgressListener: ((bytes: number) => void) | null = null;
+/** 전체 spots.json을 받는 동안 바이트가 올 때마다 받은 풀린 바이트 수로 부를 함수를 등록한다 */
+export const onSpotsProgress = (cb: ((bytes: number) => void) | null): void => { spotsProgressListener = cb; };
+// 헤더나 바이트가 이만큼 오지 않으면 끊고 샘플로 떨어진다. Slow 4G 정상 받기가 20초를 넘어 전체 시간 제한은 두지 않는다(P-257)
+const SPOTS_IDLE_MS = 15000;
 
 export async function loadStaticSpots(): Promise<Spot[]> {
+  const ctrl = new AbortController();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const arm = () => { clearTimeout(timer); timer = setTimeout(() => ctrl.abort(), SPOTS_IDLE_MS); };
+  spotsBytesReceived = 0;
   try {
-    const res = await fetch('./data/spots.json');
+    arm();
+    const res = await fetch('./data/spots.json', { signal: ctrl.signal });
     if (res.ok) {
-      const data = await res.json();
+      let data: unknown;
+      if (res.body) {
+        // 스트림은 풀린 바이트를 내준다. Content-Length는 gzip 크기라 분모로 쓰지 않는다
+        arm();
+        const reader = res.body.getReader();
+        const chunks: Uint8Array[] = [];
+        let got = 0; // 지역별 loadSpots가 겹쳐 불려도 한 요청의 값만 내도록 요청마다 센다
+        for (let r = await reader.read(); !r.done; r = await reader.read()) {
+          arm();
+          chunks.push(r.value);
+          spotsBytesReceived = got += r.value.length;
+          spotsProgressListener?.(got);
+        }
+        clearTimeout(timer);
+        data = JSON.parse(await new Blob(chunks as BlobPart[]).text());
+      } else {
+        clearTimeout(timer);
+        data = await res.json();
+      }
       if (Array.isArray(data) && data.length > 0) {
         const normalized = normalizeSpots(data as Spot[]);
         saveSpotsToCache(normalized);
@@ -303,6 +333,8 @@ export async function loadStaticSpots(): Promise<Spot[]> {
     }
   } catch {
     // CDN 로드 실패 시 빌드 번들 내장 샘플로 최종 폴백
+  } finally {
+    clearTimeout(timer);
   }
   // 샘플은 IndexedDB에 저장하지 않는다. 저장하면 다시 받기(새로 고침)가 캐시의 샘플을 먼저 읽어 전체 파일을 다시 요청하지 않는다
   spotsFellBackToSample = true;
