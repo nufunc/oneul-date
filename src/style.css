@@ -3273,6 +3273,48 @@ html[data-shared-course] .home-regions {
   animation: sheet-down 0.2s cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 
+/* 클립보드 복사가 거부될 때 여는 주소 시트(P-269). 저장한 코스 패널과 스팟 상세(1000) 위, 토스트(1100) 아래 */
+.copy-sheet-backdrop {
+  z-index: 1040;
+}
+
+.copy-sheet-panel {
+  z-index: 1041;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5) calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+}
+
+.copy-sheet-desc {
+  font-size: var(--font-sm);
+  color: var(--color-text-sub);
+}
+
+.copy-sheet-text {
+  width: 100%;
+  font-size: 16px; /* iOS가 16px 미만 입력칸에 초점을 주면 화면을 확대한다 */
+  line-height: 1.5;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-text);
+  resize: none;
+  /* 한국어는 낱말 단위로 꺾고, 공백 없는 긴 주소만 아무 데서나 꺾는다 */
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.copy-sheet-close {
+  width: 100%;
+}
+
+@media (max-width: 360px) {
+  .copy-sheet-panel {
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+  }
+}
+
 .overlay-head {
   display: flex;
   justify-content: space-between;

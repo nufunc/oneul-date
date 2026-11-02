@@ -3297,12 +3297,75 @@ async function shareOrCopyLink(url: string, dropped = 0, text?: string): Promise
       // 그 외 실패는 클립보드 복사로 폴백
     }
   }
+  await copyOrShowText(url, dropped > 0 ? `🔗 ${dropped}곳을 빼고 공유 링크를 복사했어요` : '🔗 공유 링크가 복사되었어요');
+}
+
+/**
+ * 클립보드에 쓰고 성공 토스트를 띄운다. 쓰기가 거부되거나 navigator.clipboard가 없으면 '복사하지 못했어요'만 떠서
+ * 코스 결과와 저장한 코스에서는 주소를 얻을 길이 없었다. 그때는 글을 전체 선택해 둔 시트를 연다(P-269)
+ */
+async function copyOrShowText(text: string, okMsg: string): Promise<void> {
+  const trigger = document.activeElement as HTMLElement | null;
   try {
-    await navigator.clipboard.writeText(url);
-    showToast(dropped > 0 ? `🔗 ${dropped}곳을 빼고 공유 링크를 복사했어요` : '🔗 공유 링크가 복사되었어요');
+    await navigator.clipboard.writeText(text);
+    showToast(okMsg);
   } catch {
-    showToast('복사하지 못했어요');
+    openCopySheet(text, trigger);
   }
+}
+
+function openCopySheet(text: string, trigger: HTMLElement | null): void {
+  document.getElementById('copy-sheet')?.remove();
+  const isLink = !text.includes('\n');
+  const wrap = document.createElement('div');
+  wrap.id = 'copy-sheet';
+  wrap.innerHTML = `
+    <div class="overlay-backdrop copy-sheet-backdrop"></div>
+    <div class="overlay-panel copy-sheet-panel" role="dialog" aria-modal="true" aria-labelledby="copy-sheet-title" aria-describedby="copy-sheet-desc">
+      <h2 class="overlay-title" id="copy-sheet-title">자동으로 복사하지 못했어요</h2>
+      <p class="copy-sheet-desc" id="copy-sheet-desc">아래 ${isLink ? '주소를' : '내용을'} 길게 눌러 복사하세요</p>
+      <textarea class="copy-sheet-text" readonly rows="${isLink ? 3 : 6}" aria-label="${isLink ? '공유 링크 주소' : '복사할 코스 내용'}"></textarea>
+      <button type="button" class="btn-secondary copy-sheet-close">닫기</button>
+    </div>`;
+  const ta = wrap.querySelector('textarea')!;
+  const closeBtn = wrap.querySelector<HTMLButtonElement>('.copy-sheet-close')!;
+  ta.value = text;
+  // 저장한 코스 패널이 이미 잠갔으면 닫을 때 풀지 않는다(P-252 잠금 재사용)
+  const html = document.documentElement;
+  const lockedHere = !html.classList.contains('overlay-locked');
+  if (lockedHere) {
+    const gap = window.innerWidth - html.clientWidth;
+    if (gap > 0) document.body.style.paddingRight = `${gap}px`;
+    html.classList.add('overlay-locked');
+  }
+  const close = () => {
+    wrap.remove();
+    if (lockedHere) {
+      html.classList.remove('overlay-locked');
+      document.body.style.paddingRight = '';
+    }
+    if (trigger?.isConnected) trigger.focus({ preventScroll: true });
+  };
+  closeBtn.addEventListener('click', close);
+  wrap.querySelector('.copy-sheet-backdrop')!.addEventListener('click', (e) => {
+    e.stopPropagation();
+    close();
+  });
+  // window의 시트 키 처리(Escape로 저장한 코스 닫기, Tab 가두기)에 넘기지 않고 이 시트 안에서만 처리한다
+  wrap.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      close();
+    } else if (e.key === 'Tab') {
+      e.stopPropagation();
+      e.preventDefault();
+      (document.activeElement === ta ? closeBtn : ta).focus();
+    }
+  });
+  document.body.appendChild(wrap);
+  ta.focus();
+  ta.setSelectionRange(0, text.length);
+  ta.scrollTop = 0;
 }
 
 /** hash에서 공유 코스 ID 배열 파싱. `#c=` 형태가 아니면 null */
@@ -6227,8 +6290,7 @@ function bindResultEvents(area: HTMLElement): void {
         state.courseConditions.mood,
         state.courseConditions.subZones,
       );
-      await navigator.clipboard.writeText(text);
-      showToast('📋 코스가 복사되었어요');
+      await copyOrShowText(text, '📋 코스가 복사되었어요');
     } catch {
       showToast('복사하지 못했어요');
     }
@@ -7560,8 +7622,7 @@ function renderReceiverView(steps: CourseStep[]): void {
   document.getElementById('btn-receiver-copy')?.addEventListener('click', async () => {
     try {
       const text = await formatCourseTextAsync(steps, spotById, [], 'ALL', []);
-      await navigator.clipboard.writeText(text);
-      showToast('📋 코스가 복사되었어요');
+      await copyOrShowText(text, '📋 코스가 복사되었어요');
     } catch {
       showToast('복사하지 못했어요');
     }
@@ -7890,9 +7951,8 @@ function renderOverlayContent(): void {
             item.conditions.mood,
             item.conditions.subZones || [],
           );
-          await navigator.clipboard.writeText(text);
           // 제외 안내를 먼저 띄우면 바로 이 토스트가 덮어써 한 번에 합친다
-          showToast(dropped > 0 ? `📋 ${dropped}곳을 빼고 코스를 복사했어요` : '📋 코스가 복사되었어요');
+          await copyOrShowText(text, dropped > 0 ? `📋 ${dropped}곳을 빼고 코스를 복사했어요` : '📋 코스가 복사되었어요');
         } catch {
           showToast('복사하지 못했어요');
         }

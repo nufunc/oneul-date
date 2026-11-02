@@ -16,18 +16,22 @@ const cut = (from, to) => {
 const code = [
   cut('function courseShareText', '\n}\n'),
   cut('async function shareOrCopyLink', '\n}\n'),
+  cut('async function copyOrShowText', '\n}\n'),
 ].join('\n');
 
 const spotById = new Map(
   ['가 카페', '나 식당', '다 공원', '라 바', '마 숙소', '바 전시'].map((name, i) => [i + 1, { id: i + 1, name }]),
 );
 const toasts = [];
+const sheets = [];
 const nav = { share: undefined, clipboard: { writeText: async (t) => nav.copied.push(t) }, shared: [], copied: [] };
 const stubs = {
   spotById,
   regionsLabel: (regions, zones) => (zones.length > 0 ? '성수' : regions.join('·')),
   showToast: (msg) => toasts.push(msg),
   navigator: nav,
+  document: { activeElement: null },
+  openCopySheet: (text) => sheets.push(text),
 };
 const { courseShareText, shareOrCopyLink } = new Function(
   ...Object.keys(stubs),
@@ -68,6 +72,16 @@ assert.strictEqual(courseShareText([]), undefined);
   };
   await shareOrCopyLink(url, 0, '데이트 코스 1곳: 가 카페');
   assert.deepStrictEqual(nav.copied, [url, url]);
+
+  // 클립보드가 거부되면 토스트 대신 주소 시트를 연다(P-269)
+  nav.share = undefined;
+  const n = toasts.length;
+  nav.clipboard.writeText = async () => {
+    throw new Error('NotAllowedError');
+  };
+  await shareOrCopyLink(url, 0, '데이트 코스 1곳: 가 카페');
+  assert.deepStrictEqual(sheets, [url]);
+  assert.strictEqual(toasts.length, n);
 
   console.log('test-share-text: ok');
 })().catch((err) => {
