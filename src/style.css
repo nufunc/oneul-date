@@ -1803,11 +1803,6 @@ button {
   animation: card-appear 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* 코스 결과에서는 목록 아래에 둔다(P-237). 받은 코스 화면은 목록 위 그대로 */
-.step-list + .ai-briefing-card {
-  margin: var(--space-5) 0 0;
-}
-
 .ai-briefing-badge {
   display: flex;
   align-items: center;

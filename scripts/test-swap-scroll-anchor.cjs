@@ -25,14 +25,15 @@ const replace = at('targetCard.replaceWith(newCard);', '카드 교체');
 const dividers = at('refreshTransitDividers();', '이동 띠 갱신');
 const shift = at('const bottomShift = newCard.offsetTop + newCard.offsetHeight - oldBottom;', '새 카드 아래끝 차이');
 const focus = at('newSwapBtn.focus()', '새 🔄 초점 이동');
-const briefing = at("document.getElementById('ai-briefing-content')", '총평 갱신');
 const scrollTo = at("window.scrollTo({ top: scrollTarget, behavior: 'instant' })", '절대 위치 스크롤 보정');
 
 assert.ok(scrollBefore < replace && oldBottom < replace, '바꾸기 전 값을 교체 뒤에 잰다');
 // 이동 띠 높이가 바뀌어도 카드 아래끝이 맞도록 띠를 다시 그린 뒤에 잰다
 assert.ok(dividers < shift, '이동 띠를 다시 그리기 전에 새 카드 아래끝을 잰다');
-// 초점 이동과 총평 갱신이 스크롤을 옮기거나 문서 높이를 바꾼 뒤에 맞춘다
-assert.ok(scrollTo > focus && scrollTo > briefing, '스크롤 보정이 초점 이동이나 총평 갱신보다 앞에 있다');
+// 초점 이동이 스크롤을 옮긴 뒤에 맞춘다
+assert.ok(scrollTo > focus, '스크롤 보정이 초점 이동보다 앞에 있다');
+// 결과 화면 총평 카드와 AI 총평 요청은 지웠다(P-274). 바꾸기 뒤 늦게 오는 문장이 높이를 바꾸지 않는다
+assert.ok(!/ai-briefing|fetchAiBriefing|aiStoryCache/.test(body), 'swapStep이 지운 총평 카드나 AI 총평 요청을 다시 부른다');
 
 // 등장 애니메이션(transform)이 섞이는 측정과 상대 이동은 쓰지 않는다
 assert.ok(!/getBoundingClientRect/.test(body), 'swapStep이 getBoundingClientRect로 잰다: 등장 애니메이션 transform이 섞인다');

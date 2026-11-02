@@ -2628,154 +2628,6 @@ function getCleanSpotSummary(spot: Spot): string {
   return '에디터가 검증한 추천 데이트 명소';
 }
 
-/** Groq 키를 프론트 번들에 노출하지 않기 위한 브리핑 프록시. OCI의 Caddy(https) → Deno(supabase/functions/ai-briefing) */
-const AI_BRIEFING_ENDPOINT = 'https://152-70-89-210.sslip.io/ai-briefing';
-/** 실패하면 로컬 템플릿 문장이 그대로 남는다 */
-const AI_BRIEFING_ENABLED = true;
-
-const aiStoryCache = new Map<string, string>();
-
-interface AiBriefingSpot {
-  slot: string;
-  name: string;
-  category: string;
-  summary: string;
-  location?: string;
-  parking_type?: string;
-  price_tier?: string;
-  signature_items?: string[];
-  curation_badges?: import('./supabase').CurationBadges;
-}
-
-/**
- * Supabase Edge Function(ai-briefing) 프록시를 통해 AI 에디터 코스 브리핑 생성
- * 프롬프트·모델·API 키는 전부 서버가 보유하며, v4.0 메타데이터(주차, 가격대, 시그니처 메뉴, 블루리본/미쉐린 인증)를
- * 서버로 안전하게 전달하여 고감도 에디토리얼 브리핑을 생성한다.
- * 호출 실패 시 null을 반환하여 로컬 템플릿(generateCourseStory) 폴백에 위임한다.
- */
-/**
- * AI 브리핑 및 코스 스토리의 문어체/해라체 종결어미를 감각적이고 다정한 에디토리얼 어조로 자동 교정
- */
-function normalizeEditorialTone(text: string): string {
-  if (!text) return '';
-
-  let normalized = text
-    .replace(/^["'“”]/, '')
-    .replace(/["'“”]$/, '')
-    .replace(/\*\*/g, '')
-    .trim();
-
-  // 문장 끝 및 문장 중간의 딱딱한 문어체/해라체 종결어미 교정 테이블
-  const replacements: [RegExp, string][] = [
-    [/마무리한다([.!?\s]|$)/g, '마무리하기 좋은 데이트 코스예요!$1'],
-    [/남긴다([.!?\s]|$)/g, '남길 수 있어요.$1'],
-    [/맞이한다([.!?\s]|$)/g, '맞이할 수 있어요.$1'],
-    [/이어간다([.!?\s]|$)/g, '이어져 추천해요!$1'],
-    [/선사한다([.!?\s]|$)/g, '선사해줘요.$1'],
-    [/채운다([.!?\s]|$)/g, '채워보세요.$1'],
-    [/즐긴다([.!?\s]|$)/g, '즐기기 제격이에요.$1'],
-    [/보낸다([.!?\s]|$)/g, '보내보세요.$1'],
-    [/만끽한다([.!?\s]|$)/g, '만끽해보세요.$1'],
-    [/어우러진다([.!?\s]|$)/g, '어우러질 수 있어요.$1'],
-    [/집중한다([.!?\s]|$)/g, '집중해보세요.$1'],
-    [/기억된다([.!?\s]|$)/g, '기억될 거예요.$1'],
-    [/도달한다([.!?\s]|$)/g, '도달할 수 있어요.$1'],
-    [/전달한다([.!?\s]|$)/g, '전해져요.$1'],
-    [/완성한다([.!?\s]|$)/g, '완성해보세요.$1'],
-    [/시작한다([.!?\s]|$)/g, '시작해보세요.$1'],
-    [/이끈다([.!?\s]|$)/g, '이끌어줘요.$1'],
-    [/돋보인다([.!?\s]|$)/g, '돋보여요.$1'],
-    [/느낀다([.!?\s]|$)/g, '느낄 수 있어요.$1'],
-    [/빠져든다([.!?\s]|$)/g, '빠져들 수 있어요.$1'],
-    [/머문다([.!?\s]|$)/g, '머물러보세요.$1'],
-  ];
-
-  for (const [pattern, target] of replacements) {
-    normalized = normalized.replace(pattern, target);
-  }
-
-  // 혹시라도 남아있는 일반 '~한다.' 패턴 처리
-  normalized = normalized.replace(/([가-힣]{2,})한다\./g, '$1해요.');
-
-  return normalized.trim();
-}
-
-/** 네트워크 없이 캐시에 있는 총평만 돌려준다 */
-function cachedAiBriefing(steps: CourseStep[], moodKey: string): string | null {
-  const ids = steps.filter((st) => st.spotId !== null).map((st) => st.spotId);
-  const cached = aiStoryCache.get(`${moodKey}_${ids.join('-')}`);
-  return cached ? normalizeEditorialTone(cached) : null;
-}
-
-async function fetchAiBriefing(
-  steps: CourseStep[],
-  byId: Map<number, Spot>,
-  moodKey: string,
-): Promise<string | null> {
-  const filled = steps.filter((st): st is CourseStep & { spotId: number } => st.spotId !== null);
-  if (filled.length === 0) return null;
-
-  const cacheKey = `${moodKey}_${filled.map((s) => s.spotId).join('-')}`;
-  const cached = cachedAiBriefing(steps, moodKey);
-  if (cached) return cached;
-
-  if (!AI_BRIEFING_ENABLED) {
-    return null;
-  }
-
-  const spots: AiBriefingSpot[] = [];
-  for (const st of filled) {
-    const s = byId.get(st.spotId);
-    if (!s) continue;
-
-    let parking = s.parking_type || '';
-    if (!parking && s.parking_info?.type) {
-      const pType = s.parking_info.type;
-      parking = pType === 'valet' ? '발렛' : pType === 'free' ? '무료주차' : pType === 'paid' ? '유료주차' : '';
-    }
-
-    spots.push({
-      slot: SLOT_META[st.slot].label,
-      name: s.name,
-      category: s.category || '',
-      summary: s.summary || '',
-      location: s.area || s.location || '',
-      parking_type: parking || undefined,
-      price_tier: s.price_tier || undefined,
-      signature_items: Array.isArray(s.signature_items) && s.signature_items.length > 0 ? s.signature_items.slice(0, 3) : undefined,
-      curation_badges: s.curation_badges && Object.keys(s.curation_badges).length > 0 ? s.curation_badges : undefined,
-    });
-  }
-  if (spots.length === 0) return null;
-
-  try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 3500); // 3.5초 타임아웃 (프록시 왕복 1단계 반영)
-
-    const res = await fetch(AI_BRIEFING_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ spots, mood: moodKey }),
-      signal: controller.signal,
-    });
-    clearTimeout(timer);
-
-    if (res.ok) {
-      const data = await res.json();
-      const rawText = typeof data?.text === 'string' ? data.text.trim() : '';
-      if (rawText.length >= 15) {
-        const cleanText = normalizeEditorialTone(rawText);
-        aiStoryCache.set(cacheKey, cleanText);
-        return cleanText;
-      }
-    }
-  } catch {
-    // 타임아웃·네트워크 오류·429 등 모든 실패는 조용히 null 반환 (로컬 템플릿 폴백)
-  }
-
-  return null;
-}
-
 /** 한글 음절의 받침 유무 판별 (조사 이/가 선택용) */
 function hasKoreanBatchim(text: string): boolean {
   const lastChar = text.trim().slice(-1);
@@ -3043,8 +2895,7 @@ async function formatCourseTextAsync(
   const blocks: string[] = [];
   const regionText = regionsLabel(regionKeys, zoneKeys);
   const moodText = moodLabel(moodKey);
-  // 복사는 클릭 직후 클립보드에 써야 하므로 총평 요청을 기다리지 않는다. 캐시에 없으면 로컬 템플릿을 쓴다
-  const story = cachedAiBriefing(steps, moodKey) || generateCourseStory(steps, byId, moodKey, false);
+  const story = generateCourseStory(steps, byId, moodKey, false);
 
   blocks.push(`💖 [오늘 데이트 코스] ${regionText} · ${moodText}\n✨ "${story}"`);
 
@@ -4994,19 +4845,6 @@ function renderResultsContent(): void {
 
   const cond = state.courseConditions;
   const usedImages = new Set<string>();
-  const cacheKey = `${cond.mood}_${courseSpotIds().join('-')}`;
-  const hasCachedStory = aiStoryCache.has(cacheKey);
-
-  // AI 응답을 기다리는 동안 한 줄짜리 로딩 문구를 두면 문장이 도착할 때 카드가 두세 배로 늘어 아래가 밀린다.
-  // 로컬 문장을 먼저 보여 주고 AI 문장이 오면 그때만 바꾼다. 바뀐 문장은 1~2줄 길이가 달라
-  // 카드가 목록 위에 있으면 보고 있던 목록이 21~42px 밀렸다(P-237). 그래서 카드를 목록 아래에 둔다
-  let initialStoryHtml = '';
-  if (hasCachedStory) {
-    initialStoryHtml = `“${escapeHtml(normalizeEditorialTone(aiStoryCache.get(cacheKey)!))}”`;
-  } else {
-    initialStoryHtml = `“${normalizeEditorialTone(generateCourseStory(state.course, spotById, cond.mood, true))}”`;
-  }
-
   const fallback = cond.searchFallback;
   area.innerHTML = `
     ${fallback ? `
@@ -5043,13 +4881,6 @@ function renderResultsContent(): void {
         return html;
       }).join('')}
     </div>
-    <div class="ai-briefing-card" id="ai-briefing-box">
-      <div class="ai-briefing-badge">
-        <span class="ai-sparkle-icon">✨</span>
-        <span>AI 에디터 브리핑</span>
-      </div>
-      <p class="ai-briefing-text" id="ai-briefing-content">${initialStoryHtml}</p>
-    </div>
     <div class="result-actions result-actions-3">
       <button class="btn-secondary" id="btn-copy">📋 복사</button>
       <button class="btn-secondary" id="btn-share-link">🔗 링크</button>
@@ -5058,21 +4889,6 @@ function renderResultsContent(): void {
   `;
   bindResultEvents(area);
   initAdSense();
-
-  // AI 브리핑 프록시 비동기 호출 (결과 도착 시 단 1회 최종 문장 렌더링)
-  if (AI_BRIEFING_ENABLED && !hasCachedStory && state.course) {
-    const currentCourse = state.course;
-    fetchAiBriefing(currentCourse, spotById, cond.mood).then((aiText) => {
-      const el = document.getElementById('ai-briefing-content');
-      if (!el || !aiText) return;
-      const finalText = aiText;
-      el.style.opacity = '0';
-      setTimeout(() => {
-        el.innerHTML = `“${escapeHtml(finalText)}”`;
-        el.style.opacity = '1';
-      }, 100);
-    });
-  }
 }
 
 // Lucide SVG Icons — 모던하고 정갈한 미니멀 벡터 라인 아이콘 세트
@@ -6183,36 +5999,7 @@ function swapStep(index: number, refocus = false): void {
     if (hadFocus) newSwapBtn.focus();
   }
 
-  // 장소 변경 시 AI 브리핑 텍스트도 실시간 자동 갱신 (Race condition 방지)
-  const briefingEl = document.getElementById('ai-briefing-content');
-  if (briefingEl && state.courseConditions && state.course) {
-    const mood = state.courseConditions.mood;
-    const currentSpotKey = courseSpotIds().join('-');
-    const cacheKey = `${mood}_${currentSpotKey}`;
-    const currentCourse = [...state.course];
-
-    if (aiStoryCache.has(cacheKey)) {
-      briefingEl.innerHTML = `“${escapeHtml(normalizeEditorialTone(aiStoryCache.get(cacheKey)!))}”`;
-    } else if (AI_BRIEFING_ENABLED) {
-      briefingEl.innerHTML = `“${normalizeEditorialTone(generateCourseStory(currentCourse, spotById, mood, true))}”`;
-      fetchAiBriefing(currentCourse, spotById, mood).then((aiText) => {
-        const el = document.getElementById('ai-briefing-content');
-        if (!el || !aiText) return;
-        // 응답 도착 시점의 코스가 요청 시점과 다르면 무시 (Race condition 방지)
-        if (courseSpotIds().join('-') !== currentSpotKey) return;
-
-        const finalText = normalizeEditorialTone(aiText);
-        el.style.opacity = '0';
-        setTimeout(() => {
-          el.innerHTML = `“${escapeHtml(finalText)}”`;
-          el.style.opacity = '1';
-        }, 100);
-      });
-    } else {
-      briefingEl.innerHTML = `“${normalizeEditorialTone(generateCourseStory(currentCourse, spotById, mood, true))}”`;
-    }
-  }
-  // 페이지 맨 아래에서는 카드와 아래 총평 높이가 바뀌는 순간 브라우저가 스크롤을 먼저 당기므로, 상대 이동이 아니라
+  // 페이지 맨 아래에서는 카드 높이가 바뀌는 순간 브라우저가 스크롤을 먼저 당기므로, 상대 이동이 아니라
   // 바꾸기 전 위치 기준 절대 위치로 맞춘다. 초점 이동이 스크롤을 옮겼어도 같은 자리로 돌아온다
   const scrollTarget = scrollBefore + bottomShift;
   if (window.scrollY !== scrollTarget) window.scrollTo({ top: scrollTarget, behavior: 'instant' });
