@@ -2149,7 +2149,11 @@ function courseTitle(cond: NonNullable<AppState['courseConditions']>, course: Co
     const region = first ? spotById.get(first)?.region : undefined;
     return region ? `❤️ 찜한 코스 · ${region}` : '❤️ 찜한 코스';
   }
-  return `${regionsLabel(cond.regions, cond.subZones)} · ${moodLabel(cond.mood)}`;
+  // 켠 테마 칩 이름을 적는다. 맞춤 코스 탭에는 분위기 입력이 없어 고르지 않은 '모든 분위기'를 적지 않는다(P-280)
+  const region = regionsLabel(cond.regions, cond.subZones);
+  const theme = cond.categoryKey && cond.categoryKey !== 'ALL' ? SPOT_EXPLORE_CATEGORIES.find((c) => c.key === cond.categoryKey) : undefined;
+  if (theme) return `${region} · ${theme.emoji} ${theme.label}`;
+  return cond.mood === 'ALL' ? region : `${region} · ${moodLabel(cond.mood)}`;
 }
 
 function moodLabel(moodKey: string): string {
