@@ -7322,7 +7322,6 @@ function showSpotsFailedBanner(count: number): void {
 function renderReceiverView(steps: CourseStep[]): void {
   setSharedCourseView(true);
   const usedImages = new Set<string>();
-  const storyHtml = generateCourseStory(steps, spotById, 'ALL', true);
   const sharedSpotIds = steps.map((s) => s.spotId).filter((id): id is number => id !== null);
   // 매거진 글의 '앱에서 코스 열기'로 들어오면 referrer가 같은 출처의 /blog/<slug>/다. slug는 외부 입력이라 영숫자와 하이픈만 받는다
   let blogSlug: string | null = null;
@@ -7361,14 +7360,6 @@ function renderReceiverView(steps: CourseStep[]): void {
         <h2 class="receiver-hero-title">${escapeHtml(heroTitle)}</h2>
         <p class="receiver-hero-desc receiver-hero-route">${escapeHtml(heroRoute)}</p>`}
         <button class="btn-primary btn-make-own-hero" id="btn-make-own-hero" type="button">🚀 나도 이런 코스 만들기 →</button>
-      </div>
-
-      <div class="ai-briefing-card">
-        <div class="ai-briefing-badge">
-          <span class="ai-sparkle-icon">✨</span>
-          <span>AI 에디터 브리핑</span>
-        </div>
-        <p class="ai-briefing-text">“${storyHtml}”</p>
       </div>
 
       <div class="step-list">

@@ -163,19 +163,6 @@ html[data-theme-resolved="dark"] .step-list::before {
   background: linear-gradient(to bottom, #38bdf8 0%, #28354b 100%);
 }
 
-/* AI 브리핑 카드 */
-html[data-theme="dark"] .ai-briefing-card,
-html[data-theme-resolved="dark"] .ai-briefing-card {
-  background: var(--color-surface);
-  border-color: var(--color-border);
-  border-left-color: var(--color-accent-text);
-}
-
-html[data-theme="dark"] .ai-briefing-badge,
-html[data-theme-resolved="dark"] .ai-briefing-badge {
-  color: var(--color-accent-text);
-}
-
 /* 스텝 액션 바 */
 html[data-theme="dark"] .step-actions-bar,
 html[data-theme-resolved="dark"] .step-actions-bar {
@@ -1789,50 +1776,6 @@ button {
 }
 
 /* 전체 코스 통합 길찾기 & 동선 바 */
-
-/* AI 에디터 코스 브리핑 카드 — Slate Navy 모던 틴트 인포박스 */
-.ai-briefing-card {
-  position: relative;
-  background: var(--color-surface-sub);
-  border: 1px solid var(--color-border);
-  border-left: 3.5px solid var(--color-accent-text);
-  border-radius: var(--radius-md);
-  padding: 10px 14px;
-  margin-bottom: var(--space-4);
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03);
-  animation: card-appear 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.ai-briefing-badge {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 0.74rem;
-  font-weight: 700;
-  color: var(--color-accent);
-  letter-spacing: -0.01em;
-  margin-bottom: 4px;
-}
-
-.ai-sparkle-icon {
-  font-size: 0.82rem;
-}
-
-.ai-briefing-text {
-  font-size: 0.86rem;
-  line-height: 1.55;
-  color: var(--color-text-sub);
-  margin: 0;
-  font-style: italic;
-  letter-spacing: -0.01em;
-  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.ai-briefing-text strong {
-  font-style: normal;
-  color: var(--color-text);
-  font-weight: 700;
-}
 
 /* 타임라인 — 모던 슬레이트 넘버링 & 정갈한 연결선 */
 .step-list {

@@ -1,6 +1,5 @@
 // 코스 결과 AI 브리핑 제거 시험(P-274): node scripts/test-no-ai-briefing.cjs
-// 결과 화면에 'AI 에디터 브리핑' 카드가 없고, AI 총평 요청 주소가 소스와 빌드 번들에 남지 않았는지 본다
-// 받은 코스 화면의 로컬 총평 카드는 남는다
+// 결과 화면과 받은 코스 화면(P-275)에 'AI 에디터 브리핑' 카드가 없고, AI 총평 요청 주소가 소스와 빌드 번들에 남지 않았는지 본다
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
@@ -17,7 +16,7 @@ const body = (name) => {
 };
 
 assert.ok(!/AI 에디터 브리핑|ai-briefing/.test(body('renderResultsContent')), '코스 결과 화면에 AI 브리핑 카드가 남았다');
-assert.ok(/AI 에디터 브리핑/.test(body('renderReceiverView')), '받은 코스 화면의 로컬 총평 카드가 사라졌다');
+assert.ok(!/AI 에디터 브리핑|ai-briefing/.test(body('renderReceiverView')), '받은 코스 화면에 AI 브리핑 카드가 남았다');
 
 for (const f of fs.readdirSync(path.join(root, 'src'))) {
   if (!/\.(ts|js)$/.test(f)) continue;
