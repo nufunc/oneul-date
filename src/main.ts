@@ -3304,17 +3304,17 @@ async function shareOrCopyLink(url: string, dropped = 0, text?: string): Promise
  * 클립보드에 쓰고 성공 토스트를 띄운다. 쓰기가 거부되거나 navigator.clipboard가 없으면 '복사하지 못했어요'만 떠서
  * 코스 결과와 저장한 코스에서는 주소를 얻을 길이 없었다. 그때는 글을 전체 선택해 둔 시트를 연다(P-269)
  */
-async function copyOrShowText(text: string, okMsg: string): Promise<void> {
+async function copyOrShowText(text: string, okMsg: string, label?: string): Promise<void> {
   const trigger = document.activeElement as HTMLElement | null;
   try {
     await navigator.clipboard.writeText(text);
     showToast(okMsg);
   } catch {
-    openCopySheet(text, trigger);
+    openCopySheet(text, trigger, label);
   }
 }
 
-function openCopySheet(text: string, trigger: HTMLElement | null): void {
+function openCopySheet(text: string, trigger: HTMLElement | null, label?: string): void {
   document.getElementById('copy-sheet')?.remove();
   const isLink = !text.includes('\n');
   const wrap = document.createElement('div');
@@ -3324,7 +3324,7 @@ function openCopySheet(text: string, trigger: HTMLElement | null): void {
     <div class="overlay-panel copy-sheet-panel" role="dialog" aria-modal="true" aria-labelledby="copy-sheet-title" aria-describedby="copy-sheet-desc">
       <h2 class="overlay-title" id="copy-sheet-title">자동으로 복사하지 못했어요</h2>
       <p class="copy-sheet-desc" id="copy-sheet-desc">아래 ${isLink ? '주소를' : '내용을'} 길게 눌러 복사하세요</p>
-      <textarea class="copy-sheet-text" readonly rows="${isLink ? 3 : 6}" aria-label="${isLink ? '공유 링크 주소' : '복사할 코스 내용'}"></textarea>
+      <textarea class="copy-sheet-text" readonly rows="${isLink ? 3 : 6}" aria-label="${label ?? (isLink ? '공유 링크 주소' : '복사할 코스 내용')}"></textarea>
       <button type="button" class="btn-secondary copy-sheet-close">닫기</button>
     </div>`;
   const ta = wrap.querySelector('textarea')!;
@@ -3338,7 +3338,9 @@ function openCopySheet(text: string, trigger: HTMLElement | null): void {
     if (gap > 0) document.body.style.paddingRight = `${gap}px`;
     html.classList.add('overlay-locked');
   }
+  // 열린 채 뒤로 가기를 누르면 아래 시트만 닫히고 이 시트가 잠금 없이 남았다(P-271). 같이 닫는다
   const close = () => {
+    window.removeEventListener('popstate', close);
     wrap.remove();
     if (lockedHere) {
       html.classList.remove('overlay-locked');
@@ -3362,6 +3364,7 @@ function openCopySheet(text: string, trigger: HTMLElement | null): void {
       (document.activeElement === ta ? closeBtn : ta).focus();
     }
   });
+  window.addEventListener('popstate', close);
   document.body.appendChild(wrap);
   ta.focus();
   ta.setSelectionRange(0, text.length);
@@ -8495,13 +8498,9 @@ function renderOverlayContent(): void {
     root.querySelector('#overlay-close')!.addEventListener('click', () => closeOverlay());
 
     // 주소 복사
-    root.querySelector('#btn-copy-spot-address')?.addEventListener('click', () => {
+    root.querySelector('#btn-copy-spot-address')?.addEventListener('click', async () => {
       const addr = (root.querySelector('#btn-copy-spot-address') as HTMLElement)?.dataset.address;
-      if (addr && navigator.clipboard) {
-        navigator.clipboard.writeText(addr).then(() => {
-          showToast('📋 주소가 복사되었어요');
-        });
-      }
+      if (addr) await copyOrShowText(addr, '📋 주소가 복사되었어요', '장소 주소');
     });
 
     // 하트 찜 토글 버튼
