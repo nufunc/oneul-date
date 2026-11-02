@@ -4122,7 +4122,7 @@ function getRegionSelectorLabel(): { title: string; subtitle: string; isSelected
  * 1-Tap 퀵 지역 칩 바 HTML 렌더러
  * 8대 권역 + 전국을 모달 없이 1-Tap으로 즉시 전환하고, 세부 동네, 보관함(찜), 실내, 무드 프리셋을 인라인으로 노출
  */
-function renderQuickRegionChips(): string {
+function renderQuickRegionChips(showSavedChip = true): string {
   const isAll = state.regions.length === 0 && state.subZones.length === 0;
   const hasSubZones = state.subZones.length > 0;
   const savedCount = visibleSavedSpotCount();
@@ -4161,9 +4161,9 @@ function renderQuickRegionChips(): string {
           : `<span class="chip-arrow" aria-hidden="true">▾</span>`
       }
     </button>
-    <button class="quick-region-chip chip-saved ${state.savedOnly ? 'is-active is-saved-active' : ''}" data-action="toggle-saved" type="button" aria-label="보관함 스팟 보기" title="내가 찜한 스팟 모아보기">
+    ${showSavedChip ? `<button class="quick-region-chip chip-saved ${state.savedOnly ? 'is-active is-saved-active' : ''}" data-action="toggle-saved" type="button" aria-label="보관함 스팟 보기" title="내가 찜한 스팟 모아보기">
       <span class="region-chip-text">${state.savedOnly ? '❤️ 보관함 ON' : (savedCount > 0 ? `❤️ ${savedCount}` : '🤍 찜')}</span>
-    </button>
+    </button>` : ''}
     <button class="quick-region-chip chip-indoor ${state.indoorOnly ? 'is-active is-indoor-active' : ''}" data-action="toggle-indoor" type="button" aria-label="실내 데이트 필터" title="비 오는 날/폭염 실내 데이트 모드">
       <span class="region-chip-text">${state.indoorOnly ? '☔ 실내 ON' : '☔ 실내'}</span>
     </button>
@@ -4333,7 +4333,7 @@ function renderConditions(): void {
 
       <!-- 2. 1-Tap 퀵 지역 칩 바 (모달 없이 전국 및 8대 권역 즉시 전환) -->
       <div class="quick-region-chips-wrap" id="course-quick-region-bar" style="margin-bottom: var(--space-3);" role="group" aria-label="지역 빠른 선택">
-        ${renderQuickRegionChips()}
+        ${renderQuickRegionChips(false)}
       </div>
 
       <!-- 3. 실시간 핫랭킹 큐레이션 테마 칩 바 (낮/밤 하루 2회 자동 최적화) -->
