@@ -4310,6 +4310,10 @@ function renderConditions(): void {
   const refocusSelector = active && area.contains(active) ? focusSelectorFor(active) : null;
 
   const regLabel = getRegionSelectorLabel();
+  // 전체 스팟을 받기 전에는 번들 샘플이라 찜이 0곳으로 세어져, 받은 뒤 찜한 코스 버튼이 생기며 390×844에서 결과 영역을
+  // 밀었다(CLS 0.0034, P-277). 받는 동안은 저장된 찜 수로 자리를 잡고 누르지 못하게 둔다
+  const savedPending = !loadedRegionKeys.has('ALL');
+  const savedCount = savedPending ? state.savedSpotIds.size : visibleSavedSpotCount();
 
   area.innerHTML = `
     <div class="conditions-card">
@@ -4366,18 +4370,15 @@ function renderConditions(): void {
         </div>
       </div>
 
-      <!-- 5. 코스 완성하기 버튼군: 맞춤 생성 + 오늘의 추천 + 찜한 코스 -->
+      <!-- 5. 코스 완성하기 버튼군: 맞춤 생성 + 찜한 코스 -->
       <div class="course-generate-btn-group">
         <button class="btn-primary btn-generate" id="btn-generate"${courseWaitingForSpots ? ' disabled aria-busy="true"' : ''}>
           ${courseWaitingForSpots ? spotsWaitLabel() : '🚀 맞춤 데이트 코스 완성하기'}
         </button>
         ${courseWaitingForSpots ? '<span class="sr-only" role="status">스팟 불러오는 중…</span>' : ''}
-        <button class="btn-daily-recommend" id="btn-daily-recommend" type="button" title="오늘 날짜 기반 에디터 추천 코스 바로 보기">
-          🎁 오늘의 코스
-        </button>
-        ${visibleSavedSpotCount() > 0 ? `
-          <button class="btn-saved-recommend" id="btn-saved-recommend" type="button" title="보관함에 담아둔 스팟으로 코스 완성하기">
-            ❤️ 찜한 코스 (${visibleSavedSpotCount()})
+        ${savedCount > 0 ? `
+          <button class="btn-saved-recommend" id="btn-saved-recommend" type="button" title="보관함에 담아둔 스팟으로 코스 완성하기"${savedPending ? ' disabled aria-busy="true"' : ''}>
+            ❤️ 찜한 코스 (${savedCount})
           </button>
         ` : ''}
       </div>
@@ -4389,26 +4390,6 @@ function renderConditions(): void {
 }
 
 function bindConditionEvents(area: HTMLElement): void {
-  // 오늘 날짜 시드 에디터 추천 코스 바로 불러오기
-  area.querySelector('#btn-daily-recommend')?.addEventListener('click', () => {
-    const daily = buildDailyRecommendedCourse(spots);
-    if (daily) {
-      state.course = daily.steps;
-      state.courseConditions = {
-        regions: [daily.regionKey],
-        subZones: [],
-        mood: daily.moodKey,
-        searchQuery: '',
-        indoorOnly: state.indoorOnly,
-      };
-      // 오늘의 코스가 고른 지역은 그 코스 조건(courseConditions)에만 둔다. state.regions에 넣으면 사용자가 고른 적
-      // 없는 지역이 이후 세부동네 선택에 누적돼 코스가 두 지역을 오갔다(분위기도 같은 이유로 넣지 않는다)
-      showToast('🎁 오늘의 추천 데이트 코스를 완성했어요');
-      renderConditions();
-      renderResults();
-    }
-  });
-
   // 찜한 스팟 기반 코스 생성
   area.querySelector('#btn-saved-recommend')?.addEventListener('click', () => {
     buildCourseFromSavedSpots();

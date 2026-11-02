@@ -1564,36 +1564,6 @@ button {
   flex: 1;
 }
 
-.btn-daily-recommend {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 0 16px;
-  border-radius: var(--radius-full);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border-strong);
-  font-size: var(--font-sm);
-  font-weight: 700;
-  color: var(--color-text);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  box-shadow: var(--shadow-sm);
-  white-space: nowrap;
-}
-
-.btn-daily-recommend:hover {
-  background: var(--color-accent-soft);
-  color: var(--color-accent);
-  border-color: var(--color-accent);
-  transform: translateY(-1px);
-}
-
-.btn-daily-recommend:active {
-  transform: scale(0.97);
-}
-
 .btn-generate {
   width: 100%;
 }
@@ -1613,7 +1583,7 @@ button {
 }
 
 /* 좁은 화면에서 한 줄에 두세 버튼을 두면 주 버튼이 320px에서 92px 폭·4줄로 눌렸고, 찜한 스팟이 있어 버튼이
-   셋이면 문서가 339px로 넘쳤다. 주 버튼을 한 줄로 올리고 보조 버튼은 아래 줄에 나눠 둔다 */
+   셋이면 문서가 339px로 넘쳤다. 주 버튼을 한 줄로 올리고 찜한 코스 버튼은 아래 줄에 전체 폭으로 둔다 */
 /* 버튼군 전체를 붙이면 320×667에서 화면 아래 136px을 가려, 좁은 화면은 버튼군을 풀고 주 버튼만 붙인다(P-236) */
 @media (max-width: 480px) {
   .course-generate-btn-group {
@@ -1624,15 +1594,11 @@ button {
     bottom: calc(8px + env(safe-area-inset-bottom, 0px));
     z-index: 5;
   }
-  .course-generate-btn-group .btn-daily-recommend,
   .course-generate-btn-group .btn-saved-recommend {
     display: inline-flex;
-    width: calc(50% - 6px);
+    width: 100%;
     margin-top: 8px;
     min-height: 44px;
-  }
-  .course-generate-btn-group .btn-daily-recommend:last-child {
-    width: 100%;
   }
 }
 
