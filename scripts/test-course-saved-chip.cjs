@@ -12,7 +12,8 @@ const callArgs = (barId) => {
   assert.ok(at >= 0, `${barId} 줄이 없다`);
   const m = src.slice(at).match(/renderQuickRegionChips\(([^)]*)\)/);
   assert.ok(m, `${barId} 줄에 renderQuickRegionChips 호출이 없다`);
-  return m[1].trim();
+  // 첫 인자(찜 칩)만 본다. 둘째 인자는 세부 동네 칩이다(P-279)
+  return m[1].split(',')[0].trim();
 };
 
 const fnAt = src.indexOf('function renderQuickRegionChips(');

@@ -3943,7 +3943,7 @@ function getRegionSelectorLabel(): { title: string; subtitle: string; isSelected
  * 1-Tap 퀵 지역 칩 바 HTML 렌더러
  * 8대 권역 + 전국을 모달 없이 1-Tap으로 즉시 전환하고, 세부 동네, 보관함(찜), 실내, 무드 프리셋을 인라인으로 노출
  */
-function renderQuickRegionChips(showSavedChip = true): string {
+function renderQuickRegionChips(showSavedChip = true, showSubZoneChip = true): string {
   const isAll = state.regions.length === 0 && state.subZones.length === 0;
   const hasSubZones = state.subZones.length > 0;
   const savedCount = visibleSavedSpotCount();
@@ -3974,14 +3974,14 @@ function renderQuickRegionChips(showSavedChip = true): string {
         `;
       })
       .join('')}
-    <button class="quick-region-chip chip-subzone ${hasSubZones ? 'is-active is-subzone-selected' : ''}" data-action="open-detail-sheet" type="button" aria-haspopup="dialog" aria-label="세부 데이트존 선택">
+    ${showSubZoneChip ? `<button class="quick-region-chip chip-subzone ${hasSubZones ? 'is-active is-subzone-selected' : ''}" data-action="open-detail-sheet" type="button" aria-haspopup="dialog" aria-label="세부 데이트존 선택">
       <span class="region-chip-text">${escapeHtml(subZoneLabel)}</span>
       ${
         hasSubZones
           ? `<span class="chip-clear-subzone" data-action="clear-subzone" role="button" tabindex="0" title="세부 동네 해제" aria-label="세부 동네 해제">✕</span>`
           : `<span class="chip-arrow" aria-hidden="true">▾</span>`
       }
-    </button>
+    </button>` : ''}
     ${showSavedChip ? `<button class="quick-region-chip chip-saved ${state.savedOnly ? 'is-active is-saved-active' : ''}" data-action="toggle-saved" type="button" aria-label="보관함 스팟 보기" title="내가 찜한 스팟 모아보기">
       <span class="region-chip-text">${state.savedOnly ? '❤️ 보관함 ON' : (savedCount > 0 ? `❤️ ${savedCount}` : '🤍 찜')}</span>
     </button>` : ''}
@@ -4158,7 +4158,7 @@ function renderConditions(): void {
 
       <!-- 2. 1-Tap 퀵 지역 칩 바 (모달 없이 전국 및 8대 권역 즉시 전환) -->
       <div class="quick-region-chips-wrap" id="course-quick-region-bar" style="margin-bottom: var(--space-3);" role="group" aria-label="지역 빠른 선택">
-        ${renderQuickRegionChips(false)}
+        ${renderQuickRegionChips(false, false)}
       </div>
 
       <!-- 3. 실시간 핫랭킹 큐레이션 테마 칩 바 (낮/밤 하루 2회 자동 최적화) -->
