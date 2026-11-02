@@ -3869,6 +3869,9 @@ function showToast(msg: string): void {
     document.body.appendChild(toast);
   }
   toast.textContent = msg;
+  // 저장한 코스 패널이 열린 동안 토스트가 맨 아래 항목과 📋 🔗를 가렸다(P-272). 패널 위쪽 끝 8px 위로 올린다
+  const panel = document.querySelector<HTMLElement>('#overlay-root .overlay-panel');
+  toast.style.bottom = panel ? `${panel.offsetHeight + 8}px` : '';
   toast.classList.add('show');
 
   if (toastTimer !== null) {
@@ -7702,6 +7705,9 @@ function closeOverlay(callback?: () => void): void {
   if (!root) return;
   const backdrop = root.querySelector('.overlay-backdrop');
   const panel = root.querySelector('.overlay-panel, .location-sheet-panel, .spot-detail-sheet-panel');
+  // 패널 위로 올린 토스트(P-272)가 패널이 사라진 빈 자리 위에 남지 않게 패널과 함께 감춘다
+  const toast = document.querySelector<HTMLElement>('.toast-msg');
+  if (toast?.style.bottom) toast.classList.remove('show');
   if (!backdrop || !panel) {
     state.savedOpen = false;
     state.regionSheetOpen = false;
