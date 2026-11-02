@@ -4173,7 +4173,8 @@ function renderConditions(): void {
 
       <!-- 3. 실시간 핫랭킹 큐레이션 테마 칩 바 (낮/밤 하루 2회 자동 최적화) -->
       <div class="spot-category-scroll" style="margin-bottom: var(--space-4);">
-        ${getCuratedThemeChips().map((cat) => `
+        ${getCuratedThemeChips() /* 앵커가 칩 이름에 맞은 횟수가 서울·전국 20번 중 7번 이하인 칩 넷은 맞춤 코스 탭에서 뺀다(P-282) */
+          .filter((cat) => !['ROMANTIC', 'EXPERIENCE', 'DRIVE', 'STAY'].includes(cat.key)).map((cat) => `
           <button class="spot-category-chip ${state.courseCategory === cat.key ? 'is-active' : ''}" data-cat-key="${cat.key}">
             <span class="chip-emoji">${cat.emoji}</span>
             <span class="chip-label">${cat.label}</span>
