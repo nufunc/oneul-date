@@ -267,14 +267,14 @@ export const SPOT_EXPLORE_CATEGORIES: SpotCategoryItem[] = [
   { key: 'ALL', label: '전체', emoji: '✨' },
   { key: 'CAFE', label: '감성카페', emoji: '☕', keywords: ['카페', '디저트', '베이커리', '빵집', '케이크', '커피', '구움과자', '소금빵', '베이글', '찻집'] },
   { key: 'DINING', label: '미식·다이닝', emoji: '🍽️', keywords: ['맛집', '미식', '식당', '레스토랑', '파스타', '스테이크', '고기', '삼겹살', '한식', '일식', '양식', '초밥', '피자', '오마카세', '다이닝'] },
-  { key: 'ROMANTIC', label: '기념일·로맨틱', emoji: '🕯️', keywords: ['기념일', '파인다이닝', '코스요리', '오마카세', '고급', '호텔다이닝', '분위기', '프로포즈', '데이트코스'] },
-  { key: 'WINE', label: '와인·위스키', emoji: '🍷', keywords: ['와인', '와인바', '위스키', '하이볼', '바(bar)', '라운지', '칵테일', '비스트로', '주점', 'lp바'] },
+  { key: 'ROMANTIC', label: '기념일·로맨틱', emoji: '🕯️', keywords: ['기념일', '파인다이닝', '코스요리', '오마카세', '고급', '호텔다이닝', '프로포즈', '데이트코스'] },
+  { key: 'WINE', label: '와인·위스키', emoji: '🍷', keywords: ['와인', '와인바', '위스키', '하이볼', '바(bar)', '칵테일', '비스트로', 'lp바'] },
   { key: 'PUB', label: '이자카야·펍', emoji: '🍺', keywords: ['이자카야', '맥주', '수제맥주', '펍', '재즈바', '야장', '포차', '꼬치', '하이볼', '심야식당'] },
   { key: 'NIGHT', label: '야경·루프탑', emoji: '🌙', keywords: ['야경', '루프탑', '전망', '스카이', '노을', '일몰', '한강', '남산', '타워', '테라스', '뷰맛집'] },
   { key: 'OCEAN', label: '오션뷰·물멍', emoji: '🌊', keywords: ['오션뷰', '리버뷰', '호수', '바다', '해변', '선셋', '물멍', '한강뷰', '해안'] },
   { key: 'EXPERIENCE', label: '공방·원데이', emoji: '🎨', keywords: ['공방', '원데이', '체험', '드로잉', '도자기', '도예', '향수', '가죽', '반지', '베이킹', '플라워'] },
   { key: 'CULTURE', label: '전시·놀거리', emoji: '🎭', keywords: ['전시', '미술관', '갤러리', '뮤지엄', '팝업', '팝업스토어', '보드게임', '방탈출', '아쿠아리움', '공연', '연극', '영화관'] },
-  { key: 'HEALING', label: '숲·산책힐링', emoji: '🌿', keywords: ['숲', '식물원', '수목원', '공원', '산책', '피크닉', '자연', '정원', '잔디', '둘레길'] },
+  { key: 'HEALING', label: '숲·산책힐링', emoji: '🌿', keywords: ['숲', '식물원', '수목원', '공원', '산책', '피크닉', '정원', '잔디', '둘레길'] },
   { key: 'SPA', label: '스파·사우나', emoji: '♨️', keywords: ['스파', '온천', '찜질', '사우나', '테르메덴', '아쿠아필드', '마사지', '피부관리', '헤드스파', '힐링스파'] },
   { key: 'DRIVE', label: '근교·드라이브', emoji: '🚗', keywords: ['드라이브', '해안도로', '외곽', '전망대', '호수', '가평', '양평', '남양주', '포천', '강화', '영종도', '대부도', '근교'] },
   { key: 'STAY', label: '호캉스·감성숙소', emoji: '🏨', keywords: ['호텔', '호캉스', '감성숙소', '풀빌라', '글램핑', '카라반', '펜션', '리조트', '료칸'] },
@@ -1938,13 +1938,19 @@ function generateCourse(
     }
     keywordAnchor = !exactAnchor && anchorPool.length > 0 && !scope && zoneKeysForQuery(query).length === 0;
   } else if (categoryDef && categoryDef.keywords) {
-    // 1-3. 카테고리 칩이 선택된 경우: 카테고리 키워드 매칭 스팟을 보유한 슬롯 앵커 최우선 탐색
-    for (const slot of slotsOn) {
-      const candidates = excludeRecent(getCandidates(all, slot, regionKeys, moodKey, [], zoneKeys, null, isIndoor), avoid);
-      const matched = applyChipFilters(candidates.filter((s) => matchesCategoryTheme(s, categoryDef.keywords!)));
-      if (matched.length > 0 && (anchorSlot === null || matched.length < anchorPool.length)) {
-        anchorSlot = slot;
-        anchorPool = matched;
+    // 1-3. 카테고리 칩이 선택된 경우: 테마 낱말에 맞는 후보가 가장 많은 칸을 앵커로 쓴다. 가장 적은 칸을 쓰면
+    // 그 종류가 드문 칸의 오판(🍷 낮 칸 라운지 카페)이 앵커가 됐다. 🌙 칩은 저녁·밤 칸을 먼저 보고
+    // 두 칸에 맞는 곳이 없을 때만 다른 칸을 쓴다. 낮 칸 전망대가 앵커가 되면 칩 이름(야경)과 결과가 어긋난다
+    const nightSlots: SlotKey[] = catKey === 'NIGHT' ? slotsOn.filter((s) => s === 'evening' || s === 'night') : [];
+    for (const group of [nightSlots, slotsOn.filter((s) => !nightSlots.includes(s))]) {
+      if (anchorSlot !== null) break;
+      for (const slot of group) {
+        const candidates = excludeRecent(getCandidates(all, slot, regionKeys, moodKey, [], zoneKeys, null, isIndoor), avoid);
+        const matched = applyChipFilters(candidates.filter((s) => matchesCategoryTheme(s, categoryDef.keywords!)));
+        if (matched.length > 0 && (anchorSlot === null || matched.length > anchorPool.length)) {
+          anchorSlot = slot;
+          anchorPool = matched;
+        }
       }
     }
   }
