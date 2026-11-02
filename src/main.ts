@@ -2987,83 +2987,9 @@ function getDynamicSearchPlaceholder(): string {
 }
 
 
-// --- 내 위치 중심 맞춤 추천 코스 & 실시간 앰비언트 티커 -------------------------
+// --- 내 위치(결과 출발지 안내, 스팟 탐색 탭 거리순) -------------------------
 
 let userCoords: { lat: number; lng: number } | null = null;
-
-export interface LiveAmbientInfo {
-  emoji: string;
-  title: string;
-  subtitle: string;
-}
-
-/**
- * 실시간 시간대 및 앰비언트 감성 정보 산출
- */
-function getLiveAmbientInfo(): LiveAmbientInfo {
-  const hour = new Date().getHours();
-  if (hour >= 6 && hour < 12) {
-    return { emoji: '🥐', title: '상쾌한 브런치 & 모닝 데이트', subtitle: '지금 가기 좋은 코스' };
-  } else if (hour >= 12 && hour < 17) {
-    return { emoji: '☀️', title: '데이트하기 딱 좋은 오후', subtitle: '실시간 감성 코스 추천' };
-  } else if (hour >= 17 && hour < 21) {
-    return { emoji: '🌇', title: '노을빛 로맨틱 디너 타임', subtitle: '분위기 맛집 & 야경 코스' };
-  } else {
-    return { emoji: '🌙', title: '둘만의 특별한 밤', subtitle: '와인바 & 심야 드라이브' };
-  }
-}
-
-/**
- * 내 위치 중심 / 실시간 추천 코스 생성 (실제 생활권 반경 기준)
- */
-function buildNearbyCourse(coords: { lat: number; lng: number } | null): {
-  label: string;
-  steps: CourseStep[];
-  distKm?: number;
-  ambient: LiveAmbientInfo;
-} {
-  let pool = spots;
-  const ambient = getLiveAmbientInfo();
-  let distKm: number | undefined;
-
-  if (coords && coords.lat && coords.lng) {
-    const spotsWithDist = spots
-      .filter((s) => s.lat != null && s.lng != null)
-      .map((s) => ({ spot: s, dist: getDistanceKm(coords.lat, coords.lng, s.lat!, s.lng!) }))
-      .sort((a, b) => a.dist - b.dist);
-
-    if (spotsWithDist.length >= 10) {
-      // 내 위치에서 반경 10km 이내 우선 (최소 15개 확보), 부족하면 최단거리 상위 25개 선별
-      const within10km = spotsWithDist.filter((s) => s.dist <= 10.0);
-      const selectedPool = within10km.length >= 12 ? within10km : spotsWithDist.slice(0, 25);
-      pool = selectedPool.map((item) => item.spot);
-    }
-  }
-
-  // 사용자가 설정한 현재 활성 슬롯(기본: 낮/저녁/밤)을 그대로 적용
-  const slotsOn = activeSlots().length > 0 ? activeSlots() : (['day', 'evening', 'night'] as SlotKey[]);
-  // GPS로 이미 내 위치 반경으로 pool을 좁혔다면 그 자체가 지역 조건이다.
-  // 여기에 화면에 남아있는 state.regions(다른 지역 여행 계획 등으로 미리
-  // 골라둔 필터)까지 또 겹치면 GPS 반경과 지역이 어긋날 때 교집합이 0이
-  // 돼 "내 주변 실시간 추천"이 상시 빈 결과로 끝난다(2026-09-23 발견).
-  const nearbyRegions = coords && coords.lat && coords.lng ? [] : state.regions;
-  const steps = generateCourse(pool, slotsOn, nearbyRegions, state.mood, { searchQuery: state.searchQuery, categoryKey: state.courseCategory }, state.subZones);
-
-  // 코스에 포함된 실제 스팟들의 내 위치 기준 최대 이동 반경(Max Distance) 계산
-  if (coords && coords.lat && coords.lng) {
-    const courseSpots = steps
-      .map((st) => (st.spotId != null ? spotById.get(st.spotId) : null))
-      .filter((s): s is Spot => Boolean(s && s.lat != null && s.lng != null));
-
-    if (courseSpots.length > 0) {
-      distKm = Math.round(getDistanceKm(coords.lat, coords.lng, courseSpots[0].lat!, courseSpots[0].lng!) * 10) / 10;
-    }
-  }
-
-  const label = distKm != null ? `${ambient.emoji} ${ambient.title} · 1차 스팟 ${distKm}km ➔` : `${ambient.emoji} ${ambient.title} · ${ambient.subtitle} ➔`;
-
-  return { label, steps, distKm, ambient };
-}
 
 /** 현재 위치(GPS) 또는 1차 스팟으로 출발하는 출발지 안내 디바이더 */
 function renderUserOriginTransitDivider(firstStep: CourseStep): string {
@@ -3568,7 +3494,6 @@ function requestUserGeolocation(showFeedback = false): void {
       if (state.mainMode === 'spots') {
         renderSpotDiscovery();
       } else {
-        renderTodayCourse(); // 첫 화면 티커는 위치를 받기 전에 그려지므로 거리(1차 스팟 N km)를 여기서 채운다
         renderConditions();
         if (state.course && state.course.length > 0) {
           renderResults();
@@ -3829,7 +3754,6 @@ function renderShell(): void {
       </div>
     </header>
     <nav class="main-mode-nav" id="main-mode-nav"></nav>
-    <section class="today-course-area" id="today-area"></section>
     <section class="conditions" id="conditions-area"></section>
     <section class="results" id="results-area"></section>
     <section class="spot-discovery-area" id="spot-discovery-area" style="display: none;"></section>
@@ -3859,15 +3783,12 @@ function renderShell(): void {
   });
   renderMainModeNav();
   if (state.mainMode === 'course') {
-    renderTodayCourse();
     renderConditions();
     renderResults();
   } else {
-    const todayArea = document.getElementById('today-area');
     const conditionsArea = document.getElementById('conditions-area');
     const resultsArea = document.getElementById('results-area');
     const discoveryArea = document.getElementById('spot-discovery-area');
-    if (todayArea) todayArea.style.display = 'none';
     if (conditionsArea) conditionsArea.style.display = 'none';
     if (resultsArea) resultsArea.style.display = 'none';
     if (discoveryArea) discoveryArea.style.display = '';
@@ -3941,14 +3862,12 @@ function spotTabEntry(
 
 function updateModeView(): void {
   renderMainModeNav();
-  const todayArea = document.getElementById('today-area');
   const conditionsArea = document.getElementById('conditions-area');
   const resultsArea = document.getElementById('results-area');
   const discoveryArea = document.getElementById('spot-discovery-area');
 
   if (state.mainMode === 'course') {
     if (discoveryArea && discoveryArea.style.display !== 'none') spotScrollY = window.scrollY;
-    if (todayArea) todayArea.style.display = '';
     if (conditionsArea) conditionsArea.style.display = '';
     if (resultsArea) resultsArea.style.display = '';
     if (discoveryArea) discoveryArea.style.display = 'none';
@@ -3956,110 +3875,12 @@ function updateModeView(): void {
     renderConditions();
     renderResults();
   } else {
-    if (todayArea) todayArea.style.display = 'none';
     if (conditionsArea) conditionsArea.style.display = 'none';
     if (resultsArea) resultsArea.style.display = 'none';
     if (discoveryArea) discoveryArea.style.display = '';
     renderSpotDiscovery();
     if (spotScrollY !== null) window.scrollTo({ top: spotScrollY, behavior: 'instant' });
   }
-}
-
-// --- 오늘의 코스 (S1) -----------------------------------------------------------
-
-function renderTodayCourse(): void {
-  const area = document.getElementById('today-area');
-  if (!area) return;
-  const initial = buildNearbyCourse(userCoords);
-  const filled = initial.steps.filter((st): st is CourseStep & { spotId: number } => st.spotId !== null);
-
-  if (filled.length === 0) {
-    area.innerHTML = '';
-    return;
-  }
-
-  area.innerHTML = `
-    <button class="live-ambient-ticker" id="btn-today-course" aria-label="${escapeHtml(`실시간 맞춤 코스 불러오기: ${initial.ambient.title}, ${initial.distKm != null ? `1차 스팟 ${initial.distKm}km` : initial.ambient.subtitle}`)}">
-      <span class="ticker-pulse" aria-hidden="true"></span>
-      <span class="ticker-emoji">${initial.ambient.emoji}</span>
-      <span class="ticker-title">${initial.ambient.title}</span>
-      <span class="ticker-sep" aria-hidden="true">·</span>
-      <span class="ticker-subtitle${initial.distKm != null ? ' is-dist' : ''}">${initial.distKm != null ? `1차 스팟 <strong>${initial.distKm}km</strong>` : initial.ambient.subtitle}</span>
-      <span class="ticker-chevron" aria-hidden="true">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </span>
-    </button>
-  `;
-
-  const btn = document.getElementById('btn-today-course');
-  if (!btn) return;
-
-  function applyCourse(steps: CourseStep[]) {
-    state.course = steps.map((st) => ({ ...st }));
-    state.courseConditions = {
-      regions: [...state.regions],
-      subZones: [...state.subZones],
-      mood: state.mood,
-      searchQuery: state.searchQuery,
-    };
-
-    renderConditions();
-    renderResults();
-  }
-
-  btn.addEventListener('click', () => {
-    if (!userCoords && typeof navigator !== 'undefined' && 'geolocation' in navigator) {
-      const subSpan = btn.querySelector('.ticker-subtitle');
-      if (subSpan) subSpan.textContent = '📍 내 위치 찾는 중...';
-
-      let resolved = false;
-
-      // 2.5초 자체 안전 타이머: 브라우저 GPS 무응답/지연 시 즉시 기본 코스로 안전 전환
-      const timer = window.setTimeout(() => {
-        if (!resolved) {
-          resolved = true;
-          const fallback = buildNearbyCourse(null);
-          applyCourse(fallback.steps);
-        }
-      }, 2500);
-
-      try {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            if (resolved) return;
-            resolved = true;
-            window.clearTimeout(timer);
-            userCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-            const nearby = buildNearbyCourse(userCoords);
-            renderTodayCourse(); // 티커 거리 정보 실시간 갱신
-            applyCourse(nearby.steps);
-            showToast('📍 내 주변 실시간 추천 코스를 불러왔어요');
-          },
-          () => {
-            if (resolved) return;
-            resolved = true;
-            window.clearTimeout(timer);
-            const fallback = buildNearbyCourse(null);
-            applyCourse(fallback.steps);
-          },
-          { timeout: 2500, maximumAge: 600000, enableHighAccuracy: false },
-        );
-      } catch {
-        if (!resolved) {
-          resolved = true;
-          window.clearTimeout(timer);
-          const fallback = buildNearbyCourse(null);
-          applyCourse(fallback.steps);
-        }
-      }
-    } else {
-      const res = buildNearbyCourse(userCoords);
-      applyCourse(res.steps);
-      showToast('✨ 실시간 추천 코스를 불러왔어요');
-    }
-  });
 }
 
 // --- 조건 영역 (대안 2: 통합 검색창 + 1줄 셀렉터 바) ---------------------------------
@@ -8576,7 +8397,6 @@ async function init(): Promise<void> {
             if (state.mainMode === 'spots') {
               renderSpotDiscovery();
             } else if (state.mainMode === 'course') {
-              renderTodayCourse(); // 첫 티커는 정적 샘플로 그려져 거리가 비므로 전체 데이터로 다시 그린다
               if (!courseWaitingForSpots) applyDailyCourseIfEmpty();
             }
           }
