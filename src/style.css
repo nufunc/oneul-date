@@ -2903,6 +2903,16 @@ button {
   line-height: 1.45;
 }
 
+/* 받은 코스 장소 경로(P-273). 이름이 긴 코스도 두 줄까지만 보이고, 잘린 이름은 화면 읽기 프로그램과 아래 카드에 그대로 있다 */
+.receiver-hero-route {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
 /* spots.json을 받지 못했을 때의 다시 받기 버튼과 홈 위 고정 띠(P-255). 띠는 흐름 밖이라 들어와도 화면을 밀지 않는다 */
 .btn-data-retry {
   min-height: 44px;

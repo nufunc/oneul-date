@@ -7468,9 +7468,12 @@ function clearCourseHash(): void {
   history.replaceState(null, '', location.pathname + location.search);
 }
 
+/** 받은 코스 화면은 문서 제목을 코스 제목으로 바꾸므로(P-273) 홈 셸로 나가면 index.html의 제목을 되돌린다 */
+const homeDocTitle = document.title;
 /** 루트 HTML의 정적 매거진 블록(scripts/build_home_magazine.mjs)은 홈 셸에서만 보이고 받은 코스 화면에서는 숨는다 */
 function setSharedCourseView(shared: boolean): void {
   document.documentElement.toggleAttribute('data-shared-course', shared);
+  if (!shared) document.title = homeDocTitle;
 }
 
 /**
@@ -7542,6 +7545,17 @@ function renderReceiverView(steps: CourseStep[]): void {
   } catch {
     blogSlug = null;
   }
+  // 받은 코스의 지역. 모든 장소가 한 세부 동네 안이면 그 동네, 아니면 첫 장소의 광역 지역
+  const sharedSpots = steps.map((st) => (st.spotId ? spotById.get(st.spotId) : undefined)).filter((s): s is Spot => Boolean(s));
+  const sharedZone = sharedSpots.length > 0 ? POPULAR_ZONES.find((z) => sharedSpots.every((s) => matchesZone(s, [z.key]))) : undefined;
+  const sharedRegion = sharedZone
+    ? REGIONS.find((r) => r.key === sharedZone.regionKey)
+    : REGIONS.find((r) => r.key !== 'ALL' && sharedSpots[0]?.region && r.match.includes(sharedSpots[0].region));
+  // 제목에는 모든 장소가 든 지역만 쓴다. 지역이 섞인 코스에 첫 장소의 지역을 붙이면 코스 전체가 그 지역인 것처럼 읽힌다(P-273)
+  const areaLabel = sharedZone?.label ?? (sharedRegion && sharedSpots.every((s) => sharedRegion.match.includes(s.region)) ? sharedRegion.label : '');
+  const heroTitle = `${areaLabel ? `${areaLabel} ` : ''}데이트 코스 ${steps.length}곳`;
+  const routeNames = sharedSpots.map((s) => s.name);
+  const heroRoute = routeNames.slice(0, 3).join(' → ') + (routeNames.length > 3 ? ` 외 ${routeNames.length - 3}곳` : '');
 
   app.innerHTML = `
     <header class="topbar">
@@ -7557,8 +7571,8 @@ function renderReceiverView(steps: CourseStep[]): void {
         <h2 class="receiver-hero-title">매거진 글에 나온 장소로 만든 코스예요</h2>
         <p class="receiver-hero-desc"><a href="./blog/${blogSlug}/" id="receiver-blog-back" style="color:inherit">← 글로 돌아가기</a></p>`
           : `<span class="receiver-hero-badge">✨ 공유받은 데이트 코스</span>
-        <h2 class="receiver-hero-title">친구가 보낸 특별한 데이트 코스예요</h2>
-        <p class="receiver-hero-desc">엄선된 스팟과 최적 동선으로 완성된 추천 일정이에요. 함께 즐거운 시간 보내세요!</p>`}
+        <h2 class="receiver-hero-title">${escapeHtml(heroTitle)}</h2>
+        <p class="receiver-hero-desc receiver-hero-route">${escapeHtml(heroRoute)}</p>`}
         <button class="btn-primary btn-make-own-hero" id="btn-make-own-hero" type="button">🚀 나도 이런 코스 만들기 →</button>
       </div>
 
@@ -7595,6 +7609,7 @@ function renderReceiverView(steps: CourseStep[]): void {
     </footer>
     <div class="overlay-root" id="overlay-root"></div>
   `;
+  if (!blogSlug) document.title = `${heroTitle} | 오늘 데이트`;
 
   const goHome = (e: Event) => {
     e.preventDefault();
@@ -7603,15 +7618,8 @@ function renderReceiverView(steps: CourseStep[]): void {
   };
   document.getElementById('receiver-home-link')?.addEventListener('click', goHome);
   document.getElementById('btn-theme-toggle')?.addEventListener('click', cycleThemeMode);
-  // 받은 코스의 지역. 모든 장소가 한 세부 동네 안이면 그 동네, 아니면 첫 장소의 광역 지역
-  const sharedArea = (): { regions: string[]; subZones: string[] } => {
-    const shared = steps.map((st) => (st.spotId ? spotById.get(st.spotId) : undefined)).filter((s): s is Spot => Boolean(s));
-    const zone = shared.length > 0 ? POPULAR_ZONES.find((z) => shared.every((s) => matchesZone(s, [z.key]))) : undefined;
-    const region = zone
-      ? REGIONS.find((r) => r.key === zone.regionKey)
-      : REGIONS.find((r) => r.key !== 'ALL' && shared[0]?.region && r.match.includes(shared[0].region));
-    return region ? { regions: [region.key], subZones: zone ? [zone.key] : [] } : { regions: [], subZones: [] };
-  };
+  const sharedArea = (): { regions: string[]; subZones: string[] } =>
+    sharedRegion ? { regions: [sharedRegion.key], subZones: sharedZone ? [sharedZone.key] : [] } : { regions: [], subZones: [] };
   // '나도 이런 코스 만들기'는 받은 코스의 지역을 이어받는다
   const makeOwn = (e: Event) => {
     const area = sharedArea();
