@@ -75,9 +75,9 @@ function matchesSearchQuery(spot, query) {
 
 const { stations } = JSON.parse(fs.readFileSync(path.join(root, 'public', 'data', 'stations.json'), 'utf8'));
 const rawSpots = JSON.parse(fs.readFileSync(path.join(root, 'public', 'data', 'spots.json'), 'utf8'));
-const { generateCourse, getCandidates, isCourseEligible, matchesSearchQuery, searchRelevanceTier, zoneKeysForQuery, zoneSelectionMatcher, swapPick, excludeRecent, dominantAnchorSpot, SPOT_EXPLORE_CATEGORIES, getLastAnchor, setStations } = new Function(
+const { generateCourse, getCandidates, isCourseEligible, matchesSearchQuery, searchRelevanceTier, zoneKeysForQuery, zoneSelectionMatcher, swapPick, excludeRecent, dominantAnchorSpot, SPOT_EXPLORE_CATEGORIES, THEME_FALSE_WORDS, getLastAnchor, setStations } = new Function(
   'rawSpotsData',
-  `${ts.transpile(code, { target: 'es2022' })};return { generateCourse, getCandidates, isCourseEligible, matchesSearchQuery, searchRelevanceTier, zoneKeysForQuery, zoneSelectionMatcher, swapPick, excludeRecent, dominantAnchorSpot, SPOT_EXPLORE_CATEGORIES, getLastAnchor: () => lastAnchor, setStations: (s) => { stationCoords = s; } };`,
+  `${ts.transpile(code, { target: 'es2022' })};return { generateCourse, getCandidates, isCourseEligible, matchesSearchQuery, searchRelevanceTier, zoneKeysForQuery, zoneSelectionMatcher, swapPick, excludeRecent, dominantAnchorSpot, SPOT_EXPLORE_CATEGORIES, THEME_FALSE_WORDS, getLastAnchor: () => lastAnchor, setStations: (s) => { stationCoords = s; } };`,
 )(rawSpots);
 setStations(stations);
 
@@ -336,10 +336,11 @@ for (const query of ['파스타', '방탈출', '글램핑', '한옥']) {
 // (j) 테마 칩 코스의 테마 일치 칸 🔄는 같은 칸 후보에 기준 스팟 20km 안 테마 일치 후보가 있으면 그중에서 바꾼다. 테마를 보지 않던 때는
 // '오션뷰·물멍' 밤 칸 서피비치 선셋바가 무인등대, 모하나, 나미야 순으로 바뀌어 3번 누르면 테마 코스 72%가 테마 카드를 모두 잃었다
 // 테마 판정은 generateCourse 1-3 단계의 키워드 식을 시험 안에서 따로 적어 앱 함수와 견준다
+// 앱 판정처럼 다른 말(THEME_FALSE_WORDS)을 지운 뒤 견준다. 지우지 않으면 앱이 빼는 오판 장소를 후보로 센다
 for (const categoryKey of ['PUB', 'CULTURE', 'OCEAN', 'HEALING']) {
   const keywords = SPOT_EXPLORE_CATEGORIES.find((c) => c.key === categoryKey).keywords.map((kw) => kw.toLowerCase());
   const inTheme = (s) => {
-    const text = [s.name, s.category, s.summary, ...(s.signature_items || []), ...(s.mood_tags || [])].join(' ').toLowerCase();
+    const text = [s.name, s.category, s.summary, ...(s.signature_items || []), ...(s.mood_tags || [])].join(' ').toLowerCase().replace(THEME_FALSE_WORDS, ' ');
     return keywords.some((kw) => text.includes(kw));
   };
   let checked = 0;
