@@ -1940,16 +1940,20 @@ function generateCourse(
   } else if (categoryDef && categoryDef.keywords) {
     // 1-3. 카테고리 칩이 선택된 경우: 테마 낱말에 맞는 후보가 가장 많은 칸을 앵커로 쓴다. 가장 적은 칸을 쓰면
     // 그 종류가 드문 칸의 오판(🍷 낮 칸 라운지 카페)이 앵커가 됐다. 🌙 칩은 저녁·밤 칸을 먼저 보고
-    // 두 칸에 맞는 곳이 없을 때만 다른 칸을 쓴다. 낮 칸 전망대가 앵커가 되면 칩 이름(야경)과 결과가 어긋난다
+    // 두 칸에 맞는 곳이 없을 때만 다른 칸을 쓴다. 낮 칸 전망대가 앵커가 되면 칩 이름(야경)과 결과가 어긋난다.
+    // 못 고르면 최근 노출 제외 없이 한 번 더 돈다. 테마 장소가 모두 최근 이력에 들면 테마 앵커를 잃고 칩 이름 제목만 남았다
     const nightSlots: SlotKey[] = catKey === 'NIGHT' ? slotsOn.filter((s) => s === 'evening' || s === 'night') : [];
-    for (const group of [nightSlots, slotsOn.filter((s) => !nightSlots.includes(s))]) {
+    for (const avoidSet of [avoid, new Set<number>()]) {
       if (anchorSlot !== null) break;
-      for (const slot of group) {
-        const candidates = excludeRecent(getCandidates(all, slot, regionKeys, moodKey, [], zoneKeys, null, isIndoor), avoid);
-        const matched = applyChipFilters(candidates.filter((s) => matchesCategoryTheme(s, categoryDef.keywords!)));
-        if (matched.length > 0 && (anchorSlot === null || matched.length > anchorPool.length)) {
-          anchorSlot = slot;
-          anchorPool = matched;
+      for (const group of [nightSlots, slotsOn.filter((s) => !nightSlots.includes(s))]) {
+        if (anchorSlot !== null) break;
+        for (const slot of group) {
+          const candidates = excludeRecent(getCandidates(all, slot, regionKeys, moodKey, [], zoneKeys, null, isIndoor), avoidSet);
+          const matched = applyChipFilters(candidates.filter((s) => matchesCategoryTheme(s, categoryDef.keywords!)));
+          if (matched.length > 0 && (anchorSlot === null || matched.length > anchorPool.length)) {
+            anchorSlot = slot;
+            anchorPool = matched;
+          }
         }
       }
     }
