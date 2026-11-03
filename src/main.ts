@@ -1822,9 +1822,15 @@ function placeScopeOf(query: string | undefined): ((s: Spot) => boolean) | null 
   return (s) => [s.location, s.area, s.address].join(' ').toLowerCase().split(/\s+/).some((w) => w.startsWith(q));
 }
 
+/** ♨️ 낱말 '스파'·'사우나'가 다른 말의 일부로 맞는 오판(인스파이어, 예스파크, 에스파스, 서퍼스파라다이스, 사우나미)을 판정 전에 지운다 */
+const THEME_FALSE_WORDS = /스파이|스파크|에스파스|스파라다이스|사우나미/g;
+
 /** 테마 칩 키워드 일치 판정. 테마 앵커(generateCourse)와 칸 교체(swapStep)가 함께 쓴다 */
 function matchesCategoryTheme(spot: Spot, keywords: string[]): boolean {
-  const text = [spot.name, spot.category, spot.summary, ...(spot.signature_items || []), ...(spot.mood_tags || [])].join(' ').toLowerCase();
+  const text = [spot.name, spot.category, spot.summary, ...(spot.signature_items || []), ...(spot.mood_tags || [])]
+    .join(' ')
+    .toLowerCase()
+    .replace(THEME_FALSE_WORDS, ' ');
   return keywords.some((kw) => text.includes(kw.toLowerCase()));
 }
 
