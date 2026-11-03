@@ -67,12 +67,18 @@ for (const name of ['인스파이어 아레나', '사우나미 서울숲', '스�
 assert.ok(matchesCategoryTheme(mk('러쉬 스파 압구정점', '스파·힐링'), spa));
 assert.ok(matchesCategoryTheme(mk('스파랜드 센텀시티', '찜질방'), spa));
 
-// (c) 칩마다 지우기 전과 비교해 빠진 장소는 ♨️ 오판뿐이다: 다른 칩 일치와 ♨️ 정상 일치를 잃지 않는다
+// (c) 칩마다 지우기 전과 비교해 ♨️ 다른 말 다섯 때문에 빠진 장소는 ♨️ 오판뿐이다: 다른 칩 일치와 ♨️ 정상 일치를 잃지 않는다
+// 다른 칩의 다른 말(P-287)로 빠지는 장소는 test-course-theme-anchor-false.cjs가 본다
 const falseSet = new Set(FALSE_IDS);
+const keptWithoutSpaWords = (s, kws) => {
+  const t = [s.name, s.category, s.summary, ...(s.signature_items || []), ...(s.mood_tags || [])].join(' ').toLowerCase();
+  return kws.some((k) => t.replace(/스파이|스파크|에스파스|스파라다이스|사우나미/g, ' ').includes(k.toLowerCase()));
+};
 for (const theme of themes) {
   const dropped = spots.filter((s) => naive(s, theme.keywords) && !matchesCategoryTheme(s, theme.keywords));
+  const bySpaWords = dropped.filter((s) => !keptWithoutSpaWords(s, theme.keywords));
   if (theme.key === 'SPA') assert.deepStrictEqual(dropped.filter((s) => !falseSet.has(s.id)).map((s) => s.name), [], '♨️ 정상 일치를 잃었다');
-  else assert.deepStrictEqual(dropped.map((s) => s.name), [], `${theme.emoji} 일치를 잃었다`);
+  else assert.deepStrictEqual(bySpaWords.map((s) => s.name), [], `${theme.emoji} 일치를 잃었다`);
 }
 
 console.log(`ok: ♨️ 오판 ${present}곳 제외, 다른 칩 ${themes.length - 1}개 일치 그대로`);
