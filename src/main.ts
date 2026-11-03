@@ -4182,7 +4182,7 @@ function renderConditions(): void {
         ${renderQuickRegionChips(false, false)}
       </div>
 
-      <!-- 3. 실시간 핫랭킹 큐레이션 테마 칩 바 (낮/밤 하루 2회 자동 최적화) -->
+      <!-- 3. 테마 칩 바 (SPOT_EXPLORE_CATEGORIES 순서 고정) -->
       <div class="spot-category-scroll" style="margin-bottom: var(--space-4);">
         ${getCuratedThemeChips() /* 앵커가 칩 이름에 맞은 횟수가 서울·전국 20번 중 7번 이하인 칩 넷은 맞춤 코스 탭에서 뺀다(P-282) */
           .filter((cat) => !['ROMANTIC', 'EXPERIENCE', 'DRIVE', 'STAY'].includes(cat.key)).map((cat) => `
@@ -5023,109 +5023,10 @@ function getSpotPopularityScore(spot: Spot): number {
 }
 
 /**
- * 실시간 스팟 데이터 + 시간대(4단계) + 요일별(주말/평일) 트렌드 인텔리전스 핫랭킹 테마 칩 정렬
+ * 테마 칩 순서. spots와 시각으로 매기면 첫 그림(번들 샘플)과 spots.json을 받은 뒤 그림의 순서가 달라 칩이 자리를 옮겨서 배열 순서로 고정한다(P-286)
  */
-let themeChipCache: { source: Spot[]; key: string; items: SpotCategoryItem[] } | null = null;
-
 export function getCuratedThemeChips(): SpotCategoryItem[] {
-  const allItem = SPOT_EXPLORE_CATEGORIES.find((c) => c.key === 'ALL') || { key: 'ALL', label: '전체', emoji: '✨' };
-  const themeItems = SPOT_EXPLORE_CATEGORIES.filter((c) => c.key !== 'ALL');
-
-  const now = new Date();
-  const hour = now.getHours();
-  const dayOfWeek = now.getDay(); // 0: 일, 5: 금, 6: 토
-  const isWeekend = dayOfWeek === 0 || dayOfWeek === 5 || dayOfWeek === 6;
-
-  // 테마마다 전체 스팟 텍스트를 훑어 렌더 비용의 대부분을 차지했다(4배 CPU 제한에서 약 0.7초).
-  // 결과는 spots 배열과 시각(시)·요일로만 정해지므로 그대로면 재사용한다
-  const cacheKey = `${hour}|${dayOfWeek}`;
-  if (themeChipCache?.source === spots && themeChipCache.key === cacheKey) return themeChipCache.items;
-
-  const scoredThemes = themeItems.map((item) => {
-    let score = 50;
-
-    // 1. 실제 데이터 기반 인기도/신상 핫플 집계
-    if (item.keywords && spots && spots.length > 0) {
-      const matched = spots.filter((s) => {
-        const text = [s.name, s.category, s.summary, ...(s.signature_items || []), ...(s.mood_tags || [])].join(' ').toLowerCase();
-        return item.keywords!.some((kw) => text.includes(kw.toLowerCase()));
-      });
-
-      if (matched.length > 0) {
-        // 상위 10개 핫플 평균 점수
-        const topScores = matched
-          .map((s) => getSpotPopularityScore(s))
-          .sort((a, b) => b - a)
-          .slice(0, 10);
-        const avgTop = topScores.reduce((sum, v) => sum + v, 0) / topScores.length;
-        score += avgTop;
-
-        // 미쉐린 및 블루리본 스팟 보유 가중치
-        const michelinCount = matched.filter((s) => s.curation_badges?.michelin).length;
-        const blueRibbonCount = matched.filter((s) => s.curation_badges?.blue_ribbon).length;
-        score += michelinCount * 12 + blueRibbonCount * 6;
-      }
-    }
-
-    // 2. 시간대별(4단계) 라이프사이클 트렌드 가중치
-    if (hour >= 6 && hour < 14) {
-      // ☀️ 아침~점심 (06:00~13:59): 카페, 숲산책, 문화, 드라이브
-      if (item.key === 'CAFE') score += 50;
-      else if (item.key === 'HEALING') score += 40;
-      else if (item.key === 'CULTURE') score += 35;
-      else if (item.key === 'DRIVE') score += 30;
-      else if (item.key === 'DINING') score += 25;
-    } else if (hour >= 14 && hour < 18) {
-      // 🌇 오후~노을 (14:00~17:59): 감성카페, 원데이공방, 오션뷰물멍, 문화, 드라이브
-      if (item.key === 'CAFE') score += 50;
-      else if (item.key === 'EXPERIENCE') score += 45;
-      else if (item.key === 'OCEAN') score += 45;
-      else if (item.key === 'CULTURE') score += 40;
-      else if (item.key === 'DRIVE') score += 35;
-      else if (item.key === 'DINING') score += 30;
-    } else if (hour >= 18 && hour < 23) {
-      // 🌙 저녁~프라임나이트 (18:00~22:59): 와인위스키, 로맨틱기념일, 야경루프탑, 미식, 이자카야
-      if (item.key === 'WINE') score += 55;
-      else if (item.key === 'ROMANTIC') score += 50;
-      else if (item.key === 'NIGHT') score += 50;
-      else if (item.key === 'DINING') score += 45;
-      else if (item.key === 'PUB') score += 40;
-      else if (item.key === 'OCEAN') score += 30;
-    } else {
-      // 🌌 심야~새벽 (23:00~05:59): 이자카야/펍, 야경, 와인, 호캉스/숙소, 드라이브
-      if (item.key === 'PUB') score += 55;
-      else if (item.key === 'NIGHT') score += 50;
-      else if (item.key === 'WINE') score += 45;
-      else if (item.key === 'STAY') score += 40;
-      else if (item.key === 'DRIVE') score += 35;
-      else if (item.key === 'SPA') score += 30;
-    }
-
-    // 3. 주말/평일 라이프스타일 가중치
-    if (isWeekend) {
-      if (item.key === 'DRIVE') score += 30;
-      else if (item.key === 'STAY') score += 30;
-      else if (item.key === 'OCEAN') score += 25;
-      else if (item.key === 'EXPERIENCE') score += 25;
-      else if (item.key === 'CULTURE') score += 20;
-    } else {
-      if (item.key === 'DINING') score += 25;
-      else if (item.key === 'WINE') score += 25;
-      else if (item.key === 'CAFE') score += 20;
-      else if (item.key === 'PUB') score += 20;
-      else if (item.key === 'SPA') score += 20;
-    }
-
-    return { item, score };
-  });
-
-  // 종합 핫니스 점수 내림차순 정렬
-  scoredThemes.sort((a, b) => b.score - a.score);
-
-  // '전체' 칩은 항상 맨 앞에 배치
-  const items = [allItem, ...scoredThemes.map((st) => st.item)];
-  themeChipCache = { source: spots, key: cacheKey, items };
-  return items;
+  return SPOT_EXPLORE_CATEGORIES;
 }
 
 /** 스팟 간 이동 동선 및 원터치 길찾기 딥링크 디바이더 렌더링 */
@@ -6523,7 +6424,7 @@ function renderSpotDiscovery(): void {
       ${renderQuickRegionChips()}
     </div>
 
-    <!-- 3. 실시간 핫랭킹 큐레이션 테마 칩 -->
+    <!-- 3. 테마 칩 (SPOT_EXPLORE_CATEGORIES 순서 고정) -->
     <div class="spot-category-scroll" style="margin-bottom: var(--space-4);">
       ${getCuratedThemeChips().map((cat) => `
         <button class="spot-category-chip ${state.spotCategory === cat.key ? 'is-active' : ''}" data-cat-key="${cat.key}">
