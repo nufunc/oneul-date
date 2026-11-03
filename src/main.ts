@@ -3076,9 +3076,22 @@ function renderUserOriginTransitDivider(firstStep: CourseStep): string {
 
 // --- URL 링크 공유 (코스 = 스폿 ID 배열 → 해시 인코딩) -----------------------------
 
-/** 현재 코스의 공유 URL — 배포 base는 location 기반 동적 생성 (로컬에서도 동작) */
-function buildShareUrl(spotIds: number[]): string {
-  return `${location.origin}${location.pathname}${location.search}#c=${spotIds.join('.')}`;
+/** 공유 링크에 싣거나 받을 테마 칩 키. 링크는 외부 입력이라 SPOT_EXPLORE_CATEGORIES에 있는 키만 받고 나머지는 버린다 */
+function shareThemeKey(key: string | null | undefined): string | undefined {
+  return key && key !== 'ALL' && SPOT_EXPLORE_CATEGORIES.some((c) => c.key === key) ? key : undefined;
+}
+
+/**
+ * 현재 코스의 공유 URL — 배포 base는 location 기반 동적 생성 (로컬에서도 동작)
+ * categoryKey: 켠 테마 칩이면 `?t=<칩 키>`로 싣는다(P-292). 받은 링크에서 이어받은 옛 `t`는 늘 지우고 다시 정한다
+ */
+function buildShareUrl(spotIds: number[], categoryKey?: string): string {
+  const params = new URLSearchParams(location.search);
+  params.delete('t');
+  const theme = shareThemeKey(categoryKey);
+  if (theme) params.set('t', theme);
+  const query = params.toString();
+  return `${location.origin}${location.pathname}${query ? `?${query}` : ''}#c=${spotIds.join('.')}`;
 }
 
 /**
@@ -5843,7 +5856,8 @@ function bindResultEvents(area: HTMLElement): void {
     // 찜한 코스와 장소 중심 코스는 선택 조건의 지역이 코스와 다를 수 있어 지역을 붙이지 않는다
     const cond = state.courseConditions;
     const byArea = cond && !cond.anchorId && !cond.fromSaved;
-    shareOrCopyLink(buildShareUrl(ids), 0, courseShareText(ids, byArea ? cond.regions : [], byArea ? cond.subZones : []));
+    // 칩은 지역으로 만든 코스에서만 싣는다. 찜한 코스와 장소 중심 코스는 칩 조건이 코스와 다를 수 있다
+    shareOrCopyLink(buildShareUrl(ids, byArea ? cond.categoryKey : undefined), 0, courseShareText(ids, byArea ? cond.regions : [], byArea ? cond.subZones : []));
   });
   area.querySelector('#btn-save')?.addEventListener('click', () => {
     if (!state.course || !state.courseConditions) return;
@@ -7070,6 +7084,8 @@ function renderReceiverView(steps: CourseStep[]): void {
   setSharedCourseView(true);
   const usedImages = new Set<string>();
   const sharedSpotIds = steps.map((s) => s.spotId).filter((id): id is number => id !== null);
+  // 보낸 사람이 켠 테마 칩(`?t=`). 저장과 다시 공유가 이어받는다(P-292)
+  const sharedCategoryKey = shareThemeKey(new URLSearchParams(location.search).get('t'));
   // 매거진 글의 '앱에서 코스 열기'로 들어오면 referrer가 같은 출처의 /blog/<slug>/다. slug는 외부 입력이라 영숫자와 하이픈만 받는다
   let blogSlug: string | null = null;
   try {
@@ -7173,6 +7189,7 @@ function renderReceiverView(steps: CourseStep[]): void {
       return;
     }
     const area = sharedArea();
+    const sharedTheme = SPOT_EXPLORE_CATEGORIES.find((c) => c.key === sharedCategoryKey);
     const item: SavedCourse = {
       id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
       createdAt: new Date().toISOString(),
@@ -7181,9 +7198,10 @@ function renderReceiverView(steps: CourseStep[]): void {
         subZones: area.subZones,
         mood: 'ALL',
         slots: steps.map((st) => st.slot),
+        categoryKey: sharedCategoryKey,
       },
       spotIds: sharedSpotIds,
-      title: `${blogSlug ? '📖 매거진 코스 · ' : ''}${regionsLabel(area.regions, area.subZones)} · ${moodLabel('ALL')}`,
+      title: `${blogSlug ? '📖 매거진 코스 · ' : ''}${regionsLabel(area.regions, area.subZones)} · ${sharedTheme ? `${sharedTheme.emoji} ${sharedTheme.label}` : moodLabel('ALL')}`,
     };
     showToast(addSavedCourse(item) ? '💾 내 보관함에 저장했어요' : '이미 저장한 코스라 맨 위로 올렸어요');
   });
@@ -7194,7 +7212,7 @@ function renderReceiverView(steps: CourseStep[]): void {
       return;
     }
     const area = sharedArea();
-    shareOrCopyLink(buildShareUrl(sharedSpotIds), 0, courseShareText(sharedSpotIds, area.regions, area.subZones));
+    shareOrCopyLink(buildShareUrl(sharedSpotIds, sharedCategoryKey), 0, courseShareText(sharedSpotIds, area.regions, area.subZones));
   });
 }
 
