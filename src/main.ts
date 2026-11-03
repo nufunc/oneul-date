@@ -73,7 +73,8 @@ interface SavedCourse {
   id: string;
   createdAt: string; // ISO
   /** region: 현재 포맷은 배열(다중 선택), 과거 저장분은 문자열 — normalizeRegionCond로 복원 */
-  conditions: { region: string[] | string; subZones?: string[]; mood: string; slots: SlotKey[] };
+  /** categoryKey: 저장할 때의 테마 칩. 예전 저장분에는 없어 칩 없음으로 불러온다 */
+  conditions: { region: string[] | string; subZones?: string[]; mood: string; slots: SlotKey[]; categoryKey?: string };
   spotIds: number[];
   /** 저장할 때의 코스 제목('🔍 성수 카페 코스' 등). 예전 저장분에는 없다 */
   title?: string;
@@ -5859,6 +5860,7 @@ function bindResultEvents(area: HTMLElement): void {
         subZones: [...state.courseConditions.subZones],
         mood: state.courseConditions.mood,
         slots: state.course.map((st) => st.slot),
+        categoryKey: state.courseConditions.categoryKey,
       },
       spotIds: ids,
       title: courseTitle(state.courseConditions, state.course),
@@ -8121,6 +8123,7 @@ function restoreCourse(item: SavedCourse, steps: CourseStep[]): void {
     regions: [...regions],
     subZones: [...subZones],
     mood: item.conditions.mood,
+    categoryKey: item.conditions.categoryKey,
   };
 
   // 스팟 탐색 탭에서 불러오면 결과가 숨겨진 코스 탭에 그려져 화면에 아무 변화가 없었다. 코스 탭으로 옮기고 결과로 내린다
