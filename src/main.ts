@@ -4169,6 +4169,14 @@ function renderConditions(): void {
   // 밀었다(CLS 0.0034, P-277). 받는 동안은 저장된 찜 수로 자리를 잡고 누르지 못하게 둔다
   const savedPending = !loadedRegionKeys.has('ALL');
   const savedCount = savedPending ? state.savedSpotIds.size : visibleSavedSpotCount();
+  // 앵커가 칩 이름에 맞은 횟수가 서울·전국 20번 중 7번 이하인 칩 넷은 맞춤 코스 탭에서 뺀다(P-282).
+  // 서울에는 바다가 없어 🌊 앵커 저녁 칸 6곳 중 5곳이 식당이었다. 서울 하나만 고르면 🌊도 뺀다(P-288)
+  const seoulOnly = state.regions.length === 1 && state.regions[0] === 'SEOUL';
+  const themeChips = getCuratedThemeChips()
+    .filter((cat) => !['ROMANTIC', 'EXPERIENCE', 'DRIVE', 'STAY'].includes(cat.key))
+    .filter((cat) => !(seoulOnly && cat.key === 'OCEAN'));
+  // 줄에 없는 칩이 켜진 채 남으면 보이지 않는 테마로 코스를 짠다. 지역 칩, 지역 시트, 코스 불러오기, 받은 코스에서 돌아오기가 모두 여기를 지난다
+  if (!themeChips.some((cat) => cat.key === state.courseCategory)) state.courseCategory = 'ALL';
 
   area.innerHTML = `
     <div class="conditions-card">
@@ -4197,8 +4205,7 @@ function renderConditions(): void {
 
       <!-- 3. 테마 칩 바 (SPOT_EXPLORE_CATEGORIES 순서 고정) -->
       <div class="spot-category-scroll" style="margin-bottom: var(--space-4);">
-        ${getCuratedThemeChips() /* 앵커가 칩 이름에 맞은 횟수가 서울·전국 20번 중 7번 이하인 칩 넷은 맞춤 코스 탭에서 뺀다(P-282) */
-          .filter((cat) => !['ROMANTIC', 'EXPERIENCE', 'DRIVE', 'STAY'].includes(cat.key)).map((cat) => `
+        ${themeChips.map((cat) => `
           <button class="spot-category-chip ${state.courseCategory === cat.key ? 'is-active' : ''}" data-cat-key="${cat.key}">
             <span class="chip-emoji">${cat.emoji}</span>
             <span class="chip-label">${cat.label}</span>
