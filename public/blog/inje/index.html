@@ -16,6 +16,9 @@
 
   <!-- Pretendard 웹폰트 -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700&display=swap&text=%26()%2C-.0123456789%3ADO%5B%5Daelntu~%C2%B7%EA%B0%95%EA%B1%B0%EA%B2%B0%EA%B2%BD%EA%B3%84%EA%B3%A1%EA%B3%BC%EA%B4%80%EA%B8%B0%EA%B9%8C%EA%BB%98%EB%82%98%EB%85%80%EB%8A%98%EB%8B%B4%EB%8C%80%EB%8D%B0%EB%8F%8C%EB%8F%99%EB%93%9C%EB%9D%BC%EB%A0%88%EB%A1%9C%EB%A3%A8%EB%A6%AC%EB%A7%81%EB%A7%88%EB%A7%8C%EB%A7%A4%EB%AA%A9%EB%AC%B4%EB%AC%B8%EB%B0%95%EB%B0%B1%EB%B6%80%EB%B8%8C%EB%B9%84%EC%82%AC%EC%82%B0%EC%83%81%EC%84%9C%EC%84%A0%EC%84%A4%EC%86%8C%EC%88%98%EC%88%99%EC%88%9C%EC%88%B2%EC%8A%A4%EC%8B%AD%EC%95%85%EC%95%8C%EC%95%BD%EC%97%90%EC%97%AC%EC%97%B4%EC%98%88%EC%98%A4%EC%99%80%EC%9B%90%EC%9D%84%EC%9D%98%EC%9D%B4%EC%9D%B8%EC%9E%84%EC%9E%90%EC%9E%91%EC%A0%9C%EC%A7%80%EC%A7%84%EC%A7%91%EC%A7%9C%EC%B2%9C%EC%B4%9D%EC%B6%94%EC%BD%94%ED%83%80%ED%83%91%ED%83%95%ED%84%B0%ED%8A%B8%ED%8C%81%ED%95%98%ED%95%99%ED%95%9C%ED%95%A8%ED%95%A9%ED%95%B4%ED%96%89%ED%99%98%ED%9E%90" rel="stylesheet">
 
   <script type="application/ld+json">
 {
@@ -43,388 +46,206 @@
   </script>
 
   <style>
-    :root {
-      --color-primary: #0f172a;
-      --color-accent: #0284c7;
-      --color-accent-light: #e0f2fe;
-      --color-text-main: #334155;
-      --color-text-sub: #64748b;
-      --color-border: #e2e8f0;
-      --color-bg-page: #f8fafc;
-      --color-card-bg: #ffffff;
-      --color-warm: #0284c7;
-      --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-    }
+/* hallmark-solstice: scripts/convert_blog_hallmark.mjs가 글의 <style>을 이 파일로 바꾼다 (Hallmark 2.0.0, 테마 Solstice, P-293) */
+:root {
+  color-scheme: light;
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-xs: 0.8125rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.125rem; --text-xl: 1.5625rem; --text-2xl: 1.953rem; --text-3xl: 2.441rem;
+  --text-hero: clamp(1.75rem, 1.6vw + 1.25rem, 2.75rem);
+  --text-section: clamp(1.75rem, 1.8vw + 1rem, 2.875rem); --text-title: clamp(1.25rem, 0.75vw + 0.875rem, 1.625rem); --text-lead: clamp(1.0625rem, 0.3vw + 0.95rem, 1.25rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-micro: 120ms; --dur-short: 220ms;
+  --container: 1200px; --measure: 680px; --gutter: 56px; --gap-columns: 40px; --section-gap: 120px;
+  --z-sticky-nav: 300;
+  --color-paper: oklch(94% 0.03 80); --color-paper-2: oklch(97% 0.02 85); --color-paper-3: oklch(89% 0.05 80);
+  --color-ink: oklch(27% 0.05 50); --color-ink-2: oklch(36% 0.05 50); --color-muted: oklch(48% 0.06 55);
+  --color-rule: oklch(84% 0.06 78);
+  --color-accent: oklch(54% 0.20 24); --color-accent-2: oklch(48% 0.19 24); --color-accent-ink: oklch(97% 0.02 85); --color-focus: oklch(54% 0.20 24);
+  --color-gold: oklch(74% 0.14 75); --color-gold-2: oklch(84% 0.11 80);
+  --color-band-text: oklch(94% 0.03 80); --color-band-muted: oklch(80% 0.05 75);
+  --color-hair-ink: color-mix(in oklab, var(--color-ink) 10%, transparent);
+  --font-display: "Noto Serif KR", "Nanum Myeongjo", ui-serif, serif;
+  --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --radius-card: 0; --radius-pill: 999px; --rule-hair: 1px; --rule-bar: 2px;
+  --shadow-card: 10px 10px 0 var(--color-paper-3);
+}
+@media (max-width: 60rem) { :root { --gutter: 24px; --section-gap: 88px; --gap-columns: 24px; } }
+@media (max-width: 40rem) { :root { --gutter: 16px; --section-gap: 64px; --gap-columns: 16px; } }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: var(--font-family);
-      background-color: var(--color-bg-page);
-      color: var(--color-text-main);
-      line-height: 1.75;
-      letter-spacing: -0.2px;
-      word-break: keep-all;
-    }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+html { scrollbar-color: var(--color-muted) var(--color-paper); scroll-padding-top: var(--space-3xl); }
+body { margin: 0; background: var(--color-paper); color: var(--color-ink-2); font-family: var(--font-family); font-size: var(--text-md); line-height: 1.75; word-break: keep-all; -webkit-font-smoothing: antialiased; }
+::selection { background: color-mix(in oklab, var(--color-gold) 40%, transparent); }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+a:hover { text-decoration-color: var(--color-accent); }
+article h1, article h2, article h3 { margin: 0; font-family: var(--font-display); font-weight: 700; color: var(--color-ink); line-height: 1.3; letter-spacing: -0.01em; overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+img { max-width: 100%; display: block; }
+.container { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); }
 
-    .site-header {
-      background: #ffffff;
-      border-bottom: 1px solid var(--color-border);
-      position: sticky;
-      top: 0;
-      z-index: 50;
-    }
-    .header-inner {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 14px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .header-logo {
-      font-weight: 800;
-      font-size: 1.1rem;
-      color: var(--color-primary);
-      text-decoration: none;
-    }
-    .header-logo span { color: var(--color-accent); }
-    .header-nav a {
-      color: var(--color-text-sub);
-      text-decoration: none;
-      font-size: 0.9rem;
-      margin-left: 16px;
-    }
+/* 44px 머리 링크 규칙: scripts/test-blog-related.cjs가 글마다 하나를 요구한다 */
+header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
 
-    .article-container {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 32px 20px 80px;
-    }
+/* Controls */
+.btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 var(--space-lg); border: 0; border-radius: var(--radius-pill); background: var(--color-accent); color: var(--color-accent-ink); font: 600 var(--text-md)/1 var(--font-family); text-decoration: none; cursor: pointer; transition: background-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out); }
+.btn:hover { background: var(--color-accent-2); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.link-quiet { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-ink); font-weight: 600; font-size: var(--text-sm); text-decoration: none; border-bottom: var(--rule-bar) solid var(--color-ink); transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out); }
+.link-quiet:hover { color: var(--color-accent); border-color: var(--color-accent); }
+.link-quiet:active { transform: translateY(1px); }
+.link-quiet:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
 
-    .article-header {
-      margin-bottom: 32px;
-    }
-    .badge-category {
-      display: inline-block;
-      background: var(--color-accent-light);
-      color: var(--color-accent);
-      font-weight: 700;
-      font-size: 0.82rem;
-      padding: 4px 10px;
-      border-radius: 6px;
-      margin-bottom: 12px;
-    }
-    .article-title {
-      font-size: 1.85rem;
-      font-weight: 800;
-      line-height: 1.35;
-      color: var(--color-primary);
-      margin-bottom: 14px;
-    }
-    .article-meta {
-      display: flex;
-      gap: 14px;
-      color: var(--color-text-sub);
-      font-size: 0.88rem;
-    }
+/* Nav */
+.site-header { position: sticky; top: 0; z-index: var(--z-sticky-nav); background: var(--color-paper); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.header-inner { display: flex; justify-content: space-between; align-items: center; min-height: 64px; }
+.header-logo { font-family: var(--font-display); font-size: var(--text-lg); color: var(--color-ink); text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; }
+.header-logo span { color: var(--color-accent); margin-left: 0.3em; }
+.header-logo:hover { color: var(--color-ink-2); }
+.header-nav { display: flex; gap: var(--space-lg); }
+.header-nav a { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--text-sm); color: var(--color-ink-2); text-decoration: none; }
+.header-nav a:hover { color: var(--color-ink); text-decoration: underline; text-decoration-color: var(--color-accent); }
+.header-nav a:active, .header-logo:active { transform: translateY(1px); }
 
-    .article-lead {
-      font-size: 1.05rem;
-      line-height: 1.8;
-      color: var(--color-text-main);
-      background: #ffffff;
-      padding: 22px 24px;
-      border-radius: 12px;
-      border: 1px solid var(--color-border);
-      margin-bottom: 36px;
-    }
+/* Hero */
+.hero { display: grid; padding-block: var(--space-2xl) var(--space-xl); }
+.hero-text { display: grid; gap: var(--space-lg); }
+.article-title { font-size: var(--text-hero); line-height: 1.3; max-width: 28ch; }
+.hero-kicker { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.hero-kicker span:first-child { color: var(--color-accent); font-weight: 600; }
+.article-meta { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-lg); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); font-variant-numeric: tabular-nums; }
+.article-meta .meta-credit { flex-basis: 100%; }
+/* 좁은 화면에서 칸마다 한 줄: 본문 글꼴(Pretendard)이 바뀔 때 줄 수가 달라져 아래 띠가 밀리는 것을 막는다 */
+@media (max-width: 40rem) { .article-meta { flex-direction: column; flex-wrap: nowrap; } }
+.spot-photo img { width: 100%; height: 100%; object-fit: cover; outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
 
-    .timeline-card {
-      background: #ffffff;
-      border: 1px solid var(--color-border);
-      border-radius: 14px;
-      padding: 24px;
-      margin-bottom: 40px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-    }
-    .timeline-title {
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .timeline-meta-box {
-      background: var(--color-bg-page);
-      border-radius: 8px;
-      padding: 12px 16px;
-      margin-bottom: 20px;
-      font-size: 0.9rem;
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
-    @media (max-width: 600px) {
-      .timeline-meta-box { grid-template-columns: 1fr; }
-    }
-    .meta-item strong { color: var(--color-primary); }
+/* Lead */
+.prose-intro { max-width: var(--measure); padding-top: var(--space-xl); font-size: var(--text-lead); line-height: 1.8; color: var(--color-ink); padding-bottom: var(--space-3xl); }
 
-    .timeline-item {
-      display: flex;
-      gap: 16px;
-      position: relative;
-      padding-bottom: 20px;
-    }
-    .timeline-item:last-child { padding-bottom: 0; }
-    .timeline-item::before {
-      content: "";
-      position: absolute;
-      left: 14px;
-      top: 28px;
-      bottom: 0;
-      width: 2px;
-      background: var(--color-border);
-    }
-    .timeline-item:last-child::before { display: none; }
+/* The day, on the brown band */
+.band { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl) var(--space-xl); }
+.band .timeline-title { color: var(--color-band-text); font-size: var(--text-section); margin-bottom: var(--space-xl); }
+.route { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: 0; padding: 0; }
+.tl-act { font-size: var(--text-sm); color: var(--color-gold-2); padding-bottom: var(--space-sm); }
+.tl-step { display: grid; align-content: start; gap: var(--space-2xs); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-gold); }
+.tl-time { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1; color: var(--color-band-text); font-variant-numeric: tabular-nums; }
+.tl-place { font-weight: 600; font-size: var(--text-lg); color: var(--color-band-text); }
+.tl-note { font-size: var(--text-sm); color: var(--color-band-muted); line-height: 1.6; }
+.tl-move { font-size: var(--text-sm); color: var(--color-band-muted); padding-block: var(--space-sm) var(--space-lg); }
+.tl-total { font-size: var(--text-sm); color: var(--color-band-muted); padding-top: var(--space-lg); margin-top: var(--space-lg); border-top: var(--rule-hair) solid color-mix(in oklab, var(--color-band-text) 25%, transparent); }
+/* spot-info-list 계열: 시간 범위(10:30 - 11:45)가 길어 시각 글자를 줄이고, 요약 상자와 번호 배지를 둔다 */
+.route.range .tl-time { font-size: var(--text-xl); }
+.route.range .tl-step { padding-bottom: var(--space-md); }
+.tl-badge { font-size: var(--text-xs); color: var(--color-gold-2); letter-spacing: 0.04em; }
+.tl-facts { display: grid; gap: var(--space-2xs) var(--space-lg); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.tl-facts strong { color: var(--color-gold-2); font-weight: 600; }
+@media (min-width: 60rem) {
+  .tl-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .route { grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); column-gap: var(--space-lg); }
+  .route > * { grid-row: var(--r); grid-column: var(--c) / span var(--s, 1); }
+  .tl-move { padding-bottom: 0; }
+  .tl-total { grid-column: 1 / -1; }
+}
 
-    .timeline-badge {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      background: var(--color-accent);
-      color: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 0.85rem;
-      flex-shrink: 0;
-      z-index: 1;
-    }
-    .timeline-content { flex: 1; padding-top: 3px; }
-    .timeline-time {
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--color-accent);
-      margin-bottom: 2px;
-    }
-    .timeline-spot {
-      font-size: 1.02rem;
-      font-weight: 700;
-      color: var(--color-primary);
-      margin-bottom: 4px;
-    }
-    .timeline-desc {
-      font-size: 0.88rem;
-      color: var(--color-text-sub);
-      line-height: 1.5;
-    }
+/* Stops */
+.spots { padding-block: var(--section-gap) 0; display: grid; gap: var(--section-gap); }
+.spot-section { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "photo head" "photo body"; grid-template-rows: auto 1fr; column-gap: var(--gap-columns); row-gap: var(--space-md); align-items: start; padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); }
+.spot-section.flip { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-areas: "head photo" "body photo"; }
+.spot-section.no-photo { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "body"; }
+.spot-head { grid-area: head; display: grid; gap: var(--space-md); }
+.spot-photo { grid-area: photo; align-self: start; margin: 0; aspect-ratio: 4 / 5; width: 100%; background: var(--color-paper-3); position: sticky; top: 96px; }
+.spot-body { grid-area: body; display: grid; gap: var(--space-md); }
+.spot-header { display: flex; align-items: baseline; gap: var(--space-md); }
+.spot-num { font-family: var(--font-display); font-size: var(--text-3xl); line-height: 1; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+.spot-title { font-size: var(--text-section); }
+.spot-tagline { font-size: var(--text-lg); color: var(--color-ink); padding-bottom: var(--space-xs); }
+.spot-desc { max-width: 60ch; }
 
-    .spot-section {
-      background: #ffffff;
-      border: 1px solid var(--color-border);
-      border-radius: 14px;
-      padding: 26px;
-      margin-bottom: 44px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    }
-    .spot-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-    .spot-num {
-      background: var(--color-accent);
-      color: #ffffff;
-      font-weight: 800;
-      font-size: 0.95rem;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .spot-title {
-      font-size: 1.35rem;
-      font-weight: 800;
-      color: var(--color-primary);
-    }
-    .spot-tagline {
-      font-size: 0.95rem;
-      color: var(--color-text-sub);
-      margin-bottom: 18px;
-      font-weight: 500;
-    }
+.spot-info-box { margin: var(--space-xs) 0 0; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); }
+.info-row { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--space-md); padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.info-row:last-child { border-bottom: 0; }
+.info-label { color: var(--color-muted); }
+.info-val { color: var(--color-ink); font-weight: 400; font-variant-numeric: tabular-nums; }
+.map-btn-wrap { padding-top: var(--space-sm); }
+.tip-box { padding: var(--space-sm) var(--space-md); border-left: var(--rule-bar) solid var(--color-accent); background: var(--color-paper-2); font-size: var(--text-sm); color: var(--color-ink-2); line-height: 1.7; }
+.tip-box strong { color: var(--color-ink); font-weight: 600; }
+.tip-box .tip-title { display: block; margin-bottom: var(--space-2xs); }
 
-    .spot-image-wrap {
-      width: 100%;
-      border-radius: 12px;
-      overflow: hidden;
-      margin-bottom: 20px;
-      background: #e2e8f0;
-      aspect-ratio: 16 / 10;
-    }
-    .spot-image {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
+/* Fees */
+.cost-table-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.cost-head { display: grid; gap: var(--space-md); align-content: start; }
+.cost-head .timeline-title { font-size: var(--text-section); }
+.cost-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.cost-table th { text-align: left; font-weight: 400; color: var(--color-muted); padding: var(--space-xs) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-bar) solid var(--color-ink); }
+.cost-table td { padding: var(--space-sm) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink-2); vertical-align: top; }
+.cost-table td:nth-child(2) { color: var(--color-ink); font-weight: 400; }
+.cost-3 .cost-total-row td:nth-child(2) { font-family: inherit; font-size: inherit; color: inherit; font-weight: 600; }
+.cost-3 .cost-total-row td:nth-child(3) { font-family: var(--font-display); font-size: var(--text-xl); color: var(--color-accent); font-weight: 700; }
+.cost-total-row td { border-bottom: 0; border-top: var(--rule-bar) solid var(--color-ink); color: var(--color-ink); font-weight: 600; }
+.cost-total-row td:nth-child(2) { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--color-accent); font-weight: 700; }
+@media (max-width: 600px) {
+  .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
+  .table-wrap thead { display: none; }
+  .table-wrap tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-sm); row-gap: var(--space-2xs); padding-block: var(--space-sm); border-bottom: var(--rule-hair) solid var(--color-rule); }
+  .table-wrap td { padding: 0; border: 0; }
+  .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: var(--text-xs); color: var(--color-muted); }
+  .table-wrap td:nth-child(3) { text-align: right; font-weight: 600; color: var(--color-ink); }
+  .table-wrap td:nth-child(4) { grid-column: 1 / -1; color: var(--color-muted); }
+  .table-wrap td:empty { display: none; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: var(--text-sm); color: var(--color-ink); }
+  .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; text-align: right; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
+  .table-wrap .cost-total-row { border-top: var(--rule-bar) solid var(--color-ink); border-bottom: 0; }
+}
 
-    .spot-desc {
-      font-size: 1rem;
-      line-height: 1.8;
-      color: var(--color-text-main);
-      margin-bottom: 20px;
-    }
+/* Tips */
+.tips-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.tips-card .timeline-title { font-size: var(--text-section); align-self: start; }
+.tips-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-md); }
+.tips-list li { padding-bottom: var(--space-md); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.tips-list li:last-child { border-bottom: 0; }
+.tips-list strong { color: var(--color-ink); font-weight: 600; }
 
-    .spot-info-box {
-      background: var(--color-bg-page);
-      border-radius: 10px;
-      padding: 16px;
-      margin-bottom: 16px;
-      font-size: 0.9rem;
-    }
-    .info-row {
-      display: flex;
-      margin-bottom: 8px;
-    }
-    .info-row:last-child { margin-bottom: 0; }
-    .info-label {
-      width: 72px;
-      font-weight: 700;
-      color: var(--color-text-sub);
-      flex-shrink: 0;
-    }
-    .info-val {
-      color: var(--color-primary);
-      font-weight: 500;
-    }
+/* App course */
+.app-course-box { margin-top: var(--section-gap); display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--gap-columns); align-items: end; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-xl); }
+.app-course-box h2 { font-size: var(--text-section); margin-bottom: var(--space-md); }
+.app-course-box p { max-width: 52ch; }
+.app-course-box .app-action { justify-self: end; }
 
-    .tip-box {
-      background: #f0f9ff;
-      border: 1px solid #bae6fd;
-      border-radius: 10px;
-      padding: 14px 16px;
-      margin-bottom: 20px;
-      font-size: 0.9rem;
-      color: #0369a1;
-      line-height: 1.6;
-    }
-    .tip-box strong { color: #0c4a6e; }
+.article-credit { margin-top: var(--space-2xl); padding-block: var(--space-md) var(--space-3xl); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); }
 
-    .map-btn-wrap {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .btn-naver-map {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #00843d;
-      color: #ffffff;
-      font-weight: 700;
-      font-size: 0.88rem;
-      padding: 10px 16px;
-      border-radius: 8px;
-      text-decoration: none;
-      transition: background 0.2s ease;
-    }
-    .btn-naver-map:hover { background: #007a37; }
+/* Footer mast */
+.site-footer { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl); }
+.footer-inner { display: grid; gap: var(--space-md); }
+.footer-mark { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1.2; color: var(--color-band-text); }
+.footer-line { color: var(--color-band-muted); font-size: var(--text-sm); }
+.footer-links { display: flex; flex-wrap: wrap; gap: var(--space-lg); }
+.footer-links a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-band-text); font-size: var(--text-sm); text-decoration: underline; text-decoration-color: var(--color-gold); }
+.footer-links a:hover { text-decoration-color: var(--color-accent); color: var(--color-gold-2); }
+.footer-links a:active { transform: translateY(1px); }
+.site-footer :focus-visible { outline-color: var(--color-gold-2); }
 
-    .cost-table-card {
-      background: #ffffff;
-      border: 1px solid var(--color-border);
-      border-radius: 14px;
-      padding: 24px;
-      margin-bottom: 40px;
-    }
-    .cost-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.92rem;
-      margin-top: 12px;
-    }
-    .cost-table th, .cost-table td {
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--color-border);
-      text-align: left;
-    }
-    .cost-table th {
-      background: var(--color-bg-page);
-      font-weight: 700;
-      color: var(--color-primary);
-    }
-    .cost-table td:last-child {
-      text-align: right;
-      font-weight: 700;
-      color: var(--color-primary);
-    }
-    .cost-table th:last-child {
-      text-align: right;
-    }
-    .cost-total-row td {
-      border-bottom: none;
-      background: var(--color-accent-light);
-      color: var(--color-accent);
-      font-weight: 800;
-      font-size: 1rem;
-    }
-
-    .tips-card {
-      background: #ffffff;
-      border: 1px solid var(--color-border);
-      border-radius: 14px;
-      padding: 24px;
-      margin-bottom: 40px;
-    }
-    .tips-list {
-      list-style: none;
-      margin-top: 14px;
-    }
-    .tips-list li {
-      position: relative;
-      padding-left: 20px;
-      margin-bottom: 12px;
-      font-size: 0.93rem;
-      color: var(--color-text-main);
-      line-height: 1.65;
-    }
-    .tips-list li:last-child { margin-bottom: 0; }
-    .tips-list li::before {
-      content: "•";
-      position: absolute;
-      left: 6px;
-      color: var(--color-accent);
-      font-weight: bold;
-    }
-
-    .site-footer {
-      background: #ffffff;
-      border-top: 1px solid var(--color-border);
-      padding: 30px 20px;
-      text-align: center;
-      font-size: 0.88rem;
-      color: var(--color-text-sub);
-    }
-    .site-footer a {
-      color: var(--color-accent);
-      text-decoration: none;
-    }
-    header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
-    .header-nav a,.header-title a,.blog-tagline a{display:inline-block}
+@media (max-width: 60rem) {
+  .hero, .spot-section, .spot-section.flip, .cost-table-card, .tips-card, .app-course-box { grid-template-columns: minmax(0, 1fr); }
+  .spot-section, .spot-section.flip { grid-template-areas: "head" "photo" "body"; grid-template-rows: auto; }
+  .spot-section.no-photo { grid-template-areas: "head" "body"; }
+  .hero { padding-block: var(--space-xl) var(--space-xl); }
+  .spot-photo { position: static; aspect-ratio: 16 / 10; }
+  .app-course-box { padding: var(--space-lg); }
+  .app-course-box .app-action { justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn, .link-quiet { transition: none; }
+  .btn:active, .link-quiet:active, .header-nav a:active, .header-logo:active, .footer-links a:active { transform: none; }
+}
   </style>
 </head>
 <body>
 
   <header class="site-header">
-    <div class="header-inner">
+    <div class="header-inner container">
       <a href="https://nufunc.github.io/oneul-date/blog/" class="header-logo">오늘 데이트 <span>매거진</span></a>
       <nav class="header-nav">
         <a href="https://nufunc.github.io/oneul-date/">홈으로</a>
@@ -435,85 +256,53 @@
 
   <main class="article-container">
     <article>
-      <header class="article-header">
-        <span class="badge-category">강원 인제 감성 드라이브</span>
-        <h1 class="article-title">[강원 인제] 원대리 자작나무숲부터 박인환문학관, 십이선녀탕, 만해마을, 백담사까지 순백·문학·계곡 힐링 코스</h1>
-        <div class="article-meta">
-          <span>발행일: 2026년 10월 30일</span>
-          <span>에디터: 오늘 데이트 큐레이션팀</span>
+      <header class="article-header hero container">
+        <div class="hero-text">
+          <p class="hero-kicker badge-category"><span>강원 인제 감성 드라이브</span></p>
+          <h1 class="article-title">[강원 인제] 원대리 자작나무숲부터 박인환문학관, 십이선녀탕, 만해마을, 백담사까지 순백·문학·계곡 힐링 코스</h1>
+          <div class="article-meta">
+            <span>발행일: 2026년 10월 30일</span>
+            <span class="meta-credit">에디터: 오늘 데이트 큐레이션팀</span>
+          </div>
+          <p><a class="btn" href="../../#c=3497.1790243907131.1791428808647.1792737817768.1793434283420">앱에서 코스 열기</a></p>
         </div>
       </header>
 
-      <div class="article-lead">
+      <div class="container">
+        <p class="prose-intro">
         순백의 자작나무가 빚어내는 이국적인 은빛 숲과 청마를 노래한 시인의 서정, 설악산 옥빛 계곡과 수만 개의 소원 돌탑이 기다리는 강원특별자치도 인제군으로 감성 힐링 드라이브를 떠나봅니다. 70만 그루의 하얀 자작나무가 빽빽하게 솟아올라 동화 같은 은빛 세상을 연출하는 원대리 자작나무 숲부터 '목마와 숙녀' 박인환 시인의 문학혼과 1950년대 명동 다방 거리를 고스란히 복원한 박인환문학관, 열두 선녀가 목욕을 즐겼다는 전설이 깃든 너럭바위와 청정 소의 비경 십이선녀탕 계곡, 만해 한용운 선생의 문학과 평화 정신을 기리는 북카페 쉼터 만해마을, 그리고 내설악 옥빛 백담계곡을 굽이돌아 닿는 천년고찰 백담사의 고요한 돌탑길 피날레까지 이어지는 인제 하루 쉼 여행입니다.
+      </p>
       </div>
 
-      <!-- 타임라인 코스 개요 -->
-      <section class="timeline-card">
-        <h3 class="timeline-title">🧭 추천 드라이브 타임라인</h3>
-        <div class="timeline-meta-box">
-          <div class="meta-item"><strong>권역</strong>: 강원특별자치도 인제군 (인제읍 · 북면)</div>
-          <div class="meta-item"><strong>테마</strong>: 순백 자작나무 숲길 & 레트로 문학관·설악산 계곡·돌탑 드라이브</div>
-          <div class="meta-item"><strong>이동 거리</strong>: 약 51.0km (차량 순수 이동 약 1시간 10분)</div>
-          <div class="meta-item"><strong>예상 경비</strong>: 2인 기준 약 8.9만 원 (식음료 및 셔틀 일체 포함)</div>
-        </div>
-
-        <div class="timeline-list">
-          <div class="timeline-item">
-            <span class="timeline-badge">1</span>
-            <div class="timeline-content">
-              <div class="timeline-time">09:30 - 12:00</div>
-              <div class="timeline-spot">원대리 자작나무 숲</div>
-              <div class="timeline-desc">70만 그루 은빛 자작나무가 빼곡한 순백의 동화 숲, 피톤치드 힐링 트레킹</div>
-            </div>
-          </div>
-          <div class="timeline-item">
-            <span class="timeline-badge">2</span>
-            <div class="timeline-content">
-              <div class="timeline-time">12:20 - 13:40</div>
-              <div class="timeline-spot">박인환문학관 & 목마와 숙녀 거리</div>
-              <div class="timeline-desc">1950년대 옛 명동 봉선화다방·은성주점 골목 시간 여행 & 메밀막국수 점심</div>
-            </div>
-          </div>
-          <div class="timeline-item">
-            <span class="timeline-badge">3</span>
-            <div class="timeline-content">
-              <div class="timeline-time">14:05 - 15:20</div>
-              <div class="timeline-spot">인제 십이선녀탕 (탕수동계곡)</div>
-              <div class="timeline-desc">너럭바위 위로 흐르는 옥빛 계곡물과 울창한 원시림 단풍 산책로</div>
-            </div>
-          </div>
-          <div class="timeline-item">
-            <span class="timeline-badge">4</span>
-            <div class="timeline-content">
-              <div class="timeline-time">15:35 - 16:40</div>
-              <div class="timeline-spot">인제 만해마을 (문인의 집)</div>
-              <div class="timeline-desc">만해 한용운 선생의 문학 산책과 통창 북카페 '구름카페' 다도 쉼터</div>
-            </div>
-          </div>
-          <div class="timeline-item">
-            <span class="timeline-badge">5</span>
-            <div class="timeline-content">
-              <div class="timeline-time">16:55 - 18:20</div>
-              <div class="timeline-spot">설악산 백담사 & 백담계곡</div>
-              <div class="timeline-desc">옥빛 백담계곡 셔틀 드라이브, 수만 개의 소원 돌탑과 천년고찰 황혼 피날레</div>
-            </div>
+      <!-- 동선 -->
+      <section class="timeline-card band">
+        <div class="container">
+          <h2 class="timeline-title">추천 드라이브 타임라인</h2>
+          <div class="tl-facts"><div class="meta-item"><strong>권역</strong>: 강원특별자치도 인제군 (인제읍 · 북면)</div> <div class="meta-item"><strong>테마</strong>: 순백 자작나무 숲길 & 레트로 문학관·설악산 계곡·돌탑 드라이브</div> <div class="meta-item"><strong>이동 거리</strong>: 약 51.0km (차량 순수 이동 약 1시간 10분)</div> <div class="meta-item"><strong>예상 경비</strong>: 2인 기준 약 8.9만 원 (식음료 및 셔틀 일체 포함)</div></div>
+          <div class="route range" style="--n:5">
+            <div class="tl-step" style="--r:2; --c:1"><span class="tl-badge">1</span><span class="tl-time">09:30 - 12:00</span><span class="tl-place">원대리 자작나무 숲</span><span class="tl-note">70만 그루 은빛 자작나무가 빼곡한 순백의 동화 숲, 피톤치드 힐링 트레킹</span></div>
+            <div class="tl-step" style="--r:2; --c:2"><span class="tl-badge">2</span><span class="tl-time">12:20 - 13:40</span><span class="tl-place">박인환문학관 & 목마와 숙녀 거리</span><span class="tl-note">1950년대 옛 명동 봉선화다방·은성주점 골목 시간 여행 & 메밀막국수 점심</span></div>
+            <div class="tl-step" style="--r:2; --c:3"><span class="tl-badge">3</span><span class="tl-time">14:05 - 15:20</span><span class="tl-place">인제 십이선녀탕 (탕수동계곡)</span><span class="tl-note">너럭바위 위로 흐르는 옥빛 계곡물과 울창한 원시림 단풍 산책로</span></div>
+            <div class="tl-step" style="--r:2; --c:4"><span class="tl-badge">4</span><span class="tl-time">15:35 - 16:40</span><span class="tl-place">인제 만해마을 (문인의 집)</span><span class="tl-note">만해 한용운 선생의 문학 산책과 통창 북카페 '구름카페' 다도 쉼터</span></div>
+            <div class="tl-step" style="--r:2; --c:5"><span class="tl-badge">5</span><span class="tl-time">16:55 - 18:20</span><span class="tl-place">설악산 백담사 & 백담계곡</span><span class="tl-note">옥빛 백담계곡 셔틀 드라이브, 수만 개의 소원 돌탑과 천년고찰 황혼 피날레</span></div>
           </div>
         </div>
       </section>
 
-      <!-- 스팟 1: 원대리 자작나무 숲 -->
-      <section class="spot-section">
-        <div class="spot-header">
+      <div class="container">
+        <div class="spots">
+          <section class="spot-section">
+            <div class="spot-head">
+              <div class="spot-header">
           <span class="spot-num">1</span>
           <h2 class="spot-title">원대리 자작나무 숲</h2>
         </div>
-        <div class="spot-tagline">순백의 은빛 기둥 70만 그루가 하늘을 찌르는 이국적인 동화의 숲</div>
-
-        <div class="spot-image-wrap">
-          <img src="https://tong.visitkorea.or.kr/cms/resource/33/3558333_image2_1.jpg" alt="인제 원대리 자작나무 숲 순백의 나무 기둥과 인디언 쉼터 전경" class="spot-image" loading="lazy" />
-        </div>
-
+              <p class="spot-tagline">순백의 은빛 기둥 70만 그루가 하늘을 찌르는 이국적인 동화의 숲</p>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/33/3558333_image2_1.jpg" alt="인제 원대리 자작나무 숲 순백의 나무 기둥과 인디언 쉼터 전경" class="spot-image" loading="lazy" />
+            </figure>
+            <div class="spot-body">
         <p class="spot-desc">
           인제 감성 드라이브의 첫 여정은 한국을 대표하는 청정 숲의 대명사 원대리 자작나무 숲입니다. 1990년대 초반 솔잎혹파리 피해를 입은 소나무 숲에 약 70만 그루의 자작나무를 심으면서 조성된 이곳은 현재 축구장 수백 개에 달하는 138헥타르 규모의 울창한 자작나무 군락을 이루고 있습니다. 안내소에서 완만한 임도를 따라 약 50분 정도 걸어 숲의 중심부에 들어서면 하얀 수피를 뽐내는 자작나무들이 빽빽하게 들어서 마치 북유럽의 원시림이나 겨울 왕국에 온 듯한 이국적인 풍경을 자아냅니다. 바람이 불 때마다 잎사귀들이 사각거리며 속삭이는 소리를 들으며 자작나무 나뭇가지로 엮어 만든 인디언 텐트 포토존에서 감성 사진을 남겨보세요.
         </p>
@@ -537,30 +326,26 @@
           </div>
         </div>
 
-        <div class="tip-box">
-          <strong>💡 에디터 탐방 꿀팁</strong><br>
-          자작나무 코스 왕복에는 약 2시간 30분에서 3시간 정도 소요되므로 편안한 트레킹화를 착용하시는 것을 추천해요. 아침 햇살이 하얀 나무 기둥 사이로 부서져 내리는 오전 시간대에 가장 눈부신 풍경을 감상할 수 있습니다.
-        </div>
+        <div class="tip-box"><strong class="tip-title">에디터 탐방 꿀팁</strong>자작나무 코스 왕복에는 약 2시간 30분에서 3시간 정도 소요되므로 편안한 트레킹화를 착용하시는 것을 추천해요. 아침 햇살이 하얀 나무 기둥 사이로 부서져 내리는 오전 시간대에 가장 눈부신 풍경을 감상할 수 있습니다.</div>
 
         <div class="map-btn-wrap">
-          <a href="https://map.naver.com/p/search/%EC%9D%B8%EC%A0%9C%20%EC%9B%90%EB%8C%80%EB%A6%AC%20%EC%9E%90%EC%9E%91%EB%82%98%EB%AC%B4%EC%88%B2" target="_blank" rel="noopener noreferrer" class="btn-naver-map">
-            🧭 네이버 지도 바로가기
-          </a>
+          <a href="https://map.naver.com/p/search/%EC%9D%B8%EC%A0%9C%20%EC%9B%90%EB%8C%80%EB%A6%AC%20%EC%9E%90%EC%9E%91%EB%82%98%EB%AC%B4%EC%88%B2" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도 바로가기</a>
         </div>
-      </section>
+            </div>
+          </section>
 
-      <!-- 스팟 2: 박인환문학관 -->
-      <section class="spot-section">
-        <div class="spot-header">
+          <section class="spot-section flip">
+            <div class="spot-head">
+              <div class="spot-header">
           <span class="spot-num">2</span>
           <h2 class="spot-title">박인환문학관 & 목마와 숙녀 거리</h2>
         </div>
-        <div class="spot-tagline">'세월이 가면' 노래가 흐르는 1950년대 명동 다방 거리 시간 여행</div>
-
-        <div class="spot-image-wrap">
-          <img src="http://tong.visitkorea.or.kr/cms/resource/75/3335975_image2_1.jpg" alt="인제 박인환문학관 현대적인 외관과 넓은 잔디마당 전경" class="spot-image" loading="lazy" />
-        </div>
-
+              <p class="spot-tagline">'세월이 가면' 노래가 흐르는 1950년대 명동 다방 거리 시간 여행</p>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="http://tong.visitkorea.or.kr/cms/resource/75/3335975_image2_1.jpg" alt="인제 박인환문학관 현대적인 외관과 넓은 잔디마당 전경" class="spot-image" loading="lazy" />
+            </figure>
+            <div class="spot-body">
         <p class="spot-desc">
           자작나무 숲에서 숲길을 내려와 인제읍 원도심으로 이동하면 한국 모더니즘 시문학의 대표 주자 박인환 시인을 기리는 박인환문학관을 마주합니다. 인제에서 태어나 자란 시인의 대표작 '목마와 숙녀', '세월이 가면'의 서정적인 시구가 방문객을 따스하게 맞이합니다. 이곳 1층 전시실은 시인이 활발하게 문학 활동을 펼쳤던 1950년대 명동의 옛 거리 풍경을 실물 크기로 재현해 두었습니다. 시인과 예술가들이 모여 시대를 고뇌하던 '봉선화다방', 시인이 직접 운영했던 서점 '마리서사', 그리고 시 '세월이 가면'이 탄생했던 선술집 '은성'의 나무 테이블과 난로까지 세심하게 복원되어 있어 마치 타임머신을 타고 과거로 들어선 듯한 낭만을 선사합니다. 문학관을 둘러본 뒤 인근 읍내 식당에서 메밀 함량이 높은 구수한 인제 막국수와 바삭한 감자전으로 든든한 점심 식사를 즐겨보세요.
         </p>
@@ -584,30 +369,26 @@
           </div>
         </div>
 
-        <div class="tip-box">
-          <strong>💡 에디터 탐방 꿀팁</strong><br>
-          옛 봉선화다방 테이블에 앉아 LP 턴테이블 음악을 들으며 레트로 감성 사진을 찍어보세요. 바로 옆에 붙어 있는 인제산촌민속박물관과 야외 조각공원도 함께 둘러보기 좋습니다.
-        </div>
+        <div class="tip-box"><strong class="tip-title">에디터 탐방 꿀팁</strong>옛 봉선화다방 테이블에 앉아 LP 턴테이블 음악을 들으며 레트로 감성 사진을 찍어보세요. 바로 옆에 붙어 있는 인제산촌민속박물관과 야외 조각공원도 함께 둘러보기 좋습니다.</div>
 
         <div class="map-btn-wrap">
-          <a href="https://map.naver.com/p/search/%EB%B0%95%EC%9D%B8%ED%99%98%EB%AC%B8%ED%95%99%EA%B4%80" target="_blank" rel="noopener noreferrer" class="btn-naver-map">
-            🧭 네이버 지도 바로가기
-          </a>
+          <a href="https://map.naver.com/p/search/%EB%B0%95%EC%9D%B8%ED%99%98%EB%AC%B8%ED%95%99%EA%B4%80" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도 바로가기</a>
         </div>
-      </section>
+            </div>
+          </section>
 
-      <!-- 스팟 3: 인제 십이선녀탕 -->
-      <section class="spot-section">
-        <div class="spot-header">
+          <section class="spot-section">
+            <div class="spot-head">
+              <div class="spot-header">
           <span class="spot-num">3</span>
           <h2 class="spot-title">인제 십이선녀탕 (탕수동계곡)</h2>
         </div>
-        <div class="spot-tagline">열두 선녀의 전설 품은 옥빛 너럭바위와 설악산 원시림 계곡 산책</div>
-
-        <div class="spot-image-wrap">
-          <img src="https://tong.visitkorea.or.kr/cms/resource/58/3042058_image2_1.jpg" alt="인제 십이선녀탕 탕수동계곡 너럭바위와 맑은 물줄기 전경" class="spot-image" loading="lazy" />
-        </div>
-
+              <p class="spot-tagline">열두 선녀의 전설 품은 옥빛 너럭바위와 설악산 원시림 계곡 산책</p>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/58/3042058_image2_1.jpg" alt="인제 십이선녀탕 탕수동계곡 너럭바위와 맑은 물줄기 전경" class="spot-image" loading="lazy" />
+            </figure>
+            <div class="spot-body">
         <p class="spot-desc">
           인제읍에서 국도 44호선을 따라 북면 설악산 자락으로 달리면 내설악 최고의 계곡미를 자랑하는 십이선녀탕에 닿습니다. 밤마다 하늘에서 열두 선녀가 내려와 목욕을 하고 올라갔다는 전설이 전해질 만큼 맑고 투명한 옥빛 물웅덩이와 기암괴석이 끝없이 이어집니다. 계곡 입구에서 잘 정비된 나무 데크 탐방로를 따라 걷다 보면 시원한 계곡 물소리와 울창한 활엽수림이 빚어내는 피톤치드가 온몸을 감쌉니다. 넓고 평평한 너럭바위에 잠시 걸터앉아 맑은 물에 손을 담그고 바람에 흔들리는 나뭇잎을 바라보는 시간은 지친 일상에 깊은 쉼을 선물합니다. 응봉폭포와 복숭아탕까지 이어지는 완만한 계곡길은 초보자도 무리 없이 가볍게 산책하기 좋습니다.
         </p>
@@ -631,30 +412,26 @@
           </div>
         </div>
 
-        <div class="tip-box">
-          <strong>💡 에디터 탐방 꿀팁</strong><br>
-          입구에서 첫 번째 다리까지 이어지는 구간은 경사가 거의 없어 30분 안팎으로 가볍게 다녀오기 좋아요. 바위가 물기에 젖어 미끄러울 수 있으니 미끄럼 방지가 되는 신발을 착용하세요.
-        </div>
+        <div class="tip-box"><strong class="tip-title">에디터 탐방 꿀팁</strong>입구에서 첫 번째 다리까지 이어지는 구간은 경사가 거의 없어 30분 안팎으로 가볍게 다녀오기 좋아요. 바위가 물기에 젖어 미끄러울 수 있으니 미끄럼 방지가 되는 신발을 착용하세요.</div>
 
         <div class="map-btn-wrap">
-          <a href="https://map.naver.com/p/search/%EC%8B%AD%EC%9D%B4%EC%84%A0%EB%85%80%ED%83%95" target="_blank" rel="noopener noreferrer" class="btn-naver-map">
-            🧭 네이버 지도 바로가기
-          </a>
+          <a href="https://map.naver.com/p/search/%EC%8B%AD%EC%9D%B4%EC%84%A0%EB%85%80%ED%83%95" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도 바로가기</a>
         </div>
-      </section>
+            </div>
+          </section>
 
-      <!-- 스팟 4: 인제 만해마을 -->
-      <section class="spot-section">
-        <div class="spot-header">
+          <section class="spot-section flip">
+            <div class="spot-head">
+              <div class="spot-header">
           <span class="spot-num">4</span>
           <h2 class="spot-title">인제 만해마을 (문인의 집)</h2>
         </div>
-        <div class="spot-tagline">님의 침묵이 흐르는 평화의 뜰과 북카페에서 즐기는 향긋한 차 한 잔</div>
-
-        <div class="spot-image-wrap">
-          <img src="https://tong.visitkorea.or.kr/cms/resource/04/4074604_image2_1.jpg" alt="인제 만해마을 문학 복합공간과 조경 정원 전경" class="spot-image" loading="lazy" />
-        </div>
-
+              <p class="spot-tagline">님의 침묵이 흐르는 평화의 뜰과 북카페에서 즐기는 향긋한 차 한 잔</p>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/04/4074604_image2_1.jpg" alt="인제 만해마을 문학 복합공간과 조경 정원 전경" class="spot-image" loading="lazy" />
+            </figure>
+            <div class="spot-body">
         <p class="spot-desc">
           십이선녀탕에서 차로 5분을 더 달려 북면 용대리로 접어들면 독립운동가이자 시인이었던 만해 한용운 선생의 문학혼을 기리는 복합문화공간 만해마을이 자리 잡고 있습니다. 백담사에서 '님의 침묵'을 집필했던 선생의 평화와 자유 정신을 널리 알리고자 조성된 곳입니다. 단정한 회색 노출 콘크리트와 한옥의 비례가 어우러진 현대적인 건축물 사이로 만해문학박물관, 평화의 종, 서정주·고은 등 한국 대표 문인들의 시비가 세워진 시인의 광장이 고즈넉하게 펼쳐집니다. 건물 1층에 위치한 구름카페는 넓은 통창 너머로 푸른 산자락을 바라보며 수천 권의 도서를 자유롭게 읽을 수 있는 북카페 쉼터입니다. 따뜻한 대추차나 향긋한 커피 한 잔을 마시며 시집을 펼쳐 드는 시간은 마음에 다정한 온기를 채워줍니다.
         </p>
@@ -678,30 +455,26 @@
           </div>
         </div>
 
-        <div class="tip-box">
-          <strong>💡 에디터 탐방 꿀팁</strong><br>
-          통창 북카페에서 북천의 물소리를 들으며 책 한 권의 여유를 즐겨보세요. 만해마을 맞은편에 자리한 한국시집박물관도 함께 관람하시면 더욱 풍성한 문학 여행이 완성됩니다.
-        </div>
+        <div class="tip-box"><strong class="tip-title">에디터 탐방 꿀팁</strong>통창 북카페에서 북천의 물소리를 들으며 책 한 권의 여유를 즐겨보세요. 만해마을 맞은편에 자리한 한국시집박물관도 함께 관람하시면 더욱 풍성한 문학 여행이 완성됩니다.</div>
 
         <div class="map-btn-wrap">
-          <a href="https://map.naver.com/p/search/%EC%9D%B8%EC%A0%9C%20%EB%A7%8C%ED%95%B4%EB%A7%88%EC%9D%84" target="_blank" rel="noopener noreferrer" class="btn-naver-map">
-            🧭 네이버 지도 바로가기
-          </a>
+          <a href="https://map.naver.com/p/search/%EC%9D%B8%EC%A0%9C%20%EB%A7%8C%ED%95%B4%EB%A7%88%EC%9D%84" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도 바로가기</a>
         </div>
-      </section>
+            </div>
+          </section>
 
-      <!-- 스팟 5: 설악산 백담사 -->
-      <section class="spot-section">
-        <div class="spot-header">
+          <section class="spot-section">
+            <div class="spot-head">
+              <div class="spot-header">
           <span class="spot-num">5</span>
           <h2 class="spot-title">설악산 백담사 & 백담계곡 소원 돌탑</h2>
         </div>
-        <div class="spot-tagline">옥빛 물결 계곡 너머 수만 개의 소원 돌탑과 천년고찰의 황혼 피날레</div>
-
-        <div class="spot-image-wrap">
-          <img src="https://tong.visitkorea.or.kr/cms/resource/96/4114796_image2_1.jpg" alt="인제 설악산 백담사 경내 전각과 울창한 숲 전경" class="spot-image" loading="lazy" />
-        </div>
-
+              <p class="spot-tagline">옥빛 물결 계곡 너머 수만 개의 소원 돌탑과 천년고찰의 황혼 피날레</p>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/96/4114796_image2_1.jpg" alt="인제 설악산 백담사 경내 전각과 울창한 숲 전경" class="spot-image" loading="lazy" />
+            </figure>
+            <div class="spot-body">
         <p class="spot-desc">
           인제 감성 드라이브의 마지막 대미는 내설악 깊은 산중에 고요히 자리한 천년고찰 백담사와 그 앞을 흐르는 백담계곡입니다. 신라 진덕여왕 때 자장율사가 창건한 백담사는 설악산 대청봉에서 절까지 작은 담이 100개나 이어진다 하여 이름 붙여졌습니다. 용대리 백담주차장에서 전용 셔틀버스를 타고 굽이치는 옥빛 백담계곡을 따라 15분간 달리는 여정 자체가 한 폭의 산수화 속으로 들어가는 듯한 설렘을 안겨줍니다. 사찰 입구 수심교를 건너기 전, 백담계곡 자갈밭 위로 수만 명의 순례자와 여행자들이 정성스럽게 쌓아 올린 무수한 돌탑들이 장관을 이룹니다. 잔잔한 물가에 작은 돌 하나를 얹으며 소원을 빌고, 산사 처마 끝 풍경 소리를 들으며 노을빛으로 물드는 설악산 능선을 바라보는 황혼의 순간은 하루 여정에 잊지 못할 깊은 평안을 선사합니다. 하산 후 용대리 황태마을에서 매콤달콤한 황태구이정식으로 따뜻하게 여행을 마무리해보세요.
         </p>
@@ -725,22 +498,22 @@
           </div>
         </div>
 
-        <div class="tip-box">
-          <strong>💡 에디터 탐방 꿀팁</strong><br>
-          백담계곡 자갈밭에서 소원 돌탑을 배경으로 기념사진을 남겨보세요. 사찰 경내 찻집 '찻자리'에서 맛보는 솔잎차도 추천해요. 백담사에서 용대리로 내려오는 마지막 셔틀버스 시간을 백담사 정류장에서 미리 확인해두시는 것이 안전합니다.
-        </div>
+        <div class="tip-box"><strong class="tip-title">에디터 탐방 꿀팁</strong>백담계곡 자갈밭에서 소원 돌탑을 배경으로 기념사진을 남겨보세요. 사찰 경내 찻집 '찻자리'에서 맛보는 솔잎차도 추천해요. 백담사에서 용대리로 내려오는 마지막 셔틀버스 시간을 백담사 정류장에서 미리 확인해두시는 것이 안전합니다.</div>
 
         <div class="map-btn-wrap">
-          <a href="https://map.naver.com/p/search/%EB%B0%B1%EB%8B%B4%EC%82%AC" target="_blank" rel="noopener noreferrer" class="btn-naver-map">
-            🧭 네이버 지도 바로가기
-          </a>
+          <a href="https://map.naver.com/p/search/%EB%B0%B1%EB%8B%B4%EC%82%AC" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도 바로가기</a>
         </div>
-      </section>
+            </div>
+          </section>
+        </div>
 
-      <!-- 여행 경비 요약 -->
-      <section class="cost-table-card">
-        <h3 class="timeline-title">💰 2인 예상 여행 경비 결산</h3>
-        <table class="cost-table">
+        <!-- 2인 예상 입장료 -->
+        <section class="cost-table-card">
+          <div class="cost-head">
+            <h2 class="timeline-title">2인 예상 여행 경비 결산</h2>
+          </div>
+          <div class="table-wrap">
+            <table class="cost-table cost-3">
           <thead>
             <tr>
               <th>구분</th>
@@ -781,35 +554,39 @@
             </tr>
           </tbody>
         </table>
-      </section>
+          </div>
+        </section>
 
-      <!-- 알짜 여행 팁 -->
-      <section class="tips-card">
-        <h3 class="timeline-title">💡 인제 힐링 드라이브 알짜 팁</h3>
-        <ul class="tips-list">
+        <section class="tips-card">
+          <h2 class="timeline-title">인제 힐링 드라이브 알짜 팁</h2>
+          <ul class="tips-list">
           <li><strong>서울·수도권 진입 및 순환 동선</strong>: 서울양양고속도로 동홍천IC에서 국도 44호선을 타고 인제로 진입하여 남서쪽의 원대리 자작나무숲을 오전에 먼저 트레킹한 뒤, 인제읍내(박인환문학관)를 거쳐 국도 46호선을 타고 북면(십이선녀탕, 만해마을, 백담사)으로 이어지는 북동진 동선을 잡으면 가장 쾌적합니다.</li>
           <li><strong>자작나무숲 입산 시간 체크</strong>: 원대리 자작나무 숲은 산림 보호 및 안전을 위해 오후 3시(동절기 오후 2시)에 입산을 마감하므로 오전 10시 이전 일찍 도착하시는 일정으로 계획하시는 것을 추천해요.</li>
           <li><strong>백담사 셔틀버스 탑승 요령</strong>: 백담사는 일반 차량 통행이 통제되어 용대리 백담주차장에서 셔틀버스를 이용해야 합니다. 배차 간격은 수시 운행(10~15분 간격)되므로 편리하게 이용할 수 있으며 성수기에는 주차장이 혼잡할 수 있으니 대중교통 승강장 근처에 주차하세요.</li>
           <li><strong>인제 특산물 쇼핑</strong>: 용대리 황태덕장 직판장에서 겨우내 얼고 녹기를 반복해 노란 빛깔과 부드러운 육질을 자랑하는 용대리 황태포와 황태채를 가족 선물용으로 구매해보시는 것도 추천해요.</li>
         </ul>
-      </section>
+        </section>
 
-      <div class="app-course-box" style="margin: 40px 0 24px; padding: 20px 22px; background: var(--color-accent-light); border: 1px solid var(--color-border); border-radius: 14px;">
-        <strong style="display: block; font-size: 17px; color: var(--color-text-main); margin-bottom: 6px;">🗺️ 이 코스 오늘 데이트에서 열기</strong>
-        <p style="margin: 0 0 14px; font-size: 14.5px; line-height: 1.6; color: var(--color-text-main);">글에 나온 장소 5곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
-        <a href="../../#c=3497.1790243907131.1791428808647.1792737817768.1793434283420" style="display: inline-block; padding: 10px 18px; border-radius: 10px; background: var(--color-text-main); color: #ffffff; font-weight: 700; font-size: 15px; text-decoration: none;">앱에서 코스 열기 →</a>
+        <div class="app-course-box">
+          <div>
+            <h2>이 코스 오늘 데이트에서 열기</h2>
+            <p>글에 나온 장소 5곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
+          </div>
+          <a class="btn app-action" href="../../#c=3497.1790243907131.1791428808647.1792737817768.1793434283420">앱에서 코스 열기</a>
+        </div>
+
+        <footer class="article-credit">
+          <p>사진 출처: 한국관광공사 TourAPI (공공누리 제1유형)</p>
+        </footer>
       </div>
-
-      <footer style="margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--color-border); font-size: 0.85rem; color: var(--color-text-sub); text-align: center;">
-        <p>사진 출처: 한국관광공사 TourAPI (공공누리 제1유형)</p>
-      </footer>
     </article>
   </main>
 
   <footer class="site-footer">
-    <div style="max-width: 760px; margin: 0 auto;">
-      <p style="margin-bottom: 8px;"><strong>오늘 데이트 (Oneul Date)</strong> · 전국 데이트 & 여행 코스 큐레이션 매거진</p>
-      <p><a href="https://nufunc.github.io/oneul-date/">홈으로 가기</a> · <a href="https://nufunc.github.io/oneul-date/blog/">매거진 전체보기</a></p>
+    <div class="footer-inner container">
+      <p class="footer-mark"><strong>오늘 데이트 (Oneul Date)</strong></p>
+      <p class="footer-line">전국 데이트 & 여행 코스 큐레이션 매거진</p>
+      <p class="footer-links"><a href="https://nufunc.github.io/oneul-date/">홈으로 가기</a><a href="https://nufunc.github.io/oneul-date/blog/">매거진 전체보기</a></p>
     </div>
   </footer>
 
