@@ -166,8 +166,46 @@ const original = `<!DOCTYPE html>
   }
 
   // 5. 모르는 틀은 파일을 만들지 않고 실패한다
-  assert.throws(() => convert(original.replace('<p class="spot-desc">', '<div class="tip-box">팁</div>\n<p class="spot-desc">')), /모르는 요소/, '모르는 요소가 있는데 변환이 실패하지 않았다');
-  assert.throws(() => convert(original.replace('<div class="app-course-box"', '<div class="other-box"')), /app-course-box|모르는 요소/, '앱 코스 상자가 없는데 변환이 실패하지 않았다');
+  assert.throws(() => convert(original.replace('<p class="spot-desc">', '<div class="other-box">팁</div>\n<p class="spot-desc">')), /모르는 요소/, '모르는 요소가 있는데 변환이 실패하지 않았다');
+  assert.throws(() => convert(original.replace('<div class="app-course-box"', '<div class="other-box"')), /모르는 요소/, '모르는 앱 코스 상자 틀인데 변환이 실패하지 않았다');
+  assert.throws(() => convert(original.replace('<section class="timeline-card">', '<section class="timeline-other">')), /동선 구획|모르는/, '동선 틀이 모르는 것인데 변환이 실패하지 않았다');
+
+  // 6. 팁 상자, article-lead 도입, 앱 코스 상자 없음(첫 화면 버튼도 없음)은 통과한다
+  const variant = original
+    .replace('<p class="spot-desc">\n          첫째 곳 설명이에요.', '<div class="tip-box">\n          <strong>💡 꿀팁</strong><br>\n          월요일은 쉬어요.\n        </div>\n        <p class="spot-desc">\n          첫째 곳 설명이에요.')
+    .replace('<div class="prose-intro">', '<div class="article-lead">')
+    .replace(/<div class="app-course-box"[\s\S]*?<\/div>\s*(?=<footer)/, '')
+    .replace(/href="\.\.\/\.\.\/#c=[^"]*"/g, 'href="https://example.com/"');
+  const vout = convert(variant);
+  assert.deepStrictEqual(compare(variant, vout), [], '변형본(팁, article-lead, 앱 상자 없음)이 보존 비교를 통과하지 못했다');
+  assert.ok(vout.includes('<div class="tip-box"><strong class="tip-title">꿀팁</strong>월요일은 쉬어요.</div>'), '팁 상자 제목이 새 틀이 아니다');
+  assert.ok(vout.includes('<p class="prose-intro">') && !vout.includes('app-course-box"'), 'article-lead가 prose-intro가 되지 않았거나 앱 상자가 생겼다');
+  const noIntro = variant.replace(/<div class="article-lead">[\s\S]*?<\/div>/, '');
+  assert.ok(!convert(noIntro).includes('prose-intro"'), '도입이 없는 글에 도입이 생겼다');
+
+  // 7. 두 번째 계열(timeline-list, table-wrap 없는 3열 경비표, 팁 구획)
+  const listOriginal = original
+    .replace(/<section class="timeline-card">[\s\S]*?<\/section>/, `<section class="timeline-card">
+        <h3 class="timeline-title">🧭 시험 타임라인</h3>
+        <div class="timeline-meta-box">
+          <div class="meta-item"><strong>권역</strong>: 시험시</div>
+        </div>
+        <div class="timeline-list">
+          <div class="timeline-item">
+            <span class="timeline-badge">1</span>
+            <div class="timeline-content">
+              <div class="timeline-time">10:30 - 11:45</div>
+              <div class="timeline-spot">첫째 곳</div>
+              <div class="timeline-desc">첫째 곳 산책</div>
+            </div>
+          </div>
+        </div>
+      </section>`)
+    .replace(/<div class="table-wrap">\s*(<table[\s\S]*?<\/table>)\s*<\/div>/, (all, t) => t.replace('<th>구분</th><th>장소</th><th>2인 금액</th><th>비고</th>', '<th>구분</th><th>세부</th><th>금액</th>').replace('<td></td>', '').replace('<td colspan="2">2인 합계</td><td>0원</td><td>시험</td>', '<td>합계</td><td>시험</td><td>0원</td>'))
+    .replace('<div class="app-course-box"', '<section class="tips-card"><h3 class="timeline-title">💡 시험 팁</h3><ul class="tips-list"><li><strong>준비</strong>: 신발</li></ul></section>\n      <div class="app-course-box"');
+  const lout = convert(listOriginal);
+  assert.deepStrictEqual(compare(listOriginal, lout), [], '두 번째 계열이 보존 비교를 통과하지 못했다');
+  assert.ok(lout.includes('<span class="tl-badge">1</span><span class="tl-time">10:30 - 11:45</span>') && lout.includes('class="tl-facts"') && lout.includes('class="cost-table cost-3"') && lout.includes('<section class="tips-card">'), '두 번째 계열의 새 틀이 아니다');
 
   assert.strictEqual(snapshot(out).links.length, snapshot(original).links.length + 1, '링크 수는 첫 화면 앱 버튼 하나만 늘어야 한다');
   console.log(`test-blog-hallmark: 변환 보존 비교, 새 틀 약속, 달라진 변환본 ${cases.length}건, 모르는 틀 실패 통과`);
