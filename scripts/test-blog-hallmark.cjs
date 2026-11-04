@@ -359,6 +359,83 @@ const original = `<!DOCTYPE html>
   assert.ok(gout.includes('<tr class="cost-total-row">') && gout.includes('<div class="cta-card">') && /<a class="btn" href="[^"]*#c=/.test(gout), '정보 격자 계열의 경비표, 마무리 상자, 앱 버튼이 새 틀이 아니다');
   assert.throws(() => convert(grid.replace('<p>첫째 곳 뒤 문단이에요.</p>', '<blockquote>모름</blockquote>')), /모르는 요소/, '정보 격자 계열에서 모르는 요소가 있는데 변환이 실패하지 않았다');
 
+  // 10. 지도 칩 줄 계열(spot-chips): 대표 사진형(budget-section, source-notice, back-btn-wrap, 푸터 없음)과 article 밖 앱 코스 상자
+  const chips = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>[시험] 칩 글</title>
+  <link rel="canonical" href="https://nufunc.github.io/oneul-date/blog/chips/">
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","headline":"칩","datePublished":"2026-10-30"}
+  </script>
+  <style>body { background: #fff; }</style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="https://nufunc.github.io/oneul-date/" class="header-logo">오늘 데이트 <span>매거진</span></a>
+      <nav class="header-nav"><a href="https://nufunc.github.io/oneul-date/blog/">매거진 목록</a></nav>
+    </div>
+  </header>
+  <main class="article-container">
+    <article>
+      <header class="article-header">
+        <span class="badge-category">시험 지역 · 시험 코스</span>
+        <h1 class="article-title">[시험] 칩 글 하루 코스</h1>
+        <div class="article-meta"><span>📅 2026.10.30</span><span>글: 시험 팀 / 사진: 시험</span></div>
+      </header>
+      <div class="hero-image-wrap">
+        <img src="https://example.com/h.jpg" alt="대표 사진" class="hero-image" />
+        <p class="image-caption">대표 사진 설명</p>
+      </div>
+      <div class="prose-intro">시험 도입이에요.</div>
+      <section class="timeline-card">
+        <h2 class="timeline-title">시험 동선</h2>
+        <div class="tl-act">오전: 첫째 곳</div>
+        <div class="tl-step"><span class="tl-time">10:00</span><div><span class="tl-place">첫째 곳</span><span class="tl-note">무료</span></div></div>
+        <div class="tl-move">↓ 차로 약 5km (약 8분)</div>
+        <div class="tl-step"><span class="tl-time">12:00</span><div><span class="tl-place">둘째 곳</span><span class="tl-note">무료</span></div></div>
+      </section>
+      <section class="spot-section">
+        <div class="spot-header"><span class="spot-number">01</span><h2 class="spot-title">첫째 곳</h2><span class="spot-tag">시험 태그</span></div>
+        <div class="spot-image-wrap"><img src="https://example.com/a.jpg" alt="첫째 곳 전경" class="spot-image" loading="lazy" /><p class="image-caption">첫째 곳 사진 설명</p></div>
+        <p class="spot-desc">첫째 곳 설명이에요.</p>
+        <div class="spot-chips-row">
+          <a href="https://map.naver.com/p/search/a" target="_blank" rel="noopener noreferrer" class="spot-chip-btn map-chip">🗺️ 네이버 지도</a>
+          <a href="tmap://search?name=a" class="spot-chip-btn">🧭 T맵 길안내</a>
+        </div>
+        <div class="tip-box"><div class="tip-box-title">💡 이용 정보</div>• 주소: 시험시 시험로 1<br>• 입장료: 무료</div>
+      </section>
+      <section class="spot-section">
+        <div class="spot-header"><span class="spot-number">02</span><h2 class="spot-title">둘째 곳</h2><span class="spot-tag">사진 없는 곳</span></div>
+        <p class="spot-desc">둘째 곳 설명이에요.</p>
+      </section>
+      <section class="budget-section">
+        <h2 class="budget-title">💰 2인 예상 입장료</h2>
+        <p>시험 경비예요.</p>
+        <div class="table-wrap"><table class="cost-table"><thead><tr><th>구분</th><th>장소</th><th>2인 금액</th><th>비고</th></tr></thead><tbody><tr><td>입장</td><td>첫째 곳</td><td>0원</td><td>무료</td></tr><tr class="cost-total-row"><td colspan="2">2인 합계</td><td>0원</td><td>별도</td></tr></tbody></table></div>
+      </section>
+      <div class="source-notice">사진 출처: 시험</div>
+      <div class="back-btn-wrap"><a href="https://nufunc.github.io/oneul-date/blog/" class="back-btn">← 매거진 목록으로 돌아가기</a></div>
+    </article>
+    <div class="app-course-box" style="margin: 40px 0 24px;">
+      <strong style="display: block;">🗺️ 이 코스 오늘 데이트에서 열기</strong>
+      <p style="margin: 0;">시험 코스를 앱에서 열어요.</p>
+      <a href="${COURSE}" style="display: inline-block;">앱에서 코스 열기 →</a>
+    </div>
+  </main>
+</body>
+</html>
+`;
+  const chout = convert(chips);
+  assert.deepStrictEqual(compare(chips, chout), [], '지도 칩 줄 계열이 보존 비교를 통과하지 못했다');
+  assert.ok(chout.includes('<figure class="hero-figure">') && chout.includes('<figcaption>첫째 곳 사진 설명</figcaption>') && chout.includes('<section class="spot-section no-photo">'), '지도 칩 줄 계열의 사진 틀이 아니다');
+  assert.ok(chout.includes('<div class="map-btn-wrap spot-actions">') && chout.includes('<strong class="tip-title">이용 정보</strong>') && chout.includes('<p class="spot-tagline">시험 태그</p>'), '지도 칩 줄 계열의 지도 버튼이나 팁 상자가 새 틀이 아니다');
+  assert.ok(chout.includes('<section class="cost-table-card">') && chout.includes('<p class="back-link">') && chout.includes('<footer class="article-credit tight">') && /<a class="btn" href="[^"]*#c=/.test(chout), '지도 칩 줄 계열의 경비표, 돌아가기, 앱 버튼이 새 틀이 아니다');
+  assert.throws(() => convert(chips.replace('<p class="spot-desc">둘째 곳 설명이에요.</p>', '<blockquote>모름</blockquote>')), /모르는 요소/, '지도 칩 줄 계열에서 모르는 요소가 있는데 변환이 실패하지 않았다');
+
   assert.strictEqual(snapshot(out).links.length, snapshot(original).links.length + 1, '링크 수는 첫 화면 앱 버튼 하나만 늘어야 한다');
   console.log(`test-blog-hallmark: 변환 보존 비교, 새 틀 약속, 달라진 변환본 ${cases.length}건, 모르는 틀 실패 통과`);
 })().catch((e) => { console.error(e); process.exit(1); });

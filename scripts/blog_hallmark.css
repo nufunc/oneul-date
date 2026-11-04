@@ -260,3 +260,5 @@ p.timeline-title { letter-spacing: -0.01em; overflow-wrap: break-word; }
 .app-course-box .cta-title { font-size: var(--text-section); margin-bottom: var(--space-md); }
 @media (max-width: 40rem) { .story-section .spot-title { font-size: var(--text-lg); } }
 @media (max-width: 60rem) { .route .tl-act:not(:first-child) { margin-top: var(--space-lg); } }
+.article-credit.tight { padding-bottom: var(--space-md); }
+.back-link { padding-bottom: var(--space-md); font-size: var(--text-sm); }

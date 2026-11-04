@@ -26,6 +26,7 @@ const FAMILY_NAMES = [
   'real-photo-flat',
   'spot-card',
   'real-photo-grid',
+  'spot-chips',
 ];
 const FAMILIES = await Promise.all(FAMILY_NAMES.map(async (n) => (await import(`./hallmark_families/${n}.mjs`)).default));
 
