@@ -16,6 +16,9 @@
 
   <!-- Pretendard 웹폰트 -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700&display=swap&text=%26()%2C.0123456789%3A%5B%5D~%EA%B0%81%EA%B0%9C%EA%B0%A4%EA%B1%B0%EA%B2%BD%EA%B3%84%EA%B3%B5%EA%B4%80%EA%B5%AD%EA%B8%88%EA%B8%B0%EA%B8%B8%EA%B9%8C%EB%82%99%EB%82%A8%EB%8A%98%EB%8B%A4%EB%8C%80%EB%8D%B0%EB%8F%84%EB%93%9C%EB%94%94%EB%9D%BC%EB%9E%91%EB%9F%AC%EB%A0%B9%EB%A5%98%EB%A6%AC%EB%A7%81%EB%A7%A4%EB%AA%A8%EB%AC%B4%EB%AF%B8%EB%B0%94%EB%B3%80%EB%B3%84%EB%B3%B4%EB%B6%80%EB%B8%8C%EB%B9%84%EC%82%AC%EC%82%B0%EC%83%81%EC%84%9C%EC%88%98%EC%88%A0%EC%88%B2%EC%8A%A4%EC%8B%9D%EC%97%90%EC%97%AC%EC%97%B4%EC%98%88%EC%98%A4%EC%98%A5%EC%99%80%EC%9A%94%EC%9A%95%EC%9B%8C%EC%9B%90%EC%9C%A0%EC%9D%B4%EC%9D%B8%EC%9E%84%EC%9E%A5%EC%A0%84%EC%A0%95%EC%A1%B0%EC%A3%BC%EC%A3%BD%EC%A7%80%EC%A7%84%EC%B0%A8%EC%B0%BD%EC%B2%9C%EC%B4%9D%EC%B6%A9%EC%B9%B4%EC%BD%94%ED%81%AC%ED%83%80%ED%84%B0%ED%86%B5%ED%8A%B8%ED%8E%98%ED%8F%89%ED%8F%AC%ED%91%9C%ED%94%8C%ED%95%9C%ED%95%A9%ED%95%B4%ED%96%89%ED%98%95%ED%99%94%ED%9A%8C%ED%9E%90" rel="stylesheet">
 
   <script type="application/ld+json">
 {
@@ -43,425 +46,294 @@
   </script>
 
   <style>
-    :root {
-      --color-primary: #1e293b;
-      --color-accent: #0284c7;
-      --color-accent-light: #e0f2fe;
-      --color-text-main: #334155;
-      --color-text-sub: #64748b;
-      --color-border: #e2e8f0;
-      --color-bg-page: #f8fafc;
-      --color-card-bg: #ffffff;
-      --color-warm: #d97706;
-      --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-    }
+/* hallmark-solstice: scripts/convert_blog_hallmark.mjs가 글의 <style>을 이 파일로 바꾼다 (Hallmark 2.0.0, 테마 Solstice, P-293) */
+:root {
+  color-scheme: light;
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-xs: 0.8125rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.125rem; --text-xl: 1.5625rem; --text-2xl: 1.953rem; --text-3xl: 2.441rem;
+  --text-hero: clamp(1.75rem, 1.6vw + 1.25rem, 2.75rem);
+  --text-section: clamp(1.75rem, 1.8vw + 1rem, 2.875rem); --text-title: clamp(1.25rem, 0.75vw + 0.875rem, 1.625rem); --text-lead: clamp(1.0625rem, 0.3vw + 0.95rem, 1.25rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-micro: 120ms; --dur-short: 220ms;
+  --container: 1200px; --measure: 680px; --gutter: 56px; --gap-columns: 40px; --section-gap: 120px;
+  --z-sticky-nav: 300;
+  --color-paper: oklch(94% 0.03 80); --color-paper-2: oklch(97% 0.02 85); --color-paper-3: oklch(89% 0.05 80);
+  --color-ink: oklch(27% 0.05 50); --color-ink-2: oklch(36% 0.05 50); --color-muted: oklch(48% 0.06 55);
+  --color-rule: oklch(84% 0.06 78);
+  --color-accent: oklch(54% 0.20 24); --color-accent-2: oklch(48% 0.19 24); --color-accent-ink: oklch(97% 0.02 85); --color-focus: oklch(54% 0.20 24);
+  --color-gold: oklch(74% 0.14 75); --color-gold-2: oklch(84% 0.11 80);
+  --color-band-text: oklch(94% 0.03 80); --color-band-muted: oklch(80% 0.05 75);
+  --color-hair-ink: color-mix(in oklab, var(--color-ink) 10%, transparent);
+  --font-display: "Noto Serif KR", "Nanum Myeongjo", ui-serif, serif;
+  --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --radius-card: 0; --radius-pill: 999px; --rule-hair: 1px; --rule-bar: 2px;
+  --shadow-card: 10px 10px 0 var(--color-paper-3);
+}
+@media (max-width: 60rem) { :root { --gutter: 24px; --section-gap: 88px; --gap-columns: 24px; } }
+@media (max-width: 40rem) { :root { --gutter: 16px; --section-gap: 64px; --gap-columns: 16px; } }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: var(--font-family);
-      background-color: var(--color-bg-page);
-      color: var(--color-text-main);
-      line-height: 1.8;
-      word-break: keep-all;
-      -webkit-font-smoothing: antialiased;
-    }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+html { scrollbar-color: var(--color-muted) var(--color-paper); scroll-padding-top: var(--space-3xl); }
+body { margin: 0; background: var(--color-paper); color: var(--color-ink-2); font-family: var(--font-family); font-size: var(--text-md); line-height: 1.75; word-break: keep-all; -webkit-font-smoothing: antialiased; }
+::selection { background: color-mix(in oklab, var(--color-gold) 40%, transparent); }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+a:hover { text-decoration-color: var(--color-accent); }
+article h1, article h2, article h3 { margin: 0; font-family: var(--font-display); font-weight: 700; color: var(--color-ink); line-height: 1.3; letter-spacing: -0.01em; overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+img { max-width: 100%; display: block; }
+.container { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); }
 
-    .site-header {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--color-border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .header-inner {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 14px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .header-logo {
-      font-weight: 800;
-      font-size: 1.15rem;
-      color: var(--color-primary);
-      text-decoration: none;
-    }
-    .header-logo span { color: var(--color-accent); }
-    .header-nav a {
-      color: var(--color-text-sub);
-      text-decoration: none;
-      font-size: 0.9rem;
-      margin-left: 16px;
-    }
+/* 44px 머리 링크 규칙: scripts/test-blog-related.cjs가 글마다 하나를 요구한다 */
+header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
 
-    .article-container {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 40px 20px 80px;
-    }
+/* Controls */
+.btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 var(--space-lg); border: 0; border-radius: var(--radius-pill); background: var(--color-accent); color: var(--color-accent-ink); font: 600 var(--text-md)/1 var(--font-family); text-decoration: none; cursor: pointer; transition: background-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out); }
+.btn:hover { background: var(--color-accent-2); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.link-quiet { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-ink); font-weight: 600; font-size: var(--text-sm); text-decoration: none; border-bottom: var(--rule-bar) solid var(--color-ink); transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out); }
+.link-quiet:hover { color: var(--color-accent); border-color: var(--color-accent); }
+.link-quiet:active { transform: translateY(1px); }
+.link-quiet:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
 
-    .article-header {
-      margin-bottom: 32px;
-    }
-    .badge {
-      display: inline-block;
-      background: var(--color-accent-light);
-      color: var(--color-accent);
-      font-weight: 700;
-      font-size: 0.8rem;
-      padding: 4px 10px;
-      border-radius: 6px;
-      margin-bottom: 12px;
-    }
-    h1 {
-      font-size: 1.85rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      line-height: 1.4;
-      margin-bottom: 16px;
-      letter-spacing: -0.02em;
-    }
-    .meta-info {
-      font-size: 0.88rem;
-      color: var(--color-text-sub);
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
+/* Nav */
+.site-header { position: sticky; top: 0; z-index: var(--z-sticky-nav); background: var(--color-paper); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.header-inner { display: flex; justify-content: space-between; align-items: center; min-height: 64px; }
+.header-logo { font-family: var(--font-display); font-size: var(--text-lg); color: var(--color-ink); text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; }
+.header-logo span { color: var(--color-accent); margin-left: 0.3em; }
+.header-logo:hover { color: var(--color-ink-2); }
+.header-nav { display: flex; gap: var(--space-lg); }
+.header-nav a { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--text-sm); color: var(--color-ink-2); text-decoration: none; }
+.header-nav a:hover { color: var(--color-ink); text-decoration: underline; text-decoration-color: var(--color-accent); }
+.header-nav a:active, .header-logo:active { transform: translateY(1px); }
 
-    .intro-box {
-      background: #f0fdf4;
-      border-left: 4px solid #16a34a;
-      padding: 20px 22px;
-      border-radius: 0 12px 12px 0;
-      margin: 28px 0 40px;
-      font-size: 0.98rem;
-      color: #166534;
-      line-height: 1.8;
-    }
+/* Hero */
+.hero { display: grid; padding-block: var(--space-2xl) var(--space-xl); }
+.hero-text { display: grid; gap: var(--space-lg); }
+.article-title { font-size: var(--text-hero); line-height: 1.3; max-width: 28ch; }
+.hero-kicker { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.hero-kicker span:first-child { color: var(--color-accent); font-weight: 600; }
+.article-meta { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-lg); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); font-variant-numeric: tabular-nums; }
+.article-meta .meta-credit { flex-basis: 100%; }
+/* 좁은 화면에서 칸마다 한 줄: 본문 글꼴(Pretendard)이 바뀔 때 줄 수가 달라져 아래 띠가 밀리는 것을 막는다 */
+@media (max-width: 40rem) { .article-meta { flex-direction: column; flex-wrap: nowrap; } }
+.spot-photo img { width: 100%; height: 100%; object-fit: cover; outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
 
-    .overview-card {
-      background: var(--color-card-bg);
-      border: 1px solid var(--color-border);
-      border-radius: 16px;
-      padding: 24px;
-      margin-bottom: 40px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
-    }
-    .overview-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--color-primary);
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .route-timeline {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      position: relative;
-      padding-left: 20px;
-    }
-    .route-timeline::before {
-      content: "";
-      position: absolute;
-      left: 6px;
-      top: 6px;
-      bottom: 6px;
-      width: 2px;
-      background: #cbd5e1;
-    }
-    .timeline-item {
-      position: relative;
-      font-size: 0.92rem;
-    }
-    .timeline-item::before {
-      content: "";
-      position: absolute;
-      left: -18px;
-      top: 6px;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--color-accent);
-      border: 2px solid white;
-      box-shadow: 0 0 0 1px var(--color-accent);
-    }
-    .timeline-time {
-      font-weight: 700;
-      color: var(--color-primary);
-      margin-right: 8px;
-    }
-    .timeline-name {
-      color: var(--color-text-main);
-    }
-    .timeline-dist {
-      color: var(--color-text-sub);
-      font-size: 0.82rem;
-      margin-left: 6px;
-    }
+/* Lead */
+.prose-intro { max-width: var(--measure); padding-top: var(--space-xl); font-size: var(--text-lead); line-height: 1.8; color: var(--color-ink); padding-bottom: var(--space-3xl); }
 
-    .spot-section {
-      background: var(--color-card-bg);
-      border: 1px solid var(--color-border);
-      border-radius: 16px;
-      padding: 28px;
-      margin-bottom: 36px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
-    }
-    .spot-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 16px;
-    }
-    .spot-number {
-      font-size: 0.82rem;
-      font-weight: 800;
-      color: var(--color-accent);
-      background: var(--color-accent-light);
-      padding: 3px 8px;
-      border-radius: 6px;
-      display: inline-block;
-      margin-bottom: 6px;
-    }
-    .spot-title {
-      font-size: 1.35rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      line-height: 1.35;
-    }
-    .spot-chips {
-      display: flex;
-      gap: 6px;
-      margin-top: 10px;
-      flex-wrap: wrap;
-    }
-    .chip {
-      font-size: 0.78rem;
-      padding: 3px 8px;
-      border-radius: 4px;
-      background: #f1f5f9;
-      color: var(--color-text-sub);
-      font-weight: 600;
-    }
+/* The day, on the brown band */
+.band { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl) var(--space-xl); }
+.band .timeline-title { color: var(--color-band-text); font-size: var(--text-section); margin-bottom: var(--space-xl); }
+.route { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: 0; padding: 0; }
+.tl-act { font-size: var(--text-sm); color: var(--color-gold-2); padding-bottom: var(--space-sm); }
+.tl-step { display: grid; align-content: start; gap: var(--space-2xs); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-gold); }
+.tl-time { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1; color: var(--color-band-text); font-variant-numeric: tabular-nums; }
+.tl-place { font-weight: 600; font-size: var(--text-lg); color: var(--color-band-text); }
+.tl-note { font-size: var(--text-sm); color: var(--color-band-muted); line-height: 1.6; }
+.tl-move { font-size: var(--text-sm); color: var(--color-band-muted); padding-block: var(--space-sm) var(--space-lg); }
+.tl-total { font-size: var(--text-sm); color: var(--color-band-muted); padding-top: var(--space-lg); margin-top: var(--space-lg); border-top: var(--rule-hair) solid color-mix(in oklab, var(--color-band-text) 25%, transparent); }
+/* spot-info-list 계열: 시간 범위(10:30 - 11:45)가 길어 시각 글자를 줄이고, 요약 상자와 번호 배지를 둔다 */
+.route.range .tl-time { font-size: var(--text-xl); }
+.route.range .tl-step { padding-bottom: var(--space-md); }
+.tl-badge { font-size: var(--text-xs); color: var(--color-gold-2); letter-spacing: 0.04em; }
+.tl-facts { display: grid; gap: var(--space-2xs) var(--space-lg); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.tl-facts strong { color: var(--color-gold-2); font-weight: 600; }
+@media (min-width: 60rem) {
+  .tl-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .route { grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); column-gap: var(--space-lg); }
+  .route > * { grid-row: var(--r); grid-column: var(--c) / span var(--s, 1); }
+  .tl-move { padding-bottom: 0; }
+  .tl-total { grid-column: 1 / -1; }
+}
 
-    .spot-image-wrap {
-      margin: 18px 0;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid var(--color-border);
-      background: #000;
-    }
-    .spot-image {
-      width: 100%;
-      height: auto;
-      max-height: 440px;
-      object-fit: cover;
-      display: block;
-    }
-    .image-caption {
-      padding: 8px 12px;
-      font-size: 0.8rem;
-      color: var(--color-text-sub);
-      background: #f8fafc;
-      border-top: 1px solid var(--color-border);
-      text-align: center;
-    }
+/* Stops */
+.spots { padding-block: var(--section-gap) 0; display: grid; gap: var(--section-gap); }
+.spot-section { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "photo head" "photo body"; grid-template-rows: auto 1fr; column-gap: var(--gap-columns); row-gap: var(--space-md); align-items: start; padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); }
+.spot-section.flip { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-areas: "head photo" "body photo"; }
+.spot-section.no-photo { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "body"; }
+.spot-head { grid-area: head; display: grid; gap: var(--space-md); }
+.spot-photo { grid-area: photo; align-self: start; margin: 0; aspect-ratio: 4 / 5; width: 100%; background: var(--color-paper-3); position: sticky; top: 96px; }
+.spot-body { grid-area: body; display: grid; gap: var(--space-md); }
+.spot-header { display: flex; align-items: baseline; gap: var(--space-md); }
+.spot-num { font-family: var(--font-display); font-size: var(--text-3xl); line-height: 1; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+.spot-title { font-size: var(--text-section); }
+.spot-tagline { font-size: var(--text-lg); color: var(--color-ink); padding-bottom: var(--space-xs); }
+.spot-desc { max-width: 60ch; }
 
-    .spot-info-list {
-      margin: 16px 0;
-      padding: 14px 16px;
-      background: #f8fafc;
-      border-radius: 8px;
-      font-size: 0.88rem;
-      list-style: none;
-    }
-    .spot-info-list li {
-      margin-bottom: 6px;
-      display: flex;
-    }
-    .spot-info-list li:last-child { margin-bottom: 0; }
-    .spot-info-label {
-      font-weight: 700;
-      color: var(--color-primary);
-      min-width: 72px;
-    }
-    .spot-info-val {
-      color: var(--color-text-main);
-    }
+.spot-info-box { margin: var(--space-xs) 0 0; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); }
+.info-row { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--space-md); padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.info-row:last-child { border-bottom: 0; }
+.info-label { color: var(--color-muted); }
+.info-val { color: var(--color-ink); font-weight: 400; font-variant-numeric: tabular-nums; }
+.map-btn-wrap { padding-top: var(--space-sm); }
+.tip-box { padding: var(--space-sm) var(--space-md); border-left: var(--rule-bar) solid var(--color-accent); background: var(--color-paper-2); font-size: var(--text-sm); color: var(--color-ink-2); line-height: 1.7; }
+.tip-box strong { color: var(--color-ink); font-weight: 600; }
+.tip-box .tip-title { display: block; margin-bottom: var(--space-2xs); }
 
-    .spot-desc {
-      font-size: 0.96rem;
-      color: var(--color-text-main);
-      line-height: 1.85;
-      margin: 16px 0;
-    }
+/* Fees */
+.cost-table-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.cost-head { display: grid; gap: var(--space-md); align-content: start; }
+.cost-head .timeline-title { font-size: var(--text-section); }
+.cost-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.cost-table th { text-align: left; font-weight: 400; color: var(--color-muted); padding: var(--space-xs) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-bar) solid var(--color-ink); }
+.cost-table td { padding: var(--space-sm) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink-2); vertical-align: top; }
+.cost-table td:nth-child(2) { color: var(--color-ink); font-weight: 400; }
+.cost-3 .cost-total-row td:nth-child(2) { font-family: inherit; font-size: inherit; color: inherit; font-weight: 600; }
+.cost-3 .cost-total-row td:nth-child(3) { font-family: var(--font-display); font-size: var(--text-xl); color: var(--color-accent); font-weight: 700; }
+.cost-total-row td { border-bottom: 0; border-top: var(--rule-bar) solid var(--color-ink); color: var(--color-ink); font-weight: 600; }
+.cost-total-row td:nth-child(2) { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--color-accent); font-weight: 700; }
+@media (max-width: 600px) {
+  .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
+  .table-wrap thead { display: none; }
+  .table-wrap tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-sm); row-gap: var(--space-2xs); padding-block: var(--space-sm); border-bottom: var(--rule-hair) solid var(--color-rule); }
+  .table-wrap td { padding: 0; border: 0; }
+  .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: var(--text-xs); color: var(--color-muted); }
+  .table-wrap td:nth-child(3) { text-align: right; font-weight: 600; color: var(--color-ink); }
+  .table-wrap td:nth-child(4) { grid-column: 1 / -1; color: var(--color-muted); }
+  .table-wrap td:empty { display: none; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: var(--text-sm); color: var(--color-ink); }
+  .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; text-align: right; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
+  .table-wrap .cost-total-row { border-top: var(--rule-bar) solid var(--color-ink); border-bottom: 0; }
+}
 
-    .tip-box {
-      background: #fffbeb;
-      border: 1px solid #fde68a;
-      border-radius: 10px;
-      padding: 14px 18px;
-      margin-top: 16px;
-      font-size: 0.88rem;
-      color: #92400e;
-      line-height: 1.7;
-    }
-    .tip-box-title {
-      font-weight: 800;
-      margin-bottom: 4px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+/* Tips */
+.tips-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.tips-card .timeline-title { font-size: var(--text-section); align-self: start; }
+.tips-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-md); }
+.tips-list li { padding-bottom: var(--space-md); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.tips-list li:last-child { border-bottom: 0; }
+.tips-list strong { color: var(--color-ink); font-weight: 600; }
 
-    .action-chips {
-      display: flex;
-      gap: 8px;
-      margin-top: 20px;
-      padding-top: 16px;
-      border-top: 1px dashed var(--color-border);
-    }
-    .btn-map {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #00843d;
-      color: white;
-      text-decoration: none;
-      font-size: 0.84rem;
-      font-weight: 700;
-      padding: 8px 14px;
-      border-radius: 8px;
-      transition: background 0.15s;
-    }
-    .btn-map:hover { background: #007a37; }
+/* App course */
+.app-course-box { margin-top: var(--section-gap); display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--gap-columns); align-items: end; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-xl); }
+.app-course-box h2 { font-size: var(--text-section); margin-bottom: var(--space-md); }
+.app-course-box p { max-width: 52ch; }
+.app-course-box .app-action { justify-self: end; }
 
-    /* 비용 정산표 반응형 스타일 */
-    .cost-section {
-      background: var(--color-card-bg);
-      border: 1px solid var(--color-border);
-      border-radius: 16px;
-      padding: 28px;
-      margin: 40px 0;
-    }
-    .cost-title {
-      font-size: 1.25rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin-bottom: 8px;
-    }
-    .cost-sub {
-      font-size: 0.88rem;
-      color: var(--color-text-sub);
-      margin-bottom: 20px;
-    }
-    /* 비용표 */
-    .table-wrap {
-      margin: 32px 0 40px;
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      overflow: hidden;
-      background: #ffffff;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.9rem;
-      text-align: left;
-    }
-    thead {
-      background: #f1f5f9;
-      color: var(--color-primary);
-      font-weight: 700;
-    }
-    th, td {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--color-border);
-    }
-    tr:last-child td {
-      border-bottom: none;
-    }
+.article-credit { margin-top: var(--space-2xl); padding-block: var(--space-md) var(--space-3xl); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); }
 
-    .cost-section .table-wrap { margin: 0; }
+/* Footer mast */
+.site-footer { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl); }
+.footer-inner { display: grid; gap: var(--space-md); }
+.footer-mark { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1.2; color: var(--color-band-text); }
+.footer-line { color: var(--color-band-muted); font-size: var(--text-sm); }
+.footer-links { display: flex; flex-wrap: wrap; gap: var(--space-lg); }
+.footer-links a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-band-text); font-size: var(--text-sm); text-decoration: underline; text-decoration-color: var(--color-gold); }
+.footer-links a:hover { text-decoration-color: var(--color-accent); color: var(--color-gold-2); }
+.footer-links a:active { transform: translateY(1px); }
+.site-footer :focus-visible { outline-color: var(--color-gold-2); }
 
-    /* 비용표: 좁은 화면에서는 한 행을 카드 하나로 쌓는다 */
-    @media (max-width: 600px) {
-      .table-wrap { overflow-x: visible; }
-      .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
-      .table-wrap thead { display: none; }
-      .table-wrap tr {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        column-gap: 12px;
-        row-gap: 4px;
-        padding: 14px 16px;
-        border-bottom: 1px solid var(--color-border);
-      }
-      .table-wrap tr:last-child { border-bottom: none; }
-      .table-wrap td { padding: 0; border: none; }
-      .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: 0.78rem; font-weight: 700; color: var(--color-text-sub); }
-      .table-wrap td:nth-child(2) { font-weight: 700; }
-      .table-wrap td:nth-child(3) { max-width: 60vw; word-break: keep-all; text-align: right; font-weight: 700; }
-      .table-wrap td:nth-child(4) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
-      .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: inherit; color: inherit; }
-      .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; max-width: 60vw; word-break: keep-all; text-align: right; }
-      .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
-    }
+@media (max-width: 60rem) {
+  .hero, .spot-section, .spot-section.flip, .cost-table-card, .tips-card, .app-course-box { grid-template-columns: minmax(0, 1fr); }
+  .spot-section, .spot-section.flip { grid-template-areas: "head" "photo" "body"; grid-template-rows: auto; }
+  .spot-section.no-photo { grid-template-areas: "head" "body"; }
+  .hero { padding-block: var(--space-xl) var(--space-xl); }
+  .spot-photo { position: static; aspect-ratio: 16 / 10; }
+  .app-course-box { padding: var(--space-lg); }
+  .app-course-box .app-action { justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn, .link-quiet { transition: none; }
+  .btn:active, .link-quiet:active, .header-nav a:active, .header-logo:active, .footer-links a:active { transform: none; }
+}
 
-    /* 600px 이하 모바일 전용 카드형 렌더링 */
-    @media (max-width: 600px) {
-      h1 { font-size: 1.45rem; }
-      .spot-title { font-size: 1.18rem; }
-      .article-container { padding: 24px 16px 60px; }
-      .spot-section { padding: 20px 16px; }
-    }
+/* real-photo-flat 계열(평면 글): 번호 있는 긴 장소 제목, 사진 설명, 안내 상자, 지도 목록 */
+.lead-photo { margin: 0 0 var(--space-3xl); }
+.lead-photo img { width: 100%; max-height: 520px; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.lead-photo figcaption, .body-photo figcaption { margin-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.spot-photo figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--space-xs) var(--space-sm); font-size: var(--text-xs); line-height: 1.5; color: var(--color-accent-ink); background: color-mix(in oklab, var(--color-ink) 78%, transparent); }
+.body-photo { margin: 0; }
+.body-photo img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.spot-section.flat .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.tl-lead { max-width: var(--measure); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.guide-box, .order-box { background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); color: var(--color-ink); }
+.guide-box h4, .order-box strong { margin: 0 0 var(--space-xs); font-family: var(--font-display); font-size: var(--text-md); color: var(--color-ink); display: block; }
+.guide-box ul, .order-box ul { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-2xs); }
+.bridge { padding-top: var(--space-xs); color: var(--color-muted); font-size: var(--text-sm); }
+.map-links { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-md); }
+.map-links .timeline-title { font-size: var(--text-section); }
+.map-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-xs); }
+.map-list a, .map-link-chip { display: flex; justify-content: space-between; gap: var(--space-md); align-items: center; min-height: 44px; padding-block: var(--space-xs); border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink); text-decoration: none; }
+.map-links-grid { display: grid; gap: 0; }
+.map-link-chip .btn-action { color: var(--color-accent); font-weight: 600; white-space: nowrap; }
+@media (max-width: 40rem) { .spot-section.flat .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .spot-photo { position: relative; top: auto; } }
 
-    .conclusion-box {
-      background: white;
-      border: 1px solid var(--color-border);
-      border-radius: 16px;
-      padding: 28px;
-      margin: 40px 0;
-      font-size: 0.96rem;
-      line-height: 1.85;
-    }
-    .conclusion-title {
-      font-size: 1.18rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin-bottom: 14px;
-    }
+/* spot-card 계열(editor-144): 대표 사진, 요약 상자, 본문 구획, 세부 코스, 이동 연결, 마무리 상자 */
+.hero-figure { margin: 0 0 var(--space-xl); }
+.hero-figure img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.hero-figure figcaption { padding-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-muted); }
+.summary-card { margin-bottom: var(--space-xl); background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-lg); font-size: var(--text-sm); }
+.summary-title, p.timeline-title, .cta-title { font-family: var(--font-display); font-weight: 700; line-height: 1.3; color: var(--color-ink); }
+.summary-title { font-size: var(--text-xl); margin-bottom: var(--space-sm); }
+p.timeline-title { letter-spacing: -0.01em; overflow-wrap: break-word; }
+.summary-list { margin: 0; padding: 0; list-style: none; display: grid; }
+.summary-list li { padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.summary-list li:last-child { border-bottom: 0; }
+.summary-list strong { color: var(--color-ink); font-weight: 600; }
+.prose-section { margin-top: var(--section-gap); max-width: var(--measure); display: grid; gap: var(--space-md); }
+.prose-section h2, .spots-title { font-size: var(--text-title); }
+.stops-section { margin-top: var(--section-gap); }
+.stops-section .spots { padding-top: var(--space-xl); }
+.spots.bridged { gap: 0; }
+.drive-bridge { margin: 0; padding-block: var(--space-xl); padding-left: var(--space-md); border-left: var(--rule-bar) solid var(--color-gold); font-size: var(--text-sm); color: var(--color-muted); }
+.drive-bridge strong { color: var(--color-ink); font-weight: 600; }
+.spot-header:has(.spot-badge) { flex-direction: column; align-items: flex-start; gap: var(--space-xs); }
+.spot-badge { font-size: var(--text-sm); font-weight: 600; color: var(--color-accent); }
+.spot-actions { display: flex; flex-wrap: wrap; gap: 0 var(--space-lg); }
+.info-wide .info-row { grid-template-columns: 5.5em minmax(0, 1fr); }
+.info-wide .info-row.plain { grid-template-columns: minmax(0, 1fr); }
+.cost-head .timeline-title.long { font-size: var(--text-title); }
+.cta-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-sm); max-width: var(--measure); }
+.cta-card h3, .cta-title { font-size: var(--text-title); }
+.cta-card .link-quiet { justify-self: start; }
 
-    .site-footer {
-      border-top: 1px solid var(--color-border);
-      padding: 30px 20px;
-      text-align: center;
-      font-size: 0.85rem;
-      color: var(--color-text-sub);
-      background: white;
-    }
-    .footer-links {
-      margin-bottom: 12px;
-    }
-    .footer-links a {
-      color: var(--color-text-sub);
-      text-decoration: none;
-      margin: 0 8px;
-    }
-    header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
-    .header-nav a,.header-title a,.blog-tagline a{display:inline-block}
+/* real-photo-grid 계열(editor-145): 사진과 정보 상자가 글 순서대로 이어지는 한 열 장소 구획, 번호 있는 동선, 도입 여러 문단 */
+.prose-intro p + p { margin-top: var(--space-md); }
+.stories { padding-top: var(--space-xl); gap: var(--space-3xl); }
+.story-section { display: grid; gap: var(--space-md); max-width: var(--measure); }
+.story-section .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.story-body { display: grid; gap: var(--space-md); }
+.story-photo { margin: 0; }
+.story-photo img { width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.story-photo figcaption { padding-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.story-photo figcaption span + span::before { content: " · "; }
+.tl-step .tl-badge { margin-bottom: calc(var(--space-2xs) * -1); }
+.tl-meta { display: block; font-style: normal; color: var(--color-gold-2); }
+.app-course-box.early { margin-top: var(--space-xl); }
+.app-course-box .cta-title { font-size: var(--text-section); margin-bottom: var(--space-md); }
+@media (max-width: 40rem) { .story-section .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .route .tl-act:not(:first-child) { margin-top: var(--space-lg); } }
+.article-credit.tight { padding-bottom: var(--space-md); }
+.back-link { padding-bottom: var(--space-md); font-size: var(--text-sm); }
+
+/* route-timeline 계열(editor-147: 보령, 거제, 고성): 사진 설명의 출처 줄, 시각 범위 동선 */
+.spot-photo figcaption .cap-src { display: block; }
+.spot-number { white-space: nowrap; }
+
+/* spot-block 계열(editor-147: 강릉, 경주): 머리 바 메모, 인용문, 날마다 나뉜 동선, 장소 분류 줄, 팁 목록, 금액이 끝 칸인 경비표 */
+.header-inner:has(.header-note) { flex-wrap: wrap; gap: 0 var(--space-md); }
+.header-note { font-size: var(--text-sm); color: var(--color-muted); }
+.hero-quote { max-width: var(--measure); font-size: var(--text-lead); line-height: 1.7; color: var(--color-ink); }
+.route + .route { margin-top: var(--space-xl); }
+.story-kicker { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.story-kicker .spot-num { font-size: var(--text-xl); }
+.stories.bridged .story-section + .story-section { margin-top: var(--space-3xl); }
+.tip-box ul { margin: 0; padding-left: 1.1em; display: grid; gap: var(--space-2xs); }
+@media (max-width: 600px) {
+  .table-wrap.amount-last td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
+  .table-wrap.amount-last td:nth-child(4) { grid-column: auto; text-align: right; font-weight: 600; color: var(--color-ink); }
+}
   </style>
 </head>
 <body>
 
   <header class="site-header">
-    <div class="header-inner">
+    <div class="header-inner container">
       <a href="https://nufunc.github.io/oneul-date/blog/" class="header-logo">오늘 데이트 <span>매거진</span></a>
       <nav class="header-nav">
         <a href="https://nufunc.github.io/oneul-date/blog/">전체 글 보기</a>
@@ -471,283 +343,157 @@
   </header>
 
   <main class="article-container">
+    <article>
+      <header class="article-header hero container">
+        <div class="hero-text">
+          <p class="hero-kicker badge-category"><span>충남 보령</span><span>서해안 오션 드라이브</span></p>
+          <h1 class="article-title">[충남 보령 바다 드라이브] 대천 스카이바이크부터 죽도 상화원 한옥 회랑길, 개화예술공원 조각숲, 플라워 갤러리 리리스카페와 무창포타워 서해 낙조까지 보령 힐링 코스</h1>
+          <div class="article-meta">
+            <span>발행일: 2026년 10월 21일</span>
+            <span class="meta-credit">글: 오늘 데이트 에디토리얼 팀 / 사진: 카카오맵 포토 리뷰, 한국관광공사</span>
+          </div>
+          <p><a class="btn" href="../../#c=1504.1792375980037.1790258775058.1791033875344.4071">앱에서 코스 열기</a></p>
+        </div>
+      </header>
 
-    <header class="article-header">
-      <span class="badge">충남 보령 · 서해안 오션 드라이브</span>
-      <h1>[충남 보령 바다 드라이브] 대천 스카이바이크부터 죽도 상화원 한옥 회랑길, 개화예술공원 조각숲, 플라워 갤러리 리리스카페와 무창포타워 서해 낙조까지 보령 힐링 코스</h1>
-      <div class="meta-info">
-        <span>발행일: 2026년 10월 21일</span>
-        <span>·</span>
-        <span>글: 오늘 데이트 에디토리얼 팀 / 사진: 카카오맵 포토 리뷰, 한국관광공사</span>
+      <div class="container">
+        <p class="prose-intro">충남 보령은 시원한 서해 바다와 낭만적인 숲길, 그리고 이국적인 예술 정원을 하루 만에 오롯이 만끽할 수 있는 다채로운 매력의 드라이브 명소입니다. 바다 위 고가 레일을 달리는 대천해수욕장 스카이바이크를 시작으로, 섬 전체를 둘러싼 2km 지붕 회랑길과 전통 한옥이 어우러진 비밀의 섬 죽도 상화원, 5만 평 야외 조각숲과 허브랜드가 있는 개화예술공원, 생화와 드라이플라워로 꾸민 플라워 카페 리리스, 그리고 신비의 바닷길과 닭벼슬섬 위로 붉게 타오르는 무창포타워 황금빛 일몰 피날레까지 가을날 잊지 못할 힐링 코스를 정리했습니다.</p>
       </div>
-    </header>
 
-    <div class="intro-box">
-      충남 보령은 시원한 서해 바다와 낭만적인 숲길, 그리고 이국적인 예술 정원을 하루 만에 오롯이 만끽할 수 있는 다채로운 매력의 드라이브 명소입니다. 바다 위 고가 레일을 달리는 대천해수욕장 스카이바이크를 시작으로, 섬 전체를 둘러싼 2km 지붕 회랑길과 전통 한옥이 어우러진 비밀의 섬 죽도 상화원, 5만 평 야외 조각숲과 허브랜드가 있는 개화예술공원, 생화와 드라이플라워로 꾸민 플라워 카페 리리스, 그리고 신비의 바닷길과 닭벼슬섬 위로 붉게 타오르는 무창포타워 황금빛 일몰 피날레까지 가을날 잊지 못할 힐링 코스를 정리했습니다.
-    </div>
-
-    <section class="overview-card">
-      <h2 class="overview-title">🚗 충남 보령 힐링 드라이브 타임라인</h2>
-      <p style="margin: 0 0 12px; font-size: 0.88rem; color: var(--color-text-sub);">상화원은 4 ~ 11월 금·토·일과 법정공휴일에만 열고, 스카이바이크는 매주 월요일에 쉬어요. 이 동선은 4 ~ 11월 금·토·일과 월요일이 아닌 공휴일에만 그대로 돌 수 있어요.</p>
-      <div class="route-timeline">
-        <div class="timeline-item">
-          <span class="timeline-time">10:30 ~ 11:50</span>
-          <span class="timeline-name"><strong>[스팟 1] 대천해수욕장 스카이바이크</strong> (바다 위 2.3km 해상 레일바이크 왕복 탑승)</span>
-        </div>
-        <div class="timeline-item">
-          <span class="timeline-time">12:00 ~ 13:30</span>
-          <span class="timeline-name"><strong>[스팟 2] 죽도 상화원</strong> (2km 목재 회랑길 산책 & 한옥마을 쉼)</span>
-          <span class="timeline-dist">(차량 6.6km · 약 10분)</span>
-        </div>
-        <div class="timeline-item">
-          <span class="timeline-time">14:00 ~ 15:20</span>
-          <span class="timeline-name"><strong>[스팟 3] 개화예술공원 & 모산조형미술관</strong> (5만 평 야외 조각숲과 허브랜드)</span>
-          <span class="timeline-dist">(차량 20.4km · 약 29분)</span>
-        </div>
-        <div class="timeline-item">
-          <span class="timeline-time">15:20 ~ 16:20</span>
-          <span class="timeline-name"><strong>[스팟 4] 보령 카페리리스</strong> (드라이플라워 갤러리 감성 테마 카페)</span>
-          <span class="timeline-dist">(공원 내 도보 2분)</span>
-        </div>
-        <div class="timeline-item">
-          <span class="timeline-time">16:45 ~ 17:50</span>
-          <span class="timeline-name"><strong>[스팟 5] 무창포타워 & 해변 낙조</strong> (타워에서 보는 신비의 바닷길과 일몰)</span>
-          <span class="timeline-dist">(차량 17.8km · 약 24분)</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- 스팟 1: 대천해수욕장 스카이바이크 -->
-    <article class="spot-section">
-      <div class="spot-header">
-        <div>
-          <span class="spot-number">SPOT 1</span>
-          <h2 class="spot-title">대천해수욕장 스카이바이크</h2>
-          <div class="spot-chips">
-            <span class="chip">바다 위 2.3km 레일</span>
-            <span class="chip">국내 최초 해상 바이크</span>
-            <span class="chip">전동 오르막 구간</span>
-            <span class="chip">오션뷰 인생샷</span>
+      <!-- 동선 -->
+      <section class="timeline-card band">
+        <div class="container">
+          <h2 class="timeline-title">충남 보령 힐링 드라이브 타임라인</h2>
+          <p class="tl-lead">상화원은 4 ~ 11월 금·토·일과 법정공휴일에만 열고, 스카이바이크는 매주 월요일에 쉬어요. 이 동선은 4 ~ 11월 금·토·일과 월요일이 아닌 공휴일에만 그대로 돌 수 있어요.</p>
+          <div class="route range" style="--n:5">
+            <div class="tl-step" style="--r:2; --c:1"><span class="tl-time">10:30 ~ 11:50</span><span class="tl-place">[스팟 1] 대천해수욕장 스카이바이크</span><span class="tl-note">(바다 위 2.3km 해상 레일바이크 왕복 탑승)</span></div>
+            <div class="tl-step" style="--r:2; --c:2"><span class="tl-time">12:00 ~ 13:30</span><span class="tl-place">[스팟 2] 죽도 상화원</span><span class="tl-note">(2km 목재 회랑길 산책 & 한옥마을 쉼)<em class="tl-meta">(차량 6.6km · 약 10분)</em></span></div>
+            <div class="tl-step" style="--r:2; --c:3"><span class="tl-time">14:00 ~ 15:20</span><span class="tl-place">[스팟 3] 개화예술공원 & 모산조형미술관</span><span class="tl-note">(5만 평 야외 조각숲과 허브랜드)<em class="tl-meta">(차량 20.4km · 약 29분)</em></span></div>
+            <div class="tl-step" style="--r:2; --c:4"><span class="tl-time">15:20 ~ 16:20</span><span class="tl-place">[스팟 4] 보령 카페리리스</span><span class="tl-note">(드라이플라워 갤러리 감성 테마 카페)<em class="tl-meta">(공원 내 도보 2분)</em></span></div>
+            <div class="tl-step" style="--r:2; --c:5"><span class="tl-time">16:45 ~ 17:50</span><span class="tl-place">[스팟 5] 무창포타워 & 해변 낙조</span><span class="tl-note">(타워에서 보는 신비의 바닷길과 일몰)<em class="tl-meta">(차량 17.8km · 약 24분)</em></span></div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div class="spot-image-wrap">
-        <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/b14de105da855c62355892fb7fadc35875e8d71d?original" alt="대천해수욕장 스카이바이크 레일과 바다 풍경 실사 사진" class="spot-image" loading="lazy">
-        <div class="image-caption">대천해수욕장 스카이바이크: 서해 바다 위를 가로지르는 고가 레일에서 마주하는 대천 앞바다 절경<span style="display: block; margin-top: 4px;">출처: 카카오맵</span></div>
-      </div>
-
-      <ul class="spot-info-list">
-        <li><span class="spot-info-label">주소</span><span class="spot-info-val">충청남도 보령시 해수욕장10길 75 (신흑동 2209-4)</span></li>
-        <li><span class="spot-info-label">운영시간</span><span class="spot-info-val">화 ~ 일 10:00 ~ 16:40, 휴식시간 12:00 ~ 14:00 (매주 월요일과 설·추석 당일 휴무, TourAPI)</span></li>
-        <li><span class="spot-info-label">이용료</span><span class="spot-info-val">일반 성인 2인 23,000원 (공식 예매 누리집)</span></li>
-        <li><span class="spot-info-label">주차안내</span><span class="spot-info-val">무료 주차 (카카오맵)</span></li>
-      </ul>
-
-      <p class="spot-desc">
+      <div class="container">
+        <div class="spots">
+          <section class="spot-section">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-number">SPOT 1</span><h2 class="spot-title">대천해수욕장 스카이바이크</h2></div>
+              <p class="spot-tagline">바다 위 2.3km 레일 · 국내 최초 해상 바이크 · 전동 오르막 구간 · 오션뷰 인생샷</p>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/b14de105da855c62355892fb7fadc35875e8d71d?original" alt="대천해수욕장 스카이바이크 레일과 바다 풍경 실사 사진" class="spot-image" loading="lazy" />
+              <figcaption>대천해수욕장 스카이바이크: 서해 바다 위를 가로지르는 고가 레일에서 마주하는 대천 앞바다 절경<span class="cap-src">출처: 카카오맵</span></figcaption>
+            </figure>
+            <div class="spot-body">
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">충청남도 보령시 해수욕장10길 75 (신흑동 2209-4)</span></div><div class="info-row"><span class="info-label">운영시간</span><span class="info-val">화 ~ 일 10:00 ~ 16:40, 휴식시간 12:00 ~ 14:00 (매주 월요일과 설·추석 당일 휴무, TourAPI)</span></div><div class="info-row"><span class="info-label">이용료</span><span class="info-val">일반 성인 2인 23,000원 (공식 예매 누리집)</span></div><div class="info-row"><span class="info-label">주차안내</span><span class="info-val">무료 주차 (카카오맵)</span></div></div>
+              <p class="spot-desc">
         대천해수욕장 분수광장 인근에서 출발하는 스카이바이크는 바다 위 최고 15m 높이의 고가 레일을 타고 대천항 방향으로 왕복 2.3km를 달리는 국내 최초의 해상 레일바이크입니다. 발아래로 시원하게 넘실대는 파도와 넓은 갯바위 절경을 감상하며 바다 위를 둥둥 떠가는 듯한 짜릿한 개방감을 선사합니다.
       </p>
-      <p class="spot-desc">
+              <p class="spot-desc">
         오르막과 곡선 구간에는 전동 보조 레일이 작동하여 페달을 무리하게 밟지 않아도 부드럽게 주행하므로 둘만의 대화를 나누며 풍경을 감상하기에 안성맞춤입니다. 반환점을 돌며 바라보는 광활한 대천 백사장과 푸른 서해 수평선은 보령 드라이브의 상쾌한 출발점으로 제격입니다.
       </p>
+              <div class="tip-box"><strong class="tip-title">에디터 방문 팁</strong>주말과 공휴일에는 당일 현장 발권 대기 줄이 길어질 수 있으므로, 오전 10시 개장 시간에 맞춰 미리 티켓을 발권한 뒤 탑승하는 것을 적극 권장합니다.</div>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EB%8C%80%EC%B2%9C%ED%95%B4%EC%88%98%EC%9A%95%EC%9E%A5%20%EC%8A%A4%EC%B9%B4%EC%9D%B4%EB%B0%94%EC%9D%B4%ED%81%AC" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도에서 위치 보기</a></div>
+            </div>
+          </section>
 
-      <div class="tip-box">
-        <div class="tip-box-title">💡 에디터 방문 팁</div>
-        주말과 공휴일에는 당일 현장 발권 대기 줄이 길어질 수 있으므로, 오전 10시 개장 시간에 맞춰 미리 티켓을 발권한 뒤 탑승하는 것을 적극 권장합니다.
-      </div>
-
-      <div class="action-chips">
-        <a href="https://map.naver.com/p/search/%EB%8C%80%EC%B2%9C%ED%95%B4%EC%88%98%EC%9A%95%EC%9E%A5%20%EC%8A%A4%EC%B9%B4%EC%9D%B4%EB%B0%94%EC%9D%B4%ED%81%AC" target="_blank" rel="noopener noreferrer" class="btn-map">🧭 네이버 지도에서 위치 보기</a>
-      </div>
-    </article>
-
-    <!-- 스팟 2: 죽도 상화원 -->
-    <article class="spot-section">
-      <div class="spot-header">
-        <div>
-          <span class="spot-number">SPOT 2</span>
-          <h2 class="spot-title">죽도 상화원 (한국식 전통정원)</h2>
-          <div class="spot-chips">
-            <span class="chip">2km 목재 회랑길</span>
-            <span class="chip">한국 전통 한옥마을</span>
-            <span class="chip">울창한 해송 숲</span>
-            <span class="chip">33개 해변 연못</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="spot-image-wrap">
-        <img src="https://tong.visitkorea.or.kr/cms/resource/75/4099875_image2_1.jpg" alt="죽도 상화원 지붕 회랑과 연못 실사 사진" class="spot-image" loading="lazy">
-        <div class="image-caption">상화원 지붕 회랑과 연못 (여름 사진)<span style="display: block; margin-top: 4px;">출처: 한국관광공사</span></div>
-      </div>
-
-      <ul class="spot-info-list">
-        <li><span class="spot-info-label">주소</span><span class="spot-info-val">충청남도 보령시 남포면 남포방조제로 408-52 (남포면 월전리 산154-1)</span></li>
-        <li><span class="spot-info-label">운영시간</span><span class="spot-info-val">4 ~ 11월 금·토·일과 법정공휴일, 하절기 09:00 ~ 18:00 (입장 마감 17:00) / 동절기 09:00 ~ 17:00 (입장 마감 16:00)</span></li>
-        <li><span class="spot-info-label">관람료</span><span class="spot-info-val">일반 7,000원 (2인 14,000원, TourAPI)</span></li>
-        <li><span class="spot-info-label">이동거리</span><span class="spot-info-val">스카이바이크에서 6.6km (차량 약 10분)</span></li>
-        <li><span class="spot-info-label">주차안내</span><span class="spot-info-val">주차 가능 (카카오맵에 유료로 표시, 요금은 방문 전 확인)</span></li>
-      </ul>
-
-      <p class="spot-desc">
+          <section class="spot-section flip">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-number">SPOT 2</span><h2 class="spot-title">죽도 상화원 (한국식 전통정원)</h2></div>
+              <p class="spot-tagline">2km 목재 회랑길 · 한국 전통 한옥마을 · 울창한 해송 숲 · 33개 해변 연못</p>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/75/4099875_image2_1.jpg" alt="죽도 상화원 지붕 회랑과 연못 실사 사진" class="spot-image" loading="lazy" />
+              <figcaption>상화원 지붕 회랑과 연못 (여름 사진)<span class="cap-src">출처: 한국관광공사</span></figcaption>
+            </figure>
+            <div class="spot-body">
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">충청남도 보령시 남포면 남포방조제로 408-52 (남포면 월전리 산154-1)</span></div><div class="info-row"><span class="info-label">운영시간</span><span class="info-val">4 ~ 11월 금·토·일과 법정공휴일, 하절기 09:00 ~ 18:00 (입장 마감 17:00) / 동절기 09:00 ~ 17:00 (입장 마감 16:00)</span></div><div class="info-row"><span class="info-label">관람료</span><span class="info-val">일반 7,000원 (2인 14,000원, TourAPI)</span></div><div class="info-row"><span class="info-label">이동거리</span><span class="info-val">스카이바이크에서 6.6km (차량 약 10분)</span></div><div class="info-row"><span class="info-label">주차안내</span><span class="info-val">주차 가능 (카카오맵에 유료로 표시, 요금은 방문 전 확인)</span></div></div>
+              <p class="spot-desc">
         대천해수욕장에서 남포방조제 도로를 따라 시원하게 달리면 바다 한가운데 떠 있는 비밀의 섬 죽도 상화원에 이릅니다. 조화와 화합을 뜻하는 상화원은 섬 전체의 자연미를 훼손하지 않고 조성된 한국식 전통 휴양 정원입니다.
       </p>
-      <p class="spot-desc">
+              <p class="spot-desc">
         섬 전체를 둘러싼 2km 길이의 지붕 있는 목재 회랑길 덕분에 햇살이 강하거나 비가 와도 쾌적하게 바다 숲길을 걸을 수 있습니다. 회랑길을 따라 걷다 보면 전국 각지에서 원형 그대로 이건하여 복원한 전통 한옥마을과 석양 정원, 해변 연못이 차례로 나타납니다.
       </p>
+              <div class="tip-box"><strong class="tip-title">에디터 방문 팁</strong>상화원은 4월부터 11월까지 매주 금·토·일요일과 법정공휴일에만 개방되므로 방문 요일을 꼭 확인해야 합니다. 지붕 회랑길을 천천히 완주하는 데 약 1시간에서 1시간 30분 정도 소요됩니다.</div>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EB%B3%B4%EB%A0%B9%20%EC%83%81%ED%99%94%EC%9B%90" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도에서 위치 보기</a></div>
+            </div>
+          </section>
 
-      <div class="tip-box">
-        <div class="tip-box-title">💡 에디터 방문 팁</div>
-        상화원은 4월부터 11월까지 매주 금·토·일요일과 법정공휴일에만 개방되므로 방문 요일을 꼭 확인해야 합니다. 지붕 회랑길을 천천히 완주하는 데 약 1시간에서 1시간 30분 정도 소요됩니다.
-      </div>
-
-      <div class="action-chips">
-        <a href="https://map.naver.com/p/search/%EB%B3%B4%EB%A0%B9%20%EC%83%81%ED%99%94%EC%9B%90" target="_blank" rel="noopener noreferrer" class="btn-map">🧭 네이버 지도에서 위치 보기</a>
-      </div>
-    </article>
-
-    <!-- 스팟 3: 개화예술공원 & 모산조형미술관 -->
-    <article class="spot-section">
-      <div class="spot-header">
-        <div>
-          <span class="spot-number">SPOT 3</span>
-          <h2 class="spot-title">개화예술공원 & 모산조형미술관</h2>
-          <div class="spot-chips">
-            <span class="chip">5만 평 야외 조각숲</span>
-            <span class="chip">모산조형미술관</span>
-            <span class="chip">허브랜드</span>
-            <span class="chip">오석 예술 조각</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="spot-image-wrap">
-        <img src="https://tong.visitkorea.or.kr/cms/resource/92/3560492_image2_1.jpg" alt="개화예술공원 모산미술관 돌 아치와 입구 실사 사진" class="spot-image" loading="lazy">
-        <div class="image-caption">모산미술관 입구<span style="display: block; margin-top: 4px;">출처: 한국관광공사</span></div>
-      </div>
-
-      <ul class="spot-info-list">
-        <li><span class="spot-info-label">주소</span><span class="spot-info-val">충청남도 보령시 성주면 성주산로 673-47 (성주면 개화리 176-1)</span></li>
-        <li><span class="spot-info-label">운영시간</span><span class="spot-info-val">매일 09:00 ~ 18:00 (연중무휴)</span></li>
-        <li><span class="spot-info-label">입장료</span><span class="spot-info-val">성인 6,000원 (2인 12,000원, TourAPI)</span></li>
-        <li><span class="spot-info-label">이동거리</span><span class="spot-info-val">죽도 상화원에서 20.4km (차량 약 29분)</span></li>
-        <li><span class="spot-info-label">주차안내</span><span class="spot-info-val">주차 가능 (카카오맵에 유료로 표시, 요금은 방문 전 확인)</span></li>
-      </ul>
-
-      <p class="spot-desc">
+          <section class="spot-section">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-number">SPOT 3</span><h2 class="spot-title">개화예술공원 & 모산조형미술관</h2></div>
+              <p class="spot-tagline">5만 평 야외 조각숲 · 모산조형미술관 · 허브랜드 · 오석 예술 조각</p>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/92/3560492_image2_1.jpg" alt="개화예술공원 모산미술관 돌 아치와 입구 실사 사진" class="spot-image" loading="lazy" />
+              <figcaption>모산미술관 입구<span class="cap-src">출처: 한국관광공사</span></figcaption>
+            </figure>
+            <div class="spot-body">
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">충청남도 보령시 성주면 성주산로 673-47 (성주면 개화리 176-1)</span></div><div class="info-row"><span class="info-label">운영시간</span><span class="info-val">매일 09:00 ~ 18:00 (연중무휴)</span></div><div class="info-row"><span class="info-label">입장료</span><span class="info-val">성인 6,000원 (2인 12,000원, TourAPI)</span></div><div class="info-row"><span class="info-label">이동거리</span><span class="info-val">죽도 상화원에서 20.4km (차량 약 29분)</span></div><div class="info-row"><span class="info-label">주차안내</span><span class="info-val">주차 가능 (카카오맵에 유료로 표시, 요금은 방문 전 확인)</span></div></div>
+              <p class="spot-desc">
         상화원에서 내륙 성주산 자락으로 드라이브를 즐기다 보면 약 18ha 골짜기에 자리한 개화예술공원을 만납니다. 보령에서 나는 오석으로 빚은 조각 작품과 시인들의 시를 새긴 육필 시비가 푸른 잔디와 숲속 연못을 배경으로 끝없이 이어져 낭만적인 산책로를 이룹니다.
       </p>
-      <p class="spot-desc">
+              <p class="spot-desc">
         주황색 지붕의 모산조형미술관은 보령 오석으로 지은 건물로 작가들의 작품을 전시하고, 허브 향기 가득한 허브랜드에서는 식사도 할 수 있습니다. 공원 곳곳에 연못 7개와 폭포, 산책로가 이어집니다.
       </p>
+              <div class="tip-box"><strong class="tip-title">에디터 방문 팁</strong>공원이 매우 넓으므로 매표소 입구 안내 지도를 챙겨 동선을 확인하는 것이 좋습니다. 야외 조각숲과 연못 산책로 곳곳에 감성 문구가 적힌 나무 벤치가 있어 사진을 남기기에 좋습니다.</div>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EA%B0%9C%ED%99%94%EC%98%88%EC%88%A0%EA%B3%B5%EC%9B%90" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도에서 위치 보기</a></div>
+            </div>
+          </section>
 
-      <div class="tip-box">
-        <div class="tip-box-title">💡 에디터 방문 팁</div>
-        공원이 매우 넓으므로 매표소 입구 안내 지도를 챙겨 동선을 확인하는 것이 좋습니다. 야외 조각숲과 연못 산책로 곳곳에 감성 문구가 적힌 나무 벤치가 있어 사진을 남기기에 좋습니다.
-      </div>
-
-      <div class="action-chips">
-        <a href="https://map.naver.com/p/search/%EA%B0%9C%ED%99%94%EC%98%88%EC%88%A0%EA%B3%B5%EC%9B%90" target="_blank" rel="noopener noreferrer" class="btn-map">🧭 네이버 지도에서 위치 보기</a>
-      </div>
-    </article>
-
-    <!-- 스팟 4: 보령 카페리리스 -->
-    <article class="spot-section">
-      <div class="spot-header">
-        <div>
-          <span class="spot-number">SPOT 4</span>
-          <h2 class="spot-title">보령 카페리리스 (리리스 플라워 갤러리)</h2>
-          <div class="spot-chips">
-            <span class="chip">드라이플라워 갤러리 카페</span>
-            <span class="chip">빈티지 포토존</span>
-            <span class="chip">식용 꽃 시그니처 음료</span>
-            <span class="chip">개화예술공원 내 위치</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="spot-image-wrap">
-        <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/a376e9ff99da5f456ac14251fe690d03566fbcbc?original" alt="카페리리스 화려한 드라이플라워와 조명 실사 사진" class="spot-image" loading="lazy">
-        <div class="image-caption">카페리리스 천장에 매단 말린 꽃과 조명<span style="display: block; margin-top: 4px;">출처: 카카오맵</span></div>
-      </div>
-
-      <ul class="spot-info-list">
-        <li><span class="spot-info-label">주소</span><span class="spot-info-val">충청남도 보령시 성주면 성주산로 673-47 (개화예술공원 내 플라워 테마 카페)</span></li>
-        <li><span class="spot-info-label">운영시간</span><span class="spot-info-val">매일 09:30 ~ 18:00 (연중무휴)</span></li>
-        <li><span class="spot-info-label">대표메뉴</span><span class="spot-info-val">리리스 플라워 와플 (TourAPI 대표메뉴), 아메리카노(6,500원), 바닐라라떼(7,500원)</span></li>
-        <li><span class="spot-info-label">이동거리</span><span class="spot-info-val">개화예술공원 내부 도보 약 2분</span></li>
-        <li><span class="spot-info-label">주차안내</span><span class="spot-info-val">개화예술공원 주차장 이용 (카카오맵)</span></li>
-      </ul>
-
-      <p class="spot-desc">
+          <section class="spot-section flip">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-number">SPOT 4</span><h2 class="spot-title">보령 카페리리스 (리리스 플라워 갤러리)</h2></div>
+              <p class="spot-tagline">드라이플라워 갤러리 카페 · 빈티지 포토존 · 식용 꽃 시그니처 음료 · 개화예술공원 내 위치</p>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/a376e9ff99da5f456ac14251fe690d03566fbcbc?original" alt="카페리리스 화려한 드라이플라워와 조명 실사 사진" class="spot-image" loading="lazy" />
+              <figcaption>카페리리스 천장에 매단 말린 꽃과 조명<span class="cap-src">출처: 카카오맵</span></figcaption>
+            </figure>
+            <div class="spot-body">
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">충청남도 보령시 성주면 성주산로 673-47 (개화예술공원 내 플라워 테마 카페)</span></div><div class="info-row"><span class="info-label">운영시간</span><span class="info-val">매일 09:30 ~ 18:00 (연중무휴)</span></div><div class="info-row"><span class="info-label">대표메뉴</span><span class="info-val">리리스 플라워 와플 (TourAPI 대표메뉴), 아메리카노(6,500원), 바닐라라떼(7,500원)</span></div><div class="info-row"><span class="info-label">이동거리</span><span class="info-val">개화예술공원 내부 도보 약 2분</span></div><div class="info-row"><span class="info-label">주차안내</span><span class="info-val">개화예술공원 주차장 이용 (카카오맵)</span></div></div>
+              <p class="spot-desc">
         개화예술공원 안 오래된 찜질방을 재해석해 만든 플라워 카페 카페리리스는 문을 여는 순간 탄성을 자아내게 만듭니다. 테이블마다 놓인 생화와 프리저브드 플라워, 드라이플라워로 만든 오브제, 은은한 조명이 어우러져 마치 환상적인 동화 속 세상에 들어선 듯한 착각을 불러일으킵니다.
       </p>
-      <p class="spot-desc">
+              <p class="spot-desc">
         빈티지 욕조, 앤티크 침대, 레이스 커튼으로 섬세하게 연출된 독립 포토존들이 끝없이 이어져 연인들이 서로의 예쁜 모습을 담아주기에 최고의 공간입니다. 찻잔 위로 향긋한 식용 꽃잎이 띄워져 나오는 시그니처 음료와 달콤한 와플을 즐기며 로맨틱한 오후의 여유를 만끽해보세요.
       </p>
+              <div class="tip-box"><strong class="tip-title">에디터 방문 팁</strong>카페리리스는 개화예술공원 내부에 위치하므로 공원 매표소에서 입장권을 발권한 후 입장할 수 있습니다. 매장 입구 쪽에서 천연 에센셜 오일로 제작된 디퓨저와 플라워 룸스프레이를 시향하고 기념으로 구매하기에도 좋습니다.</div>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EB%B3%B4%EB%A0%B9%20%EC%B9%B4%ED%8E%98%EB%A6%AC%EB%A6%AC%EC%8A%A4" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도에서 위치 보기</a></div>
+            </div>
+          </section>
 
-      <div class="tip-box">
-        <div class="tip-box-title">💡 에디터 방문 팁</div>
-        카페리리스는 개화예술공원 내부에 위치하므로 공원 매표소에서 입장권을 발권한 후 입장할 수 있습니다. 매장 입구 쪽에서 천연 에센셜 오일로 제작된 디퓨저와 플라워 룸스프레이를 시향하고 기념으로 구매하기에도 좋습니다.
-      </div>
-
-      <div class="action-chips">
-        <a href="https://map.naver.com/p/search/%EB%B3%B4%EB%A0%B9%20%EC%B9%B4%ED%8E%98%EB%A6%AC%EB%A6%AC%EC%8A%A4" target="_blank" rel="noopener noreferrer" class="btn-map">🧭 네이버 지도에서 위치 보기</a>
-      </div>
-    </article>
-
-    <!-- 스팟 5: 무창포타워 & 무창포해변 낙조 -->
-    <article class="spot-section">
-      <div class="spot-header">
-        <div>
-          <span class="spot-number">SPOT 5</span>
-          <h2 class="spot-title">무창포타워 & 무창포해변 낙조</h2>
-          <div class="spot-chips">
-            <span class="chip">전망 타워</span>
-            <span class="chip">신비의 바닷길 조망</span>
-            <span class="chip">무창포해수욕장</span>
-            <span class="chip">닭벼슬섬 파노라마</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="spot-image-wrap">
-        <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/61a0492f2426f11e1ba9fbfb92c452a33418bad3?original" alt="무창포타워 전망대에서 바라보는 방파제와 바다 전경 실사 사진" class="spot-image" loading="lazy">
-        <div class="image-caption">무창포타워 창밖으로 본 방파제와 바다<span style="display: block; margin-top: 4px;">출처: 카카오맵</span></div>
-      </div>
-
-      <ul class="spot-info-list">
-        <li><span class="spot-info-label">주소</span><span class="spot-info-val">충청남도 보령시 웅천읍 열린바다로 295 (웅천읍 관당리 798-6)</span></li>
-        <li><span class="spot-info-label">운영시간</span><span class="spot-info-val">매일 09:00 ~ 18:00 (네이버 플레이스, 해변은 상시 개방)</span></li>
-        <li><span class="spot-info-label">입장료</span><span class="spot-info-val">타워 요금은 공식 안내를 찾지 못해 방문 전 확인 (해변 입장 무료, TourAPI)</span></li>
-        <li><span class="spot-info-label">이동거리</span><span class="spot-info-val">개화예술공원에서 17.8km (차량 약 24분)</span></li>
-        <li><span class="spot-info-label">주차안내</span><span class="spot-info-val">무료 주차 (카카오맵)</span></li>
-      </ul>
-
-      <p class="spot-desc">
+          <section class="spot-section">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-number">SPOT 5</span><h2 class="spot-title">무창포타워 & 무창포해변 낙조</h2></div>
+              <p class="spot-tagline">전망 타워 · 신비의 바닷길 조망 · 무창포해수욕장 · 닭벼슬섬 파노라마</p>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/61a0492f2426f11e1ba9fbfb92c452a33418bad3?original" alt="무창포타워 전망대에서 바라보는 방파제와 바다 전경 실사 사진" class="spot-image" loading="lazy" />
+              <figcaption>무창포타워 창밖으로 본 방파제와 바다<span class="cap-src">출처: 카카오맵</span></figcaption>
+            </figure>
+            <div class="spot-body">
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">충청남도 보령시 웅천읍 열린바다로 295 (웅천읍 관당리 798-6)</span></div><div class="info-row"><span class="info-label">운영시간</span><span class="info-val">매일 09:00 ~ 18:00 (네이버 플레이스, 해변은 상시 개방)</span></div><div class="info-row"><span class="info-label">입장료</span><span class="info-val">타워 요금은 공식 안내를 찾지 못해 방문 전 확인 (해변 입장 무료, TourAPI)</span></div><div class="info-row"><span class="info-label">이동거리</span><span class="info-val">개화예술공원에서 17.8km (차량 약 24분)</span></div><div class="info-row"><span class="info-label">주차안내</span><span class="info-val">무료 주차 (카카오맵)</span></div></div>
+              <p class="spot-desc">
         오늘 드라이브의 마지막은 무창포해수욕장 앞 무창포타워입니다. 전망 타워에 오르면 무창포 앞바다와 닭벼슬섬, 석대도가 한눈에 내려다보입니다.
       </p>
-      <p class="spot-desc">
+              <p class="spot-desc">
         음력 보름과 그믐 무렵이면 바닷물이 갈라져 석대도까지 1.5km의 바닷길이 열리는 신비의 바닷길 노선이 바다 위로 선명하게 드러납니다. 늦은 오후 해 질 무렵 서서히 붉게 타오르는 석양이 잔잔한 서해 바다와 갯벌을 온통 황금빛과 자줏빛으로 물들이는 장관을 바라보며, 보령 드라이브의 가장 로맨틱한 순간을 마음속에 담아보세요.
       </p>
+              <div class="tip-box"><strong class="tip-title">에디터 방문 팁</strong>계절에 따라 일몰 시각이 달라지므로, 방문 당일의 일몰 예정 시각을 미리 확인하여 30분 전까지 타워에 도착하면 하늘과 바다가 물드는 석양을 감상할 수 있습니다. 10월 31일 무창포 일몰은 약 17:39(NOAA 계산식)라 16:45 도착이면 여유가 있어요. 타워는 18:00에 닫으니 해가 늦게 지는 계절에는 해변에서 노을을 보세요.</div>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EB%AC%B4%EC%B0%BD%ED%8F%AC%ED%83%80%EC%9B%8C" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도에서 위치 보기</a></div>
+            </div>
+          </section>
+        </div>
 
-      <div class="tip-box">
-        <div class="tip-box-title">💡 에디터 방문 팁</div>
-        계절에 따라 일몰 시각이 달라지므로, 방문 당일의 일몰 예정 시각을 미리 확인하여 30분 전까지 타워에 도착하면 하늘과 바다가 물드는 석양을 감상할 수 있습니다. 10월 31일 무창포 일몰은 약 17:39(NOAA 계산식)라 16:45 도착이면 여유가 있어요. 타워는 18:00에 닫으니 해가 늦게 지는 계절에는 해변에서 노을을 보세요.
-      </div>
-
-      <div class="action-chips">
-        <a href="https://map.naver.com/p/search/%EB%AC%B4%EC%B0%BD%ED%8F%AC%ED%83%80%EC%9B%8C" target="_blank" rel="noopener noreferrer" class="btn-map">🧭 네이버 지도에서 위치 보기</a>
-      </div>
-    </article>
-
-    <!-- 비용 정산표 섹션 -->
-    <section class="cost-section">
-      <h2 class="cost-title">💰 충남 보령 드라이브 2인 예상 여행 경비표</h2>
-      <p class="cost-sub">관람료와 카페 음료를 더한 2인 기준 금액이에요. 식사와 유류비, 주차비는 넣지 않았어요.</p>
-
-      <div class="table-wrap">
-        <table>
+        <section class="cost-table-card">
+          <div class="cost-head">
+            <h2 class="timeline-title">충남 보령 드라이브 2인 예상 여행 경비표</h2>
+            <p>관람료와 카페 음료를 더한 2인 기준 금액이에요. 식사와 유류비, 주차비는 넣지 않았어요.</p>
+          </div>
+          <div class="table-wrap"><table class="cost-table">
           <thead>
             <tr>
               <th>구분</th>
@@ -787,41 +533,41 @@
               <td>방문 전 확인</td>
               <td>타워 요금은 공식 안내를 찾지 못했어요. 해변은 입장 무료 (TourAPI)</td>
             </tr>
-            <tr style="background-color: #f8fafc; font-weight: 700;">
+            <tr class="cost-total-row">
               <td colspan="2">2인 총 예상 경비 합계</td>
-              <td style="color: var(--color-warm);">63,000원</td>
+              <td>63,000원</td>
               <td>식사, 유류비, 주차비, 무창포타워 요금 별도 (1인 31,500원)</td>
             </tr>
           </tbody>
-        </table>
-      </div>
-    </section>
+        </table></div>
+        </section>
 
-    <!-- 에디터 총평 -->
-    <div class="conclusion-box">
-      <h2 class="conclusion-title">✨ 에디터 총평</h2>
-      <p>
+        <section class="prose-section">
+          <h2>에디터 총평</h2>
+          <p>
         충남 보령은 단순한 여름 해수욕장을 넘어, 사계절 내내 바다와 숲, 문화예술이 조화롭게 어우러진 서해안 최고의 힐링 여행지입니다. 바다 위 레일을 달리는 스카이바이크의 짜릿함부터 지붕 회랑길을 따라 걷는 죽도 상화원의 고즈넉한 휴식, 5만 평 숲속 미술관과 플라워 카페 리리스의 감성, 그리고 황금빛으로 물드는 무창포타워의 석양까지 하루가 모자랄 만큼 풍성한 추억을 선물합니다.
       </p>
       <p>
         바다와 숲길을 넘나드는 약 45km의 여정은 연인에게 잊지 못할 하루를 선사할 것입니다. 이번 주말, 소중한 사람과 함께 서해안의 낭만을 품은 보령으로 감성 드라이브를 떠나보세요!
       </p>
-    </div>
+        </section>
 
-    <div class="app-course-box" style="margin: 40px 0 24px; padding: 20px 22px; background: var(--color-accent-light); border: 1px solid var(--color-border); border-radius: 14px;">
-      <strong style="display: block; font-size: 17px; color: var(--color-text-main); margin-bottom: 6px;">🗺️ 이 코스 오늘 데이트에서 열기</strong>
-      <p style="margin: 0 0 14px; font-size: 14.5px; line-height: 1.6; color: var(--color-text-main);">글에 나온 장소 5곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
-      <a href="../../#c=1504.1792375980037.1790258775058.1791033875344.4071" style="display: inline-block; padding: 10px 18px; border-radius: 10px; background: var(--color-text-main); color: #ffffff; font-weight: 700; font-size: 15px; text-decoration: none;">앱에서 코스 열기 →</a>
-    </div>
-
+        <div class="app-course-box">
+          <div>
+            <h2>이 코스 오늘 데이트에서 열기</h2>
+            <p>글에 나온 장소 5곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
+          </div>
+          <a class="btn app-action" href="../../#c=1504.1792375980037.1790258775058.1791033875344.4071">앱에서 코스 열기</a>
+        </div>
+      </div>
+    </article>
   </main>
 
   <footer class="site-footer">
-    <div class="footer-links">
-      <a href="https://nufunc.github.io/oneul-date/">오늘 데이트 홈</a>
-      <a href="https://nufunc.github.io/oneul-date/blog/">블로그 매거진 전체보기</a>
+    <div class="footer-inner container">
+      <p class="footer-links"><a href="https://nufunc.github.io/oneul-date/">오늘 데이트 홈</a><a href="https://nufunc.github.io/oneul-date/blog/">블로그 매거진 전체보기</a></p>
+      <p class="footer-line">© 2026 오늘 데이트 (Oneul Date). All rights reserved.</p>
     </div>
-    <p>© 2026 오늘 데이트 (Oneul Date). All rights reserved.</p>
   </footer>
 
 </body>

@@ -15,6 +15,9 @@
   
   <!-- Pretendard 웹폰트 -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700&display=swap&text=%26'()%2C.0123456789%3AOPST%5B%5D%7C~%C2%B7%E2%86%90%EA%B0%80%EA%B0%81%EA%B0%84%EA%B0%88%EA%B1%B0%EA%B2%83%EA%B2%B0%EA%B2%BD%EA%B3%84%EA%B3%A0%EA%B3%BC%EA%B5%90%EA%B5%AD%EA%B7%B8%EA%B8%88%EA%B8%B0%EA%B8%B8%EA%BE%B8%EB%82%9C%EB%82%A8%EB%84%A4%EB%88%84%EB%8A%94%EB%8A%98%EB%8B%A8%EB%8C%80%EB%8C%93%EB%8D%B0%EB%8F%84%EB%8F%8C%EB%8F%99%EB%90%9C%EB%93%A4%EB%93%B1%EB%94%B0%EB%9C%BB%EB%9D%BD%EB%A1%9C%EB%A1%9D%EB%A5%BC%EB%A6%AC%EB%A7%88%EB%A7%A4%EB%A9%B4%EB%AA%A9%EB%AC%B8%EB%AC%BC%EB%B0%94%EB%B0%95%EB%B0%9C%EB%B0%A4%EB%B0%A5%EB%B0%A9%EB%B2%84%EB%B2%97%EB%B3%B4%EB%B3%B8%EB%B4%89%EB%B6%84%EB%B9%84%EB%B9%9B%EB%B9%B5%EC%82%AC%EC%82%B0%EC%82%BC%EC%83%81%EC%83%89%EC%84%9C%EC%84%A0%EC%84%B1%EC%86%8C%EC%86%8D%EC%88%99%EC%89%BC%EC%8A%A4%EC%8B%9C%EC%8B%9D%EC%8B%A0%EC%95%A1%EC%95%BC%EC%95%BD%EC%96%B4%EC%97%90%EC%97%AC%EC%97%B4%EC%98%81%EC%98%88%EC%98%A4%EC%98%A5%EC%99%B8%EC%9A%94%EC%9A%B0%EC%9B%90%EC%9B%94%EC%9C%84%EC%9D%84%EC%9D%98%EC%9D%B4%EC%9D%B8%EC%9D%BC%EC%9E%85%EC%9E%90%EC%9E%A5%EC%A0%84%EC%A0%90%EC%A0%95%EC%A0%9C%EC%A1%B0%EC%A3%BC%EC%A6%90%EC%A7%80%EC%A7%84%EC%A7%91%EC%B0%9C%EC%B0%BB%EC%B1%85%EC%B2%A8%EC%B5%9C%EC%B9%9C%EC%BB%AC%EC%BD%94%EC%BD%A9%ED%85%8C%ED%86%A0%ED%8A%B8%ED%8C%8C%ED%8C%9F%ED%8F%AC%ED%95%84%ED%95%98%ED%95%9C%ED%95%A8%ED%95%A9%ED%95%AD%ED%96%89%ED%98%9C%ED%99%94%ED%99%95%ED%99%A9%ED%9A%A8" rel="stylesheet">
   
   <script type="application/ld+json">
 {
@@ -42,817 +45,538 @@
   </script>
 
   <style>
-    :root {
-      --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-      --bg-page: #fbf9f5;
-      --bg-card: #ffffff;
-      --color-primary: #1c1917;
-      --color-accent: #c2410c;
-      --color-warm: #b45309;
-      --color-text-main: #292524;
-      --color-text-sub: #57534e;
-      --color-text-faint: #78716c;
-      --color-border: #e7e5e4;
-      --color-tip-bg: #fffbeb;
-      --color-tip-border: #fde68a;
-      --color-tip-text: #92400e;
-      --color-bridge-bg: #f5f5f4;
-      --max-width: 780px;
-    }
+/* hallmark-solstice: scripts/convert_blog_hallmark.mjs가 글의 <style>을 이 파일로 바꾼다 (Hallmark 2.0.0, 테마 Solstice, P-293) */
+:root {
+  color-scheme: light;
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-xs: 0.8125rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.125rem; --text-xl: 1.5625rem; --text-2xl: 1.953rem; --text-3xl: 2.441rem;
+  --text-hero: clamp(1.75rem, 1.6vw + 1.25rem, 2.75rem);
+  --text-section: clamp(1.75rem, 1.8vw + 1rem, 2.875rem); --text-title: clamp(1.25rem, 0.75vw + 0.875rem, 1.625rem); --text-lead: clamp(1.0625rem, 0.3vw + 0.95rem, 1.25rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-micro: 120ms; --dur-short: 220ms;
+  --container: 1200px; --measure: 680px; --gutter: 56px; --gap-columns: 40px; --section-gap: 120px;
+  --z-sticky-nav: 300;
+  --color-paper: oklch(94% 0.03 80); --color-paper-2: oklch(97% 0.02 85); --color-paper-3: oklch(89% 0.05 80);
+  --color-ink: oklch(27% 0.05 50); --color-ink-2: oklch(36% 0.05 50); --color-muted: oklch(48% 0.06 55);
+  --color-rule: oklch(84% 0.06 78);
+  --color-accent: oklch(54% 0.20 24); --color-accent-2: oklch(48% 0.19 24); --color-accent-ink: oklch(97% 0.02 85); --color-focus: oklch(54% 0.20 24);
+  --color-gold: oklch(74% 0.14 75); --color-gold-2: oklch(84% 0.11 80);
+  --color-band-text: oklch(94% 0.03 80); --color-band-muted: oklch(80% 0.05 75);
+  --color-hair-ink: color-mix(in oklab, var(--color-ink) 10%, transparent);
+  --font-display: "Noto Serif KR", "Nanum Myeongjo", ui-serif, serif;
+  --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --radius-card: 0; --radius-pill: 999px; --rule-hair: 1px; --rule-bar: 2px;
+  --shadow-card: 10px 10px 0 var(--color-paper-3);
+}
+@media (max-width: 60rem) { :root { --gutter: 24px; --section-gap: 88px; --gap-columns: 24px; } }
+@media (max-width: 40rem) { :root { --gutter: 16px; --section-gap: 64px; --gap-columns: 16px; } }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+html { scrollbar-color: var(--color-muted) var(--color-paper); scroll-padding-top: var(--space-3xl); }
+body { margin: 0; background: var(--color-paper); color: var(--color-ink-2); font-family: var(--font-family); font-size: var(--text-md); line-height: 1.75; word-break: keep-all; -webkit-font-smoothing: antialiased; }
+::selection { background: color-mix(in oklab, var(--color-gold) 40%, transparent); }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+a:hover { text-decoration-color: var(--color-accent); }
+article h1, article h2, article h3 { margin: 0; font-family: var(--font-display); font-weight: 700; color: var(--color-ink); line-height: 1.3; letter-spacing: -0.01em; overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+img { max-width: 100%; display: block; }
+.container { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); }
 
-    body {
-      font-family: var(--font-family);
-      background-color: var(--bg-page);
-      color: var(--color-text-main);
-      line-height: 1.85;
-      letter-spacing: -0.02em;
-      word-break: keep-all;
-      -webkit-font-smoothing: antialiased;
-    }
+/* 44px 머리 링크 규칙: scripts/test-blog-related.cjs가 글마다 하나를 요구한다 */
+header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
 
-    /* 상단 감성 헤더 바 */
-    .travel-header-bar {
-      background: #ffffff;
-      border-bottom: 1px solid var(--color-border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(10px);
-      background: rgba(255, 255, 255, 0.92);
-    }
-    .header-inner {
-      max-width: var(--max-width);
-      margin: 0 auto;
-      padding: 14px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .blog-tagline {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--color-warm);
-      letter-spacing: 0.02em;
-    }
-    .read-time {
-      font-size: 12px;
-      color: var(--color-text-faint);
-    }
+/* Controls */
+.btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 var(--space-lg); border: 0; border-radius: var(--radius-pill); background: var(--color-accent); color: var(--color-accent-ink); font: 600 var(--text-md)/1 var(--font-family); text-decoration: none; cursor: pointer; transition: background-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out); }
+.btn:hover { background: var(--color-accent-2); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.link-quiet { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-ink); font-weight: 600; font-size: var(--text-sm); text-decoration: none; border-bottom: var(--rule-bar) solid var(--color-ink); transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out); }
+.link-quiet:hover { color: var(--color-accent); border-color: var(--color-accent); }
+.link-quiet:active { transform: translateY(1px); }
+.link-quiet:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
 
-    /* 메인 아티클 랩 */
-    .article-container {
-      max-width: var(--max-width);
-      margin: 32px auto 80px;
-      padding: 0 16px;
-    }
+/* Nav */
+.site-header { position: sticky; top: 0; z-index: var(--z-sticky-nav); background: var(--color-paper); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.header-inner { display: flex; justify-content: space-between; align-items: center; min-height: 64px; }
+.header-logo { font-family: var(--font-display); font-size: var(--text-lg); color: var(--color-ink); text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; }
+.header-logo span { color: var(--color-accent); margin-left: 0.3em; }
+.header-logo:hover { color: var(--color-ink-2); }
+.header-nav { display: flex; gap: var(--space-lg); }
+.header-nav a { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--text-sm); color: var(--color-ink-2); text-decoration: none; }
+.header-nav a:hover { color: var(--color-ink); text-decoration: underline; text-decoration-color: var(--color-accent); }
+.header-nav a:active, .header-logo:active { transform: translateY(1px); }
 
-    .article-card {
-      background: var(--bg-card);
-      border-radius: 20px;
-      border: 1px solid var(--color-border);
-      box-shadow: 0 4px 24px rgba(41, 37, 36, 0.04);
-      padding: 48px 48px;
-      overflow: hidden;
-    }
+/* Hero */
+.hero { display: grid; padding-block: var(--space-2xl) var(--space-xl); }
+.hero-text { display: grid; gap: var(--space-lg); }
+.article-title { font-size: var(--text-hero); line-height: 1.3; max-width: 28ch; }
+.hero-kicker { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.hero-kicker span:first-child { color: var(--color-accent); font-weight: 600; }
+.article-meta { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-lg); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); font-variant-numeric: tabular-nums; }
+.article-meta .meta-credit { flex-basis: 100%; }
+/* 좁은 화면에서 칸마다 한 줄: 본문 글꼴(Pretendard)이 바뀔 때 줄 수가 달라져 아래 띠가 밀리는 것을 막는다 */
+@media (max-width: 40rem) { .article-meta { flex-direction: column; flex-wrap: nowrap; } }
+.spot-photo img { width: 100%; height: 100%; object-fit: cover; outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
 
-    @media (max-width: 768px) {
-      .article-container {
-        margin: 16px auto 50px;
-        padding: 0 10px;
-      }
-      .article-card {
-        padding: 28px 20px;
-        border-radius: 16px;
-      }
-    }
+/* Lead */
+.prose-intro { max-width: var(--measure); padding-top: var(--space-xl); font-size: var(--text-lead); line-height: 1.8; color: var(--color-ink); padding-bottom: var(--space-3xl); }
 
-    /* 포스트 메타 헤더 */
-    .post-badge {
-      display: inline-block;
-      background: #fef3c7;
-      color: #92400e;
-      font-size: 13px;
-      font-weight: 700;
-      padding: 4px 12px;
-      border-radius: 20px;
-      margin-bottom: 16px;
-    }
+/* The day, on the brown band */
+.band { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl) var(--space-xl); }
+.band .timeline-title { color: var(--color-band-text); font-size: var(--text-section); margin-bottom: var(--space-xl); }
+.route { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: 0; padding: 0; }
+.tl-act { font-size: var(--text-sm); color: var(--color-gold-2); padding-bottom: var(--space-sm); }
+.tl-step { display: grid; align-content: start; gap: var(--space-2xs); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-gold); }
+.tl-time { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1; color: var(--color-band-text); font-variant-numeric: tabular-nums; }
+.tl-place { font-weight: 600; font-size: var(--text-lg); color: var(--color-band-text); }
+.tl-note { font-size: var(--text-sm); color: var(--color-band-muted); line-height: 1.6; }
+.tl-move { font-size: var(--text-sm); color: var(--color-band-muted); padding-block: var(--space-sm) var(--space-lg); }
+.tl-total { font-size: var(--text-sm); color: var(--color-band-muted); padding-top: var(--space-lg); margin-top: var(--space-lg); border-top: var(--rule-hair) solid color-mix(in oklab, var(--color-band-text) 25%, transparent); }
+/* spot-info-list 계열: 시간 범위(10:30 - 11:45)가 길어 시각 글자를 줄이고, 요약 상자와 번호 배지를 둔다 */
+.route.range .tl-time { font-size: var(--text-xl); }
+.route.range .tl-step { padding-bottom: var(--space-md); }
+.tl-badge { font-size: var(--text-xs); color: var(--color-gold-2); letter-spacing: 0.04em; }
+.tl-facts { display: grid; gap: var(--space-2xs) var(--space-lg); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.tl-facts strong { color: var(--color-gold-2); font-weight: 600; }
+@media (min-width: 60rem) {
+  .tl-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .route { grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); column-gap: var(--space-lg); }
+  .route > * { grid-row: var(--r); grid-column: var(--c) / span var(--s, 1); }
+  .tl-move { padding-bottom: 0; }
+  .tl-total { grid-column: 1 / -1; }
+}
 
-    .post-title {
-      font-size: 30px;
-      font-weight: 800;
-      line-height: 1.4;
-      color: var(--color-primary);
-      margin-bottom: 16px;
-      letter-spacing: -0.03em;
-    }
-    @media (max-width: 768px) {
-      .post-title {
-        font-size: 23px;
-      }
-    }
+/* Stops */
+.spots { padding-block: var(--section-gap) 0; display: grid; gap: var(--section-gap); }
+.spot-section { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "photo head" "photo body"; grid-template-rows: auto 1fr; column-gap: var(--gap-columns); row-gap: var(--space-md); align-items: start; padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); }
+.spot-section.flip { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-areas: "head photo" "body photo"; }
+.spot-section.no-photo { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "body"; }
+.spot-head { grid-area: head; display: grid; gap: var(--space-md); }
+.spot-photo { grid-area: photo; align-self: start; margin: 0; aspect-ratio: 4 / 5; width: 100%; background: var(--color-paper-3); position: sticky; top: 96px; }
+.spot-body { grid-area: body; display: grid; gap: var(--space-md); }
+.spot-header { display: flex; align-items: baseline; gap: var(--space-md); }
+.spot-num { font-family: var(--font-display); font-size: var(--text-3xl); line-height: 1; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+.spot-title { font-size: var(--text-section); }
+.spot-tagline { font-size: var(--text-lg); color: var(--color-ink); padding-bottom: var(--space-xs); }
+.spot-desc { max-width: 60ch; }
 
-    .post-quote {
-      font-size: 16.5px;
-      line-height: 1.75;
-      color: #78350f;
-      background: #fffbeb;
-      border-left: 4px solid #f59e0b;
-      padding: 16px 20px;
-      border-radius: 0 12px 12px 0;
-      margin-bottom: 24px;
-      font-weight: 500;
-    }
+.spot-info-box { margin: var(--space-xs) 0 0; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); }
+.info-row { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--space-md); padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.info-row:last-child { border-bottom: 0; }
+.info-label { color: var(--color-muted); }
+.info-val { color: var(--color-ink); font-weight: 400; font-variant-numeric: tabular-nums; }
+.map-btn-wrap { padding-top: var(--space-sm); }
+.tip-box { padding: var(--space-sm) var(--space-md); border-left: var(--rule-bar) solid var(--color-accent); background: var(--color-paper-2); font-size: var(--text-sm); color: var(--color-ink-2); line-height: 1.7; }
+.tip-box strong { color: var(--color-ink); font-weight: 600; }
+.tip-box .tip-title { display: block; margin-bottom: var(--space-2xs); }
 
-    .post-meta-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--color-border);
-      padding-bottom: 20px;
-      margin-bottom: 32px;
-      font-size: 13.5px;
-      color: var(--color-text-faint);
-      flex-wrap: wrap;
-      gap: 10px;
-    }
+/* Fees */
+.cost-table-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.cost-head { display: grid; gap: var(--space-md); align-content: start; }
+.cost-head .timeline-title { font-size: var(--text-section); }
+.cost-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.cost-table th { text-align: left; font-weight: 400; color: var(--color-muted); padding: var(--space-xs) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-bar) solid var(--color-ink); }
+.cost-table td { padding: var(--space-sm) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink-2); vertical-align: top; }
+.cost-table td:nth-child(2) { color: var(--color-ink); font-weight: 400; }
+.cost-3 .cost-total-row td:nth-child(2) { font-family: inherit; font-size: inherit; color: inherit; font-weight: 600; }
+.cost-3 .cost-total-row td:nth-child(3) { font-family: var(--font-display); font-size: var(--text-xl); color: var(--color-accent); font-weight: 700; }
+.cost-total-row td { border-bottom: 0; border-top: var(--rule-bar) solid var(--color-ink); color: var(--color-ink); font-weight: 600; }
+.cost-total-row td:nth-child(2) { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--color-accent); font-weight: 700; }
+@media (max-width: 600px) {
+  .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
+  .table-wrap thead { display: none; }
+  .table-wrap tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-sm); row-gap: var(--space-2xs); padding-block: var(--space-sm); border-bottom: var(--rule-hair) solid var(--color-rule); }
+  .table-wrap td { padding: 0; border: 0; }
+  .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: var(--text-xs); color: var(--color-muted); }
+  .table-wrap td:nth-child(3) { text-align: right; font-weight: 600; color: var(--color-ink); }
+  .table-wrap td:nth-child(4) { grid-column: 1 / -1; color: var(--color-muted); }
+  .table-wrap td:empty { display: none; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: var(--text-sm); color: var(--color-ink); }
+  .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; text-align: right; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
+  .table-wrap .cost-total-row { border-top: var(--rule-bar) solid var(--color-ink); border-bottom: 0; }
+}
 
-    .author-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 600;
-      color: var(--color-text-main);
-    }
-    .author-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: #fed7aa;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-    }
+/* Tips */
+.tips-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.tips-card .timeline-title { font-size: var(--text-section); align-self: start; }
+.tips-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-md); }
+.tips-list li { padding-bottom: var(--space-md); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.tips-list li:last-child { border-bottom: 0; }
+.tips-list strong { color: var(--color-ink); font-weight: 600; }
 
-    /* 본문 사진 블록 */
-    .content-photo {
-      margin: 28px 0;
-      border-radius: 14px;
-      overflow: hidden;
-      background: #f5f5f4;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
-    }
-    .content-photo img {
-      width: 100%;
-      height: auto;
-      max-height: 480px;
-      object-fit: cover;
-      display: block;
-      transition: transform 0.4s ease;
-    }
-    .content-photo:hover img {
-      transform: scale(1.02);
-    }
-    .photo-caption {
-      font-size: 13px;
-      color: var(--color-text-faint);
-      padding: 10px 16px;
-      text-align: center;
-      background: #fafaf9;
-      border-top: 1px solid #f5f5f4;
-      font-style: italic;
-    }
+/* App course */
+.app-course-box { margin-top: var(--section-gap); display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--gap-columns); align-items: end; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-xl); }
+.app-course-box h2 { font-size: var(--text-section); margin-bottom: var(--space-md); }
+.app-course-box p { max-width: 52ch; }
+.app-course-box .app-action { justify-self: end; }
 
-    /* 인트로 문단 */
-    .lead-paragraph {
-      font-size: 16.5px;
-      line-height: 1.9;
-      color: var(--color-text-main);
-      margin-bottom: 24px;
-    }
-    .lead-paragraph strong {
-      color: var(--color-primary);
-      background: linear-gradient(to top, rgba(254, 215, 170, 0.4) 40%, transparent 40%);
-    }
+.article-credit { margin-top: var(--space-2xl); padding-block: var(--space-md) var(--space-3xl); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); }
 
-    /* 동선 요약 타임라인 카드 */
-    .itinerary-box {
-      background: #fafaf9;
-      border: 1px solid var(--color-border);
-      border-radius: 16px;
-      padding: 26px 28px;
-      margin: 36px 0 44px;
-    }
-    .itinerary-header {
-      font-size: 17px;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin-bottom: 18px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .day-pill {
-      display: inline-block;
-      background: #44403c;
-      color: #ffffff;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 3px 9px;
-      border-radius: 6px;
-      margin-right: 6px;
-    }
-    .itinerary-step {
-      display: flex;
-      align-items: baseline;
-      gap: 12px;
-      margin-bottom: 10px;
-      font-size: 14.5px;
-      color: var(--color-text-sub);
-    }
-    .itinerary-step .time-tag {
-      font-size: 12.5px;
-      font-weight: 700;
-      color: #78716c;
-      min-width: 44px;
-    }
-    .itinerary-step strong {
-      color: var(--color-primary);
-    }
+/* Footer mast */
+.site-footer { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl); }
+.footer-inner { display: grid; gap: var(--space-md); }
+.footer-mark { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1.2; color: var(--color-band-text); }
+.footer-line { color: var(--color-band-muted); font-size: var(--text-sm); }
+.footer-links { display: flex; flex-wrap: wrap; gap: var(--space-lg); }
+.footer-links a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-band-text); font-size: var(--text-sm); text-decoration: underline; text-decoration-color: var(--color-gold); }
+.footer-links a:hover { text-decoration-color: var(--color-accent); color: var(--color-gold-2); }
+.footer-links a:active { transform: translateY(1px); }
+.site-footer :focus-visible { outline-color: var(--color-gold-2); }
 
-    /* 스팟별 섹션 */
-    .spot-block {
-      margin: 48px 0;
-      padding-top: 24px;
-      border-top: 1px solid #f5f5f4;
-    }
-    .spot-block:first-of-type {
-      border-top: none;
-      padding-top: 0;
-    }
-    .spot-badge-wrap {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-    .spot-num {
-      background: var(--color-accent);
-      color: #ffffff;
-      font-size: 12px;
-      font-weight: 800;
-      padding: 2px 8px;
-      border-radius: 6px;
-      letter-spacing: 0.05em;
-    }
-    .spot-category-label {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--color-warm);
-    }
-    .spot-title {
-      font-size: 23px;
-      font-weight: 800;
-      color: var(--color-primary);
-      line-height: 1.4;
-      margin-bottom: 16px;
-    }
-    @media (max-width: 768px) {
-      .spot-title {
-        font-size: 20px;
-      }
-    }
-    .spot-text {
-      font-size: 16px;
-      line-height: 1.9;
-      color: var(--color-text-main);
-      margin-bottom: 20px;
-    }
+@media (max-width: 60rem) {
+  .hero, .spot-section, .spot-section.flip, .cost-table-card, .tips-card, .app-course-box { grid-template-columns: minmax(0, 1fr); }
+  .spot-section, .spot-section.flip { grid-template-areas: "head" "photo" "body"; grid-template-rows: auto; }
+  .spot-section.no-photo { grid-template-areas: "head" "body"; }
+  .hero { padding-block: var(--space-xl) var(--space-xl); }
+  .spot-photo { position: static; aspect-ratio: 16 / 10; }
+  .app-course-box { padding: var(--space-lg); }
+  .app-course-box .app-action { justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn, .link-quiet { transition: none; }
+  .btn:active, .link-quiet:active, .header-nav a:active, .header-logo:active, .footer-links a:active { transform: none; }
+}
 
-    /* 꿀팁 박스 */
-    .tip-card {
-      background: var(--color-tip-bg);
-      border: 1px solid var(--color-tip-border);
-      border-left: 4px solid var(--color-warm);
-      border-radius: 10px;
-      padding: 18px 20px;
-      margin: 24px 0;
-      color: var(--color-tip-text);
-      font-size: 14.5px;
-    }
-    .tip-card-title {
-      font-weight: 800;
-      font-size: 14px;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      color: #92400e;
-    }
-    .tip-card ul {
-      margin-left: 20px;
-    }
-    .tip-card li {
-      margin-bottom: 5px;
-      line-height: 1.65;
-    }
-    .tip-card li:last-child {
-      margin-bottom: 0;
-    }
+/* real-photo-flat 계열(평면 글): 번호 있는 긴 장소 제목, 사진 설명, 안내 상자, 지도 목록 */
+.lead-photo { margin: 0 0 var(--space-3xl); }
+.lead-photo img { width: 100%; max-height: 520px; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.lead-photo figcaption, .body-photo figcaption { margin-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.spot-photo figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--space-xs) var(--space-sm); font-size: var(--text-xs); line-height: 1.5; color: var(--color-accent-ink); background: color-mix(in oklab, var(--color-ink) 78%, transparent); }
+.body-photo { margin: 0; }
+.body-photo img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.spot-section.flat .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.tl-lead { max-width: var(--measure); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.guide-box, .order-box { background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); color: var(--color-ink); }
+.guide-box h4, .order-box strong { margin: 0 0 var(--space-xs); font-family: var(--font-display); font-size: var(--text-md); color: var(--color-ink); display: block; }
+.guide-box ul, .order-box ul { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-2xs); }
+.bridge { padding-top: var(--space-xs); color: var(--color-muted); font-size: var(--text-sm); }
+.map-links { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-md); }
+.map-links .timeline-title { font-size: var(--text-section); }
+.map-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-xs); }
+.map-list a, .map-link-chip { display: flex; justify-content: space-between; gap: var(--space-md); align-items: center; min-height: 44px; padding-block: var(--space-xs); border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink); text-decoration: none; }
+.map-links-grid { display: grid; gap: 0; }
+.map-link-chip .btn-action { color: var(--color-accent); font-weight: 600; white-space: nowrap; }
+@media (max-width: 40rem) { .spot-section.flat .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .spot-photo { position: relative; top: auto; } }
 
-    /* 이동 브릿지 박스 */
-    .bridge-card {
-      background: var(--color-bridge-bg);
-      border: 1px dashed #d6d3d1;
-      border-radius: 12px;
-      padding: 14px 20px;
-      margin: 32px 0;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 14px;
-      color: var(--color-text-sub);
-    }
-    .bridge-icon {
-      font-size: 20px;
-      flex-shrink: 0;
-    }
+/* spot-card 계열(editor-144): 대표 사진, 요약 상자, 본문 구획, 세부 코스, 이동 연결, 마무리 상자 */
+.hero-figure { margin: 0 0 var(--space-xl); }
+.hero-figure img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.hero-figure figcaption { padding-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-muted); }
+.summary-card { margin-bottom: var(--space-xl); background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-lg); font-size: var(--text-sm); }
+.summary-title, p.timeline-title, .cta-title { font-family: var(--font-display); font-weight: 700; line-height: 1.3; color: var(--color-ink); }
+.summary-title { font-size: var(--text-xl); margin-bottom: var(--space-sm); }
+p.timeline-title { letter-spacing: -0.01em; overflow-wrap: break-word; }
+.summary-list { margin: 0; padding: 0; list-style: none; display: grid; }
+.summary-list li { padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.summary-list li:last-child { border-bottom: 0; }
+.summary-list strong { color: var(--color-ink); font-weight: 600; }
+.prose-section { margin-top: var(--section-gap); max-width: var(--measure); display: grid; gap: var(--space-md); }
+.prose-section h2, .spots-title { font-size: var(--text-title); }
+.stops-section { margin-top: var(--section-gap); }
+.stops-section .spots { padding-top: var(--space-xl); }
+.spots.bridged { gap: 0; }
+.drive-bridge { margin: 0; padding-block: var(--space-xl); padding-left: var(--space-md); border-left: var(--rule-bar) solid var(--color-gold); font-size: var(--text-sm); color: var(--color-muted); }
+.drive-bridge strong { color: var(--color-ink); font-weight: 600; }
+.spot-header:has(.spot-badge) { flex-direction: column; align-items: flex-start; gap: var(--space-xs); }
+.spot-badge { font-size: var(--text-sm); font-weight: 600; color: var(--color-accent); }
+.spot-actions { display: flex; flex-wrap: wrap; gap: 0 var(--space-lg); }
+.info-wide .info-row { grid-template-columns: 5.5em minmax(0, 1fr); }
+.info-wide .info-row.plain { grid-template-columns: minmax(0, 1fr); }
+.cost-head .timeline-title.long { font-size: var(--text-title); }
+.cta-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-sm); max-width: var(--measure); }
+.cta-card h3, .cta-title { font-size: var(--text-title); }
+.cta-card .link-quiet { justify-self: start; }
 
-    /* 2인 여행 정산표 */
-    .expense-section {
-      margin: 48px 0;
-      padding: 30px;
-      background: #fafaf9;
-      border-radius: 16px;
-      border: 1px solid var(--color-border);
-    }
-    @media (max-width: 768px) {
-      .expense-section {
-        padding: 20px 14px;
-      }
-    }
-    .expense-title {
-      font-size: 19px;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .expense-desc {
-      font-size: 14px;
-      color: var(--color-text-sub);
-      margin-bottom: 20px;
-    }
-    .table-responsive {
-      overflow-x: auto;
-      border-radius: 10px;
-      background: #ffffff;
-      border: 1px solid var(--color-border);
-    }
-    .expense-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14.5px;
-      text-align: left;
-    }
-    .expense-table th {
-      background: #f5f5f4;
-      color: var(--color-primary);
-      font-weight: 700;
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--color-border);
-      white-space: nowrap;
-    }
-    .expense-table td {
-      padding: 12px 16px;
-      border-bottom: 1px solid #f5f5f4;
-      color: var(--color-text-main);
-    }
-    .expense-table tr:last-child td {
-      border-bottom: none;
-    }
-    .expense-table .total-row td {
-      background: #fff7ed;
-      font-weight: 800;
-      color: var(--color-accent);
-      font-size: 15.5px;
-      border-top: 2px solid #fed7aa;
-    }
+/* real-photo-grid 계열(editor-145): 사진과 정보 상자가 글 순서대로 이어지는 한 열 장소 구획, 번호 있는 동선, 도입 여러 문단 */
+.prose-intro p + p { margin-top: var(--space-md); }
+.stories { padding-top: var(--space-xl); gap: var(--space-3xl); }
+.story-section { display: grid; gap: var(--space-md); max-width: var(--measure); }
+.story-section .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.story-body { display: grid; gap: var(--space-md); }
+.story-photo { margin: 0; }
+.story-photo img { width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.story-photo figcaption { padding-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.story-photo figcaption span + span::before { content: " · "; }
+.tl-step .tl-badge { margin-bottom: calc(var(--space-2xs) * -1); }
+.tl-meta { display: block; font-style: normal; color: var(--color-gold-2); }
+.app-course-box.early { margin-top: var(--space-xl); }
+.app-course-box .cta-title { font-size: var(--text-section); margin-bottom: var(--space-md); }
+@media (max-width: 40rem) { .story-section .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .route .tl-act:not(:first-child) { margin-top: var(--space-lg); } }
+.article-credit.tight { padding-bottom: var(--space-md); }
+.back-link { padding-bottom: var(--space-md); font-size: var(--text-sm); }
 
-    /* 네이버 지도 안내 카드 */
-    .map-box {
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
-      border-radius: 16px;
-      padding: 28px 24px;
-      margin: 40px 0;
-      text-align: center;
-    }
-    .map-box-title {
-      font-size: 18px;
-      font-weight: 800;
-      color: #166534;
-      margin-bottom: 8px;
-    }
-    .map-box-desc {
-      font-size: 14.5px;
-      color: #15803d;
-      margin-bottom: 20px;
-      line-height: 1.6;
-    }
-    .naver-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #00843d;
-      color: #ffffff;
-      font-weight: 700;
-      font-size: 15px;
-      padding: 12px 26px;
-      border-radius: 10px;
-      text-decoration: none;
-      box-shadow: 0 4px 12px rgba(3, 199, 90, 0.25);
-      transition: background 0.2s, transform 0.2s;
-    }
-    .naver-btn:hover {
-      background: #007a37;
-      transform: translateY(-1px);
-    }
+/* route-timeline 계열(editor-147: 보령, 거제, 고성): 사진 설명의 출처 줄, 시각 범위 동선 */
+.spot-photo figcaption .cap-src { display: block; }
+.spot-number { white-space: nowrap; }
 
-    /* 푸터 */
-    .site-footer {
-      border-top: 1px solid var(--color-border);
-      padding: 30px 20px 60px;
-      text-align: center;
-      font-size: 13px;
-      color: var(--color-text-faint);
-      line-height: 1.8;
-    }
-    .source-credit {
-      margin-top: 8px;
-      font-size: 12px;
-      color: #a8a29e;
-    }
-    header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
-    .header-nav a,.header-title a,.blog-tagline a{display:inline-block}
+/* spot-block 계열(editor-147: 강릉, 경주): 머리 바 메모, 인용문, 날마다 나뉜 동선, 장소 분류 줄, 팁 목록, 금액이 끝 칸인 경비표 */
+.header-inner:has(.header-note) { flex-wrap: wrap; gap: 0 var(--space-md); }
+.header-note { font-size: var(--text-sm); color: var(--color-muted); }
+.hero-quote { max-width: var(--measure); font-size: var(--text-lead); line-height: 1.7; color: var(--color-ink); }
+.route + .route { margin-top: var(--space-xl); }
+.story-kicker { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.story-kicker .spot-num { font-size: var(--text-xl); }
+.stories.bridged .story-section + .story-section { margin-top: var(--space-3xl); }
+.tip-box ul { margin: 0; padding-left: 1.1em; display: grid; gap: var(--space-2xs); }
+@media (max-width: 600px) {
+  .table-wrap.amount-last td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
+  .table-wrap.amount-last td:nth-child(4) { grid-column: auto; text-align: right; font-weight: 600; color: var(--color-ink); }
+}
   </style>
 </head>
 <body>
 
   <!-- 헤더 바 -->
-  <header class="travel-header-bar">
-    <div class="header-inner">
-      <div class="blog-tagline"><a href="../" style="text-decoration:none; color:inherit; font-weight:700;">← 📖 오늘 데이트 매거진</a></div>
-      <div class="read-time">경북 경주 1박 2일 편</div>
+  <header class="site-header">
+    <div class="header-inner container">
+      <a href="../" class="header-logo">← 오늘 데이트 <span>매거진</span></a>
+      <span class="header-note">경북 경주 1박 2일 편</span>
     </div>
   </header>
 
   <!-- 메인 본문 컨테이너 -->
   <main class="article-container">
-    <article class="article-card">
-      
-      <!-- 포스트 헤더 -->
-      <span class="post-badge">경주 1박 2일 여행 코스</span>
-      <h1 class="post-title">[경주 1박 2일 여행] 황리단길 인파를 벗어난 고요한 한옥 쉼 코스 | 박신우제면소·봉황대·어서어서·빛꾸리·최영화빵·한옥스테이 목화·원조콩국·월정교 야경·토함혜</h1>
-      
-      <div class="post-quote">
-        "주말 경주의 북새통을 살짝 비껴선 순간, 천년 고도가 품어온 고요한 숨결과 따스한 온기가 온전히 여행자의 몫이 될 거예요."
-      </div>
-
-      <div class="post-meta-row">
-        <div class="author-info">
-          <div class="author-avatar">☕</div>
-          <div>
-            <div>오늘 데이트 에디토리얼 팀</div>
-            <div style="font-size: 12px; color: var(--color-text-faint); font-weight: normal;">2026. 10.</div>
+    <article>
+      <header class="article-header hero container">
+        <div class="hero-text">
+          <p class="hero-kicker badge-category"><span>경주 1박 2일 여행 코스</span></p>
+          <h1 class="article-title">[경주 1박 2일 여행] 황리단길 인파를 벗어난 고요한 한옥 쉼 코스 | 박신우제면소·봉황대·어서어서·빛꾸리·최영화빵·한옥스테이 목화·원조콩국·월정교 야경·토함혜</h1>
+          <p class="hero-quote">"주말 경주의 북새통을 살짝 비껴선 순간, 천년 고도가 품어온 고요한 숨결과 따스한 온기가 온전히 여행자의 몫이 될 거예요."</p>
+          <div class="article-meta">
+            <span>오늘 데이트 에디토리얼 팀</span>
+            <span>2026. 10.</span>
+            <span>경북 경주시 일대</span>
           </div>
+          <p><a class="btn" href="../../#c=1791475806910.5219.3806.2422.4667.1788633400091.1788932446097.3698">앱에서 코스 열기</a></p>
         </div>
-        <div>경북 경주시 일대</div>
+      </header>
+
+      <div class="container">
+        <figure class="hero-figure">
+            <img src="https://tong.visitkorea.or.kr/cms/resource/62/2612562_image2_1.jpg" alt="경주 동궁과 월지의 은은한 밤 풍경" loading="lazy" />
+            <figcaption>물결 위에 비친 누각의 고요한 반영, 경주의 밤은 낮보다 깊고 평온해요.</figcaption>
+          </figure>
       </div>
 
-      <!-- 히어로 이미지 -->
-      <div class="content-photo">
-        <img src="https://tong.visitkorea.or.kr/cms/resource/62/2612562_image2_1.jpg" alt="경주 동궁과 월지의 은은한 밤 풍경" loading="lazy">
-        <div class="photo-caption">물결 위에 비친 누각의 고요한 반영, 경주의 밤은 낮보다 깊고 평온해요.</div>
-      </div>
-
-      <!-- 인트로 문단 -->
-      <p class="lead-paragraph">
+      <div class="container">
+        <div class="prose-intro"><p>
         주말 경주 황리단길을 걸어보신 분들이라면 누구나 공감하실 거예요. 발 디딜 틈 없이 쏟아져 나온 인파, 유명 카페마다 길게 늘어선 대기 줄, 쉼 없이 울리는 자동차 경적에 치이다 보면, 정작 경주가 간직한 천년의 평온함은 느껴볼 겨를도 없이 지쳐버리곤 하죠.
       </p>
-      <p class="lead-paragraph">
+        <p>
         그래서 이번 코스는 완전히 다른 리듬으로 짰어요. 화려한 핫플레이스를 쫓아다니기보다는, <strong>능선의 곡선을 바라보며 조용히 걷고, 정갈한 음식으로 속을 편안히 달래며, 밤에는 고요한 한옥 숙소에서 서로의 이야기에 귀 기울이는 쉼의 여정</strong>으로 구성했어요.
       </p>
-      <p class="lead-paragraph">
+        <p>
         황리단길 메인 거리에서 불과 몇 블록만 비껴서도 만나게 되는 고요하고 낭만적인 1박 2일 코스, 지금부터 하나씩 생생하게 풀어볼게요!
-      </p>
-
-      <!-- 동선 요약 카드 -->
-      <div class="itinerary-box">
-        <div class="itinerary-header">
-          <span>🗺️</span> 1박 2일 고요한 쉼 동선 요약
-        </div>
-        <div style="margin-bottom: 14px;">
-          <span class="day-pill">Day 1</span>
-          <span style="font-size: 13.5px; font-weight: 700; color: #44403c;">고분 능선 산책과 한옥 숙소 쉼</span>
-        </div>
-        <div class="itinerary-step">
-          <span class="time-tag">12:00</span>
-          <span><strong>박신우제면소</strong> : 원효로의 면 요리 전문점에서 점심</span>
-        </div>
-        <div class="itinerary-step">
-          <span class="time-tag">13:15</span>
-          <span><strong>봉황대 고분길 & 서점 어서어서</strong> : 고분 산책 뒤 황리단길 서점에서 책 고르기</span>
-        </div>
-        <div class="itinerary-step">
-          <span class="time-tag">14:30</span>
-          <span><strong>빛꾸리 한옥 찻집</strong> : 댓돌에 신발 벗고 즐기는 오미자차 & 삼색 인절미구이</span>
-        </div>
-        <div class="itinerary-step">
-          <span class="time-tag">16:00</span>
-          <span><strong>최영화빵 본점</strong> : 최영화빵 포장</span>
-        </div>
-        <div class="itinerary-step">
-          <span class="time-tag">16:30</span>
-          <span><strong>한옥스테이 목화 체크인</strong> : 황남동 황리단길 안쪽의 한옥 숙소</span>
-        </div>
-        <div class="itinerary-step">
-          <span class="time-tag">19:30</span>
-          <span><strong>월정교 & 첨성대 밤 산책</strong> : 남천 물결에 비친 황금빛 누각 야경</span>
-        </div>
-        <div class="itinerary-step">
-          <span class="time-tag">20:45</span>
-          <span><strong>경주 원조 콩국</strong> : 숙소에서 파자마 입고 즐기는 포장 야식</span>
-        </div>
-
-        <div style="margin: 20px 0 14px;">
-          <span class="day-pill">Day 2</span>
-          <span style="font-size: 13.5px; font-weight: 700; color: #44403c;">속 편한 아침과 남산 자락 여운</span>
-        </div>
-        <div class="itinerary-step">
-          <span class="time-tag">11:00</span>
-          <span>느긋한 체크아웃 후 남산 자락으로 드라이브 이동</span>
-        </div>
-        <div class="itinerary-step">
-          <span class="time-tag">11:30</span>
-          <span><strong>토함혜</strong> : 남산 자락에서 즐기는 삼합보리밥 정식 & 갈비찜</span>
-        </div>
+      </p></div>
       </div>
-      <p class="spot-text">영업시간, 주차 요금, 휴무는 바뀔 수 있어 방문 전에 각 장소의 네이버 지도 정보에서 확인해 주세요.</p>
 
-      <!-- Spot 1 -->
-      <section class="spot-block">
-        <div class="spot-badge-wrap">
-          <span class="spot-num">SPOT 01</span>
-          <span class="spot-category-label">면 요리 / 점심</span>
+      <!-- 동선 -->
+      <section class="timeline-card band">
+        <div class="container">
+          <p class="timeline-title">1박 2일 고요한 쉼 동선 요약</p>
+          <div class="route" style="--n:7">
+            <div class="tl-act" style="--r:1; --c:1; --s:7">Day 1 · 고분 능선 산책과 한옥 숙소 쉼</div>
+            <div class="tl-step" style="--r:2; --c:1"><span class="tl-time">12:00</span><span class="tl-place">박신우제면소</span><span class="tl-note">원효로의 면 요리 전문점에서 점심</span></div>
+            <div class="tl-step" style="--r:2; --c:2"><span class="tl-time">13:15</span><span class="tl-place">봉황대 고분길 & 서점 어서어서</span><span class="tl-note">고분 산책 뒤 황리단길 서점에서 책 고르기</span></div>
+            <div class="tl-step" style="--r:2; --c:3"><span class="tl-time">14:30</span><span class="tl-place">빛꾸리 한옥 찻집</span><span class="tl-note">댓돌에 신발 벗고 즐기는 오미자차 & 삼색 인절미구이</span></div>
+            <div class="tl-step" style="--r:2; --c:4"><span class="tl-time">16:00</span><span class="tl-place">최영화빵 본점</span><span class="tl-note">최영화빵 포장</span></div>
+            <div class="tl-step" style="--r:2; --c:5"><span class="tl-time">16:30</span><span class="tl-place">한옥스테이 목화 체크인</span><span class="tl-note">황남동 황리단길 안쪽의 한옥 숙소</span></div>
+            <div class="tl-step" style="--r:2; --c:6"><span class="tl-time">19:30</span><span class="tl-place">월정교 & 첨성대 밤 산책</span><span class="tl-note">남천 물결에 비친 황금빛 누각 야경</span></div>
+            <div class="tl-step" style="--r:2; --c:7"><span class="tl-time">20:45</span><span class="tl-place">경주 원조 콩국</span><span class="tl-note">숙소에서 파자마 입고 즐기는 포장 야식</span></div>
+          </div>
+          <div class="route" style="--n:2">
+            <div class="tl-act" style="--r:1; --c:1; --s:2">Day 2 · 속 편한 아침과 남산 자락 여운</div>
+            <div class="tl-step" style="--r:2; --c:1"><span class="tl-time">11:00</span><span class="tl-place">느긋한 체크아웃 후 남산 자락으로 드라이브 이동</span></div>
+            <div class="tl-step" style="--r:2; --c:2"><span class="tl-time">11:30</span><span class="tl-place">토함혜</span><span class="tl-note">남산 자락에서 즐기는 삼합보리밥 정식 & 갈비찜</span></div>
+          </div>
         </div>
-        <h2 class="spot-title">박신우제면소, 원효로의 면 요리 전문점</h2>
-        <p class="spot-text">
+      </section>
+
+      <div class="container">
+        <div class="spots stories bridged">
+          <p class="drive-bridge">영업시간, 주차 요금, 휴무는 바뀔 수 있어 방문 전에 각 장소의 네이버 지도 정보에서 확인해 주세요.</p>
+
+          <section class="story-section">
+            <p class="story-kicker"><span class="spot-num">SPOT 01</span><span>면 요리 / 점심</span></p>
+            <h2 class="spot-title">박신우제면소, 원효로의 면 요리 전문점</h2>
+            <div class="story-body">
+              <p>
           첫 끼는 경주시 원효로 130에 있는 면 요리 전문점 <strong>박신우제면소</strong>에서 먹어요. 네이버 지도에는 우동·소바 전문점으로 올라 있고, 봉황대 고분이 있는 노동동과 가까워 점심 뒤 바로 산책으로 이어가기 좋아요.
         </p>
-
-        <div class="tip-card">
-          <div class="tip-card-title">💡 방문 전 확인할 것</div>
-          <ul>
+              <div class="tip-box"><strong class="tip-title">방문 전 확인할 것</strong><ul>
             <li><strong>메뉴와 영업시간</strong>: 메뉴, 가격, 영업시간은 방문 전에 네이버 지도의 박신우제면소 장소 정보에서 확인하세요.</li>
             <li><strong>주차 정보</strong>: 주변 '노동공영주차장'에 차를 두면 봉황대와 황리단길까지 걸어서 다닐 수 있어요.</li>
-          </ul>
-        </div>
-      </section>
+          </ul></div>
+            </div>
+          </section>
 
-      <!-- 이동 브릿지 -->
-      <div class="bridge-card">
-        <span class="bridge-icon">🚶‍♀️</span>
-        <div>박신우제면소에서 나와 봉황대 방향으로 걷다 보면 푸른 고분 잔디밭이 눈앞에 시원하게 펼쳐져요.</div>
-      </div>
+          <p class="drive-bridge">박신우제면소에서 나와 봉황대 방향으로 걷다 보면 푸른 고분 잔디밭이 눈앞에 시원하게 펼쳐져요.</p>
 
-      <!-- Spot 2 -->
-      <section class="spot-block">
-        <div class="spot-badge-wrap">
-          <span class="spot-num">SPOT 02</span>
-          <span class="spot-category-label">산책로 & 서점</span>
-        </div>
-        <h2 class="spot-title">봉황대 고분길 산책 & 황리단길 서점 '어서어서'</h2>
-        
-        <div class="content-photo">
-          <img src="https://tong.visitkorea.or.kr/cms/resource/98/4105798_image2_1.jpg" alt="경주 대릉원과 고분군 능선의 푸른 풍경" loading="lazy">
-          <div class="photo-caption">푸른 잔디로 덮인 웅장한 능선 사이를 걸으면 마음속 소음들이 차분하게 가라앉아요.</div>
-        </div>
-
-        <p class="spot-text">
+          <section class="story-section">
+            <p class="story-kicker"><span class="spot-num">SPOT 02</span><span>산책로 & 서점</span></p>
+            <h2 class="spot-title">봉황대 고분길 산책 & 황리단길 서점 '어서어서'</h2>
+            <div class="story-body">
+              <figure class="story-photo">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/98/4105798_image2_1.jpg" alt="경주 대릉원과 고분군 능선의 푸른 풍경" loading="lazy" />
+              <figcaption>푸른 잔디로 덮인 웅장한 능선 사이를 걸으면 마음속 소음들이 차분하게 가라앉아요.</figcaption>
+            </figure>
+              <p>
           식사를 마치고 차는 그대로 둔 채 천천히 걸어 보세요. 조금만 걸어가면 거대한 언덕처럼 솟아있는 봉황대 고분이 눈앞에 펼쳐져요. 고분 꼭대기에 수백 년 된 느티나무가 자라난 봉황대의 독특하고 웅장한 능선은 볼 때마다 경이로운 감정을 선물해 줘요.
         </p>
-        <p class="spot-text">
+              <p>
           고분 사이 잔디밭 길을 걸어 황리단길 쪽으로 넘어가면 서점 <strong>'어서어서'</strong>가 있어요. 문학 도서가 1만~2만 원 선이고, 산 책을 '읽는약' 처방 봉투에 무료로 포장해 줘요. 서로에게 어울릴 만한 책을 한 권씩 골라 선물해 보세요.
         </p>
-
-        <div class="tip-card">
-          <div class="tip-card-title">💡 방문 전 확인할 것</div>
-          <ul>
+              <div class="tip-box"><strong class="tip-title">방문 전 확인할 것</strong><ul>
             <li><strong>운영 시간</strong>: 영업시간과 휴무일은 방문 전에 네이버 지도의 어서어서 장소 정보에서 확인하세요.</li>
-          </ul>
-        </div>
-      </section>
+          </ul></div>
+            </div>
+          </section>
 
-      <!-- Spot 3 -->
-      <section class="spot-block">
-        <div class="spot-badge-wrap">
-          <span class="spot-num">SPOT 03</span>
-          <span class="spot-category-label">한옥 전통찻집 / 디저트</span>
-        </div>
-        <h2 class="spot-title">한옥 찻집 '빛꾸리', 댓돌 위에 신발을 벗고 누리는 사색의 시간</h2>
-
-        <div class="content-photo">
-          <img src="https://tong.visitkorea.or.kr/cms/resource/11/4097011_image2_1.jpg" alt="경주 전통 한옥의 아늑한 돌담 정취" loading="lazy">
-          <div class="photo-caption">댓돌 위에 신발을 가지런히 벗어두고 툇마루에 앉아 바라보는 한옥의 안마당.</div>
-        </div>
-
-        <p class="spot-text">
+          <section class="story-section">
+            <p class="story-kicker"><span class="spot-num">SPOT 03</span><span>한옥 전통찻집 / 디저트</span></p>
+            <h2 class="spot-title">한옥 찻집 '빛꾸리', 댓돌 위에 신발을 벗고 누리는 사색의 시간</h2>
+            <div class="story-body">
+              <figure class="story-photo">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/11/4097011_image2_1.jpg" alt="경주 전통 한옥의 아늑한 돌담 정취" loading="lazy" />
+              <figcaption>댓돌 위에 신발을 가지런히 벗어두고 툇마루에 앉아 바라보는 한옥의 안마당.</figcaption>
+            </figure>
+              <p>
           책방을 나와 황리단길 북쪽 끝자락의 한적한 주택가 골목으로 발걸음을 옮겨 보세요. 100년 넘은 고택의 모습을 정성껏 보존해 온 전통 찻집 <strong>'빛꾸리'</strong>가 기다리고 있어요.
         </p>
-        <p class="spot-text">
+              <p>
           낮은 대문을 지나 안으로 들어서면 단정하게 정돈된 네모난 잔디 마당이 나타나요. 하얀 고무신이 놓인 댓돌 위에 신발을 벗어두고 방으로 올라서면, 발바닥에 닿는 시원한 한지 장판의 감촉이 참 다정해요.
         </p>
-        <p class="spot-text">
+              <p>
           햇살이 부드럽게 비쳐 드는 마당 쪽 창가 자리에 앉아 오미자차와 삼색 인절미구이를 주문해 보세요. 등록된 가격은 오미자차 8,000원, 삼색 인절미구이 9,500원이에요.
         </p>
-        <p class="spot-text">
+              <p>
           창밖으로 스쳐 지나가는 바람에 흔들리는 처마 끝 풍경 소리를 들으며 시원한 차를 마시면, 복잡한 머릿속이 맑은 샘물처럼 깨끗해지는 기분이에요.
         </p>
-
-        <div class="tip-card">
-          <div class="tip-card-title">💡 방문 실전 꿀팁</div>
-          <ul>
+              <div class="tip-box"><strong class="tip-title">방문 실전 꿀팁</strong><ul>
             <li><strong>공간 에티켓</strong>: 빛꾸리는 조용한 쉼과 사색을 지향하는 찻집이에요. 큰 소리의 대화나 통화는 자제해 주세요.</li>
-          </ul>
-        </div>
-      </section>
+          </ul></div>
+            </div>
+          </section>
 
-      <!-- 이동 브릿지 -->
-      <div class="bridge-card">
-        <span class="bridge-icon">🚗</span>
-        <div>빛꾸리에서 나와 차를 타고 3분 거리의 최영화빵 본점에 들러 갓 구운 빵을 픽업해요.</div>
-      </div>
+          <p class="drive-bridge">빛꾸리에서 나와 차를 타고 3분 거리의 최영화빵 본점에 들러 갓 구운 빵을 픽업해요.</p>
 
-      <!-- Spot 4 -->
-      <section class="spot-block">
-        <div class="spot-badge-wrap">
-          <span class="spot-num">SPOT 04</span>
-          <span class="spot-category-label">특산 베이커리 / 포장</span>
-        </div>
-        <h2 class="spot-title">최영화빵 본점, 숙소 가기 전 빵 포장</h2>
-        <p class="spot-text">
+          <section class="story-section">
+            <p class="story-kicker"><span class="spot-num">SPOT 04</span><span>특산 베이커리 / 포장</span></p>
+            <h2 class="spot-title">최영화빵 본점, 숙소 가기 전 빵 포장</h2>
+            <div class="story-body">
+              <p>
           숙소로 체크인하러 이동하기 전, 경주 시내 골목에 위치한 <strong>최영화빵 본점</strong>에 들러 보세요.
         </p>
-        <p class="spot-text">
+              <p>
           가게 안으로 들어서면 유리창 너머로 장인분들이 손으로 직접 반죽을 얇게 펴고 통팥 앙금을 아낌없이 가득 채워 정성스레 빚어내는 모습을 직접 볼 수 있어요.
         </p>
-        <p class="spot-text">
+              <p>
           방금 구워져 나와 김이 모락모락 피어오르는 빵을 한 상자(10개입) 포장해 보세요. 종잇장처럼 얇은 피 속에서 팥알이 알알이 씹히며 너무 달지 않고 고급스러운 단맛이 입안 가득 퍼져요. 겉은 바삭하고 속은 부드러운 이 첫 입의 감동은 오직 갓 구워낸 본점에서만 만날 수 있는 특권이에요.
         </p>
-
-        <div class="tip-card">
-          <div class="tip-card-title">💡 방문 실전 꿀팁</div>
-          <ul>
+              <div class="tip-box"><strong class="tip-title">방문 실전 꿀팁</strong><ul>
             <li><strong>보관 팁</strong>: 갓 구웠을 때 바로 하나 드셔보시고, 숙소 냉장고에 넣어 차갑게 드시거나 에어프라이어에 살짝 돌려 드셔도 겉바속촉이 그대로 살아나요.</li>
-          </ul>
-        </div>
-      </section>
+          </ul></div>
+            </div>
+          </section>
 
-      <!-- 이동 브릿지 -->
-      <div class="bridge-card">
-        <span class="bridge-icon">🏡</span>
-        <div>최영화빵에서 단팥빵을 챙긴 뒤 황남동 황리단길 안쪽의 숙소로 향해요.</div>
-      </div>
+          <p class="drive-bridge">최영화빵에서 단팥빵을 챙긴 뒤 황남동 황리단길 안쪽의 숙소로 향해요.</p>
 
-      <!-- Spot 5 -->
-      <section class="spot-block">
-        <div class="spot-badge-wrap">
-          <span class="spot-num">SPOT 05</span>
-          <span class="spot-category-label">한옥 숙소</span>
-        </div>
-        <h2 class="spot-title">황남동 한옥 숙소 '한옥스테이 목화'</h2>
-        <p class="spot-text">
+          <section class="story-section">
+            <p class="story-kicker"><span class="spot-num">SPOT 05</span><span>한옥 숙소</span></p>
+            <h2 class="spot-title">황남동 한옥 숙소 '한옥스테이 목화'</h2>
+            <div class="story-body">
+              <p>
           오후 4시 반쯤 숙소 <strong>'한옥스테이 목화'</strong>에 체크인해요. 경주시 포석로1068번길 15-11, 황리단길 안쪽 골목에 있는 한옥 숙소이고 한국관광공사 숙박 정보에는 '경주황리단길숙소'라는 이름으로 올라 있어요.
         </p>
-        <p class="spot-text">
+              <p>
           객실 구성과 편의시설, 요금은 날짜와 예약 경로에 따라 달라요. 예약 전에 네이버 지도의 숙소 정보에서 확인해 주세요.
         </p>
-      </section>
+            </div>
+          </section>
 
-      <!-- Spot 6 -->
-      <section class="spot-block">
-        <div class="spot-badge-wrap">
-          <span class="spot-num">SPOT 06</span>
-          <span class="spot-category-label">야경 산책 / 낭만</span>
-        </div>
-        <h2 class="spot-title">월정교 & 첨성대 밤 산책, 물결 위에 비친 황금빛 누각</h2>
-
-        <div class="content-photo">
-          <img src="https://tong.visitkorea.or.kr/cms/resource_photo/94/3052894_image2_1.jpg" alt="경주 월정교의 화려하고 우아한 야경" loading="lazy">
-          <div class="photo-caption">남천 물결 위로 황금빛 누각이 비치는 월정교의 밤, 낭만적인 밤 산책 코스예요.</div>
-        </div>
-
-        <p class="spot-text">
+          <section class="story-section">
+            <p class="story-kicker"><span class="spot-num">SPOT 06</span><span>야경 산책 / 낭만</span></p>
+            <h2 class="spot-title">월정교 & 첨성대 밤 산책, 물결 위에 비친 황금빛 누각</h2>
+            <div class="story-body">
+              <figure class="story-photo">
+              <img src="https://tong.visitkorea.or.kr/cms/resource_photo/94/3052894_image2_1.jpg" alt="경주 월정교의 화려하고 우아한 야경" loading="lazy" />
+              <figcaption>남천 물결 위로 황금빛 누각이 비치는 월정교의 밤, 낭만적인 밤 산책 코스예요.</figcaption>
+            </figure>
+              <p>
           숙소에서 잠시 쉰 뒤, 가벼운 외투를 걸치고 경주의 밤공기를 쐬러 나가 보세요. 숙소에서 멀지 않은 <strong>월정교</strong>로 향해 보세요.
         </p>
-        <p class="spot-text">
+              <p>
           낮의 단아한 모습도 아름답지만, 어둠이 깔리고 조명이 켜진 월정교는 그야말로 압도적인 낭만을 자랑해요. 남천 물길 위로 길게 뻗은 목조 누교가 황금빛 조명을 받아 강물 위에 거울처럼 투영되는데, 다리 앞 돌다리에 서서 그 모습을 바라보기 좋아요.
         </p>
-
-        <div class="content-photo">
-          <img src="https://tong.visitkorea.or.kr/cms/resource/35/4097535_image2_1.JPG" alt="경주 첨성대의 고요한 밤 풍경" loading="lazy">
-          <div class="photo-caption">어둠 속에서 은은한 조명을 받아 신비로운 자태를 뽐내는 첨성대.</div>
-        </div>
-
-        <p class="spot-text">
+              <figure class="story-photo">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/35/4097535_image2_1.JPG" alt="경주 첨성대의 고요한 밤 풍경" loading="lazy" />
+              <figcaption>어둠 속에서 은은한 조명을 받아 신비로운 자태를 뽐내는 첨성대.</figcaption>
+            </figure>
+              <p>
           다리 내부의 회랑을 천천히 걸으며 은은한 나무 향을 맡고, 인근 교촌마을 돌담길을 따라 첨성대 잔디밭까지 걸어 보세요. 조명을 받은 첨성대와 밤하늘의 별을 올려다보며 거니는 밤 산책길은 낮보다 훨씬 한적하고 서정적이에요.
         </p>
-
-        <div class="tip-card">
-          <div class="tip-card-title">💡 야경 산책 꿀팁</div>
-          <ul>
+              <div class="tip-box"><strong class="tip-title">야경 산책 꿀팁</strong><ul>
             <li><strong>주차 정보</strong>: 월정교 공영주차장(교동 153-5)을 이용할 수 있어요.</li>
             <li><strong>추천 코스</strong>: 월정교 앞 징검다리에서 반영 사진을 남기신 뒤, 다리를 건너 교촌마을 골목을 지나 첨성대까지 걸어 다녀오시면 약 40분 정도의 완벽한 산책 코스가 완성돼요.</li>
-          </ul>
-        </div>
-      </section>
+          </ul></div>
+            </div>
+          </section>
 
-      <!-- Spot 7 -->
-      <section class="spot-block">
-        <div class="spot-badge-wrap">
-          <span class="spot-num">SPOT 07</span>
-          <span class="spot-category-label">로컬 이색 야식 / 포장</span>
-        </div>
-        <h2 class="spot-title">경주 원조 콩국, 파자마 입고 즐기는 따뜻하고 고소한 로컬 야식</h2>
-        <p class="spot-text">
+          <section class="story-section">
+            <p class="story-kicker"><span class="spot-num">SPOT 07</span><span>로컬 이색 야식 / 포장</span></p>
+            <h2 class="spot-title">경주 원조 콩국, 파자마 입고 즐기는 따뜻하고 고소한 로컬 야식</h2>
+            <div class="story-body">
+              <p>
           밤 산책을 마치고 숙소로 돌아오는 길, 첨성로의 한식집 <strong>경주 원조 콩국</strong>에 들러 야식을 포장해 오는 것도 좋아요.
         </p>
-        <p class="spot-text">
+              <p>
           여행지에서 늦은 밤 야식으로 기름진 배달 치킨이나 피자를 먹고 나면 다음 날 아침 속이 더부룩하기 쉬운데, 경주의 따뜻한 콩국은 그런 부담이 전혀 없어요. 숙소로 돌아와 편안한 파자마로 갈아입고, 거실 빔프로젝터로 잔잔한 영화를 켜둔 채 식탁에 마주 앉아 보세요.
         </p>
-        <p class="spot-text">
+              <p>
           메뉴와 가격은 네이버 지도에서 확인해 주세요.
         </p>
-
-        <div class="tip-card">
-          <div class="tip-card-title">💡 포장 실전 꿀팁</div>
-          <ul>
+              <div class="tip-box"><strong class="tip-title">포장 실전 꿀팁</strong><ul>
             <li><strong>메뉴와 영업시간</strong>: 메뉴, 가격, 영업시간은 방문 전에 네이버 지도의 경주원조콩국 장소 정보에서 확인하세요.</li>
-          </ul>
-        </div>
-      </section>
+          </ul></div>
+            </div>
+          </section>
 
-      <!-- Day 2 헤더 -->
-      <div style="margin: 50px 0 20px; padding: 14px 18px; background: #fef3c7; border-radius: 12px; display: inline-block;">
-        <span style="font-weight: 800; color: #92400e; font-size: 15px;">☀️ Day 2: 맑은 속으로 맞이하는 아침과 여운</span>
-      </div>
+          <p class="drive-bridge"><strong>Day 2: 맑은 속으로 맞이하는 아침과 여운</strong></p>
 
-      <!-- Spot 8 -->
-      <section class="spot-block" style="border-top: none; padding-top: 0;">
-        <div class="spot-badge-wrap">
-          <span class="spot-num">SPOT 08</span>
-          <span class="spot-category-label">한식 뚝배기 해장 / 아침</span>
-        </div>
-        <h2 class="spot-title">토함혜, 남산 자락의 삼합보리밥 정식과 갈비찜</h2>
-        <p class="spot-text">
+          <section class="story-section">
+            <p class="story-kicker"><span class="spot-num">SPOT 08</span><span>한식 뚝배기 해장 / 아침</span></p>
+            <h2 class="spot-title">토함혜, 남산 자락의 삼합보리밥 정식과 갈비찜</h2>
+            <div class="story-body">
+              <p>
           한옥에서 하룻밤을 푹 쉬고 11시에 체크아웃한 뒤, 남산 자락의 한적한 숲길에 자리한 <strong>토함혜</strong>로 향해 보세요.
         </p>
-        <p class="spot-text">
+              <p>
           등록된 메뉴는 삼합보리밥 정식 23,000원과 갈비찜 39,000원이에요.
         </p>
-        <p class="spot-text">
+              <p>
           두 사람이면 삼합보리밥 정식에 갈비찜을 곁들여 주문해 보세요. 나머지 메뉴와 구성은 네이버 지도에서 확인해 주세요.
         </p>
-
-      </section>
-
-      <!-- 정산표 섹션 -->
-      <section class="expense-section">
-        <div class="expense-title">
-          <span>🧾</span> 2인 예상 경비
+            </div>
+          </section>
         </div>
-        <p class="expense-desc">
-          이번 1박 2일 코스를 2인 기준으로 따랐을 때의 예상 경비를 정리했어요. 금액이 등록되지 않은 곳은 지도에서 확인해 주세요.
-        </p>
 
-        <div class="table-responsive">
-          <table class="expense-table">
+        <section class="cost-table-card">
+          <div class="cost-head">
+            <p class="timeline-title">2인 예상 경비</p>
+            <p>이번 1박 2일 코스를 2인 기준으로 따랐을 때의 예상 경비를 정리했어요. 금액이 등록되지 않은 곳은 지도에서 확인해 주세요.</p>
+          </div>
+          <div class="table-wrap amount-last"><table class="cost-table">
             <thead>
               <tr>
                 <th>구분</th>
                 <th>스팟 / 항목</th>
                 <th>상세 내용</th>
-                <th style="text-align: right;">2인 지출 금액</th>
+                <th>2인 지출 금액</th>
               </tr>
             </thead>
             <tbody>
@@ -860,106 +584,105 @@
                 <td><strong>Day 1 점심</strong></td>
                 <td>박신우제면소</td>
                 <td>면 요리 2그릇 (가격은 네이버 지도에서 확인)</td>
-                <td style="text-align: right; font-weight: 600;">별도</td>
+                <td>별도</td>
               </tr>
               <tr>
                 <td><strong>Day 1 문화</strong></td>
                 <td>어서어서</td>
                 <td>문학 도서 2권 (권당 10,000원~20,000원 등록)</td>
-                <td style="text-align: right; font-weight: 600;">20,000원~40,000원</td>
+                <td>20,000원~40,000원</td>
               </tr>
               <tr>
                 <td><strong>Day 1 찻집</strong></td>
                 <td>빛꾸리</td>
                 <td>오미자차 + 삼색 인절미구이</td>
-                <td style="text-align: right; font-weight: 600;">17,500원</td>
+                <td>17,500원</td>
               </tr>
               <tr>
                 <td><strong>Day 1 간식</strong></td>
                 <td>최영화빵 본점</td>
                 <td>최영화빵 10개 포장</td>
-                <td style="text-align: right; font-weight: 600;">12,000원</td>
+                <td>12,000원</td>
               </tr>
               <tr>
                 <td><strong>Day 1 숙박</strong></td>
                 <td>한옥스테이 목화</td>
                 <td>한옥 숙소 1박 (요금은 날짜별로 확인)</td>
-                <td style="text-align: right; font-weight: 600;">별도</td>
+                <td>별도</td>
               </tr>
               <tr>
                 <td><strong>Day 1 야식</strong></td>
                 <td>경주 원조 콩국</td>
                 <td>야식 포장</td>
-                <td style="text-align: right; font-weight: 600;">지도에서 확인</td>
+                <td>지도에서 확인</td>
               </tr>
               <tr>
                 <td><strong>Day 2 아침</strong></td>
                 <td>토함혜</td>
                 <td>삼합보리밥 정식 23,000원, 갈비찜 39,000원 등록</td>
-                <td style="text-align: right; font-weight: 600;">지도에서 확인</td>
+                <td>지도에서 확인</td>
               </tr>
               <tr>
                 <td><strong>기타 경비</strong></td>
                 <td>공영주차장 & 간식</td>
                 <td>노동공영주차장 주차비 및 편의점 생수</td>
-                <td style="text-align: right; font-weight: 600;">5,500원</td>
+                <td>5,500원</td>
               </tr>
-              <tr class="total-row">
+              <tr class="cost-total-row">
                 <td colspan="3"><strong>등록된 금액 합계 (숙박과 지도에서 확인 항목 제외)</strong></td>
-                <td style="text-align: right;">55,000원~75,000원</td>
+                <td>55,000원~75,000원</td>
               </tr>
             </tbody>
-          </table>
-        </div>
-      </section>
+          </table></div>
+        </section>
 
-      <!-- 네이버 지도 동선 안내 카드 -->
-      <section class="map-box">
-        <div class="map-box-title">🧭 방문 스팟 네이버 지도 바로가기</div>
-        <div class="map-box-desc">
-          스팟별 상세 위치, 영업시간, 주차 정보는 아래 네이버 지도 링크에서 바로 확인하실 수 있어요:
-        </div>
-        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px;">
-          <a class="naver-btn" style="padding: 8px 14px; font-size: 13.5px;" href="https://map.naver.com/p/search/%EA%B2%BD%EC%A3%BC%20%EB%B0%95%EC%8B%A0%EC%9A%B0%EC%A0%9C%EB%A9%B4%EC%86%8C" target="_blank" rel="noopener noreferrer">🍜 박신우제면소</a>
-          <a class="naver-btn" style="padding: 8px 14px; font-size: 13.5px;" href="https://map.naver.com/p/search/%EA%B2%BD%EC%A3%BC%20%EB%B4%89%ED%99%A9%EB%8C%80" target="_blank" rel="noopener noreferrer">🌿 봉황대</a>
-          <a class="naver-btn" style="padding: 8px 14px; font-size: 13.5px;" href="https://map.naver.com/p/search/%EA%B2%BD%EC%A3%BC%20%EC%96%B4%EC%84%9C%EC%96%B4%EC%84%9C" target="_blank" rel="noopener noreferrer">📚 어서어서</a>
-          <a class="naver-btn" style="padding: 8px 14px; font-size: 13.5px;" href="https://map.naver.com/p/search/%EA%B2%BD%EC%A3%BC%20%EB%B9%9B%EA%BE%B8%EB%A6%AC" target="_blank" rel="noopener noreferrer">🍵 빛꾸리</a>
-          <a class="naver-btn" style="padding: 8px 14px; font-size: 13.5px;" href="https://map.naver.com/p/search/%EA%B2%BD%EC%A3%BC%20%EC%B5%9C%EC%98%81%ED%99%94%EB%B9%B5" target="_blank" rel="noopener noreferrer">🥐 최영화빵</a>
-          <a class="naver-btn" style="padding: 8px 14px; font-size: 13.5px;" href="https://map.naver.com/p/search/%EA%B2%BD%EC%A3%BC%20%ED%95%9C%EC%98%A5%EC%8A%A4%ED%85%8C%EC%9D%B4%20%EB%AA%A9%ED%99%94" target="_blank" rel="noopener noreferrer">🏡 한옥스테이 목화</a>
-          <a class="naver-btn" style="padding: 8px 14px; font-size: 13.5px;" href="https://map.naver.com/p/search/%EA%B2%BD%EC%A3%BC%20%EC%9B%94%EC%A0%95%EA%B5%90" target="_blank" rel="noopener noreferrer">🌉 월정교</a>
-          <a class="naver-btn" style="padding: 8px 14px; font-size: 13.5px;" href="https://map.naver.com/p/search/%EC%B2%A8%EC%84%B1%EB%8C%80" target="_blank" rel="noopener noreferrer">🌟 첨성대</a>
-          <a class="naver-btn" style="padding: 8px 14px; font-size: 13.5px;" href="https://map.naver.com/p/search/%EA%B2%BD%EC%A3%BC%20%EC%9B%90%EC%A1%B0%EC%BD%A9%EA%B5%AD" target="_blank" rel="noopener noreferrer">🥣 원조 콩국</a>
-          <a class="naver-btn" style="padding: 8px 14px; font-size: 13.5px;" href="https://map.naver.com/p/search/%EA%B2%BD%EC%A3%BC%20%ED%86%A0%ED%95%A8%ED%98%9C" target="_blank" rel="noopener noreferrer">🥘 토함혜</a>
-        </div>
-      </section>
+        <section class="map-links">
+          <p class="timeline-title">방문 스팟 네이버 지도 바로가기</p>
+          <p>스팟별 상세 위치, 영업시간, 주차 정보는 아래 네이버 지도 링크에서 바로 확인하실 수 있어요:</p>
+          <ul class="map-list">
+            <li><a href="https://map.naver.com/p/search/%EA%B2%BD%EC%A3%BC%20%EB%B0%95%EC%8B%A0%EC%9A%B0%EC%A0%9C%EB%A9%B4%EC%86%8C" target="_blank" rel="noopener noreferrer">박신우제면소</a></li>
+            <li><a href="https://map.naver.com/p/search/%EA%B2%BD%EC%A3%BC%20%EB%B4%89%ED%99%A9%EB%8C%80" target="_blank" rel="noopener noreferrer">봉황대</a></li>
+            <li><a href="https://map.naver.com/p/search/%EA%B2%BD%EC%A3%BC%20%EC%96%B4%EC%84%9C%EC%96%B4%EC%84%9C" target="_blank" rel="noopener noreferrer">어서어서</a></li>
+            <li><a href="https://map.naver.com/p/search/%EA%B2%BD%EC%A3%BC%20%EB%B9%9B%EA%BE%B8%EB%A6%AC" target="_blank" rel="noopener noreferrer">빛꾸리</a></li>
+            <li><a href="https://map.naver.com/p/search/%EA%B2%BD%EC%A3%BC%20%EC%B5%9C%EC%98%81%ED%99%94%EB%B9%B5" target="_blank" rel="noopener noreferrer">최영화빵</a></li>
+            <li><a href="https://map.naver.com/p/search/%EA%B2%BD%EC%A3%BC%20%ED%95%9C%EC%98%A5%EC%8A%A4%ED%85%8C%EC%9D%B4%20%EB%AA%A9%ED%99%94" target="_blank" rel="noopener noreferrer">한옥스테이 목화</a></li>
+            <li><a href="https://map.naver.com/p/search/%EA%B2%BD%EC%A3%BC%20%EC%9B%94%EC%A0%95%EA%B5%90" target="_blank" rel="noopener noreferrer">월정교</a></li>
+            <li><a href="https://map.naver.com/p/search/%EC%B2%A8%EC%84%B1%EB%8C%80" target="_blank" rel="noopener noreferrer">첨성대</a></li>
+            <li><a href="https://map.naver.com/p/search/%EA%B2%BD%EC%A3%BC%20%EC%9B%90%EC%A1%B0%EC%BD%A9%EA%B5%AD" target="_blank" rel="noopener noreferrer">원조 콩국</a></li>
+            <li><a href="https://map.naver.com/p/search/%EA%B2%BD%EC%A3%BC%20%ED%86%A0%ED%95%A8%ED%98%9C" target="_blank" rel="noopener noreferrer">토함혜</a></li>
+          </ul>
+        </section>
 
-      <!-- 에필로그 -->
-      <section style="margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--color-border);">
-        <h3 style="font-size: 20px; font-weight: 800; color: var(--color-primary); margin-bottom: 14px;">에필로그: 고요함 속에서 비로소 보이는 것들</h3>
-        <p class="spot-text">
+        <section class="prose-section">
+          <h2>에필로그: 고요함 속에서 비로소 보이는 것들</h2>
+          <p>
           남들 다 가는 유적지 스탬프 투어나 빽빽한 사진 명소를 쫓아다니지 않아도, 경주는 그 자체로 충분히 깊고 다정해요.
         </p>
-        <p class="spot-text">
+          <p>
           고분의 부드러운 능선 아래서 불어오는 맑은 가을바람, 100년 된 한옥 마당에서 나누는 따뜻한 차 한 잔, 그리고 한옥 숙소에서 보내는 조용한 밤까지. 속도를 조금만 늦추면 경주가 숨겨둔 진짜 온기가 비로소 마음에 와닿아요.
         </p>
-        <p class="spot-text" style="margin-bottom: 0;">
+          <p>
           일상의 번잡함에 지쳐 조용한 위로와 쉼이 필요한 주말이라면, 여러분도 이 고즈넉한 리듬에 발맞춰 경주의 골목길을 천천히 걸어보시는 건 어떨까요?
         </p>
-      </section>
+        </section>
 
-    <div class="app-course-box" style="margin: 40px 0 24px; padding: 20px 22px; background: var(--color-tip-bg); border: 1px solid var(--color-tip-border); border-radius: 14px;">
-      <strong style="display: block; font-size: 17px; color: var(--color-tip-text); margin-bottom: 6px;">🗺️ 이 코스 오늘 데이트에서 열기</strong>
-      <p style="margin: 0 0 14px; font-size: 14.5px; line-height: 1.6; color: var(--color-tip-text);">글에 나온 장소 8곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
-      <a href="../../#c=1791475806910.5219.3806.2422.4667.1788633400091.1788932446097.3698" style="display: inline-block; padding: 10px 18px; border-radius: 10px; background: var(--color-accent); color: #ffffff; font-weight: 700; font-size: 15px; text-decoration: none;">앱에서 코스 열기 →</a>
-    </div>
-
+        <div class="app-course-box">
+          <div>
+            <h2>이 코스 오늘 데이트에서 열기</h2>
+            <p>글에 나온 장소 8곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
+          </div>
+          <a class="btn app-action" href="../../#c=1791475806910.5219.3806.2422.4667.1788633400091.1788932446097.3698">앱에서 코스 열기</a>
+        </div>
+      </div>
     </article>
   </main>
 
   <!-- 푸터 -->
   <footer class="site-footer">
-    <div>본 글은 공개 데이터를 바탕으로 정리한 여행 코스 가이드입니다.</div>
-    <div class="source-credit">사진 출처: 한국관광공사 TourAPI (공공누리 제1유형)</div>
+    <div class="footer-inner container">
+      <p class="footer-line">본 글은 공개 데이터를 바탕으로 정리한 여행 코스 가이드입니다.</p>
+      <p class="footer-line">사진 출처: 한국관광공사 TourAPI (공공누리 제1유형)</p>
+    </div>
   </footer>
 
 </body>

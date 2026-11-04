@@ -16,6 +16,9 @@
 
   <!-- Pretendard 웹폰트 -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700&display=swap&text=()%2C.0123456789%3ANO%5B%5Ddeorsuy~%EA%B1%B0%EA%B2%BD%EA%B3%84%EA%B8%80%EA%B8%B0%EA%B9%8C%EB%82%A8%EB%84%90%EB%8A%98%EB%8B%A4%EB%8C%80%EB%8D%95%EB%8D%B0%EB%8F%84%EB%8F%8C%EB%8F%99%EB%93%9C%EB%94%94%EB%9D%BC%EB%9E%84%EB%9E%8C%EB%9F%BD%EB%A5%98%EB%A6%AC%EB%A7%81%EB%A7%A4%EB%A9%94%EB%AA%B0%EB%AA%BD%EB%AF%B8%EB%B0%94%EB%B2%BD%EB%B3%80%EB%B3%84%EB%B6%80%EB%B8%8C%EB%B9%84%EC%82%AC%EC%83%81%EC%84%9C%EC%84%A0%EC%84%B1%EC%85%98%EC%8A%A4%EC%8B%9D%EC%8B%A0%EC%96%B8%EC%97%90%EC%97%AC%EC%97%B4%EC%98%88%EC%98%A4%EC%99%80%EC%99%B8%EC%9A%B0%EC%9B%90%EC%9C%A0%EC%9D%98%EC%9D%B4%EC%9D%B8%EC%9D%BC%EC%9E%84%EC%A0%88%EC%A0%9C%EC%A3%BC%EC%A7%80%EC%A7%84%EC%B0%A8%EC%B1%84%EC%B4%9D%EC%BD%94%ED%83%80%ED%84%B0%ED%8A%B8%ED%8F%89%ED%91%9C%ED%92%8D%ED%95%98%ED%95%99%ED%95%A9%ED%95%B4%ED%96%89%ED%9D%91%ED%9E%90" rel="stylesheet">
 
   <script type="application/ld+json">
 {
@@ -43,425 +46,294 @@
   </script>
 
   <style>
-    :root {
-      --color-primary: #1e293b;
-      --color-accent: #0284c7;
-      --color-accent-light: #e0f2fe;
-      --color-text-main: #334155;
-      --color-text-sub: #64748b;
-      --color-border: #e2e8f0;
-      --color-bg-page: #f8fafc;
-      --color-card-bg: #ffffff;
-      --color-warm: #d97706;
-      --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-    }
+/* hallmark-solstice: scripts/convert_blog_hallmark.mjs가 글의 <style>을 이 파일로 바꾼다 (Hallmark 2.0.0, 테마 Solstice, P-293) */
+:root {
+  color-scheme: light;
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-xs: 0.8125rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.125rem; --text-xl: 1.5625rem; --text-2xl: 1.953rem; --text-3xl: 2.441rem;
+  --text-hero: clamp(1.75rem, 1.6vw + 1.25rem, 2.75rem);
+  --text-section: clamp(1.75rem, 1.8vw + 1rem, 2.875rem); --text-title: clamp(1.25rem, 0.75vw + 0.875rem, 1.625rem); --text-lead: clamp(1.0625rem, 0.3vw + 0.95rem, 1.25rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-micro: 120ms; --dur-short: 220ms;
+  --container: 1200px; --measure: 680px; --gutter: 56px; --gap-columns: 40px; --section-gap: 120px;
+  --z-sticky-nav: 300;
+  --color-paper: oklch(94% 0.03 80); --color-paper-2: oklch(97% 0.02 85); --color-paper-3: oklch(89% 0.05 80);
+  --color-ink: oklch(27% 0.05 50); --color-ink-2: oklch(36% 0.05 50); --color-muted: oklch(48% 0.06 55);
+  --color-rule: oklch(84% 0.06 78);
+  --color-accent: oklch(54% 0.20 24); --color-accent-2: oklch(48% 0.19 24); --color-accent-ink: oklch(97% 0.02 85); --color-focus: oklch(54% 0.20 24);
+  --color-gold: oklch(74% 0.14 75); --color-gold-2: oklch(84% 0.11 80);
+  --color-band-text: oklch(94% 0.03 80); --color-band-muted: oklch(80% 0.05 75);
+  --color-hair-ink: color-mix(in oklab, var(--color-ink) 10%, transparent);
+  --font-display: "Noto Serif KR", "Nanum Myeongjo", ui-serif, serif;
+  --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --radius-card: 0; --radius-pill: 999px; --rule-hair: 1px; --rule-bar: 2px;
+  --shadow-card: 10px 10px 0 var(--color-paper-3);
+}
+@media (max-width: 60rem) { :root { --gutter: 24px; --section-gap: 88px; --gap-columns: 24px; } }
+@media (max-width: 40rem) { :root { --gutter: 16px; --section-gap: 64px; --gap-columns: 16px; } }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: var(--font-family);
-      background-color: var(--color-bg-page);
-      color: var(--color-text-main);
-      line-height: 1.8;
-      word-break: keep-all;
-      -webkit-font-smoothing: antialiased;
-    }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+html { scrollbar-color: var(--color-muted) var(--color-paper); scroll-padding-top: var(--space-3xl); }
+body { margin: 0; background: var(--color-paper); color: var(--color-ink-2); font-family: var(--font-family); font-size: var(--text-md); line-height: 1.75; word-break: keep-all; -webkit-font-smoothing: antialiased; }
+::selection { background: color-mix(in oklab, var(--color-gold) 40%, transparent); }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+a:hover { text-decoration-color: var(--color-accent); }
+article h1, article h2, article h3 { margin: 0; font-family: var(--font-display); font-weight: 700; color: var(--color-ink); line-height: 1.3; letter-spacing: -0.01em; overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+img { max-width: 100%; display: block; }
+.container { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); }
 
-    .site-header {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--color-border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .header-inner {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 14px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .header-logo {
-      font-weight: 800;
-      font-size: 1.15rem;
-      color: var(--color-primary);
-      text-decoration: none;
-    }
-    .header-logo span { color: var(--color-accent); }
-    .header-nav a {
-      color: var(--color-text-sub);
-      text-decoration: none;
-      font-size: 0.9rem;
-      margin-left: 16px;
-    }
+/* 44px 머리 링크 규칙: scripts/test-blog-related.cjs가 글마다 하나를 요구한다 */
+header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
 
-    .article-container {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 40px 20px 80px;
-    }
+/* Controls */
+.btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 var(--space-lg); border: 0; border-radius: var(--radius-pill); background: var(--color-accent); color: var(--color-accent-ink); font: 600 var(--text-md)/1 var(--font-family); text-decoration: none; cursor: pointer; transition: background-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out); }
+.btn:hover { background: var(--color-accent-2); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.link-quiet { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-ink); font-weight: 600; font-size: var(--text-sm); text-decoration: none; border-bottom: var(--rule-bar) solid var(--color-ink); transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out); }
+.link-quiet:hover { color: var(--color-accent); border-color: var(--color-accent); }
+.link-quiet:active { transform: translateY(1px); }
+.link-quiet:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
 
-    .article-header {
-      margin-bottom: 32px;
-    }
-    .badge {
-      display: inline-block;
-      background: var(--color-accent-light);
-      color: var(--color-accent);
-      font-weight: 700;
-      font-size: 0.8rem;
-      padding: 4px 10px;
-      border-radius: 6px;
-      margin-bottom: 12px;
-    }
-    h1 {
-      font-size: 1.85rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      line-height: 1.4;
-      margin-bottom: 16px;
-      letter-spacing: -0.02em;
-    }
-    .meta-info {
-      font-size: 0.88rem;
-      color: var(--color-text-sub);
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
+/* Nav */
+.site-header { position: sticky; top: 0; z-index: var(--z-sticky-nav); background: var(--color-paper); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.header-inner { display: flex; justify-content: space-between; align-items: center; min-height: 64px; }
+.header-logo { font-family: var(--font-display); font-size: var(--text-lg); color: var(--color-ink); text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; }
+.header-logo span { color: var(--color-accent); margin-left: 0.3em; }
+.header-logo:hover { color: var(--color-ink-2); }
+.header-nav { display: flex; gap: var(--space-lg); }
+.header-nav a { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--text-sm); color: var(--color-ink-2); text-decoration: none; }
+.header-nav a:hover { color: var(--color-ink); text-decoration: underline; text-decoration-color: var(--color-accent); }
+.header-nav a:active, .header-logo:active { transform: translateY(1px); }
 
-    .intro-box {
-      background: #f0fdf4;
-      border-left: 4px solid #16a34a;
-      padding: 20px 22px;
-      border-radius: 0 12px 12px 0;
-      margin: 28px 0 40px;
-      font-size: 0.98rem;
-      color: #166534;
-      line-height: 1.8;
-    }
+/* Hero */
+.hero { display: grid; padding-block: var(--space-2xl) var(--space-xl); }
+.hero-text { display: grid; gap: var(--space-lg); }
+.article-title { font-size: var(--text-hero); line-height: 1.3; max-width: 28ch; }
+.hero-kicker { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.hero-kicker span:first-child { color: var(--color-accent); font-weight: 600; }
+.article-meta { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-lg); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); font-variant-numeric: tabular-nums; }
+.article-meta .meta-credit { flex-basis: 100%; }
+/* 좁은 화면에서 칸마다 한 줄: 본문 글꼴(Pretendard)이 바뀔 때 줄 수가 달라져 아래 띠가 밀리는 것을 막는다 */
+@media (max-width: 40rem) { .article-meta { flex-direction: column; flex-wrap: nowrap; } }
+.spot-photo img { width: 100%; height: 100%; object-fit: cover; outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
 
-    .overview-card {
-      background: var(--color-card-bg);
-      border: 1px solid var(--color-border);
-      border-radius: 16px;
-      padding: 24px;
-      margin-bottom: 40px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
-    }
-    .overview-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--color-primary);
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .route-timeline {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      position: relative;
-      padding-left: 20px;
-    }
-    .route-timeline::before {
-      content: "";
-      position: absolute;
-      left: 6px;
-      top: 6px;
-      bottom: 6px;
-      width: 2px;
-      background: #cbd5e1;
-    }
-    .timeline-item {
-      position: relative;
-      font-size: 0.92rem;
-    }
-    .timeline-item::before {
-      content: "";
-      position: absolute;
-      left: -18px;
-      top: 6px;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--color-accent);
-      border: 2px solid white;
-      box-shadow: 0 0 0 1px var(--color-accent);
-    }
-    .timeline-time {
-      font-weight: 700;
-      color: var(--color-primary);
-      margin-right: 8px;
-    }
-    .timeline-name {
-      color: var(--color-text-main);
-    }
-    .timeline-dist {
-      color: var(--color-text-sub);
-      font-size: 0.82rem;
-      margin-left: 6px;
-    }
+/* Lead */
+.prose-intro { max-width: var(--measure); padding-top: var(--space-xl); font-size: var(--text-lead); line-height: 1.8; color: var(--color-ink); padding-bottom: var(--space-3xl); }
 
-    .spot-section {
-      background: var(--color-card-bg);
-      border: 1px solid var(--color-border);
-      border-radius: 16px;
-      padding: 28px;
-      margin-bottom: 36px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
-    }
-    .spot-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 16px;
-    }
-    .spot-number {
-      font-size: 0.82rem;
-      font-weight: 800;
-      color: var(--color-accent);
-      background: var(--color-accent-light);
-      padding: 3px 8px;
-      border-radius: 6px;
-      display: inline-block;
-      margin-bottom: 6px;
-    }
-    .spot-title {
-      font-size: 1.35rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      line-height: 1.35;
-    }
-    .spot-chips {
-      display: flex;
-      gap: 6px;
-      margin-top: 10px;
-      flex-wrap: wrap;
-    }
-    .chip {
-      font-size: 0.78rem;
-      padding: 3px 8px;
-      border-radius: 4px;
-      background: #f1f5f9;
-      color: var(--color-text-sub);
-      font-weight: 600;
-    }
+/* The day, on the brown band */
+.band { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl) var(--space-xl); }
+.band .timeline-title { color: var(--color-band-text); font-size: var(--text-section); margin-bottom: var(--space-xl); }
+.route { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: 0; padding: 0; }
+.tl-act { font-size: var(--text-sm); color: var(--color-gold-2); padding-bottom: var(--space-sm); }
+.tl-step { display: grid; align-content: start; gap: var(--space-2xs); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-gold); }
+.tl-time { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1; color: var(--color-band-text); font-variant-numeric: tabular-nums; }
+.tl-place { font-weight: 600; font-size: var(--text-lg); color: var(--color-band-text); }
+.tl-note { font-size: var(--text-sm); color: var(--color-band-muted); line-height: 1.6; }
+.tl-move { font-size: var(--text-sm); color: var(--color-band-muted); padding-block: var(--space-sm) var(--space-lg); }
+.tl-total { font-size: var(--text-sm); color: var(--color-band-muted); padding-top: var(--space-lg); margin-top: var(--space-lg); border-top: var(--rule-hair) solid color-mix(in oklab, var(--color-band-text) 25%, transparent); }
+/* spot-info-list 계열: 시간 범위(10:30 - 11:45)가 길어 시각 글자를 줄이고, 요약 상자와 번호 배지를 둔다 */
+.route.range .tl-time { font-size: var(--text-xl); }
+.route.range .tl-step { padding-bottom: var(--space-md); }
+.tl-badge { font-size: var(--text-xs); color: var(--color-gold-2); letter-spacing: 0.04em; }
+.tl-facts { display: grid; gap: var(--space-2xs) var(--space-lg); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.tl-facts strong { color: var(--color-gold-2); font-weight: 600; }
+@media (min-width: 60rem) {
+  .tl-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .route { grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); column-gap: var(--space-lg); }
+  .route > * { grid-row: var(--r); grid-column: var(--c) / span var(--s, 1); }
+  .tl-move { padding-bottom: 0; }
+  .tl-total { grid-column: 1 / -1; }
+}
 
-    .spot-image-wrap {
-      margin: 18px 0;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid var(--color-border);
-      background: #000;
-    }
-    .spot-image {
-      width: 100%;
-      height: auto;
-      max-height: 440px;
-      object-fit: cover;
-      display: block;
-    }
-    .image-caption {
-      padding: 8px 12px;
-      font-size: 0.8rem;
-      color: var(--color-text-sub);
-      background: #f8fafc;
-      border-top: 1px solid var(--color-border);
-      text-align: center;
-    }
+/* Stops */
+.spots { padding-block: var(--section-gap) 0; display: grid; gap: var(--section-gap); }
+.spot-section { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "photo head" "photo body"; grid-template-rows: auto 1fr; column-gap: var(--gap-columns); row-gap: var(--space-md); align-items: start; padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); }
+.spot-section.flip { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-areas: "head photo" "body photo"; }
+.spot-section.no-photo { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "body"; }
+.spot-head { grid-area: head; display: grid; gap: var(--space-md); }
+.spot-photo { grid-area: photo; align-self: start; margin: 0; aspect-ratio: 4 / 5; width: 100%; background: var(--color-paper-3); position: sticky; top: 96px; }
+.spot-body { grid-area: body; display: grid; gap: var(--space-md); }
+.spot-header { display: flex; align-items: baseline; gap: var(--space-md); }
+.spot-num { font-family: var(--font-display); font-size: var(--text-3xl); line-height: 1; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+.spot-title { font-size: var(--text-section); }
+.spot-tagline { font-size: var(--text-lg); color: var(--color-ink); padding-bottom: var(--space-xs); }
+.spot-desc { max-width: 60ch; }
 
-    .spot-info-list {
-      margin: 16px 0;
-      padding: 14px 16px;
-      background: #f8fafc;
-      border-radius: 8px;
-      font-size: 0.88rem;
-      list-style: none;
-    }
-    .spot-info-list li {
-      margin-bottom: 6px;
-      display: flex;
-    }
-    .spot-info-list li:last-child { margin-bottom: 0; }
-    .spot-info-label {
-      font-weight: 700;
-      color: var(--color-primary);
-      min-width: 72px;
-    }
-    .spot-info-val {
-      color: var(--color-text-main);
-    }
+.spot-info-box { margin: var(--space-xs) 0 0; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); }
+.info-row { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--space-md); padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.info-row:last-child { border-bottom: 0; }
+.info-label { color: var(--color-muted); }
+.info-val { color: var(--color-ink); font-weight: 400; font-variant-numeric: tabular-nums; }
+.map-btn-wrap { padding-top: var(--space-sm); }
+.tip-box { padding: var(--space-sm) var(--space-md); border-left: var(--rule-bar) solid var(--color-accent); background: var(--color-paper-2); font-size: var(--text-sm); color: var(--color-ink-2); line-height: 1.7; }
+.tip-box strong { color: var(--color-ink); font-weight: 600; }
+.tip-box .tip-title { display: block; margin-bottom: var(--space-2xs); }
 
-    .spot-desc {
-      font-size: 0.96rem;
-      color: var(--color-text-main);
-      line-height: 1.85;
-      margin: 16px 0;
-    }
+/* Fees */
+.cost-table-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.cost-head { display: grid; gap: var(--space-md); align-content: start; }
+.cost-head .timeline-title { font-size: var(--text-section); }
+.cost-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.cost-table th { text-align: left; font-weight: 400; color: var(--color-muted); padding: var(--space-xs) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-bar) solid var(--color-ink); }
+.cost-table td { padding: var(--space-sm) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink-2); vertical-align: top; }
+.cost-table td:nth-child(2) { color: var(--color-ink); font-weight: 400; }
+.cost-3 .cost-total-row td:nth-child(2) { font-family: inherit; font-size: inherit; color: inherit; font-weight: 600; }
+.cost-3 .cost-total-row td:nth-child(3) { font-family: var(--font-display); font-size: var(--text-xl); color: var(--color-accent); font-weight: 700; }
+.cost-total-row td { border-bottom: 0; border-top: var(--rule-bar) solid var(--color-ink); color: var(--color-ink); font-weight: 600; }
+.cost-total-row td:nth-child(2) { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--color-accent); font-weight: 700; }
+@media (max-width: 600px) {
+  .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
+  .table-wrap thead { display: none; }
+  .table-wrap tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-sm); row-gap: var(--space-2xs); padding-block: var(--space-sm); border-bottom: var(--rule-hair) solid var(--color-rule); }
+  .table-wrap td { padding: 0; border: 0; }
+  .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: var(--text-xs); color: var(--color-muted); }
+  .table-wrap td:nth-child(3) { text-align: right; font-weight: 600; color: var(--color-ink); }
+  .table-wrap td:nth-child(4) { grid-column: 1 / -1; color: var(--color-muted); }
+  .table-wrap td:empty { display: none; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: var(--text-sm); color: var(--color-ink); }
+  .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; text-align: right; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
+  .table-wrap .cost-total-row { border-top: var(--rule-bar) solid var(--color-ink); border-bottom: 0; }
+}
 
-    .tip-box {
-      background: #fffbeb;
-      border: 1px solid #fde68a;
-      border-radius: 10px;
-      padding: 14px 18px;
-      margin-top: 16px;
-      font-size: 0.88rem;
-      color: #92400e;
-      line-height: 1.7;
-    }
-    .tip-box-title {
-      font-weight: 800;
-      margin-bottom: 4px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+/* Tips */
+.tips-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.tips-card .timeline-title { font-size: var(--text-section); align-self: start; }
+.tips-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-md); }
+.tips-list li { padding-bottom: var(--space-md); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.tips-list li:last-child { border-bottom: 0; }
+.tips-list strong { color: var(--color-ink); font-weight: 600; }
 
-    .action-chips {
-      display: flex;
-      gap: 8px;
-      margin-top: 20px;
-      padding-top: 16px;
-      border-top: 1px dashed var(--color-border);
-    }
-    .btn-map {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #00843d;
-      color: white;
-      text-decoration: none;
-      font-size: 0.84rem;
-      font-weight: 700;
-      padding: 8px 14px;
-      border-radius: 8px;
-      transition: background 0.15s;
-    }
-    .btn-map:hover { background: #007a37; }
+/* App course */
+.app-course-box { margin-top: var(--section-gap); display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--gap-columns); align-items: end; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-xl); }
+.app-course-box h2 { font-size: var(--text-section); margin-bottom: var(--space-md); }
+.app-course-box p { max-width: 52ch; }
+.app-course-box .app-action { justify-self: end; }
 
-    /* 비용 정산표 반응형 스타일 */
-    .cost-section {
-      background: var(--color-card-bg);
-      border: 1px solid var(--color-border);
-      border-radius: 16px;
-      padding: 28px;
-      margin: 40px 0;
-    }
-    .cost-title {
-      font-size: 1.25rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin-bottom: 8px;
-    }
-    .cost-sub {
-      font-size: 0.88rem;
-      color: var(--color-text-sub);
-      margin-bottom: 20px;
-    }
-    /* 비용표 */
-    .table-wrap {
-      margin: 32px 0 40px;
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      overflow: hidden;
-      background: #ffffff;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.9rem;
-      text-align: left;
-    }
-    thead {
-      background: #f1f5f9;
-      color: var(--color-primary);
-      font-weight: 700;
-    }
-    th, td {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--color-border);
-    }
-    tr:last-child td {
-      border-bottom: none;
-    }
+.article-credit { margin-top: var(--space-2xl); padding-block: var(--space-md) var(--space-3xl); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); }
 
-    .cost-section .table-wrap { margin: 0; }
+/* Footer mast */
+.site-footer { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl); }
+.footer-inner { display: grid; gap: var(--space-md); }
+.footer-mark { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1.2; color: var(--color-band-text); }
+.footer-line { color: var(--color-band-muted); font-size: var(--text-sm); }
+.footer-links { display: flex; flex-wrap: wrap; gap: var(--space-lg); }
+.footer-links a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-band-text); font-size: var(--text-sm); text-decoration: underline; text-decoration-color: var(--color-gold); }
+.footer-links a:hover { text-decoration-color: var(--color-accent); color: var(--color-gold-2); }
+.footer-links a:active { transform: translateY(1px); }
+.site-footer :focus-visible { outline-color: var(--color-gold-2); }
 
-    /* 비용표: 좁은 화면에서는 한 행을 카드 하나로 쌓는다 */
-    @media (max-width: 600px) {
-      .table-wrap { overflow-x: visible; }
-      .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
-      .table-wrap thead { display: none; }
-      .table-wrap tr {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        column-gap: 12px;
-        row-gap: 4px;
-        padding: 14px 16px;
-        border-bottom: 1px solid var(--color-border);
-      }
-      .table-wrap tr:last-child { border-bottom: none; }
-      .table-wrap td { padding: 0; border: none; }
-      .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: 0.78rem; font-weight: 700; color: var(--color-text-sub); }
-      .table-wrap td:nth-child(2) { font-weight: 700; }
-      .table-wrap td:nth-child(3) { max-width: 60vw; word-break: keep-all; text-align: right; font-weight: 700; }
-      .table-wrap td:nth-child(4) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
-      .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: inherit; color: inherit; }
-      .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; max-width: 60vw; word-break: keep-all; text-align: right; }
-      .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
-    }
+@media (max-width: 60rem) {
+  .hero, .spot-section, .spot-section.flip, .cost-table-card, .tips-card, .app-course-box { grid-template-columns: minmax(0, 1fr); }
+  .spot-section, .spot-section.flip { grid-template-areas: "head" "photo" "body"; grid-template-rows: auto; }
+  .spot-section.no-photo { grid-template-areas: "head" "body"; }
+  .hero { padding-block: var(--space-xl) var(--space-xl); }
+  .spot-photo { position: static; aspect-ratio: 16 / 10; }
+  .app-course-box { padding: var(--space-lg); }
+  .app-course-box .app-action { justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn, .link-quiet { transition: none; }
+  .btn:active, .link-quiet:active, .header-nav a:active, .header-logo:active, .footer-links a:active { transform: none; }
+}
 
-    /* 600px 이하 모바일 전용 카드형 렌더링 */
-    @media (max-width: 600px) {
-      h1 { font-size: 1.45rem; }
-      .spot-title { font-size: 1.18rem; }
-      .article-container { padding: 24px 16px 60px; }
-      .spot-section { padding: 20px 16px; }
-    }
+/* real-photo-flat 계열(평면 글): 번호 있는 긴 장소 제목, 사진 설명, 안내 상자, 지도 목록 */
+.lead-photo { margin: 0 0 var(--space-3xl); }
+.lead-photo img { width: 100%; max-height: 520px; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.lead-photo figcaption, .body-photo figcaption { margin-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.spot-photo figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--space-xs) var(--space-sm); font-size: var(--text-xs); line-height: 1.5; color: var(--color-accent-ink); background: color-mix(in oklab, var(--color-ink) 78%, transparent); }
+.body-photo { margin: 0; }
+.body-photo img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.spot-section.flat .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.tl-lead { max-width: var(--measure); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.guide-box, .order-box { background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); color: var(--color-ink); }
+.guide-box h4, .order-box strong { margin: 0 0 var(--space-xs); font-family: var(--font-display); font-size: var(--text-md); color: var(--color-ink); display: block; }
+.guide-box ul, .order-box ul { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-2xs); }
+.bridge { padding-top: var(--space-xs); color: var(--color-muted); font-size: var(--text-sm); }
+.map-links { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-md); }
+.map-links .timeline-title { font-size: var(--text-section); }
+.map-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-xs); }
+.map-list a, .map-link-chip { display: flex; justify-content: space-between; gap: var(--space-md); align-items: center; min-height: 44px; padding-block: var(--space-xs); border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink); text-decoration: none; }
+.map-links-grid { display: grid; gap: 0; }
+.map-link-chip .btn-action { color: var(--color-accent); font-weight: 600; white-space: nowrap; }
+@media (max-width: 40rem) { .spot-section.flat .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .spot-photo { position: relative; top: auto; } }
 
-    .conclusion-box {
-      background: white;
-      border: 1px solid var(--color-border);
-      border-radius: 16px;
-      padding: 28px;
-      margin: 40px 0;
-      font-size: 0.96rem;
-      line-height: 1.85;
-    }
-    .conclusion-title {
-      font-size: 1.18rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin-bottom: 14px;
-    }
+/* spot-card 계열(editor-144): 대표 사진, 요약 상자, 본문 구획, 세부 코스, 이동 연결, 마무리 상자 */
+.hero-figure { margin: 0 0 var(--space-xl); }
+.hero-figure img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.hero-figure figcaption { padding-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-muted); }
+.summary-card { margin-bottom: var(--space-xl); background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-lg); font-size: var(--text-sm); }
+.summary-title, p.timeline-title, .cta-title { font-family: var(--font-display); font-weight: 700; line-height: 1.3; color: var(--color-ink); }
+.summary-title { font-size: var(--text-xl); margin-bottom: var(--space-sm); }
+p.timeline-title { letter-spacing: -0.01em; overflow-wrap: break-word; }
+.summary-list { margin: 0; padding: 0; list-style: none; display: grid; }
+.summary-list li { padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.summary-list li:last-child { border-bottom: 0; }
+.summary-list strong { color: var(--color-ink); font-weight: 600; }
+.prose-section { margin-top: var(--section-gap); max-width: var(--measure); display: grid; gap: var(--space-md); }
+.prose-section h2, .spots-title { font-size: var(--text-title); }
+.stops-section { margin-top: var(--section-gap); }
+.stops-section .spots { padding-top: var(--space-xl); }
+.spots.bridged { gap: 0; }
+.drive-bridge { margin: 0; padding-block: var(--space-xl); padding-left: var(--space-md); border-left: var(--rule-bar) solid var(--color-gold); font-size: var(--text-sm); color: var(--color-muted); }
+.drive-bridge strong { color: var(--color-ink); font-weight: 600; }
+.spot-header:has(.spot-badge) { flex-direction: column; align-items: flex-start; gap: var(--space-xs); }
+.spot-badge { font-size: var(--text-sm); font-weight: 600; color: var(--color-accent); }
+.spot-actions { display: flex; flex-wrap: wrap; gap: 0 var(--space-lg); }
+.info-wide .info-row { grid-template-columns: 5.5em minmax(0, 1fr); }
+.info-wide .info-row.plain { grid-template-columns: minmax(0, 1fr); }
+.cost-head .timeline-title.long { font-size: var(--text-title); }
+.cta-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-sm); max-width: var(--measure); }
+.cta-card h3, .cta-title { font-size: var(--text-title); }
+.cta-card .link-quiet { justify-self: start; }
 
-    .site-footer {
-      border-top: 1px solid var(--color-border);
-      padding: 30px 20px;
-      text-align: center;
-      font-size: 0.85rem;
-      color: var(--color-text-sub);
-      background: white;
-    }
-    .footer-links {
-      margin-bottom: 12px;
-    }
-    .footer-links a {
-      color: var(--color-text-sub);
-      text-decoration: none;
-      margin: 0 8px;
-    }
-    header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
-    .header-nav a,.header-title a,.blog-tagline a{display:inline-block}
+/* real-photo-grid 계열(editor-145): 사진과 정보 상자가 글 순서대로 이어지는 한 열 장소 구획, 번호 있는 동선, 도입 여러 문단 */
+.prose-intro p + p { margin-top: var(--space-md); }
+.stories { padding-top: var(--space-xl); gap: var(--space-3xl); }
+.story-section { display: grid; gap: var(--space-md); max-width: var(--measure); }
+.story-section .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.story-body { display: grid; gap: var(--space-md); }
+.story-photo { margin: 0; }
+.story-photo img { width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.story-photo figcaption { padding-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.story-photo figcaption span + span::before { content: " · "; }
+.tl-step .tl-badge { margin-bottom: calc(var(--space-2xs) * -1); }
+.tl-meta { display: block; font-style: normal; color: var(--color-gold-2); }
+.app-course-box.early { margin-top: var(--space-xl); }
+.app-course-box .cta-title { font-size: var(--text-section); margin-bottom: var(--space-md); }
+@media (max-width: 40rem) { .story-section .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .route .tl-act:not(:first-child) { margin-top: var(--space-lg); } }
+.article-credit.tight { padding-bottom: var(--space-md); }
+.back-link { padding-bottom: var(--space-md); font-size: var(--text-sm); }
+
+/* route-timeline 계열(editor-147: 보령, 거제, 고성): 사진 설명의 출처 줄, 시각 범위 동선 */
+.spot-photo figcaption .cap-src { display: block; }
+.spot-number { white-space: nowrap; }
+
+/* spot-block 계열(editor-147: 강릉, 경주): 머리 바 메모, 인용문, 날마다 나뉜 동선, 장소 분류 줄, 팁 목록, 금액이 끝 칸인 경비표 */
+.header-inner:has(.header-note) { flex-wrap: wrap; gap: 0 var(--space-md); }
+.header-note { font-size: var(--text-sm); color: var(--color-muted); }
+.hero-quote { max-width: var(--measure); font-size: var(--text-lead); line-height: 1.7; color: var(--color-ink); }
+.route + .route { margin-top: var(--space-xl); }
+.story-kicker { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.story-kicker .spot-num { font-size: var(--text-xl); }
+.stories.bridged .story-section + .story-section { margin-top: var(--space-3xl); }
+.tip-box ul { margin: 0; padding-left: 1.1em; display: grid; gap: var(--space-2xs); }
+@media (max-width: 600px) {
+  .table-wrap.amount-last td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
+  .table-wrap.amount-last td:nth-child(4) { grid-column: auto; text-align: right; font-weight: 600; color: var(--color-ink); }
+}
   </style>
 </head>
 <body>
 
   <header class="site-header">
-    <div class="header-inner">
+    <div class="header-inner container">
       <a href="https://nufunc.github.io/oneul-date/blog/" class="header-logo">오늘 데이트 <span>매거진</span></a>
       <nav class="header-nav">
         <a href="https://nufunc.github.io/oneul-date/blog/">전체 글 보기</a>
@@ -471,278 +343,156 @@
   </header>
 
   <main class="article-container">
+    <article>
+      <header class="article-header hero container">
+        <div class="hero-text">
+          <p class="hero-kicker badge-category"><span>경남 거제</span><span>남해안 오션 드라이브</span></p>
+          <h1 class="article-title">[경남 거제 오션 드라이브] 매미성 유럽 성채부터 외도널서리 글라스하우스, 학동 흑진주 몽돌해변, 바람의언덕 풍차와 신선대 해식절벽 일몰까지 에메랄드 남해 바다 힐링 코스</h1>
+          <div class="article-meta">
+            <span>발행일: 2026년 10월 21일</span>
+            <span class="meta-credit">글: 오늘 데이트 에디토리얼 팀 / 사진: 카카오맵 포토 리뷰</span>
+          </div>
+          <p><a class="btn" href="../../#c=1381.1386.1379.1790741952982">앱에서 코스 열기</a></p>
+        </div>
+      </header>
 
-    <header class="article-header">
-      <span class="badge">경남 거제 · 남해안 오션 드라이브</span>
-      <h1>[경남 거제 오션 드라이브] 매미성 유럽 성채부터 외도널서리 글라스하우스, 학동 흑진주 몽돌해변, 바람의언덕 풍차와 신선대 해식절벽 일몰까지 에메랄드 남해 바다 힐링 코스</h1>
-      <div class="meta-info">
-        <span>발행일: 2026년 10월 21일</span>
-        <span>·</span>
-        <span>글: 오늘 데이트 에디토리얼 팀 / 사진: 카카오맵 포토 리뷰</span>
+      <div class="container">
+        <p class="prose-intro">거가대교를 건너 남해안의 푸른 비경 속으로 진입하는 순간, 일상의 번잡함은 사라지고 끝없이 펼쳐지는 코발트빛 바다가 반깁니다. 2003년 태풍 매미 이후 한 시민의 집념으로 완성된 유럽 중세 성채 거제 매미성에서 시작해, 프랑스풍 글라스하우스 정원 카페 외도널서리, 자그락거리는 파도 소리가 울려 퍼지는 학동 흑진주 몽돌해변, 바람의언덕 풍차 산책, 그리고 신선이 머물던 천혜의 기암절벽 신선대에서 맞이하는 황금빛 일몰 피날레까지 거제도를 북에서 남으로 가로지르는 하루 오션 드라이브 코스를 정리했습니다.</p>
       </div>
-    </header>
 
-    <div class="intro-box">
-      거가대교를 건너 남해안의 푸른 비경 속으로 진입하는 순간, 일상의 번잡함은 사라지고 끝없이 펼쳐지는 코발트빛 바다가 반깁니다. 2003년 태풍 매미 이후 한 시민의 집념으로 완성된 유럽 중세 성채 거제 매미성에서 시작해, 프랑스풍 글라스하우스 정원 카페 외도널서리, 자그락거리는 파도 소리가 울려 퍼지는 학동 흑진주 몽돌해변, 바람의언덕 풍차 산책, 그리고 신선이 머물던 천혜의 기암절벽 신선대에서 맞이하는 황금빛 일몰 피날레까지 거제도를 북에서 남으로 가로지르는 하루 오션 드라이브 코스를 정리했습니다.
-    </div>
-
-    <section class="overview-card">
-      <h2 class="overview-title">🚗 경남 거제 오션 드라이브 타임라인</h2>
-      <div class="route-timeline">
-        <div class="timeline-item">
-          <span class="timeline-time">11:30 ~ 13:00</span>
-          <span class="timeline-name"><strong>[스팟 1] 거제 매미성</strong> (바다를 마주한 화강암 성채 포토존 탐방)</span>
-        </div>
-        <div class="timeline-item">
-          <span class="timeline-time">13:30 ~ 14:40</span>
-          <span class="timeline-name"><strong>[스팟 2] 외도널서리</strong> (구조라 해변 앞 프랑스풍 온실 가든 카페 & 몽돌 디저트)</span>
-          <span class="timeline-dist">(차량 26.3km · 약 29분)</span>
-        </div>
-        <div class="timeline-item">
-          <span class="timeline-time">14:51 ~ 15:45</span>
-          <span class="timeline-name"><strong>[스팟 3] 학동 흑진주 몽돌해변</strong> (자그락거리는 몽돌 파도 소리와 해변 산책)</span>
-          <span class="timeline-dist">(차량 11.5km · 약 11분)</span>
-        </div>
-        <div class="timeline-item">
-          <span class="timeline-time">15:53 ~ 17:00</span>
-          <span class="timeline-name"><strong>[스팟 4] 거제 바람의언덕</strong> (도장포 포구 언덕 위 풍차와 파노라마 다도해 뷰)</span>
-          <span class="timeline-dist">(차량 6.5km · 약 8분)</span>
-        </div>
-        <div class="timeline-item">
-          <span class="timeline-time">17:02 ~ 18:00</span>
-          <span class="timeline-name"><strong>[스팟 5] 거제 신선대</strong> (바람의언덕 맞은편 해식절벽에서 감상하는 남해 낙조)</span>
-          <span class="timeline-dist">(차량 0.7km · 약 2분)</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- 스팟 1: 거제 매미성 -->
-    <article class="spot-section">
-      <div class="spot-header">
-        <div>
-          <span class="spot-number">SPOT 1</span>
-          <h2 class="spot-title">거제 매미성</h2>
-          <div class="spot-chips">
-            <span class="chip">유럽 중세 성채 포토존</span>
-            <span class="chip">거가대교 & 남해 뷰</span>
-            <span class="chip">한 시민의 기적의 건축</span>
-            <span class="chip">무료 입장</span>
+      <!-- 동선 -->
+      <section class="timeline-card band">
+        <div class="container">
+          <h2 class="timeline-title">경남 거제 오션 드라이브 타임라인</h2>
+          <div class="route range" style="--n:5">
+            <div class="tl-step" style="--r:2; --c:1"><span class="tl-time">11:30 ~ 13:00</span><span class="tl-place">[스팟 1] 거제 매미성</span><span class="tl-note">(바다를 마주한 화강암 성채 포토존 탐방)</span></div>
+            <div class="tl-step" style="--r:2; --c:2"><span class="tl-time">13:30 ~ 14:40</span><span class="tl-place">[스팟 2] 외도널서리</span><span class="tl-note">(구조라 해변 앞 프랑스풍 온실 가든 카페 & 몽돌 디저트)<em class="tl-meta">(차량 26.3km · 약 29분)</em></span></div>
+            <div class="tl-step" style="--r:2; --c:3"><span class="tl-time">14:51 ~ 15:45</span><span class="tl-place">[스팟 3] 학동 흑진주 몽돌해변</span><span class="tl-note">(자그락거리는 몽돌 파도 소리와 해변 산책)<em class="tl-meta">(차량 11.5km · 약 11분)</em></span></div>
+            <div class="tl-step" style="--r:2; --c:4"><span class="tl-time">15:53 ~ 17:00</span><span class="tl-place">[스팟 4] 거제 바람의언덕</span><span class="tl-note">(도장포 포구 언덕 위 풍차와 파노라마 다도해 뷰)<em class="tl-meta">(차량 6.5km · 약 8분)</em></span></div>
+            <div class="tl-step" style="--r:2; --c:5"><span class="tl-time">17:02 ~ 18:00</span><span class="tl-place">[스팟 5] 거제 신선대</span><span class="tl-note">(바람의언덕 맞은편 해식절벽에서 감상하는 남해 낙조)<em class="tl-meta">(차량 0.7km · 약 2분)</em></span></div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div class="spot-image-wrap">
-        <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/dd5d495aa8a14196bb793644938f119c5818b87d?original" alt="거제 매미성 바다 앞 성벽과 돌담 실사 사진" class="spot-image" loading="lazy">
-        <div class="image-caption">거제 매미성: 푸른 남해 바다를 배경으로 유럽 중세 요새처럼 웅장하게 쌓아 올린 화강암 성벽<span style="display: block; margin-top: 4px;">출처: 카카오맵</span></div>
-      </div>
-
-      <ul class="spot-info-list">
-        <li><span class="spot-info-label">주소</span><span class="spot-info-val">경상남도 거제시 장목면 복항길 29 (장목면 대금리 1)</span></li>
-        <li><span class="spot-info-label">운영시간</span><span class="spot-info-val">상시 개방 (연중무휴, 입장료 무료)</span></li>
-        <li><span class="spot-info-label">관람포인트</span><span class="spot-info-val">성벽 아치형 창문 너머로 바다와 거가대교가 걸리는 시그니처 포토존</span></li>
-        <li><span class="spot-info-label">주차안내</span><span class="spot-info-val">매미성 공영주차장 무료 (카카오맵)</span></li>
-      </ul>
-
-      <p class="spot-desc">
+      <div class="container">
+        <div class="spots">
+          <section class="spot-section">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-number">SPOT 1</span><h2 class="spot-title">거제 매미성</h2></div>
+              <p class="spot-tagline">유럽 중세 성채 포토존 · 거가대교 & 남해 뷰 · 한 시민의 기적의 건축 · 무료 입장</p>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/dd5d495aa8a14196bb793644938f119c5818b87d?original" alt="거제 매미성 바다 앞 성벽과 돌담 실사 사진" class="spot-image" loading="lazy" />
+              <figcaption>거제 매미성: 푸른 남해 바다를 배경으로 유럽 중세 요새처럼 웅장하게 쌓아 올린 화강암 성벽<span class="cap-src">출처: 카카오맵</span></figcaption>
+            </figure>
+            <div class="spot-body">
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">경상남도 거제시 장목면 복항길 29 (장목면 대금리 1)</span></div><div class="info-row"><span class="info-label">운영시간</span><span class="info-val">상시 개방 (연중무휴, 입장료 무료)</span></div><div class="info-row"><span class="info-label">관람포인트</span><span class="info-val">성벽 아치형 창문 너머로 바다와 거가대교가 걸리는 시그니처 포토존</span></div><div class="info-row"><span class="info-label">주차안내</span><span class="info-val">매미성 공영주차장 무료 (카카오맵)</span></div></div>
+              <p class="spot-desc">
         거가대교를 타고 거제도에 들어서면 가장 먼저 들르게 되는 장목면 해안가에 유럽 중세의 요새를 옮겨 놓은 듯한 매미성이 자리 잡고 있습니다. 2003년 한반도를 강타한 태풍 매미로 경작지를 잃은 백순삼 씨가 농경지를 지키기 위해 홀로 화강암 벽돌을 쌓아 올려 완성한 기적의 건축물입니다.
       </p>
-      <p class="spot-desc">
+              <p class="spot-desc">
         홀로 돌을 하나하나 쌓아 올렸다고는 믿기지 않을 만큼 정교한 아치형 돌문과 총안, 바다를 굽어보는 성곽 테라스가 방문객의 감탄을 자아냅니다. 성벽 위 아치형 돌창문 프레임에 서서 에메랄드빛 바다와 저 멀리 거가대교를 배경으로 사진을 남기면 마치 지중해 연안의 고성에 온 듯한 이국적인 분위기를 연출할 수 있습니다.
       </p>
+              <div class="tip-box"><strong class="tip-title">에디터 방문 팁</strong>공영주차장에서 매미성까지 내려가는 마을 골목길에 거제 유자빵, 수제 아이스크림, 몽돌 와플 등 로컬 간식거리가 다양합니다. 성곽 위는 돌계단과 좁은 통로가 이어지므로 편안한 운동화를 신는 것을 권장합니다.</div>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EA%B1%B0%EC%A0%9C%20%EB%A7%A4%EB%AF%B8%EC%84%B1" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도에서 위치 보기</a></div>
+            </div>
+          </section>
 
-      <div class="tip-box">
-        <div class="tip-box-title">💡 에디터 방문 팁</div>
-        공영주차장에서 매미성까지 내려가는 마을 골목길에 거제 유자빵, 수제 아이스크림, 몽돌 와플 등 로컬 간식거리가 다양합니다. 성곽 위는 돌계단과 좁은 통로가 이어지므로 편안한 운동화를 신는 것을 권장합니다.
-      </div>
-
-      <div class="action-chips">
-        <a href="https://map.naver.com/p/search/%EA%B1%B0%EC%A0%9C%20%EB%A7%A4%EB%AF%B8%EC%84%B1" target="_blank" rel="noopener noreferrer" class="btn-map">🧭 네이버 지도에서 위치 보기</a>
-      </div>
-    </article>
-
-    <!-- 스팟 2: 외도널서리 -->
-    <article class="spot-section">
-      <div class="spot-header">
-        <div>
-          <span class="spot-number">SPOT 2</span>
-          <h2 class="spot-title">외도널서리 (Oedo Nursery)</h2>
-          <div class="spot-chips">
-            <span class="chip">프랑스풍 온실 글라스하우스</span>
-            <span class="chip">구조라 해변 앞</span>
-            <span class="chip">구조라에이드</span>
-            <span class="chip">보태니컬 정원</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="spot-image-wrap">
-        <img src="https://t1.kakaocdn.net/fiy_reboot/place/A8602C236E704B2B8E7699122BA725D2" alt="외도널서리 입구 벽돌 간판 벽과 금빛 글자 실사 사진" class="spot-image" loading="lazy">
-        <div class="image-caption">외도널서리 입구 벽돌 간판<span style="display: block; margin-top: 4px;">출처: 카카오맵</span></div>
-      </div>
-
-      <ul class="spot-info-list">
-        <li><span class="spot-info-label">주소</span><span class="spot-info-val">경상남도 거제시 일운면 구조라로4길 21 (일운면 구조라리 415-5)</span></li>
-        <li><span class="spot-info-label">운영시간</span><span class="spot-info-val">매일 10:30 ~ 18:00 (라스트오더 17:00, 네이버 플레이스)</span></li>
-        <li><span class="spot-info-label">대표메뉴</span><span class="spot-info-val">구조라에이드(8,500원), 널서리커피(8,000원), 아메리카노(6,000원)</span></li>
-        <li><span class="spot-info-label">이동거리</span><span class="spot-info-val">매미성에서 26.3km (차량 약 29분)</span></li>
-        <li><span class="spot-info-label">주차안내</span><span class="spot-info-val">무료 주차 (네이버 플레이스, 내비게이션에 "외도널서리 주차장" 검색)</span></li>
-      </ul>
-
-      <p class="spot-desc">
+          <section class="spot-section flip">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-number">SPOT 2</span><h2 class="spot-title">외도널서리 (Oedo Nursery)</h2></div>
+              <p class="spot-tagline">프랑스풍 온실 글라스하우스 · 구조라 해변 앞 · 구조라에이드 · 보태니컬 정원</p>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://t1.kakaocdn.net/fiy_reboot/place/A8602C236E704B2B8E7699122BA725D2" alt="외도널서리 입구 벽돌 간판 벽과 금빛 글자 실사 사진" class="spot-image" loading="lazy" />
+              <figcaption>외도널서리 입구 벽돌 간판<span class="cap-src">출처: 카카오맵</span></figcaption>
+            </figure>
+            <div class="spot-body">
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">경상남도 거제시 일운면 구조라로4길 21 (일운면 구조라리 415-5)</span></div><div class="info-row"><span class="info-label">운영시간</span><span class="info-val">매일 10:30 ~ 18:00 (라스트오더 17:00, 네이버 플레이스)</span></div><div class="info-row"><span class="info-label">대표메뉴</span><span class="info-val">구조라에이드(8,500원), 널서리커피(8,000원), 아메리카노(6,000원)</span></div><div class="info-row"><span class="info-label">이동거리</span><span class="info-val">매미성에서 26.3km (차량 약 29분)</span></div><div class="info-row"><span class="info-label">주차안내</span><span class="info-val">무료 주차 (네이버 플레이스, 내비게이션에 "외도널서리 주차장" 검색)</span></div></div>
+              <p class="spot-desc">
         매미성에서 남쪽으로 30분가량 달리면 구조라 해수욕장 초입에 자리한 감성 온실 카페 외도널서리가 모습을 드러냅니다. 해상 식물원 외도 보타니아를 가꾼 원예 예술의 숨결을 육지에서도 온전히 느낄 수 있도록 조성된 보태니컬 가든 카페입니다.
       </p>
-      <p class="spot-desc">
+              <p class="spot-desc">
         붉은 고벽돌과 높은 유리 통창으로 지어진 온실 실내에는 야자수, 고사리류, 다양한 아열대 관엽식물과 활짝 핀 꽃들이 어우러져 유럽의 식물원 정원에 들어선 듯한 싱그러움을 선사합니다. 온실 테라스 문을 열면 시원한 구조라 해변 산책로가 바로 연결됩니다.
       </p>
+              <div class="tip-box"><strong class="tip-title">에디터 방문 팁</strong>매장 입구의 푸른 수국 숲길과 실내 중앙의 유리 천장 채광 존이 대표적인 사진 명소입니다.</div>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EC%99%B8%EB%8F%84%EB%84%90%EC%84%9C%EB%A6%AC" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도에서 위치 보기</a></div>
+            </div>
+          </section>
 
-      <div class="tip-box">
-        <div class="tip-box-title">💡 에디터 방문 팁</div>
-        매장 입구의 푸른 수국 숲길과 실내 중앙의 유리 천장 채광 존이 대표적인 사진 명소입니다.
-      </div>
-
-      <div class="action-chips">
-        <a href="https://map.naver.com/p/search/%EC%99%B8%EB%8F%84%EB%84%90%EC%84%9C%EB%A6%AC" target="_blank" rel="noopener noreferrer" class="btn-map">🧭 네이버 지도에서 위치 보기</a>
-      </div>
-    </article>
-
-    <!-- 스팟 3: 학동 흑진주 몽돌해변 -->
-    <article class="spot-section">
-      <div class="spot-header">
-        <div>
-          <span class="spot-number">SPOT 3</span>
-          <h2 class="spot-title">학동 흑진주 몽돌해변</h2>
-          <div class="spot-chips">
-            <span class="chip">한국의 아름다운 소리 100선</span>
-            <span class="chip">흑진주 자갈 파도 소리</span>
-            <span class="chip">몽돌 해안 산책</span>
-            <span class="chip">입장 무료</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="spot-image-wrap">
-        <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/c107256b93b6c0821525fc33a66c1071bd9bee4a?original" alt="학동 흑진주 몽돌해변에 늘어선 파라솔 실사 사진" class="spot-image" loading="lazy">
-        <div class="image-caption">파라솔이 늘어선 학동 몽돌해변 (여름 사진)<span style="display: block; margin-top: 4px;">출처: 카카오맵</span></div>
-      </div>
-
-      <ul class="spot-info-list">
-        <li><span class="spot-info-label">주소</span><span class="spot-info-val">경상남도 거제시 동부면 학동리 277-2</span></li>
-        <li><span class="spot-info-label">운영시간</span><span class="spot-info-val">상시 개방 (연중무휴, 입장료 무료)</span></li>
-        <li><span class="spot-info-label">이동거리</span><span class="spot-info-val">외도널서리에서 11.5km (차량 약 11분)</span></li>
-        <li><span class="spot-info-label">주차안내</span><span class="spot-info-val">주차 가능 (카카오맵)</span></li>
-      </ul>
-
-      <p class="spot-desc">
+          <section class="spot-section">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-number">SPOT 3</span><h2 class="spot-title">학동 흑진주 몽돌해변</h2></div>
+              <p class="spot-tagline">한국의 아름다운 소리 100선 · 흑진주 자갈 파도 소리 · 몽돌 해안 산책 · 입장 무료</p>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/c107256b93b6c0821525fc33a66c1071bd9bee4a?original" alt="학동 흑진주 몽돌해변에 늘어선 파라솔 실사 사진" class="spot-image" loading="lazy" />
+              <figcaption>파라솔이 늘어선 학동 몽돌해변 (여름 사진)<span class="cap-src">출처: 카카오맵</span></figcaption>
+            </figure>
+            <div class="spot-body">
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">경상남도 거제시 동부면 학동리 277-2</span></div><div class="info-row"><span class="info-label">운영시간</span><span class="info-val">상시 개방 (연중무휴, 입장료 무료)</span></div><div class="info-row"><span class="info-label">이동거리</span><span class="info-val">외도널서리에서 11.5km (차량 약 11분)</span></div><div class="info-row"><span class="info-label">주차안내</span><span class="info-val">주차 가능 (카카오맵)</span></div></div>
+              <p class="spot-desc">
         외도널서리에서 남해안 드라이브 코스를 따라 11분 남짓 달리면 흑진주를 닮은 둥근 몽돌이 끝없이 펼쳐지는 학동 흑진주 몽돌해변에 이릅니다. 모래사장 대신 매끄럽게 다듬어진 까만 몽돌이 해안선을 따라 빼곡하게 깔려 있습니다.
       </p>
-      <p class="spot-desc">
+              <p class="spot-desc">
         거센 파도가 하얗게 밀려왔다 빠져나갈 때마다 몽돌끼리 부딪히며 들려주는 '자그락자그락' 소리는 '한국의 아름다운 소리 100선'에 선정될 만큼 맑고 청량한 감동을 선사합니다. 해변에 나란히 앉아 귓가에 맴도는 파도 소리를 들으며 지친 마음을 달래거나, 맨발로 몽돌을 지그시 밟으며 산책하는 힐링 시간을 가져보세요.
       </p>
+              <div class="tip-box"><strong class="tip-title">에디터 방문 팁</strong>학동 몽돌은 자연공원법에 의해 보호되는 소중한 자연유산이므로 해변 밖으로 반출이 엄격히 금지되어 있습니다. 눈과 귀, 그리고 사진으로만 아름다운 추억을 담아주세요.</div>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%ED%95%99%EB%8F%99%ED%9D%91%EC%A7%84%EC%A3%BC%EB%AA%BD%EB%8F%8C%ED%95%B4%EB%B3%80" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도에서 위치 보기</a></div>
+            </div>
+          </section>
 
-      <div class="tip-box">
-        <div class="tip-box-title">💡 에디터 방문 팁</div>
-        학동 몽돌은 자연공원법에 의해 보호되는 소중한 자연유산이므로 해변 밖으로 반출이 엄격히 금지되어 있습니다. 눈과 귀, 그리고 사진으로만 아름다운 추억을 담아주세요.
-      </div>
-
-      <div class="action-chips">
-        <a href="https://map.naver.com/p/search/%ED%95%99%EB%8F%99%ED%9D%91%EC%A7%84%EC%A3%BC%EB%AA%BD%EB%8F%8C%ED%95%B4%EB%B3%80" target="_blank" rel="noopener noreferrer" class="btn-map">🧭 네이버 지도에서 위치 보기</a>
-      </div>
-    </article>
-
-    <!-- 스팟 4: 거제 바람의언덕 -->
-    <article class="spot-section">
-      <div class="spot-header">
-        <div>
-          <span class="spot-number">SPOT 4</span>
-          <h2 class="spot-title">거제 바람의언덕</h2>
-          <div class="spot-chips">
-            <span class="chip">언덕 위 풍차</span>
-            <span class="chip">도장포 포구 파노라마</span>
-            <span class="chip">한려해상 다도해 뷰</span>
-            <span class="chip">입장 무료</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="spot-image-wrap">
-        <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/f49857f1d22268a6bf47bfd1d1b9811c2958a02b?original" alt="거제 바람의언덕 잔디 언덕 위 풍차 실사 사진" class="spot-image" loading="lazy">
-        <div class="image-caption">거제 바람의언덕: 도장포 포구를 굽어보는 잔디 언덕 위에 이국적으로 우뚝 솟은 네덜란드식 풍차<span style="display: block; margin-top: 4px;">출처: 카카오맵</span></div>
-      </div>
-
-      <ul class="spot-info-list">
-        <li><span class="spot-info-label">주소</span><span class="spot-info-val">경상남도 거제시 남부면 갈곶리 산14-47</span></li>
-        <li><span class="spot-info-label">운영시간</span><span class="spot-info-val">상시 개방 (연중무휴, 입장료 무료)</span></li>
-        <li><span class="spot-info-label">이동거리</span><span class="spot-info-val">학동 흑진주 몽돌해변에서 6.5km (차량 약 8분)</span></li>
-      </ul>
-
-      <p class="spot-desc">
+          <section class="spot-section flip">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-number">SPOT 4</span><h2 class="spot-title">거제 바람의언덕</h2></div>
+              <p class="spot-tagline">언덕 위 풍차 · 도장포 포구 파노라마 · 한려해상 다도해 뷰 · 입장 무료</p>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/f49857f1d22268a6bf47bfd1d1b9811c2958a02b?original" alt="거제 바람의언덕 잔디 언덕 위 풍차 실사 사진" class="spot-image" loading="lazy" />
+              <figcaption>거제 바람의언덕: 도장포 포구를 굽어보는 잔디 언덕 위에 이국적으로 우뚝 솟은 네덜란드식 풍차<span class="cap-src">출처: 카카오맵</span></figcaption>
+            </figure>
+            <div class="spot-body">
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">경상남도 거제시 남부면 갈곶리 산14-47</span></div><div class="info-row"><span class="info-label">운영시간</span><span class="info-val">상시 개방 (연중무휴, 입장료 무료)</span></div><div class="info-row"><span class="info-label">이동거리</span><span class="info-val">학동 흑진주 몽돌해변에서 6.5km (차량 약 8분)</span></div></div>
+              <p class="spot-desc">
         학동에서 남쪽 끝자락 도장포 마을로 8분 달리면 거제도 여행의 대표 상징인 바람의언덕에 도달합니다. 잔잔한 도장포 포구를 감싸 안은 초록빛 잔디 언덕 정상에 고풍스러운 붉은 네덜란드식 풍차가 우뚝 서 있어 마치 유럽의 전원 해안가에 온 듯한 낭만을 자아냅니다.
       </p>
-      <p class="spot-desc">
+              <p class="spot-desc">
         언덕 산책로를 따라 오르면 거제 남해의 거침없는 바닷바람이 온몸을 감싸며, 짙푸른 한려해상국립공원의 다도해 풍경이 파노라마로 펼쳐집니다. 풍차 앞 나무 벤치에 걸터앉아 바다를 내려다보거나 언덕 능선을 따라 이어지는 나무 데크길을 손잡고 거닐며 둘만의 감성 스냅을 남기기에 더없이 훌륭합니다.
       </p>
+              <div class="tip-box"><strong class="tip-title">에디터 방문 팁</strong>주말 오후에는 도장포 진입로가 붐빌 수 있으니 여유를 두고 이동하는 것이 좋습니다.</div>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EA%B1%B0%EC%A0%9C%20%EB%B0%94%EB%9E%8C%EC%9D%98%EC%96%B8%EB%8D%95" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도에서 위치 보기</a></div>
+            </div>
+          </section>
 
-      <div class="tip-box">
-        <div class="tip-box-title">💡 에디터 방문 팁</div>
-        주말 오후에는 도장포 진입로가 붐빌 수 있으니 여유를 두고 이동하는 것이 좋습니다.
-      </div>
-
-      <div class="action-chips">
-        <a href="https://map.naver.com/p/search/%EA%B1%B0%EC%A0%9C%20%EB%B0%94%EB%9E%8C%EC%9D%98%EC%96%B8%EB%8D%95" target="_blank" rel="noopener noreferrer" class="btn-map">🧭 네이버 지도에서 위치 보기</a>
-      </div>
-    </article>
-
-    <!-- 스팟 5: 거제 신선대 -->
-    <article class="spot-section">
-      <div class="spot-header">
-        <div>
-          <span class="spot-number">SPOT 5</span>
-          <h2 class="spot-title">거제 신선대</h2>
-          <div class="spot-chips">
-            <span class="chip">신선이 머물던 해식절벽</span>
-            <span class="chip">기암괴석 & 다도해</span>
-            <span class="chip">황금빛 남해 낙조 피날레</span>
-            <span class="chip">입장 무료</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="spot-image-wrap">
-        <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/934b8fad95c3135c2e1ca573820a9aad794bb61e?original" alt="거제 신선대 층암절벽과 탁 트인 바다 실사 사진" class="spot-image" loading="lazy">
-        <div class="image-caption">신선대 암반에서 본 남해와 섬<span style="display: block; margin-top: 4px;">출처: 카카오맵</span></div>
-      </div>
-
-      <ul class="spot-info-list">
-        <li><span class="spot-info-label">주소</span><span class="spot-info-val">경상남도 거제시 남부면 갈곶리 산21-23</span></li>
-        <li><span class="spot-info-label">운영시간</span><span class="spot-info-val">상시 개방 (연중무휴, 입장료 무료)</span></li>
-        <li><span class="spot-info-label">이동거리</span><span class="spot-info-val">바람의언덕에서 0.7km (차량 약 2분)</span></li>
-        <li><span class="spot-info-label">주차안내</span><span class="spot-info-val">주차 가능 (카카오맵)</span></li>
-      </ul>
-
-      <p class="spot-desc">
+          <section class="spot-section">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-number">SPOT 5</span><h2 class="spot-title">거제 신선대</h2></div>
+              <p class="spot-tagline">신선이 머물던 해식절벽 · 기암괴석 & 다도해 · 황금빛 남해 낙조 피날레 · 입장 무료</p>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/934b8fad95c3135c2e1ca573820a9aad794bb61e?original" alt="거제 신선대 층암절벽과 탁 트인 바다 실사 사진" class="spot-image" loading="lazy" />
+              <figcaption>신선대 암반에서 본 남해와 섬<span class="cap-src">출처: 카카오맵</span></figcaption>
+            </figure>
+            <div class="spot-body">
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">경상남도 거제시 남부면 갈곶리 산21-23</span></div><div class="info-row"><span class="info-label">운영시간</span><span class="info-val">상시 개방 (연중무휴, 입장료 무료)</span></div><div class="info-row"><span class="info-label">이동거리</span><span class="info-val">바람의언덕에서 0.7km (차량 약 2분)</span></div><div class="info-row"><span class="info-label">주차안내</span><span class="info-val">주차 가능 (카카오맵)</span></div></div>
+              <p class="spot-desc">
         오늘 드라이브의 마지막 대미는 바람의언덕 바로 맞은편 해안 절벽에 자리한 신선대입니다. 신선이 내려와 풍류를 즐겼다는 전설이 전해질 만큼, 오랜 세월 파도와 비바람이 빚어낸 웅장한 층암절벽과 기암괴석이 감탄을 자아내는 곳입니다.
       </p>
-      <p class="spot-desc">
+              <p class="spot-desc">
         선비의 갓을 닮은 독특한 형상의 바위와 거대한 평평한 암반 위에 서면 눈앞으로 끝없이 펼쳐지는 남해 바다와 올망졸망 떠 있는 다도해 섬들이 한 폭의 산수화처럼 펼쳐집니다. 늦은 오후 해 질 무렵이 되면 붉게 물드는 석양이 기암절벽과 코발트빛 바다를 온통 황금빛으로 물들이며, 하루 동안 달린 거제 오션 드라이브의 잊지 못할 낭만적인 피날레를 완성해 줍니다.
       </p>
+              <div class="tip-box"><strong class="tip-title">에디터 방문 팁</strong>도로변 신선대전망대 주차장에 차를 대고 나무 데크 계단을 따라 5분 정도 천천히 내려가면 바위 위에 닿을 수 있습니다. 일몰 30분 전쯤 도착해 서서히 붉어지는 하늘과 바다의 그러데이션을 감상하는 것을 추천합니다.</div>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EA%B1%B0%EC%A0%9C%20%EC%8B%A0%EC%84%A0%EB%8C%80" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도에서 위치 보기</a></div>
+            </div>
+          </section>
+        </div>
 
-      <div class="tip-box">
-        <div class="tip-box-title">💡 에디터 방문 팁</div>
-        도로변 신선대전망대 주차장에 차를 대고 나무 데크 계단을 따라 5분 정도 천천히 내려가면 바위 위에 닿을 수 있습니다. 일몰 30분 전쯤 도착해 서서히 붉어지는 하늘과 바다의 그러데이션을 감상하는 것을 추천합니다.
-      </div>
-
-      <div class="action-chips">
-        <a href="https://map.naver.com/p/search/%EA%B1%B0%EC%A0%9C%20%EC%8B%A0%EC%84%A0%EB%8C%80" target="_blank" rel="noopener noreferrer" class="btn-map">🧭 네이버 지도에서 위치 보기</a>
-      </div>
-    </article>
-
-    <!-- 비용 정산표 섹션 -->
-    <section class="cost-section">
-      <h2 class="cost-title">💰 경남 거제 드라이브 2인 예상 여행 경비표</h2>
-      <p class="cost-sub">카페 음료를 더한 2인 기준 금액이에요. 식사와 유류비, 주차비는 넣지 않았어요.</p>
-
-      <div class="table-wrap">
-        <table>
+        <section class="cost-table-card">
+          <div class="cost-head">
+            <h2 class="timeline-title">경남 거제 드라이브 2인 예상 여행 경비표</h2>
+            <p>카페 음료를 더한 2인 기준 금액이에요. 식사와 유류비, 주차비는 넣지 않았어요.</p>
+          </div>
+          <div class="table-wrap"><table class="cost-table">
           <thead>
             <tr>
               <th>구분</th>
@@ -782,41 +532,41 @@
               <td>0원</td>
               <td>입장 무료 (TourAPI)</td>
             </tr>
-            <tr style="background-color: #f8fafc; font-weight: 700;">
+            <tr class="cost-total-row">
               <td colspan="2">2인 총 예상 경비 합계</td>
-              <td style="color: var(--color-warm);">16,500원</td>
+              <td>16,500원</td>
               <td>식사, 유류비, 주차비 별도 (1인 8,250원)</td>
             </tr>
           </tbody>
-        </table>
-      </div>
-    </section>
+        </table></div>
+        </section>
 
-    <!-- 에디터 총평 -->
-    <div class="conclusion-box">
-      <h2 class="conclusion-title">✨ 에디터 총평</h2>
-      <p>
+        <section class="prose-section">
+          <h2>에디터 총평</h2>
+          <p>
         경남 거제도는 거가대교 개통 이후 수도권 및 영남권 커플들의 주말 바다 드라이브 성지로 확고히 자리 잡았습니다. 북쪽 장목면에서 시작해 남쪽 남부면까지 약 45km를 달리는 동안, 유럽의 고성을 닮은 매미성부터 프랑스풍 온실 카페 외도널서리, 자그락거리는 파도 소리가 정겨운 학동 몽돌밭, 그리고 바람의언덕 풍차와 신선대 일몰까지 한순간도 지루할 틈 없는 이국적인 풍경이 펼쳐집니다.
       </p>
       <p>
         카페를 뺀 네 곳이 모두 입장 무료라 식사와 유류비를 빼면 2인 기준 1만 원대로 카페와 남해 바다 풍경을 즐길 수 있습니다. 이번 주말, 탁 트인 남해의 푸른 바다를 품은 거제도로 둘만의 낭만 드라이브를 떠나보세요!
       </p>
-    </div>
+        </section>
 
-    <div class="app-course-box" style="margin: 40px 0 24px; padding: 20px 22px; background: var(--color-accent-light); border: 1px solid var(--color-border); border-radius: 14px;">
-      <strong style="display: block; font-size: 17px; color: var(--color-text-main); margin-bottom: 6px;">🗺️ 이 코스 오늘 데이트에서 열기</strong>
-      <p style="margin: 0 0 14px; font-size: 14.5px; line-height: 1.6; color: var(--color-text-main);">글에 나온 장소 4곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
-      <a href="../../#c=1381.1386.1379.1790741952982" style="display: inline-block; padding: 10px 18px; border-radius: 10px; background: var(--color-text-main); color: #ffffff; font-weight: 700; font-size: 15px; text-decoration: none;">앱에서 코스 열기 →</a>
-    </div>
-
+        <div class="app-course-box">
+          <div>
+            <h2>이 코스 오늘 데이트에서 열기</h2>
+            <p>글에 나온 장소 4곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
+          </div>
+          <a class="btn app-action" href="../../#c=1381.1386.1379.1790741952982">앱에서 코스 열기</a>
+        </div>
+      </div>
+    </article>
   </main>
 
   <footer class="site-footer">
-    <div class="footer-links">
-      <a href="https://nufunc.github.io/oneul-date/">오늘 데이트 홈</a>
-      <a href="https://nufunc.github.io/oneul-date/blog/">블로그 매거진 전체보기</a>
+    <div class="footer-inner container">
+      <p class="footer-links"><a href="https://nufunc.github.io/oneul-date/">오늘 데이트 홈</a><a href="https://nufunc.github.io/oneul-date/blog/">블로그 매거진 전체보기</a></p>
+      <p class="footer-line">© 2026 오늘 데이트 (Oneul Date). All rights reserved.</p>
     </div>
-    <p>© 2026 오늘 데이트 (Oneul Date). All rights reserved.</p>
   </footer>
 
 </body>
