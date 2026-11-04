@@ -16,6 +16,9 @@
   
   <!-- Pretendard 웹폰트 -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700&display=swap&text=!%25%26'()%2C.0123456789%3AOPST%5B%5Dkm~%E2%86%90%E5%8F%A4%E6%9C%80%EA%B0%80%EA%B0%84%EA%B0%88%EA%B1%B0%EA%B2%BD%EA%B3%84%EA%B3%A0%EA%B3%A8%EA%B3%BC%EA%B4%80%EA%B5%90%EA%B5%AD%EA%B5%B0%EA%B8%88%EA%B8%B0%EA%B8%B8%EA%B9%8C%EB%81%9D%EB%82%A0%EB%82%AD%EB%82%B4%EB%84%A4%EB%85%B8%EB%8A%94%EB%8A%98%EB%8B%90%EB%8B%A4%EB%8B%B9%EB%8C%80%EB%8D%98%EB%8D%B0%EB%8F%84%EB%8F%8C%EB%8F%99%EB%90%9C%EB%93%9C%EB%93%B1%EB%9D%BC%EB%9E%84%EB%A0%88%EB%A1%9C%EB%A1%9D%EB%A3%A8%EB%A5%B4%EB%A6%AC%EB%A7%88%EB%A7%8C%EB%A7%A4%EB%A9%94%EB%A9%B4%EB%AA%A9%EB%AC%B8%EB%AF%BC%EB%B0%94%EB%B0%A9%EB%B2%84%EB%B2%BD%EB%B3%80%EB%B3%B4%EB%B3%B5%EB%B3%B8%EB%B4%89%EB%B6%80%EB%B6%88%EB%B7%B0%EB%B8%8C%EB%B9%84%EB%B9%9B%EB%B9%B5%EB%BD%95%EC%82%AC%EC%82%B0%EC%83%81%EC%83%88%EC%84%9C%EC%84%A0%EC%84%AC%EC%84%B1%EC%85%98%EC%86%8C%EC%86%8D%EC%8A%88%EC%8A%A4%EC%8B%9C%EC%8B%A0%EC%95%8C%EC%95%94%EC%95%A1%EC%96%B5%EC%97%84%EC%97%86%EC%97%90%EC%97%AC%EC%97%B0%EC%97%B4%EC%98%81%EC%98%88%EC%98%9B%EC%98%A4%EC%98%A5%EC%99%80%EC%99%84%EC%99%B8%EC%9A%94%EC%9B%90%EC%9C%84%EC%9C%A0%EC%9D%84%EC%9D%98%EC%9D%B4%EC%9D%B8%EC%9D%BC%EC%9E%84%EC%9E%90%EC%9E%A5%EC%A0%81%EC%A0%84%EC%A0%88%EC%A0%9C%EC%A1%B0%EC%A7%80%EC%A7%84%EC%A7%91%EC%A7%9C%EC%A7%AC%EC%B0%B8%EC%B2%A0%EC%B3%90%EC%B4%88%EC%B5%9C%EC%B6%94%EC%B9%98%EC%B9%B4%EC%BD%94%ED%83%80%ED%83%84%ED%84%B0%ED%8A%B8%ED%8C%8C%ED%8C%9F%ED%8D%BC%ED%8E%98%ED%8E%BC%ED%8F%89%ED%95%98%ED%95%9C%ED%95%A0%ED%95%A9%ED%95%B4%ED%96%89%ED%99%94" rel="stylesheet">
   
   <script type="application/ld+json">
 {
@@ -43,917 +46,545 @@
   </script>
 
   <style>
-    :root {
-      --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
-      --bg-page: #f8fafc;
-      --bg-card: #ffffff;
-      --color-primary: #0f172a;
-      --color-accent: #0284c7;
-      --color-tag: #0369a1;
-      --color-text-main: #1e293b;
-      --color-text-sub: #475569;
-      --color-text-faint: #64748b;
-      --color-border: #e2e8f0;
-      --color-tip-bg: #fffbeb;
-      --color-tip-border: #fef3c7;
-      --color-tip-text: #92400e;
-      --color-bridge-bg: #f1f5f9;
-      --max-width: 760px;
-    }
+/* hallmark-solstice: scripts/convert_blog_hallmark.mjs가 글의 <style>을 이 파일로 바꾼다 (Hallmark 2.0.0, 테마 Solstice, P-293) */
+:root {
+  color-scheme: light;
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-xs: 0.8125rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.125rem; --text-xl: 1.5625rem; --text-2xl: 1.953rem; --text-3xl: 2.441rem;
+  --text-hero: clamp(1.75rem, 1.6vw + 1.25rem, 2.75rem);
+  --text-section: clamp(1.75rem, 1.8vw + 1rem, 2.875rem); --text-title: clamp(1.25rem, 0.75vw + 0.875rem, 1.625rem); --text-lead: clamp(1.0625rem, 0.3vw + 0.95rem, 1.25rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-micro: 120ms; --dur-short: 220ms;
+  --container: 1200px; --measure: 680px; --gutter: 56px; --gap-columns: 40px; --section-gap: 120px;
+  --z-sticky-nav: 300;
+  --color-paper: oklch(94% 0.03 80); --color-paper-2: oklch(97% 0.02 85); --color-paper-3: oklch(89% 0.05 80);
+  --color-ink: oklch(27% 0.05 50); --color-ink-2: oklch(36% 0.05 50); --color-muted: oklch(48% 0.06 55);
+  --color-rule: oklch(84% 0.06 78);
+  --color-accent: oklch(54% 0.20 24); --color-accent-2: oklch(48% 0.19 24); --color-accent-ink: oklch(97% 0.02 85); --color-focus: oklch(54% 0.20 24);
+  --color-gold: oklch(74% 0.14 75); --color-gold-2: oklch(84% 0.11 80);
+  --color-band-text: oklch(94% 0.03 80); --color-band-muted: oklch(80% 0.05 75);
+  --color-hair-ink: color-mix(in oklab, var(--color-ink) 10%, transparent);
+  --font-display: "Noto Serif KR", "Nanum Myeongjo", ui-serif, serif;
+  --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --radius-card: 0; --radius-pill: 999px; --rule-hair: 1px; --rule-bar: 2px;
+  --shadow-card: 10px 10px 0 var(--color-paper-3);
+}
+@media (max-width: 60rem) { :root { --gutter: 24px; --section-gap: 88px; --gap-columns: 24px; } }
+@media (max-width: 40rem) { :root { --gutter: 16px; --section-gap: 64px; --gap-columns: 16px; } }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+html { scrollbar-color: var(--color-muted) var(--color-paper); scroll-padding-top: var(--space-3xl); }
+body { margin: 0; background: var(--color-paper); color: var(--color-ink-2); font-family: var(--font-family); font-size: var(--text-md); line-height: 1.75; word-break: keep-all; -webkit-font-smoothing: antialiased; }
+::selection { background: color-mix(in oklab, var(--color-gold) 40%, transparent); }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+a:hover { text-decoration-color: var(--color-accent); }
+article h1, article h2, article h3 { margin: 0; font-family: var(--font-display); font-weight: 700; color: var(--color-ink); line-height: 1.3; letter-spacing: -0.01em; overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+img { max-width: 100%; display: block; }
+.container { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); }
 
-    body {
-      font-family: var(--font-family);
-      background-color: var(--bg-page);
-      color: var(--color-text-main);
-      line-height: 1.85;
-      letter-spacing: -0.02em;
-      word-break: keep-all;
-      -webkit-font-smoothing: antialiased;
-    }
+/* 44px 머리 링크 규칙: scripts/test-blog-related.cjs가 글마다 하나를 요구한다 */
+header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
 
-    /* 상단 블로그 헤더 */
-    .blog-header {
-      background: #ffffff;
-      border-bottom: 1px solid var(--color-border);
-      position: sticky;
-      top: 0;
-      z-index: 990;
-      backdrop-filter: blur(8px);
-    }
-    .header-inner {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 14px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .blog-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      color: var(--color-primary);
-    }
-    .blog-badge-icon {
-      width: 32px;
-      height: 32px;
-      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #ffffff;
-      font-size: 16px;
-    }
-    .blog-title-text {
-      font-weight: 800;
-      font-size: 17px;
-      letter-spacing: -0.03em;
-    }
-    .blog-sub-text {
-      font-size: 12px;
-      color: var(--color-text-faint);
-      font-weight: 500;
-      border-left: 1px solid var(--color-border);
-      padding-left: 8px;
-      margin-left: 4px;
-    }
-    .header-share-btn {
-      background: #f1f5f9;
-      color: var(--color-text-sub);
-      padding: 7px 14px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
-      text-decoration: none;
-      border: 1px solid var(--color-border);
-      transition: background 0.2s;
-    }
-    .header-share-btn:hover {
-      background: #e2e8f0;
-      color: var(--color-primary);
-    }
+/* Controls */
+.btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 var(--space-lg); border: 0; border-radius: var(--radius-pill); background: var(--color-accent); color: var(--color-accent-ink); font: 600 var(--text-md)/1 var(--font-family); text-decoration: none; cursor: pointer; transition: background-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out); }
+.btn:hover { background: var(--color-accent-2); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.link-quiet { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-ink); font-weight: 600; font-size: var(--text-sm); text-decoration: none; border-bottom: var(--rule-bar) solid var(--color-ink); transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out); }
+.link-quiet:hover { color: var(--color-accent); border-color: var(--color-accent); }
+.link-quiet:active { transform: translateY(1px); }
+.link-quiet:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
 
-    /* 본문 래퍼 */
-    .article-wrap {
-      max-width: var(--max-width);
-      margin: 32px auto 60px;
-      background: var(--bg-card);
-      border-radius: 16px;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
-      border: 1px solid var(--color-border);
-      overflow: hidden;
-      padding: 44px 48px;
-    }
+/* Nav */
+.site-header { position: sticky; top: 0; z-index: var(--z-sticky-nav); background: var(--color-paper); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.header-inner { display: flex; justify-content: space-between; align-items: center; min-height: 64px; }
+.header-logo { font-family: var(--font-display); font-size: var(--text-lg); color: var(--color-ink); text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; }
+.header-logo span { color: var(--color-accent); margin-left: 0.3em; }
+.header-logo:hover { color: var(--color-ink-2); }
+.header-nav { display: flex; gap: var(--space-lg); }
+.header-nav a { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--text-sm); color: var(--color-ink-2); text-decoration: none; }
+.header-nav a:hover { color: var(--color-ink); text-decoration: underline; text-decoration-color: var(--color-accent); }
+.header-nav a:active, .header-logo:active { transform: translateY(1px); }
 
-    @media (max-width: 768px) {
-      .article-wrap {
-        margin: 12px 8px 40px;
-        padding: 24px 18px;
-        border-radius: 12px;
-      }
-    }
+/* Hero */
+.hero { display: grid; padding-block: var(--space-2xl) var(--space-xl); }
+.hero-text { display: grid; gap: var(--space-lg); }
+.article-title { font-size: var(--text-hero); line-height: 1.3; max-width: 28ch; }
+.hero-kicker { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.hero-kicker span:first-child { color: var(--color-accent); font-weight: 600; }
+.article-meta { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-lg); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); font-variant-numeric: tabular-nums; }
+.article-meta .meta-credit { flex-basis: 100%; }
+/* 좁은 화면에서 칸마다 한 줄: 본문 글꼴(Pretendard)이 바뀔 때 줄 수가 달라져 아래 띠가 밀리는 것을 막는다 */
+@media (max-width: 40rem) { .article-meta { flex-direction: column; flex-wrap: nowrap; } }
+.spot-photo img { width: 100%; height: 100%; object-fit: cover; outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
 
-    /* 포스트 메타 헤더 */
-    .post-category-tag {
-      display: inline-block;
-      color: #0284c7;
-      background: rgba(2, 132, 199, 0.08);
-      font-size: 13px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 6px;
-      margin-bottom: 14px;
-    }
-    .post-title {
-      font-size: 27px;
-      line-height: 1.4;
-      font-weight: 800;
-      color: #0f172a;
-      margin-bottom: 14px;
-      letter-spacing: -0.03em;
-    }
-    @media (max-width: 768px) {
-      .post-title { font-size: 22px; }
-    }
-    .post-subtitle {
-      font-size: 16px;
-      color: var(--color-text-sub);
-      line-height: 1.65;
-      margin-bottom: 22px;
-    }
-    .post-meta-row {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      font-size: 13px;
-      color: var(--color-text-faint);
-      border-bottom: 1px solid var(--color-border);
-      padding-bottom: 20px;
-      margin-bottom: 28px;
-      flex-wrap: wrap;
-    }
-    .author-profile {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--color-text-main);
-      font-weight: 600;
-    }
-    .author-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: #e2e8f0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 15px;
-    }
+/* Lead */
+.prose-intro { max-width: var(--measure); padding-top: var(--space-xl); font-size: var(--text-lead); line-height: 1.8; color: var(--color-ink); padding-bottom: var(--space-3xl); }
 
-    /* 리드 인트로 문단 */
-    .post-lead {
-      font-size: 16.5px;
-      line-height: 1.9;
-      color: #334155;
-      margin-bottom: 28px;
-      background: #f8fafc;
-      padding: 20px 24px;
-      border-radius: 12px;
-      border-left: 4px solid var(--color-accent);
-    }
-    .post-lead strong {
-      color: #0f172a;
-    }
+/* The day, on the brown band */
+.band { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl) var(--space-xl); }
+.band .timeline-title { color: var(--color-band-text); font-size: var(--text-section); margin-bottom: var(--space-xl); }
+.route { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: 0; padding: 0; }
+.tl-act { font-size: var(--text-sm); color: var(--color-gold-2); padding-bottom: var(--space-sm); }
+.tl-step { display: grid; align-content: start; gap: var(--space-2xs); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-gold); }
+.tl-time { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1; color: var(--color-band-text); font-variant-numeric: tabular-nums; }
+.tl-place { font-weight: 600; font-size: var(--text-lg); color: var(--color-band-text); }
+.tl-note { font-size: var(--text-sm); color: var(--color-band-muted); line-height: 1.6; }
+.tl-move { font-size: var(--text-sm); color: var(--color-band-muted); padding-block: var(--space-sm) var(--space-lg); }
+.tl-total { font-size: var(--text-sm); color: var(--color-band-muted); padding-top: var(--space-lg); margin-top: var(--space-lg); border-top: var(--rule-hair) solid color-mix(in oklab, var(--color-band-text) 25%, transparent); }
+/* spot-info-list 계열: 시간 범위(10:30 - 11:45)가 길어 시각 글자를 줄이고, 요약 상자와 번호 배지를 둔다 */
+.route.range .tl-time { font-size: var(--text-xl); }
+.route.range .tl-step { padding-bottom: var(--space-md); }
+.tl-badge { font-size: var(--text-xs); color: var(--color-gold-2); letter-spacing: 0.04em; }
+.tl-facts { display: grid; gap: var(--space-2xs) var(--space-lg); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.tl-facts strong { color: var(--color-gold-2); font-weight: 600; }
+@media (min-width: 60rem) {
+  .tl-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .route { grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); column-gap: var(--space-lg); }
+  .route > * { grid-row: var(--r); grid-column: var(--c) / span var(--s, 1); }
+  .tl-move { padding-bottom: 0; }
+  .tl-total { grid-column: 1 / -1; }
+}
 
-    /* 동선 요약 카드 */
-    .itinerary-card {
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
-      border-radius: 14px;
-      padding: 24px 26px;
-      margin: 32px 0 40px;
-    }
-    .itinerary-title {
-      font-size: 17px;
-      font-weight: 800;
-      color: #166534;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .itinerary-section-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: #15803d;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-top: 14px;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .itinerary-list {
-      list-style: none;
-      padding-left: 0;
-      margin-bottom: 10px;
-    }
-    .itinerary-list li {
-      font-size: 14.5px;
-      margin-bottom: 8px;
-      color: #334155;
-      display: flex;
-      align-items: baseline;
-      gap: 10px;
-    }
-    .itinerary-list li .time {
-      font-size: 12px;
-      color: #16a34a;
-      background: #dcfce7;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 4px;
-      min-width: 48px;
-      text-align: center;
-    }
-    .itinerary-list li strong {
-      color: #0f172a;
-    }
+/* Stops */
+.spots { padding-block: var(--section-gap) 0; display: grid; gap: var(--section-gap); }
+.spot-section { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "photo head" "photo body"; grid-template-rows: auto 1fr; column-gap: var(--gap-columns); row-gap: var(--space-md); align-items: start; padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); }
+.spot-section.flip { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-areas: "head photo" "body photo"; }
+.spot-section.no-photo { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "body"; }
+.spot-head { grid-area: head; display: grid; gap: var(--space-md); }
+.spot-photo { grid-area: photo; align-self: start; margin: 0; aspect-ratio: 4 / 5; width: 100%; background: var(--color-paper-3); position: sticky; top: 96px; }
+.spot-body { grid-area: body; display: grid; gap: var(--space-md); }
+.spot-header { display: flex; align-items: baseline; gap: var(--space-md); }
+.spot-num { font-family: var(--font-display); font-size: var(--text-3xl); line-height: 1; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+.spot-title { font-size: var(--text-section); }
+.spot-tagline { font-size: var(--text-lg); color: var(--color-ink); padding-bottom: var(--space-xs); }
+.spot-desc { max-width: 60ch; }
 
-    /* 유튜브 임베드 박스 */
-    .youtube-embed-card {
-      margin: 36px 0;
-      background: #0f172a;
-      border-radius: 14px;
-      overflow: hidden;
-      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.15);
-    }
-    .video-header {
-      padding: 14px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      color: #f8fafc;
-      font-size: 13.5px;
-      font-weight: 700;
-      background: #1e293b;
-    }
-    .video-header span {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .video-iframe-wrap {
-      position: relative;
-      padding-bottom: 56.25%;
-      height: 0;
-      overflow: hidden;
-    }
-    .video-iframe-wrap iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border: 0;
-    }
-    .video-caption {
-      padding: 12px 18px;
-      font-size: 12.5px;
-      color: #94a3b8;
-      background: #0f172a;
-      text-align: center;
-    }
-    .video-caption a {
-      color: #38bdf8;
-      text-decoration: none;
-    }
+.spot-info-box { margin: var(--space-xs) 0 0; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); }
+.info-row { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--space-md); padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.info-row:last-child { border-bottom: 0; }
+.info-label { color: var(--color-muted); }
+.info-val { color: var(--color-ink); font-weight: 400; font-variant-numeric: tabular-nums; }
+.map-btn-wrap { padding-top: var(--space-sm); }
+.tip-box { padding: var(--space-sm) var(--space-md); border-left: var(--rule-bar) solid var(--color-accent); background: var(--color-paper-2); font-size: var(--text-sm); color: var(--color-ink-2); line-height: 1.7; }
+.tip-box strong { color: var(--color-ink); font-weight: 600; }
+.tip-box .tip-title { display: block; margin-bottom: var(--space-2xs); }
 
-    /* 스팟별 섹션 */
-    .spot-section {
-      margin: 50px 0;
-      padding-top: 10px;
-    }
-    .spot-badge {
-      display: inline-block;
-      font-size: 12px;
-      font-weight: 800;
-      color: #ffffff;
-      background: var(--color-accent);
-      padding: 3px 10px;
-      border-radius: 6px;
-      margin-bottom: 10px;
-      letter-spacing: 0.04em;
-    }
-    .spot-heading {
-      font-size: 22px;
-      font-weight: 800;
-      color: #0f172a;
-      line-height: 1.4;
-      margin-bottom: 16px;
-      letter-spacing: -0.02em;
-    }
-    @media (max-width: 768px) {
-      .spot-heading { font-size: 19px; }
-    }
-    .spot-desc {
-      font-size: 16px;
-      line-height: 1.85;
-      color: #334155;
-      margin-bottom: 20px;
-    }
+/* Fees */
+.cost-table-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.cost-head { display: grid; gap: var(--space-md); align-content: start; }
+.cost-head .timeline-title { font-size: var(--text-section); }
+.cost-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.cost-table th { text-align: left; font-weight: 400; color: var(--color-muted); padding: var(--space-xs) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-bar) solid var(--color-ink); }
+.cost-table td { padding: var(--space-sm) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink-2); vertical-align: top; }
+.cost-table td:nth-child(2) { color: var(--color-ink); font-weight: 400; }
+.cost-3 .cost-total-row td:nth-child(2) { font-family: inherit; font-size: inherit; color: inherit; font-weight: 600; }
+.cost-3 .cost-total-row td:nth-child(3) { font-family: var(--font-display); font-size: var(--text-xl); color: var(--color-accent); font-weight: 700; }
+.cost-total-row td { border-bottom: 0; border-top: var(--rule-bar) solid var(--color-ink); color: var(--color-ink); font-weight: 600; }
+.cost-total-row td:nth-child(2) { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--color-accent); font-weight: 700; }
+@media (max-width: 600px) {
+  .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
+  .table-wrap thead { display: none; }
+  .table-wrap tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-sm); row-gap: var(--space-2xs); padding-block: var(--space-sm); border-bottom: var(--rule-hair) solid var(--color-rule); }
+  .table-wrap td { padding: 0; border: 0; }
+  .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: var(--text-xs); color: var(--color-muted); }
+  .table-wrap td:nth-child(3) { text-align: right; font-weight: 600; color: var(--color-ink); }
+  .table-wrap td:nth-child(4) { grid-column: 1 / -1; color: var(--color-muted); }
+  .table-wrap td:empty { display: none; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: var(--text-sm); color: var(--color-ink); }
+  .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; text-align: right; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
+  .table-wrap .cost-total-row { border-top: var(--rule-bar) solid var(--color-ink); border-bottom: 0; }
+}
 
-    /* 사진 갤러리/단일 사진 */
-    .article-photo {
-      margin: 24px 0;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-      background: #f1f5f9;
-    }
-    .article-photo img {
-      width: 100%;
-      height: auto;
-      max-height: 480px;
-      object-fit: cover;
-      display: block;
-      transition: transform 0.3s ease;
-    }
-    .article-photo:hover img {
-      transform: scale(1.015);
-    }
-    .photo-caption {
-      font-size: 12.5px;
-      color: #64748b;
-      text-align: center;
-      padding: 9px 14px;
-      background: #f8fafc;
-      border-top: 1px solid #f1f5f9;
-    }
+/* Tips */
+.tips-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.tips-card .timeline-title { font-size: var(--text-section); align-self: start; }
+.tips-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-md); }
+.tips-list li { padding-bottom: var(--space-md); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.tips-list li:last-child { border-bottom: 0; }
+.tips-list strong { color: var(--color-ink); font-weight: 600; }
 
-    /* 방문 꿀팁 박스 */
-    .tip-box {
-      background: var(--color-tip-bg);
-      border: 1px solid var(--color-tip-border);
-      border-left: 4px solid #f59e0b;
-      border-radius: 10px;
-      padding: 18px 20px;
-      margin: 24px 0;
-      color: var(--color-tip-text);
-      font-size: 14.5px;
-    }
-    .tip-box-title {
-      font-weight: 800;
-      font-size: 14px;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      color: #b45309;
-    }
-    .tip-box ul {
-      margin-left: 18px;
-      margin-bottom: 0;
-    }
-    .tip-box li {
-      margin-bottom: 5px;
-      line-height: 1.65;
-    }
+/* App course */
+.app-course-box { margin-top: var(--section-gap); display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--gap-columns); align-items: end; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-xl); }
+.app-course-box h2 { font-size: var(--text-section); margin-bottom: var(--space-md); }
+.app-course-box p { max-width: 52ch; }
+.app-course-box .app-action { justify-self: end; }
 
-    /* 이동 브릿지 박스 */
-    .transition-bridge {
-      background: var(--color-bridge-bg);
-      border: 1px dashed #cbd5e1;
-      border-radius: 10px;
-      padding: 14px 18px;
-      margin: 32px 0;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 14px;
-      color: #475569;
-    }
-    .bridge-icon {
-      font-size: 22px;
-      flex-shrink: 0;
-    }
+.article-credit { margin-top: var(--space-2xl); padding-block: var(--space-md) var(--space-3xl); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); }
 
-    /* 정산표 테이블 */
-    .table-container {
-      margin: 32px 0;
-      overflow-x: auto;
-      border-radius: 12px;
-      border: 1px solid var(--color-border);
-    }
-    .expense-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14.5px;
-      text-align: left;
-    }
-    .expense-table th {
-      background: #f1f5f9;
-      color: #0f172a;
-      font-weight: 700;
-      padding: 13px 16px;
-      border-bottom: 1px solid var(--color-border);
-    }
-    .expense-table td {
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--color-border);
-      color: #334155;
-    }
-    .expense-table tr:last-child td {
-      border-bottom: none;
-    }
-    .expense-table .total-row td {
-      background: #f8fafc;
-      font-weight: 800;
-      color: #0284c7;
-      font-size: 15px;
-    }
+/* Footer mast */
+.site-footer { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl); }
+.footer-inner { display: grid; gap: var(--space-md); }
+.footer-mark { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1.2; color: var(--color-band-text); }
+.footer-line { color: var(--color-band-muted); font-size: var(--text-sm); }
+.footer-links { display: flex; flex-wrap: wrap; gap: var(--space-lg); }
+.footer-links a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-band-text); font-size: var(--text-sm); text-decoration: underline; text-decoration-color: var(--color-gold); }
+.footer-links a:hover { text-decoration-color: var(--color-accent); color: var(--color-gold-2); }
+.footer-links a:active { transform: translateY(1px); }
+.site-footer :focus-visible { outline-color: var(--color-gold-2); }
 
-    /* 네이버 지도 바로가기 카드 */
-    .map-action-card {
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
-      border-radius: 14px;
-      padding: 24px 26px;
-      margin: 40px 0;
-      text-align: center;
-    }
-    .map-action-title {
-      font-size: 18px;
-      font-weight: 800;
-      color: #166534;
-      margin-bottom: 8px;
-    }
-    .map-action-desc {
-      font-size: 14.5px;
-      color: #15803d;
-      margin-bottom: 18px;
-    }
-    .naver-map-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #00843d;
-      color: #ffffff;
-      font-weight: 700;
-      font-size: 15px;
-      padding: 12px 24px;
-      border-radius: 10px;
-      text-decoration: none;
-      box-shadow: 0 3px 10px rgba(3, 199, 90, 0.25);
-      transition: background 0.2s, transform 0.2s;
-    }
-    .naver-map-btn:hover {
-      background: #007a37;
-      transform: translateY(-2px);
-    }
-    .spot-links-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 8px;
-      margin-top: 18px;
-      padding-top: 16px;
-      border-top: 1px dashed #bbf7d0;
-    }
-    .spot-link-chip {
-      background: #ffffff;
-      border: 1px solid #86efac;
-      color: #166534;
-      font-size: 12.5px;
-      font-weight: 600;
-      padding: 6px 10px;
-      border-radius: 6px;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      transition: all 0.2s;
-    }
-    .spot-link-chip:hover {
-      background: #dcfce7;
-      border-color: #22c55e;
-    }
+@media (max-width: 60rem) {
+  .hero, .spot-section, .spot-section.flip, .cost-table-card, .tips-card, .app-course-box { grid-template-columns: minmax(0, 1fr); }
+  .spot-section, .spot-section.flip { grid-template-areas: "head" "photo" "body"; grid-template-rows: auto; }
+  .spot-section.no-photo { grid-template-areas: "head" "body"; }
+  .hero { padding-block: var(--space-xl) var(--space-xl); }
+  .spot-photo { position: static; aspect-ratio: 16 / 10; }
+  .app-course-box { padding: var(--space-lg); }
+  .app-course-box .app-action { justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn, .link-quiet { transition: none; }
+  .btn:active, .link-quiet:active, .header-nav a:active, .header-logo:active, .footer-links a:active { transform: none; }
+}
 
-    /* 태그 목록 */
-    .tag-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 36px 0 24px;
-      padding-top: 24px;
-      border-top: 1px solid var(--color-border);
-    }
-    .tag-item {
-      background: #f1f5f9;
-      color: #475569;
-      font-size: 13px;
-      padding: 6px 12px;
-      border-radius: 20px;
-      text-decoration: none;
-      transition: background 0.2s;
-    }
-    .tag-item:hover {
-      background: #e2e8f0;
-      color: #0f172a;
-    }
+/* real-photo-flat 계열(평면 글): 번호 있는 긴 장소 제목, 사진 설명, 안내 상자, 지도 목록 */
+.lead-photo { margin: 0 0 var(--space-3xl); }
+.lead-photo img { width: 100%; max-height: 520px; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.lead-photo figcaption, .body-photo figcaption { margin-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.spot-photo figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--space-xs) var(--space-sm); font-size: var(--text-xs); line-height: 1.5; color: var(--color-accent-ink); background: color-mix(in oklab, var(--color-ink) 78%, transparent); }
+.body-photo { margin: 0; }
+.body-photo img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.spot-section.flat .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.tl-lead { max-width: var(--measure); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.guide-box, .order-box { background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); color: var(--color-ink); }
+.guide-box h4, .order-box strong { margin: 0 0 var(--space-xs); font-family: var(--font-display); font-size: var(--text-md); color: var(--color-ink); display: block; }
+.guide-box ul, .order-box ul { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-2xs); }
+.bridge { padding-top: var(--space-xs); color: var(--color-muted); font-size: var(--text-sm); }
+.map-links { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-md); }
+.map-links .timeline-title { font-size: var(--text-section); }
+.map-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-xs); }
+.map-list a, .map-link-chip { display: flex; justify-content: space-between; gap: var(--space-md); align-items: center; min-height: 44px; padding-block: var(--space-xs); border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink); text-decoration: none; }
+.map-links-grid { display: grid; gap: 0; }
+.map-link-chip .btn-action { color: var(--color-accent); font-weight: 600; white-space: nowrap; }
+@media (max-width: 40rem) { .spot-section.flat .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .spot-photo { position: relative; top: auto; } }
 
-    /* 푸터 */
-    .blog-footer {
-      background: #ffffff;
-      border-top: 1px solid var(--color-border);
-      padding: 36px 20px;
-      text-align: center;
-      font-size: 13px;
-      color: var(--color-text-faint);
-    }
-    .footer-license {
-      margin-top: 8px;
-      font-size: 12px;
-      color: #94a3b8;
-    }
-    header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
-    .header-nav a,.header-title a,.blog-tagline a{display:inline-block}
+/* spot-card 계열(editor-144): 대표 사진, 요약 상자, 본문 구획, 세부 코스, 이동 연결, 마무리 상자 */
+.hero-figure { margin: 0 0 var(--space-xl); }
+.hero-figure img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.hero-figure figcaption { padding-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-muted); }
+.summary-card { margin-bottom: var(--space-xl); background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-lg); font-size: var(--text-sm); }
+.summary-title, p.timeline-title, .cta-title { font-family: var(--font-display); font-weight: 700; line-height: 1.3; color: var(--color-ink); }
+.summary-title { font-size: var(--text-xl); margin-bottom: var(--space-sm); }
+p.timeline-title { letter-spacing: -0.01em; overflow-wrap: break-word; }
+.summary-list { margin: 0; padding: 0; list-style: none; display: grid; }
+.summary-list li { padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.summary-list li:last-child { border-bottom: 0; }
+.summary-list strong { color: var(--color-ink); font-weight: 600; }
+.prose-section { margin-top: var(--section-gap); max-width: var(--measure); display: grid; gap: var(--space-md); }
+.prose-section h2, .spots-title { font-size: var(--text-title); }
+.stops-section { margin-top: var(--section-gap); }
+.stops-section .spots { padding-top: var(--space-xl); }
+.spots.bridged { gap: 0; }
+.drive-bridge { margin: 0; padding-block: var(--space-xl); padding-left: var(--space-md); border-left: var(--rule-bar) solid var(--color-gold); font-size: var(--text-sm); color: var(--color-muted); }
+.drive-bridge strong { color: var(--color-ink); font-weight: 600; }
+.spot-header:has(.spot-badge) { flex-direction: column; align-items: flex-start; gap: var(--space-xs); }
+.spot-badge { font-size: var(--text-sm); font-weight: 600; color: var(--color-accent); }
+.spot-actions { display: flex; flex-wrap: wrap; gap: 0 var(--space-lg); }
+.info-wide .info-row { grid-template-columns: 5.5em minmax(0, 1fr); }
+.info-wide .info-row.plain { grid-template-columns: minmax(0, 1fr); }
+.cost-head .timeline-title.long { font-size: var(--text-title); }
+.cta-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-sm); max-width: var(--measure); }
+.cta-card h3, .cta-title { font-size: var(--text-title); }
+.cta-card .link-quiet { justify-self: start; }
+
+/* real-photo-grid 계열(editor-145): 사진과 정보 상자가 글 순서대로 이어지는 한 열 장소 구획, 번호 있는 동선, 도입 여러 문단 */
+.prose-intro p + p { margin-top: var(--space-md); }
+.stories { padding-top: var(--space-xl); gap: var(--space-3xl); }
+.story-section { display: grid; gap: var(--space-md); max-width: var(--measure); }
+.story-section .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.story-body { display: grid; gap: var(--space-md); }
+.story-photo { margin: 0; }
+.story-photo img { width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.story-photo figcaption { padding-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.story-photo figcaption span + span::before { content: " · "; }
+.tl-step .tl-badge { margin-bottom: calc(var(--space-2xs) * -1); }
+.tl-meta { display: block; font-style: normal; color: var(--color-gold-2); }
+.app-course-box.early { margin-top: var(--space-xl); }
+.app-course-box .cta-title { font-size: var(--text-section); margin-bottom: var(--space-md); }
+@media (max-width: 40rem) { .story-section .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .route .tl-act:not(:first-child) { margin-top: var(--space-lg); } }
+.article-credit.tight { padding-bottom: var(--space-md); }
+.back-link { padding-bottom: var(--space-md); font-size: var(--text-sm); }
+
+/* route-timeline 계열(editor-147: 보령, 거제, 고성): 사진 설명의 출처 줄, 시각 범위 동선 */
+.spot-photo figcaption .cap-src { display: block; }
+.spot-number { white-space: nowrap; }
+
+/* spot-block 계열(editor-147: 강릉, 경주): 머리 바 메모, 인용문, 날마다 나뉜 동선, 장소 분류 줄, 팁 목록, 금액이 끝 칸인 경비표 */
+.header-inner:has(.header-note) { flex-wrap: wrap; gap: 0 var(--space-md); }
+.header-note { font-size: var(--text-sm); color: var(--color-muted); }
+.hero-quote { max-width: var(--measure); font-size: var(--text-lead); line-height: 1.7; color: var(--color-ink); }
+.route + .route { margin-top: var(--space-xl); }
+.story-kicker { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.story-kicker .spot-num { font-size: var(--text-xl); }
+.stories.bridged .story-section + .story-section { margin-top: var(--space-3xl); }
+.tip-box ul { margin: 0; padding-left: 1.1em; display: grid; gap: var(--space-2xs); }
+@media (max-width: 600px) {
+  .table-wrap.amount-last td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
+  .table-wrap.amount-last td:nth-child(4) { grid-column: auto; text-align: right; font-weight: 600; color: var(--color-ink); }
+}
+
+/* timeline-list 계열(editor-149: 한남·이태원, 목포, 남해): 출처 줄의 글쓴이(아바타 글자는 장식이라 숨김) */
+.credit-mark { display: none; }
+.credit-author strong { margin-right: var(--space-xs); color: var(--color-ink); font-weight: 600; }
+.article-credit p + p { margin-top: var(--space-xs); }
+.spot-head { grid-template-columns: minmax(0, 1fr); }
+.spot-num { white-space: nowrap; }
+.spot-header .spot-title { min-width: 0; overflow-wrap: break-word; }
+
+/* itinerary-spots 계열(editor-150: 군산): 동선 아래 안내 문단, 참고 영상 카드, 해시태그 줄 */
+.video-card { margin-top: var(--section-gap); max-width: var(--measure); display: grid; gap: var(--space-sm); }
+.video-title { font-family: var(--font-display); font-size: var(--text-title); line-height: 1.3; color: var(--color-ink); }
+.video-source, .video-caption { font-size: var(--text-sm); color: var(--color-muted); }
+.video-frame { aspect-ratio: 16 / 9; background: var(--color-paper-3); }
+.video-frame iframe { display: block; width: 100%; height: 100%; border: 0; }
+.tag-list { margin-top: var(--space-xl); display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+
+/* course-list 계열(editor-150: 서울·경기 20선): 목차, 코스 구획의 분위기 줄, 장소 목록 */
+.toc-list { margin: 0; padding: 0; list-style: none; display: grid; column-gap: var(--gap-columns); }
+.toc-list li { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0 var(--space-md); min-height: 44px; padding-block: var(--space-xs); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.toc-list a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-ink); text-decoration: none; }
+.toc-mood, .course-mood { font-size: var(--text-sm); color: var(--color-muted); }
+.course-mood { color: var(--color-accent); font-weight: 600; }
+.stop-list { margin: 0; padding: 0; list-style: none; display: grid; }
+.stop { display: grid; gap: var(--space-2xs); padding-block: var(--space-md); border-top: var(--rule-hair) solid var(--color-rule); }
+.stop-name { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--space-sm); }
+.stop-name strong { font-size: var(--text-md); font-weight: 700; color: var(--color-ink); }
+.stop-cat, .stop-addr, .stop-hop { font-size: var(--text-xs); color: var(--color-muted); }
+.stop-desc { font-size: var(--text-sm); }
+.stop-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 var(--space-md); }
+.stop-foot .link-quiet { margin-left: auto; }
+.back-toc { justify-self: start; }
+@media (min-width: 60rem) { .toc-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   </style>
 </head>
 <body>
 
   <!-- 상단 헤더 -->
-  <header class="blog-header">
-    <div class="header-inner">
-      <a href="../" class="blog-brand" style="text-decoration:none;">
-        <span class="blog-title-text" style="font-weight:700;">← 📖 오늘 데이트 매거진</span>
-        <span class="blog-sub-text">전북 군산 당일치기 편</span>
-      </a>
-      <a href="#naver-map-section" class="header-share-btn">🗺️ 지도 바로가기</a>
+  <header class="site-header">
+    <div class="header-inner container">
+      <a href="../" class="header-logo">← 오늘 데이트 <span>매거진</span></a>
+      <span class="header-note">전북 군산 당일치기 편</span>
     </div>
   </header>
 
   <!-- 메인 아티클 -->
-  <main class="article-wrap">
-    
-    <!-- 포스트 메타 -->
-    <span class="post-category-tag">전북 군산 당일치기 코스</span>
-    <h1 class="post-title">[군산 당일치기 여행] 시내만 보고 오면 50%만 본 거예요! 레트로 골목부터 에메랄드빛 고군산군도 섬 드라이브까지 완벽 코스</h1>
-    <p class="post-subtitle">1930년대 시간 여행을 떠난 듯한 원도심 골목길부터 새만금 33.9km 지평선 질주, 대장봉 360도 하롱베이 뷰, 옥돌해변 노을과 바지락라면까지 정리한 실전 가이드</p>
-    
-    <div class="post-meta-row">
-      <div class="author-profile">
-        <div class="author-avatar">🚗</div>
-        <span>글: 오늘 데이트 에디토리얼 팀</span>
-      </div>
-      <span>·</span>
-      <span>사진: 한국관광공사 TourAPI, 카카오맵</span>
-      <span>·</span>
-      <span>2026. 10. 05.</span>
-      <span>·</span>
-      <span>읽는 시간 약 5분</span>
-      <span>·</span>
-      <span>여행 코스 가이드</span>
-    </div>
+  <main class="article-container"><article>
+      <header class="article-header hero container">
+        <div class="hero-text">
+          <p class="hero-kicker badge-category"><span>전북 군산 당일치기 코스</span></p>
+          <h1 class="article-title">[군산 당일치기 여행] 시내만 보고 오면 50%만 본 거예요! 레트로 골목부터 에메랄드빛 고군산군도 섬 드라이브까지 완벽 코스</h1>
+          <p class="hero-quote">1930년대 시간 여행을 떠난 듯한 원도심 골목길부터 새만금 33.9km 지평선 질주, 대장봉 360도 하롱베이 뷰, 옥돌해변 노을과 바지락라면까지 정리한 실전 가이드</p>
+          <div class="article-meta">
+            <span>글: 오늘 데이트 에디토리얼 팀</span>
+            <span class="meta-credit">사진: 한국관광공사 TourAPI, 카카오맵</span>
+            <span>2026. 10. 05.</span>
+            <span>읽는 시간 약 5분</span>
+            <span>여행 코스 가이드</span>
+          </div>
+          <p><a class="btn" href="../../#c=3925.1180.1177.1790683582847.1183.1791181485629">앱에서 코스 열기</a></p>
+        </div>
+      </header>
 
-    <!-- 리드 인트로 -->
-    <div class="post-lead">
-      <strong>"군산 여행 하면 이성당 빵집이랑 짬뽕만 떠오르시나요?"</strong><br>
-      군산은 흔히 빵 사 먹고 사진 몇 장 찍고 오는 가벼운 당일치기로 떠나지만, 차를 몰고 고군산군도까지 횡단해 보면 군산에 대한 생각이 180도 바뀔 수 있어요. 고즈넉한 1930년대 원도심 레트로 골목부터, 서해라고는 도저히 믿기지 않는 투명한 에메랄드빛 바다와 장자도 대장봉 파노라마, 그리고 자갈 파도 소리를 들으며 노을빛 아래서 먹는 옥돌해변 바지락라면과 수육까지! 하루 만에 두 개의 여행지를 다녀온 듯 알찬 당일치기 동선과 실전 꿀팁을 모두 정리해 드릴게요.
-    </div>
-
-    <!-- 동선 요약 카드 -->
-    <div class="itinerary-card">
-      <div class="itinerary-title">
-        <span>🧭</span>
-        <span>군산 하루 완성 알짜 동선 타임라인</span>
-      </div>
-      
-      <div class="itinerary-section-title">🌅 오전 1막: 시간 멈춘 원도심 레트로</div>
-      <ul class="itinerary-list">
-        <li>
-          <span class="time">10:30</span>
-          <span><strong>복성루</strong> : 전국 5대 짬뽕의 묵직한 고기짬뽕 & 감칠맛 폭발 물짜장</span>
-        </li>
-        <li>
-          <span class="time">11:40</span>
-          <span><strong>이성당 본관</strong> : 갓 구워져 나오는 따끈한 단팥빵 & 아삭한 야채빵 포장</span>
-        </li>
-        <li>
-          <span class="time">12:30</span>
-          <span><strong>초원사진관 & 동국사</strong> : &lt;8월의 크리스마스&gt; 감성과 고즈넉한 사찰 산책</span>
-        </li>
-        <li>
-          <span class="time">13:30</span>
-          <span><strong>경암동 철길마을</strong> : 연탄불 달고나 굽기 & 옛날 교복 추억 여행</span>
-        </li>
-      </ul>
-
-      <div class="itinerary-section-title" style="color: #0284c7; margin-top: 18px;">🌊 오후 2막: 서해 횡단 & 다도해 힐링</div>
-      <ul class="itinerary-list">
-        <li>
-          <span class="time" style="background:#e0f2fe; color:#0284c7;">14:40</span>
-          <span><strong>새만금방조제 드라이브</strong> : 33.9km 바다 한가운데를 가로지르는 지평선 질주</span>
-        </li>
-        <li>
-          <span class="time" style="background:#e0f2fe; color:#0284c7;">15:30</span>
-          <span><strong>선유도 & 대장봉</strong> : 20분 등산으로 만나는 '한국의 하롱베이' 다도해 파노라마</span>
-        </li>
-        <li>
-          <span class="time" style="background:#e0f2fe; color:#0284c7;">17:00</span>
-          <span><strong>카페 라파르</strong> : 장자도 절벽 위 통창으로 즐기는 오션뷰 티타임</span>
-        </li>
-        <li>
-          <span class="time" style="background:#e0f2fe; color:#0284c7;">18:20</span>
-          <span><strong>옥돌해변 & 옥돌슈퍼</strong> : 몽돌 파도 소리와 붉은 노을 속 바지락라면 & 수육</span>
-        </li>
-      </ul>
-    </div>
-    <p class="spot-desc">영업시간, 주차 요금, 휴무는 바뀔 수 있어 방문 전에 각 장소의 네이버 지도 정보에서 확인해 주세요.</p>
-
-    <!-- 유튜브 참고 영상 임베드 -->
-    <div class="youtube-embed-card">
-      <div class="video-header">
-        <span>🎬 여행 전에 참고할 만한 영상</span>
-        <span style="font-size:12px; color:#94a3b8; font-weight:normal;">유튜브 '시수패밀리'</span>
-      </div>
-      <div class="video-iframe-wrap">
-        <iframe src="https://www.youtube.com/embed/kyXwNZ8thwI" title="군산 여행? 저는 여기 갑니다 (시내 말고 남해 같은 서해 섬으로 가야 하는 이유)" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-      </div>
-      <div class="video-caption">
-        "군산 여행 시내만 돌고 오면 50%만 본 것!" 고군산군도의 매력을 제대로 일깨워준 고마운 영상이에요. 👉 <a href="https://www.youtube.com/watch?v=kyXwNZ8thwI" target="_blank" rel="noopener">유튜브 원본 보러가기</a>
-      </div>
-    </div>
-
-    <!-- 스팟 1: 복성루 -->
-    <section class="spot-section">
-      <span class="spot-badge">SPOT 01 · 10:30 AM</span>
-      <h2 class="spot-heading">전국 5대 짬뽕의 위엄, '복성루'</h2>
-      <p class="spot-desc">
-        군산에 도착하자마자 첫 끼로 찾기 좋은 곳은 전국 5대 짬뽕 명가로 유명한 <strong>복성루</strong>예요. 오전 10시 오픈 시간에 맞춰 일찍 도착하면 웨이팅을 줄일 수 있어요.
-      </p>
-
-      <div class="article-photo">
-        <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/4e22336d58b323770912cca8eaf96d283d908947?original" alt="복성루" loading="lazy">
-        <div class="photo-caption">복성루 (사진 출처: 카카오맵)</div>
+      <div class="container">
+        <div class="prose-intro"><strong>"군산 여행 하면 이성당 빵집이랑 짬뽕만 떠오르시나요?"</strong><br>
+      군산은 흔히 빵 사 먹고 사진 몇 장 찍고 오는 가벼운 당일치기로 떠나지만, 차를 몰고 고군산군도까지 횡단해 보면 군산에 대한 생각이 180도 바뀔 수 있어요. 고즈넉한 1930년대 원도심 레트로 골목부터, 서해라고는 도저히 믿기지 않는 투명한 에메랄드빛 바다와 장자도 대장봉 파노라마, 그리고 자갈 파도 소리를 들으며 노을빛 아래서 먹는 옥돌해변 바지락라면과 수육까지! 하루 만에 두 개의 여행지를 다녀온 듯 알찬 당일치기 동선과 실전 꿀팁을 모두 정리해 드릴게요.</div>
       </div>
 
-      <p class="spot-desc">
-        대표 메뉴인 <strong>짬뽕</strong>과 <strong>물짜장</strong>을 주문해 보세요. 가격은 짬뽕 10,000원, 물짜장 11,000원으로 등록돼 있어요. 짬뽕 그릇 가득 홍합과 바지락, 꼬막, 오징어가 푸짐하게 올라가 있고 그 위에 잘 볶아낸 돼지고기 고명이 얹어져 나와요. 해산물의 시원함과 진한 고기 육수가 어우러져 한 입 먹자마자 "와, 국물 진짜 깊다!"는 탄성이 터져 나와요. 투명하고 걸쭉한 소스에 채소와 해산물이 듬뿍 들어간 물짜장도 별미라 두 메뉴를 번갈아 나눠 먹기 딱 좋아요!
-      </p>
+      <!-- 동선 -->
+      <section class="timeline-card band">
+        <div class="container">
+          <p class="timeline-title">군산 하루 완성 알짜 동선 타임라인</p>
+          <div class="route" style="--n:4">
+            <div class="tl-act" style="--r:1; --c:1; --s:4">오전 1막: 시간 멈춘 원도심 레트로</div>
+            <div class="tl-step" style="--r:2; --c:1"><span class="tl-time">10:30</span><span class="tl-place">복성루</span><span class="tl-note">전국 5대 짬뽕의 묵직한 고기짬뽕 & 감칠맛 폭발 물짜장</span></div>
+            <div class="tl-step" style="--r:2; --c:2"><span class="tl-time">11:40</span><span class="tl-place">이성당 본관</span><span class="tl-note">갓 구워져 나오는 따끈한 단팥빵 & 아삭한 야채빵 포장</span></div>
+            <div class="tl-step" style="--r:2; --c:3"><span class="tl-time">12:30</span><span class="tl-place">초원사진관 & 동국사</span><span class="tl-note">&lt;8월의 크리스마스&gt; 감성과 고즈넉한 사찰 산책</span></div>
+            <div class="tl-step" style="--r:2; --c:4"><span class="tl-time">13:30</span><span class="tl-place">경암동 철길마을</span><span class="tl-note">연탄불 달고나 굽기 & 옛날 교복 추억 여행</span></div>
+          </div>
+          <div class="route" style="--n:4">
+            <div class="tl-act" style="--r:1; --c:1; --s:4">오후 2막: 서해 횡단 & 다도해 힐링</div>
+            <div class="tl-step" style="--r:2; --c:1"><span class="tl-time">14:40</span><span class="tl-place">새만금방조제 드라이브</span><span class="tl-note">33.9km 바다 한가운데를 가로지르는 지평선 질주</span></div>
+            <div class="tl-step" style="--r:2; --c:2"><span class="tl-time">15:30</span><span class="tl-place">선유도 & 대장봉</span><span class="tl-note">20분 등산으로 만나는 '한국의 하롱베이' 다도해 파노라마</span></div>
+            <div class="tl-step" style="--r:2; --c:3"><span class="tl-time">17:00</span><span class="tl-place">카페 라파르</span><span class="tl-note">장자도 절벽 위 통창으로 즐기는 오션뷰 티타임</span></div>
+            <div class="tl-step" style="--r:2; --c:4"><span class="tl-time">18:20</span><span class="tl-place">옥돌해변 & 옥돌슈퍼</span><span class="tl-note">몽돌 파도 소리와 붉은 노을 속 바지락라면 & 수육</span></div>
+          </div>
+          <p class="tl-total">영업시간, 주차 요금, 휴무는 바뀔 수 있어 방문 전에 각 장소의 네이버 지도 정보에서 확인해 주세요.</p>
+        </div>
+      </section>
 
-      <div class="tip-box">
-        <div class="tip-box-title">💡 복성루 방문 실전 꿀팁</div>
-        <ul>
+      <div class="container">
+        <section class="video-card">
+          <p class="video-title">여행 전에 참고할 만한 영상</p>
+          <p class="video-source">유튜브 '시수패밀리'</p>
+          <div class="video-frame"><iframe src="https://www.youtube.com/embed/kyXwNZ8thwI" title="군산 여행? 저는 여기 갑니다 (시내 말고 남해 같은 서해 섬으로 가야 하는 이유)" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
+          <p class="video-caption">"군산 여행 시내만 돌고 오면 50%만 본 것!" 고군산군도의 매력을 제대로 일깨워준 고마운 영상이에요. 👉 <a href="https://www.youtube.com/watch?v=kyXwNZ8thwI" target="_blank" rel="noopener">유튜브 원본 보러가기</a></p>
+        </section>
+
+        <div class="spots stories bridged">
+          <section class="story-section">
+            <p class="story-kicker"><span class="spot-num">SPOT 01</span><span>10:30 AM</span></p>
+            <h2 class="spot-title">전국 5대 짬뽕의 위엄, '복성루'</h2>
+            <div class="story-body">
+              <p>군산에 도착하자마자 첫 끼로 찾기 좋은 곳은 전국 5대 짬뽕 명가로 유명한 <strong>복성루</strong>예요. 오전 10시 오픈 시간에 맞춰 일찍 도착하면 웨이팅을 줄일 수 있어요.</p>
+              <figure class="story-photo">
+              <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/4e22336d58b323770912cca8eaf96d283d908947?original" alt="복성루" loading="lazy" />
+              <figcaption>복성루 (사진 출처: 카카오맵)</figcaption>
+            </figure>
+              <p>대표 메뉴인 <strong>짬뽕</strong>과 <strong>물짜장</strong>을 주문해 보세요. 가격은 짬뽕 10,000원, 물짜장 11,000원으로 등록돼 있어요. 짬뽕 그릇 가득 홍합과 바지락, 꼬막, 오징어가 푸짐하게 올라가 있고 그 위에 잘 볶아낸 돼지고기 고명이 얹어져 나와요. 해산물의 시원함과 진한 고기 육수가 어우러져 한 입 먹자마자 "와, 국물 진짜 깊다!"는 탄성이 터져 나와요. 투명하고 걸쭉한 소스에 채소와 해산물이 듬뿍 들어간 물짜장도 별미라 두 메뉴를 번갈아 나눠 먹기 딱 좋아요!</p>
+              <div class="tip-box"><strong class="tip-title">복성루 방문 실전 꿀팁</strong><ul>
           <li><strong>주차:</strong> 매장 맞은편 공영주차장이나 인근 골목 주차 구획을 이용할 수 있어요.</li>
-        </ul>
-      </div>
-    </section>
+        </ul></div>
+            </div>
+          </section>
 
-    <!-- 이동 브릿지 -->
-    <div class="transition-bridge">
-      <div class="bridge-icon">🚶</div>
-      <div><strong>도보 5분:</strong> 복성루에서 배를 든든하게 채우고 중앙로 번화가 골목을 따라 이성당 본관으로 걸어갑니다.</div>
-    </div>
+          <p class="drive-bridge"><strong>도보 5분:</strong> 복성루에서 배를 든든하게 채우고 중앙로 번화가 골목을 따라 이성당 본관으로 걸어갑니다.</p>
 
-    <!-- 스팟 2: 이성당 -->
-    <section class="spot-section">
-      <span class="spot-badge">SPOT 02 · 11:40 AM</span>
-      <h2 class="spot-heading">대한민국 최고(最古)의 빵집, '이성당' 본관</h2>
-      <p class="spot-desc">
-        1945년에 문을 열어 우리나라에서 가장 역사가 깊은 베이커리, <strong>이성당</strong>으로 향해 보세요. 가게 입구에 들어서자마자 고소하고 달콤한 갓 구운 빵 냄새가 코끝을 사로잡아요.
-      </p>
-
-      <div class="article-photo">
-        <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/d097864d573d1b5e198209811e5c4ee98816375d?original" alt="이성당" loading="lazy">
-        <div class="photo-caption">이성당 (사진 출처: 카카오맵)</div>
-      </div>
-
-      <p class="spot-desc">
-        이성당의 시그니처는 <strong>단팥빵</strong>과 <strong>야채빵</strong>이고, 가격은 단팥빵 2,000원, 야채빵 2,500원으로 등록돼 있어요. 얇고 쫀득한 빵 피 속에 묵직하게 들어찬 팥앙금은 지나치게 달지 않아 물리지 않고, 아삭아삭한 양배추 식감이 살아있는 야채빵은 담백하면서도 감칠맛이 넘쳐나요. 오후에 섬 드라이브를 갈 때 차 안에서 먹을 간식과 부모님 선물용 박스까지 넉넉하게 챙겨 가기 좋아요.
-      </p>
-
-      <div class="tip-box">
-        <div class="tip-box-title">💡 이성당 구매 & 포장 꿀팁</div>
-        <ul>
+          <section class="story-section">
+            <p class="story-kicker"><span class="spot-num">SPOT 02</span><span>11:40 AM</span></p>
+            <h2 class="spot-title">대한민국 최고(最古)의 빵집, '이성당' 본관</h2>
+            <div class="story-body">
+              <p>1945년에 문을 열어 우리나라에서 가장 역사가 깊은 베이커리, <strong>이성당</strong>으로 향해 보세요. 가게 입구에 들어서자마자 고소하고 달콤한 갓 구운 빵 냄새가 코끝을 사로잡아요.</p>
+              <figure class="story-photo">
+              <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/d097864d573d1b5e198209811e5c4ee98816375d?original" alt="이성당" loading="lazy" />
+              <figcaption>이성당 (사진 출처: 카카오맵)</figcaption>
+            </figure>
+              <p>이성당의 시그니처는 <strong>단팥빵</strong>과 <strong>야채빵</strong>이고, 가격은 단팥빵 2,000원, 야채빵 2,500원으로 등록돼 있어요. 얇고 쫀득한 빵 피 속에 묵직하게 들어찬 팥앙금은 지나치게 달지 않아 물리지 않고, 아삭아삭한 양배추 식감이 살아있는 야채빵은 담백하면서도 감칠맛이 넘쳐나요. 오후에 섬 드라이브를 갈 때 차 안에서 먹을 간식과 부모님 선물용 박스까지 넉넉하게 챙겨 가기 좋아요.</p>
+              <div class="tip-box"><strong class="tip-title">이성당 구매 & 포장 꿀팁</strong><ul>
           <li><strong>주차:</strong> 길 건너 구 시청 공영주차장을 이용할 수 있어요.</li>
-        </ul>
-      </div>
-    </section>
+        </ul></div>
+            </div>
+          </section>
 
-    <!-- 이동 브릿지 -->
-    <div class="transition-bridge">
-      <div class="bridge-icon">🚶</div>
-      <div><strong>도보 3분:</strong> 이성당에서 영화 &lt;8월의 크리스마스&gt; 촬영지인 초원사진관과 신흥동 골목으로 산책을 이어갑니다.</div>
-    </div>
+          <p class="drive-bridge"><strong>도보 3분:</strong> 이성당에서 영화 &lt;8월의 크리스마스&gt; 촬영지인 초원사진관과 신흥동 골목으로 산책을 이어갑니다.</p>
 
-    <!-- 스팟 3: 초원사진관 & 동국사 -->
-    <section class="spot-section">
-      <span class="spot-badge">SPOT 03 · 12:30 PM</span>
-      <h2 class="spot-heading">영화 속 시간 여행, '초원사진관' & '동국사'</h2>
-      <p class="spot-desc">
-        이성당에서 천천히 걸어 3분이면 닿는 <strong>초원사진관</strong>은 영화 &lt;8월의 크리스마스&gt;의 메인 무대로 군산 원도심의 대표 상징이에요.
-      </p>
-
-      <div class="article-photo">
-        <img src="https://tong.visitkorea.or.kr/cms/resource/53/3039553_image2_1.jpg" alt="초원사진관" loading="lazy">
-        <div class="photo-caption">초원사진관 전경, 8월의 크리스마스 감성이 고스란히 깃든 원도심 명소 (사진 출처: 한국관광공사 TourAPI)</div>
-      </div>
-
-      <p class="spot-desc">
-        가게 앞에는 영화 속 주차단속용 초록색 티코 차량과 나무 간판이 원형 그대로 보존되어 있어 감성 충만한 커플 인생샷을 남기기 딱 좋아요. 내부는 무료로 개방되어 영화 스틸컷과 흑백 필름 카메라, 옛 소품들을 둘러보며 아날로그 낭만을 음미할 수 있답니다.
-      </p>
-
-      <p class="spot-desc">
-        이어 고즈넉한 골목길을 따라 7분 정도 걸어가면 국내 유일의 일본식 사찰인 <strong>동국사</strong>를 만날 수 있어요.
-      </p>
-
-      <div class="article-photo">
-        <img src="https://tong.visitkorea.or.kr/cms/resource/15/4088715_image2_1.jpg" alt="동국사 대웅전" loading="lazy">
-        <div class="photo-caption">동국사 대웅전, 국내 유일의 일본 전통 에도시대 양식 사찰 (사진 출처: 한국관광공사 TourAPI)</div>
-      </div>
-
-      <p class="spot-desc">
-        화려한 단청 없이 차분한 일본 에도시대 목조 양식으로 지어진 대웅전과, 뒤편으로 곧게 뻗은 울창한 대나무 숲길을 걸으며 번잡한 마음을 차분히 가라앉히는 특별한 힐링을 누릴 수 있어요.
-      </p>
-
-      <div class="tip-box">
-        <div class="tip-box-title">💡 초원사진관 & 동국사 관람 꿀팁</div>
-        <ul>
+          <section class="story-section">
+            <p class="story-kicker"><span class="spot-num">SPOT 03</span><span>12:30 PM</span></p>
+            <h2 class="spot-title">영화 속 시간 여행, '초원사진관' & '동국사'</h2>
+            <div class="story-body">
+              <p>이성당에서 천천히 걸어 3분이면 닿는 <strong>초원사진관</strong>은 영화 &lt;8월의 크리스마스&gt;의 메인 무대로 군산 원도심의 대표 상징이에요.</p>
+              <figure class="story-photo">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/53/3039553_image2_1.jpg" alt="초원사진관" loading="lazy" />
+              <figcaption>초원사진관 전경, 8월의 크리스마스 감성이 고스란히 깃든 원도심 명소 (사진 출처: 한국관광공사 TourAPI)</figcaption>
+            </figure>
+              <p>가게 앞에는 영화 속 주차단속용 초록색 티코 차량과 나무 간판이 원형 그대로 보존되어 있어 감성 충만한 커플 인생샷을 남기기 딱 좋아요. 내부는 무료로 개방되어 영화 스틸컷과 흑백 필름 카메라, 옛 소품들을 둘러보며 아날로그 낭만을 음미할 수 있답니다.</p>
+              <p>이어 고즈넉한 골목길을 따라 7분 정도 걸어가면 국내 유일의 일본식 사찰인 <strong>동국사</strong>를 만날 수 있어요.</p>
+              <figure class="story-photo">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/15/4088715_image2_1.jpg" alt="동국사 대웅전" loading="lazy" />
+              <figcaption>동국사 대웅전, 국내 유일의 일본 전통 에도시대 양식 사찰 (사진 출처: 한국관광공사 TourAPI)</figcaption>
+            </figure>
+              <p>화려한 단청 없이 차분한 일본 에도시대 목조 양식으로 지어진 대웅전과, 뒤편으로 곧게 뻗은 울창한 대나무 숲길을 걸으며 번잡한 마음을 차분히 가라앉히는 특별한 힐링을 누릴 수 있어요.</p>
+              <div class="tip-box"><strong class="tip-title">초원사진관 & 동국사 관람 꿀팁</strong><ul>
           <li><strong>입장료:</strong> 초원사진관과 동국사 모두 별도 입장료 없이 무료 관람이에요.</li>
           <li><strong>골목 산책:</strong> 초원사진관 맞은편 한일옥(소고기뭇국)과 신흥동 일본식 가옥(히로쓰 가옥)까지 모두 도보 5분 거리 안에 모여 있어 차를 두고 도보로 둘러보시는 것을 강력 추천해요.</li>
           <li><strong>주차:</strong> 신흥동 공영주차장에 주차해 두시면 원도심 명소들을 한 번에 걸어서 이동할 수 있어요.</li>
-        </ul>
-      </div>
-    </section>
+        </ul></div>
+            </div>
+          </section>
 
-    <!-- 이동 브릿지 -->
-    <div class="transition-bridge">
-      <div class="bridge-icon">🚗</div>
-      <div><strong>차량 7분:</strong> 원도심 골목 투어를 마치고 추억의 레트로 감성이 가득한 경암동 철길마을로 이동합니다.</div>
-    </div>
+          <p class="drive-bridge"><strong>차량 7분:</strong> 원도심 골목 투어를 마치고 추억의 레트로 감성이 가득한 경암동 철길마을로 이동합니다.</p>
 
-    <!-- 스팟 4: 경암동 철길마을 -->
-    <section class="spot-section">
-      <span class="spot-badge">SPOT 04 · 13:30</span>
-      <h2 class="spot-heading">추억의 연탄불과 옛날 교복, '경암동 철길마을'</h2>
-      <p class="spot-desc">
-        1944년 신문 용지를 나르기 위해 마을 한복판을 지나던 철길 주변으로 아기자기한 레트로 상점들이 늘어선 <strong>경암동 철길마을</strong>이 나와요.
-      </p>
-
-      <div class="article-photo">
-        <img src="https://tong.visitkorea.or.kr/cms/resource/50/3080250_image2_1.JPG" alt="경암동 철길마을" loading="lazy">
-        <div class="photo-caption">경암동 철길마을, 철로를 따라 이어지는 아기자기한 레트로 상점과 벽화 (사진 출처: 한국관광공사 TourAPI)</div>
-      </div>
-
-      <p class="spot-desc">
-        어릴 적 학교 앞 문방구에서 보던 불량식품과 쫀드기, 연탄불 위에서 직접 설탕을 녹여 소다를 톡톡 쳐서 만드는 <strong>달고나 체험(3,000원)</strong>까지 소소한 즐길 거리가 가득해요. 옛날 교복을 빌려 입고 알록달록한 벽화와 철길 위에서 두 손을 꼭 잡고 걷는 사진을 찍으면 학창 시절로 돌아간 듯 웃음이 끊이지 않아요.
-      </p>
-
-      <div class="tip-box">
-        <div class="tip-box-title">💡 경암동 철길마을 꿀팁</div>
-        <ul>
+          <section class="story-section">
+            <p class="story-kicker"><span class="spot-num">SPOT 04</span><span>13:30</span></p>
+            <h2 class="spot-title">추억의 연탄불과 옛날 교복, '경암동 철길마을'</h2>
+            <div class="story-body">
+              <p>1944년 신문 용지를 나르기 위해 마을 한복판을 지나던 철길 주변으로 아기자기한 레트로 상점들이 늘어선 <strong>경암동 철길마을</strong>이 나와요.</p>
+              <figure class="story-photo">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/50/3080250_image2_1.JPG" alt="경암동 철길마을" loading="lazy" />
+              <figcaption>경암동 철길마을, 철로를 따라 이어지는 아기자기한 레트로 상점과 벽화 (사진 출처: 한국관광공사 TourAPI)</figcaption>
+            </figure>
+              <p>어릴 적 학교 앞 문방구에서 보던 불량식품과 쫀드기, 연탄불 위에서 직접 설탕을 녹여 소다를 톡톡 쳐서 만드는 <strong>달고나 체험(3,000원)</strong>까지 소소한 즐길 거리가 가득해요. 옛날 교복을 빌려 입고 알록달록한 벽화와 철길 위에서 두 손을 꼭 잡고 걷는 사진을 찍으면 학창 시절로 돌아간 듯 웃음이 끊이지 않아요.</p>
+              <div class="tip-box"><strong class="tip-title">경암동 철길마을 꿀팁</strong><ul>
           <li><strong>소요 시간:</strong> 철길 총 길이는 약 400m로 달고나 체험과 사진 촬영을 포함해 40분~1시간 정도면 여유롭게 즐길 수 있어요.</li>
-        </ul>
-      </div>
-    </section>
+        </ul></div>
+            </div>
+          </section>
 
-    <!-- 이동 브릿지: 2막 진입 -->
-    <div class="transition-bridge" style="background:#e0f2fe; border-color:#7dd3fc; color:#0369a1;">
-      <div class="bridge-icon">🌊</div>
-      <div><strong>차량 25분 (오후 2막 시작):</strong> 시내를 벗어나 세계 최장 33.9km 새만금방조제를 질주하며 에메랄드빛 고군산군도로 향합니다!</div>
-    </div>
+          <p class="drive-bridge"><strong>차량 25분 (오후 2막 시작):</strong> 시내를 벗어나 세계 최장 33.9km 새만금방조제를 질주하며 에메랄드빛 고군산군도로 향합니다!</p>
 
-    <!-- 스팟 5: 새만금방조제 드라이브 -->
-    <section class="spot-section">
-      <span class="spot-badge" style="background:#0284c7;">SPOT 05 · 14:40</span>
-      <h2 class="spot-heading">끝없이 펼쳐지는 지평선, '새만금방조제' 33.9km 바다 드라이브</h2>
-      <p class="spot-desc">
-        비응항을 지나 고군산군도로 이어지는 <strong>새만금방조제</strong>에 차를 올려 보세요. 기네스북에 등재된 세계 최장(33.9km) 방조제답게 좌우로 서해 바다와 웅장한 풍력발전기, 그리고 지평선이 끝도 없이 시원하게 펼쳐져요.
-      </p>
+          <section class="story-section">
+            <p class="story-kicker"><span class="spot-num">SPOT 05</span><span>14:40</span></p>
+            <h2 class="spot-title">끝없이 펼쳐지는 지평선, '새만금방조제' 33.9km 바다 드라이브</h2>
+            <div class="story-body">
+              <p>비응항을 지나 고군산군도로 이어지는 <strong>새만금방조제</strong>에 차를 올려 보세요. 기네스북에 등재된 세계 최장(33.9km) 방조제답게 좌우로 서해 바다와 웅장한 풍력발전기, 그리고 지평선이 끝도 없이 시원하게 펼쳐져요.</p>
+              <figure class="story-photo">
+              <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/931dc59772e0276e4e2a224437f7b93232d01ab9?original" alt="해 질 무렵 새만금방조제 도로와 서해" loading="lazy" />
+              <figcaption>해 질 무렵 새만금방조제 도로와 서해 바다 (사진 출처: 카카오맵)</figcaption>
+            </figure>
+              <p>창문을 활짝 열고 시원한 서해 바닷바람을 맞으며 달리는 순간, 도심에서 쌓인 답답함이 단번에 날아가는 기분이에요. 중간 지점의 <strong>신시도 해넘이 휴게소</strong>에 차를 잠시 세우고 드넓은 수평선을 눈에 담아보시는 것도 추천해요.</p>
+            </div>
+          </section>
 
-      <div class="article-photo">
-        <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/931dc59772e0276e4e2a224437f7b93232d01ab9?original" alt="해 질 무렵 새만금방조제 도로와 서해" loading="lazy">
-        <div class="photo-caption">해 질 무렵 새만금방조제 도로와 서해 바다 (사진 출처: 카카오맵)</div>
-      </div>
-
-      <p class="spot-desc">
-        창문을 활짝 열고 시원한 서해 바닷바람을 맞으며 달리는 순간, 도심에서 쌓인 답답함이 단번에 날아가는 기분이에요. 중간 지점의 <strong>신시도 해넘이 휴게소</strong>에 차를 잠시 세우고 드넓은 수평선을 눈에 담아보시는 것도 추천해요.
-      </p>
-    </section>
-
-    <!-- 스팟 6: 선유도 & 대장봉 -->
-    <section class="spot-section">
-      <span class="spot-badge" style="background:#0284c7;">SPOT 06 · 15:30</span>
-      <h2 class="spot-heading">신선이 노닐던 에메랄드빛 다도해, '선유도' & '대장봉'</h2>
-      <p class="spot-desc">
-        새만금방조제를 지나 연륙교를 건너면 신비로운 섬들의 낙원, <strong>고군산군도</strong>에 진입해요. 예전에는 배를 타야만 올 수 있었지만 지금은 도로가 완전히 개통되어 승용차로 편안하게 진입할 수 있답니다.
-      </p>
-
-      <div class="article-photo">
-        <img src="https://tong.visitkorea.or.kr/cms/resource/39/3350739_image2_1.jpg" alt="선유도해수욕장 명사십리" loading="lazy">
-        <div class="photo-caption">선유도해수욕장, 에메랄드빛 바다와 부드러운 명사십리 백사장 (사진 출처: 한국관광공사 TourAPI)</div>
-      </div>
-
-      <p class="spot-desc">
-        먼저 유리알처럼 맑은 서해 바다와 고운 모래사장이 끝없이 펼쳐진 <strong>선유도해수욕장(명사십리)</strong>을 거닐어 보세요. 서해 갯벌 바다라는 편견을 완전히 깨부수는 옥빛 바다가 눈부시게 빛나요.
-      </p>
-
-      <p class="spot-desc">
-        선유도에서 차로 5분 더 들어가 장자교를 건넌 뒤, 이 코스의 최고 절경인 <strong>대장도 대장봉</strong>으로 향해 보세요. 대장봉은 해발 142m의 야트막한 봉우리이지만, 나무 데크 계단을 따라 약 20분만 땀을 흘리며 오르면 눈앞에 기적 같은 풍경이 펼쳐져요.
-      </p>
-
-      <div class="article-photo">
-        <img src="https://tong.visitkorea.or.kr/cms/resource/62/3550562_image2_1.jpg" alt="대장봉 전망대" loading="lazy">
-        <div class="photo-caption">대장봉 전망대 (사진 출처: 한국관광공사 TourAPI)</div>
-      </div>
-
-      <p class="spot-desc">
-        올망졸망 떠 있는 고군산군도의 크고 작은 섬들과 푸른 바다가 360도로 한눈에 내려다보이는데, 왜 이곳을 <strong>'한국의 하롱베이'</strong>라 부르는지 절로 감탄이 나와요. 군산에 오셨다면 대장봉 정상 뷰는 정말 무조건 보고 가셔야 해요!
-      </p>
-
-      <div class="tip-box">
-        <div class="tip-box-title">💡 선유도 & 대장봉 등산 꿀팁</div>
-        <ul>
+          <section class="story-section">
+            <p class="story-kicker"><span class="spot-num">SPOT 06</span><span>15:30</span></p>
+            <h2 class="spot-title">신선이 노닐던 에메랄드빛 다도해, '선유도' & '대장봉'</h2>
+            <div class="story-body">
+              <p>새만금방조제를 지나 연륙교를 건너면 신비로운 섬들의 낙원, <strong>고군산군도</strong>에 진입해요. 예전에는 배를 타야만 올 수 있었지만 지금은 도로가 완전히 개통되어 승용차로 편안하게 진입할 수 있답니다.</p>
+              <figure class="story-photo">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/39/3350739_image2_1.jpg" alt="선유도해수욕장 명사십리" loading="lazy" />
+              <figcaption>선유도해수욕장, 에메랄드빛 바다와 부드러운 명사십리 백사장 (사진 출처: 한국관광공사 TourAPI)</figcaption>
+            </figure>
+              <p>먼저 유리알처럼 맑은 서해 바다와 고운 모래사장이 끝없이 펼쳐진 <strong>선유도해수욕장(명사십리)</strong>을 거닐어 보세요. 서해 갯벌 바다라는 편견을 완전히 깨부수는 옥빛 바다가 눈부시게 빛나요.</p>
+              <p>선유도에서 차로 5분 더 들어가 장자교를 건넌 뒤, 이 코스의 최고 절경인 <strong>대장도 대장봉</strong>으로 향해 보세요. 대장봉은 해발 142m의 야트막한 봉우리이지만, 나무 데크 계단을 따라 약 20분만 땀을 흘리며 오르면 눈앞에 기적 같은 풍경이 펼쳐져요.</p>
+              <figure class="story-photo">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/62/3550562_image2_1.jpg" alt="대장봉 전망대" loading="lazy" />
+              <figcaption>대장봉 전망대 (사진 출처: 한국관광공사 TourAPI)</figcaption>
+            </figure>
+              <p>올망졸망 떠 있는 고군산군도의 크고 작은 섬들과 푸른 바다가 360도로 한눈에 내려다보이는데, 왜 이곳을 <strong>'한국의 하롱베이'</strong>라 부르는지 절로 감탄이 나와요. 군산에 오셨다면 대장봉 정상 뷰는 정말 무조건 보고 가셔야 해요!</p>
+              <div class="tip-box"><strong class="tip-title">선유도 & 대장봉 등산 꿀팁</strong><ul>
           <li><strong>주차:</strong> 장자도 공영주차장에 주차하신 후 장자교를 건너 대장도로 도보 이동하시면 돼요.</li>
           <li><strong>신발 추천:</strong> 정상까지 약 20~25분 정도 데크 계단과 일부 바위 구간이 이어지므로 슬리퍼나 구두보다는 편안한 운동화를 꼭 착용하세요.</li>
           <li><strong>액티비티:</strong> 짜릿한 액티비티를 즐기신다면 선유도해수욕장의 짚라인(선유스카이썬라인) 체험도 추천해요.</li>
-        </ul>
-      </div>
-    </section>
+        </ul></div>
+            </div>
+          </section>
 
-    <!-- 스팟 7: 카페 라파르 -->
-    <section class="spot-section">
-      <span class="spot-badge" style="background:#0284c7;">SPOT 07 · 17:00</span>
-      <h2 class="spot-heading">절벽 위 이국적인 오션뷰, 장자도 '카페 라파르'</h2>
-      <p class="spot-desc">
-        대장봉을 내려와 가쁜 숨을 고르기 좋은 곳은 장자도 해안 절벽 바로 앞에 자리한 감성 카페 <strong>라파르(La Phare)</strong>예요.
-      </p>
+          <section class="story-section">
+            <p class="story-kicker"><span class="spot-num">SPOT 07</span><span>17:00</span></p>
+            <h2 class="spot-title">절벽 위 이국적인 오션뷰, 장자도 '카페 라파르'</h2>
+            <div class="story-body">
+              <p>대장봉을 내려와 가쁜 숨을 고르기 좋은 곳은 장자도 해안 절벽 바로 앞에 자리한 감성 카페 <strong>라파르(La Phare)</strong>예요.</p>
+              <figure class="story-photo">
+              <img src="https://t1.kakaocdn.net/mystore/18124D398DEF4FE8A18CC8CA5F4EE9D5" alt="장자도 바닷가에 선 카페 라파르 건물" loading="lazy" />
+              <figcaption>장자도 바닷가 언덕에 선 카페 라파르 (사진 출처: 카카오맵)</figcaption>
+            </figure>
+              <p>프랑스어로 '등대'를 뜻하는 이름처럼, 층마다 통유리창 너머로 장자도의 빨간 등대와 바다가 그림처럼 펼쳐져요. 테라스 빈백에 기대어 반짝이는 윤슬을 바라보는 시간은 가장 달콤하고 평화로운 순간이에요. 메뉴와 가격은 네이버 지도에서 확인해 주세요.</p>
+            </div>
+          </section>
 
-      <div class="article-photo">
-        <img src="https://t1.kakaocdn.net/mystore/18124D398DEF4FE8A18CC8CA5F4EE9D5" alt="장자도 바닷가에 선 카페 라파르 건물" loading="lazy">
-        <div class="photo-caption">장자도 바닷가 언덕에 선 카페 라파르 (사진 출처: 카카오맵)</div>
-      </div>
+          <p class="drive-bridge"><strong>차량 10분:</strong> 장자도에서 선유도로 되돌아 나와 일몰이 아름다운 옥돌해변으로 이동합니다.</p>
 
-      <p class="spot-desc">
-        프랑스어로 '등대'를 뜻하는 이름처럼, 층마다 통유리창 너머로 장자도의 빨간 등대와 바다가 그림처럼 펼쳐져요. 테라스 빈백에 기대어 반짝이는 윤슬을 바라보는 시간은 가장 달콤하고 평화로운 순간이에요. 메뉴와 가격은 네이버 지도에서 확인해 주세요.
-      </p>
-
-    </section>
-
-    <!-- 이동 브릿지 -->
-    <div class="transition-bridge">
-      <div class="bridge-icon">🚗</div>
-      <div><strong>차량 10분:</strong> 장자도에서 선유도로 되돌아 나와 일몰이 아름다운 옥돌해변으로 이동합니다.</div>
-    </div>
-
-    <!-- 스팟 8: 옥돌해변 & 옥돌슈퍼 -->
-    <section class="spot-section">
-      <span class="spot-badge" style="background:#0284c7;">SPOT 08 · 18:20</span>
-      <h2 class="spot-heading">자갈 파도 소리와 노을빛 낭만, '옥돌해변' & '옥돌슈퍼'</h2>
-      <p class="spot-desc">
-        군산 당일치기 여행의 피날레를 장식할 곳은 선유도의 숨은 보석, <strong>옥돌해변</strong>이에요. 부드러운 모래 대신 둥글둥글한 자갈(옥돌)이 깔려 있어 파도가 칠 때마다 "차르르~ 차르르~" 들려오는 맑은 파도 소리가 온몸의 피로를 사르르 녹여줘요.
-      </p>
-
-      <div class="article-photo">
-        <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/9c2eb1b4174b80215502639e268190959c4b6a6c?original" alt="옥돌해변" loading="lazy">
-        <div class="photo-caption">옥돌해변 (사진 출처: 카카오맵)</div>
-      </div>
-
-      <p class="spot-desc">
-        해안선을 따라 기암절벽 위에 놓인 나무 데크 산책로를 걸으며 서해로 저물어가는 황금빛 햇살을 만끽한 뒤, 바로 앞 <strong>옥돌슈퍼</strong> 야외 평상에 자리를 잡아 보세요.
-      </p>
-
-      <p class="spot-desc">
-        바다 바로 코앞에서 붉은 노을을 정면으로 마주하며 먹는 <strong>바지락라면</strong>과 <strong>수육</strong>의 조합은 그 어떤 5성급 호텔 디너도 부럽지 않을 만큼 낭만적이에요. 노을빛으로 붉게 물든 하늘과 바다를 배경으로 잔을 부딪치며 오늘 하루를 돌아보면, "정말 군산에 오길 잘했다!"는 감동이 밀려올 거예요. 옥돌해변에는 바지락라면 6,000원과 수육 25,000원이 등록돼 있고, 나머지 메뉴와 가격은 네이버 지도에서 확인해 주세요.
-      </p>
-
-      <div class="tip-box">
-        <div class="tip-box-title">💡 옥돌해변 & 옥돌슈퍼 꿀팁</div>
-        <ul>
+          <section class="story-section">
+            <p class="story-kicker"><span class="spot-num">SPOT 08</span><span>18:20</span></p>
+            <h2 class="spot-title">자갈 파도 소리와 노을빛 낭만, '옥돌해변' & '옥돌슈퍼'</h2>
+            <div class="story-body">
+              <p>군산 당일치기 여행의 피날레를 장식할 곳은 선유도의 숨은 보석, <strong>옥돌해변</strong>이에요. 부드러운 모래 대신 둥글둥글한 자갈(옥돌)이 깔려 있어 파도가 칠 때마다 "차르르~ 차르르~" 들려오는 맑은 파도 소리가 온몸의 피로를 사르르 녹여줘요.</p>
+              <figure class="story-photo">
+              <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/9c2eb1b4174b80215502639e268190959c4b6a6c?original" alt="옥돌해변" loading="lazy" />
+              <figcaption>옥돌해변 (사진 출처: 카카오맵)</figcaption>
+            </figure>
+              <p>해안선을 따라 기암절벽 위에 놓인 나무 데크 산책로를 걸으며 서해로 저물어가는 황금빛 햇살을 만끽한 뒤, 바로 앞 <strong>옥돌슈퍼</strong> 야외 평상에 자리를 잡아 보세요.</p>
+              <p>바다 바로 코앞에서 붉은 노을을 정면으로 마주하며 먹는 <strong>바지락라면</strong>과 <strong>수육</strong>의 조합은 그 어떤 5성급 호텔 디너도 부럽지 않을 만큼 낭만적이에요. 노을빛으로 붉게 물든 하늘과 바다를 배경으로 잔을 부딪치며 오늘 하루를 돌아보면, "정말 군산에 오길 잘했다!"는 감동이 밀려올 거예요. 옥돌해변에는 바지락라면 6,000원과 수육 25,000원이 등록돼 있고, 나머지 메뉴와 가격은 네이버 지도에서 확인해 주세요.</p>
+              <div class="tip-box"><strong class="tip-title">옥돌해변 & 옥돌슈퍼 꿀팁</strong><ul>
           <li><strong>방문 시간:</strong> 일몰 시간 40분~1시간 전에 도착하셔야 데크길 산책도 하고 노을 명당 평상 자리를 잡을 수 있어요.</li>
           <li><strong>주차:</strong> 옥돌해변 입구 공영주차장을 이용하시면 돼요.</li>
           <li><strong>겉옷 준비:</strong> 바닷가 저녁 바람이 선선할 수 있으니 얇은 겉옷이나 카디건을 챙기시면 좋아요.</li>
-        </ul>
-      </div>
-    </section>
+        </ul></div>
+            </div>
+          </section>
+        </div>
 
-    <!-- 정산 내역 -->
-    <section style="margin: 44px 0;">
-      <h2 style="font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 14px;">💰 2인 예상 경비</h2>
-      <p style="font-size: 14.5px; color: #64748b; margin-bottom: 14px;">코스를 2인 기준으로 따랐을 때의 예상 경비예요. 수도권 출발 기준 기름값과 고속도로 통행료를 넣었고, 금액이 등록되지 않은 곳은 지도에서 확인해 주세요.</p>
-      
-      <div class="table-container">
-        <table class="expense-table">
+        <section class="cost-table-card">
+          <div class="cost-head">
+            <h2 class="timeline-title">2인 예상 경비</h2>
+            <p>코스를 2인 기준으로 따랐을 때의 예상 경비예요. 수도권 출발 기준 기름값과 고속도로 통행료를 넣었고, 금액이 등록되지 않은 곳은 지도에서 확인해 주세요.</p>
+          </div>
+          <div class="table-wrap"><table class="cost-table">
           <thead>
             <tr>
               <th>구분</th>
@@ -1005,62 +636,50 @@
               <td>1,000원</td>
               <td>본문 주차 안내 기준</td>
             </tr>
-            <tr class="total-row">
+            <tr class="cost-total-row">
               <td colspan="2"><strong>등록된 금액 합계</strong></td>
               <td><strong>77,500원</strong></td>
               <td><strong>카페 라파르와 옥돌슈퍼는 제외</strong></td>
             </tr>
           </tbody>
-        </table>
+        </table></div>
+        </section>
+
+        <section class="map-links">
+          <p class="timeline-title">방문 스팟 네이버 지도 바로가기</p>
+          <p>스팟별 영업시간, 휴무일, 주차 정보 및 상세 위치는 아래 네이버 지도 링크에서 바로 확인하실 수 있어요:</p>
+          <ul class="map-list">
+            <li><a href="https://map.naver.com/p/search/%EA%B5%B0%EC%82%B0%20%EB%B3%B5%EC%84%B1%EB%A3%A8" target="_blank" rel="noopener">복성루</a></li>
+            <li><a href="https://map.naver.com/p/search/%EA%B5%B0%EC%82%B0%20%EC%9D%B4%EC%84%B1%EB%8B%B9" target="_blank" rel="noopener">이성당</a></li>
+            <li><a href="https://map.naver.com/p/search/%EA%B5%B0%EC%82%B0%20%EC%B4%88%EC%9B%90%EC%82%AC%EC%A7%84%EA%B4%80" target="_blank" rel="noopener">초원사진관</a></li>
+            <li><a href="https://map.naver.com/p/search/%EA%B5%B0%EC%82%B0%20%EB%8F%99%EA%B5%AD%EC%82%AC" target="_blank" rel="noopener">동국사</a></li>
+            <li><a href="https://map.naver.com/p/search/%EA%B2%BD%EC%95%94%EB%8F%99%20%EC%B2%A0%EA%B8%B8%EB%A7%88%EC%9D%84" target="_blank" rel="noopener">철길마을</a></li>
+            <li><a href="https://map.naver.com/p/search/%EC%84%A0%EC%9C%A0%EB%8F%84%ED%95%B4%EC%88%98%EC%9A%95%EC%9E%A5" target="_blank" rel="noopener">선유도해변</a></li>
+            <li><a href="https://map.naver.com/p/search/%EB%8C%80%EC%9E%A5%EB%B4%89" target="_blank" rel="noopener">대장봉</a></li>
+            <li><a href="https://map.naver.com/p/search/%EC%9E%A5%EC%9E%90%EB%8F%84%20%EB%9D%BC%ED%8C%8C%EB%A5%B4" target="_blank" rel="noopener">카페 라파르</a></li>
+            <li><a href="https://map.naver.com/p/search/%EC%84%A0%EC%9C%A0%EB%8F%84%20%EC%98%A5%EB%8F%8C%EC%8A%88%ED%8D%BC" target="_blank" rel="noopener">옥돌슈퍼</a></li>
+          </ul>
+        </section>
+
+        <p class="tag-list"><span>#군산여행</span><span>#군산당일치기</span><span>#고군산군도</span><span>#선유도</span><span>#대장봉</span><span>#초원사진관</span><span>#이성당</span><span>#복성루</span><span>#카페라파르</span><span>#옥돌슈퍼</span><span>#새만금방조제</span><span>#커플국내여행</span></p>
+
+        <div class="app-course-box">
+          <div>
+            <h2>이 코스 오늘 데이트에서 열기</h2>
+            <p>글에 나온 장소 6곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
+          </div>
+          <a class="btn app-action" href="../../#c=3925.1180.1177.1790683582847.1183.1791181485629">앱에서 코스 열기</a>
+        </div>
       </div>
-    </section>
-
-    <!-- 네이버 지도 바로가기 섹션 -->
-    <section id="naver-map-section" class="map-action-card">
-      <div class="map-action-title">🗺️ 방문 스팟 네이버 지도 바로가기</div>
-      <div class="map-action-desc">스팟별 영업시간, 휴무일, 주차 정보 및 상세 위치는 아래 네이버 지도 링크에서 바로 확인하실 수 있어요:</div>
-
-      <div class="spot-links-grid">
-        <a href="https://map.naver.com/p/search/%EA%B5%B0%EC%82%B0%20%EB%B3%B5%EC%84%B1%EB%A3%A8" target="_blank" rel="noopener" class="spot-link-chip">🍜 복성루</a>
-        <a href="https://map.naver.com/p/search/%EA%B5%B0%EC%82%B0%20%EC%9D%B4%EC%84%B1%EB%8B%B9" target="_blank" rel="noopener" class="spot-link-chip">🥐 이성당</a>
-        <a href="https://map.naver.com/p/search/%EA%B5%B0%EC%82%B0%20%EC%B4%88%EC%9B%90%EC%82%AC%EC%A7%84%EA%B4%80" target="_blank" rel="noopener" class="spot-link-chip">📷 초원사진관</a>
-        <a href="https://map.naver.com/p/search/%EA%B5%B0%EC%82%B0%20%EB%8F%99%EA%B5%AD%EC%82%AC" target="_blank" rel="noopener" class="spot-link-chip">⛩️ 동국사</a>
-        <a href="https://map.naver.com/p/search/%EA%B2%BD%EC%95%94%EB%8F%99%20%EC%B2%A0%EA%B8%B8%EB%A7%88%EC%9D%84" target="_blank" rel="noopener" class="spot-link-chip">🚂 철길마을</a>
-        <a href="https://map.naver.com/p/search/%EC%84%A0%EC%9C%A0%EB%8F%84%ED%95%B4%EC%88%98%EC%9A%95%EC%9E%A5" target="_blank" rel="noopener" class="spot-link-chip">🏖️ 선유도해변</a>
-        <a href="https://map.naver.com/p/search/%EB%8C%80%EC%9E%A5%EB%B4%89" target="_blank" rel="noopener" class="spot-link-chip">⛰️ 대장봉</a>
-        <a href="https://map.naver.com/p/search/%EC%9E%A5%EC%9E%90%EB%8F%84%20%EB%9D%BC%ED%8C%8C%EB%A5%B4" target="_blank" rel="noopener" class="spot-link-chip">☕ 카페 라파르</a>
-        <a href="https://map.naver.com/p/search/%EC%84%A0%EC%9C%A0%EB%8F%84%20%EC%98%A5%EB%8F%8C%EC%8A%88%ED%8D%BC" target="_blank" rel="noopener" class="spot-link-chip">🌅 옥돌슈퍼</a>
-      </div>
-    </section>
-
-    <!-- 태그 -->
-    <div class="tag-list">
-      <span class="tag-item">#군산여행</span>
-      <span class="tag-item">#군산당일치기</span>
-      <span class="tag-item">#고군산군도</span>
-      <span class="tag-item">#선유도</span>
-      <span class="tag-item">#대장봉</span>
-      <span class="tag-item">#초원사진관</span>
-      <span class="tag-item">#이성당</span>
-      <span class="tag-item">#복성루</span>
-      <span class="tag-item">#카페라파르</span>
-      <span class="tag-item">#옥돌슈퍼</span>
-      <span class="tag-item">#새만금방조제</span>
-      <span class="tag-item">#커플국내여행</span>
-    </div>
-
-    <div class="app-course-box" style="margin: 40px 0 24px; padding: 20px 22px; background: var(--color-tip-bg); border: 1px solid var(--color-tip-border); border-radius: 14px;">
-      <strong style="display: block; font-size: 17px; color: var(--color-tip-text); margin-bottom: 6px;">🗺️ 이 코스 오늘 데이트에서 열기</strong>
-      <p style="margin: 0 0 14px; font-size: 14.5px; line-height: 1.6; color: var(--color-tip-text);">글에 나온 장소 6곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
-      <a href="../../#c=3925.1180.1177.1790683582847.1183.1791181485629" style="display: inline-block; padding: 10px 18px; border-radius: 10px; background: var(--color-accent); color: #ffffff; font-weight: 700; font-size: 15px; text-decoration: none;">앱에서 코스 열기 →</a>
-    </div>
-
-  </main>
+    </article></main>
 
   <!-- 푸터 -->
-  <footer class="blog-footer">
-    <p>© 2026 오늘 데이트 (Oneul Date). All rights reserved.</p>
-    <p class="footer-license">본 포스팅의 여행지 사진 출처: 한국관광공사 TourAPI (공공누리 제1유형 - 출처표시 조건 하 상업적 이용 및 변형 가능), 일부 장소 사진은 카카오맵</p>
+  <footer class="site-footer">
+    <div class="footer-inner container">
+      <p class="footer-line">© 2026 오늘 데이트 (Oneul Date). All rights reserved.</p>
+      <p class="footer-line">본 포스팅의 여행지 사진 출처: 한국관광공사 TourAPI (공공누리 제1유형 - 출처표시 조건 하 상업적 이용 및 변형 가능), 일부 장소 사진은 카카오맵</p>
+      <p class="footer-links"><a href="https://nufunc.github.io/oneul-date/">홈으로 가기</a><a href="https://nufunc.github.io/oneul-date/blog/">매거진 전체보기</a></p>
+    </div>
   </footer>
 
 </body>
