@@ -36,6 +36,9 @@ for (const slug of slugs) {
   if (firstCourse) {
     assert.deepStrictEqual(bars, [firstCourse], `${slug}: 코스 막대 href가 원본 첫 코스 링크와 다르다`);
     courseBars++;
+    // 글 안 코스 버튼(a.btn)이 보이는 동안 막대를 hidden으로 빼는 스크립트가 막대 바로 뒤에 하나, 숨김 규칙이 CSS에 하나 있다
+    assert.strictEqual(html.match(/IntersectionObserver/g)?.length, 2, `${slug}: 막대 숨김 스크립트가 1개가 아니다`);
+    assert.strictEqual(html.match(/\.od-course-bar\[hidden\]\{display:none\}/g)?.length, 1, `${slug}: 막대 hidden 규칙이 1개가 아니다`);
   }
 }
 

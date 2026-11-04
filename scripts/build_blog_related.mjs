@@ -92,12 +92,16 @@ const COURSE_STYLE = `<style>
 .od-course-bar:focus-visible{outline:3px solid #0284c7;outline-offset:3px}
 .od-course-spacer{height:76px}
 html{scroll-padding-bottom:80px}
+.od-course-bar[hidden]{display:none}
 </style>`;
+// 320×640에서 첫 화면 코스 버튼(a.btn)이 막대에 가려지고 같은 링크가 둘 보이므로, 글 안 코스 버튼이 화면에 보이는 동안 막대를 hidden으로 뺀다(초점과 스크린리더에서도 빠진다).
+// 스크립트가 없거나 IntersectionObserver가 없거나 글 안 코스 버튼이 없는 옛 틀 글은 막대가 그대로 보인다.
+const COURSE_SCRIPT = `<script>(function(){var b=document.querySelector('.od-course-bar'),t=document.querySelectorAll('a.btn[href*="#c="]');if(!b||!t.length||!('IntersectionObserver' in window))return;var n=new Set(),o=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)n.add(e.target);else n.delete(e.target)});b.hidden=n.size>0});t.forEach(function(e){o.observe(e)})})()</script>`;
 
 function courseBarFor(html) {
   const href = html.match(/href="([^"]*#c=[^"]*)"/)?.[1];
   if (!href) return '';
-  return `${COURSE_STYLE}<div class="od-course-spacer" aria-hidden="true"></div><a class="od-course-bar" href="${href}">🗺️ 이 코스 앱에서 열기</a>\n`;
+  return `${COURSE_STYLE}<div class="od-course-spacer" aria-hidden="true"></div><a class="od-course-bar" href="${href}">🗺️ 이 코스 앱에서 열기</a>${COURSE_SCRIPT}\n`;
 }
 
 let barCount = 0;
