@@ -16,6 +16,9 @@
 
   <!-- Pretendard 웹폰트 -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700&display=swap&text=%26()%2C.0123456789%3A%5B%5D~%C2%B7%EA%B0%80%EA%B0%95%EA%B1%B0%EA%B1%B7%EA%B2%BD%EA%B3%84%EA%B3%A0%EA%B3%B5%EA%B3%BC%EA%B5%AD%EA%B8%88%EA%B8%B0%EA%B9%8C%EB%82%98%EB%82%B4%EB%82%B8%EB%85%84%EB%85%B8%EB%8A%94%EB%8A%98%EB%8B%A4%EB%8B%A8%EB%8B%B9%EB%8B%BB%EB%8C%80%EB%8D%B0%EB%8F%84%EB%8F%99%EB%9D%BC%EB%9E%91%EB%9F%AC%EB%A0%88%EB%A1%A4%EB%A5%B8%EB%A5%BC%EB%A6%AC%EB%A7%88%EB%A7%8C%EB%A7%9D%EB%A7%9E%EB%A7%A4%EB%A9%B0%EB%AA%A8%EB%AC%BC%EB%B0%94%EB%B0%98%EB%B2%88%EB%B2%BD%EB%B3%84%EB%B3%B4%EB%B6%80%EB%B7%B0%EB%B8%94%EB%B9%84%EB%B9%9A%EB%B9%9B%EC%82%AC%EC%82%B0%EC%83%81%EC%84%9C%EC%84%A0%EC%84%B8%EC%86%8C%EC%86%94%EC%88%B2%EC%8A%A4%EC%8B%9D%EC%8B%A0%EC%95%84%EC%95%88%EC%95%94%EC%95%BC%EC%95%BD%EC%96%91%EC%96%B4%EC%97%90%EC%97%AC%EC%97%B0%EC%97%B4%EC%98%81%EC%98%88%EC%98%A4%EC%98%A5%EC%99%80%EC%9A%94%EC%9A%A9%EC%9B%8C%EC%9B%90%EC%9C%84%EC%9D%84%EC%9D%98%EC%9D%B4%EC%9D%B8%EC%9D%BC%EC%A0%84%EC%A0%88%EC%A1%B0%EC%A4%84%EC%A7%80%EC%A7%84%EC%B0%B0%EC%B0%BE%EC%B2%9C%EC%B4%9D%EC%B6%94%EC%B6%A4%EC%B9%98%EC%B9%B4%EC%BD%94%ED%81%AC%ED%82%B9%ED%84%B0%ED%8A%B8%ED%8C%8C%ED%8E%98%ED%8F%AC%ED%8F%AD%ED%91%B8%ED%92%8D%ED%95%98%ED%95%A9%ED%95%AD%ED%95%B4%ED%96%89%ED%98%95%ED%98%B8%ED%99%98%ED%9B%84" rel="stylesheet">
 
   <script type="application/ld+json">
 {
@@ -43,380 +46,331 @@
   </script>
 
   <style>
-    :root {
-      --color-primary: #1e293b;
-      --color-accent: #059669;
-      --color-accent-light: #ecfdf5;
-      --color-text-main: #334155;
-      --color-text-sub: #64748b;
-      --color-border: #e2e8f0;
-      --color-bg-page: #f8fafc;
-      --color-card-bg: #ffffff;
-      --color-warm: #d97706;
-      --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-    }
+/* hallmark-solstice: scripts/convert_blog_hallmark.mjs가 글의 <style>을 이 파일로 바꾼다 (Hallmark 2.0.0, 테마 Solstice, P-293) */
+:root {
+  color-scheme: light;
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-xs: 0.8125rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.125rem; --text-xl: 1.5625rem; --text-2xl: 1.953rem; --text-3xl: 2.441rem;
+  --text-hero: clamp(1.75rem, 1.6vw + 1.25rem, 2.75rem);
+  --text-section: clamp(1.75rem, 1.8vw + 1rem, 2.875rem); --text-title: clamp(1.25rem, 0.75vw + 0.875rem, 1.625rem); --text-lead: clamp(1.0625rem, 0.3vw + 0.95rem, 1.25rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-micro: 120ms; --dur-short: 220ms;
+  --container: 1200px; --measure: 680px; --gutter: 56px; --gap-columns: 40px; --section-gap: 120px;
+  --z-sticky-nav: 300;
+  --color-paper: oklch(94% 0.03 80); --color-paper-2: oklch(97% 0.02 85); --color-paper-3: oklch(89% 0.05 80);
+  --color-ink: oklch(27% 0.05 50); --color-ink-2: oklch(36% 0.05 50); --color-muted: oklch(48% 0.06 55);
+  --color-rule: oklch(84% 0.06 78);
+  --color-accent: oklch(54% 0.20 24); --color-accent-2: oklch(48% 0.19 24); --color-accent-ink: oklch(97% 0.02 85); --color-focus: oklch(54% 0.20 24);
+  --color-gold: oklch(74% 0.14 75); --color-gold-2: oklch(84% 0.11 80);
+  --color-band-text: oklch(94% 0.03 80); --color-band-muted: oklch(80% 0.05 75);
+  --color-hair-ink: color-mix(in oklab, var(--color-ink) 10%, transparent);
+  --font-display: "Noto Serif KR", "Nanum Myeongjo", ui-serif, serif;
+  --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --radius-card: 0; --radius-pill: 999px; --rule-hair: 1px; --rule-bar: 2px;
+  --shadow-card: 10px 10px 0 var(--color-paper-3);
+}
+@media (max-width: 60rem) { :root { --gutter: 24px; --section-gap: 88px; --gap-columns: 24px; } }
+@media (max-width: 40rem) { :root { --gutter: 16px; --section-gap: 64px; --gap-columns: 16px; } }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: var(--font-family);
-      background-color: var(--color-bg-page);
-      color: var(--color-text-main);
-      line-height: 1.8;
-      word-break: keep-all;
-      -webkit-font-smoothing: antialiased;
-    }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+html { scrollbar-color: var(--color-muted) var(--color-paper); scroll-padding-top: var(--space-3xl); }
+body { margin: 0; background: var(--color-paper); color: var(--color-ink-2); font-family: var(--font-family); font-size: var(--text-md); line-height: 1.75; word-break: keep-all; -webkit-font-smoothing: antialiased; }
+::selection { background: color-mix(in oklab, var(--color-gold) 40%, transparent); }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+a:hover { text-decoration-color: var(--color-accent); }
+article h1, article h2, article h3 { margin: 0; font-family: var(--font-display); font-weight: 700; color: var(--color-ink); line-height: 1.3; letter-spacing: -0.01em; overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+img { max-width: 100%; display: block; }
+.container { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); }
 
-    .site-header {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--color-border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .header-inner {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 14px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .header-logo {
-      font-weight: 800;
-      font-size: 1.15rem;
-      color: var(--color-primary);
-      text-decoration: none;
-    }
-    .header-logo span { color: var(--color-accent); }
-    .header-nav a {
-      color: var(--color-text-sub);
-      text-decoration: none;
-      font-size: 0.9rem;
-      margin-left: 16px;
-    }
+/* 44px 머리 링크 규칙: scripts/test-blog-related.cjs가 글마다 하나를 요구한다 */
+header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
 
-    .article-container {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 40px 20px 80px;
-    }
+/* Controls */
+.btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 var(--space-lg); border: 0; border-radius: var(--radius-pill); background: var(--color-accent); color: var(--color-accent-ink); font: 600 var(--text-md)/1 var(--font-family); text-decoration: none; cursor: pointer; transition: background-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out); }
+.btn:hover { background: var(--color-accent-2); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.link-quiet { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-ink); font-weight: 600; font-size: var(--text-sm); text-decoration: none; border-bottom: var(--rule-bar) solid var(--color-ink); transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out); }
+.link-quiet:hover { color: var(--color-accent); border-color: var(--color-accent); }
+.link-quiet:active { transform: translateY(1px); }
+.link-quiet:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
 
-    .article-header {
-      margin-bottom: 32px;
-    }
-    .badge {
-      display: inline-block;
-      background: var(--color-accent-light);
-      color: var(--color-accent);
-      font-weight: 700;
-      font-size: 0.8rem;
-      padding: 4px 10px;
-      border-radius: 6px;
-      margin-bottom: 12px;
-    }
-    h1 {
-      font-size: 1.95rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      line-height: 1.35;
-      letter-spacing: -0.02em;
-      margin-bottom: 16px;
-    }
-    .meta-info {
-      font-size: 0.88rem;
-      color: var(--color-text-sub);
-      display: flex;
-      gap: 16px;
-      border-bottom: 1px solid var(--color-border);
-      padding-bottom: 20px;
-    }
+/* Nav */
+.site-header { position: sticky; top: 0; z-index: var(--z-sticky-nav); background: var(--color-paper); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.header-inner { display: flex; justify-content: space-between; align-items: center; min-height: 64px; }
+.header-logo { font-family: var(--font-display); font-size: var(--text-lg); color: var(--color-ink); text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; }
+.header-logo span { color: var(--color-accent); margin-left: 0.3em; }
+.header-logo:hover { color: var(--color-ink-2); }
+.header-nav { display: flex; gap: var(--space-lg); }
+.header-nav a { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--text-sm); color: var(--color-ink-2); text-decoration: none; }
+.header-nav a:hover { color: var(--color-ink); text-decoration: underline; text-decoration-color: var(--color-accent); }
+.header-nav a:active, .header-logo:active { transform: translateY(1px); }
 
-    /* 동선 요약 카드 */
-    .summary-card {
-      background: #ffffff;
-      border: 1px solid var(--color-border);
-      border-radius: 14px;
-      padding: 24px;
-      margin-bottom: 40px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-    }
-    .summary-title {
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .route-steps {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 10px;
-    }
-    .route-step-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-    }
-    .step-num {
-      background: var(--color-primary);
-      color: #fff;
-      font-size: 0.75rem;
-      font-weight: 700;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-    .step-text {
-      font-size: 0.94rem;
-      color: var(--color-text-main);
-    }
-    .step-text strong {
-      color: var(--color-primary);
-    }
-    .step-note {
-      font-size: 0.84rem;
-      color: var(--color-text-sub);
-      margin-top: 2px;
-    }
+/* Hero */
+.hero { display: grid; padding-block: var(--space-2xl) var(--space-xl); }
+.hero-text { display: grid; gap: var(--space-lg); }
+.article-title { font-size: var(--text-hero); line-height: 1.3; max-width: 28ch; }
+.hero-kicker { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.hero-kicker span:first-child { color: var(--color-accent); font-weight: 600; }
+.article-meta { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-lg); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); font-variant-numeric: tabular-nums; }
+.article-meta .meta-credit { flex-basis: 100%; }
+/* 좁은 화면에서 칸마다 한 줄: 본문 글꼴(Pretendard)이 바뀔 때 줄 수가 달라져 아래 띠가 밀리는 것을 막는다 */
+@media (max-width: 40rem) { .article-meta { flex-direction: column; flex-wrap: nowrap; } }
+.spot-photo img { width: 100%; height: 100%; object-fit: cover; outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
 
-    h2 {
-      font-size: 1.45rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin-top: 48px;
-      margin-bottom: 18px;
-      letter-spacing: -0.01em;
-      line-height: 1.45;
-    }
+/* Lead */
+.prose-intro { max-width: var(--measure); padding-top: var(--space-xl); font-size: var(--text-lead); line-height: 1.8; color: var(--color-ink); padding-bottom: var(--space-3xl); }
 
-    p {
-      margin-bottom: 18px;
-      color: #334155;
-      font-size: 1rem;
-    }
+/* The day, on the brown band */
+.band { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl) var(--space-xl); }
+.band .timeline-title { color: var(--color-band-text); font-size: var(--text-section); margin-bottom: var(--space-xl); }
+.route { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: 0; padding: 0; }
+.tl-act { font-size: var(--text-sm); color: var(--color-gold-2); padding-bottom: var(--space-sm); }
+.tl-step { display: grid; align-content: start; gap: var(--space-2xs); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-gold); }
+.tl-time { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1; color: var(--color-band-text); font-variant-numeric: tabular-nums; }
+.tl-place { font-weight: 600; font-size: var(--text-lg); color: var(--color-band-text); }
+.tl-note { font-size: var(--text-sm); color: var(--color-band-muted); line-height: 1.6; }
+.tl-move { font-size: var(--text-sm); color: var(--color-band-muted); padding-block: var(--space-sm) var(--space-lg); }
+.tl-total { font-size: var(--text-sm); color: var(--color-band-muted); padding-top: var(--space-lg); margin-top: var(--space-lg); border-top: var(--rule-hair) solid color-mix(in oklab, var(--color-band-text) 25%, transparent); }
+/* spot-info-list 계열: 시간 범위(10:30 - 11:45)가 길어 시각 글자를 줄이고, 요약 상자와 번호 배지를 둔다 */
+.route.range .tl-time { font-size: var(--text-xl); }
+.route.range .tl-step { padding-bottom: var(--space-md); }
+.tl-badge { font-size: var(--text-xs); color: var(--color-gold-2); letter-spacing: 0.04em; }
+.tl-facts { display: grid; gap: var(--space-2xs) var(--space-lg); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.tl-facts strong { color: var(--color-gold-2); font-weight: 600; }
+@media (min-width: 60rem) {
+  .tl-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .route { grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); column-gap: var(--space-lg); }
+  .route > * { grid-row: var(--r); grid-column: var(--c) / span var(--s, 1); }
+  .tl-move { padding-bottom: 0; }
+  .tl-total { grid-column: 1 / -1; }
+}
 
-    .real-photo-card {
-      margin: 24px 0 28px;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
-      background: #000;
-    }
-    .real-photo-card img {
-      width: 100%;
-      height: auto;
-      max-height: 480px;
-      object-fit: cover;
-      display: block;
-    }
-    .photo-caption {
-      background: #ffffff;
-      padding: 10px 14px;
-      font-size: 0.84rem;
-      color: var(--color-text-sub);
-      border-top: 1px solid var(--color-border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+/* Stops */
+.spots { padding-block: var(--section-gap) 0; display: grid; gap: var(--section-gap); }
+.spot-section { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "photo head" "photo body"; grid-template-rows: auto 1fr; column-gap: var(--gap-columns); row-gap: var(--space-md); align-items: start; padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); }
+.spot-section.flip { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-areas: "head photo" "body photo"; }
+.spot-section.no-photo { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "body"; }
+.spot-head { grid-area: head; display: grid; gap: var(--space-md); }
+.spot-photo { grid-area: photo; align-self: start; margin: 0; aspect-ratio: 4 / 5; width: 100%; background: var(--color-paper-3); position: sticky; top: 96px; }
+.spot-body { grid-area: body; display: grid; gap: var(--space-md); }
+.spot-header { display: flex; align-items: baseline; gap: var(--space-md); }
+.spot-num { font-family: var(--font-display); font-size: var(--text-3xl); line-height: 1; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+.spot-title { font-size: var(--text-section); }
+.spot-tagline { font-size: var(--text-lg); color: var(--color-ink); padding-bottom: var(--space-xs); }
+.spot-desc { max-width: 60ch; }
 
-    .info-grid {
-      background: #f8fafc;
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      padding: 18px 20px;
-      margin: 20px 0 24px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px 20px;
-    }
-    @media (max-width: 540px) {
-      .info-grid { grid-template-columns: 1fr; }
-    }
-    .info-item {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .info-label {
-      font-size: 0.76rem;
-      font-weight: 700;
-      color: var(--color-text-sub);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .info-val {
-      font-size: 0.92rem;
-      font-weight: 600;
-      color: var(--color-primary);
-    }
+.spot-info-box { margin: var(--space-xs) 0 0; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); }
+.info-row { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--space-md); padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.info-row:last-child { border-bottom: 0; }
+.info-label { color: var(--color-muted); }
+.info-val { color: var(--color-ink); font-weight: 400; font-variant-numeric: tabular-nums; }
+.map-btn-wrap { padding-top: var(--space-sm); }
+.tip-box { padding: var(--space-sm) var(--space-md); border-left: var(--rule-bar) solid var(--color-accent); background: var(--color-paper-2); font-size: var(--text-sm); color: var(--color-ink-2); line-height: 1.7; }
+.tip-box strong { color: var(--color-ink); font-weight: 600; }
+.tip-box .tip-title { display: block; margin-bottom: var(--space-2xs); }
 
-    .tip-box {
-      background: #fffbeb;
-      border: 1px solid #fde68a;
-      border-left: 4px solid #f59e0b;
-      padding: 16px 18px;
-      border-radius: 0 10px 10px 0;
-      margin: 22px 0 26px;
-      font-size: 0.92rem;
-      color: #92400e;
-      line-height: 1.7;
-    }
-    .tip-title {
-      font-weight: 800;
-      font-size: 0.9rem;
-      color: #78350f;
-      margin-bottom: 4px;
-    }
+/* Fees */
+.cost-table-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.cost-head { display: grid; gap: var(--space-md); align-content: start; }
+.cost-head .timeline-title { font-size: var(--text-section); }
+.cost-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.cost-table th { text-align: left; font-weight: 400; color: var(--color-muted); padding: var(--space-xs) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-bar) solid var(--color-ink); }
+.cost-table td { padding: var(--space-sm) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink-2); vertical-align: top; }
+.cost-table td:nth-child(2) { color: var(--color-ink); font-weight: 400; }
+.cost-3 .cost-total-row td:nth-child(2) { font-family: inherit; font-size: inherit; color: inherit; font-weight: 600; }
+.cost-3 .cost-total-row td:nth-child(3) { font-family: var(--font-display); font-size: var(--text-xl); color: var(--color-accent); font-weight: 700; }
+.cost-total-row td { border-bottom: 0; border-top: var(--rule-bar) solid var(--color-ink); color: var(--color-ink); font-weight: 600; }
+.cost-total-row td:nth-child(2) { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--color-accent); font-weight: 700; }
+@media (max-width: 600px) {
+  .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
+  .table-wrap thead { display: none; }
+  .table-wrap tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-sm); row-gap: var(--space-2xs); padding-block: var(--space-sm); border-bottom: var(--rule-hair) solid var(--color-rule); }
+  .table-wrap td { padding: 0; border: 0; }
+  .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: var(--text-xs); color: var(--color-muted); }
+  .table-wrap td:nth-child(3) { text-align: right; font-weight: 600; color: var(--color-ink); }
+  .table-wrap td:nth-child(4) { grid-column: 1 / -1; color: var(--color-muted); }
+  .table-wrap td:empty { display: none; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: var(--text-sm); color: var(--color-ink); }
+  .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; text-align: right; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
+  .table-wrap .cost-total-row { border-top: var(--rule-bar) solid var(--color-ink); border-bottom: 0; }
+}
 
-    .map-btn-wrap {
-      margin: 20px 0 32px;
-    }
-    .map-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #ffffff;
-      border: 1.5px solid #cbd5e1;
-      padding: 10px 18px;
-      border-radius: 8px;
-      font-size: 0.88rem;
-      font-weight: 700;
-      color: #0f172a;
-      text-decoration: none;
-      transition: all 0.15s ease;
-    }
-    .map-btn:hover {
-      border-color: var(--color-accent);
-      color: var(--color-accent);
-      background: var(--color-accent-light);
-    }
+/* Tips */
+.tips-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.tips-card .timeline-title { font-size: var(--text-section); align-self: start; }
+.tips-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-md); }
+.tips-list li { padding-bottom: var(--space-md); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.tips-list li:last-child { border-bottom: 0; }
+.tips-list strong { color: var(--color-ink); font-weight: 600; }
 
-    /* 비용표 */
-    .table-wrap {
-      margin: 32px 0 40px;
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      overflow: hidden;
-      background: #ffffff;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.9rem;
-      text-align: left;
-    }
-    thead {
-      background: #f1f5f9;
-      color: var(--color-primary);
-      font-weight: 700;
-    }
-    th, td {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--color-border);
-    }
-    tr:last-child td {
-      border-bottom: none;
-    }
+/* App course */
+.app-course-box { margin-top: var(--section-gap); display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--gap-columns); align-items: end; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-xl); }
+.app-course-box h2 { font-size: var(--text-section); margin-bottom: var(--space-md); }
+.app-course-box p { max-width: 52ch; }
+.app-course-box .app-action { justify-self: end; }
 
-    /* 비용표: 좁은 화면에서는 한 행을 카드 하나로 쌓는다 */
-    @media (max-width: 600px) {
-      .table-wrap { overflow-x: visible; }
-      .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
-      .table-wrap thead { display: none; }
-      .table-wrap tr {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        column-gap: 12px;
-        row-gap: 4px;
-        padding: 14px 16px;
-        border-bottom: 1px solid var(--color-border);
-      }
-      .table-wrap tr:last-child { border-bottom: none; }
-      .table-wrap td { padding: 0; border: none; }
-      .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: 0.78rem; font-weight: 700; color: var(--color-text-sub); }
-      .table-wrap td:nth-child(2) { font-weight: 700; }
-      .table-wrap td:nth-child(3) { max-width: 60vw; word-break: keep-all; text-align: right; font-weight: 700; }
-      .table-wrap td:nth-child(4) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
-      .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: inherit; color: inherit; }
-      .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; max-width: 60vw; word-break: keep-all; text-align: right; }
-      .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
-    }
+.article-credit { margin-top: var(--space-2xl); padding-block: var(--space-md) var(--space-3xl); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); }
 
-    /* 앱 연동 배너 */
-    .app-link-card {
-      background: linear-gradient(135deg, #065f46 0%, #047857 100%);
-      color: #ffffff;
-      padding: 24px;
-      border-radius: 14px;
-      margin: 40px 0;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .app-link-title {
-      font-size: 1.15rem;
-      font-weight: 800;
-    }
-    .app-link-desc {
-      font-size: 0.92rem;
-      opacity: 0.92;
-      line-height: 1.6;
-    }
-    .app-link-btn {
-      align-self: flex-start;
-      background: #ffffff;
-      color: #065f46;
-      font-weight: 700;
-      padding: 10px 20px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-size: 0.9rem;
-      transition: background 0.15s ease;
-    }
-    .app-link-btn:hover {
-      background: #f0fdf4;
-    }
+/* Footer mast */
+.site-footer { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl); }
+.footer-inner { display: grid; gap: var(--space-md); }
+.footer-mark { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1.2; color: var(--color-band-text); }
+.footer-line { color: var(--color-band-muted); font-size: var(--text-sm); }
+.footer-links { display: flex; flex-wrap: wrap; gap: var(--space-lg); }
+.footer-links a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-band-text); font-size: var(--text-sm); text-decoration: underline; text-decoration-color: var(--color-gold); }
+.footer-links a:hover { text-decoration-color: var(--color-accent); color: var(--color-gold-2); }
+.footer-links a:active { transform: translateY(1px); }
+.site-footer :focus-visible { outline-color: var(--color-gold-2); }
 
-    .outro-card {
-      background: #ffffff;
-      border: 1px solid var(--color-border);
-      border-radius: 14px;
-      padding: 26px;
-      margin-top: 40px;
-    }
-    .outro-title {
-      font-size: 1.1rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin-bottom: 12px;
-    }
+@media (max-width: 60rem) {
+  .hero, .spot-section, .spot-section.flip, .cost-table-card, .tips-card, .app-course-box { grid-template-columns: minmax(0, 1fr); }
+  .spot-section, .spot-section.flip { grid-template-areas: "head" "photo" "body"; grid-template-rows: auto; }
+  .spot-section.no-photo { grid-template-areas: "head" "body"; }
+  .hero { padding-block: var(--space-xl) var(--space-xl); }
+  .spot-photo { position: static; aspect-ratio: 16 / 10; }
+  .app-course-box { padding: var(--space-lg); }
+  .app-course-box .app-action { justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn, .link-quiet { transition: none; }
+  .btn:active, .link-quiet:active, .header-nav a:active, .header-logo:active, .footer-links a:active { transform: none; }
+}
 
-    .article-footer {
-      margin-top: 60px;
-      padding-top: 24px;
-      border-top: 1px solid var(--color-border);
-      font-size: 0.85rem;
-      color: var(--color-text-sub);
-      text-align: center;
-    }
-    header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
-    .header-nav a,.header-title a,.blog-tagline a{display:inline-block}
+/* real-photo-flat 계열(평면 글): 번호 있는 긴 장소 제목, 사진 설명, 안내 상자, 지도 목록 */
+.lead-photo { margin: 0 0 var(--space-3xl); }
+.lead-photo img { width: 100%; max-height: 520px; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.lead-photo figcaption, .body-photo figcaption { margin-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.spot-photo figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--space-xs) var(--space-sm); font-size: var(--text-xs); line-height: 1.5; color: var(--color-accent-ink); background: color-mix(in oklab, var(--color-ink) 78%, transparent); }
+.body-photo { margin: 0; }
+.body-photo img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.spot-section.flat .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.tl-lead { max-width: var(--measure); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.guide-box, .order-box { background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); color: var(--color-ink); }
+.guide-box h4, .order-box strong { margin: 0 0 var(--space-xs); font-family: var(--font-display); font-size: var(--text-md); color: var(--color-ink); display: block; }
+.guide-box ul, .order-box ul { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-2xs); }
+.bridge { padding-top: var(--space-xs); color: var(--color-muted); font-size: var(--text-sm); }
+.map-links { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-md); }
+.map-links .timeline-title { font-size: var(--text-section); }
+.map-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-xs); }
+.map-list a, .map-link-chip { display: flex; justify-content: space-between; gap: var(--space-md); align-items: center; min-height: 44px; padding-block: var(--space-xs); border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink); text-decoration: none; }
+.map-links-grid { display: grid; gap: 0; }
+.map-link-chip .btn-action { color: var(--color-accent); font-weight: 600; white-space: nowrap; }
+@media (max-width: 40rem) { .spot-section.flat .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .spot-photo { position: relative; top: auto; } }
+
+/* spot-card 계열(editor-144): 대표 사진, 요약 상자, 본문 구획, 세부 코스, 이동 연결, 마무리 상자 */
+.hero-figure { margin: 0 0 var(--space-xl); }
+.hero-figure img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.hero-figure figcaption { padding-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-muted); }
+.summary-card { margin-bottom: var(--space-xl); background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-lg); font-size: var(--text-sm); }
+.summary-title, p.timeline-title, .cta-title { font-family: var(--font-display); font-weight: 700; line-height: 1.3; color: var(--color-ink); }
+.summary-title { font-size: var(--text-xl); margin-bottom: var(--space-sm); }
+p.timeline-title { letter-spacing: -0.01em; overflow-wrap: break-word; }
+.summary-list { margin: 0; padding: 0; list-style: none; display: grid; }
+.summary-list li { padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.summary-list li:last-child { border-bottom: 0; }
+.summary-list strong { color: var(--color-ink); font-weight: 600; }
+.prose-section { margin-top: var(--section-gap); max-width: var(--measure); display: grid; gap: var(--space-md); }
+.prose-section h2, .spots-title { font-size: var(--text-title); }
+.stops-section { margin-top: var(--section-gap); }
+.stops-section .spots { padding-top: var(--space-xl); }
+.spots.bridged { gap: 0; }
+.drive-bridge { margin: 0; padding-block: var(--space-xl); padding-left: var(--space-md); border-left: var(--rule-bar) solid var(--color-gold); font-size: var(--text-sm); color: var(--color-muted); }
+.drive-bridge strong { color: var(--color-ink); font-weight: 600; }
+.spot-header:has(.spot-badge) { flex-direction: column; align-items: flex-start; gap: var(--space-xs); }
+.spot-badge { font-size: var(--text-sm); font-weight: 600; color: var(--color-accent); }
+.spot-actions { display: flex; flex-wrap: wrap; gap: 0 var(--space-lg); }
+.info-wide .info-row { grid-template-columns: 5.5em minmax(0, 1fr); }
+.info-wide .info-row.plain { grid-template-columns: minmax(0, 1fr); }
+.cost-head .timeline-title.long { font-size: var(--text-title); }
+.cta-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-sm); max-width: var(--measure); }
+.cta-card h3, .cta-title { font-size: var(--text-title); }
+.cta-card .link-quiet { justify-self: start; }
+
+/* real-photo-grid 계열(editor-145): 사진과 정보 상자가 글 순서대로 이어지는 한 열 장소 구획, 번호 있는 동선, 도입 여러 문단 */
+.prose-intro p + p { margin-top: var(--space-md); }
+.stories { padding-top: var(--space-xl); gap: var(--space-3xl); }
+.story-section { display: grid; gap: var(--space-md); max-width: var(--measure); }
+.story-section .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.story-body { display: grid; gap: var(--space-md); }
+.story-photo { margin: 0; }
+.story-photo img { width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.story-photo figcaption { padding-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.story-photo figcaption span + span::before { content: " · "; }
+.tl-step .tl-badge { margin-bottom: calc(var(--space-2xs) * -1); }
+.tl-meta { display: block; font-style: normal; color: var(--color-gold-2); }
+.app-course-box.early { margin-top: var(--space-xl); }
+.app-course-box .cta-title { font-size: var(--text-section); margin-bottom: var(--space-md); }
+@media (max-width: 40rem) { .story-section .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .route .tl-act:not(:first-child) { margin-top: var(--space-lg); } }
+.article-credit.tight { padding-bottom: var(--space-md); }
+.back-link { padding-bottom: var(--space-md); font-size: var(--text-sm); }
+
+/* route-timeline 계열(editor-147: 보령, 거제, 고성): 사진 설명의 출처 줄, 시각 범위 동선 */
+.spot-photo figcaption .cap-src { display: block; }
+.spot-number { white-space: nowrap; }
+
+/* spot-block 계열(editor-147: 강릉, 경주): 머리 바 메모, 인용문, 날마다 나뉜 동선, 장소 분류 줄, 팁 목록, 금액이 끝 칸인 경비표 */
+.header-inner:has(.header-note) { flex-wrap: wrap; gap: 0 var(--space-md); }
+.header-note { font-size: var(--text-sm); color: var(--color-muted); }
+.hero-quote { max-width: var(--measure); font-size: var(--text-lead); line-height: 1.7; color: var(--color-ink); }
+.route + .route { margin-top: var(--space-xl); }
+.story-kicker { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.story-kicker .spot-num { font-size: var(--text-xl); }
+.stories.bridged .story-section + .story-section { margin-top: var(--space-3xl); }
+.tip-box ul { margin: 0; padding-left: 1.1em; display: grid; gap: var(--space-2xs); }
+@media (max-width: 600px) {
+  .table-wrap.amount-last td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
+  .table-wrap.amount-last td:nth-child(4) { grid-column: auto; text-align: right; font-weight: 600; color: var(--color-ink); }
+}
+
+/* timeline-list 계열(editor-149: 한남·이태원, 목포, 남해): 출처 줄의 글쓴이(아바타 글자는 장식이라 숨김) */
+.credit-mark { display: none; }
+.credit-author strong { margin-right: var(--space-xs); color: var(--color-ink); font-weight: 600; }
+.article-credit p + p { margin-top: var(--space-xs); }
+.spot-head { grid-template-columns: minmax(0, 1fr); }
+.spot-num { white-space: nowrap; }
+.spot-header .spot-title { min-width: 0; overflow-wrap: break-word; }
+
+/* itinerary-spots 계열(editor-150: 군산): 동선 아래 안내 문단, 참고 영상 카드, 해시태그 줄 */
+.video-card { margin-top: var(--section-gap); max-width: var(--measure); display: grid; gap: var(--space-sm); }
+.video-title { font-family: var(--font-display); font-size: var(--text-title); line-height: 1.3; color: var(--color-ink); }
+.video-source, .video-caption { font-size: var(--text-sm); color: var(--color-muted); }
+.video-frame { aspect-ratio: 16 / 9; background: var(--color-paper-3); }
+.video-frame iframe { display: block; width: 100%; height: 100%; border: 0; }
+.tag-list { margin-top: var(--space-xl); display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+
+/* course-list 계열(editor-150: 서울·경기 20선): 목차, 코스 구획의 분위기 줄, 장소 목록 */
+.toc-list { margin: 0; padding: 0; list-style: none; display: grid; column-gap: var(--gap-columns); }
+.toc-list li { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0 var(--space-md); min-height: 44px; padding-block: var(--space-xs); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.toc-list a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-ink); text-decoration: none; }
+.toc-mood, .course-mood { font-size: var(--text-sm); color: var(--color-muted); }
+.course-mood { color: var(--color-accent); font-weight: 600; }
+.stop-list { margin: 0; padding: 0; list-style: none; display: grid; }
+.stop { display: grid; gap: var(--space-2xs); padding-block: var(--space-md); border-top: var(--rule-hair) solid var(--color-rule); }
+.stop-name { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--space-sm); }
+.stop-name strong { font-size: var(--text-md); font-weight: 700; color: var(--color-ink); }
+.stop-cat, .stop-addr, .stop-hop { font-size: var(--text-xs); color: var(--color-muted); }
+.stop-desc { font-size: var(--text-sm); }
+.stop-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 var(--space-md); }
+.stop-foot .link-quiet { margin-left: auto; }
+.back-toc { justify-self: start; }
+@media (min-width: 60rem) { .toc-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* jeju-days 계열과 포항(editor-151): 장소 제목의 날 표시, 한 칸에 둘 이상인 지도 링크 */
+.spot-title .day-badge { display: block; margin-bottom: var(--space-2xs); font-family: var(--font-family); font-size: var(--text-sm); font-weight: 600; color: var(--color-accent); }
+.map-btn-wrap.multi .link-quiet:not(:last-child) { margin-right: var(--space-lg); }
   </style>
 </head>
 <body>
 
   <header class="site-header">
-    <div class="header-inner">
+    <div class="header-inner container">
       <a href="../" class="header-logo">오늘 데이트 <span>매거진</span></a>
       <nav class="header-nav">
         <a href="../../">추천 코스 홈</a>
@@ -425,345 +379,173 @@
     </div>
   </header>
 
-  <main class="article-container">
-    <article>
-      <header class="article-header">
-        <span class="badge">경북 포항 · 가을 계곡 단풍과 오션뷰 산책</span>
-        <h1>[포항 당일치기 여행] 내연산 12폭포·소금강 전망대 단풍 트레킹부터 동해 절벽 러블랑 카페, 이가리 닻 전망대와 환호공원 스페이스워크 야경까지</h1>
-        <div class="meta-info">
-          <span>작성일: 2026-10-16</span>
-          <span>글: 오늘 데이트 에디토리얼 팀</span>
-          <span>사진: 한국관광공사 TourAPI·카카오맵 포토 리뷰</span>
+  <main class="article-container"><article>
+      <header class="article-header hero container">
+        <div class="hero-text">
+          <p class="hero-kicker badge-category"><span>경북 포항</span><span>가을 계곡 단풍과 오션뷰 산책</span></p>
+          <h1 class="article-title">[포항 당일치기 여행] 내연산 12폭포·소금강 전망대 단풍 트레킹부터 동해 절벽 러블랑 카페, 이가리 닻 전망대와 환호공원 스페이스워크 야경까지</h1>
+          <div class="article-meta">
+            <span>작성일: 2026-10-16</span>
+            <span>글: 오늘 데이트 에디토리얼 팀</span>
+            <span class="meta-credit">사진: 한국관광공사 TourAPI·카카오맵 포토 리뷰</span>
+          </div>
+          <p><a class="btn" href="../../#c=1791181496944.1792069837143.1792069837144.9267.1483.1482">앱에서 코스 열기</a></p>
         </div>
       </header>
 
-      <!-- 동선 요약 카드 -->
-      <section class="summary-card">
-        <h2 class="summary-title" style="margin-top:0; font-size:1.05rem;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-accent);"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-          포항 가을 당일치기 추천 동선 요약
-        </h2>
-        <div class="route-steps">
-          <div class="route-step-item">
-            <div class="step-num">1</div>
-            <div class="step-text">
-              <strong>오전 09:30 · 포항 보경사</strong>
-              <div class="step-note">603년 지명법사가 창건한 천년 고찰 경내 산책과 단풍 숲길 진입 (입장료 무료)</div>
-            </div>
-          </div>
-          <div class="route-step-item">
-            <div class="step-num">2</div>
-            <div class="step-text">
-              <strong>오전 10:15 · 내연산 12폭포 & 소금강 전망대</strong>
-              <div class="step-note">상생폭포를 거쳐 관음폭포와 연산구름다리, 선일대 수직 암벽을 조망하는 계곡 트레킹 (도보 이동, 약 2시간 30분)</div>
-            </div>
-          </div>
-          <div class="route-step-item">
-            <div class="step-num">3</div>
-            <div class="step-text">
-              <strong>오후 13:15 · 포항 러블랑</strong>
-              <div class="step-note">7번 국도 해안 절벽 위에 자리한 통창 오션뷰 대형 베이커리 카페 쉼 (보경사에서 차량 8.9km, 약 12분)</div>
-            </div>
-          </div>
-          <div class="route-step-item">
-            <div class="step-num">4</div>
-            <div class="step-text">
-              <strong>오후 15:15 · 이가리 닻 전망대</strong>
-              <div class="step-note">푸른 동해를 향해 시원하게 뻗은 닻 모양 해상 데크길 산책 (러블랑에서 차량 11.8km, 약 12분)</div>
-            </div>
-          </div>
-          <div class="route-step-item">
-            <div class="step-num">5</div>
-            <div class="step-text">
-              <strong>오후 16:40 · 환호공원 포항 스페이스워크</strong>
-              <div class="step-note">영일만과 도심 바다가 펼쳐지는 롤러코스터 조형물 공중 산책과 노을·야경 (이가리에서 차량 18.8km, 약 24분)</div>
-            </div>
+      <!-- 동선 -->
+      <section class="timeline-card band">
+        <div class="container">
+          <h2 class="timeline-title">포항 가을 당일치기 추천 동선 요약</h2>
+          <div class="route" style="--n:5">
+            <div class="tl-step" style="--r:2; --c:1"><span class="tl-badge">1</span><span class="tl-time">오전 09:30</span><span class="tl-place">포항 보경사</span><span class="tl-note">603년 지명법사가 창건한 천년 고찰 경내 산책과 단풍 숲길 진입 (입장료 무료)</span></div>
+            <div class="tl-step" style="--r:2; --c:2"><span class="tl-badge">2</span><span class="tl-time">오전 10:15</span><span class="tl-place">내연산 12폭포 & 소금강 전망대</span><span class="tl-note">상생폭포를 거쳐 관음폭포와 연산구름다리, 선일대 수직 암벽을 조망하는 계곡 트레킹 (도보 이동, 약 2시간 30분)</span></div>
+            <div class="tl-step" style="--r:2; --c:3"><span class="tl-badge">3</span><span class="tl-time">오후 13:15</span><span class="tl-place">포항 러블랑</span><span class="tl-note">7번 국도 해안 절벽 위에 자리한 통창 오션뷰 대형 베이커리 카페 쉼 (보경사에서 차량 8.9km, 약 12분)</span></div>
+            <div class="tl-step" style="--r:2; --c:4"><span class="tl-badge">4</span><span class="tl-time">오후 15:15</span><span class="tl-place">이가리 닻 전망대</span><span class="tl-note">푸른 동해를 향해 시원하게 뻗은 닻 모양 해상 데크길 산책 (러블랑에서 차량 11.8km, 약 12분)</span></div>
+            <div class="tl-step" style="--r:2; --c:5"><span class="tl-badge">5</span><span class="tl-time">오후 16:40</span><span class="tl-place">환호공원 포항 스페이스워크</span><span class="tl-note">영일만과 도심 바다가 펼쳐지는 롤러코스터 조형물 공중 산책과 노을·야경 (이가리에서 차량 18.8km, 약 24분)</span></div>
           </div>
         </div>
       </section>
 
-      <p>
+      <div class="container">
+        <div class="prose-intro"><p>
         선선한 가을바람이 불어오는 10월, 경북 포항은 울창한 기암괴석 계곡의 단풍과 눈이 시리도록 푸른 동해 바다를 하루에 모두 만날 수 있는 매력적인 여행지입니다.
         특히 '한국의 소금강'이자 'K-장가계'로 불리는 내연산 청하골은 신라 천년 고찰 보경사를 지나 12개 폭포와 수직 암벽을 따라 이어지는 명품 트레킹 코스로 유명합니다.
       </p>
-      <p>
+        <p>
         이번 코스는 오전 시간 내연산의 맑은 공기와 웅장한 폭포, 단풍 숲을 호젓하게 거닐고, 오후에는 7번 국도를 따라 동해안 해안 절벽 카페와 해상 전망대, 그리고 영일만이 내려다보이는 공중 산책로 스페이스워크까지 물 흐르듯 이어지는 포항의 알짜 하루 여정입니다.
-      </p>
+      </p></div>
+      </div>
 
-      <!-- 스팟 1: 포항 보경사 -->
-      <h2>1. 천년의 솔숲과 단풍이 반기는 신라 고찰, 포항 보경사</h2>
-      <p>
+      <div class="container">
+        <div class="spots stories">
+          <section class="story-section">
+            <h2 class="spot-title">1. 천년의 솔숲과 단풍이 반기는 신라 고찰, 포항 보경사</h2>
+            <div class="story-body">
+              <p>
         내연산 자락에 자리 잡은 보경사(寶鏡寺)는 서기 602년 진나라에서 유학하고 돌아온 신라 지명법사가 창건한 천년 고찰입니다.
         일주문을 지나 경내로 들어서면 수백 년 된 소나무 군락과 단풍나무가 호젓한 산사를 고즈넉하게 감싸 안고 있습니다.
       </p>
-      <p>
+              <p>
         경내에는 보물로 지정된 원진국사비와 고즈넉한 대웅전, 석탑이 정갈하게 보존되어 있으며, 아침 햇살이 단청 사이로 비쳐들 때 고요한 풍경 소리를 들으며 마음을 차분하게 가라앉히기 좋습니다.
         특히 2023년 5월부터 문화재 관람료가 전면 무료화되어 누구나 부담 없이 사찰 경내와 내연산 계곡 입구로 편안하게 진입할 수 있습니다.
       </p>
+              <figure class="story-photo">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/30/3573030_image2_1.jpg" alt="계절 산자락 단풍을 배경으로 자리 잡은 포항 보경사 대웅전과 전통 건축물 전경" loading="lazy" />
+              <figcaption><span>신라 천년 고찰 보경사 경내 전경</span><span>출처: 한국관광공사 TourAPI (공공누리 제1유형)</span></figcaption>
+            </figure>
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">경북 포항시 북구 송라면 보경로 523</span></div><div class="info-row"><span class="info-label">운영 시간</span><span class="info-val">매일 06:00 ~ 18:00 (연중무휴)</span></div><div class="info-row"><span class="info-label">입장료</span><span class="info-val">무료 (문화재 관람료 면제)</span></div><div class="info-row"><span class="info-label">주차 정보</span><span class="info-val">내연산보경사시립공원 공영주차장 (무료)</span></div></div>
+              <div class="tip-box"><strong class="tip-title">에디터 꿀팁: 보경사 주차 및 트레킹 시작</strong>보경사 앞 상가지구를 지나 내연산보경사시립공원 공영주차장에 무료로 주차한 뒤 일주문까지 약 5분 정도 가볍게 걸어 올라가면 됩니다. 천년 고찰의 고즈넉한 숲길을 따라 아침 산책을 즐기며 여유롭게 하루 일정을 시작해 보세요.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%ED%8F%AC%ED%95%AD%20%EB%B3%B4%EA%B2%BD%EC%82%AC" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          네이버 지도에서 '포항 보경사' 길찾기</a></div>
+            </div>
+          </section>
 
-      <div class="real-photo-card">
-        <img src="https://tong.visitkorea.or.kr/cms/resource/30/3573030_image2_1.jpg" alt="계절 산자락 단풍을 배경으로 자리 잡은 포항 보경사 대웅전과 전통 건축물 전경" loading="lazy">
-        <div class="photo-caption">
-          <span>신라 천년 고찰 보경사 경내 전경</span>
-          <span>출처: 한국관광공사 TourAPI (공공누리 제1유형)</span>
-        </div>
-      </div>
-
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">주소</span>
-          <span class="info-val">경북 포항시 북구 송라면 보경로 523</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">운영 시간</span>
-          <span class="info-val">매일 06:00 ~ 18:00 (연중무휴)</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">입장료</span>
-          <span class="info-val">무료 (문화재 관람료 면제)</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">주차 정보</span>
-          <span class="info-val">내연산보경사시립공원 공영주차장 (무료)</span>
-        </div>
-      </div>
-
-      <div class="tip-box">
-        <div class="tip-title">에디터 꿀팁: 보경사 주차 및 트레킹 시작</div>
-        보경사 앞 상가지구를 지나 내연산보경사시립공원 공영주차장에 무료로 주차한 뒤 일주문까지 약 5분 정도 가볍게 걸어 올라가면 됩니다. 천년 고찰의 고즈넉한 숲길을 따라 아침 산책을 즐기며 여유롭게 하루 일정을 시작해 보세요.
-      </div>
-
-      <div class="map-btn-wrap">
-        <a href="https://map.naver.com/p/search/%ED%8F%AC%ED%95%AD%20%EB%B3%B4%EA%B2%BD%EC%82%AC" target="_blank" rel="noopener noreferrer" class="map-btn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-          네이버 지도에서 '포항 보경사' 길찾기
-        </a>
-      </div>
-
-      <!-- 스팟 2: 내연산 12폭포 & 소금강 전망대 -->
-      <h2>2. 기암절벽과 옥빛 물줄기가 빚어낸 비경, 내연산 12폭포 & 소금강 전망대</h2>
-      <p>
+          <section class="story-section">
+            <h2 class="spot-title">2. 기암절벽과 옥빛 물줄기가 빚어낸 비경, 내연산 12폭포 & 소금강 전망대</h2>
+            <div class="story-body">
+              <p>
         보경사 담장을 지나 청하골 계곡으로 발을 들이면 내연산 12폭포 트레킹이 본격적으로 시작됩니다.
         내연산 계곡은 완만한 흙길과 나무 데크로 정비되어 있어 등산 장비가 없어도 편안한 운동화 차림으로 가볍게 탐방하기 좋습니다.
       </p>
-      <p>
+              <p>
         제1폭포인 쌍둥이 물줄기 '상생폭포'를 시작으로 보현폭포, 삼보폭포, 잠룡폭포를 차례로 지나면 내연산의 하이라이트인 제6폭포 '관음폭포'와 제7폭포 '연산폭포'에 다다릅니다.
         관음폭포 뒤편 동굴 모양 암벽과 에메랄드빛 소는 감탄을 자아내며, 연산구름다리를 건너 마주하는 거대한 수직 암벽의 연산폭포는 시원한 물보라와 함께 웅장한 자연의 울림을 전해줍니다.
       </p>
-
-      <div class="real-photo-card">
-        <img src="https://tong.visitkorea.or.kr/cms/resource/72/3520372_image2_1.jpg" alt="기암절벽과 연산구름다리 아래로 에메랄드빛 계곡물이 굽이치는 내연산 12폭포 관음폭포 절경" loading="lazy">
-        <div class="photo-caption">
-          <span>내연산 청하골 12폭포 중 백미인 관음폭포와 연산구름다리</span>
-          <span>출처: 한국관광공사 TourAPI (공공누리 제1유형)</span>
-        </div>
-      </div>
-
-      <p>
+              <figure class="story-photo">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/72/3520372_image2_1.jpg" alt="기암절벽과 연산구름다리 아래로 에메랄드빛 계곡물이 굽이치는 내연산 12폭포 관음폭포 절경" loading="lazy" />
+              <figcaption><span>내연산 청하골 12폭포 중 백미인 관음폭포와 연산구름다리</span><span>출처: 한국관광공사 TourAPI (공공누리 제1유형)</span></figcaption>
+            </figure>
+              <p>
         관음폭포 갈림길에서 선일대 방면 나무 계단을 따라 오르면 깎아지른 수직 절벽 위에 설치된 '소금강 전망대'가 나타납니다.
         전망대에 서면 맞은편 선일대와 비하대, 학소대 등 기암절벽 산세가 360도 파노라마로 펼쳐집니다. 10월 중하순부터는 계곡 자락을 따라 단풍이 깃드는 풍경을 조망할 수 있어 청하골 트레킹의 백미로 꼽힙니다.
       </p>
+              <figure class="story-photo">
+              <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/3b3c10dbb588931aec65c75c5485c29fc7d98de5?original" alt="내연산 소금강 전망대에서 내려다본 수직 기암절벽 선일대와 산세 조망" loading="lazy" />
+              <figcaption><span>소금강 전망대에서 조망하는 내연산 수직 암벽 선일대 풍경</span><span>출처: 카카오맵 포토 리뷰</span></figcaption>
+            </figure>
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">경북 포항시 북구 송라면 중산리 (내연산 청하골)</span></div><div class="info-row"><span class="info-label">소요 시간</span><span class="info-val">보경사 왕복 약 2시간 ~ 2시간 30분</span></div><div class="info-row"><span class="info-label">코스 구성</span><span class="info-val">보경사 ~ 관음·연산폭포 ~ 소금강 전망대 원점 회귀</span></div><div class="info-row"><span class="info-label">입장료</span><span class="info-val">무료</span></div></div>
+              <div class="tip-box"><strong class="tip-title">에디터 꿀팁: 추천 트레킹 동선과 신발</strong>보경사에서 출발해 완만한 숲길을 따라 상생폭포와 관음폭포를 감상한 뒤 소금강 전망대 데크에 오르는 코스가 추천 동선입니다. 계곡 바위 구간이 젖어 있을 수 있으므로 미끄럼 방지가 되는 운동화를 신는 것을 권장합니다.</div>
+              <div class="map-btn-wrap multi"><a href="https://map.naver.com/p/search/%EB%82%B4%EC%97%B0%EC%82%B0%2012%ED%8F%AD%ED%8F%AC" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          네이버 지도에서 '내연산 12폭포' 길찾기</a><a href="https://map.naver.com/p/search/%ED%8F%AC%ED%95%AD%20%EC%86%8C%EA%B8%88%EA%B0%95%EC%A0%84%EB%A7%9D%EB%8C%80" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          네이버 지도에서 '포항 소금강전망대' 길찾기</a></div>
+            </div>
+          </section>
 
-      <div class="real-photo-card">
-        <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/3b3c10dbb588931aec65c75c5485c29fc7d98de5?original" alt="내연산 소금강 전망대에서 내려다본 수직 기암절벽 선일대와 산세 조망" loading="lazy">
-        <div class="photo-caption">
-          <span>소금강 전망대에서 조망하는 내연산 수직 암벽 선일대 풍경</span>
-          <span>출처: 카카오맵 포토 리뷰</span>
-        </div>
-      </div>
-
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">주소</span>
-          <span class="info-val">경북 포항시 북구 송라면 중산리 (내연산 청하골)</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">소요 시간</span>
-          <span class="info-val">보경사 왕복 약 2시간 ~ 2시간 30분</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">코스 구성</span>
-          <span class="info-val">보경사 ~ 관음·연산폭포 ~ 소금강 전망대 원점 회귀</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">입장료</span>
-          <span class="info-val">무료</span>
-        </div>
-      </div>
-
-      <div class="tip-box">
-        <div class="tip-title">에디터 꿀팁: 추천 트레킹 동선과 신발</div>
-        보경사에서 출발해 완만한 숲길을 따라 상생폭포와 관음폭포를 감상한 뒤 소금강 전망대 데크에 오르는 코스가 추천 동선입니다. 계곡 바위 구간이 젖어 있을 수 있으므로 미끄럼 방지가 되는 운동화를 신는 것을 권장합니다.
-      </div>
-
-      <div class="map-btn-wrap" style="display:flex; gap:10px; flex-wrap:wrap;">
-        <a href="https://map.naver.com/p/search/%EB%82%B4%EC%97%B0%EC%82%B0%2012%ED%8F%AD%ED%8F%AC" target="_blank" rel="noopener noreferrer" class="map-btn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-          네이버 지도에서 '내연산 12폭포' 길찾기
-        </a>
-        <a href="https://map.naver.com/p/search/%ED%8F%AC%ED%95%AD%20%EC%86%8C%EA%B8%88%EA%B0%95%EC%A0%84%EB%A7%9D%EB%8C%80" target="_blank" rel="noopener noreferrer" class="map-btn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-          네이버 지도에서 '포항 소금강전망대' 길찾기
-        </a>
-      </div>
-
-      <!-- 스팟 3: 포항 러블랑 -->
-      <h2>3. 7번 국도 해안 절벽 위 파노라마 바다 뷰, 포항 러블랑</h2>
-      <p>
+          <section class="story-section">
+            <h2 class="spot-title">3. 7번 국도 해안 절벽 위 파노라마 바다 뷰, 포항 러블랑</h2>
+            <div class="story-body">
+              <p>
         내연산의 시원한 숲길 트레킹을 마치고 보경사에서 차로 약 12분(거리 8.9km) 7번 국도를 따라 동해안 쪽으로 달리면 깎아지른 해안 절벽 위에 하얗게 솟아 있는 오션뷰 베이커리 카페 '러블랑(LOVEBLANC)'에 도착합니다.
       </p>
-      <p>
+              <p>
         넓은 통유리 창과 야외 테라스가 마련되어 있어 실내 좌석 어디서나 푸른 동해 수평선이 눈앞에 펼쳐집니다.
         다양한 베이커리와 시그니처 커피를 곁들이며 트레킹 후 편안한 휴식을 누릴 수 있습니다.
       </p>
+              <figure class="story-photo">
+              <img src="https://t1.kakaocdn.net/mystore/7EAA242576A64B9C97FA512F0AF6DECB" alt="대형 통유리를 통해 푸른 동해 바다와 해안 정자가 한눈에 들어오는 포항 러블랑 카페 실내 전경" loading="lazy" />
+              <figcaption><span>동해안 해안 절벽을 조망하는 대형 오션뷰 카페 러블랑</span><span>출처: 카카오맵 포토 리뷰</span></figcaption>
+            </figure>
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">경북 포항시 북구 송라면 동해대로 3310</span></div><div class="info-row"><span class="info-label">영업 시간</span><span class="info-val">월~금 09:00 ~ 21:00, 토·일·공휴일 09:00 ~ 21:30 (카카오맵 기준)</span></div><div class="info-row"><span class="info-label">대표 메뉴</span><span class="info-val">카페러블랑(시그니처) 9,000원 / 카페라떼 8,000원 (카카오맵 기준)</span></div><div class="info-row"><span class="info-label">주차 정보</span><span class="info-val">매장 전용 대형 지상 주차장 구비 (무료)</span></div></div>
+              <div class="tip-box"><strong class="tip-title">에디터 꿀팁: 야외 포토존과 자리 선정</strong>카페 야외 테라스 쪽으로 나가면 바다로 뻗어 있는 하얀 정자와 기암절벽을 배경으로 사진을 남길 수 있는 시그니처 포토존이 조성되어 있습니다. 창가 좌석은 수평선이 시원하게 보여 바다 풍경을 감상하며 쉬어가기 좋습니다.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%ED%8F%AC%ED%95%AD%20%EB%9F%AC%EB%B8%94%EB%9E%91" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          네이버 지도에서 '포항 러블랑' 길찾기</a></div>
+            </div>
+          </section>
 
-      <div class="real-photo-card">
-        <img src="https://t1.kakaocdn.net/mystore/7EAA242576A64B9C97FA512F0AF6DECB" alt="대형 통유리를 통해 푸른 동해 바다와 해안 정자가 한눈에 들어오는 포항 러블랑 카페 실내 전경" loading="lazy">
-        <div class="photo-caption">
-          <span>동해안 해안 절벽을 조망하는 대형 오션뷰 카페 러블랑</span>
-          <span>출처: 카카오맵 포토 리뷰</span>
-        </div>
-      </div>
-
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">주소</span>
-          <span class="info-val">경북 포항시 북구 송라면 동해대로 3310</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">영업 시간</span>
-          <span class="info-val">월~금 09:00 ~ 21:00, 토·일·공휴일 09:00 ~ 21:30 (카카오맵 기준)</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">대표 메뉴</span>
-          <span class="info-val">카페러블랑(시그니처) 9,000원 / 카페라떼 8,000원 (카카오맵 기준)</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">주차 정보</span>
-          <span class="info-val">매장 전용 대형 지상 주차장 구비 (무료)</span>
-        </div>
-      </div>
-
-      <div class="tip-box">
-        <div class="tip-title">에디터 꿀팁: 야외 포토존과 자리 선정</div>
-        카페 야외 테라스 쪽으로 나가면 바다로 뻗어 있는 하얀 정자와 기암절벽을 배경으로 사진을 남길 수 있는 시그니처 포토존이 조성되어 있습니다. 창가 좌석은 수평선이 시원하게 보여 바다 풍경을 감상하며 쉬어가기 좋습니다.
-      </div>
-
-      <div class="map-btn-wrap">
-        <a href="https://map.naver.com/p/search/%ED%8F%AC%ED%95%AD%20%EB%9F%AC%EB%B8%94%EB%9E%91" target="_blank" rel="noopener noreferrer" class="map-btn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-          네이버 지도에서 '포항 러블랑' 길찾기
-        </a>
-      </div>
-
-      <!-- 스팟 4: 이가리 닻 전망대 -->
-      <h2>4. 푸른 동해 위를 걷는 닻 모양 해상 데크, 이가리 닻 전망대</h2>
-      <p>
+          <section class="story-section">
+            <h2 class="spot-title">4. 푸른 동해 위를 걷는 닻 모양 해상 데크, 이가리 닻 전망대</h2>
+            <div class="story-body">
+              <p>
         러블랑에서 7번 국도와 해안도로를 따라 남쪽으로 약 11.8km(차량 약 12분) 이동하면 솔숲 언덕 너머로 짙푸른 바다를 향해 뻗어 있는 '이가리 닻 전망대'를 만납니다.
         선박의 닻 모양을 형상화한 해상 목재 데크 교량입니다.
       </p>
-      <p>
+              <p>
         전망대 끝자락의 빨간 등대 조형물과 함께 시원한 바다 한가운데 서 있는 듯한 청량감을 만끽할 수 있습니다.
         해송 숲과 해안 암초가 어우러져 바다 풍경을 감상하며 걷기에 더없이 좋습니다.
       </p>
+              <figure class="story-photo">
+              <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/550c7d1884facfc0ec751d6e24d96d928eb54985?original" alt="푸른 바다 위로 길게 뻗은 목재 데크와 빨간 등대 조형물이 돋보이는 포항 이가리 닻 전망대 전경" loading="lazy" />
+              <figcaption><span>바다 위로 시원하게 뻗어 있는 이가리 닻 전망대</span><span>출처: 카카오맵 포토 리뷰</span></figcaption>
+            </figure>
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">경북 포항시 북구 청하면 이가리 산67-3</span></div><div class="info-row"><span class="info-label">개방 시간</span><span class="info-val">매일 09:00 ~ 18:00 (기상 악화 시 통제)</span></div><div class="info-row"><span class="info-label">입장료</span><span class="info-val">무료</span></div><div class="info-row"><span class="info-label">주차 정보</span><span class="info-val">이가리닻전망대 2주차장 및 인근 공영 공간 이용 (무료)</span></div></div>
+              <div class="tip-box"><strong class="tip-title">에디터 꿀팁: 해변 산책과 방문 시기</strong>데크길을 걷고 해변 쪽으로 내려오면 바다를 배경으로 사진을 남기기 좋습니다. 가을철 바람이 강한 날에는 해상 데크 출입이 일시 제한될 수 있으니 바람이 잦아드는 오후 시간대에 방문하는 것을 권장합니다.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%EC%9D%B4%EA%B0%80%EB%A6%AC%20%EB%8B%BB%20%EC%A0%84%EB%A7%9D%EB%8C%80" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          네이버 지도에서 '이가리 닻 전망대' 길찾기</a></div>
+            </div>
+          </section>
 
-      <div class="real-photo-card">
-        <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/550c7d1884facfc0ec751d6e24d96d928eb54985?original" alt="푸른 바다 위로 길게 뻗은 목재 데크와 빨간 등대 조형물이 돋보이는 포항 이가리 닻 전망대 전경" loading="lazy">
-        <div class="photo-caption">
-          <span>바다 위로 시원하게 뻗어 있는 이가리 닻 전망대</span>
-          <span>출처: 카카오맵 포토 리뷰</span>
-        </div>
-      </div>
-
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">주소</span>
-          <span class="info-val">경북 포항시 북구 청하면 이가리 산67-3</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">개방 시간</span>
-          <span class="info-val">매일 09:00 ~ 18:00 (기상 악화 시 통제)</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">입장료</span>
-          <span class="info-val">무료</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">주차 정보</span>
-          <span class="info-val">이가리닻전망대 2주차장 및 인근 공영 공간 이용 (무료)</span>
-        </div>
-      </div>
-
-      <div class="tip-box">
-        <div class="tip-title">에디터 꿀팁: 해변 산책과 방문 시기</div>
-        데크길을 걷고 해변 쪽으로 내려오면 바다를 배경으로 사진을 남기기 좋습니다. 가을철 바람이 강한 날에는 해상 데크 출입이 일시 제한될 수 있으니 바람이 잦아드는 오후 시간대에 방문하는 것을 권장합니다.
-      </div>
-
-      <div class="map-btn-wrap">
-        <a href="https://map.naver.com/p/search/%EC%9D%B4%EA%B0%80%EB%A6%AC%20%EB%8B%BB%20%EC%A0%84%EB%A7%9D%EB%8C%80" target="_blank" rel="noopener noreferrer" class="map-btn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-          네이버 지도에서 '이가리 닻 전망대' 길찾기
-        </a>
-      </div>
-
-      <!-- 스팟 5: 포항 스페이스워크 (환호공원) -->
-      <h2>5. 영일만 하늘을 걷는 롤러코스터 조형물, 환호공원 포항 스페이스워크</h2>
-      <p>
+          <section class="story-section">
+            <h2 class="spot-title">5. 영일만 하늘을 걷는 롤러코스터 조형물, 환호공원 포항 스페이스워크</h2>
+            <div class="story-body">
+              <p>
         이가리에서 남쪽으로 차를 몰아 포항 시내 북단 환호공원으로 이동하면(차량 약 24분, 거리 18.8km), 하루의 피날레를 장식할 포항의 랜드마크 '스페이스워크(Space Walk)'가 언덕 위에 우뚝 솟아 있습니다.
         독일의 세계적인 건축·예술 듀오 하이케 무터와 울리히 겐츠가 디자인하고 포스코 철강으로 지어진 체험형 조형물입니다.
       </p>
-      <p>
+              <p>
         총 길이 333m, 높이 25m의 곡선형 철골 트랙을 따라 717개의 계단을 직접 걸어 올라가면 마치 우주 공간이나 롤러코스터 레일 위를 유영하는 듯한 이색적인 전율을 선사합니다.
         가장 높은 계단에 오르면 시원한 바닷바람과 함께 영일대해수욕장과 포스코 야경, 영일만 앞바다가 360도로 한눈에 담깁니다.
       </p>
-
-      <div class="real-photo-card">
-        <img src="https://tong.visitkorea.or.kr/cms/resource_photo/44/3415044_image2_1.jpg" alt="벚꽃 가지 사이로 올려다본 환호공원 스페이스워크 철골 트랙" loading="lazy">
-        <div class="photo-caption">
-          <span>벚꽃 사이로 보이는 환호공원 스페이스워크 전경</span>
-          <span>출처: 한국관광공사 TourAPI (공공누리 제1유형)</span>
+              <figure class="story-photo">
+              <img src="https://tong.visitkorea.or.kr/cms/resource_photo/44/3415044_image2_1.jpg" alt="벚꽃 가지 사이로 올려다본 환호공원 스페이스워크 철골 트랙" loading="lazy" />
+              <figcaption><span>벚꽃 사이로 보이는 환호공원 스페이스워크 전경</span><span>출처: 한국관광공사 TourAPI (공공누리 제1유형)</span></figcaption>
+            </figure>
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">경북 포항시 북구 환호공원길 30 (환호동 산56-1)</span></div><div class="info-row"><span class="info-label">운영 시간</span><span class="info-val">동절기(11~3월) 평일 10:00~17:00, 주말·공휴일 10:00~18:00 / 하절기(4~10월) 평일 10:00~20:00, 주말 10:00~21:00 (매월 첫째 주 월요일 정기휴무, 공휴일인 경우 다음 평일)</span></div><div class="info-row"><span class="info-label">입장료</span><span class="info-val">무료 (포항시 운영)</span></div><div class="info-row"><span class="info-label">주차 정보</span><span class="info-val">환호공원 공영주차장 (무료 이용)</span></div></div>
+              <div class="tip-box"><strong class="tip-title">에디터 꿀팁: 일몰 시간 방문과 야간 조명</strong>10월 일몰 시간(오후 5시 40분 전후) 약 30분 전에 도착하면 노을로 붉게 물드는 영일만과 해가 진 후 조형물 전체에 켜지는 은은한 조명 야경을 감상할 수 있습니다. 바람이 강하게 불거나 우천 시에는 안전을 위해 입장이 제한되므로 방문 직전 날씨를 확인해 두는 것이 좋습니다.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%ED%8F%AC%ED%95%AD%20%EC%8A%A4%ED%8E%98%EC%9D%B4%EC%8A%A4%EC%9B%8C%ED%81%AC" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          네이버 지도에서 '포항 스페이스워크' 길찾기</a></div>
+            </div>
+          </section>
         </div>
-      </div>
 
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">주소</span>
-          <span class="info-val">경북 포항시 북구 환호공원길 30 (환호동 산56-1)</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">운영 시간</span>
-          <span class="info-val">동절기(11~3월) 평일 10:00~17:00, 주말·공휴일 10:00~18:00 / 하절기(4~10월) 평일 10:00~20:00, 주말 10:00~21:00 (매월 첫째 주 월요일 정기휴무, 공휴일인 경우 다음 평일)</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">입장료</span>
-          <span class="info-val">무료 (포항시 운영)</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">주차 정보</span>
-          <span class="info-val">환호공원 공영주차장 (무료 이용)</span>
-        </div>
-      </div>
-
-      <div class="tip-box">
-        <div class="tip-title">에디터 꿀팁: 일몰 시간 방문과 야간 조명</div>
-        10월 일몰 시간(오후 5시 40분 전후) 약 30분 전에 도착하면 노을로 붉게 물드는 영일만과 해가 진 후 조형물 전체에 켜지는 은은한 조명 야경을 감상할 수 있습니다. 바람이 강하게 불거나 우천 시에는 안전을 위해 입장이 제한되므로 방문 직전 날씨를 확인해 두는 것이 좋습니다.
-      </div>
-
-      <div class="map-btn-wrap">
-        <a href="https://map.naver.com/p/search/%ED%8F%AC%ED%95%AD%20%EC%8A%A4%ED%8E%98%EC%9D%B4%EC%8A%A4%EC%9B%8C%ED%81%AC" target="_blank" rel="noopener noreferrer" class="map-btn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-          네이버 지도에서 '포항 스페이스워크' 길찾기
-        </a>
-      </div>
-
-      <!-- 코스 경비 요약 -->
-      <h2>포항 가을 당일치기 코스 2인 추천 예산</h2>
-      <p>
+        <section class="cost-table-card">
+          <div class="cost-head">
+            <h2 class="timeline-title">포항 가을 당일치기 코스 2인 추천 예산</h2>
+            <p>
         포항의 주요 자연 명소와 공공 관광지는 대부분 입장료와 주차료가 무료로 운영되어 알뜰하면서도 매우 만족도 높은 여행을 완성할 수 있습니다.
       </p>
-
-      <div class="table-wrap">
-        <table>
+          </div>
+          <div class="table-wrap"><table class="cost-table">
           <thead>
             <tr>
               <th>구분</th>
@@ -797,49 +579,49 @@
               <td>0원</td>
               <td>체험 조형물 무료 개방, 공영주차장 무료</td>
             </tr>
-            <tr style="background:#f8fafc; font-weight:700;">
+            <tr class="cost-total-row">
               <td colspan="2">2인 총 합계</td>
-              <td style="color:var(--color-accent);">약 24,000 ~ 32,000원</td>
+              <td>약 24,000 ~ 32,000원</td>
               <td>1인 약 12,000 ~ 16,000원 (식사 비용 별도)</td>
             </tr>
           </tbody>
-        </table>
-      </div>
+        </table></div>
+        </section>
 
-      <!-- 아웃트로 요약 카드 -->
-      <section class="outro-card">
-        <h3 class="outro-title">포항 가을 여행을 마치며</h3>
-        <p style="margin-bottom:10px;">
+        <div class="cta-card">
+          <h3>포항 가을 여행을 마치며</h3>
+          <p>
           신라 천년 고찰 보경사의 솔숲길에서 시작해 깎아지른 절벽 사이로 쏟아지는 12폭포의 옥빛 물줄기, 가슴이 뻥 뚫리는 7번 국도의 동해 바다와 붉은 노을빛을 품은 스페이스워크 공중 산책까지.
         </p>
-        <p style="margin-bottom:0;">
+        <p>
           단풍이 짙어가는 10월, 숲과 바다가 함께 어우러지는 포항에서 소중한 사람과 함께 잊지 못할 가을날의 하루를 완성해 보시기 바랍니다.
         </p>
-      </section>
-
-      <!-- 앱 연동 배너 -->
-      <div class="app-link-card">
-        <div class="app-link-title">오늘 데이트에서 나만의 맞춤 코스를 찾아보세요</div>
-        <div class="app-link-desc">
-          전국 2만여 개 엄선된 데이트 스팟과 감성 여행지 정보를 거리순·테마별로 한눈에 확인할 수 있습니다.
         </div>
-        <a href="../../" class="app-link-btn">오늘 데이트 둘러보기</a>
-      </div>
 
-      <div class="app-course-box" style="margin: 40px 0 24px; padding: 20px 22px; background: var(--color-accent-light); border: 1px solid var(--color-border); border-radius: 14px;">
-        <strong style="display: block; font-size: 17px; color: var(--color-text-main); margin-bottom: 6px;">🗺️ 이 코스 오늘 데이트에서 열기</strong>
-        <p style="margin: 0 0 14px; font-size: 14.5px; line-height: 1.6; color: var(--color-text-main);">글에 나온 장소 6곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
-        <a href="../../#c=1791181496944.1792069837143.1792069837144.9267.1483.1482" style="display: inline-block; padding: 10px 18px; border-radius: 10px; background: var(--color-text-main); color: #ffffff; font-weight: 700; font-size: 15px; text-decoration: none;">앱에서 코스 열기 →</a>
-      </div>
+        <div class="app-course-box">
+          <div>
+            <p class="cta-title">오늘 데이트에서 나만의 맞춤 코스를 찾아보세요</p>
+            <p>전국 2만여 개 엄선된 데이트 스팟과 감성 여행지 정보를 거리순·테마별로 한눈에 확인할 수 있습니다.</p>
+          </div>
+          <a class="btn app-action" href="../../">오늘 데이트 둘러보기</a>
+        </div>
 
-      <footer class="article-footer">
-        <p>본 콘텐츠는 오늘 데이트 에디토리얼 팀에서 공개 데이터를 기반으로 기획·작성하였습니다.</p>
-        <p style="margin-top:6px; font-size:0.8rem; color:#94a3b8;">
+        <div class="app-course-box">
+          <div>
+            <h2>이 코스 오늘 데이트에서 열기</h2>
+            <p>글에 나온 장소 6곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
+          </div>
+          <a class="btn app-action" href="../../#c=1791181496944.1792069837143.1792069837144.9267.1483.1482">앱에서 코스 열기</a>
+        </div>
+
+        <footer class="article-credit">
+          <p>본 콘텐츠는 오늘 데이트 에디토리얼 팀에서 공개 데이터를 기반으로 기획·작성하였습니다.</p>
+        <p>
           사진 출처: 한국관광공사 TourAPI (공공누리 제1유형) 및 카카오맵 포토 리뷰
         </p>
-      </footer>
-    </article>
-  </main>
+        </footer>
+      </div>
+    </article></main>
 
 </body>
 </html>

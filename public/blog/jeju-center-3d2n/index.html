@@ -16,6 +16,9 @@
 
   <!-- Pretendard 웹폰트 -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700&display=swap&text='()%2C.0123456789%3ADMORS%5B%5Day~%C2%B7%EA%B0%80%EA%B0%84%EA%B0%88%EA%B0%99%EA%B0%9C%EA%B1%B0%EA%B2%8C%EA%B2%B0%EA%B2%BD%EA%B3%84%EA%B3%A0%EA%B3%A7%EA%B3%B5%EA%B3%BC%EA%B5%90%EA%B5%AC%EA%B5%BC%EA%B6%8C%EA%B8%88%EA%B8%B0%EA%B8%B8%EA%B9%8C%EA%BD%83%EB%81%9D%EB%82%80%EB%82%98%EB%82%9C%EB%82%A0%EB%84%A4%EB%85%81%EB%85%B8%EB%8A%94%EB%8A%98%EB%8A%A5%EB%8B%88%EB%8B%A4%EB%8C%80%EB%8D%B0%EB%8F%84%EB%8F%99%EB%93%9C%EB%94%B0%EB%9D%BC%EB%9E%8C%EB%9E%98%EB%9F%AC%EB%A0%88%EB%A0%A4%EB%A1%9C%EB%A1%AC%EB%A3%8C%EB%A5%98%EB%A6%84%EB%A6%AC%EB%A6%BC%EB%A7%81%EB%A7%A4%EB%A9%94%EB%A9%B4%EB%AC%B4%EB%AC%BC%EB%B0%80%EB%B0%8F%EB%B0%94%EB%B0%95%EB%B0%AD%EB%B2%84%EB%B3%84%EB%B3%B4%EB%B6%80%EB%B6%84%EB%B6%89%EB%B8%8C%EB%B9%84%EB%B9%9B%EB%BB%97%EC%82%AC%EC%82%B0%EC%82%BC%EC%83%81%EC%83%88%EC%84%9C%EC%84%A0%EC%86%8D%EC%86%A1%EC%88%98%EC%88%99%EC%88%B2%EC%89%BC%EC%8A%A4%EC%8B%9D%EC%8B%A4%EC%95%84%EC%95%88%EC%95%BD%EC%96%91%EC%96%B4%EC%96%B5%EC%97%86%EC%97%90%EC%97%AC%EC%97%B0%EC%97%B4%EC%98%81%EC%98%88%EC%98%A4%EC%99%80%EC%99%93%EC%99%95%EC%99%B8%EC%9A%94%EC%9A%B4%EC%9B%90%EC%9C%84%EC%9D%80%EC%9D%84%EC%9D%8C%EC%9D%98%EC%9D%B4%EC%9D%B8%EC%9D%BC%EC%9E%90%EC%9E%A5%EC%9E%AC%EC%A0%80%EC%A0%88%EC%A0%95%EC%A0%9C%EC%A2%85%EC%A3%BC%EC%A4%91%EC%A7%80%EC%A7%84%EC%B1%85%EC%B2%9C%EC%B2%B4%EC%B3%90%EC%B4%9D%EC%B6%94%EC%B6%A4%EC%B8%A1%EC%B9%98%EC%B9%B4%EC%BD%94%ED%81%AC%ED%84%B0%ED%86%A0%ED%86%A4%ED%8A%B8%ED%8C%9F%ED%8E%98%ED%8E%BC%ED%91%9C%ED%94%BC%ED%95%9C%ED%95%A9%ED%95%AD%ED%96%89%ED%96%A5%ED%98%84%ED%98%95%ED%99%94%ED%99%A9%ED%9C%B4%ED%9E%90" rel="stylesheet">
 
   <script type="application/ld+json">
 {
@@ -43,733 +46,488 @@
   </script>
 
   <style>
-    :root {
-      --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-      --bg-page: #fbfaf8;
-      --bg-card: #ffffff;
-      --color-primary: #1c1917;
-      --color-accent: #059669;
-      --color-accent-light: #ecfdf5;
-      --color-accent-border: #a7f3d0;
-      --color-warm: #047857;
-      --color-text-main: #292524;
-      --color-text-sub: #57534e;
-      --color-text-faint: #78716c;
-      --color-border: #e7e5e4;
-      --color-tip-bg: #f0fdf4;
-      --color-tip-border: #dcfce7;
-      --radius-sm: 8px;
-      --radius-md: 14px;
-      --radius-lg: 20px;
-      --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
-      --shadow-md: 0 6px 20px rgba(0,0,0,0.06);
-    }
+/* hallmark-solstice: scripts/convert_blog_hallmark.mjs가 글의 <style>을 이 파일로 바꾼다 (Hallmark 2.0.0, 테마 Solstice, P-293) */
+:root {
+  color-scheme: light;
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-xs: 0.8125rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.125rem; --text-xl: 1.5625rem; --text-2xl: 1.953rem; --text-3xl: 2.441rem;
+  --text-hero: clamp(1.75rem, 1.6vw + 1.25rem, 2.75rem);
+  --text-section: clamp(1.75rem, 1.8vw + 1rem, 2.875rem); --text-title: clamp(1.25rem, 0.75vw + 0.875rem, 1.625rem); --text-lead: clamp(1.0625rem, 0.3vw + 0.95rem, 1.25rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-micro: 120ms; --dur-short: 220ms;
+  --container: 1200px; --measure: 680px; --gutter: 56px; --gap-columns: 40px; --section-gap: 120px;
+  --z-sticky-nav: 300;
+  --color-paper: oklch(94% 0.03 80); --color-paper-2: oklch(97% 0.02 85); --color-paper-3: oklch(89% 0.05 80);
+  --color-ink: oklch(27% 0.05 50); --color-ink-2: oklch(36% 0.05 50); --color-muted: oklch(48% 0.06 55);
+  --color-rule: oklch(84% 0.06 78);
+  --color-accent: oklch(54% 0.20 24); --color-accent-2: oklch(48% 0.19 24); --color-accent-ink: oklch(97% 0.02 85); --color-focus: oklch(54% 0.20 24);
+  --color-gold: oklch(74% 0.14 75); --color-gold-2: oklch(84% 0.11 80);
+  --color-band-text: oklch(94% 0.03 80); --color-band-muted: oklch(80% 0.05 75);
+  --color-hair-ink: color-mix(in oklab, var(--color-ink) 10%, transparent);
+  --font-display: "Noto Serif KR", "Nanum Myeongjo", ui-serif, serif;
+  --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --radius-card: 0; --radius-pill: 999px; --rule-hair: 1px; --rule-bar: 2px;
+  --shadow-card: 10px 10px 0 var(--color-paper-3);
+}
+@media (max-width: 60rem) { :root { --gutter: 24px; --section-gap: 88px; --gap-columns: 24px; } }
+@media (max-width: 40rem) { :root { --gutter: 16px; --section-gap: 64px; --gap-columns: 16px; } }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+html { scrollbar-color: var(--color-muted) var(--color-paper); scroll-padding-top: var(--space-3xl); }
+body { margin: 0; background: var(--color-paper); color: var(--color-ink-2); font-family: var(--font-family); font-size: var(--text-md); line-height: 1.75; word-break: keep-all; -webkit-font-smoothing: antialiased; }
+::selection { background: color-mix(in oklab, var(--color-gold) 40%, transparent); }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+a:hover { text-decoration-color: var(--color-accent); }
+article h1, article h2, article h3 { margin: 0; font-family: var(--font-display); font-weight: 700; color: var(--color-ink); line-height: 1.3; letter-spacing: -0.01em; overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+img { max-width: 100%; display: block; }
+.container { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); }
 
-    body {
-      font-family: var(--font-family);
-      background-color: var(--bg-page);
-      color: var(--color-text-main);
-      line-height: 1.85;
-      letter-spacing: -0.015em;
-      -webkit-font-smoothing: antialiased;
-    }
+/* 44px 머리 링크 규칙: scripts/test-blog-related.cjs가 글마다 하나를 요구한다 */
+header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
 
-    header.nav-header {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--color-border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .nav-inner {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 14px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .brand-logo {
-      font-weight: 800;
-      font-size: 1.15rem;
-      color: var(--color-warm);
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .nav-back {
-      font-size: 0.9rem;
-      color: var(--color-text-sub);
-      text-decoration: none;
-      font-weight: 600;
-      transition: color 0.15s ease;
-    }
-    .nav-back:hover {
-      color: var(--color-warm);
-    }
+/* Controls */
+.btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 var(--space-lg); border: 0; border-radius: var(--radius-pill); background: var(--color-accent); color: var(--color-accent-ink); font: 600 var(--text-md)/1 var(--font-family); text-decoration: none; cursor: pointer; transition: background-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out); }
+.btn:hover { background: var(--color-accent-2); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.link-quiet { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-ink); font-weight: 600; font-size: var(--text-sm); text-decoration: none; border-bottom: var(--rule-bar) solid var(--color-ink); transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out); }
+.link-quiet:hover { color: var(--color-accent); border-color: var(--color-accent); }
+.link-quiet:active { transform: translateY(1px); }
+.link-quiet:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
 
-    main.post-container {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 40px 20px 80px;
-    }
+/* Nav */
+.site-header { position: sticky; top: 0; z-index: var(--z-sticky-nav); background: var(--color-paper); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.header-inner { display: flex; justify-content: space-between; align-items: center; min-height: 64px; }
+.header-logo { font-family: var(--font-display); font-size: var(--text-lg); color: var(--color-ink); text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; }
+.header-logo span { color: var(--color-accent); margin-left: 0.3em; }
+.header-logo:hover { color: var(--color-ink-2); }
+.header-nav { display: flex; gap: var(--space-lg); }
+.header-nav a { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--text-sm); color: var(--color-ink-2); text-decoration: none; }
+.header-nav a:hover { color: var(--color-ink); text-decoration: underline; text-decoration-color: var(--color-accent); }
+.header-nav a:active, .header-logo:active { transform: translateY(1px); }
 
-    /* 포스트 헤더 */
-    .post-header {
-      margin-bottom: 36px;
-    }
-    .post-category {
-      display: inline-block;
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--color-warm);
-      background: var(--color-accent-light);
-      padding: 4px 12px;
-      border-radius: 999px;
-      margin-bottom: 14px;
-    }
-    h1.post-title {
-      font-size: 2.05rem;
-      font-weight: 800;
-      line-height: 1.35;
-      color: var(--color-primary);
-      margin-bottom: 16px;
-      word-break: keep-all;
-    }
-    .post-meta {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 12px;
-      font-size: 0.88rem;
-      color: var(--color-text-faint);
-      border-bottom: 1px solid var(--color-border);
-      padding-bottom: 18px;
-    }
-    .post-meta span.divider {
-      color: var(--color-border);
-    }
+/* Hero */
+.hero { display: grid; padding-block: var(--space-2xl) var(--space-xl); }
+.hero-text { display: grid; gap: var(--space-lg); }
+.article-title { font-size: var(--text-hero); line-height: 1.3; max-width: 28ch; }
+.hero-kicker { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.hero-kicker span:first-child { color: var(--color-accent); font-weight: 600; }
+.article-meta { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-lg); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); font-variant-numeric: tabular-nums; }
+.article-meta .meta-credit { flex-basis: 100%; }
+/* 좁은 화면에서 칸마다 한 줄: 본문 글꼴(Pretendard)이 바뀔 때 줄 수가 달라져 아래 띠가 밀리는 것을 막는다 */
+@media (max-width: 40rem) { .article-meta { flex-direction: column; flex-wrap: nowrap; } }
+.spot-photo img { width: 100%; height: 100%; object-fit: cover; outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
 
-    /* 인트로 카드 */
-    .intro-box {
-      background: var(--bg-card);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      padding: 24px;
-      margin: 28px 0 40px;
-      box-shadow: var(--shadow-sm);
-    }
-    .intro-box p {
-      margin-bottom: 14px;
-      color: var(--color-text-sub);
-      font-size: 1.02rem;
-      word-break: keep-all;
-    }
-    .intro-box p:last-child {
-      margin-bottom: 0;
-    }
+/* Lead */
+.prose-intro { max-width: var(--measure); padding-top: var(--space-xl); font-size: var(--text-lead); line-height: 1.8; color: var(--color-ink); padding-bottom: var(--space-3xl); }
 
-    /* OSRM 코스 요약 배너 */
-    .route-summary {
-      background: linear-gradient(135deg, #059669 0%, #047857 100%);
-      color: #ffffff;
-      border-radius: var(--radius-md);
-      padding: 20px 22px;
-      margin: 32px 0 44px;
-      box-shadow: var(--shadow-md);
-    }
-    .route-summary h3 {
-      font-size: 1.1rem;
-      font-weight: 800;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .route-days {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      font-size: 0.90rem;
-      line-height: 1.6;
-    }
-    .route-day-item {
-      background: rgba(255, 255, 255, 0.12);
-      border-radius: var(--radius-sm);
-      padding: 10px 14px;
-    }
-    .route-day-title {
-      font-weight: 700;
-      color: #d1fae5;
-      margin-bottom: 4px;
-    }
-    .route-stat {
-      font-size: 0.85rem;
-      color: #a7f3d0;
-    }
+/* The day, on the brown band */
+.band { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl) var(--space-xl); }
+.band .timeline-title { color: var(--color-band-text); font-size: var(--text-section); margin-bottom: var(--space-xl); }
+.route { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: 0; padding: 0; }
+.tl-act { font-size: var(--text-sm); color: var(--color-gold-2); padding-bottom: var(--space-sm); }
+.tl-step { display: grid; align-content: start; gap: var(--space-2xs); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-gold); }
+.tl-time { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1; color: var(--color-band-text); font-variant-numeric: tabular-nums; }
+.tl-place { font-weight: 600; font-size: var(--text-lg); color: var(--color-band-text); }
+.tl-note { font-size: var(--text-sm); color: var(--color-band-muted); line-height: 1.6; }
+.tl-move { font-size: var(--text-sm); color: var(--color-band-muted); padding-block: var(--space-sm) var(--space-lg); }
+.tl-total { font-size: var(--text-sm); color: var(--color-band-muted); padding-top: var(--space-lg); margin-top: var(--space-lg); border-top: var(--rule-hair) solid color-mix(in oklab, var(--color-band-text) 25%, transparent); }
+/* spot-info-list 계열: 시간 범위(10:30 - 11:45)가 길어 시각 글자를 줄이고, 요약 상자와 번호 배지를 둔다 */
+.route.range .tl-time { font-size: var(--text-xl); }
+.route.range .tl-step { padding-bottom: var(--space-md); }
+.tl-badge { font-size: var(--text-xs); color: var(--color-gold-2); letter-spacing: 0.04em; }
+.tl-facts { display: grid; gap: var(--space-2xs) var(--space-lg); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.tl-facts strong { color: var(--color-gold-2); font-weight: 600; }
+@media (min-width: 60rem) {
+  .tl-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .route { grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); column-gap: var(--space-lg); }
+  .route > * { grid-row: var(--r); grid-column: var(--c) / span var(--s, 1); }
+  .tl-move { padding-bottom: 0; }
+  .tl-total { grid-column: 1 / -1; }
+}
 
-    /* 본문 섹션 */
-    h2.spot-heading {
-      font-size: 1.45rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin: 48px 0 18px;
-      padding-bottom: 10px;
-      border-bottom: 2px solid var(--color-primary);
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-      word-break: keep-all;
-    }
-    .day-badge {
-      font-size: 0.8rem;
-      background: #047857;
-      color: #ffffff;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-weight: 700;
-      vertical-align: middle;
-    }
+/* Stops */
+.spots { padding-block: var(--section-gap) 0; display: grid; gap: var(--section-gap); }
+.spot-section { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "photo head" "photo body"; grid-template-rows: auto 1fr; column-gap: var(--gap-columns); row-gap: var(--space-md); align-items: start; padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); }
+.spot-section.flip { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-areas: "head photo" "body photo"; }
+.spot-section.no-photo { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "body"; }
+.spot-head { grid-area: head; display: grid; gap: var(--space-md); }
+.spot-photo { grid-area: photo; align-self: start; margin: 0; aspect-ratio: 4 / 5; width: 100%; background: var(--color-paper-3); position: sticky; top: 96px; }
+.spot-body { grid-area: body; display: grid; gap: var(--space-md); }
+.spot-header { display: flex; align-items: baseline; gap: var(--space-md); }
+.spot-num { font-family: var(--font-display); font-size: var(--text-3xl); line-height: 1; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+.spot-title { font-size: var(--text-section); }
+.spot-tagline { font-size: var(--text-lg); color: var(--color-ink); padding-bottom: var(--space-xs); }
+.spot-desc { max-width: 60ch; }
 
-    p.spot-desc {
-      font-size: 1.02rem;
-      color: var(--color-text-main);
-      margin-bottom: 16px;
-      word-break: keep-all;
-    }
+.spot-info-box { margin: var(--space-xs) 0 0; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); }
+.info-row { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--space-md); padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.info-row:last-child { border-bottom: 0; }
+.info-label { color: var(--color-muted); }
+.info-val { color: var(--color-ink); font-weight: 400; font-variant-numeric: tabular-nums; }
+.map-btn-wrap { padding-top: var(--space-sm); }
+.tip-box { padding: var(--space-sm) var(--space-md); border-left: var(--rule-bar) solid var(--color-accent); background: var(--color-paper-2); font-size: var(--text-sm); color: var(--color-ink-2); line-height: 1.7; }
+.tip-box strong { color: var(--color-ink); font-weight: 600; }
+.tip-box .tip-title { display: block; margin-bottom: var(--space-2xs); }
 
-    /* 사진 카드 */
-    .photo-card {
-      background: var(--bg-card);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      overflow: hidden;
-      margin: 22px 0 28px;
-      box-shadow: var(--shadow-sm);
-    }
-    .photo-card img {
-      width: 100%;
-      height: auto;
-      max-height: 480px;
-      object-fit: cover;
-      display: block;
-    }
-    .photo-caption {
-      padding: 10px 14px;
-      font-size: 0.83rem;
-      color: var(--color-text-faint);
-      background: #fafaf9;
-      border-top: 1px solid var(--color-border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-    }
+/* Fees */
+.cost-table-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.cost-head { display: grid; gap: var(--space-md); align-content: start; }
+.cost-head .timeline-title { font-size: var(--text-section); }
+.cost-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.cost-table th { text-align: left; font-weight: 400; color: var(--color-muted); padding: var(--space-xs) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-bar) solid var(--color-ink); }
+.cost-table td { padding: var(--space-sm) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink-2); vertical-align: top; }
+.cost-table td:nth-child(2) { color: var(--color-ink); font-weight: 400; }
+.cost-3 .cost-total-row td:nth-child(2) { font-family: inherit; font-size: inherit; color: inherit; font-weight: 600; }
+.cost-3 .cost-total-row td:nth-child(3) { font-family: var(--font-display); font-size: var(--text-xl); color: var(--color-accent); font-weight: 700; }
+.cost-total-row td { border-bottom: 0; border-top: var(--rule-bar) solid var(--color-ink); color: var(--color-ink); font-weight: 600; }
+.cost-total-row td:nth-child(2) { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--color-accent); font-weight: 700; }
+@media (max-width: 600px) {
+  .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
+  .table-wrap thead { display: none; }
+  .table-wrap tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-sm); row-gap: var(--space-2xs); padding-block: var(--space-sm); border-bottom: var(--rule-hair) solid var(--color-rule); }
+  .table-wrap td { padding: 0; border: 0; }
+  .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: var(--text-xs); color: var(--color-muted); }
+  .table-wrap td:nth-child(3) { text-align: right; font-weight: 600; color: var(--color-ink); }
+  .table-wrap td:nth-child(4) { grid-column: 1 / -1; color: var(--color-muted); }
+  .table-wrap td:empty { display: none; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: var(--text-sm); color: var(--color-ink); }
+  .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; text-align: right; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
+  .table-wrap .cost-total-row { border-top: var(--rule-bar) solid var(--color-ink); border-bottom: 0; }
+}
 
-    /* 안내 상자 */
-    .info-grid {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: var(--radius-md);
-      padding: 16px 18px;
-      margin: 20px 0;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 10px;
-      font-size: 0.90rem;
-    }
-    .info-item {
-      display: flex;
-      gap: 8px;
-    }
-    .info-label {
-      font-weight: 700;
-      color: #475569;
-      min-width: 68px;
-    }
-    .info-val {
-      color: #1e293b;
-    }
+/* Tips */
+.tips-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.tips-card .timeline-title { font-size: var(--text-section); align-self: start; }
+.tips-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-md); }
+.tips-list li { padding-bottom: var(--space-md); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.tips-list li:last-child { border-bottom: 0; }
+.tips-list strong { color: var(--color-ink); font-weight: 600; }
 
-    /* 에디터 팁 */
-    .tip-box {
-      background: var(--color-tip-bg);
-      border: 1px solid var(--color-tip-border);
-      border-radius: var(--radius-md);
-      padding: 16px 18px;
-      margin: 18px 0;
-      font-size: 0.92rem;
-      color: #065f46;
-      line-height: 1.7;
-    }
-    .tip-title {
-      font-weight: 800;
-      color: #047857;
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+/* App course */
+.app-course-box { margin-top: var(--section-gap); display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--gap-columns); align-items: end; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-xl); }
+.app-course-box h2 { font-size: var(--text-section); margin-bottom: var(--space-md); }
+.app-course-box p { max-width: 52ch; }
+.app-course-box .app-action { justify-self: end; }
 
-    /* 지도 버튼 */
-    .map-btn-wrap {
-      margin: 18px 0 32px;
-    }
-    .map-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #00843d;
-      color: #ffffff;
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 0.88rem;
-      padding: 9px 16px;
-      border-radius: var(--radius-sm);
-      transition: background 0.15s ease;
-    }
-    .map-btn:hover {
-      background: #007a37;
-    }
+.article-credit { margin-top: var(--space-2xl); padding-block: var(--space-md) var(--space-3xl); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); }
 
-    /* 비용표 */
-    .table-wrap {
-      overflow-x: auto;
-      margin: 24px 0 36px;
-      background: #ffffff;
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-sm);
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-      font-size: 0.92rem;
-    }
-    th, td {
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--color-border);
-    }
-    th {
-      background: #fafaf9;
-      font-weight: 700;
-      color: #44403c;
-    }
-    tr:last-child td {
-      border-bottom: none;
-    }
-    .total-row {
-      background: #ecfdf5;
-      font-weight: 800;
-      color: #047857;
-    }
+/* Footer mast */
+.site-footer { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl); }
+.footer-inner { display: grid; gap: var(--space-md); }
+.footer-mark { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1.2; color: var(--color-band-text); }
+.footer-line { color: var(--color-band-muted); font-size: var(--text-sm); }
+.footer-links { display: flex; flex-wrap: wrap; gap: var(--space-lg); }
+.footer-links a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-band-text); font-size: var(--text-sm); text-decoration: underline; text-decoration-color: var(--color-gold); }
+.footer-links a:hover { text-decoration-color: var(--color-accent); color: var(--color-gold-2); }
+.footer-links a:active { transform: translateY(1px); }
+.site-footer :focus-visible { outline-color: var(--color-gold-2); }
 
-    /* 4열 비용표 모바일 카드 반응형 CSS */
-    @media (max-width: 600px) {
-      .table-wrap {
-        border: none;
-        box-shadow: none;
-        background: transparent;
-      }
-      table, thead, tbody, th, td, tr {
-        display: block;
-      }
-      thead tr {
-        position: absolute;
-        top: -9999px;
-        left: -9999px;
-      }
-      tbody tr {
-        margin-bottom: 14px;
-        border: 1px solid var(--color-border);
-        border-radius: var(--radius-md);
-        background: #ffffff;
-        padding: 12px 14px;
-        box-shadow: var(--shadow-sm);
-      }
-      tbody tr.total-row {
-        background: #ecfdf5;
-        border-color: #a7f3d0;
-      }
-      td {
-        border: none;
-        padding: 6px 0;
-        position: relative;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 0.88rem;
-      }
-      td:not(:last-child) {
-        border-bottom: 1px dashed #f1f5f9;
-      }
-      td:before {
-        content: attr(data-label);
-        font-weight: 700;
-        color: #64748b;
-        font-size: 0.82rem;
-      }
-    }
+@media (max-width: 60rem) {
+  .hero, .spot-section, .spot-section.flip, .cost-table-card, .tips-card, .app-course-box { grid-template-columns: minmax(0, 1fr); }
+  .spot-section, .spot-section.flip { grid-template-areas: "head" "photo" "body"; grid-template-rows: auto; }
+  .spot-section.no-photo { grid-template-areas: "head" "body"; }
+  .hero { padding-block: var(--space-xl) var(--space-xl); }
+  .spot-photo { position: static; aspect-ratio: 16 / 10; }
+  .app-course-box { padding: var(--space-lg); }
+  .app-course-box .app-action { justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn, .link-quiet { transition: none; }
+  .btn:active, .link-quiet:active, .header-nav a:active, .header-logo:active, .footer-links a:active { transform: none; }
+}
 
-    /* 지도 모음 섹션 */
-    .map-collection {
-      background: #ffffff;
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      padding: 24px;
-      margin: 36px 0;
-      box-shadow: var(--shadow-sm);
-    }
-    .map-collection h3 {
-      font-size: 1.15rem;
-      font-weight: 800;
-      margin-bottom: 16px;
-      color: var(--color-primary);
-    }
-    .map-list {
-      list-style: none;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
-      gap: 10px;
-    }
-    .map-list-item a {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 14px;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: var(--radius-sm);
-      color: var(--color-text-main);
-      text-decoration: none;
-      font-size: 0.90rem;
-      font-weight: 600;
-      transition: all 0.15s ease;
-    }
-    .map-list-item a:hover {
-      background: #ecfdf5;
-      border-color: #a7f3d0;
-      color: #059669;
-    }
+/* real-photo-flat 계열(평면 글): 번호 있는 긴 장소 제목, 사진 설명, 안내 상자, 지도 목록 */
+.lead-photo { margin: 0 0 var(--space-3xl); }
+.lead-photo img { width: 100%; max-height: 520px; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.lead-photo figcaption, .body-photo figcaption { margin-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.spot-photo figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--space-xs) var(--space-sm); font-size: var(--text-xs); line-height: 1.5; color: var(--color-accent-ink); background: color-mix(in oklab, var(--color-ink) 78%, transparent); }
+.body-photo { margin: 0; }
+.body-photo img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.spot-section.flat .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.tl-lead { max-width: var(--measure); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.guide-box, .order-box { background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); color: var(--color-ink); }
+.guide-box h4, .order-box strong { margin: 0 0 var(--space-xs); font-family: var(--font-display); font-size: var(--text-md); color: var(--color-ink); display: block; }
+.guide-box ul, .order-box ul { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-2xs); }
+.bridge { padding-top: var(--space-xs); color: var(--color-muted); font-size: var(--text-sm); }
+.map-links { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-md); }
+.map-links .timeline-title { font-size: var(--text-section); }
+.map-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-xs); }
+.map-list a, .map-link-chip { display: flex; justify-content: space-between; gap: var(--space-md); align-items: center; min-height: 44px; padding-block: var(--space-xs); border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink); text-decoration: none; }
+.map-links-grid { display: grid; gap: 0; }
+.map-link-chip .btn-action { color: var(--color-accent); font-weight: 600; white-space: nowrap; }
+@media (max-width: 40rem) { .spot-section.flat .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .spot-photo { position: relative; top: auto; } }
 
-    /* 푸터 */
-    footer.post-footer {
-      border-top: 1px solid var(--color-border);
-      margin-top: 60px;
-      padding-top: 28px;
-      font-size: 0.86rem;
-      color: var(--color-text-faint);
-      line-height: 1.7;
-    }
-    .editorial-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #f5f5f4;
-      padding: 6px 12px;
-      border-radius: var(--radius-sm);
-      font-weight: 700;
-      color: #57534e;
-      margin-bottom: 14px;
-    }
-    header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
-    .header-nav a,.header-title a,.blog-tagline a{display:inline-block}
+/* spot-card 계열(editor-144): 대표 사진, 요약 상자, 본문 구획, 세부 코스, 이동 연결, 마무리 상자 */
+.hero-figure { margin: 0 0 var(--space-xl); }
+.hero-figure img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.hero-figure figcaption { padding-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-muted); }
+.summary-card { margin-bottom: var(--space-xl); background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-lg); font-size: var(--text-sm); }
+.summary-title, p.timeline-title, .cta-title { font-family: var(--font-display); font-weight: 700; line-height: 1.3; color: var(--color-ink); }
+.summary-title { font-size: var(--text-xl); margin-bottom: var(--space-sm); }
+p.timeline-title { letter-spacing: -0.01em; overflow-wrap: break-word; }
+.summary-list { margin: 0; padding: 0; list-style: none; display: grid; }
+.summary-list li { padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.summary-list li:last-child { border-bottom: 0; }
+.summary-list strong { color: var(--color-ink); font-weight: 600; }
+.prose-section { margin-top: var(--section-gap); max-width: var(--measure); display: grid; gap: var(--space-md); }
+.prose-section h2, .spots-title { font-size: var(--text-title); }
+.stops-section { margin-top: var(--section-gap); }
+.stops-section .spots { padding-top: var(--space-xl); }
+.spots.bridged { gap: 0; }
+.drive-bridge { margin: 0; padding-block: var(--space-xl); padding-left: var(--space-md); border-left: var(--rule-bar) solid var(--color-gold); font-size: var(--text-sm); color: var(--color-muted); }
+.drive-bridge strong { color: var(--color-ink); font-weight: 600; }
+.spot-header:has(.spot-badge) { flex-direction: column; align-items: flex-start; gap: var(--space-xs); }
+.spot-badge { font-size: var(--text-sm); font-weight: 600; color: var(--color-accent); }
+.spot-actions { display: flex; flex-wrap: wrap; gap: 0 var(--space-lg); }
+.info-wide .info-row { grid-template-columns: 5.5em minmax(0, 1fr); }
+.info-wide .info-row.plain { grid-template-columns: minmax(0, 1fr); }
+.cost-head .timeline-title.long { font-size: var(--text-title); }
+.cta-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-sm); max-width: var(--measure); }
+.cta-card h3, .cta-title { font-size: var(--text-title); }
+.cta-card .link-quiet { justify-self: start; }
+
+/* real-photo-grid 계열(editor-145): 사진과 정보 상자가 글 순서대로 이어지는 한 열 장소 구획, 번호 있는 동선, 도입 여러 문단 */
+.prose-intro p + p { margin-top: var(--space-md); }
+.stories { padding-top: var(--space-xl); gap: var(--space-3xl); }
+.story-section { display: grid; gap: var(--space-md); max-width: var(--measure); }
+.story-section .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.story-body { display: grid; gap: var(--space-md); }
+.story-photo { margin: 0; }
+.story-photo img { width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.story-photo figcaption { padding-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.story-photo figcaption span + span::before { content: " · "; }
+.tl-step .tl-badge { margin-bottom: calc(var(--space-2xs) * -1); }
+.tl-meta { display: block; font-style: normal; color: var(--color-gold-2); }
+.app-course-box.early { margin-top: var(--space-xl); }
+.app-course-box .cta-title { font-size: var(--text-section); margin-bottom: var(--space-md); }
+@media (max-width: 40rem) { .story-section .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .route .tl-act:not(:first-child) { margin-top: var(--space-lg); } }
+.article-credit.tight { padding-bottom: var(--space-md); }
+.back-link { padding-bottom: var(--space-md); font-size: var(--text-sm); }
+
+/* route-timeline 계열(editor-147: 보령, 거제, 고성): 사진 설명의 출처 줄, 시각 범위 동선 */
+.spot-photo figcaption .cap-src { display: block; }
+.spot-number { white-space: nowrap; }
+
+/* spot-block 계열(editor-147: 강릉, 경주): 머리 바 메모, 인용문, 날마다 나뉜 동선, 장소 분류 줄, 팁 목록, 금액이 끝 칸인 경비표 */
+.header-inner:has(.header-note) { flex-wrap: wrap; gap: 0 var(--space-md); }
+.header-note { font-size: var(--text-sm); color: var(--color-muted); }
+.hero-quote { max-width: var(--measure); font-size: var(--text-lead); line-height: 1.7; color: var(--color-ink); }
+.route + .route { margin-top: var(--space-xl); }
+.story-kicker { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.story-kicker .spot-num { font-size: var(--text-xl); }
+.stories.bridged .story-section + .story-section { margin-top: var(--space-3xl); }
+.tip-box ul { margin: 0; padding-left: 1.1em; display: grid; gap: var(--space-2xs); }
+@media (max-width: 600px) {
+  .table-wrap.amount-last td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
+  .table-wrap.amount-last td:nth-child(4) { grid-column: auto; text-align: right; font-weight: 600; color: var(--color-ink); }
+}
+
+/* timeline-list 계열(editor-149: 한남·이태원, 목포, 남해): 출처 줄의 글쓴이(아바타 글자는 장식이라 숨김) */
+.credit-mark { display: none; }
+.credit-author strong { margin-right: var(--space-xs); color: var(--color-ink); font-weight: 600; }
+.article-credit p + p { margin-top: var(--space-xs); }
+.spot-head { grid-template-columns: minmax(0, 1fr); }
+.spot-num { white-space: nowrap; }
+.spot-header .spot-title { min-width: 0; overflow-wrap: break-word; }
+
+/* itinerary-spots 계열(editor-150: 군산): 동선 아래 안내 문단, 참고 영상 카드, 해시태그 줄 */
+.video-card { margin-top: var(--section-gap); max-width: var(--measure); display: grid; gap: var(--space-sm); }
+.video-title { font-family: var(--font-display); font-size: var(--text-title); line-height: 1.3; color: var(--color-ink); }
+.video-source, .video-caption { font-size: var(--text-sm); color: var(--color-muted); }
+.video-frame { aspect-ratio: 16 / 9; background: var(--color-paper-3); }
+.video-frame iframe { display: block; width: 100%; height: 100%; border: 0; }
+.tag-list { margin-top: var(--space-xl); display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+
+/* course-list 계열(editor-150: 서울·경기 20선): 목차, 코스 구획의 분위기 줄, 장소 목록 */
+.toc-list { margin: 0; padding: 0; list-style: none; display: grid; column-gap: var(--gap-columns); }
+.toc-list li { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0 var(--space-md); min-height: 44px; padding-block: var(--space-xs); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.toc-list a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-ink); text-decoration: none; }
+.toc-mood, .course-mood { font-size: var(--text-sm); color: var(--color-muted); }
+.course-mood { color: var(--color-accent); font-weight: 600; }
+.stop-list { margin: 0; padding: 0; list-style: none; display: grid; }
+.stop { display: grid; gap: var(--space-2xs); padding-block: var(--space-md); border-top: var(--rule-hair) solid var(--color-rule); }
+.stop-name { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--space-sm); }
+.stop-name strong { font-size: var(--text-md); font-weight: 700; color: var(--color-ink); }
+.stop-cat, .stop-addr, .stop-hop { font-size: var(--text-xs); color: var(--color-muted); }
+.stop-desc { font-size: var(--text-sm); }
+.stop-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 var(--space-md); }
+.stop-foot .link-quiet { margin-left: auto; }
+.back-toc { justify-self: start; }
+@media (min-width: 60rem) { .toc-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* jeju-days 계열과 포항(editor-151): 장소 제목의 날 표시, 한 칸에 둘 이상인 지도 링크 */
+.spot-title .day-badge { display: block; margin-bottom: var(--space-2xs); font-family: var(--font-family); font-size: var(--text-sm); font-weight: 600; color: var(--color-accent); }
+.map-btn-wrap.multi .link-quiet:not(:last-child) { margin-right: var(--space-lg); }
   </style>
 </head>
 <body>
 
-  <header class="nav-header">
-    <div class="nav-inner">
-      <a href="/oneul-date/blog/" class="brand-logo">
-        <span>오늘 데이트 매거진</span>
-      </a>
-      <a href="/oneul-date/blog/" class="nav-back">← 매거진 목록으로</a>
+  <header class="site-header">
+    <div class="header-inner container">
+      <a href="/oneul-date/blog/" class="header-logo">오늘 데이트 <span>매거진</span></a>
+      <nav class="header-nav">
+        <a href="/oneul-date/blog/">← 매거진 목록으로</a>
+      </nav>
     </div>
   </header>
 
-  <main class="post-container">
-    <article>
-      <div class="post-header">
-        <span class="post-category">제주 2박 3일 시리즈 · 중산간 숲과 오름</span>
-        <h1 class="post-title">[제주 중산간 2박 3일 여행 코스] 사려니숲길·절물부터 산굼부리·따라비오름, 아부오름·새별오름까지 삼나무 숲과 은빛 억새 힐링 데이트</h1>
-        <div class="post-meta">
-          <span>작성일: 2026. 10. 16</span>
-          <span class="divider">/</span>
-          <span>글: 오늘 데이트 에디토리얼 팀</span>
-          <span class="divider">/</span>
-          <span>사진: 한국관광공사 TourAPI · 카카오맵 포토 리뷰</span>
+  <main class="article-container"><article>
+      <header class="article-header hero container">
+        <div class="hero-text">
+          <p class="hero-kicker badge-category"><span>제주 2박 3일 시리즈</span><span>중산간 숲과 오름</span></p>
+          <h1 class="article-title">[제주 중산간 2박 3일 여행 코스] 사려니숲길·절물부터 산굼부리·따라비오름, 아부오름·새별오름까지 삼나무 숲과 은빛 억새 힐링 데이트</h1>
+          <div class="article-meta">
+            <span>작성일: 2026. 10. 16</span>
+            <span>글: 오늘 데이트 에디토리얼 팀</span>
+            <span class="meta-credit">사진: 한국관광공사 TourAPI · 카카오맵 포토 리뷰</span>
+          </div>
+          <p><a class="btn" href="../../#c=1788915843931.1788827339252.1790562708831.1533.1791425117167.1790791410067">앱에서 코스 열기</a></p>
         </div>
+      </header>
+
+      <div class="container">
+        <div class="prose-intro"><p>해안가의 번잡함을 벗어나 한라산 자락 해발 200~600m 중산간 지대로 들어서면, 피톤치드가 뿜어져 나오는 울창한 삼나무 숲과 바람에 춤추는 은빛 억새 오름들이 그림처럼 펼쳐져요. 제주의 진짜 속살과 고요한 자연의 숨결을 온전히 느낄 수 있는 청정 힐링의 안식처입니다.</p>
+        <p>이번 2박 3일 중산간 코스는 붉은 화산송이 길 위로 뻗은 사려니숲길과 절물자연휴양림의 삼나무 숲 산책으로 시작해 교래리 향토 한정식, 국내 유일 마르형 분화구와 억새 바다를 품은 산굼부리, 사계절 메밀꽃 정원 보롬왓, 오름의 여왕 따라비오름과 원형 삼나무 숲 아부오름, 그리고 서부 황금빛 노을을 선사하는 새별오름까지 이어지는 제주 내륙 힐링 데이트 코스입니다.</p></div>
       </div>
 
-      <div class="intro-box">
-        <p>해안가의 번잡함을 벗어나 한라산 자락 해발 200~600m 중산간 지대로 들어서면, 피톤치드가 뿜어져 나오는 울창한 삼나무 숲과 바람에 춤추는 은빛 억새 오름들이 그림처럼 펼쳐져요. 제주의 진짜 속살과 고요한 자연의 숨결을 온전히 느낄 수 있는 청정 힐링의 안식처입니다.</p>
-        <p>이번 2박 3일 중산간 코스는 붉은 화산송이 길 위로 뻗은 사려니숲길과 절물자연휴양림의 삼나무 숲 산책으로 시작해 교래리 향토 한정식, 국내 유일 마르형 분화구와 억새 바다를 품은 산굼부리, 사계절 메밀꽃 정원 보롬왓, 오름의 여왕 따라비오름과 원형 삼나무 숲 아부오름, 그리고 서부 황금빛 노을을 선사하는 새별오름까지 이어지는 제주 내륙 힐링 데이트 코스입니다.</p>
-      </div>
-
-      <div class="route-summary">
-        <h3>🧭 2박 3일 추천 동선 및 OSRM 실측 드라이브 요약</h3>
-        <div class="route-days">
-          <div class="route-day-item">
-            <div class="route-day-title">1일차 : 제주공항 → 사려니숲길 → 절물자연휴양림 → 교래향 (중산간 한정식)</div>
-            <div class="route-stat">공항에서 번영로를 타고 중산간으로 진입 (19.4km, 약 27분) 후 절물휴양림 (3.2km, 약 4분)과 교래리 (5.4km, 약 7분)로 이어지는 삼나무 숲 힐링</div>
-          </div>
-          <div class="route-day-item">
-            <div class="route-day-title">2일차 : 교래리 → 산굼부리 → 보롬왓 → 따라비오름 → 아부오름</div>
-            <div class="route-stat">산굼부리 분화구 (1.7km, 약 2분)에서 보롬왓 (8.8km, 약 11분), 따라비오름 (12.4km, 약 22분)과 아부오름 (19.4km, 약 30분)으로 이어지는 오름 투어</div>
-          </div>
-          <div class="route-day-item">
-            <div class="route-day-title">3일차 : 중산간 숙소 → 새별오름 → 제주공항 복귀</div>
-            <div class="route-stat">숙소 위치에 따라 새별오름까지 거리가 달라요. 2일차 끝 아부오름에서 새별오름까지는 49.6km, 약 58분이고, 새별오름에서 제주공항까지는 24.3km, 약 30분이에요 (OSRM 경로 기준)</div>
+      <!-- 동선 -->
+      <section class="timeline-card band">
+        <div class="container">
+          <h2 class="timeline-title">2박 3일 추천 동선 및 OSRM 실측 드라이브 요약</h2>
+          <div class="route" style="--n:3">
+            <div class="tl-act" style="--r:1; --c:1">1일차</div>
+            <div class="tl-step" style="--r:2; --c:1"><span class="tl-place">제주공항 → 사려니숲길 → 절물자연휴양림 → 교래향 (중산간 한정식)</span><span class="tl-note">공항에서 번영로를 타고 중산간으로 진입 (19.4km, 약 27분) 후 절물휴양림 (3.2km, 약 4분)과 교래리 (5.4km, 약 7분)로 이어지는 삼나무 숲 힐링</span></div>
+            <div class="tl-act" style="--r:1; --c:2">2일차</div>
+            <div class="tl-step" style="--r:2; --c:2"><span class="tl-place">교래리 → 산굼부리 → 보롬왓 → 따라비오름 → 아부오름</span><span class="tl-note">산굼부리 분화구 (1.7km, 약 2분)에서 보롬왓 (8.8km, 약 11분), 따라비오름 (12.4km, 약 22분)과 아부오름 (19.4km, 약 30분)으로 이어지는 오름 투어</span></div>
+            <div class="tl-act" style="--r:1; --c:3">3일차</div>
+            <div class="tl-step" style="--r:2; --c:3"><span class="tl-place">중산간 숙소 → 새별오름 → 제주공항 복귀</span><span class="tl-note">숙소 위치에 따라 새별오름까지 거리가 달라요. 2일차 끝 아부오름에서 새별오름까지는 49.6km, 약 58분이고, 새별오름에서 제주공항까지는 24.3km, 약 30분이에요 (OSRM 경로 기준)</span></div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- 1번 스팟: 사려니숲길 -->
-      <h2 class="spot-heading"><span class="day-badge">Day 1</span> 1. 제주 사려니숲길, 붉은 화산송이 길 위로 곧게 뻗은 삼나무 숲 피톤치드 산책</h2>
-      <p class="spot-desc">제주국제공항에서 번영로와 비자림로를 거쳐 조천읍 교래리로 올라오면 '신성한 숲'이라는 뜻의 사려니숲길을 만날 수 있어요. 해발 500m 고지대에 자리 잡은 이 숲길은 붉은 화산송이 흙길 양옆으로 수십 미터 높이의 곧은 삼나무들이 하늘을 가릴 듯 빽빽하게 숲을 이루고 있습니다. 숲에 들어서는 순간 청량한 삼나무 향기와 피톤치드가 온몸을 감싸며 일상의 피로를 말끔히 씻어내 줍니다.</p>
+      <div class="container">
+        <div class="spots stories">
+          <section class="story-section">
+            <h2 class="spot-title"><span class="day-badge">Day 1</span> 1. 제주 사려니숲길, 붉은 화산송이 길 위로 곧게 뻗은 삼나무 숲 피톤치드 산책</h2>
+            <div class="story-body">
+              <p>제주국제공항에서 번영로와 비자림로를 거쳐 조천읍 교래리로 올라오면 '신성한 숲'이라는 뜻의 사려니숲길을 만날 수 있어요. 해발 500m 고지대에 자리 잡은 이 숲길은 붉은 화산송이 흙길 양옆으로 수십 미터 높이의 곧은 삼나무들이 하늘을 가릴 듯 빽빽하게 숲을 이루고 있습니다. 숲에 들어서는 순간 청량한 삼나무 향기와 피톤치드가 온몸을 감싸며 일상의 피로를 말끔히 씻어내 줍니다.</p>
+              <figure class="story-photo">
+              <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/1060fdf7998e1d509f17a752b2525a71399d0f3f?original" alt="하늘을 가릴 듯 곧게 뻗은 거대한 삼나무 숲길 전경" loading="lazy" />
+              <figcaption><span>하늘 높이 곧게 뻗은 삼나무 숲길과 푸른 녹음</span><span>출처: 카카오맵 포토 리뷰</span></figcaption>
+            </figure>
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">제주특별자치도 제주시 조천읍 교래리 산137-1 (사려니숲길 비자림로 입구, 이 코스의 거리 기준)</span></div><div class="info-row"><span class="info-label">운영시간</span><span class="info-val">09:00 - 17:00 (입산 통제: 하절기 4~9월 14:00 이후, 동절기 10~3월 12:00 이후, <a href="https://www.ktriptips.com/kor/leisure/2414827" target="_blank" rel="noopener noreferrer">TourAPI</a> 기준)</span></div><div class="info-row"><span class="info-label">입장료</span><span class="info-val">무료</span></div><div class="info-row"><span class="info-label">주차안내</span><span class="info-val">붉은오름 입구 무료 주차 (TourAPI 기준)</span></div></div>
+              <div class="tip-box"><strong class="tip-title">에디토리얼 팁</strong>TourAPI는 사려니숲길 주소를 붉은오름 입구(서귀포시 표선면 가시리)로 적고 무료 주차를 안내해요. 이 코스의 이동 거리는 비자림로 입구 기준이에요. 입구에서 약 1.5km 정도 이어지는 무장애 나눔길 데크로드는 경사가 없어 편안하게 대화하며 걷기에 최적입니다.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%EC%82%AC%EB%A0%A4%EB%8B%88%EC%88%B2%EA%B8%B8" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도에서 사려니숲길 확인하기</a></div>
+            </div>
+          </section>
 
-      <div class="photo-card">
-        <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/1060fdf7998e1d509f17a752b2525a71399d0f3f?original" alt="하늘을 가릴 듯 곧게 뻗은 거대한 삼나무 숲길 전경" loading="lazy">
-        <div class="photo-caption">
-          <span>하늘 높이 곧게 뻗은 삼나무 숲길과 푸른 녹음</span>
-          <span>출처: 카카오맵 포토 리뷰</span>
+          <section class="story-section">
+            <h2 class="spot-title"><span class="day-badge">Day 1</span> 2. 절물자연휴양림, 안개 낀 삼나무 숲 데크로드와 고요한 약수터 쉼</h2>
+            <div class="story-body">
+              <p>사려니숲길에서 차로 불과 4분 거리에는 50년생 삼나무들이 숲을 이루고 있는 절물자연휴양림이 자리하고 있어요. 제주시 봉개동 절물오름 기슭에 위치하며, 숲 전체에 나무 데크로드가 촘촘하게 깔려 있어 비가 오거나 안개가 낀 날에도 흙을 묻히지 않고 쾌적하게 산책할 수 있습니다. 숲속 곳곳에 놓인 나무 벤치와 평상에 누워 바람 소리와 새소리를 들으며 즐기는 산림욕은 중산간 여행의 백미입니다.</p>
+              <figure class="story-photo">
+              <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/7c957650d8cdf1ba5d2010e7f5e3682ed873406d?original" alt="울창한 삼나무 숲 사이로 흐르는 작은 개울과 산책로 전경" loading="lazy" />
+              <figcaption><span>키 큰 삼나무들이 터널을 이루는 절물자연휴양림 산책로</span><span>출처: 카카오맵 포토 리뷰</span></figcaption>
+            </figure>
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">제주특별자치도 제주시 명림로 584</span></div><div class="info-row"><span class="info-label">운영시간</span><span class="info-val">매일 07:00 - 18:00 (동절기 17:00까지, 연중무휴)</span></div><div class="info-row"><span class="info-label">입장료</span><span class="info-val">성인 1,000원 / 청소년 600원 / 어린이 300원</span></div><div class="info-row"><span class="info-label">주차요금</span><span class="info-val">경형 1,500원 / 중·소형 3,000원</span></div></div>
+              <div class="tip-box"><strong class="tip-title">에디토리얼 팁</strong>휴양림 중앙 약수터에서 솟아나는 시원한 암반수는 신경통과 위장병에 좋기로 유명합니다. 텀블러를 챙겨가 시원한 약수를 담아 마시고, 삼나무 숲길 데크 벤치에 잠시 누워 하늘을 올려다보는 여유를 즐겨보세요.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%EC%A0%88%EB%AC%BC%EC%9E%90%EC%97%B0%ED%9C%B4%EC%96%91%EB%A6%BC" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도에서 절물자연휴양림 확인하기</a></div>
+            </div>
+          </section>
+
+          <section class="story-section">
+            <h2 class="spot-title"><span class="day-badge">Day 1</span> 3. 교래향, 제주 토종 식재료와 정갈한 중산간 한정식 저녁</h2>
+            <div class="story-body">
+              <p>숲 산책을 마친 첫날 저녁은 제주 중산간 토종닭 마을로 유명한 조천읍 교래리의 향토 한정식 전문점 '교래향'에서 따뜻하게 마무리해요. 카카오맵 메뉴(2026-10-28 갱신)에는 갈치조림, 갈치조림구이한상, 전복해물뚝배기, 성게미역국이 있어요.</p>
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">제주특별자치도 제주시 조천읍 비자림로 638</span></div><div class="info-row"><span class="info-label">영업시간</span><span class="info-val">09:00 - 20:30, 화요일 휴무 (카카오맵 기준)</span></div><div class="info-row"><span class="info-label">주차안내</span><span class="info-val">매장 전면 전용 주차장 무료 완비</span></div><div class="info-row"><span class="info-label">대표 메뉴</span><span class="info-val">갈치조림구이한상(밥 별도) 25,000원, 갈치조림 1인(밥 별도) 16,000원, 전복해물뚝배기 17,000원, 성게미역국 15,000원 (카카오맵 메뉴 2026-10-28 갱신)</span></div></div>
+              <div class="tip-box"><strong class="tip-title">에디토리얼 팁</strong>2인이라면 갈치조림구이한상과 전복해물뚝배기를 함께 주문하는 구성을 비용표에 넣었어요. 밥은 별도예요.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%EA%B5%90%EB%9E%98%ED%96%A5" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도에서 교래향 확인하기</a></div>
+            </div>
+          </section>
+
+          <section class="story-section">
+            <h2 class="spot-title"><span class="day-badge">Day 2</span> 4. 산굼부리, 거대한 화산 분화구와 끝없이 물결치는 은빛 억새 바다</h2>
+            <div class="story-body">
+              <p>둘째 날 아침은 가을 제주를 상징하는 대표 명소, 산굼부리에서 시작해요. 산굼부리는 산 정상부가 아닌 평지에 둥글게 파인 국내 유일의 마르(Maar)형 화산 분화구로, 천연기념물 제263호로 지정되어 있습니다. 둘레 2km가 넘는 분화구 내부의 원시림도 신비롭지만, 가을철 분화구 능선 진입로 양옆으로 드넓게 펼쳐지는 은빛 억새 군락이 바람에 일렁이는 장관은 감탄을 자아냅니다.</p>
+              <figure class="story-photo">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/55/3354255_image2_1.jpg" alt="산굼부리 입구 표지석과 야외 정원 전경" loading="lazy" />
+              <figcaption><span>산굼부리 입구 표지석</span><span>출처: 한국관광공사 TourAPI</span></figcaption>
+            </figure>
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">제주특별자치도 제주시 조천읍 비자림로 768</span></div><div class="info-row"><span class="info-label">운영시간</span><span class="info-val">계절별 상이 (9~10월 09:00 - 18:40, 입장 마감 18:00, <a href="https://www.ktriptips.com/kor/tourspot/126474" target="_blank" rel="noopener noreferrer">TourAPI</a> 기준)</span></div><div class="info-row"><span class="info-label">입장료</span><span class="info-val">성인 7,000원 / 청소년 및 어린이 6,000원 (TourAPI 기준)</span></div><div class="info-row"><span class="info-label">주차안내</span><span class="info-val">산굼부리 대형 전용 주차장 무료 이용</span></div></div>
+              <div class="tip-box"><strong class="tip-title">에디토리얼 팁</strong>오전 9시 30분에서 10시경 방문하면 햇살이 은빛 억새 꽃에 비스듬히 비추어 억새가 반짝반짝 빛나는 최상의 사진을 담을 수 있습니다. 정상부 전망대에 오르면 날씨가 맑은 날 한라산 백록담 정상 능선까지 선명하게 조망됩니다.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%EC%82%B0%EA%B5%BC%EB%B6%80%EB%A6%AC" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도에서 산굼부리 확인하기</a></div>
+            </div>
+          </section>
+
+          <section class="story-section">
+            <h2 class="spot-title"><span class="day-badge">Day 2</span> 5. 보롬왓, 바람 부는 밭에 피어난 메밀꽃과 사계절 정원 힐링 카페</h2>
+            <div class="story-body">
+              <p>산굼부리에서 표선면 방면으로 10분 정도 내려오면 '바람이 부는 밭'이라는 예쁜 순우리말 이름을 가진 보롬왓에 닿게 돼요. 중산간 청정 들판에 메밀꽃, 라벤더, 핑크뮬리, 맨드라미 등 계절마다 다채로운 꽃들이 파노라마처럼 펼쳐지는 농원형 복합문화공간입니다. 실내 대형 온실 식물원과 통창 카페가 함께 조성되어 있어 감성적인 꽃밭 산책과 여유로운 티타임을 동시에 즐길 수 있습니다.</p>
+              <figure class="story-photo">
+              <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/69d79d5f3a3ba3893a6df7916049c24337b6674c?original" alt="청초한 꽃들이 화사하게 피어난 보롬왓 정원 꽃밭 근접 풍경" loading="lazy" />
+              <figcaption><span>사계절 다채로운 꽃들이 만발하는 보롬왓 야외 정원</span><span>출처: 카카오맵 포토 리뷰</span></figcaption>
+            </figure>
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">제주특별자치도 서귀포시 표선면 번영로 2350-104</span></div><div class="info-row"><span class="info-label">운영시간</span><span class="info-val">매일 09:00 - 18:00 (연중무휴)</span></div><div class="info-row"><span class="info-label">입장료</span><span class="info-val">성인 6,000원 (오늘 데이트 등록 정보, 경로와 어린이 요금은 현장 확인)</span></div><div class="info-row"><span class="info-label">주차안내</span><span class="info-val">보롬왓 전용 주차장 무료 이용</span></div></div>
+              <div class="tip-box"><strong class="tip-title">에디토리얼 팁</strong>야외 정원 너머로 보이는 풍력발전기와 하얀 메밀꽃밭이 어우러지는 풍경이 대표적인 포토존입니다.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%EB%B3%B4%EB%A1%AC%EC%99%93" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도에서 보롬왓 확인하기</a></div>
+            </div>
+          </section>
+
+          <section class="story-section">
+            <h2 class="spot-title"><span class="day-badge">Day 2</span> 6. 따라비오름, 3개의 분화구와 부드러운 능선을 따라 펼쳐지는 '오름의 여왕'</h2>
+            <div class="story-body">
+              <p>표선면 가시리에 위치한 따라비오름은 수많은 제주의 오름 중에서도 단연 '오름의 여왕'이라 불릴 만큼 빼어난 능선미를 자랑해요. 크고 작은 3개의 원형 분화구와 6개의 봉우리가 부드럽게 이어지며 하나의 거대한 화산체를 이룹니다. 능선 정상에 오르면 눈앞에 드넓은 은빛 억새 물결이 춤추고, 발아래로 제주 동부와 남부의 오름 군락들이 한눈에 들어오는 압도적인 풍광을 선사합니다.</p>
+              <figure class="story-photo">
+              <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/604e3d6ae7ef06af11ca9a955dade2c46cc6b584?original" alt="푸른 하늘과 오름 능선 너머로 시원하게 펼쳐진 탁 트인 중산간 전경" loading="lazy" />
+              <figcaption><span>부드러운 능선과 탁 트인 시야를 자랑하는 따라비오름 전경</span><span>출처: 카카오맵 포토 리뷰</span></figcaption>
+            </figure>
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">제주특별자치도 서귀포시 표선면 가시리 산 63</span></div><div class="info-row"><span class="info-label">소요시간</span><span class="info-val">왕복 약 1시간 - 1시간 20분 (정상 능선 둘레길 포함)</span></div><div class="info-row"><span class="info-label">입장료</span><span class="info-val">무료</span></div><div class="info-row"><span class="info-label">주차안내</span><span class="info-val">따라비오름 진입로 공영 주차장 완비 (무료, 간이 화장실 구비)</span></div></div>
+              <div class="tip-box"><strong class="tip-title">에디토리얼 팁</strong>초반 15분 정도의 계단 구간만 지나면 능선 정상부터는 완만한 분화구 둘레길이 이어집니다. 능선을 따라 걷는 동안 바람이 시원하게 불어오니 얇은 겉옷을 준비하고, 능선 위에서 서로의 인생 사진을 남겨보세요.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%EB%94%B0%EB%9D%BC%EB%B9%84%EC%98%A4%EB%A6%84" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도에서 따라비오름 확인하기</a></div>
+            </div>
+          </section>
+
+          <section class="story-section">
+            <h2 class="spot-title"><span class="day-badge">Day 2</span> 7. 아부오름, 영화 속 한 장면 같은 원형 분화구와 삼나무 원형 숲길</h2>
+            <div class="story-body">
+              <p>구좌읍 송당리에 위치한 아부오름(앞오름)은 오름 등반이 부담스러운 초보자도 5분 만에 정상에 오를 수 있는 가장 친절하고 신비로운 오름이에요. 완만한 경사로를 따라 몇 걸음만 올라가면 깊이 78m에 달하는 거대한 원형 분화구가 거짓말처럼 나타납니다. 인공으로 심은 삼나무가 분화구 안에 원형 숲을 이루고, 영화 '이재수의 난' 촬영지로도 알려졌어요.</p>
+              <figure class="story-photo">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/27/3011827_image2_1.jpg" alt="원형의 숲으로 둘러싸인 거대한 아부오름 분화구 전경" loading="lazy" />
+              <figcaption><span>원형 분화구 안쪽으로 삼나무 숲이 자라난 아부오름 전경</span><span>출처: 한국관광공사 TourAPI</span></figcaption>
+            </figure>
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">제주특별자치도 제주시 구좌읍 송당리 산 164-1</span></div><div class="info-row"><span class="info-label">소요시간</span><span class="info-val">정상 진입 5분, 분화구 둘레길 한 바퀴 약 30분</span></div><div class="info-row"><span class="info-label">입장료</span><span class="info-val">무료</span></div><div class="info-row"><span class="info-label">주차안내</span><span class="info-val">아부오름 입구 주차 공간 이용 가능 (무료)</span></div></div>
+              <div class="tip-box"><strong class="tip-title">에디토리얼 팁</strong>경사가 완만해 해 질 녘 노을 산책으로 가볍게 들르기에 더없이 좋습니다.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%EC%95%84%EB%B6%80%EC%98%A4%EB%A6%84" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도에서 아부오름 확인하기</a></div>
+            </div>
+          </section>
+
+          <section class="story-section">
+            <h2 class="spot-title"><span class="day-badge">Day 3</span> 8. 제주 새별오름, 황금빛 노을 속에 춤추는 은빛 억새 능선 피날레</h2>
+            <div class="story-body">
+              <p>3일차 마지막 일정은 서부 중산간 평화로변에 솟아 있는 명품 오름, 새별오름이에요. '초저녁 하늘에 외롭게 반짝이는 샛별 같다' 하여 이름 붙여진 곳으로, 가을이면 오름 전체가 은빛 억새로 뒤덮여 장관을 이룹니다. 해발 519m(비고 119m) 정상에 서면 멀리 비양도와 서쪽 바다, 그리고 한라산 능선까지 360도 파노라마로 펼쳐집니다. 늦은 오후 서쪽 바다로 지는 노을빛에 억새밭이 황금빛으로 물드는 순간은 이번 2박 3일 여행의 가장 찬란한 피날레가 되어줍니다.</p>
+              <figure class="story-photo">
+              <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/adf53846a04e054706f89e55c1b3a273f8eee27c?original" alt="푸른 하늘과 구름 아래 넓은 억새 들판과 능선이 펼쳐진 평화로운 전경" loading="lazy" />
+              <figcaption><span>푸른 하늘 아래 풀밭으로 덮인 새별오름 능선</span><span>출처: 카카오맵 포토 리뷰</span></figcaption>
+            </figure>
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">제주특별자치도 제주시 애월읍 봉성리 산59-8</span></div><div class="info-row"><span class="info-label">소요시간</span><span class="info-val">왕복 약 40분 - 50분 (정상 능선 쉼 포함)</span></div><div class="info-row"><span class="info-label">입장료</span><span class="info-val">무료</span></div><div class="info-row"><span class="info-label">주차안내</span><span class="info-val">새별오름 대형 전용 주차장 무료 완비</span></div></div>
+              <div class="tip-box"><strong class="tip-title">에디토리얼 팁</strong>새별오름 좌측 진입로는 경사가 가파른 편이므로, 우측 완만한 능선 산책로로 올라가 반대편으로 내려오는 코스를 추천합니다. 공항으로 향하기 전 주차장 인근 푸드트럭이나 감성 카페에서 시원한 한라봉 주스를 곁들이며 여행을 마무리해보세요.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%EC%A0%9C%EC%A3%BC%20%EC%83%88%EB%B3%84%EC%98%A4%EB%A6%84" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도에서 새별오름 확인하기</a></div>
+            </div>
+          </section>
         </div>
-      </div>
 
-      <div class="info-grid">
-        <div class="info-item"><span class="info-label">주소</span><span class="info-val">제주특별자치도 제주시 조천읍 교래리 산137-1 (사려니숲길 비자림로 입구, 이 코스의 거리 기준)</span></div>
-        <div class="info-item"><span class="info-label">운영시간</span><span class="info-val">09:00 - 17:00 (입산 통제: 하절기 4~9월 14:00 이후, 동절기 10~3월 12:00 이후, <a href="https://www.ktriptips.com/kor/leisure/2414827" target="_blank" rel="noopener noreferrer">TourAPI</a> 기준)</span></div>
-        <div class="info-item"><span class="info-label">입장료</span><span class="info-val">무료</span></div>
-        <div class="info-item"><span class="info-label">주차안내</span><span class="info-val">붉은오름 입구 무료 주차 (TourAPI 기준)</span></div>
-      </div>
-
-      <div class="tip-box">
-        <div class="tip-title">💡 에디토리얼 팁</div>
-        TourAPI는 사려니숲길 주소를 붉은오름 입구(서귀포시 표선면 가시리)로 적고 무료 주차를 안내해요. 이 코스의 이동 거리는 비자림로 입구 기준이에요. 입구에서 약 1.5km 정도 이어지는 무장애 나눔길 데크로드는 경사가 없어 편안하게 대화하며 걷기에 최적입니다.
-      </div>
-
-      <div class="map-btn-wrap">
-        <a href="https://map.naver.com/p/search/%EC%82%AC%EB%A0%A4%EB%8B%88%EC%88%B2%EA%B8%B8" target="_blank" rel="noopener noreferrer" class="map-btn">
-          <span>네이버 지도에서 사려니숲길 확인하기</span>
-        </a>
-      </div>
-
-      <!-- 2번 스팟: 절물자연휴양림 -->
-      <h2 class="spot-heading"><span class="day-badge">Day 1</span> 2. 절물자연휴양림, 안개 낀 삼나무 숲 데크로드와 고요한 약수터 쉼</h2>
-      <p class="spot-desc">사려니숲길에서 차로 불과 4분 거리에는 50년생 삼나무들이 숲을 이루고 있는 절물자연휴양림이 자리하고 있어요. 제주시 봉개동 절물오름 기슭에 위치하며, 숲 전체에 나무 데크로드가 촘촘하게 깔려 있어 비가 오거나 안개가 낀 날에도 흙을 묻히지 않고 쾌적하게 산책할 수 있습니다. 숲속 곳곳에 놓인 나무 벤치와 평상에 누워 바람 소리와 새소리를 들으며 즐기는 산림욕은 중산간 여행의 백미입니다.</p>
-
-      <div class="photo-card">
-        <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/7c957650d8cdf1ba5d2010e7f5e3682ed873406d?original" alt="울창한 삼나무 숲 사이로 흐르는 작은 개울과 산책로 전경" loading="lazy">
-        <div class="photo-caption">
-          <span>키 큰 삼나무들이 터널을 이루는 절물자연휴양림 산책로</span>
-          <span>출처: 카카오맵 포토 리뷰</span>
-        </div>
-      </div>
-
-      <div class="info-grid">
-        <div class="info-item"><span class="info-label">주소</span><span class="info-val">제주특별자치도 제주시 명림로 584</span></div>
-        <div class="info-item"><span class="info-label">운영시간</span><span class="info-val">매일 07:00 - 18:00 (동절기 17:00까지, 연중무휴)</span></div>
-        <div class="info-item"><span class="info-label">입장료</span><span class="info-val">성인 1,000원 / 청소년 600원 / 어린이 300원</span></div>
-        <div class="info-item"><span class="info-label">주차요금</span><span class="info-val">경형 1,500원 / 중·소형 3,000원</span></div>
-      </div>
-
-      <div class="tip-box">
-        <div class="tip-title">💡 에디토리얼 팁</div>
-        휴양림 중앙 약수터에서 솟아나는 시원한 암반수는 신경통과 위장병에 좋기로 유명합니다. 텀블러를 챙겨가 시원한 약수를 담아 마시고, 삼나무 숲길 데크 벤치에 잠시 누워 하늘을 올려다보는 여유를 즐겨보세요.
-      </div>
-
-      <div class="map-btn-wrap">
-        <a href="https://map.naver.com/p/search/%EC%A0%88%EB%AC%BC%EC%9E%90%EC%97%B0%ED%9C%B4%EC%96%91%EB%A6%BC" target="_blank" rel="noopener noreferrer" class="map-btn">
-          <span>네이버 지도에서 절물자연휴양림 확인하기</span>
-        </a>
-      </div>
-
-      <!-- 3번 스팟: 교래향 -->
-      <h2 class="spot-heading"><span class="day-badge">Day 1</span> 3. 교래향, 제주 토종 식재료와 정갈한 중산간 한정식 저녁</h2>
-      <p class="spot-desc">숲 산책을 마친 첫날 저녁은 제주 중산간 토종닭 마을로 유명한 조천읍 교래리의 향토 한정식 전문점 '교래향'에서 따뜻하게 마무리해요. 카카오맵 메뉴(2026-10-28 갱신)에는 갈치조림, 갈치조림구이한상, 전복해물뚝배기, 성게미역국이 있어요.</p>
-
-
-      <div class="info-grid">
-        <div class="info-item"><span class="info-label">주소</span><span class="info-val">제주특별자치도 제주시 조천읍 비자림로 638</span></div>
-        <div class="info-item"><span class="info-label">영업시간</span><span class="info-val">09:00 - 20:30, 화요일 휴무 (카카오맵 기준)</span></div>
-        <div class="info-item"><span class="info-label">주차안내</span><span class="info-val">매장 전면 전용 주차장 무료 완비</span></div>
-        <div class="info-item"><span class="info-label">대표 메뉴</span><span class="info-val">갈치조림구이한상(밥 별도) 25,000원, 갈치조림 1인(밥 별도) 16,000원, 전복해물뚝배기 17,000원, 성게미역국 15,000원 (카카오맵 메뉴 2026-10-28 갱신)</span></div>
-      </div>
-
-      <div class="tip-box">
-        <div class="tip-title">💡 에디토리얼 팁</div>
-        2인이라면 갈치조림구이한상과 전복해물뚝배기를 함께 주문하는 구성을 비용표에 넣었어요. 밥은 별도예요.
-      </div>
-
-      <div class="map-btn-wrap">
-        <a href="https://map.naver.com/p/search/%EA%B5%90%EB%9E%98%ED%96%A5" target="_blank" rel="noopener noreferrer" class="map-btn">
-          <span>네이버 지도에서 교래향 확인하기</span>
-        </a>
-      </div>
-
-      <!-- 4번 스팟: 산굼부리 -->
-      <h2 class="spot-heading"><span class="day-badge">Day 2</span> 4. 산굼부리, 거대한 화산 분화구와 끝없이 물결치는 은빛 억새 바다</h2>
-      <p class="spot-desc">둘째 날 아침은 가을 제주를 상징하는 대표 명소, 산굼부리에서 시작해요. 산굼부리는 산 정상부가 아닌 평지에 둥글게 파인 국내 유일의 마르(Maar)형 화산 분화구로, 천연기념물 제263호로 지정되어 있습니다. 둘레 2km가 넘는 분화구 내부의 원시림도 신비롭지만, 가을철 분화구 능선 진입로 양옆으로 드넓게 펼쳐지는 은빛 억새 군락이 바람에 일렁이는 장관은 감탄을 자아냅니다.</p>
-
-      <div class="photo-card">
-        <img src="https://tong.visitkorea.or.kr/cms/resource/55/3354255_image2_1.jpg" alt="산굼부리 입구 표지석과 야외 정원 전경" loading="lazy">
-        <div class="photo-caption">
-          <span>산굼부리 입구 표지석</span>
-          <span>출처: 한국관광공사 TourAPI</span>
-        </div>
-      </div>
-
-      <div class="info-grid">
-        <div class="info-item"><span class="info-label">주소</span><span class="info-val">제주특별자치도 제주시 조천읍 비자림로 768</span></div>
-        <div class="info-item"><span class="info-label">운영시간</span><span class="info-val">계절별 상이 (9~10월 09:00 - 18:40, 입장 마감 18:00, <a href="https://www.ktriptips.com/kor/tourspot/126474" target="_blank" rel="noopener noreferrer">TourAPI</a> 기준)</span></div>
-        <div class="info-item"><span class="info-label">입장료</span><span class="info-val">성인 7,000원 / 청소년 및 어린이 6,000원 (TourAPI 기준)</span></div>
-        <div class="info-item"><span class="info-label">주차안내</span><span class="info-val">산굼부리 대형 전용 주차장 무료 이용</span></div>
-      </div>
-
-      <div class="tip-box">
-        <div class="tip-title">💡 에디토리얼 팁</div>
-        오전 9시 30분에서 10시경 방문하면 햇살이 은빛 억새 꽃에 비스듬히 비추어 억새가 반짝반짝 빛나는 최상의 사진을 담을 수 있습니다. 정상부 전망대에 오르면 날씨가 맑은 날 한라산 백록담 정상 능선까지 선명하게 조망됩니다.
-      </div>
-
-      <div class="map-btn-wrap">
-        <a href="https://map.naver.com/p/search/%EC%82%B0%EA%B5%BC%EB%B6%80%EB%A6%AC" target="_blank" rel="noopener noreferrer" class="map-btn">
-          <span>네이버 지도에서 산굼부리 확인하기</span>
-        </a>
-      </div>
-
-      <!-- 5번 스팟: 보롬왓 -->
-      <h2 class="spot-heading"><span class="day-badge">Day 2</span> 5. 보롬왓, 바람 부는 밭에 피어난 메밀꽃과 사계절 정원 힐링 카페</h2>
-      <p class="spot-desc">산굼부리에서 표선면 방면으로 10분 정도 내려오면 '바람이 부는 밭'이라는 예쁜 순우리말 이름을 가진 보롬왓에 닿게 돼요. 중산간 청정 들판에 메밀꽃, 라벤더, 핑크뮬리, 맨드라미 등 계절마다 다채로운 꽃들이 파노라마처럼 펼쳐지는 농원형 복합문화공간입니다. 실내 대형 온실 식물원과 통창 카페가 함께 조성되어 있어 감성적인 꽃밭 산책과 여유로운 티타임을 동시에 즐길 수 있습니다.</p>
-
-      <div class="photo-card">
-        <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/69d79d5f3a3ba3893a6df7916049c24337b6674c?original" alt="청초한 꽃들이 화사하게 피어난 보롬왓 정원 꽃밭 근접 풍경" loading="lazy">
-        <div class="photo-caption">
-          <span>사계절 다채로운 꽃들이 만발하는 보롬왓 야외 정원</span>
-          <span>출처: 카카오맵 포토 리뷰</span>
-        </div>
-      </div>
-
-      <div class="info-grid">
-        <div class="info-item"><span class="info-label">주소</span><span class="info-val">제주특별자치도 서귀포시 표선면 번영로 2350-104</span></div>
-        <div class="info-item"><span class="info-label">운영시간</span><span class="info-val">매일 09:00 - 18:00 (연중무휴)</span></div>
-        <div class="info-item"><span class="info-label">입장료</span><span class="info-val">성인 6,000원 (오늘 데이트 등록 정보, 경로와 어린이 요금은 현장 확인)</span></div>
-        <div class="info-item"><span class="info-label">주차안내</span><span class="info-val">보롬왓 전용 주차장 무료 이용</span></div>
-      </div>
-
-      <div class="tip-box">
-        <div class="tip-title">💡 에디토리얼 팁</div>
-        야외 정원 너머로 보이는 풍력발전기와 하얀 메밀꽃밭이 어우러지는 풍경이 대표적인 포토존입니다.
-      </div>
-
-      <div class="map-btn-wrap">
-        <a href="https://map.naver.com/p/search/%EB%B3%B4%EB%A1%AC%EC%99%93" target="_blank" rel="noopener noreferrer" class="map-btn">
-          <span>네이버 지도에서 보롬왓 확인하기</span>
-        </a>
-      </div>
-
-      <!-- 6번 스팟: 따라비오름 -->
-      <h2 class="spot-heading"><span class="day-badge">Day 2</span> 6. 따라비오름, 3개의 분화구와 부드러운 능선을 따라 펼쳐지는 '오름의 여왕'</h2>
-      <p class="spot-desc">표선면 가시리에 위치한 따라비오름은 수많은 제주의 오름 중에서도 단연 '오름의 여왕'이라 불릴 만큼 빼어난 능선미를 자랑해요. 크고 작은 3개의 원형 분화구와 6개의 봉우리가 부드럽게 이어지며 하나의 거대한 화산체를 이룹니다. 능선 정상에 오르면 눈앞에 드넓은 은빛 억새 물결이 춤추고, 발아래로 제주 동부와 남부의 오름 군락들이 한눈에 들어오는 압도적인 풍광을 선사합니다.</p>
-
-      <div class="photo-card">
-        <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/604e3d6ae7ef06af11ca9a955dade2c46cc6b584?original" alt="푸른 하늘과 오름 능선 너머로 시원하게 펼쳐진 탁 트인 중산간 전경" loading="lazy">
-        <div class="photo-caption">
-          <span>부드러운 능선과 탁 트인 시야를 자랑하는 따라비오름 전경</span>
-          <span>출처: 카카오맵 포토 리뷰</span>
-        </div>
-      </div>
-
-      <div class="info-grid">
-        <div class="info-item"><span class="info-label">주소</span><span class="info-val">제주특별자치도 서귀포시 표선면 가시리 산 63</span></div>
-        <div class="info-item"><span class="info-label">소요시간</span><span class="info-val">왕복 약 1시간 - 1시간 20분 (정상 능선 둘레길 포함)</span></div>
-        <div class="info-item"><span class="info-label">입장료</span><span class="info-val">무료</span></div>
-        <div class="info-item"><span class="info-label">주차안내</span><span class="info-val">따라비오름 진입로 공영 주차장 완비 (무료, 간이 화장실 구비)</span></div>
-      </div>
-
-      <div class="tip-box">
-        <div class="tip-title">💡 에디토리얼 팁</div>
-        초반 15분 정도의 계단 구간만 지나면 능선 정상부터는 완만한 분화구 둘레길이 이어집니다. 능선을 따라 걷는 동안 바람이 시원하게 불어오니 얇은 겉옷을 준비하고, 능선 위에서 서로의 인생 사진을 남겨보세요.
-      </div>
-
-      <div class="map-btn-wrap">
-        <a href="https://map.naver.com/p/search/%EB%94%B0%EB%9D%BC%EB%B9%84%EC%98%A4%EB%A6%84" target="_blank" rel="noopener noreferrer" class="map-btn">
-          <span>네이버 지도에서 따라비오름 확인하기</span>
-        </a>
-      </div>
-
-      <!-- 7번 스팟: 아부오름 -->
-      <h2 class="spot-heading"><span class="day-badge">Day 2</span> 7. 아부오름, 영화 속 한 장면 같은 원형 분화구와 삼나무 원형 숲길</h2>
-      <p class="spot-desc">구좌읍 송당리에 위치한 아부오름(앞오름)은 오름 등반이 부담스러운 초보자도 5분 만에 정상에 오를 수 있는 가장 친절하고 신비로운 오름이에요. 완만한 경사로를 따라 몇 걸음만 올라가면 깊이 78m에 달하는 거대한 원형 분화구가 거짓말처럼 나타납니다. 인공으로 심은 삼나무가 분화구 안에 원형 숲을 이루고, 영화 '이재수의 난' 촬영지로도 알려졌어요.</p>
-
-      <div class="photo-card">
-        <img src="https://tong.visitkorea.or.kr/cms/resource/27/3011827_image2_1.jpg" alt="원형의 숲으로 둘러싸인 거대한 아부오름 분화구 전경" loading="lazy">
-        <div class="photo-caption">
-          <span>원형 분화구 안쪽으로 삼나무 숲이 자라난 아부오름 전경</span>
-          <span>출처: 한국관광공사 TourAPI</span>
-        </div>
-      </div>
-
-      <div class="info-grid">
-        <div class="info-item"><span class="info-label">주소</span><span class="info-val">제주특별자치도 제주시 구좌읍 송당리 산 164-1</span></div>
-        <div class="info-item"><span class="info-label">소요시간</span><span class="info-val">정상 진입 5분, 분화구 둘레길 한 바퀴 약 30분</span></div>
-        <div class="info-item"><span class="info-label">입장료</span><span class="info-val">무료</span></div>
-        <div class="info-item"><span class="info-label">주차안내</span><span class="info-val">아부오름 입구 주차 공간 이용 가능 (무료)</span></div>
-      </div>
-
-      <div class="tip-box">
-        <div class="tip-title">💡 에디토리얼 팁</div>
-        경사가 완만해 해 질 녘 노을 산책으로 가볍게 들르기에 더없이 좋습니다.
-      </div>
-
-      <div class="map-btn-wrap">
-        <a href="https://map.naver.com/p/search/%EC%95%84%EB%B6%80%EC%98%A4%EB%A6%84" target="_blank" rel="noopener noreferrer" class="map-btn">
-          <span>네이버 지도에서 아부오름 확인하기</span>
-        </a>
-      </div>
-
-      <!-- 8번 스팟: 새별오름 -->
-      <h2 class="spot-heading"><span class="day-badge">Day 3</span> 8. 제주 새별오름, 황금빛 노을 속에 춤추는 은빛 억새 능선 피날레</h2>
-      <p class="spot-desc">3일차 마지막 일정은 서부 중산간 평화로변에 솟아 있는 명품 오름, 새별오름이에요. '초저녁 하늘에 외롭게 반짝이는 샛별 같다' 하여 이름 붙여진 곳으로, 가을이면 오름 전체가 은빛 억새로 뒤덮여 장관을 이룹니다. 해발 519m(비고 119m) 정상에 서면 멀리 비양도와 서쪽 바다, 그리고 한라산 능선까지 360도 파노라마로 펼쳐집니다. 늦은 오후 서쪽 바다로 지는 노을빛에 억새밭이 황금빛으로 물드는 순간은 이번 2박 3일 여행의 가장 찬란한 피날레가 되어줍니다.</p>
-
-      <div class="photo-card">
-        <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/adf53846a04e054706f89e55c1b3a273f8eee27c?original" alt="푸른 하늘과 구름 아래 넓은 억새 들판과 능선이 펼쳐진 평화로운 전경" loading="lazy">
-        <div class="photo-caption">
-          <span>푸른 하늘 아래 풀밭으로 덮인 새별오름 능선</span>
-          <span>출처: 카카오맵 포토 리뷰</span>
-        </div>
-      </div>
-
-      <div class="info-grid">
-        <div class="info-item"><span class="info-label">주소</span><span class="info-val">제주특별자치도 제주시 애월읍 봉성리 산59-8</span></div>
-        <div class="info-item"><span class="info-label">소요시간</span><span class="info-val">왕복 약 40분 - 50분 (정상 능선 쉼 포함)</span></div>
-        <div class="info-item"><span class="info-label">입장료</span><span class="info-val">무료</span></div>
-        <div class="info-item"><span class="info-label">주차안내</span><span class="info-val">새별오름 대형 전용 주차장 무료 완비</span></div>
-      </div>
-
-      <div class="tip-box">
-        <div class="tip-title">💡 에디토리얼 팁</div>
-        새별오름 좌측 진입로는 경사가 가파른 편이므로, 우측 완만한 능선 산책로로 올라가 반대편으로 내려오는 코스를 추천합니다. 공항으로 향하기 전 주차장 인근 푸드트럭이나 감성 카페에서 시원한 한라봉 주스를 곁들이며 여행을 마무리해보세요.
-      </div>
-
-      <div class="map-btn-wrap">
-        <a href="https://map.naver.com/p/search/%EC%A0%9C%EC%A3%BC%20%EC%83%88%EB%B3%84%EC%98%A4%EB%A6%84" target="_blank" rel="noopener noreferrer" class="map-btn">
-          <span>네이버 지도에서 새별오름 확인하기</span>
-        </a>
-      </div>
-
-      <!-- 예상 여행 경비 정산표 (4열 반응형) -->
-      <h2>💰 제주 중산간 2박 3일 2인 예상 여행 경비 정산표</h2>
-      <div class="table-wrap">
-        <table>
+        <section class="cost-table-card">
+          <div class="cost-head">
+            <h2 class="timeline-title">제주 중산간 2박 3일 2인 예상 여행 경비 정산표</h2>
+          </div>
+          <div class="table-wrap"><table class="cost-table">
           <thead>
             <tr>
               <th>구분</th>
@@ -815,84 +573,85 @@
               <td data-label="2인 기준 예상 비용">40,000원</td>
               <td data-label="비고">3일간 약 140km 주행 유류비</td>
             </tr>
-            <tr class="total-row">
+            <tr class="cost-total-row">
               <td data-label="구분">합계</td>
               <td data-label="항목">2박 3일 현지 총 체류 경비 (2인)</td>
               <td data-label="2인 기준 예상 비용">113,000원</td>
               <td data-label="비고">항공권, 숙박비, 카페 음료 제외</td>
             </tr>
           </tbody>
-        </table>
-      </div>
+        </table></div>
+        </section>
 
-      <!-- 지도 바로가기 모음 -->
-      <div class="map-collection">
-        <h3>📍 코스 추천 스팟 네이버 지도 바로가기</h3>
-        <ul class="map-list">
-          <li class="map-list-item">
+        <section class="map-links">
+          <h2 class="timeline-title">코스 추천 스팟 네이버 지도 바로가기</h2>
+          <ul class="map-list">
+          <li>
             <a href="https://map.naver.com/p/search/%EC%82%AC%EB%A0%A4%EB%8B%88%EC%88%B2%EA%B8%B8" target="_blank" rel="noopener noreferrer">
               <span>1. 사려니숲길</span>
               <span>지도 열기 ↗</span>
             </a>
           </li>
-          <li class="map-list-item">
+          <li>
             <a href="https://map.naver.com/p/search/%EC%A0%88%EB%AC%BC%EC%9E%90%EC%97%B0%ED%9C%B4%EC%96%91%EB%A6%BC" target="_blank" rel="noopener noreferrer">
               <span>2. 절물자연휴양림</span>
               <span>지도 열기 ↗</span>
             </a>
           </li>
-          <li class="map-list-item">
+          <li>
             <a href="https://map.naver.com/p/search/%EA%B5%90%EB%9E%98%ED%96%A5" target="_blank" rel="noopener noreferrer">
               <span>3. 교래향</span>
               <span>지도 열기 ↗</span>
             </a>
           </li>
-          <li class="map-list-item">
+          <li>
             <a href="https://map.naver.com/p/search/%EC%82%B0%EA%B5%BC%EB%B6%80%EB%A6%AC" target="_blank" rel="noopener noreferrer">
               <span>4. 산굼부리</span>
               <span>지도 열기 ↗</span>
             </a>
           </li>
-          <li class="map-list-item">
+          <li>
             <a href="https://map.naver.com/p/search/%EB%B3%B4%EB%A1%AC%EC%99%93" target="_blank" rel="noopener noreferrer">
               <span>5. 보롬왓</span>
               <span>지도 열기 ↗</span>
             </a>
           </li>
-          <li class="map-list-item">
+          <li>
             <a href="https://map.naver.com/p/search/%EB%94%B0%EB%9D%BC%EB%B9%84%EC%98%A4%EB%A6%84" target="_blank" rel="noopener noreferrer">
               <span>6. 따라비오름</span>
               <span>지도 열기 ↗</span>
             </a>
           </li>
-          <li class="map-list-item">
+          <li>
             <a href="https://map.naver.com/p/search/%EC%95%84%EB%B6%80%EC%98%A4%EB%A6%84" target="_blank" rel="noopener noreferrer">
               <span>7. 아부오름</span>
               <span>지도 열기 ↗</span>
             </a>
           </li>
-          <li class="map-list-item">
+          <li>
             <a href="https://map.naver.com/p/search/%EC%A0%9C%EC%A3%BC%20%EC%83%88%EB%B3%84%EC%98%A4%EB%A6%84" target="_blank" rel="noopener noreferrer">
               <span>8. 새별오름</span>
               <span>지도 열기 ↗</span>
             </a>
           </li>
         </ul>
-      </div>
+        </section>
 
-      <div class="app-course-box" style="margin: 40px 0 24px; padding: 20px 22px; background: var(--color-accent-light); border: 1px solid var(--color-border); border-radius: 14px;">
-        <strong style="display: block; font-size: 17px; color: var(--color-text-main); margin-bottom: 6px;">🗺️ 이 코스 오늘 데이트에서 열기</strong>
-        <p style="margin: 0 0 14px; font-size: 14.5px; line-height: 1.6; color: var(--color-text-main);">글에 나온 장소 6곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
-        <a href="../../#c=1788915843931.1788827339252.1790562708831.1533.1791425117167.1790791410067" style="display: inline-block; padding: 10px 18px; border-radius: 10px; background: var(--color-text-main); color: #ffffff; font-weight: 700; font-size: 15px; text-decoration: none;">앱에서 코스 열기 →</a>
-      </div>
+        <div class="app-course-box">
+          <div>
+            <h2>이 코스 오늘 데이트에서 열기</h2>
+            <p>글에 나온 장소 6곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
+          </div>
+          <a class="btn app-action" href="../../#c=1788915843931.1788827339252.1790562708831.1533.1791425117167.1790791410067">앱에서 코스 열기</a>
+        </div>
 
-      <footer class="post-footer">
-        <div class="editorial-badge">오늘 데이트 에디토리얼 팀 공식 큐레이션</div>
-        <p>본 콘텐츠는 오늘 데이트 에디토리얼 팀에서 공개 데이터를 기반으로 기획·작성하였습니다. 각 스팟의 영업시간, 입장료 및 주차 여건은 현지 상황이나 계절, 기상에 따라 달라질 수 있으므로 방문 전 실시간 정보를 확인하시길 권장합니다.</p>
-        <p style="margin-top: 8px;">제주 중산간의 울창한 삼나무 숲길과 바람에 춤추는 은빛 억새 능선을 거닐며, 소중한 사람과 함께 번잡한 일상을 내려놓고 깊은 쉼의 시간을 가져보세요.</p>
-      </footer>
-    </article>
-  </main>
+        <footer class="article-credit">
+          <p>오늘 데이트 에디토리얼 팀 공식 큐레이션</p>
+          <p>본 콘텐츠는 오늘 데이트 에디토리얼 팀에서 공개 데이터를 기반으로 기획·작성하였습니다. 각 스팟의 영업시간, 입장료 및 주차 여건은 현지 상황이나 계절, 기상에 따라 달라질 수 있으므로 방문 전 실시간 정보를 확인하시길 권장합니다.</p>
+          <p>제주 중산간의 울창한 삼나무 숲길과 바람에 춤추는 은빛 억새 능선을 거닐며, 소중한 사람과 함께 번잡한 일상을 내려놓고 깊은 쉼의 시간을 가져보세요.</p>
+        </footer>
+      </div>
+    </article></main>
 
 </body>
 </html>
