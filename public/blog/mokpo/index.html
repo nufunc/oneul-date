@@ -16,6 +16,9 @@
 
   <!-- Pretendard 웹폰트 -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700&display=swap&text=%26()%2C.0123456789%3AS%5B%5Dopt~%EA%B0%90%EA%B0%93%EA%B1%B0%EA%B2%BD%EA%B3%84%EA%B3%A0%EA%B4%80%EA%B5%90%EA%B5%AC%EA%B7%BC%EA%B8%B0%EA%B8%B8%EA%B9%8C%EB%82%99%EB%82%A8%EB%82%AD%EB%85%90%EB%8A%98%EB%8B%AC%EB%8C%80%EB%8D%B0%EB%8F%84%EB%8F%8C%EB%8F%99%EB%9D%BC%EB%A0%88%EB%A1%9C%EB%A5%98%EB%A7%8C%EB%A7%9D%EB%A7%A4%EB%AA%A9%EB%AA%B0%EB%AC%BC%EB%B0%94%EB%B2%BD%EB%B3%84%EB%B3%B4%EB%B3%B8%EB%B6%80%EB%B6%81%EB%B6%89%EB%B7%B0%EB%B8%94%EB%B9%84%EC%82%AC%EC%82%B0%EC%83%81%EC%84%9C%EC%84%A0%EC%84%B1%EC%85%98%EC%8A%A4%EC%8A%B9%EC%8B%9D%EC%97%90%EC%97%AC%EC%97%AD%EC%97%B0%EC%97%B4%EC%98%81%EC%98%88%EC%98%A4%EC%98%A5%EC%99%80%EC%9B%90%EC%9C%84%EC%9C%A0%EC%9D%80%EC%9D%B4%EC%9D%B8%EC%9D%BC%EC%9E%84%EC%9E%A5%EC%A0%84%EC%A1%B0%EC%A3%BC%EC%A7%80%EC%A7%84%EC%B0%A8%EC%B2%9C%EC%B9%B4%EC%BC%80%EC%BD%94%ED%81%AC%ED%83%80%ED%83%91%ED%84%B0%ED%8A%B8%ED%8C%90%ED%8F%AC%ED%91%9C%ED%95%98%ED%95%A9%ED%95%AD%ED%95%B4%ED%96%89" rel="stylesheet">
 
   <script type="application/ld+json">
 {
@@ -43,376 +46,302 @@
   </script>
 
   <style>
-    :root {
-      --color-primary: #1e293b;
-      --color-accent: #0284c7;
-      --color-accent-light: #e0f2fe;
-      --color-text-main: #334155;
-      --color-text-sub: #64748b;
-      --color-border: #e2e8f0;
-      --color-bg-page: #f8fafc;
-      --color-card-bg: #ffffff;
-      --color-warm: #d97706;
-      --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-    }
+/* hallmark-solstice: scripts/convert_blog_hallmark.mjs가 글의 <style>을 이 파일로 바꾼다 (Hallmark 2.0.0, 테마 Solstice, P-293) */
+:root {
+  color-scheme: light;
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-xs: 0.8125rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.125rem; --text-xl: 1.5625rem; --text-2xl: 1.953rem; --text-3xl: 2.441rem;
+  --text-hero: clamp(1.75rem, 1.6vw + 1.25rem, 2.75rem);
+  --text-section: clamp(1.75rem, 1.8vw + 1rem, 2.875rem); --text-title: clamp(1.25rem, 0.75vw + 0.875rem, 1.625rem); --text-lead: clamp(1.0625rem, 0.3vw + 0.95rem, 1.25rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-micro: 120ms; --dur-short: 220ms;
+  --container: 1200px; --measure: 680px; --gutter: 56px; --gap-columns: 40px; --section-gap: 120px;
+  --z-sticky-nav: 300;
+  --color-paper: oklch(94% 0.03 80); --color-paper-2: oklch(97% 0.02 85); --color-paper-3: oklch(89% 0.05 80);
+  --color-ink: oklch(27% 0.05 50); --color-ink-2: oklch(36% 0.05 50); --color-muted: oklch(48% 0.06 55);
+  --color-rule: oklch(84% 0.06 78);
+  --color-accent: oklch(54% 0.20 24); --color-accent-2: oklch(48% 0.19 24); --color-accent-ink: oklch(97% 0.02 85); --color-focus: oklch(54% 0.20 24);
+  --color-gold: oklch(74% 0.14 75); --color-gold-2: oklch(84% 0.11 80);
+  --color-band-text: oklch(94% 0.03 80); --color-band-muted: oklch(80% 0.05 75);
+  --color-hair-ink: color-mix(in oklab, var(--color-ink) 10%, transparent);
+  --font-display: "Noto Serif KR", "Nanum Myeongjo", ui-serif, serif;
+  --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --radius-card: 0; --radius-pill: 999px; --rule-hair: 1px; --rule-bar: 2px;
+  --shadow-card: 10px 10px 0 var(--color-paper-3);
+}
+@media (max-width: 60rem) { :root { --gutter: 24px; --section-gap: 88px; --gap-columns: 24px; } }
+@media (max-width: 40rem) { :root { --gutter: 16px; --section-gap: 64px; --gap-columns: 16px; } }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: var(--font-family);
-      background-color: var(--color-bg-page);
-      color: var(--color-text-main);
-      line-height: 1.8;
-      word-break: keep-all;
-      -webkit-font-smoothing: antialiased;
-    }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+html { scrollbar-color: var(--color-muted) var(--color-paper); scroll-padding-top: var(--space-3xl); }
+body { margin: 0; background: var(--color-paper); color: var(--color-ink-2); font-family: var(--font-family); font-size: var(--text-md); line-height: 1.75; word-break: keep-all; -webkit-font-smoothing: antialiased; }
+::selection { background: color-mix(in oklab, var(--color-gold) 40%, transparent); }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+a:hover { text-decoration-color: var(--color-accent); }
+article h1, article h2, article h3 { margin: 0; font-family: var(--font-display); font-weight: 700; color: var(--color-ink); line-height: 1.3; letter-spacing: -0.01em; overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+img { max-width: 100%; display: block; }
+.container { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); }
 
-    .site-header {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--color-border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .header-inner {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 14px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .header-logo {
-      font-weight: 800;
-      font-size: 1.15rem;
-      color: var(--color-primary);
-      text-decoration: none;
-    }
-    .header-logo span { color: var(--color-accent); }
-    .header-nav a {
-      color: var(--color-text-sub);
-      text-decoration: none;
-      font-size: 0.9rem;
-      margin-left: 16px;
-    }
+/* 44px 머리 링크 규칙: scripts/test-blog-related.cjs가 글마다 하나를 요구한다 */
+header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
 
-    .article-container {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 40px 20px 80px;
-    }
+/* Controls */
+.btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 var(--space-lg); border: 0; border-radius: var(--radius-pill); background: var(--color-accent); color: var(--color-accent-ink); font: 600 var(--text-md)/1 var(--font-family); text-decoration: none; cursor: pointer; transition: background-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out); }
+.btn:hover { background: var(--color-accent-2); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.link-quiet { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-ink); font-weight: 600; font-size: var(--text-sm); text-decoration: none; border-bottom: var(--rule-bar) solid var(--color-ink); transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out); }
+.link-quiet:hover { color: var(--color-accent); border-color: var(--color-accent); }
+.link-quiet:active { transform: translateY(1px); }
+.link-quiet:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
 
-    .article-header {
-      margin-bottom: 32px;
-    }
-    .badge {
-      display: inline-block;
-      background: var(--color-accent-light);
-      color: var(--color-accent);
-      font-weight: 700;
-      font-size: 0.8rem;
-      padding: 4px 10px;
-      border-radius: 6px;
-      margin-bottom: 12px;
-    }
-    h1 {
-      font-size: 1.85rem;
-      font-weight: 800;
-      line-height: 1.35;
-      color: var(--color-primary);
-      margin-bottom: 16px;
-      letter-spacing: -0.02em;
-    }
-    .lead-text {
-      font-size: 1.05rem;
-      color: var(--color-text-sub);
-      line-height: 1.75;
-      background: #f1f5f9;
-      padding: 18px 20px;
-      border-radius: 12px;
-      border-left: 4px solid var(--color-accent);
-      margin-bottom: 32px;
-    }
+/* Nav */
+.site-header { position: sticky; top: 0; z-index: var(--z-sticky-nav); background: var(--color-paper); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.header-inner { display: flex; justify-content: space-between; align-items: center; min-height: 64px; }
+.header-logo { font-family: var(--font-display); font-size: var(--text-lg); color: var(--color-ink); text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; }
+.header-logo span { color: var(--color-accent); margin-left: 0.3em; }
+.header-logo:hover { color: var(--color-ink-2); }
+.header-nav { display: flex; gap: var(--space-lg); }
+.header-nav a { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--text-sm); color: var(--color-ink-2); text-decoration: none; }
+.header-nav a:hover { color: var(--color-ink); text-decoration: underline; text-decoration-color: var(--color-accent); }
+.header-nav a:active, .header-logo:active { transform: translateY(1px); }
 
-    .meta-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px 16px;
-      font-size: 0.85rem;
-      color: var(--color-text-sub);
-      margin-bottom: 24px;
-    }
+/* Hero */
+.hero { display: grid; padding-block: var(--space-2xl) var(--space-xl); }
+.hero-text { display: grid; gap: var(--space-lg); }
+.article-title { font-size: var(--text-hero); line-height: 1.3; max-width: 28ch; }
+.hero-kicker { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.hero-kicker span:first-child { color: var(--color-accent); font-weight: 600; }
+.article-meta { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-lg); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); font-variant-numeric: tabular-nums; }
+.article-meta .meta-credit { flex-basis: 100%; }
+/* 좁은 화면에서 칸마다 한 줄: 본문 글꼴(Pretendard)이 바뀔 때 줄 수가 달라져 아래 띠가 밀리는 것을 막는다 */
+@media (max-width: 40rem) { .article-meta { flex-direction: column; flex-wrap: nowrap; } }
+.spot-photo img { width: 100%; height: 100%; object-fit: cover; outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
 
-    .timeline-card {
-      background: var(--color-card-bg);
-      border: 1px solid var(--color-border);
-      border-radius: 16px;
-      padding: 24px;
-      margin-bottom: 40px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-    }
-    .timeline-title {
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: var(--color-primary);
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .timeline-list {
-      list-style: none;
-      position: relative;
-      padding-left: 20px;
-    }
-    .timeline-list::before {
-      content: '';
-      position: absolute;
-      left: 6px;
-      top: 8px;
-      bottom: 8px;
-      width: 2px;
-      background: #cbd5e1;
-    }
-    .timeline-item {
-      position: relative;
-      margin-bottom: 16px;
-      font-size: 0.95rem;
-    }
-    .timeline-item:last-child { margin-bottom: 0; }
-    .timeline-item::before {
-      content: '';
-      position: absolute;
-      left: -18px;
-      top: 7px;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--color-accent);
-      border: 2px solid white;
-      box-shadow: 0 0 0 2px var(--color-accent-light);
-    }
-    .timeline-time {
-      font-weight: 700;
-      color: var(--color-accent);
-      margin-right: 8px;
-    }
+/* Lead */
+.prose-intro { max-width: var(--measure); padding-top: var(--space-xl); font-size: var(--text-lead); line-height: 1.8; color: var(--color-ink); padding-bottom: var(--space-3xl); }
 
-    .spot-section {
-      margin-bottom: 48px;
-    }
-    .spot-card {
-      background: var(--color-card-bg);
-      border: 1px solid var(--color-border);
-      border-radius: 16px;
-      overflow: hidden;
-      margin-bottom: 24px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-    }
-    .spot-image-wrap {
-      width: 100%;
-      height: 380px;
-      background: #e2e8f0;
-      position: relative;
-      overflow: hidden;
-    }
-    .spot-image-wrap img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      transition: transform 0.3s ease;
-    }
-    .spot-image-wrap:hover img {
-      transform: scale(1.02);
-    }
-    .spot-image-caption {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: linear-gradient(transparent, rgba(0,0,0,0.7));
-      color: white;
-      padding: 12px 16px;
-      font-size: 0.8rem;
-    }
-    .spot-body {
-      padding: 24px;
-    }
-    .spot-header-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 14px;
-    }
-    .spot-num {
-      font-size: 0.85rem;
-      font-weight: 800;
-      color: var(--color-accent);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .spot-name {
-      font-size: 1.35rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin-top: 2px;
-    }
-    .spot-chips {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      margin-top: 8px;
-    }
-    .spot-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 0.8rem;
-      padding: 4px 10px;
-      border-radius: 20px;
-      text-decoration: none;
-      background: #f1f5f9;
-      color: var(--color-text-main);
-      border: 1px solid var(--color-border);
-      transition: all 0.2s;
-    }
-    .spot-chip:hover {
-      background: var(--color-accent-light);
-      color: var(--color-accent);
-      border-color: var(--color-accent);
-    }
-    .spot-chip.map-link {
-      background: #e0f2fe;
-      color: #0369a1;
-      border-color: #bae6fd;
-      font-weight: 600;
-    }
+/* The day, on the brown band */
+.band { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl) var(--space-xl); }
+.band .timeline-title { color: var(--color-band-text); font-size: var(--text-section); margin-bottom: var(--space-xl); }
+.route { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: 0; padding: 0; }
+.tl-act { font-size: var(--text-sm); color: var(--color-gold-2); padding-bottom: var(--space-sm); }
+.tl-step { display: grid; align-content: start; gap: var(--space-2xs); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-gold); }
+.tl-time { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1; color: var(--color-band-text); font-variant-numeric: tabular-nums; }
+.tl-place { font-weight: 600; font-size: var(--text-lg); color: var(--color-band-text); }
+.tl-note { font-size: var(--text-sm); color: var(--color-band-muted); line-height: 1.6; }
+.tl-move { font-size: var(--text-sm); color: var(--color-band-muted); padding-block: var(--space-sm) var(--space-lg); }
+.tl-total { font-size: var(--text-sm); color: var(--color-band-muted); padding-top: var(--space-lg); margin-top: var(--space-lg); border-top: var(--rule-hair) solid color-mix(in oklab, var(--color-band-text) 25%, transparent); }
+/* spot-info-list 계열: 시간 범위(10:30 - 11:45)가 길어 시각 글자를 줄이고, 요약 상자와 번호 배지를 둔다 */
+.route.range .tl-time { font-size: var(--text-xl); }
+.route.range .tl-step { padding-bottom: var(--space-md); }
+.tl-badge { font-size: var(--text-xs); color: var(--color-gold-2); letter-spacing: 0.04em; }
+.tl-facts { display: grid; gap: var(--space-2xs) var(--space-lg); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.tl-facts strong { color: var(--color-gold-2); font-weight: 600; }
+@media (min-width: 60rem) {
+  .tl-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .route { grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); column-gap: var(--space-lg); }
+  .route > * { grid-row: var(--r); grid-column: var(--c) / span var(--s, 1); }
+  .tl-move { padding-bottom: 0; }
+  .tl-total { grid-column: 1 / -1; }
+}
 
-    .spot-desc {
-      font-size: 0.98rem;
-      color: var(--color-text-main);
-      line-height: 1.85;
-      margin-bottom: 16px;
-    }
+/* Stops */
+.spots { padding-block: var(--section-gap) 0; display: grid; gap: var(--section-gap); }
+.spot-section { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "photo head" "photo body"; grid-template-rows: auto 1fr; column-gap: var(--gap-columns); row-gap: var(--space-md); align-items: start; padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); }
+.spot-section.flip { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-areas: "head photo" "body photo"; }
+.spot-section.no-photo { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "body"; }
+.spot-head { grid-area: head; display: grid; gap: var(--space-md); }
+.spot-photo { grid-area: photo; align-self: start; margin: 0; aspect-ratio: 4 / 5; width: 100%; background: var(--color-paper-3); position: sticky; top: 96px; }
+.spot-body { grid-area: body; display: grid; gap: var(--space-md); }
+.spot-header { display: flex; align-items: baseline; gap: var(--space-md); }
+.spot-num { font-family: var(--font-display); font-size: var(--text-3xl); line-height: 1; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+.spot-title { font-size: var(--text-section); }
+.spot-tagline { font-size: var(--text-lg); color: var(--color-ink); padding-bottom: var(--space-xs); }
+.spot-desc { max-width: 60ch; }
 
-    .tip-box {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 16px 18px;
-      font-size: 0.9rem;
-      color: #475569;
-      margin-top: 14px;
-    }
-    .tip-box strong {
-      color: var(--color-primary);
-      display: block;
-      margin-bottom: 6px;
-    }
+.spot-info-box { margin: var(--space-xs) 0 0; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); }
+.info-row { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--space-md); padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.info-row:last-child { border-bottom: 0; }
+.info-label { color: var(--color-muted); }
+.info-val { color: var(--color-ink); font-weight: 400; font-variant-numeric: tabular-nums; }
+.map-btn-wrap { padding-top: var(--space-sm); }
+.tip-box { padding: var(--space-sm) var(--space-md); border-left: var(--rule-bar) solid var(--color-accent); background: var(--color-paper-2); font-size: var(--text-sm); color: var(--color-ink-2); line-height: 1.7; }
+.tip-box strong { color: var(--color-ink); font-weight: 600; }
+.tip-box .tip-title { display: block; margin-bottom: var(--space-2xs); }
 
-    .table-wrap {
-      background: var(--color-card-bg);
-      border: 1px solid var(--color-border);
-      border-radius: 16px;
-      overflow: hidden;
-      margin: 40px 0;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.9rem;
-    }
-    th, td {
-      padding: 14px 16px;
-      text-align: left;
-      border-bottom: 1px solid var(--color-border);
-    }
-    th {
-      background: #f8fafc;
-      font-weight: 600;
-      color: var(--color-text-sub);
-    }
-    tr:last-child td { border-bottom: none; }
-    .sum-row {
-      font-weight: 700;
-      background: #f8fafc;
-      color: var(--color-primary);
-    }
+/* Fees */
+.cost-table-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.cost-head { display: grid; gap: var(--space-md); align-content: start; }
+.cost-head .timeline-title { font-size: var(--text-section); }
+.cost-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.cost-table th { text-align: left; font-weight: 400; color: var(--color-muted); padding: var(--space-xs) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-bar) solid var(--color-ink); }
+.cost-table td { padding: var(--space-sm) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink-2); vertical-align: top; }
+.cost-table td:nth-child(2) { color: var(--color-ink); font-weight: 400; }
+.cost-3 .cost-total-row td:nth-child(2) { font-family: inherit; font-size: inherit; color: inherit; font-weight: 600; }
+.cost-3 .cost-total-row td:nth-child(3) { font-family: var(--font-display); font-size: var(--text-xl); color: var(--color-accent); font-weight: 700; }
+.cost-total-row td { border-bottom: 0; border-top: var(--rule-bar) solid var(--color-ink); color: var(--color-ink); font-weight: 600; }
+.cost-total-row td:nth-child(2) { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--color-accent); font-weight: 700; }
+@media (max-width: 600px) {
+  .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
+  .table-wrap thead { display: none; }
+  .table-wrap tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-sm); row-gap: var(--space-2xs); padding-block: var(--space-sm); border-bottom: var(--rule-hair) solid var(--color-rule); }
+  .table-wrap td { padding: 0; border: 0; }
+  .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: var(--text-xs); color: var(--color-muted); }
+  .table-wrap td:nth-child(3) { text-align: right; font-weight: 600; color: var(--color-ink); }
+  .table-wrap td:nth-child(4) { grid-column: 1 / -1; color: var(--color-muted); }
+  .table-wrap td:empty { display: none; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: var(--text-sm); color: var(--color-ink); }
+  .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; text-align: right; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
+  .table-wrap .cost-total-row { border-top: var(--rule-bar) solid var(--color-ink); border-bottom: 0; }
+}
 
-    /* 비용표: 좁은 화면에서는 한 행을 카드 하나로 쌓는다 */
-    @media (max-width: 600px) {
-      .table-wrap { overflow-x: visible; }
-      .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
-      .table-wrap thead { display: none; }
-      .table-wrap tr {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        column-gap: 12px;
-        row-gap: 4px;
-        padding: 14px 16px;
-        border-bottom: 1px solid var(--color-border);
-      }
-      .table-wrap tr:last-child { border-bottom: none; }
-      .table-wrap td { padding: 0; border: none; }
-      .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: 0.78rem; font-weight: 700; color: var(--color-text-sub); }
-      .table-wrap td:nth-child(2) { font-weight: 700; }
-      .table-wrap td:nth-child(3) { max-width: 60vw; word-break: keep-all; text-align: right; font-weight: 700; }
-      .table-wrap td:nth-child(4) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
-      .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: inherit; color: inherit; }
-      .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; max-width: 60vw; word-break: keep-all; text-align: right; }
-      .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
-    }
+/* Tips */
+.tips-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.tips-card .timeline-title { font-size: var(--text-section); align-self: start; }
+.tips-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-md); }
+.tips-list li { padding-bottom: var(--space-md); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.tips-list li:last-child { border-bottom: 0; }
+.tips-list strong { color: var(--color-ink); font-weight: 600; }
 
-    .article-footer {
-      border-top: 1px solid var(--color-border);
-      padding-top: 32px;
-      margin-top: 48px;
-      font-size: 0.85rem;
-      color: var(--color-text-sub);
-      line-height: 1.7;
-    }
-    .author-card {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 24px;
-    }
-    .author-avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: var(--color-accent-light);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      color: var(--color-accent);
-      font-size: 1.1rem;
-    }
-    .author-info strong {
-      display: block;
-      color: var(--color-primary);
-      font-size: 0.95rem;
-    }
+/* App course */
+.app-course-box { margin-top: var(--section-gap); display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--gap-columns); align-items: end; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-xl); }
+.app-course-box h2 { font-size: var(--text-section); margin-bottom: var(--space-md); }
+.app-course-box p { max-width: 52ch; }
+.app-course-box .app-action { justify-self: end; }
 
-    @media (max-width: 640px) {
-      .spot-image-wrap { height: 260px; }
-      h1 { font-size: 1.5rem; }
-      .article-container { padding: 24px 16px 60px; }
-      .timeline-card { padding: 18px 16px; }
-      .spot-body { padding: 18px 16px; }
-      th, td { padding: 10px 12px; font-size: 0.82rem; }
-    }
-    header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
-    .header-nav a,.header-title a,.blog-tagline a{display:inline-block}
+.article-credit { margin-top: var(--space-2xl); padding-block: var(--space-md) var(--space-3xl); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); }
+
+/* Footer mast */
+.site-footer { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl); }
+.footer-inner { display: grid; gap: var(--space-md); }
+.footer-mark { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1.2; color: var(--color-band-text); }
+.footer-line { color: var(--color-band-muted); font-size: var(--text-sm); }
+.footer-links { display: flex; flex-wrap: wrap; gap: var(--space-lg); }
+.footer-links a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-band-text); font-size: var(--text-sm); text-decoration: underline; text-decoration-color: var(--color-gold); }
+.footer-links a:hover { text-decoration-color: var(--color-accent); color: var(--color-gold-2); }
+.footer-links a:active { transform: translateY(1px); }
+.site-footer :focus-visible { outline-color: var(--color-gold-2); }
+
+@media (max-width: 60rem) {
+  .hero, .spot-section, .spot-section.flip, .cost-table-card, .tips-card, .app-course-box { grid-template-columns: minmax(0, 1fr); }
+  .spot-section, .spot-section.flip { grid-template-areas: "head" "photo" "body"; grid-template-rows: auto; }
+  .spot-section.no-photo { grid-template-areas: "head" "body"; }
+  .hero { padding-block: var(--space-xl) var(--space-xl); }
+  .spot-photo { position: static; aspect-ratio: 16 / 10; }
+  .app-course-box { padding: var(--space-lg); }
+  .app-course-box .app-action { justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn, .link-quiet { transition: none; }
+  .btn:active, .link-quiet:active, .header-nav a:active, .header-logo:active, .footer-links a:active { transform: none; }
+}
+
+/* real-photo-flat 계열(평면 글): 번호 있는 긴 장소 제목, 사진 설명, 안내 상자, 지도 목록 */
+.lead-photo { margin: 0 0 var(--space-3xl); }
+.lead-photo img { width: 100%; max-height: 520px; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.lead-photo figcaption, .body-photo figcaption { margin-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.spot-photo figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--space-xs) var(--space-sm); font-size: var(--text-xs); line-height: 1.5; color: var(--color-accent-ink); background: color-mix(in oklab, var(--color-ink) 78%, transparent); }
+.body-photo { margin: 0; }
+.body-photo img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.spot-section.flat .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.tl-lead { max-width: var(--measure); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.guide-box, .order-box { background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); color: var(--color-ink); }
+.guide-box h4, .order-box strong { margin: 0 0 var(--space-xs); font-family: var(--font-display); font-size: var(--text-md); color: var(--color-ink); display: block; }
+.guide-box ul, .order-box ul { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-2xs); }
+.bridge { padding-top: var(--space-xs); color: var(--color-muted); font-size: var(--text-sm); }
+.map-links { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-md); }
+.map-links .timeline-title { font-size: var(--text-section); }
+.map-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-xs); }
+.map-list a, .map-link-chip { display: flex; justify-content: space-between; gap: var(--space-md); align-items: center; min-height: 44px; padding-block: var(--space-xs); border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink); text-decoration: none; }
+.map-links-grid { display: grid; gap: 0; }
+.map-link-chip .btn-action { color: var(--color-accent); font-weight: 600; white-space: nowrap; }
+@media (max-width: 40rem) { .spot-section.flat .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .spot-photo { position: relative; top: auto; } }
+
+/* spot-card 계열(editor-144): 대표 사진, 요약 상자, 본문 구획, 세부 코스, 이동 연결, 마무리 상자 */
+.hero-figure { margin: 0 0 var(--space-xl); }
+.hero-figure img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.hero-figure figcaption { padding-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-muted); }
+.summary-card { margin-bottom: var(--space-xl); background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-lg); font-size: var(--text-sm); }
+.summary-title, p.timeline-title, .cta-title { font-family: var(--font-display); font-weight: 700; line-height: 1.3; color: var(--color-ink); }
+.summary-title { font-size: var(--text-xl); margin-bottom: var(--space-sm); }
+p.timeline-title { letter-spacing: -0.01em; overflow-wrap: break-word; }
+.summary-list { margin: 0; padding: 0; list-style: none; display: grid; }
+.summary-list li { padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.summary-list li:last-child { border-bottom: 0; }
+.summary-list strong { color: var(--color-ink); font-weight: 600; }
+.prose-section { margin-top: var(--section-gap); max-width: var(--measure); display: grid; gap: var(--space-md); }
+.prose-section h2, .spots-title { font-size: var(--text-title); }
+.stops-section { margin-top: var(--section-gap); }
+.stops-section .spots { padding-top: var(--space-xl); }
+.spots.bridged { gap: 0; }
+.drive-bridge { margin: 0; padding-block: var(--space-xl); padding-left: var(--space-md); border-left: var(--rule-bar) solid var(--color-gold); font-size: var(--text-sm); color: var(--color-muted); }
+.drive-bridge strong { color: var(--color-ink); font-weight: 600; }
+.spot-header:has(.spot-badge) { flex-direction: column; align-items: flex-start; gap: var(--space-xs); }
+.spot-badge { font-size: var(--text-sm); font-weight: 600; color: var(--color-accent); }
+.spot-actions { display: flex; flex-wrap: wrap; gap: 0 var(--space-lg); }
+.info-wide .info-row { grid-template-columns: 5.5em minmax(0, 1fr); }
+.info-wide .info-row.plain { grid-template-columns: minmax(0, 1fr); }
+.cost-head .timeline-title.long { font-size: var(--text-title); }
+.cta-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-sm); max-width: var(--measure); }
+.cta-card h3, .cta-title { font-size: var(--text-title); }
+.cta-card .link-quiet { justify-self: start; }
+
+/* real-photo-grid 계열(editor-145): 사진과 정보 상자가 글 순서대로 이어지는 한 열 장소 구획, 번호 있는 동선, 도입 여러 문단 */
+.prose-intro p + p { margin-top: var(--space-md); }
+.stories { padding-top: var(--space-xl); gap: var(--space-3xl); }
+.story-section { display: grid; gap: var(--space-md); max-width: var(--measure); }
+.story-section .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.story-body { display: grid; gap: var(--space-md); }
+.story-photo { margin: 0; }
+.story-photo img { width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.story-photo figcaption { padding-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.story-photo figcaption span + span::before { content: " · "; }
+.tl-step .tl-badge { margin-bottom: calc(var(--space-2xs) * -1); }
+.tl-meta { display: block; font-style: normal; color: var(--color-gold-2); }
+.app-course-box.early { margin-top: var(--space-xl); }
+.app-course-box .cta-title { font-size: var(--text-section); margin-bottom: var(--space-md); }
+@media (max-width: 40rem) { .story-section .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .route .tl-act:not(:first-child) { margin-top: var(--space-lg); } }
+.article-credit.tight { padding-bottom: var(--space-md); }
+.back-link { padding-bottom: var(--space-md); font-size: var(--text-sm); }
+
+/* route-timeline 계열(editor-147: 보령, 거제, 고성): 사진 설명의 출처 줄, 시각 범위 동선 */
+.spot-photo figcaption .cap-src { display: block; }
+.spot-number { white-space: nowrap; }
+
+/* spot-block 계열(editor-147: 강릉, 경주): 머리 바 메모, 인용문, 날마다 나뉜 동선, 장소 분류 줄, 팁 목록, 금액이 끝 칸인 경비표 */
+.header-inner:has(.header-note) { flex-wrap: wrap; gap: 0 var(--space-md); }
+.header-note { font-size: var(--text-sm); color: var(--color-muted); }
+.hero-quote { max-width: var(--measure); font-size: var(--text-lead); line-height: 1.7; color: var(--color-ink); }
+.route + .route { margin-top: var(--space-xl); }
+.story-kicker { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.story-kicker .spot-num { font-size: var(--text-xl); }
+.stories.bridged .story-section + .story-section { margin-top: var(--space-3xl); }
+.tip-box ul { margin: 0; padding-left: 1.1em; display: grid; gap: var(--space-2xs); }
+@media (max-width: 600px) {
+  .table-wrap.amount-last td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
+  .table-wrap.amount-last td:nth-child(4) { grid-column: auto; text-align: right; font-weight: 600; color: var(--color-ink); }
+}
+
+/* timeline-list 계열(editor-149: 한남·이태원, 목포, 남해): 출처 줄의 글쓴이(아바타 글자는 장식이라 숨김) */
+.credit-mark { display: none; }
+.credit-author strong { margin-right: var(--space-xs); color: var(--color-ink); font-weight: 600; }
+.article-credit p + p { margin-top: var(--space-xs); }
+.spot-head { grid-template-columns: minmax(0, 1fr); }
+.spot-num { white-space: nowrap; }
+.spot-header .spot-title { min-width: 0; overflow-wrap: break-word; }
   </style>
 </head>
 <body>
 
   <header class="site-header">
-    <div class="header-inner">
+    <div class="header-inner container">
       <a href="/oneul-date/blog/" class="header-logo">오늘 데이트 <span>매거진</span></a>
       <nav class="header-nav">
         <a href="/oneul-date/">코스 탐색</a>
@@ -422,227 +351,158 @@
   </header>
 
   <main class="article-container">
-    <header class="article-header">
-      <span class="badge">전남 목포 코스</span>
-      <h1>[전남 목포 낭만 레트로] 근대역사관 붉은 벽돌부터 해상케이블카 오션뷰, 고하도 판옥선 전망대, 천연기념물 갓바위와 유달산 낙조까지 목포 감성 코스</h1>
-      <div class="meta-bar">
-        <span>발행일: 2026. 10. 21</span>
-        <span>추천 계절: 사계절(가을·봄 추천)</span>
-        <span>소요 시간: 당일치기 (약 7시간 30분)</span>
-        <span>글: 오늘 데이트 에디토리얼 팀 / 사진: 한국관광공사, 카카오맵</span>
-      </div>
-      <p class="lead-text">
-        푸른 다도해와 백년의 근대 역사가 공존하는 전남 목포 하루 여행 코스: 드라마 '호텔 델루나'의 붉은 벽돌 르네상스 건축 목포근대역사관 1관과 방공호 동굴, 산과 바다를 가로지르는 국내 최장 3.23km 목포 해상케이블카, 13척 판옥선 고하도 전망대와 바다 위 해상데크길, 영산강 하구 천연기념물 목포 갓바위, 목포대교를 붉게 물들이는 유달산 낙조 피날레까지 상세 여행 정보를 총정리했습니다.
-      </p>
-    </header>
-
-    <section class="timeline-card">
-      <div class="timeline-title">
-        <span>🗺️</span> 목포 낭만 레트로 여행 동선 타임라인
-      </div>
-      <ul class="timeline-list">
-        <li class="timeline-item">
-          <span class="timeline-time">10:30 ~ 12:00</span>
-          <strong>[스팟 1] 목포근대역사관 1관</strong> (옛 목포 일본영사관 붉은 벽돌 건물과 방공호 동굴 탐방)
-        </li>
-        <li class="timeline-item">
-          <span class="timeline-time">12:10 ~ 14:40</span>
-          <strong>[스팟 2 & 3] 목포 해상케이블카 & 고하도 전망대</strong> (차량 약 5분, 3.23km 바다 횡단 & 13척 판옥선 전망대와 해상데크길)
-        </li>
-        <li class="timeline-item">
-          <span class="timeline-time">14:50 ~ 15:30</span>
-          <strong>[간식] 씨엘비베이커리</strong> (차량 약 4분, 새우바게트와 크림치즈바게트)
-        </li>
-        <li class="timeline-item">
-          <span class="timeline-time">15:40 ~ 16:45</span>
-          <strong>[스팟 4] 목포 갓바위</strong> (차량 약 7분, 삿갓 바위와 바다 위 해상보행교 산책)
-        </li>
-        <li class="timeline-item">
-          <span class="timeline-time">17:00 ~ 18:00</span>
-          <strong>[스팟 5] 유달산낙조대 & 목포대교 일몰</strong> (차량 약 12분, 가을 기준 일몰 전 도착, 다도해 섬들과 목포대교 너머 낙조)
-        </li>
-      </ul>
-    </section>
-
-    <!-- 스팟 1: 목포근대역사관 1관 -->
-    <article class="spot-section">
-      <div class="spot-card">
-        <div class="spot-image-wrap">
-          <img src="https://tong.visitkorea.or.kr/cms/resource/03/4067003_image2_1.JPG" alt="목포근대역사관 1관 붉은 벽돌 르네상스 건축 전경" loading="lazy">
-          <div class="spot-image-caption">언덕 위 목포근대역사관 1관 붉은 벽돌 건물과 진입로</div>
+    <article>
+      <header class="article-header hero container">
+        <div class="hero-text">
+          <p class="hero-kicker badge-category"><span>전남 목포 코스</span></p>
+          <h1 class="article-title">[전남 목포 낭만 레트로] 근대역사관 붉은 벽돌부터 해상케이블카 오션뷰, 고하도 판옥선 전망대, 천연기념물 갓바위와 유달산 낙조까지 목포 감성 코스</h1>
+          <div class="article-meta">
+            <span>발행일: 2026. 10. 21</span>
+            <span>추천 계절: 사계절(가을·봄 추천)</span>
+            <span>소요 시간: 당일치기 (약 7시간 30분)</span>
+            <span class="meta-credit">글: 오늘 데이트 에디토리얼 팀 / 사진: 한국관광공사, 카카오맵</span>
+          </div>
+          <p><a class="btn" href="../../#c=1789400665887.2034.1789853249658.1789853245010.4453">앱에서 코스 열기</a></p>
         </div>
-        <div class="spot-body">
-          <div class="spot-header-row">
-            <div>
-              <span class="spot-num">Spot 01</span>
-              <h2 class="spot-name">목포근대역사관 1관 (구 목포 일본영사관)</h2>
+      </header>
+
+      <div class="container">
+        <p class="prose-intro">푸른 다도해와 백년의 근대 역사가 공존하는 전남 목포 하루 여행 코스: 드라마 '호텔 델루나'의 붉은 벽돌 르네상스 건축 목포근대역사관 1관과 방공호 동굴, 산과 바다를 가로지르는 국내 최장 3.23km 목포 해상케이블카, 13척 판옥선 고하도 전망대와 바다 위 해상데크길, 영산강 하구 천연기념물 목포 갓바위, 목포대교를 붉게 물들이는 유달산 낙조 피날레까지 상세 여행 정보를 총정리했습니다.</p>
+      </div>
+
+      <!-- 동선 -->
+      <section class="timeline-card band">
+        <div class="container">
+          <p class="timeline-title">목포 낭만 레트로 여행 동선 타임라인</p>
+          <div class="route range" style="--n:5">
+            <div class="tl-step" style="--r:2; --c:1"><span class="tl-time">10:30 ~ 12:00</span><span class="tl-place">[스팟 1] 목포근대역사관 1관</span><span class="tl-note">(옛 목포 일본영사관 붉은 벽돌 건물과 방공호 동굴 탐방)</span></div>
+            <div class="tl-step" style="--r:2; --c:2"><span class="tl-time">12:10 ~ 14:40</span><span class="tl-place">[스팟 2 & 3] 목포 해상케이블카 & 고하도 전망대</span><span class="tl-note">(차량 약 5분, 3.23km 바다 횡단 & 13척 판옥선 전망대와 해상데크길)</span></div>
+            <div class="tl-step" style="--r:2; --c:3"><span class="tl-time">14:50 ~ 15:30</span><span class="tl-place">[간식] 씨엘비베이커리</span><span class="tl-note">(차량 약 4분, 새우바게트와 크림치즈바게트)</span></div>
+            <div class="tl-step" style="--r:2; --c:4"><span class="tl-time">15:40 ~ 16:45</span><span class="tl-place">[스팟 4] 목포 갓바위</span><span class="tl-note">(차량 약 7분, 삿갓 바위와 바다 위 해상보행교 산책)</span></div>
+            <div class="tl-step" style="--r:2; --c:5"><span class="tl-time">17:00 ~ 18:00</span><span class="tl-place">[스팟 5] 유달산낙조대 & 목포대교 일몰</span><span class="tl-note">(차량 약 12분, 가을 기준 일몰 전 도착, 다도해 섬들과 목포대교 너머 낙조)</span></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="container">
+        <div class="spots">
+          <section class="spot-section">
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/03/4067003_image2_1.JPG" alt="목포근대역사관 1관 붉은 벽돌 르네상스 건축 전경" loading="lazy" />
+              <figcaption>언덕 위 목포근대역사관 1관 붉은 벽돌 건물과 진입로</figcaption>
+            </figure>
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-num">Spot 01</span><h2 class="spot-title">목포근대역사관 1관 (구 목포 일본영사관)</h2></div>
             </div>
-          </div>
-          <div class="spot-chips">
-            <a href="https://map.naver.com/p/search/%EB%AA%A9%ED%8F%AC%EA%B7%BC%EB%8C%80%EC%97%AD%EC%82%AC%EA%B4%80%201%EA%B4%80" class="spot-chip map-link" target="_blank" rel="noopener">네이버 지도 바로가기</a>
-            <a href="https://tmap.life/route?name=%EB%AA%A9%ED%8F%AC%EA%B7%BC%EB%8C%80%EC%97%AD%EC%82%AC%EA%B4%801%EA%B4%80" class="spot-chip" target="_blank" rel="noopener">🧭 T맵 길안내</a>
-            <a href="https://m.taxi.kakao.com/" class="spot-chip" target="_blank" rel="noopener">🚕 카카오T 호출</a>
-          </div>
-          <p class="spot-desc" style="margin-top: 16px;">
+            <div class="spot-body">
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EB%AA%A9%ED%8F%AC%EA%B7%BC%EB%8C%80%EC%97%AD%EC%82%AC%EA%B4%80%201%EA%B4%80" target="_blank" rel="noopener" class="btn-naver-map link-quiet">네이버 지도 바로가기</a><a href="https://tmap.life/route?name=%EB%AA%A9%ED%8F%AC%EA%B7%BC%EB%8C%80%EC%97%AD%EC%82%AC%EA%B4%801%EA%B4%80" target="_blank" rel="noopener" class="btn-naver-map link-quiet">T맵 길안내</a><a href="https://m.taxi.kakao.com/" target="_blank" rel="noopener" class="btn-naver-map link-quiet">카카오T 호출</a></div>
+              <p class="spot-desc">
             유달산 기슭 완만한 언덕 위에 우뚝 솟은 목포근대역사관 1관은 1898년 10월 목포에 일본영사관이 설치되면서 영사관으로 지은 붉은 벽돌 건물로, 목포에서 가장 오래된 근대 건물입니다(TourAPI). 인기 드라마 '호텔 델루나'의 외관 촬영지로 널리 알려지며 사계절 여행자들의 발길이 끊이지 않는 대표 명소입니다.
           </p>
-          <p class="spot-desc">
+              <p class="spot-desc">
             붉은 벽돌 외벽과 고풍스러운 아치형 창문, 그리고 언덕 위에서 내려다보이는 목포 원도심 풍경이 어우러져 어디서 셔터를 눌러도 클래식한 영화의 한 장면 같은 사진이 완성됩니다. 내부에는 개항 당시의 목포와 일제강점기 독립운동의 역사가 체계적으로 전시되어 있으며, 본관 뒤편에는 태평양전쟁 말기 공습에 대비해 판 거대한 방공호 동굴이 원형 그대로 보존되어 있어 신비로운 동굴 탐방까지 함께 즐길 수 있습니다.
           </p>
-          <div class="tip-box">
-            <strong>💡 에디터 추천 팁 & 관람 정보</strong>
-            • 관람료는 성인 2,000원입니다(TourAPI).<br>
+              <div class="tip-box"><strong class="tip-title">에디터 추천 팁 & 관람 정보</strong>• 관람료는 성인 2,000원입니다(TourAPI).<br>
             • 본관 정면 중앙 계단과 뒤편 방공호 입구가 가장 인기 있는 사진 명당입니다.<br>
-            • 운영시간: 09:00 ~ 17:30 (입장 마감 17:00), 매주 월요일 휴관(월요일이 공휴일이면 다음 날, TourAPI)
-          </div>
-        </div>
-      </div>
-    </article>
-
-    <!-- 스팟 2: 목포 해상케이블카 -->
-    <article class="spot-section">
-      <div class="spot-card">
-        <div class="spot-image-wrap">
-          <img src="https://t1.kakaocdn.net/mystore/61098D8EE2A74C60829C3A3CFD68CCAA" alt="목포 해상케이블카 캐빈과 다도해 바다 전경" loading="lazy">
-          <div class="spot-image-caption">북항과 유달산 상공을 지나 고하도로 이어지는 3.23km 목포 해상케이블카</div>
-        </div>
-        <div class="spot-body">
-          <div class="spot-header-row">
-            <div>
-              <span class="spot-num">Spot 02</span>
-              <h2 class="spot-name">목포 해상케이블카 (북항 탑승장)</h2>
+            • 운영시간: 09:00 ~ 17:30 (입장 마감 17:00), 매주 월요일 휴관(월요일이 공휴일이면 다음 날, TourAPI)</div>
             </div>
-          </div>
-          <div class="spot-chips">
-            <a href="https://map.naver.com/p/search/%EB%AA%A9%ED%8F%AC%20%ED%95%B4%EC%83%81%EC%BC%80%EC%9D%B4%EB%B8%94%EC%B9%B4" class="spot-chip map-link" target="_blank" rel="noopener">네이버 지도 바로가기</a>
-            <a href="https://tmap.life/route?name=%EB%AA%A9%ED%8F%AC%ED%95%B4%EC%83%81%EC%BC%80%EC%9D%B4%EB%B8%94%EC%B9%B4%EB%B6%81%ED%95%AD%EC%8A%B9%EA%B0%95%EC%9E%A5" class="spot-chip" target="_blank" rel="noopener">🧭 T맵 길안내</a>
-            <a href="https://m.taxi.kakao.com/" class="spot-chip" target="_blank" rel="noopener">🚕 카카오T 호출</a>
-          </div>
-          <p class="spot-desc" style="margin-top: 16px;">
+          </section>
+
+          <section class="spot-section flip">
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://t1.kakaocdn.net/mystore/61098D8EE2A74C60829C3A3CFD68CCAA" alt="목포 해상케이블카 캐빈과 다도해 바다 전경" loading="lazy" />
+              <figcaption>북항과 유달산 상공을 지나 고하도로 이어지는 3.23km 목포 해상케이블카</figcaption>
+            </figure>
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-num">Spot 02</span><h2 class="spot-title">목포 해상케이블카 (북항 탑승장)</h2></div>
+            </div>
+            <div class="spot-body">
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EB%AA%A9%ED%8F%AC%20%ED%95%B4%EC%83%81%EC%BC%80%EC%9D%B4%EB%B8%94%EC%B9%B4" target="_blank" rel="noopener" class="btn-naver-map link-quiet">네이버 지도 바로가기</a><a href="https://tmap.life/route?name=%EB%AA%A9%ED%8F%AC%ED%95%B4%EC%83%81%EC%BC%80%EC%9D%B4%EB%B8%94%EC%B9%B4%EB%B6%81%ED%95%AD%EC%8A%B9%EA%B0%95%EC%9E%A5" target="_blank" rel="noopener" class="btn-naver-map link-quiet">T맵 길안내</a><a href="https://m.taxi.kakao.com/" target="_blank" rel="noopener" class="btn-naver-map link-quiet">카카오T 호출</a></div>
+              <p class="spot-desc">
             근대역사관 1관에서 차량으로 약 5분 이동하면 북항 스테이션에 도착합니다. 목포 해상케이블카는 북항에서 출발해 유달산 정상부를 관통하고 바다를 건너 고하도까지 연결되는 총연장 3.23km의 국내 최장 케이블카(TourAPI)로, 산과 섬, 바다를 한 번에 아우르는 압도적인 스케일을 자랑합니다.
           </p>
-          <p class="spot-desc">
+              <p class="spot-desc">
             국내 최고 높이인 155m 주탑(TourAPI)을 지날 때 발아래로 펼쳐지는 목포항과 다도해의 푸른 바다, 그리고 거대한 목포대교의 전경은 감탄을 자아냅니다. 공중을 가르며 바다 위를 날아가는 듯한 짜릿한 스릴과 탁 트인 개방감을 만끽할 수 있어 목포 여행의 핵심 하이라이트로 손꼽힙니다.
           </p>
-          <div class="tip-box">
-            <strong>💡 에디터 추천 팁 & 탑승 안내</strong>
-            • 바닥이 투명한 크리스탈 캐빈을 선택하면 발밑으로 펼쳐지는 에메랄드빛 바다를 더욱 아찔하게 체감할 수 있습니다.<br>
+              <div class="tip-box"><strong class="tip-title">에디터 추천 팁 & 탑승 안내</strong>• 바닥이 투명한 크리스탈 캐빈을 선택하면 발밑으로 펼쳐지는 에메랄드빛 바다를 더욱 아찔하게 체감할 수 있습니다.<br>
             • 북항에서 탑승해 고하도 스테이션에 내린 뒤, 고하도 전망대와 해상데크길을 산책하고 다시 케이블카를 타고 북항으로 돌아오는 왕복 코스를 추천합니다.<br>
-            • 케이블카 탑승객은 주차장을 3시간 무료로 이용할 수 있습니다(TourAPI).
-          </div>
-        </div>
-      </div>
-    </article>
-
-    <!-- 스팟 3: 고하도 전망대 -->
-    <article class="spot-section">
-      <div class="spot-card">
-        <div class="spot-image-wrap">
-          <img src="https://tong.visitkorea.or.kr/cms/resource/38/4096638_image2_1.jpg" alt="13척 판옥선 목조 구조의 고하도 전망대 전경" loading="lazy">
-          <div class="spot-image-caption">충무공 이순신의 13척 판옥선을 모티브로 건축된 독창적인 고하도 전망대</div>
-        </div>
-        <div class="spot-body">
-          <div class="spot-header-row">
-            <div>
-              <span class="spot-num">Spot 03</span>
-              <h2 class="spot-name">고하도 전망대 & 해상데크길</h2>
+            • 케이블카 탑승객은 주차장을 3시간 무료로 이용할 수 있습니다(TourAPI).</div>
             </div>
-          </div>
-          <div class="spot-chips">
-            <a href="https://map.naver.com/p/search/%EA%B3%A0%ED%95%98%EB%8F%84%EC%A0%84%EB%A7%9D%EB%8C%80" class="spot-chip map-link" target="_blank" rel="noopener">네이버 지도 바로가기</a>
-            <a href="https://tmap.life/route?name=%EA%B3%A0%ED%95%98%EB%8F%84%EC%A0%84%EB%A7%9D%EB%8C%80" class="spot-chip" target="_blank" rel="noopener">🧭 T맵 길안내</a>
-            <a href="https://m.taxi.kakao.com/" class="spot-chip" target="_blank" rel="noopener">🚕 카카오T 호출</a>
-          </div>
-          <p class="spot-desc" style="margin-top: 16px;">
+          </section>
+
+          <section class="spot-section">
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/38/4096638_image2_1.jpg" alt="13척 판옥선 목조 구조의 고하도 전망대 전경" loading="lazy" />
+              <figcaption>충무공 이순신의 13척 판옥선을 모티브로 건축된 독창적인 고하도 전망대</figcaption>
+            </figure>
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-num">Spot 03</span><h2 class="spot-title">고하도 전망대 & 해상데크길</h2></div>
+            </div>
+            <div class="spot-body">
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EA%B3%A0%ED%95%98%EB%8F%84%EC%A0%84%EB%A7%9D%EB%8C%80" target="_blank" rel="noopener" class="btn-naver-map link-quiet">네이버 지도 바로가기</a><a href="https://tmap.life/route?name=%EA%B3%A0%ED%95%98%EB%8F%84%EC%A0%84%EB%A7%9D%EB%8C%80" target="_blank" rel="noopener" class="btn-naver-map link-quiet">T맵 길안내</a><a href="https://m.taxi.kakao.com/" target="_blank" rel="noopener" class="btn-naver-map link-quiet">카카오T 호출</a></div>
+              <p class="spot-desc">
             해상케이블카 고하도 스테이션에서 솔내음 가득한 둘레길 숲을 따라 15분 정도 걸어가면, 충무공 이순신 장군이 명량대첩 승리 후 전열을 정비했던 역사를 기려 13척의 판옥선을 층층이 엇갈려 쌓아 올린 독창적인 목조 전망대를 만납니다.
           </p>
-          <p class="spot-desc">
+              <p class="spot-desc">
             2층부터 5층까지 이어진 전망대에 오르면 유달산의 기암괴석과 목포 시가지, 그리고 서해 바다를 가로지르는 웅장한 목포대교가 파노라마로 펼쳐집니다. 전망대 아래 해안을 따라 전 구간이 바다 위에 놓인 총연장 1,080m 해상데크길(TourAPI)은 발밑에서 찰랑이는 파도 소리를 들으며 다도해 비경을 가까이서 감상할 수 있는 명품 해안 트레킹 코스입니다.
           </p>
-          <div class="tip-box">
-            <strong>💡 에디터 추천 팁 & 이용 안내</strong>
-            • 전망대에서 해상데크길로 내려갈 때 최근 설치된 경사형 엘리베이터를 이용하면 가파른 계단을 오르내리지 않고 편안하게 이동할 수 있습니다.<br>
+              <div class="tip-box"><strong class="tip-title">에디터 추천 팁 & 이용 안내</strong>• 전망대에서 해상데크길로 내려갈 때 최근 설치된 경사형 엘리베이터를 이용하면 가파른 계단을 오르내리지 않고 편안하게 이동할 수 있습니다.<br>
             • 해상데크길을 따라 걷다 보면 용머리 포토존과 바순이 바위 등 기암절벽 포토 스팟들이 이어집니다.<br>
-            • 전망대 입장료는 무료이고, 이용시간은 09:00 ~ 22:00 연중무휴입니다(TourAPI).
-          </div>
-        </div>
-      </div>
-    </article>
-
-    <!-- 스팟 4: 목포 갓바위 -->
-    <article class="spot-section">
-      <div class="spot-card">
-        <div class="spot-image-wrap">
-          <img src="https://tong.visitkorea.or.kr/cms/resource/03/4098603_image2_1.jpg" alt="영산강 하구 바다 위에 서 있는 목포 갓바위 전경" loading="lazy">
-          <div class="spot-image-caption">영산강 하구 바닷가의 목포 갓바위 풍화 바위</div>
-        </div>
-        <div class="spot-body">
-          <div class="spot-header-row">
-            <div>
-              <span class="spot-num">Spot 04</span>
-              <h2 class="spot-name">목포 갓바위 & 해상보행교</h2>
+            • 전망대 입장료는 무료이고, 이용시간은 09:00 ~ 22:00 연중무휴입니다(TourAPI).</div>
             </div>
-          </div>
-          <div class="spot-chips">
-            <a href="https://map.naver.com/p/search/%EB%AA%A9%ED%8F%AC%20%EA%B0%93%EB%B0%94%EC%9C%84" class="spot-chip map-link" target="_blank" rel="noopener">네이버 지도 바로가기</a>
-            <a href="https://tmap.life/route?name=%EB%AA%A9%ED%8F%AC%EA%B0%93%EB%B0%94%EC%9C%84" class="spot-chip" target="_blank" rel="noopener">🧭 T맵 길안내</a>
-            <a href="https://m.taxi.kakao.com/" class="spot-chip" target="_blank" rel="noopener">🚕 카카오T 호출</a>
-          </div>
-          <p class="spot-desc" style="margin-top: 16px;">
+          </section>
+
+          <section class="spot-section flip">
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/03/4098603_image2_1.jpg" alt="영산강 하구 바다 위에 서 있는 목포 갓바위 전경" loading="lazy" />
+              <figcaption>영산강 하구 바닷가의 목포 갓바위 풍화 바위</figcaption>
+            </figure>
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-num">Spot 04</span><h2 class="spot-title">목포 갓바위 & 해상보행교</h2></div>
+            </div>
+            <div class="spot-body">
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EB%AA%A9%ED%8F%AC%20%EA%B0%93%EB%B0%94%EC%9C%84" target="_blank" rel="noopener" class="btn-naver-map link-quiet">네이버 지도 바로가기</a><a href="https://tmap.life/route?name=%EB%AA%A9%ED%8F%AC%EA%B0%93%EB%B0%94%EC%9C%84" target="_blank" rel="noopener" class="btn-naver-map link-quiet">T맵 길안내</a><a href="https://m.taxi.kakao.com/" target="_blank" rel="noopener" class="btn-naver-map link-quiet">카카오T 호출</a></div>
+              <p class="spot-desc">
             씨엘비베이커리에서 차량으로 약 7분 이동하면, 영산강 하구 바닷가에 자리 잡은 천연기념물 제500호 목포 갓바위에 도착합니다. 수억 년의 시간 동안 파도와 해풍, 염분이 바위 표면을 깎아내며 만든 풍화혈(타포니) 지형으로, 삿갓을 쓴 두 사람이 나란히 서 있는 듯한 신비로운 형태를 띠고 있습니다.
           </p>
-          <p class="spot-desc">
+              <p class="spot-desc">
             과거에는 배를 타고 바다로 나가야만 볼 수 있었던 갓바위는 바다 위에 띄운 부교 형태의 해상 보행교가 설치되어 파도 위에 서서 바위를 정면에서 가까이 감상할 수 있습니다. 바다 위를 걸으며 은은하게 퍼지는 바다 내음과 함께 자연이 빚어낸 경이로운 조각품을 둘러보기 좋습니다.
           </p>
-          <div class="tip-box">
-            <strong>💡 에디터 추천 팁 & 산책 안내</strong>
-            • 해상보행교는 바다 위에 떠 있어 밀물과 썰물에 따라 높이가 자연스럽게 조절됩니다.<br>
+              <div class="tip-box"><strong class="tip-title">에디터 추천 팁 & 산책 안내</strong>• 해상보행교는 바다 위에 떠 있어 밀물과 썰물에 따라 높이가 자연스럽게 조절됩니다.<br>
             • 갓바위 산책로에서 평화광장 해안 산책로까지 이어지는 데크길이 평탄하게 조성되어 있어 도보 데이트 코스로도 안성맞춤입니다.<br>
-            • 갓바위 문화타운 공영주차장을 무료로 이용할 수 있습니다.
-          </div>
-        </div>
-      </div>
-    </article>
-
-    <!-- 스팟 5: 유달산낙조대 -->
-    <article class="spot-section">
-      <div class="spot-card">
-        <div class="spot-image-wrap">
-          <img src="https://tong.visitkorea.or.kr/cms/resource/11/4067011_image2_1.JPG" alt="유달산 일등바위 228M 표지석과 다도해" loading="lazy">
-          <div class="spot-image-caption">유달산 일등바위 표지석과 다도해 (흐린 날)</div>
-        </div>
-        <div class="spot-body">
-          <div class="spot-header-row">
-            <div>
-              <span class="spot-num">Spot 05</span>
-              <h2 class="spot-name">유달산낙조대 & 목포대교 일몰</h2>
+            • 갓바위 문화타운 공영주차장을 무료로 이용할 수 있습니다.</div>
             </div>
-          </div>
-          <div class="spot-chips">
-            <a href="https://map.naver.com/p/search/%EC%9C%A0%EB%8B%AC%EC%82%B0%EB%82%99%EC%A1%B0%EB%8C%80" class="spot-chip map-link" target="_blank" rel="noopener">네이버 지도 바로가기</a>
-            <a href="https://tmap.life/route?name=%EC%9C%A0%EB%8B%AC%EC%82%B0%EB%82%99%EC%A1%B0%EB%8C%80" class="spot-chip" target="_blank" rel="noopener">🧭 T맵 길안내</a>
-            <a href="https://m.taxi.kakao.com/" class="spot-chip" target="_blank" rel="noopener">🚕 카카오T 호출</a>
-          </div>
-          <p class="spot-desc" style="margin-top: 16px;">
+          </section>
+
+          <section class="spot-section">
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/11/4067011_image2_1.JPG" alt="유달산 일등바위 228M 표지석과 다도해" loading="lazy" />
+              <figcaption>유달산 일등바위 표지석과 다도해 (흐린 날)</figcaption>
+            </figure>
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-num">Spot 05</span><h2 class="spot-title">유달산낙조대 & 목포대교 일몰</h2></div>
+            </div>
+            <div class="spot-body">
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EC%9C%A0%EB%8B%AC%EC%82%B0%EB%82%99%EC%A1%B0%EB%8C%80" target="_blank" rel="noopener" class="btn-naver-map link-quiet">네이버 지도 바로가기</a><a href="https://tmap.life/route?name=%EC%9C%A0%EB%8B%AC%EC%82%B0%EB%82%99%EC%A1%B0%EB%8C%80" target="_blank" rel="noopener" class="btn-naver-map link-quiet">T맵 길안내</a><a href="https://m.taxi.kakao.com/" target="_blank" rel="noopener" class="btn-naver-map link-quiet">카카오T 호출</a></div>
+              <p class="spot-desc">
             목포 하루 여행의 마지막 일정은 갓바위에서 차량으로 약 12분 거리, 유달산 서쪽 기슭 일주도로변에 자리 잡은 유달산낙조대입니다. 해발 228m 유달산의 웅장한 기암괴석을 뒤로하고, 서남해 다도해의 올망졸망한 섬들과 우뚝 솟은 목포대교 주탑을 정면으로 마주하는 최고의 일몰 전망 명소입니다.
           </p>
-          <p class="spot-desc">
+              <p class="spot-desc">
             해 질 무렵이 되면 붉게 타오르는 석양이 하늘과 잔잔한 바다를 온통 황금빛과 자줏빛으로 물들이며 목포대교 실루엣과 어우러져 한 폭의 유화 같은 장관을 연출합니다. 전망 데크 벤치에 나란히 앉아 차분하게 지는 해를 바라보며 하루 동안의 감동을 나누는 시간은 목포 데이트의 가장 낭만적인 피날레를 선사합니다.
           </p>
-          <div class="tip-box">
-            <strong>💡 에디터 추천 팁 & 낙조 감상 정보</strong>
-            • 유달산낙조대 일몰은 10월 하순 17:40 ~ 17:55, 6월 하순 19:50 안팎입니다(NOAA 계산식). 일몰 30분 전에 도착하려면 계절에 맞춰 앞 일정을 당기거나 늦추세요.<br>
+              <div class="tip-box"><strong class="tip-title">에디터 추천 팁 & 낙조 감상 정보</strong>• 유달산낙조대 일몰은 10월 하순 17:40 ~ 17:55, 6월 하순 19:50 안팎입니다(NOAA 계산식). 일몰 30분 전에 도착하려면 계절에 맞춰 앞 일정을 당기거나 늦추세요.<br>
             • 해가 진 직후 매직아워가 찾아오면 목포대교에 화려한 야간 조명이 점등되어 황홀한 밤바다 야경까지 이어집니다.<br>
-            • 입장은 무료이고 유달산 주차장을 이용합니다(오늘 데이트 등록 정보).
-          </div>
+            • 입장은 무료이고 유달산 주차장을 이용합니다(오늘 데이트 등록 정보).</div>
+            </div>
+          </section>
         </div>
-      </div>
-    </article>
 
-    <!-- 2인 여행 경비표 -->
-    <h2 class="spot-name" style="margin-top: 48px;">💰 목포 낭만 레트로 여행 2인 예상 경비표</h2>
-    <div class="table-wrap">
-      <table>
+        <!-- 2인 예상 입장료 -->
+        <section class="cost-table-card">
+          <div class="cost-head">
+            <h2 class="timeline-title long">목포 낭만 레트로 여행 2인 예상 경비표</h2>
+          </div>
+          <div class="table-wrap"><table class="cost-table">
         <thead>
           <tr>
             <th>구분</th>
@@ -688,37 +548,34 @@
             <td>0원</td>
             <td>입장 무료 (오늘 데이트 등록 정보)</td>
           </tr>
-          <tr class="sum-row">
+          <tr class="cost-total-row">
             <td colspan="2"><strong>2인 합계</strong></td>
             <td><strong>64,000원</strong></td>
             <td>1인 32,000원. 식사, 유류비, 주차비 별도</td>
           </tr>
         </tbody>
-      </table>
-    </div>
+      </table></div>
+        </section>
 
-    <!-- 아티클 푸터 -->
-    <div class="app-course-box" style="margin: 40px 0 24px; padding: 20px 22px; background: var(--color-accent-light); border: 1px solid var(--color-border); border-radius: 14px;">
-      <strong style="display: block; font-size: 17px; color: var(--color-text-main); margin-bottom: 6px;">🗺️ 이 코스 오늘 데이트에서 열기</strong>
-      <p style="margin: 0 0 14px; font-size: 14.5px; line-height: 1.6; color: var(--color-text-main);">글에 나온 장소 5곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
-      <a href="../../#c=1789400665887.2034.1789853249658.1789853245010.4453" style="display: inline-block; padding: 10px 18px; border-radius: 10px; background: var(--color-text-main); color: #ffffff; font-weight: 700; font-size: 15px; text-decoration: none;">앱에서 코스 열기 →</a>
-    </div>
-
-    <footer class="article-footer">
-      <div class="author-card">
-        <div class="author-avatar">오늘</div>
-        <div class="author-info">
-          <strong>오늘 데이트 에디토리얼 팀</strong>
-          <span>전국 1.6만 개 스팟 데이터를 직접 검증하여 낭만적인 데이트 코스를 큐레이션합니다.</span>
+        <div class="app-course-box">
+          <div>
+            <h2>이 코스 오늘 데이트에서 열기</h2>
+            <p>글에 나온 장소 5곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
+          </div>
+          <a class="btn app-action" href="../../#c=1789400665887.2034.1789853249658.1789853245010.4453">앱에서 코스 열기</a>
         </div>
-      </div>
-      <p style="margin-bottom: 8px;">
+
+        <footer class="article-credit">
+          <p class="credit-author"><span class="credit-mark" aria-hidden="true">오늘</span><strong>오늘 데이트 에디토리얼 팀</strong> <span>전국 1.6만 개 스팟 데이터를 직접 검증하여 낭만적인 데이트 코스를 큐레이션합니다.</span></p>
+          <p>
         본 콘텐츠에 수록된 사진 출처는 한국관광공사 TourAPI(공공누리 제1유형: 출처 표기 시 상업적 이용 및 변형 가능) 및 카카오맵 플레이스 포토이며, 해당 저작권 규정을 엄격히 준수합니다.
       </p>
-      <p>
+          <p>
         게재된 운영 시간, 요금, 휴관일 정보는 현지 사정에 따라 변경될 수 있으므로 방문 전 각 스팟의 실시간 링크를 통해 최신 정보를 확인하시기 바랍니다.
       </p>
-    </footer>
+        </footer>
+      </div>
+    </article>
   </main>
 
 </body>
