@@ -24,6 +24,7 @@ const FAMILY_NAMES = [
   'spot-info-step',
   'spot-info-list',
   'real-photo-flat',
+  'spot-card',
 ];
 const FAMILIES = await Promise.all(FAMILY_NAMES.map(async (n) => (await import(`./hallmark_families/${n}.mjs`)).default));
 
@@ -80,7 +81,7 @@ export function compare(before, after) {
 
 // 제목 글꼴(Noto Serif KR 700)이 그리는 글자만 받도록 text= 인수를 만든다.
 function serifLink(html) {
-  const sel = [/<h[1-3]\b[^>]*>([\s\S]*?)<\/h[1-3]>/g, /<span class="(?:tl-time|spot-num)">([\s\S]*?)<\/span>/g, /<a [^>]*class="header-logo"[^>]*>([\s\S]*?)<\/a>/g, /<p class="footer-mark">([\s\S]*?)<\/p>/g];
+  const sel = [/<h[1-3]\b[^>]*>([\s\S]*?)<\/h[1-3]>/g, /<span class="(?:tl-time|spot-num)">([\s\S]*?)<\/span>/g, /<a [^>]*class="header-logo"[^>]*>([\s\S]*?)<\/a>/g, /<p class="footer-mark">([\s\S]*?)<\/p>/g, /<p class="(?:timeline-title|summary-title|cta-title)">([\s\S]*?)<\/p>/g];
   const cost = html.match(/<tr class="cost-total-row">([\s\S]*?)<\/tr>/)?.[1] ?? '';
   let chars = '0123456789,.:~';
   for (const re of sel) for (const m of html.matchAll(re)) chars += tagText(m[1]);
