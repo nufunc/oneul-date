@@ -23,6 +23,7 @@ const SERIF_BASE = 'https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@
 const FAMILY_NAMES = [
   'spot-info-step',
   'spot-info-list',
+  'spot-card',
 ];
 const FAMILIES = await Promise.all(FAMILY_NAMES.map(async (n) => (await import(`./hallmark_families/${n}.mjs`)).default));
 
@@ -68,7 +69,7 @@ export function compare(before, after) {
 
 // 제목 글꼴(Noto Serif KR 700)이 그리는 글자만 받도록 text= 인수를 만든다.
 function serifLink(html) {
-  const sel = [/<h[1-3]\b[^>]*>([\s\S]*?)<\/h[1-3]>/g, /<span class="(?:tl-time|spot-num)">([\s\S]*?)<\/span>/g, /<a [^>]*class="header-logo"[^>]*>([\s\S]*?)<\/a>/g, /<p class="footer-mark">([\s\S]*?)<\/p>/g];
+  const sel = [/<h[1-3]\b[^>]*>([\s\S]*?)<\/h[1-3]>/g, /<span class="(?:tl-time|spot-num)">([\s\S]*?)<\/span>/g, /<a [^>]*class="header-logo"[^>]*>([\s\S]*?)<\/a>/g, /<p class="footer-mark">([\s\S]*?)<\/p>/g, /<p class="(?:timeline-title|summary-title|cta-title)">([\s\S]*?)<\/p>/g];
   const cost = html.match(/<tr class="cost-total-row">([\s\S]*?)<\/tr>/)?.[1] ?? '';
   let chars = '0123456789,.:~';
   for (const re of sel) for (const m of html.matchAll(re)) chars += tagText(m[1]);
@@ -84,10 +85,14 @@ export function convert(html) {
   if (blocks(html, /<style>/, 'style').length !== 1) fail('<style>이 하나가 아니다');
   const css = readCss();
 
+  // 페이지 틀 전체가 다른 계열(머리·푸터까지 모듈이 읽는다)
+  const pageFamily = FAMILIES.find((f) => f.matchPage?.(html));
+  if (pageFamily) return pageFamily.convertPage(html, { css, finish: addSerif });
+
   // 본문: <main class="article-container"><article> ... </article></main> 안쪽을 계열 모듈이 읽는다.
   const art = html.match(/(<main class="article-container">\s*<article>)([\s\S]*?)(<\/article>\s*<\/main>)/);
   if (!art) fail('<main class="article-container"><article>를 찾지 못했다');
-  const family = FAMILIES.find((f) => f.match(art[2])) ?? fail('아는 계열(' + FAMILY_NAMES.join(', ') + ')에 맞지 않는 모르는 틀이다');
+  const family = FAMILIES.find((f) => f.match?.(art[2])) ?? fail('아는 계열(' + FAMILY_NAMES.join(', ') + ')에 맞지 않는 모르는 틀이다');
   const newInner = convertBody(art[2], family);
 
   let out = html.replace(art[0], () => art[1] + newInner + art[3]);
@@ -105,11 +110,14 @@ export function convert(html) {
     </div>
   </footer>`);
 
-  // 제목 글꼴 링크는 Pretendard 링크 바로 뒤. 글자 목록은 변환 후 본문에서 뽑는다.
+  return addSerif(out);
+}
+
+// 제목 글꼴 링크는 Pretendard 링크 바로 뒤. 글자 목록은 변환 후 본문에서 뽑는다.
+function addSerif(out) {
   const pret = out.match(/[ \t]*<link rel="stylesheet" as="style" crossorigin href="[^"]*pretendard[^"]*" \/>/);
   if (!pret) fail('Pretendard 링크를 찾지 못했다');
-  out = out.replace(pret[0], () => `${pret[0]}\n${serifLink(out)}`);
-  return out;
+  return out.replace(pret[0], () => `${pret[0]}\n${serifLink(out)}`);
 }
 
 // ---- CLI ----
