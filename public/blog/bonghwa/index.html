@@ -16,6 +16,9 @@
 
   <!-- Pretendard 웹폰트 -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700&display=swap&text=%2C.0123456789%3A%5B%5D~%EA%B1%B0%EA%B2%BD%EA%B3%84%EA%B3%BC%EA%B5%90%EA%B8%88%EA%B8%B0%EA%B8%B8%EA%B9%8C%EB%82%B4%EB%88%88%EB%8A%98%EB%8B%AD%EB%8D%98%EB%8D%B0%EB%8F%84%EB%8F%99%EB%93%9C%EB%9D%BC%EB%9F%89%EB%A3%8C%EB%A3%A8%EB%A5%98%EB%A5%BC%EB%A7%88%EB%A7%A4%EB%B3%84%EB%B3%B4%EB%B4%89%EB%B6%81%EB%B6%84%EB%B8%8C%EB%B9%84%EC%82%AC%EC%82%B0%EC%83%81%EC%84%9C%EC%84%A0%EC%8A%A4%EC%8B%9D%EC%8B%A4%EC%95%8A%EC%95%94%EC%95%98%EC%96%B4%EC%97%86%EC%97%90%EC%97%B4%EC%98%88%EC%98%A4%EC%99%80%EC%9A%94%EC%9C%A0%EC%9D%84%EC%9D%8C%EC%9D%B4%EC%9D%B8%EC%9E%85%EC%9E%A5%EC%A0%95%EC%A3%BC%EC%A7%80%EC%A7%84%EC%B0%A8%EC%B2%9C%EC%B2%AD%EC%B6%95%EC%BD%94%ED%83%80%ED%8A%B8%ED%95%98%ED%95%9C%ED%95%A9%ED%99%94%ED%99%95" rel="stylesheet">
 
   <script type="application/ld+json">
 {
@@ -43,374 +46,276 @@
   </script>
 
   <style>
-    :root {
-      --color-primary: #0f172a;
-      --color-accent: #15803d;
-      --color-accent-light: #f0fdf4;
-      --color-text-main: #334155;
-      --color-text-sub: #64748b;
-      --color-border: #e2e8f0;
-      --color-bg-page: #f8fafc;
-      --color-card-bg: #ffffff;
-      --color-warm: #ea580c;
-      --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-    }
+/* hallmark-solstice: scripts/convert_blog_hallmark.mjs가 글의 <style>을 이 파일로 바꾼다 (Hallmark 2.0.0, 테마 Solstice, P-293) */
+:root {
+  color-scheme: light;
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-xs: 0.8125rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.125rem; --text-xl: 1.5625rem; --text-2xl: 1.953rem; --text-3xl: 2.441rem;
+  --text-hero: clamp(1.75rem, 1.6vw + 1.25rem, 2.75rem);
+  --text-section: clamp(1.75rem, 1.8vw + 1rem, 2.875rem); --text-title: clamp(1.25rem, 0.75vw + 0.875rem, 1.625rem); --text-lead: clamp(1.0625rem, 0.3vw + 0.95rem, 1.25rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-micro: 120ms; --dur-short: 220ms;
+  --container: 1200px; --measure: 680px; --gutter: 56px; --gap-columns: 40px; --section-gap: 120px;
+  --z-sticky-nav: 300;
+  --color-paper: oklch(94% 0.03 80); --color-paper-2: oklch(97% 0.02 85); --color-paper-3: oklch(89% 0.05 80);
+  --color-ink: oklch(27% 0.05 50); --color-ink-2: oklch(36% 0.05 50); --color-muted: oklch(48% 0.06 55);
+  --color-rule: oklch(84% 0.06 78);
+  --color-accent: oklch(54% 0.20 24); --color-accent-2: oklch(48% 0.19 24); --color-accent-ink: oklch(97% 0.02 85); --color-focus: oklch(54% 0.20 24);
+  --color-gold: oklch(74% 0.14 75); --color-gold-2: oklch(84% 0.11 80);
+  --color-band-text: oklch(94% 0.03 80); --color-band-muted: oklch(80% 0.05 75);
+  --color-hair-ink: color-mix(in oklab, var(--color-ink) 10%, transparent);
+  --font-display: "Noto Serif KR", "Nanum Myeongjo", ui-serif, serif;
+  --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --radius-card: 0; --radius-pill: 999px; --rule-hair: 1px; --rule-bar: 2px;
+  --shadow-card: 10px 10px 0 var(--color-paper-3);
+}
+@media (max-width: 60rem) { :root { --gutter: 24px; --section-gap: 88px; --gap-columns: 24px; } }
+@media (max-width: 40rem) { :root { --gutter: 16px; --section-gap: 64px; --gap-columns: 16px; } }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: var(--font-family);
-      background-color: var(--color-bg-page);
-      color: var(--color-text-main);
-      line-height: 1.75;
-      letter-spacing: -0.2px;
-      word-break: keep-all;
-    }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+html { scrollbar-color: var(--color-muted) var(--color-paper); scroll-padding-top: var(--space-3xl); }
+body { margin: 0; background: var(--color-paper); color: var(--color-ink-2); font-family: var(--font-family); font-size: var(--text-md); line-height: 1.75; word-break: keep-all; -webkit-font-smoothing: antialiased; }
+::selection { background: color-mix(in oklab, var(--color-gold) 40%, transparent); }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+a:hover { text-decoration-color: var(--color-accent); }
+article h1, article h2, article h3 { margin: 0; font-family: var(--font-display); font-weight: 700; color: var(--color-ink); line-height: 1.3; letter-spacing: -0.01em; overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+img { max-width: 100%; display: block; }
+.container { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); }
 
-    .site-header {
-      background: #ffffff;
-      border-bottom: 1px solid var(--color-border);
-      position: sticky;
-      top: 0;
-      z-index: 50;
-    }
-    .header-inner {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 14px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .header-logo {
-      font-weight: 800;
-      font-size: 1.1rem;
-      color: var(--color-primary);
-      text-decoration: none;
-    }
-    .header-logo span { color: var(--color-accent); }
-    .header-nav a {
-      color: var(--color-text-sub);
-      text-decoration: none;
-      font-size: 0.9rem;
-      margin-left: 16px;
-    }
+/* 44px 머리 링크 규칙: scripts/test-blog-related.cjs가 글마다 하나를 요구한다 */
+header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
 
-    .article-container {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 32px 20px 80px;
-    }
+/* Controls */
+.btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 var(--space-lg); border: 0; border-radius: var(--radius-pill); background: var(--color-accent); color: var(--color-accent-ink); font: 600 var(--text-md)/1 var(--font-family); text-decoration: none; cursor: pointer; transition: background-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out); }
+.btn:hover { background: var(--color-accent-2); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.link-quiet { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-ink); font-weight: 600; font-size: var(--text-sm); text-decoration: none; border-bottom: var(--rule-bar) solid var(--color-ink); transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out); }
+.link-quiet:hover { color: var(--color-accent); border-color: var(--color-accent); }
+.link-quiet:active { transform: translateY(1px); }
+.link-quiet:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
 
-    .article-header {
-      margin-bottom: 32px;
-    }
-    .badge-category {
-      display: inline-block;
-      background: var(--color-accent-light);
-      color: var(--color-accent);
-      font-weight: 700;
-      font-size: 0.82rem;
-      padding: 4px 10px;
-      border-radius: 6px;
-      margin-bottom: 12px;
-    }
-    .article-title {
-      font-size: 1.85rem;
-      font-weight: 800;
-      line-height: 1.35;
-      color: var(--color-primary);
-      margin-bottom: 16px;
-    }
-    .article-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px 16px;
-      font-size: 0.88rem;
-      color: var(--color-text-sub);
-      border-bottom: 1px solid var(--color-border);
-      padding-bottom: 20px;
-    }
+/* Nav */
+.site-header { position: sticky; top: 0; z-index: var(--z-sticky-nav); background: var(--color-paper); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.header-inner { display: flex; justify-content: space-between; align-items: center; min-height: 64px; }
+.header-logo { font-family: var(--font-display); font-size: var(--text-lg); color: var(--color-ink); text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; }
+.header-logo span { color: var(--color-accent); margin-left: 0.3em; }
+.header-logo:hover { color: var(--color-ink-2); }
+.header-nav { display: flex; gap: var(--space-lg); }
+.header-nav a { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--text-sm); color: var(--color-ink-2); text-decoration: none; }
+.header-nav a:hover { color: var(--color-ink); text-decoration: underline; text-decoration-color: var(--color-accent); }
+.header-nav a:active, .header-logo:active { transform: translateY(1px); }
 
-    .prose-intro {
-      font-size: 1.05rem;
-      line-height: 1.8;
-      color: #1e293b;
-      margin-bottom: 32px;
-      background: #ffffff;
-      padding: 24px;
-      border-radius: 12px;
-      border-left: 4px solid var(--color-accent);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
+/* Hero */
+.hero { display: grid; padding-block: var(--space-2xl) var(--space-xl); }
+.hero-text { display: grid; gap: var(--space-lg); }
+.article-title { font-size: var(--text-hero); line-height: 1.3; max-width: 28ch; }
+.hero-kicker { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.hero-kicker span:first-child { color: var(--color-accent); font-weight: 600; }
+.article-meta { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-lg); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); font-variant-numeric: tabular-nums; }
+.article-meta .meta-credit { flex-basis: 100%; }
+/* 좁은 화면에서 칸마다 한 줄: 본문 글꼴(Pretendard)이 바뀔 때 줄 수가 달라져 아래 띠가 밀리는 것을 막는다 */
+@media (max-width: 40rem) { .article-meta { flex-direction: column; flex-wrap: nowrap; } }
+.spot-photo img { width: 100%; height: 100%; object-fit: cover; outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
 
-    .course-summary-card {
-      background: #ffffff;
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 40px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-    }
-    .summary-title {
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: var(--color-primary);
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-    @media (max-width: 560px) {
-      .summary-grid { grid-template-columns: 1fr; }
-    }
-    .summary-item {
-      background: var(--color-bg-page);
-      padding: 12px 14px;
-      border-radius: 8px;
-    }
-    .summary-label {
-      font-size: 0.8rem;
-      color: var(--color-text-sub);
-      display: block;
-      margin-bottom: 4px;
-    }
-    .summary-val {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--color-primary);
-    }
+/* Lead */
+.prose-intro { max-width: var(--measure); padding-top: var(--space-xl); font-size: var(--text-lead); line-height: 1.8; color: var(--color-ink); padding-bottom: var(--space-3xl); }
 
-    .timeline-card {
-      background: #ffffff;
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 48px;
-    }
-    .timeline-title {
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: var(--color-primary);
-      margin-bottom: 18px;
-    }
-    .tl-act { font-weight: 700; font-size: 13px; color: #64748b; margin: 18px 0 8px; }
-    .timeline-title + .tl-act { margin-top: 0; }
-    .tl-step { display: flex; gap: 12px; align-items: baseline; padding: 6px 0; }
-    .tl-time { flex: none; min-width: 46px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--color-accent); }
-    .tl-place { font-weight: 700; color: #1e293b; }
-    .tl-note { display: block; font-size: 13px; color: #64748b; margin-top: 2px; }
-    .tl-move { font-size: 12.5px; color: #94a3b8; padding: 0 0 0 58px; }
-    @media (max-width: 640px) {
-      .timeline-card { padding: 14px 16px; }
-    }
+/* The day, on the brown band */
+.band { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl) var(--space-xl); }
+.band .timeline-title { color: var(--color-band-text); font-size: var(--text-section); margin-bottom: var(--space-xl); }
+.route { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: 0; padding: 0; }
+.tl-act { font-size: var(--text-sm); color: var(--color-gold-2); padding-bottom: var(--space-sm); }
+.tl-step { display: grid; align-content: start; gap: var(--space-2xs); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-gold); }
+.tl-time { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1; color: var(--color-band-text); font-variant-numeric: tabular-nums; }
+.tl-place { font-weight: 600; font-size: var(--text-lg); color: var(--color-band-text); }
+.tl-note { font-size: var(--text-sm); color: var(--color-band-muted); line-height: 1.6; }
+.tl-move { font-size: var(--text-sm); color: var(--color-band-muted); padding-block: var(--space-sm) var(--space-lg); }
+.tl-total { font-size: var(--text-sm); color: var(--color-band-muted); padding-top: var(--space-lg); margin-top: var(--space-lg); border-top: var(--rule-hair) solid color-mix(in oklab, var(--color-band-text) 25%, transparent); }
+/* spot-info-list 계열: 시간 범위(10:30 - 11:45)가 길어 시각 글자를 줄이고, 요약 상자와 번호 배지를 둔다 */
+.route.range .tl-time { font-size: var(--text-xl); }
+.route.range .tl-step { padding-bottom: var(--space-md); }
+.tl-badge { font-size: var(--text-xs); color: var(--color-gold-2); letter-spacing: 0.04em; }
+.tl-facts { display: grid; gap: var(--space-2xs) var(--space-lg); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.tl-facts strong { color: var(--color-gold-2); font-weight: 600; }
+@media (min-width: 60rem) {
+  .tl-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .route { grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); column-gap: var(--space-lg); }
+  .route > * { grid-row: var(--r); grid-column: var(--c) / span var(--s, 1); }
+  .tl-move { padding-bottom: 0; }
+  .tl-total { grid-column: 1 / -1; }
+}
 
-    .spot-section {
-      background: #ffffff;
-      border: 1px solid var(--color-border);
-      border-radius: 16px;
-      padding: 28px;
-      margin-bottom: 44px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    }
-    .spot-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-    .spot-number {
-      background: var(--color-accent);
-      color: #ffffff;
-      font-weight: 800;
-      font-size: 0.9rem;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .spot-title {
-      font-size: 1.35rem;
-      font-weight: 700;
-      color: var(--color-primary);
-    }
-    .spot-tag {
-      font-size: 0.8rem;
-      color: var(--color-accent);
-      background: var(--color-accent-light);
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-weight: 600;
-    }
-    .spot-image-wrap {
-      margin-bottom: 20px;
-      border-radius: 10px;
-      overflow: hidden;
-      border: 1px solid var(--color-border);
-    }
-    .spot-image {
-      width: 100%;
-      height: auto;
-      max-height: 440px;
-      object-fit: cover;
-      display: block;
-    }
-    .image-caption {
-      font-size: 0.78rem;
-      color: #94a3b8;
-      text-align: right;
-      padding: 6px 12px;
-      background: #fdfdfd;
-      border-top: 1px solid #f1f5f9;
-    }
-    .spot-desc {
-      font-size: 0.98rem;
-      line-height: 1.8;
-      color: var(--color-text-main);
-      margin-bottom: 14px;
-    }
+/* Stops */
+.spots { padding-block: var(--section-gap) 0; display: grid; gap: var(--section-gap); }
+.spot-section { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "photo head" "photo body"; grid-template-rows: auto 1fr; column-gap: var(--gap-columns); row-gap: var(--space-md); align-items: start; padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); }
+.spot-section.flip { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-areas: "head photo" "body photo"; }
+.spot-section.no-photo { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "body"; }
+.spot-head { grid-area: head; display: grid; gap: var(--space-md); }
+.spot-photo { grid-area: photo; align-self: start; margin: 0; aspect-ratio: 4 / 5; width: 100%; background: var(--color-paper-3); position: sticky; top: 96px; }
+.spot-body { grid-area: body; display: grid; gap: var(--space-md); }
+.spot-header { display: flex; align-items: baseline; gap: var(--space-md); }
+.spot-num { font-family: var(--font-display); font-size: var(--text-3xl); line-height: 1; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+.spot-title { font-size: var(--text-section); }
+.spot-tagline { font-size: var(--text-lg); color: var(--color-ink); padding-bottom: var(--space-xs); }
+.spot-desc { max-width: 60ch; }
 
-    .spot-chips-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 20px 0 16px;
-    }
-    .spot-chip-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      padding: 7px 14px;
-      border-radius: 8px;
-      text-decoration: none;
-      background: var(--color-bg-page);
-      border: 1px solid var(--color-border);
-      color: var(--color-text-main);
-      transition: all 0.2s ease;
-    }
-    .spot-chip-btn:hover {
-      background: #f1f5f9;
-      color: var(--color-primary);
-    }
-    .spot-chip-btn.map-chip {
-      background: #00843d;
-      border-color: #00843d;
-      color: #ffffff;
-    }
-    .spot-chip-btn.map-chip:hover {
-      background: #007a37;
-    }
+.spot-info-box { margin: var(--space-xs) 0 0; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); }
+.info-row { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--space-md); padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.info-row:last-child { border-bottom: 0; }
+.info-label { color: var(--color-muted); }
+.info-val { color: var(--color-ink); font-weight: 400; font-variant-numeric: tabular-nums; }
+.map-btn-wrap { padding-top: var(--space-sm); }
+.tip-box { padding: var(--space-sm) var(--space-md); border-left: var(--rule-bar) solid var(--color-accent); background: var(--color-paper-2); font-size: var(--text-sm); color: var(--color-ink-2); line-height: 1.7; }
+.tip-box strong { color: var(--color-ink); font-weight: 600; }
+.tip-box .tip-title { display: block; margin-bottom: var(--space-2xs); }
 
-    .tip-box {
-      background: #f8fafc;
-      border: 1px dashed #cbd5e1;
-      border-radius: 10px;
-      padding: 14px 18px;
-      font-size: 0.88rem;
-      color: #475569;
-      margin-top: 14px;
-    }
-    .tip-box-title {
-      font-weight: 700;
-      color: var(--color-accent);
-      margin-bottom: 6px;
-    }
+/* Fees */
+.cost-table-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.cost-head { display: grid; gap: var(--space-md); align-content: start; }
+.cost-head .timeline-title { font-size: var(--text-section); }
+.cost-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.cost-table th { text-align: left; font-weight: 400; color: var(--color-muted); padding: var(--space-xs) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-bar) solid var(--color-ink); }
+.cost-table td { padding: var(--space-sm) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink-2); vertical-align: top; }
+.cost-table td:nth-child(2) { color: var(--color-ink); font-weight: 400; }
+.cost-3 .cost-total-row td:nth-child(2) { font-family: inherit; font-size: inherit; color: inherit; font-weight: 600; }
+.cost-3 .cost-total-row td:nth-child(3) { font-family: var(--font-display); font-size: var(--text-xl); color: var(--color-accent); font-weight: 700; }
+.cost-total-row td { border-bottom: 0; border-top: var(--rule-bar) solid var(--color-ink); color: var(--color-ink); font-weight: 600; }
+.cost-total-row td:nth-child(2) { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--color-accent); font-weight: 700; }
+@media (max-width: 600px) {
+  .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
+  .table-wrap thead { display: none; }
+  .table-wrap tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-sm); row-gap: var(--space-2xs); padding-block: var(--space-sm); border-bottom: var(--rule-hair) solid var(--color-rule); }
+  .table-wrap td { padding: 0; border: 0; }
+  .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: var(--text-xs); color: var(--color-muted); }
+  .table-wrap td:nth-child(3) { text-align: right; font-weight: 600; color: var(--color-ink); }
+  .table-wrap td:nth-child(4) { grid-column: 1 / -1; color: var(--color-muted); }
+  .table-wrap td:empty { display: none; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: var(--text-sm); color: var(--color-ink); }
+  .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; text-align: right; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
+  .table-wrap .cost-total-row { border-top: var(--rule-bar) solid var(--color-ink); border-bottom: 0; }
+}
 
-    .cost-table-card {
-      overflow-x: auto;
-      background: #ffffff;
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 40px;
-    }
-    .cost-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 14px;
-      font-size: 0.9rem;
-    }
-    .cost-table th {
-      background: var(--color-bg-page);
-      padding: 10px 12px;
-      text-align: left;
-      font-weight: 700;
-      color: var(--color-primary);
-      border-bottom: 2px solid var(--color-border);
-    }
-    .cost-table td {
-      padding: 12px;
-      border-bottom: 1px solid var(--color-border);
-      color: var(--color-text-main);
-    }
-    .cost-total-row td {
-      font-weight: 700;
-      color: var(--color-accent);
-      background: var(--color-accent-light);
-      border-top: 2px solid var(--color-accent);
-      border-bottom: none;
-    }
+/* Tips */
+.tips-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.tips-card .timeline-title { font-size: var(--text-section); align-self: start; }
+.tips-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-md); }
+.tips-list li { padding-bottom: var(--space-md); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.tips-list li:last-child { border-bottom: 0; }
+.tips-list strong { color: var(--color-ink); font-weight: 600; }
 
-    .table-wrap {
-      overflow-x: auto;
-      margin: 16px 0 0;
-      border-radius: 12px;
-      border: 1px solid var(--color-border);
-      background: #fff;
-    }
-    .table-wrap .cost-table { margin-top: 0; }
+/* App course */
+.app-course-box { margin-top: var(--section-gap); display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--gap-columns); align-items: end; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-xl); }
+.app-course-box h2 { font-size: var(--text-section); margin-bottom: var(--space-md); }
+.app-course-box p { max-width: 52ch; }
+.app-course-box .app-action { justify-self: end; }
 
-    /* 비용표: 좁은 화면에서는 한 행을 카드 하나로 쌓는다 */
-    @media (max-width: 600px) {
-      .cost-table-card { padding: 16px; }
-      .table-wrap { overflow-x: visible; }
-      .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
-      .table-wrap thead { display: none; }
-      .table-wrap tr {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        column-gap: 12px;
-        row-gap: 4px;
-        padding: 14px 16px;
-        border-bottom: 1px solid var(--color-border);
-      }
-      .table-wrap tr:last-child { border-bottom: none; }
-      .table-wrap td { padding: 0; border: none; }
-      .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: 0.78rem; font-weight: 700; color: var(--color-text-sub); }
-      .table-wrap td:nth-child(2) { font-weight: 700; }
-      .table-wrap td:nth-child(3) { max-width: 60vw; word-break: keep-all; text-align: right; font-weight: 700; }
-      .table-wrap td:nth-child(4) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
-      .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: inherit; color: inherit; }
-      .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; max-width: 60vw; word-break: keep-all; text-align: right; }
-      .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; max-width: none; text-align: left; font-size: 0.85rem; font-weight: 400; color: var(--color-text-sub); }
-      .table-wrap .cost-total-row td { border: none; }
-    }
+.article-credit { margin-top: var(--space-2xl); padding-block: var(--space-md) var(--space-3xl); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); }
 
-    .site-footer {
-      border-top: 1px solid var(--color-border);
-      background: #ffffff;
-      padding: 32px 20px;
-      text-align: center;
-      font-size: 0.85rem;
-      color: var(--color-text-sub);
-    }
-    .site-footer a { color: var(--color-accent); text-decoration: none; }
-    header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
-    .header-nav a,.header-title a,.blog-tagline a{display:inline-block}
+/* Footer mast */
+.site-footer { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl); }
+.footer-inner { display: grid; gap: var(--space-md); }
+.footer-mark { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1.2; color: var(--color-band-text); }
+.footer-line { color: var(--color-band-muted); font-size: var(--text-sm); }
+.footer-links { display: flex; flex-wrap: wrap; gap: var(--space-lg); }
+.footer-links a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-band-text); font-size: var(--text-sm); text-decoration: underline; text-decoration-color: var(--color-gold); }
+.footer-links a:hover { text-decoration-color: var(--color-accent); color: var(--color-gold-2); }
+.footer-links a:active { transform: translateY(1px); }
+.site-footer :focus-visible { outline-color: var(--color-gold-2); }
+
+@media (max-width: 60rem) {
+  .hero, .spot-section, .spot-section.flip, .cost-table-card, .tips-card, .app-course-box { grid-template-columns: minmax(0, 1fr); }
+  .spot-section, .spot-section.flip { grid-template-areas: "head" "photo" "body"; grid-template-rows: auto; }
+  .spot-section.no-photo { grid-template-areas: "head" "body"; }
+  .hero { padding-block: var(--space-xl) var(--space-xl); }
+  .spot-photo { position: static; aspect-ratio: 16 / 10; }
+  .app-course-box { padding: var(--space-lg); }
+  .app-course-box .app-action { justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn, .link-quiet { transition: none; }
+  .btn:active, .link-quiet:active, .header-nav a:active, .header-logo:active, .footer-links a:active { transform: none; }
+}
+
+/* real-photo-flat 계열(평면 글): 번호 있는 긴 장소 제목, 사진 설명, 안내 상자, 지도 목록 */
+.lead-photo { margin: 0 0 var(--space-3xl); }
+.lead-photo img { width: 100%; max-height: 520px; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.lead-photo figcaption, .body-photo figcaption { margin-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.spot-photo figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--space-xs) var(--space-sm); font-size: var(--text-xs); line-height: 1.5; color: var(--color-accent-ink); background: color-mix(in oklab, var(--color-ink) 78%, transparent); }
+.body-photo { margin: 0; }
+.body-photo img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.spot-section.flat .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.tl-lead { max-width: var(--measure); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.guide-box, .order-box { background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); color: var(--color-ink); }
+.guide-box h4, .order-box strong { margin: 0 0 var(--space-xs); font-family: var(--font-display); font-size: var(--text-md); color: var(--color-ink); display: block; }
+.guide-box ul, .order-box ul { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-2xs); }
+.bridge { padding-top: var(--space-xs); color: var(--color-muted); font-size: var(--text-sm); }
+.map-links { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-md); }
+.map-links .timeline-title { font-size: var(--text-section); }
+.map-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-xs); }
+.map-list a, .map-link-chip { display: flex; justify-content: space-between; gap: var(--space-md); align-items: center; min-height: 44px; padding-block: var(--space-xs); border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink); text-decoration: none; }
+.map-links-grid { display: grid; gap: 0; }
+.map-link-chip .btn-action { color: var(--color-accent); font-weight: 600; white-space: nowrap; }
+@media (max-width: 40rem) { .spot-section.flat .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .spot-photo { position: relative; } }
+
+/* spot-card 계열(editor-144): 대표 사진, 요약 상자, 본문 구획, 세부 코스, 이동 연결, 마무리 상자 */
+.hero-figure { margin: 0 0 var(--space-xl); }
+.hero-figure img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.hero-figure figcaption { padding-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-muted); }
+.summary-card { margin-bottom: var(--space-xl); background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-lg); font-size: var(--text-sm); }
+.summary-title, p.timeline-title, .cta-title { font-family: var(--font-display); font-weight: 700; line-height: 1.3; color: var(--color-ink); }
+.summary-title { font-size: var(--text-xl); margin-bottom: var(--space-sm); }
+p.timeline-title { letter-spacing: -0.01em; overflow-wrap: break-word; }
+.summary-list { margin: 0; padding: 0; list-style: none; display: grid; }
+.summary-list li { padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.summary-list li:last-child { border-bottom: 0; }
+.summary-list strong { color: var(--color-ink); font-weight: 600; }
+.prose-section { margin-top: var(--section-gap); max-width: var(--measure); display: grid; gap: var(--space-md); }
+.prose-section h2, .spots-title { font-size: var(--text-title); }
+.stops-section { margin-top: var(--section-gap); }
+.stops-section .spots { padding-top: var(--space-xl); }
+.spots.bridged { gap: 0; }
+.drive-bridge { margin: 0; padding-block: var(--space-xl); padding-left: var(--space-md); border-left: var(--rule-bar) solid var(--color-gold); font-size: var(--text-sm); color: var(--color-muted); }
+.drive-bridge strong { color: var(--color-ink); font-weight: 600; }
+.spot-header:has(.spot-badge) { flex-direction: column; align-items: flex-start; gap: var(--space-xs); }
+.spot-badge { font-size: var(--text-sm); font-weight: 600; color: var(--color-accent); }
+.spot-actions { display: flex; flex-wrap: wrap; gap: 0 var(--space-lg); }
+.info-wide .info-row { grid-template-columns: 5.5em minmax(0, 1fr); }
+.info-wide .info-row.plain { grid-template-columns: minmax(0, 1fr); }
+.cost-head .timeline-title.long { font-size: var(--text-title); }
+.cta-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-sm); max-width: var(--measure); }
+.cta-card h3, .cta-title { font-size: var(--text-title); }
+.cta-card .link-quiet { justify-self: start; }
+
+/* real-photo-grid 계열(editor-145): 사진과 정보 상자가 글 순서대로 이어지는 한 열 장소 구획, 번호 있는 동선, 도입 여러 문단 */
+.prose-intro p + p { margin-top: var(--space-md); }
+.stories { padding-top: var(--space-xl); gap: var(--space-3xl); }
+.story-section { display: grid; gap: var(--space-md); max-width: var(--measure); }
+.story-section .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.story-body { display: grid; gap: var(--space-md); }
+.story-photo { margin: 0; }
+.story-photo img { width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.story-photo figcaption { padding-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.story-photo figcaption span + span::before { content: " · "; }
+.tl-step .tl-badge { margin-bottom: calc(var(--space-2xs) * -1); }
+.tl-meta { display: block; font-style: normal; color: var(--color-gold-2); }
+.app-course-box.early { margin-top: var(--space-xl); }
+.app-course-box .cta-title { font-size: var(--text-section); margin-bottom: var(--space-md); }
+@media (max-width: 40rem) { .story-section .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .route .tl-act:not(:first-child) { margin-top: var(--space-lg); } }
+.article-credit.tight { padding-bottom: var(--space-md); }
+.back-link { padding-bottom: var(--space-md); font-size: var(--text-sm); }
   </style>
 </head>
 <body>
 
   <header class="site-header">
-    <div class="header-inner">
+    <div class="header-inner container">
       <a href="https://nufunc.github.io/oneul-date/" class="header-logo">오늘 데이트 <span>매거진</span></a>
       <nav class="header-nav">
         <a href="https://nufunc.github.io/oneul-date/blog/">매거진 홈</a>
@@ -421,199 +326,175 @@
 
   <main class="article-container">
     <article>
-      <header class="article-header">
-        <span class="badge-category">경북 봉화 · 정자와 산사 드라이브 코스</span>
-        <h1 class="article-title">[경북 봉화 드라이브] 청암정과 축서사에서 분천 산타마을, 선유교, 청량사까지 하루 코스</h1>
-        <div class="article-meta">
-          <span>📅 2026.10.29</span>
-          <span>🚗 차량 이동 약 103km</span>
-          <span>💰 입장료 정보 없음</span>
-          <span>글: 오늘 데이트 에디토리얼 팀 / 사진: 한국관광공사</span>
+      <header class="article-header hero container">
+        <div class="hero-text">
+          <p class="hero-kicker badge-category"><span>경북 봉화</span><span>정자와 산사 드라이브 코스</span></p>
+          <h1 class="article-title">[경북 봉화 드라이브] 청암정과 축서사에서 분천 산타마을, 선유교, 청량사까지 하루 코스</h1>
+          <div class="article-meta">
+            <span>2026.10.29</span>
+            <span>차량 이동 약 103km</span>
+            <span>입장료 정보 없음</span>
+            <span class="meta-credit">글: 오늘 데이트 에디토리얼 팀 / 사진: 한국관광공사</span>
+          </div>
+          <p><a class="btn" href="../../#c=1791246572548.1793274953942.1793274954131.1791309534541.1793274954316">앱에서 코스 열기</a></p>
         </div>
       </header>
 
-      <div class="prose-intro">
-        1526년 권벌이 닭실마을에 지은 정자 청암정에서 시작해 문수산 해발 800m에 자리한 축서사, 1년 내내 크리스마스 분위기로 꾸민 분천 산타마을, 퇴계 이황이 오가던 예던길의 출렁다리 봉화선유교를 지나 원효대사가 세웠다고 전하는 청량사까지 차로 잇는 경북 봉화 하루 코스예요. 청암정은 10:00~16:00에 열고 매주 월요일에 쉬어요. 축서사와 청량사는 09:00~18:00, 분천 산타마을은 08:00~18:00에 열고 연중무휴이며, 봉화선유교는 상시 개방이에요. 다섯 곳 모두 출처에 입장 요금 항목이 없어 요금은 적지 않았어요.
+      <div class="container">
+        <p class="prose-intro">1526년 권벌이 닭실마을에 지은 정자 청암정에서 시작해 문수산 해발 800m에 자리한 축서사, 1년 내내 크리스마스 분위기로 꾸민 분천 산타마을, 퇴계 이황이 오가던 예던길의 출렁다리 봉화선유교를 지나 원효대사가 세웠다고 전하는 청량사까지 차로 잇는 경북 봉화 하루 코스예요. 청암정은 10:00~16:00에 열고 매주 월요일에 쉬어요. 축서사와 청량사는 09:00~18:00, 분천 산타마을은 08:00~18:00에 열고 연중무휴이며, 봉화선유교는 상시 개방이에요. 다섯 곳 모두 출처에 입장 요금 항목이 없어 요금은 적지 않았어요.</p>
       </div>
 
       <!-- 동선 -->
-      <section class="timeline-card">
-        <h3 class="timeline-title">⏱️ 봉화 하루 드라이브 동선</h3>
-        <div class="tl-act">오전: 봉화읍 닭실마을에서 물야면 문수산으로</div>
-        <div class="tl-step"><span class="tl-time">10:00</span><div><span class="tl-place">청암정과 닭실마을</span><span class="tl-note">10:00~16:00. 매주 월요일 휴무</span></div></div>
-        <div class="tl-move">↓ 차로 약 16.4km (약 27분)</div>
-        <div class="tl-step"><span class="tl-time">11:10</span><div><span class="tl-place">축서사</span><span class="tl-note">09:00~18:00, 연중무휴</span></div></div>
-        <div class="tl-move">↓ 차로 약 48.8km (약 1시간 4분)</div>
-        <div class="tl-act">오후: 점심 뒤 소천면 분천에서 명호면 낙동강과 청량산으로</div>
-        <div class="tl-step"><span class="tl-time">14:00</span><div><span class="tl-place">분천 산타마을</span><span class="tl-note">08:00~18:00, 연중무휴</span></div></div>
-        <div class="tl-move">↓ 차로 약 30.6km (약 36분)</div>
-        <div class="tl-step"><span class="tl-time">15:20</span><div><span class="tl-place">봉화선유교와 예던길</span><span class="tl-note">상시 개방, 연중무휴. 주차 불가</span></div></div>
-        <div class="tl-move">↓ 차로 약 7.2km (약 12분)</div>
-        <div class="tl-step"><span class="tl-time">16:00</span><div><span class="tl-place">청량사</span><span class="tl-note">09:00~18:00, 연중무휴. 11월 15일 해 지는 시각 17:16 무렵</span></div></div>
-        <div class="tl-move">다섯 곳 사이 차량 이동 합계 약 103km, 약 2시간 20분 (OSRM 경로 계산, 점심 장소 오가는 길 제외)</div>
+      <section class="timeline-card band">
+        <div class="container">
+          <h2 class="timeline-title">봉화 하루 드라이브 동선</h2>
+          <div class="route" style="--n:5">
+            <div class="tl-act" style="--r:1; --c:1; --s:2">오전: 봉화읍 닭실마을에서 물야면 문수산으로</div>
+            <div class="tl-step" style="--r:2; --c:1"><span class="tl-time">10:00</span><span class="tl-place">청암정과 닭실마을</span><span class="tl-note">10:00~16:00. 매주 월요일 휴무</span></div>
+            <div class="tl-move" style="--r:3; --c:1">차로 약 16.4km (약 27분)</div>
+            <div class="tl-step" style="--r:2; --c:2"><span class="tl-time">11:10</span><span class="tl-place">축서사</span><span class="tl-note">09:00~18:00, 연중무휴</span></div>
+            <div class="tl-move" style="--r:3; --c:2">차로 약 48.8km (약 1시간 4분)</div>
+            <div class="tl-act" style="--r:1; --c:3; --s:3">오후: 점심 뒤 소천면 분천에서 명호면 낙동강과 청량산으로</div>
+            <div class="tl-step" style="--r:2; --c:3"><span class="tl-time">14:00</span><span class="tl-place">분천 산타마을</span><span class="tl-note">08:00~18:00, 연중무휴</span></div>
+            <div class="tl-move" style="--r:3; --c:3">차로 약 30.6km (약 36분)</div>
+            <div class="tl-step" style="--r:2; --c:4"><span class="tl-time">15:20</span><span class="tl-place">봉화선유교와 예던길</span><span class="tl-note">상시 개방, 연중무휴. 주차 불가</span></div>
+            <div class="tl-move" style="--r:3; --c:4">차로 약 7.2km (약 12분)</div>
+            <div class="tl-step" style="--r:2; --c:5"><span class="tl-time">16:00</span><span class="tl-place">청량사</span><span class="tl-note">09:00~18:00, 연중무휴. 11월 15일 해 지는 시각 17:16 무렵</span></div>
+            <div class="tl-total" style="--r:4">다섯 곳 사이 차량 이동 합계 약 103km, 약 2시간 20분 (OSRM 경로 계산, 점심 장소 오가는 길 제외)</div>
+          </div>
+        </div>
       </section>
 
-      <!-- 1. 봉화 청암정 -->
-      <section class="spot-section">
-        <div class="spot-header">
-          <span class="spot-number">01</span>
-          <h2 class="spot-title">봉화 청암정과 닭실마을</h2>
-          <span class="spot-tag">1526년 권벌이 지은 정자</span>
-        </div>
-        <div class="spot-image-wrap">
-          <img src="https://tong.visitkorea.or.kr/cms/resource/84/3014684_image2_1.jpg" alt="너른 바위 위에 선 단청 정자 청암정과 오른쪽 아래 물가의 돌다리" class="spot-image" loading="lazy" />
-          <p class="image-caption">바위 위에 선 정자 청암정과 물가의 돌다리</p>
-        </div>
-        <p class="spot-desc">
+      <div class="container">
+        <div class="spots">
+          <section class="spot-section">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-number">01</span><h2 class="spot-title">봉화 청암정과 닭실마을</h2></div>
+              <p class="spot-tagline">1526년 권벌이 지은 정자</p>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/84/3014684_image2_1.jpg" alt="너른 바위 위에 선 단청 정자 청암정과 오른쪽 아래 물가의 돌다리" class="spot-image" loading="lazy" />
+              <figcaption>바위 위에 선 정자 청암정과 물가의 돌다리</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p class="spot-desc">
           청암정은 조선 중기 문신 권벌이 1526년 봉화읍 닭실마을(옛 유곡마을)에 지은 정자예요. 닭실마을은 1380년 권벌의 선조가 처음 자리 잡은 안동권씨 집성촌이고, 마을 서쪽으로 석천계곡이 흘러요.
         </p>
-        <p class="spot-desc">
+              <p class="spot-desc">
           정자 둘레에는 약 500m 위쪽 물줄기에서 물을 끌어와 판 연못이 있고, 거북 모양 바위와 작은 돌다리가 놓여 있어요. 정자 안에는 허목이 쓴 '청암수석(靑巖水石)' 편액이 걸려 있어요. 2009년 12월에 명승으로 지정됐어요.
         </p>
-        <div class="spot-chips-row">
-          <a href="https://map.naver.com/p/search/%EB%B4%89%ED%99%94%20%EC%B2%AD%EC%95%94%EC%A0%95" target="_blank" rel="noopener noreferrer" class="spot-chip-btn map-chip">🗺️ 네이버 지도</a>
-          <a href="tmap://search?name=%EB%B4%89%ED%99%94%20%EC%B2%AD%EC%95%94%EC%A0%95" class="spot-chip-btn">🧭 T맵 길안내</a>
-          <a href="kakaotaxi://search?name=%EB%B4%89%ED%99%94%20%EC%B2%AD%EC%95%94%EC%A0%95" class="spot-chip-btn">🚕 카카오T 호출</a>
-        </div>
-        <div class="tip-box">
-          <div class="tip-box-title">💡 이용 정보</div>
-          • 주소: 경상북도 봉화군 봉화읍 충재길 44<br>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EB%B4%89%ED%99%94%20%EC%B2%AD%EC%95%94%EC%A0%95" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도</a><a href="tmap://search?name=%EB%B4%89%ED%99%94%20%EC%B2%AD%EC%95%94%EC%A0%95" class="btn-naver-map link-quiet">T맵 길안내</a><a href="kakaotaxi://search?name=%EB%B4%89%ED%99%94%20%EC%B2%AD%EC%95%94%EC%A0%95" class="btn-naver-map link-quiet">카카오T 호출</a></div>
+              <div class="tip-box"><strong class="tip-title">이용 정보</strong>• 주소: 경상북도 봉화군 봉화읍 충재길 44<br>
           • 운영 시간: 10:00~16:00<br>
           • 휴무: 매주 월요일<br>
-          • 주차: 가능 (요금 정보 없음)
-        </div>
-      </section>
+          • 주차: 가능 (요금 정보 없음)</div>
+            </div>
+          </section>
 
-      <!-- 2. 봉화 축서사 -->
-      <section class="spot-section">
-        <div class="spot-header">
-          <span class="spot-number">02</span>
-          <h2 class="spot-title">봉화 축서사</h2>
-          <span class="spot-tag">문수산 해발 800m</span>
-        </div>
-        <div class="spot-image-wrap">
-          <img src="https://tong.visitkorea.or.kr/cms/resource/03/3526103_image2_1.jpg" alt="해 질 녘 축서사 경내의 전각 지붕과 연등을 두른 석탑, 멀리 겹쳐 선 산줄기" class="spot-image" loading="lazy" />
-          <p class="image-caption">해 질 녘 축서사 경내와 석탑, 먼 산줄기</p>
-        </div>
-        <p class="spot-desc">
+          <section class="spot-section flip">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-number">02</span><h2 class="spot-title">봉화 축서사</h2></div>
+              <p class="spot-tagline">문수산 해발 800m</p>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/03/3526103_image2_1.jpg" alt="해 질 녘 축서사 경내의 전각 지붕과 연등을 두른 석탑, 멀리 겹쳐 선 산줄기" class="spot-image" loading="lazy" />
+              <figcaption>해 질 녘 축서사 경내와 석탑, 먼 산줄기</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p class="spot-desc">
           축서사는 신라 문무왕 13년(673년) 의상대사가 창건했다고 전하는 절로, 문수산 기슭 해발 800m에 자리 잡았어요. 절 이름은 독수리 축(鷲), 깃들 서(棲) 자를 써서 '독수리가 사는 절'이라는 뜻이에요.
         </p>
-        <p class="spot-desc">
+              <p class="spot-desc">
           조선 말기 의병을 토벌하던 일본군이 불을 질러 대웅전 한 동만 남기고 불탔다고 해요. 경내에는 보물로 지정된 석조비로자나불좌상 및 목조광배와 괘불탱, 경상북도 문화유산자료인 삼층석탑과 석등이 있어요.
         </p>
-        <div class="spot-chips-row">
-          <a href="https://map.naver.com/p/search/%EB%B4%89%ED%99%94%20%EC%B6%95%EC%84%9C%EC%82%AC" target="_blank" rel="noopener noreferrer" class="spot-chip-btn map-chip">🗺️ 네이버 지도</a>
-          <a href="tmap://search?name=%EB%B4%89%ED%99%94%20%EC%B6%95%EC%84%9C%EC%82%AC" class="spot-chip-btn">🧭 T맵 길안내</a>
-          <a href="kakaotaxi://search?name=%EB%B4%89%ED%99%94%20%EC%B6%95%EC%84%9C%EC%82%AC" class="spot-chip-btn">🚕 카카오T 호출</a>
-        </div>
-        <div class="tip-box">
-          <div class="tip-box-title">💡 이용 정보</div>
-          • 주소: 경상북도 봉화군 물야면 월계길 739<br>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EB%B4%89%ED%99%94%20%EC%B6%95%EC%84%9C%EC%82%AC" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도</a><a href="tmap://search?name=%EB%B4%89%ED%99%94%20%EC%B6%95%EC%84%9C%EC%82%AC" class="btn-naver-map link-quiet">T맵 길안내</a><a href="kakaotaxi://search?name=%EB%B4%89%ED%99%94%20%EC%B6%95%EC%84%9C%EC%82%AC" class="btn-naver-map link-quiet">카카오T 호출</a></div>
+              <div class="tip-box"><strong class="tip-title">이용 정보</strong>• 주소: 경상북도 봉화군 물야면 월계길 739<br>
           • 운영 시간: 09:00~18:00, 연중무휴<br>
           • 주차: 가능 (요금 정보 없음)<br>
-          • 문의: 054-672-7579
-        </div>
-      </section>
+          • 문의: 054-672-7579</div>
+            </div>
+          </section>
 
-      <!-- 3. 분천 산타마을 -->
-      <section class="spot-section">
-        <div class="spot-header">
-          <span class="spot-number">03</span>
-          <h2 class="spot-title">분천 산타마을</h2>
-          <span class="spot-tag">1년 내내 크리스마스</span>
-        </div>
-        <div class="spot-image-wrap">
-          <img src="https://tong.visitkorea.or.kr/cms/resource/98/3520498_image2_1.jpg" alt="다리 입구에 선 빨간 '분천산타마을' 아치와 산타 그림, 뒤편 마을과 숲 덮인 산" class="spot-image" loading="lazy" />
-          <p class="image-caption">다리 입구에 선 분천 산타마을 아치</p>
-        </div>
-        <p class="spot-desc">
+          <section class="spot-section">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-number">03</span><h2 class="spot-title">분천 산타마을</h2></div>
+              <p class="spot-tagline">1년 내내 크리스마스</p>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/98/3520498_image2_1.jpg" alt="다리 입구에 선 빨간 '분천산타마을' 아치와 산타 그림, 뒤편 마을과 숲 덮인 산" class="spot-image" loading="lazy" />
+              <figcaption>다리 입구에 선 분천 산타마을 아치</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p class="spot-desc">
           분천 산타마을은 소천면 분천역 일대에 백두대간 자연과 산타클로스 이미지를 엮어 1년 내내 크리스마스 분위기를 낸 마을이에요. 2016년 한국지역진흥재단 겨울여행지 선호도 조사에서 2위에 올랐고, 문화체육관광부 '한국 관광의 별'(이색 창조관광 분야)에 뽑혔어요.
         </p>
-        <p class="spot-desc">
+              <p class="spot-desc">
           마을 안에는 산타썰매, 산타우체국, 산타레일바이크, 산타슬라이드 같은 체험 거리가 있어요. 체험마다 운영 기간과 요금은 출처에서 확인하지 못했으니 가기 전에 봉화군청 문화관광과에 물어보세요.
         </p>
-        <div class="spot-chips-row">
-          <a href="https://map.naver.com/p/search/%EB%B6%84%EC%B2%9C%EC%97%AD%20%EC%82%B0%ED%83%80%EB%A7%88%EC%9D%84" target="_blank" rel="noopener noreferrer" class="spot-chip-btn map-chip">🗺️ 네이버 지도</a>
-          <a href="tmap://search?name=%EB%B6%84%EC%B2%9C%EC%97%AD%20%EC%82%B0%ED%83%80%EB%A7%88%EC%9D%84" class="spot-chip-btn">🧭 T맵 길안내</a>
-          <a href="kakaotaxi://search?name=%EB%B6%84%EC%B2%9C%EC%97%AD%20%EC%82%B0%ED%83%80%EB%A7%88%EC%9D%84" class="spot-chip-btn">🚕 카카오T 호출</a>
-        </div>
-        <div class="tip-box">
-          <div class="tip-box-title">💡 이용 정보</div>
-          • 주소: 경상북도 봉화군 소천면 분천길 49<br>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EB%B6%84%EC%B2%9C%EC%97%AD%20%EC%82%B0%ED%83%80%EB%A7%88%EC%9D%84" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도</a><a href="tmap://search?name=%EB%B6%84%EC%B2%9C%EC%97%AD%20%EC%82%B0%ED%83%80%EB%A7%88%EC%9D%84" class="btn-naver-map link-quiet">T맵 길안내</a><a href="kakaotaxi://search?name=%EB%B6%84%EC%B2%9C%EC%97%AD%20%EC%82%B0%ED%83%80%EB%A7%88%EC%9D%84" class="btn-naver-map link-quiet">카카오T 호출</a></div>
+              <div class="tip-box"><strong class="tip-title">이용 정보</strong>• 주소: 경상북도 봉화군 소천면 분천길 49<br>
           • 운영 시간: 08:00~18:00, 연중무휴<br>
           • 주차: 가능 (요금 정보 없음)<br>
-          • 문의: 봉화군청 문화관광과 054-679-6351~3
-        </div>
-      </section>
+          • 문의: 봉화군청 문화관광과 054-679-6351~3</div>
+            </div>
+          </section>
 
-      <!-- 4. 봉화선유교 -->
-      <section class="spot-section">
-        <div class="spot-header">
-          <span class="spot-number">04</span>
-          <h2 class="spot-title">봉화선유교와 예던길</h2>
-          <span class="spot-tag">낙동강 위 출렁다리</span>
-        </div>
-        <div class="spot-image-wrap">
-          <img src="https://tong.visitkorea.or.kr/cms/resource/64/3408364_image2_1.jpg" alt="낙동강 가 언덕에 선 '예던길 선유교' 글자 조형물과 나무 데크 길, 자갈 깔린 강가와 숲 덮인 산" class="spot-image" loading="lazy" />
-          <p class="image-caption">강가 언덕의 '예던길 선유교' 글자 조형물과 낙동강</p>
-        </div>
-        <p class="spot-desc">
+          <section class="spot-section flip">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-number">04</span><h2 class="spot-title">봉화선유교와 예던길</h2></div>
+              <p class="spot-tagline">낙동강 위 출렁다리</p>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/64/3408364_image2_1.jpg" alt="낙동강 가 언덕에 선 '예던길 선유교' 글자 조형물과 나무 데크 길, 자갈 깔린 강가와 숲 덮인 산" class="spot-image" loading="lazy" />
+              <figcaption>강가 언덕의 '예던길 선유교' 글자 조형물과 낙동강</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p class="spot-desc">
           봉화선유교는 안동, 봉화, 태백을 잇는 35번 국도에서 가송리와 청량산 사이 드라이브 길에 있는 낙동강 위 출렁다리예요. 이름은 '신선이 노니는 다리'라는 뜻이에요.
         </p>
-        <p class="spot-desc">
+              <p class="spot-desc">
           예던길은 옛 선비들이 다니던 길이라는 뜻으로, 퇴계 이황이 10대 때 숙부에게 글을 배우러 청량산 오산당(지금의 청량정사)을 오가던 길이에요. 다리 시작과 끝에는 쉬어 갈 벤치와 정자가 있고, 다리 옆으로 산책로가 이어져요.
         </p>
-        <div class="spot-chips-row">
-          <a href="https://map.naver.com/p/search/%EB%B4%89%ED%99%94%EC%84%A0%EC%9C%A0%EA%B5%90" target="_blank" rel="noopener noreferrer" class="spot-chip-btn map-chip">🗺️ 네이버 지도</a>
-          <a href="tmap://search?name=%EB%B4%89%ED%99%94%EC%84%A0%EC%9C%A0%EA%B5%90" class="spot-chip-btn">🧭 T맵 길안내</a>
-          <a href="kakaotaxi://search?name=%EB%B4%89%ED%99%94%EC%84%A0%EC%9C%A0%EA%B5%90" class="spot-chip-btn">🚕 카카오T 호출</a>
-        </div>
-        <div class="tip-box">
-          <div class="tip-box-title">💡 이용 정보</div>
-          • 위치: 경상북도 봉화군 명호면 고계리<br>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EB%B4%89%ED%99%94%EC%84%A0%EC%9C%A0%EA%B5%90" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도</a><a href="tmap://search?name=%EB%B4%89%ED%99%94%EC%84%A0%EC%9C%A0%EA%B5%90" class="btn-naver-map link-quiet">T맵 길안내</a><a href="kakaotaxi://search?name=%EB%B4%89%ED%99%94%EC%84%A0%EC%9C%A0%EA%B5%90" class="btn-naver-map link-quiet">카카오T 호출</a></div>
+              <div class="tip-box"><strong class="tip-title">이용 정보</strong>• 위치: 경상북도 봉화군 명호면 고계리<br>
           • 운영 시간: 상시 개방, 연중무휴<br>
           • 주차: 한국관광공사 관광정보에 주차 불가로 나와 있어요. 차를 세울 곳은 출처에서 확인하지 못했어요<br>
-          • 문의: 봉화관광안내소 054-673-4996
-        </div>
-      </section>
+          • 문의: 봉화관광안내소 054-673-4996</div>
+            </div>
+          </section>
 
-      <!-- 5. 청량사 -->
-      <section class="spot-section">
-        <div class="spot-header">
-          <span class="spot-number">05</span>
-          <h2 class="spot-title">청량산 청량사</h2>
-          <span class="spot-tag">663년 원효대사가 세운 절</span>
-        </div>
-        <div class="spot-image-wrap">
-          <img src="https://tong.visitkorea.or.kr/cms/resource/81/3528381_image2_1.jpg" alt="청량사 경내 마당 위로 줄지어 걸린 색색의 연등과 소나무 가지, 뒤편 숲 덮인 산" class="spot-image" loading="lazy" />
-          <p class="image-caption">연등 줄이 걸린 청량사 경내와 소나무</p>
-        </div>
-        <p class="spot-desc">
+          <section class="spot-section">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-number">05</span><h2 class="spot-title">청량산 청량사</h2></div>
+              <p class="spot-tagline">663년 원효대사가 세운 절</p>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/81/3528381_image2_1.jpg" alt="청량사 경내 마당 위로 줄지어 걸린 색색의 연등과 소나무 가지, 뒤편 숲 덮인 산" class="spot-image" loading="lazy" />
+              <figcaption>연등 줄이 걸린 청량사 경내와 소나무</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p class="spot-desc">
           청량사는 청량산도립공원 안에 있는 절로, 신라 문무왕 3년(663년)에 원효대사가 세웠다고 전해요. 세울 때에는 부속 건물 33개를 갖춘 큰 절이었다고 해요.
         </p>
-        <p class="spot-desc">
+              <p class="spot-desc">
           경내에는 약사여래를 모신 법당 유리보전(경상북도 유형문화유산)이 있어요. 원효대사가 머물렀다는 암자 응진전은 청량산에서 경관이 뛰어난 곳으로 꼽혀요.
         </p>
-        <div class="spot-chips-row">
-          <a href="https://map.naver.com/p/search/%EB%B4%89%ED%99%94%20%EC%B2%AD%EB%9F%89%EC%82%AC" target="_blank" rel="noopener noreferrer" class="spot-chip-btn map-chip">🗺️ 네이버 지도</a>
-          <a href="tmap://search?name=%EB%B4%89%ED%99%94%20%EC%B2%AD%EB%9F%89%EC%82%AC" class="spot-chip-btn">🧭 T맵 길안내</a>
-          <a href="kakaotaxi://search?name=%EB%B4%89%ED%99%94%20%EC%B2%AD%EB%9F%89%EC%82%AC" class="spot-chip-btn">🚕 카카오T 호출</a>
-        </div>
-        <div class="tip-box">
-          <div class="tip-box-title">💡 이용 정보</div>
-          • 주소: 경상북도 봉화군 명호면 청량산길 199-152<br>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EB%B4%89%ED%99%94%20%EC%B2%AD%EB%9F%89%EC%82%AC" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도</a><a href="tmap://search?name=%EB%B4%89%ED%99%94%20%EC%B2%AD%EB%9F%89%EC%82%AC" class="btn-naver-map link-quiet">T맵 길안내</a><a href="kakaotaxi://search?name=%EB%B4%89%ED%99%94%20%EC%B2%AD%EB%9F%89%EC%82%AC" class="btn-naver-map link-quiet">카카오T 호출</a></div>
+              <div class="tip-box"><strong class="tip-title">이용 정보</strong>• 주소: 경상북도 봉화군 명호면 청량산길 199-152<br>
           • 운영 시간: 09:00~18:00, 연중무휴 (자세한 사항은 전화 문의)<br>
           • 주차: 가능 (요금 정보 없음)<br>
           • 문의: 054-672-1446<br>
-          • 해 지는 시각: 청량사 일대는 10월 29일 17:32, 11월 15일 17:16, 12월 1일 17:09 무렵이에요. 11월 15일에는 17:44 무렵이면 어두워져요. 주차한 곳에서 경내까지 걷는 시간은 출처에서 확인하지 못했으니, 16:00 무렵 도착해 해 지기 전에 내려오도록 시간을 잡으세요.
+          • 해 지는 시각: 청량사 일대는 10월 29일 17:32, 11월 15일 17:16, 12월 1일 17:09 무렵이에요. 11월 15일에는 17:44 무렵이면 어두워져요. 주차한 곳에서 경내까지 걷는 시간은 출처에서 확인하지 못했으니, 16:00 무렵 도착해 해 지기 전에 내려오도록 시간을 잡으세요.</div>
+            </div>
+          </section>
         </div>
-      </section>
 
-      <!-- 2인 비용 -->
-      <section class="cost-table-card">
-        <h3 class="timeline-title">💰 2인 예상 입장료</h3>
-        <p>출처에서 확인한 입장 요금만 적는 표예요.</p>
-        <div class="table-wrap">
+        <section class="cost-table-card">
+          <div class="cost-head">
+            <h2 class="timeline-title">2인 예상 입장료</h2>
+            <p>출처에서 확인한 입장 요금만 적는 표예요.</p>
+          </div>
+          <div class="table-wrap">
           <table class="cost-table">
             <thead>
               <tr>
@@ -662,42 +543,34 @@
             </tbody>
           </table>
         </div>
-      </section>
+        </section>
 
-      <!-- 코스 요약 안내 카드 -->
-      <section class="course-summary-card">
-        <h3 class="summary-title">🚗 봉화 드라이브 코스 한눈에 보기</h3>
-        <div class="summary-grid">
-          <div class="summary-item">
-            <span class="summary-label">총 이동 거리</span>
-            <span class="summary-val">차로 약 103km (점심 장소 오가는 길 제외)</span>
-          </div>
-          <div class="summary-item">
-            <span class="summary-label">소요 시간</span>
-            <span class="summary-val">당일 (10:00~17:00 무렵)</span>
-          </div>
-          <div class="summary-item">
-            <span class="summary-label">주요 장소</span>
-            <span class="summary-val">청암정, 축서사, 분천 산타마을, 봉화선유교, 청량사</span>
-          </div>
-          <div class="summary-item">
-            <span class="summary-label">추천 준비물</span>
-            <span class="summary-val">편안한 운동화, 겉옷, 카메라</span>
-          </div>
+        <div class="summary-card">
+          <h2 class="summary-title">봉화 드라이브 코스 한눈에 보기</h2>
+          <ul class="summary-list">
+            <li><strong>총 이동 거리</strong> 차로 약 103km (점심 장소 오가는 길 제외)</li>
+            <li><strong>소요 시간</strong> 당일 (10:00~17:00 무렵)</li>
+            <li><strong>주요 장소</strong> 청암정, 축서사, 분천 산타마을, 봉화선유교, 청량사</li>
+            <li><strong>추천 준비물</strong> 편안한 운동화, 겉옷, 카메라</li>
+          </ul>
         </div>
-      </section>
-    </article>
-    <div class="app-course-box" style="margin: 40px 0 24px; padding: 20px 22px; background: var(--color-accent-light); border: 1px solid var(--color-border); border-radius: 14px;">
-      <strong style="display: block; font-size: 17px; color: var(--color-text-main); margin-bottom: 6px;">🗺️ 이 코스 오늘 데이트에서 열기</strong>
-      <p style="margin: 0 0 14px; font-size: 14.5px; line-height: 1.6; color: var(--color-text-main);">글에 나온 장소 5곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
-      <a href="../../#c=1791246572548.1793274953942.1793274954131.1791309534541.1793274954316" style="display: inline-block; padding: 10px 18px; border-radius: 10px; background: var(--color-text-main); color: #ffffff; font-weight: 700; font-size: 15px; text-decoration: none;">앱에서 코스 열기 →</a>
-    </div>
 
+        <div class="app-course-box">
+          <div>
+            <h2>이 코스 오늘 데이트에서 열기</h2>
+            <p>글에 나온 장소 5곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
+          </div>
+          <a class="btn app-action" href="../../#c=1791246572548.1793274953942.1793274954131.1791309534541.1793274954316">앱에서 코스 열기</a>
+        </div>
+      </div>
+    </article>
   </main>
 
   <footer class="site-footer">
-    <p>© 2026 <a href="https://nufunc.github.io/oneul-date/">오늘 데이트 (Oneul Date)</a>. 모든 권리 보유.</p>
-    <p>본 콘텐츠에 사용된 사진은 한국관광공사 TourAPI의 공공저작물을 활용하였습니다. 청암정 사진은 공공누리 제1유형, 나머지 사진은 공공누리 제3유형(출처표시, 변경금지)입니다.</p>
+    <div class="footer-inner container">
+      <p class="footer-line">© 2026 <a href="https://nufunc.github.io/oneul-date/">오늘 데이트 (Oneul Date)</a>. 모든 권리 보유.</p>
+      <p class="footer-line">본 콘텐츠에 사용된 사진은 한국관광공사 TourAPI의 공공저작물을 활용하였습니다. 청암정 사진은 공공누리 제1유형, 나머지 사진은 공공누리 제3유형(출처표시, 변경금지)입니다.</p>
+    </div>
   </footer>
 
 </body>

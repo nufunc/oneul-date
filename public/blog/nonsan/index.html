@@ -16,6 +16,9 @@
 
   <!-- Pretendard 웹폰트 -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700&display=swap&text=%2C.0123456789%3A%5B%5D~%EA%B0%92%EA%B1%B0%EA%B3%84%EA%B3%A0%EA%B3%B5%EA%B3%BC%EA%B4%80%EA%B8%B0%EA%B9%8C%EB%82%A8%EB%85%BC%EB%8A%98%EB%8B%A4%EB%8C%80%EB%8D%94%EB%8D%B0%EB%8F%84%EB%8F%88%EB%8F%99%EB%93%9C%EB%94%94%EB%9D%BC%EB%9E%9C%EB%A0%81%EB%A3%8C%EB%A3%A8%EB%A5%98%EB%A5%B5%EB%A6%AC%EB%A7%8C%EB%A7%A4%EB%AA%85%EB%AF%B8%EB%B3%80%EB%B3%84%EB%B8%8C%EB%B9%84%EC%82%AC%EC%82%B0%EC%83%81%EC%83%9D%EC%83%A4%EC%84%9C%EC%84%A0%EC%88%98%EC%8A%A4%EC%8B%9D%EC%95%94%EC%97%90%EC%97%AC%EC%97%B4%EC%98%88%EC%98%A4%EC%99%80%EC%9A%94%EC%9B%90%EC%9C%A0%EC%9D%80%EC%9D%8C%EC%9D%98%EC%9D%B4%EC%9D%B8%EC%9E%85%EC%9E%A5%EC%9E%AC%EC%A0%95%EC%A7%80%EC%A7%84%EC%B2%B4%EC%B4%89%EC%B6%9C%EC%B6%A9%EC%BD%94%ED%83%91%ED%83%9C%ED%83%9D%ED%8A%9C%ED%8A%B8%ED%95%98%ED%95%9C%ED%95%A9%ED%97%98%ED%98%B8" rel="stylesheet">
 
   <script type="application/ld+json">
 {
@@ -43,348 +46,276 @@
   </script>
 
   <style>
-    :root {
-      --color-primary: #0f172a;
-      --color-accent: #d97706;
-      --color-accent-light: #fffbeb;
-      --color-text-main: #334155;
-      --color-text-sub: #64748b;
-      --color-border: #e2e8f0;
-      --color-bg-page: #f8fafc;
-      --color-card-bg: #ffffff;
-      --color-warm: #b45309;
-      --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-    }
+/* hallmark-solstice: scripts/convert_blog_hallmark.mjs가 글의 <style>을 이 파일로 바꾼다 (Hallmark 2.0.0, 테마 Solstice, P-293) */
+:root {
+  color-scheme: light;
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-xs: 0.8125rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.125rem; --text-xl: 1.5625rem; --text-2xl: 1.953rem; --text-3xl: 2.441rem;
+  --text-hero: clamp(1.75rem, 1.6vw + 1.25rem, 2.75rem);
+  --text-section: clamp(1.75rem, 1.8vw + 1rem, 2.875rem); --text-title: clamp(1.25rem, 0.75vw + 0.875rem, 1.625rem); --text-lead: clamp(1.0625rem, 0.3vw + 0.95rem, 1.25rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-micro: 120ms; --dur-short: 220ms;
+  --container: 1200px; --measure: 680px; --gutter: 56px; --gap-columns: 40px; --section-gap: 120px;
+  --z-sticky-nav: 300;
+  --color-paper: oklch(94% 0.03 80); --color-paper-2: oklch(97% 0.02 85); --color-paper-3: oklch(89% 0.05 80);
+  --color-ink: oklch(27% 0.05 50); --color-ink-2: oklch(36% 0.05 50); --color-muted: oklch(48% 0.06 55);
+  --color-rule: oklch(84% 0.06 78);
+  --color-accent: oklch(54% 0.20 24); --color-accent-2: oklch(48% 0.19 24); --color-accent-ink: oklch(97% 0.02 85); --color-focus: oklch(54% 0.20 24);
+  --color-gold: oklch(74% 0.14 75); --color-gold-2: oklch(84% 0.11 80);
+  --color-band-text: oklch(94% 0.03 80); --color-band-muted: oklch(80% 0.05 75);
+  --color-hair-ink: color-mix(in oklab, var(--color-ink) 10%, transparent);
+  --font-display: "Noto Serif KR", "Nanum Myeongjo", ui-serif, serif;
+  --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --radius-card: 0; --radius-pill: 999px; --rule-hair: 1px; --rule-bar: 2px;
+  --shadow-card: 10px 10px 0 var(--color-paper-3);
+}
+@media (max-width: 60rem) { :root { --gutter: 24px; --section-gap: 88px; --gap-columns: 24px; } }
+@media (max-width: 40rem) { :root { --gutter: 16px; --section-gap: 64px; --gap-columns: 16px; } }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: var(--font-family);
-      background-color: var(--color-bg-page);
-      color: var(--color-text-main);
-      line-height: 1.75;
-      letter-spacing: -0.2px;
-      word-break: keep-all;
-    }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+html { scrollbar-color: var(--color-muted) var(--color-paper); scroll-padding-top: var(--space-3xl); }
+body { margin: 0; background: var(--color-paper); color: var(--color-ink-2); font-family: var(--font-family); font-size: var(--text-md); line-height: 1.75; word-break: keep-all; -webkit-font-smoothing: antialiased; }
+::selection { background: color-mix(in oklab, var(--color-gold) 40%, transparent); }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+a:hover { text-decoration-color: var(--color-accent); }
+article h1, article h2, article h3 { margin: 0; font-family: var(--font-display); font-weight: 700; color: var(--color-ink); line-height: 1.3; letter-spacing: -0.01em; overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+img { max-width: 100%; display: block; }
+.container { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); }
 
-    .site-header {
-      background: #ffffff;
-      border-bottom: 1px solid var(--color-border);
-      position: sticky;
-      top: 0;
-      z-index: 50;
-    }
-    .header-inner {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 14px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .header-logo {
-      font-weight: 800;
-      font-size: 1.1rem;
-      color: var(--color-primary);
-      text-decoration: none;
-    }
-    .header-logo span { color: var(--color-accent); }
-    .header-nav a {
-      color: var(--color-text-sub);
-      text-decoration: none;
-      font-size: 0.9rem;
-      margin-left: 16px;
-    }
+/* 44px 머리 링크 규칙: scripts/test-blog-related.cjs가 글마다 하나를 요구한다 */
+header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
 
-    .article-container {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 32px 20px 80px;
-    }
+/* Controls */
+.btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 var(--space-lg); border: 0; border-radius: var(--radius-pill); background: var(--color-accent); color: var(--color-accent-ink); font: 600 var(--text-md)/1 var(--font-family); text-decoration: none; cursor: pointer; transition: background-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out); }
+.btn:hover { background: var(--color-accent-2); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.link-quiet { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-ink); font-weight: 600; font-size: var(--text-sm); text-decoration: none; border-bottom: var(--rule-bar) solid var(--color-ink); transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out); }
+.link-quiet:hover { color: var(--color-accent); border-color: var(--color-accent); }
+.link-quiet:active { transform: translateY(1px); }
+.link-quiet:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
 
-    .article-header {
-      margin-bottom: 32px;
-    }
-    .badge-category {
-      display: inline-block;
-      background: var(--color-accent-light);
-      color: var(--color-accent);
-      font-weight: 700;
-      font-size: 0.85rem;
-      padding: 4px 10px;
-      border-radius: 9999px;
-      margin-bottom: 12px;
-    }
-    .article-title {
-      font-size: 1.85rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      line-height: 1.35;
-      margin-bottom: 16px;
-    }
-    .article-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      font-size: 0.88rem;
-      color: var(--color-text-sub);
-      align-items: center;
-    }
+/* Nav */
+.site-header { position: sticky; top: 0; z-index: var(--z-sticky-nav); background: var(--color-paper); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.header-inner { display: flex; justify-content: space-between; align-items: center; min-height: 64px; }
+.header-logo { font-family: var(--font-display); font-size: var(--text-lg); color: var(--color-ink); text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; }
+.header-logo span { color: var(--color-accent); margin-left: 0.3em; }
+.header-logo:hover { color: var(--color-ink-2); }
+.header-nav { display: flex; gap: var(--space-lg); }
+.header-nav a { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--text-sm); color: var(--color-ink-2); text-decoration: none; }
+.header-nav a:hover { color: var(--color-ink); text-decoration: underline; text-decoration-color: var(--color-accent); }
+.header-nav a:active, .header-logo:active { transform: translateY(1px); }
 
-    .hero-image-wrap {
-      margin: 24px 0 32px;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-    }
-    .hero-image {
-      width: 100%;
-      height: 380px;
-      object-fit: cover;
-      display: block;
-    }
-    .image-caption {
-      font-size: 0.82rem;
-      color: var(--color-text-sub);
-      text-align: center;
-      padding: 8px 12px;
-      background: #ffffff;
-      border-bottom: 1px solid var(--color-border);
-    }
+/* Hero */
+.hero { display: grid; padding-block: var(--space-2xl) var(--space-xl); }
+.hero-text { display: grid; gap: var(--space-lg); }
+.article-title { font-size: var(--text-hero); line-height: 1.3; max-width: 28ch; }
+.hero-kicker { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.hero-kicker span:first-child { color: var(--color-accent); font-weight: 600; }
+.article-meta { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-lg); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); font-variant-numeric: tabular-nums; }
+.article-meta .meta-credit { flex-basis: 100%; }
+/* 좁은 화면에서 칸마다 한 줄: 본문 글꼴(Pretendard)이 바뀔 때 줄 수가 달라져 아래 띠가 밀리는 것을 막는다 */
+@media (max-width: 40rem) { .article-meta { flex-direction: column; flex-wrap: nowrap; } }
+.spot-photo img { width: 100%; height: 100%; object-fit: cover; outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
 
-    .prose-intro {
-      font-size: 1.06rem;
-      line-height: 1.85;
-      color: #1e293b;
-      margin-bottom: 36px;
-      padding: 20px 24px;
-      background: #ffffff;
-      border-left: 4px solid var(--color-accent);
-      border-radius: 0 12px 12px 0;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-    }
+/* Lead */
+.prose-intro { max-width: var(--measure); padding-top: var(--space-xl); font-size: var(--text-lead); line-height: 1.8; color: var(--color-ink); padding-bottom: var(--space-3xl); }
 
-    .timeline-card {
-      background: #ffffff;
-      border: 1px solid var(--color-border);
-      border-radius: 16px;
-      padding: 24px;
-      margin-bottom: 48px;
-    }
-    .timeline-title { font-weight: 700; font-size: 1.05rem; color: var(--color-primary); margin-bottom: 12px; }
-    .tl-act { font-weight: 700; font-size: 13px; color: #64748b; margin: 18px 0 8px; }
-    .timeline-title + .tl-act { margin-top: 0; }
-    .tl-step { display: flex; gap: 12px; align-items: baseline; padding: 6px 0; }
-    .tl-time { flex: none; min-width: 46px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--color-accent); }
-    .tl-place { font-weight: 700; color: #1e293b; }
-    .tl-note { display: block; font-size: 13px; color: #64748b; margin-top: 2px; }
-    .tl-move { font-size: 12.5px; color: #94a3b8; padding: 0 0 0 58px; }
-    @media (max-width: 640px) {
-      .timeline-card { padding: 14px 16px; }
-    }
+/* The day, on the brown band */
+.band { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl) var(--space-xl); }
+.band .timeline-title { color: var(--color-band-text); font-size: var(--text-section); margin-bottom: var(--space-xl); }
+.route { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: 0; padding: 0; }
+.tl-act { font-size: var(--text-sm); color: var(--color-gold-2); padding-bottom: var(--space-sm); }
+.tl-step { display: grid; align-content: start; gap: var(--space-2xs); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-gold); }
+.tl-time { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1; color: var(--color-band-text); font-variant-numeric: tabular-nums; }
+.tl-place { font-weight: 600; font-size: var(--text-lg); color: var(--color-band-text); }
+.tl-note { font-size: var(--text-sm); color: var(--color-band-muted); line-height: 1.6; }
+.tl-move { font-size: var(--text-sm); color: var(--color-band-muted); padding-block: var(--space-sm) var(--space-lg); }
+.tl-total { font-size: var(--text-sm); color: var(--color-band-muted); padding-top: var(--space-lg); margin-top: var(--space-lg); border-top: var(--rule-hair) solid color-mix(in oklab, var(--color-band-text) 25%, transparent); }
+/* spot-info-list 계열: 시간 범위(10:30 - 11:45)가 길어 시각 글자를 줄이고, 요약 상자와 번호 배지를 둔다 */
+.route.range .tl-time { font-size: var(--text-xl); }
+.route.range .tl-step { padding-bottom: var(--space-md); }
+.tl-badge { font-size: var(--text-xs); color: var(--color-gold-2); letter-spacing: 0.04em; }
+.tl-facts { display: grid; gap: var(--space-2xs) var(--space-lg); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.tl-facts strong { color: var(--color-gold-2); font-weight: 600; }
+@media (min-width: 60rem) {
+  .tl-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .route { grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); column-gap: var(--space-lg); }
+  .route > * { grid-row: var(--r); grid-column: var(--c) / span var(--s, 1); }
+  .tl-move { padding-bottom: 0; }
+  .tl-total { grid-column: 1 / -1; }
+}
 
-    .spot-section {
-      margin-bottom: 56px;
-    }
-    .spot-header {
-      display: flex;
-      align-items: baseline;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-    .spot-number {
-      font-size: 1.4rem;
-      font-weight: 900;
-      color: var(--color-accent);
-    }
-    .spot-title {
-      font-size: 1.4rem;
-      font-weight: 800;
-      color: var(--color-primary);
-    }
-    .spot-tag {
-      font-size: 0.8rem;
-      color: #64748b;
-      background: #f1f5f9;
-      padding: 2px 8px;
-      border-radius: 6px;
-    }
-    .spot-image-wrap {
-      margin: 16px 0 20px;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    .spot-image {
-      width: 100%;
-      height: 320px;
-      object-fit: cover;
-      display: block;
-    }
-    .spot-desc {
-      font-size: 1rem;
-      line-height: 1.8;
-      color: #334155;
-      margin-bottom: 18px;
-    }
+/* Stops */
+.spots { padding-block: var(--section-gap) 0; display: grid; gap: var(--section-gap); }
+.spot-section { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "photo head" "photo body"; grid-template-rows: auto 1fr; column-gap: var(--gap-columns); row-gap: var(--space-md); align-items: start; padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); }
+.spot-section.flip { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-areas: "head photo" "body photo"; }
+.spot-section.no-photo { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "body"; }
+.spot-head { grid-area: head; display: grid; gap: var(--space-md); }
+.spot-photo { grid-area: photo; align-self: start; margin: 0; aspect-ratio: 4 / 5; width: 100%; background: var(--color-paper-3); position: sticky; top: 96px; }
+.spot-body { grid-area: body; display: grid; gap: var(--space-md); }
+.spot-header { display: flex; align-items: baseline; gap: var(--space-md); }
+.spot-num { font-family: var(--font-display); font-size: var(--text-3xl); line-height: 1; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+.spot-title { font-size: var(--text-section); }
+.spot-tagline { font-size: var(--text-lg); color: var(--color-ink); padding-bottom: var(--space-xs); }
+.spot-desc { max-width: 60ch; }
 
-    .spot-chips-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 16px 0 20px;
-    }
-    .spot-chip-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 14px;
-      border-radius: 8px;
-      font-size: 0.84rem;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.15s ease;
-      border: 1px solid var(--color-border);
-      background: #ffffff;
-      color: var(--color-primary);
-    }
-    .spot-chip-btn:hover {
-      background: #f8fafc;
-      border-color: #cbd5e1;
-    }
-    .spot-chip-btn.map-chip {
-      background: #00843d;
-      color: #ffffff;
-      border-color: #00843d;
-    }
-    .spot-chip-btn.map-chip:hover {
-      background: #007a37;
-      border-color: #007a37;
-    }
+.spot-info-box { margin: var(--space-xs) 0 0; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); }
+.info-row { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--space-md); padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.info-row:last-child { border-bottom: 0; }
+.info-label { color: var(--color-muted); }
+.info-val { color: var(--color-ink); font-weight: 400; font-variant-numeric: tabular-nums; }
+.map-btn-wrap { padding-top: var(--space-sm); }
+.tip-box { padding: var(--space-sm) var(--space-md); border-left: var(--rule-bar) solid var(--color-accent); background: var(--color-paper-2); font-size: var(--text-sm); color: var(--color-ink-2); line-height: 1.7; }
+.tip-box strong { color: var(--color-ink); font-weight: 600; }
+.tip-box .tip-title { display: block; margin-bottom: var(--space-2xs); }
 
-    .tip-box {
-      background: #fffbeb;
-      border: 1px solid #fde68a;
-      border-radius: 12px;
-      padding: 16px 18px;
-      margin-bottom: 24px;
-      font-size: 0.92rem;
-      color: #92400e;
-      line-height: 1.65;
-    }
-    .tip-box-title {
-      font-weight: 700;
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+/* Fees */
+.cost-table-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.cost-head { display: grid; gap: var(--space-md); align-content: start; }
+.cost-head .timeline-title { font-size: var(--text-section); }
+.cost-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.cost-table th { text-align: left; font-weight: 400; color: var(--color-muted); padding: var(--space-xs) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-bar) solid var(--color-ink); }
+.cost-table td { padding: var(--space-sm) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink-2); vertical-align: top; }
+.cost-table td:nth-child(2) { color: var(--color-ink); font-weight: 400; }
+.cost-3 .cost-total-row td:nth-child(2) { font-family: inherit; font-size: inherit; color: inherit; font-weight: 600; }
+.cost-3 .cost-total-row td:nth-child(3) { font-family: var(--font-display); font-size: var(--text-xl); color: var(--color-accent); font-weight: 700; }
+.cost-total-row td { border-bottom: 0; border-top: var(--rule-bar) solid var(--color-ink); color: var(--color-ink); font-weight: 600; }
+.cost-total-row td:nth-child(2) { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--color-accent); font-weight: 700; }
+@media (max-width: 600px) {
+  .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
+  .table-wrap thead { display: none; }
+  .table-wrap tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-sm); row-gap: var(--space-2xs); padding-block: var(--space-sm); border-bottom: var(--rule-hair) solid var(--color-rule); }
+  .table-wrap td { padding: 0; border: 0; }
+  .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: var(--text-xs); color: var(--color-muted); }
+  .table-wrap td:nth-child(3) { text-align: right; font-weight: 600; color: var(--color-ink); }
+  .table-wrap td:nth-child(4) { grid-column: 1 / -1; color: var(--color-muted); }
+  .table-wrap td:empty { display: none; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: var(--text-sm); color: var(--color-ink); }
+  .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; text-align: right; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
+  .table-wrap .cost-total-row { border-top: var(--rule-bar) solid var(--color-ink); border-bottom: 0; }
+}
 
-    .budget-section {
-      background: #ffffff;
-      border: 1px solid var(--color-border);
-      border-radius: 16px;
-      padding: 24px;
-      margin-top: 48px;
-    }
-    .budget-title {
-      font-size: 1.25rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin-bottom: 16px;
-    }
-    .table-wrap {
-      overflow-x: auto;
-      margin: 16px 0 0;
-      border-radius: 12px;
-      border: 1px solid var(--color-border);
-      background: #fff;
-    }
-    .cost-table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-      font-size: 0.92rem;
-    }
-    .cost-table th, .cost-table td {
-      padding: 14px 18px;
-      border-bottom: 1px solid var(--color-border);
-    }
-    .cost-table th {
-      background: var(--color-bg-page);
-      font-weight: 700;
-      color: var(--color-primary);
-    }
-    .cost-table tr:last-child td {
-      border-bottom: none;
-    }
-    .cost-total-row {
-      font-weight: 800;
-      background: var(--color-accent-light);
-      color: var(--color-accent);
-    }
+/* Tips */
+.tips-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.tips-card .timeline-title { font-size: var(--text-section); align-self: start; }
+.tips-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-md); }
+.tips-list li { padding-bottom: var(--space-md); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.tips-list li:last-child { border-bottom: 0; }
+.tips-list strong { color: var(--color-ink); font-weight: 600; }
 
-    /* 비용표: 좁은 화면에서는 한 행을 카드 하나로 쌓는다 */
-    @media (max-width: 600px) {
-      .table-wrap { overflow-x: visible; }
-      .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
-      .table-wrap thead { display: none; }
-      .table-wrap tr {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        column-gap: 12px;
-        row-gap: 4px;
-        padding: 14px 16px;
-        border-bottom: 1px solid var(--color-border);
-      }
-      .table-wrap tr:last-child { border-bottom: none; }
-      .table-wrap td { padding: 0; border: none; }
-      .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: 0.78rem; font-weight: 700; color: var(--color-text-sub); }
-      .table-wrap td:nth-child(2) { font-weight: 700; }
-      .table-wrap td:nth-child(3) { max-width: 60vw; word-break: keep-all; text-align: right; font-weight: 700; }
-      .table-wrap td:nth-child(4) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
-      .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: inherit; color: inherit; }
-      .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; max-width: 60vw; word-break: keep-all; text-align: right; }
-      .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; max-width: none; text-align: left; font-size: 0.85rem; font-weight: 400; color: var(--color-text-sub); }
-    }
+/* App course */
+.app-course-box { margin-top: var(--section-gap); display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--gap-columns); align-items: end; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-xl); }
+.app-course-box h2 { font-size: var(--text-section); margin-bottom: var(--space-md); }
+.app-course-box p { max-width: 52ch; }
+.app-course-box .app-action { justify-self: end; }
 
-    .source-notice {
-      margin-top: 40px;
-      padding-top: 20px;
-      border-top: 1px solid var(--color-border);
-      font-size: 0.82rem;
-      color: #94a3b8;
-      text-align: center;
-    }
+.article-credit { margin-top: var(--space-2xl); padding-block: var(--space-md) var(--space-3xl); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); }
 
-    .back-btn-wrap {
-      margin-top: 32px;
-      text-align: center;
-    }
-    .back-btn {
-      display: inline-block;
-      padding: 12px 24px;
-      border-radius: 9999px;
-      background: var(--color-primary);
-      color: #ffffff;
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 0.92rem;
-    }
+/* Footer mast */
+.site-footer { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl); }
+.footer-inner { display: grid; gap: var(--space-md); }
+.footer-mark { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1.2; color: var(--color-band-text); }
+.footer-line { color: var(--color-band-muted); font-size: var(--text-sm); }
+.footer-links { display: flex; flex-wrap: wrap; gap: var(--space-lg); }
+.footer-links a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-band-text); font-size: var(--text-sm); text-decoration: underline; text-decoration-color: var(--color-gold); }
+.footer-links a:hover { text-decoration-color: var(--color-accent); color: var(--color-gold-2); }
+.footer-links a:active { transform: translateY(1px); }
+.site-footer :focus-visible { outline-color: var(--color-gold-2); }
 
-    @media (max-width: 640px) {
-      .article-title { font-size: 1.45rem; }
-      .hero-image { height: 240px; }
-      .spot-image { height: 210px; }
-      .article-container { padding: 20px 16px 60px; }
-    }
-    header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
-    .header-nav a,.header-title a,.blog-tagline a{display:inline-block}
+@media (max-width: 60rem) {
+  .hero, .spot-section, .spot-section.flip, .cost-table-card, .tips-card, .app-course-box { grid-template-columns: minmax(0, 1fr); }
+  .spot-section, .spot-section.flip { grid-template-areas: "head" "photo" "body"; grid-template-rows: auto; }
+  .spot-section.no-photo { grid-template-areas: "head" "body"; }
+  .hero { padding-block: var(--space-xl) var(--space-xl); }
+  .spot-photo { position: static; aspect-ratio: 16 / 10; }
+  .app-course-box { padding: var(--space-lg); }
+  .app-course-box .app-action { justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn, .link-quiet { transition: none; }
+  .btn:active, .link-quiet:active, .header-nav a:active, .header-logo:active, .footer-links a:active { transform: none; }
+}
+
+/* real-photo-flat 계열(평면 글): 번호 있는 긴 장소 제목, 사진 설명, 안내 상자, 지도 목록 */
+.lead-photo { margin: 0 0 var(--space-3xl); }
+.lead-photo img { width: 100%; max-height: 520px; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.lead-photo figcaption, .body-photo figcaption { margin-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.spot-photo figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--space-xs) var(--space-sm); font-size: var(--text-xs); line-height: 1.5; color: var(--color-accent-ink); background: color-mix(in oklab, var(--color-ink) 78%, transparent); }
+.body-photo { margin: 0; }
+.body-photo img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.spot-section.flat .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.tl-lead { max-width: var(--measure); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.guide-box, .order-box { background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); color: var(--color-ink); }
+.guide-box h4, .order-box strong { margin: 0 0 var(--space-xs); font-family: var(--font-display); font-size: var(--text-md); color: var(--color-ink); display: block; }
+.guide-box ul, .order-box ul { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-2xs); }
+.bridge { padding-top: var(--space-xs); color: var(--color-muted); font-size: var(--text-sm); }
+.map-links { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-md); }
+.map-links .timeline-title { font-size: var(--text-section); }
+.map-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-xs); }
+.map-list a, .map-link-chip { display: flex; justify-content: space-between; gap: var(--space-md); align-items: center; min-height: 44px; padding-block: var(--space-xs); border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink); text-decoration: none; }
+.map-links-grid { display: grid; gap: 0; }
+.map-link-chip .btn-action { color: var(--color-accent); font-weight: 600; white-space: nowrap; }
+@media (max-width: 40rem) { .spot-section.flat .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .spot-photo { position: relative; } }
+
+/* spot-card 계열(editor-144): 대표 사진, 요약 상자, 본문 구획, 세부 코스, 이동 연결, 마무리 상자 */
+.hero-figure { margin: 0 0 var(--space-xl); }
+.hero-figure img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.hero-figure figcaption { padding-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-muted); }
+.summary-card { margin-bottom: var(--space-xl); background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-lg); font-size: var(--text-sm); }
+.summary-title, p.timeline-title, .cta-title { font-family: var(--font-display); font-weight: 700; line-height: 1.3; color: var(--color-ink); }
+.summary-title { font-size: var(--text-xl); margin-bottom: var(--space-sm); }
+p.timeline-title { letter-spacing: -0.01em; overflow-wrap: break-word; }
+.summary-list { margin: 0; padding: 0; list-style: none; display: grid; }
+.summary-list li { padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.summary-list li:last-child { border-bottom: 0; }
+.summary-list strong { color: var(--color-ink); font-weight: 600; }
+.prose-section { margin-top: var(--section-gap); max-width: var(--measure); display: grid; gap: var(--space-md); }
+.prose-section h2, .spots-title { font-size: var(--text-title); }
+.stops-section { margin-top: var(--section-gap); }
+.stops-section .spots { padding-top: var(--space-xl); }
+.spots.bridged { gap: 0; }
+.drive-bridge { margin: 0; padding-block: var(--space-xl); padding-left: var(--space-md); border-left: var(--rule-bar) solid var(--color-gold); font-size: var(--text-sm); color: var(--color-muted); }
+.drive-bridge strong { color: var(--color-ink); font-weight: 600; }
+.spot-header:has(.spot-badge) { flex-direction: column; align-items: flex-start; gap: var(--space-xs); }
+.spot-badge { font-size: var(--text-sm); font-weight: 600; color: var(--color-accent); }
+.spot-actions { display: flex; flex-wrap: wrap; gap: 0 var(--space-lg); }
+.info-wide .info-row { grid-template-columns: 5.5em minmax(0, 1fr); }
+.info-wide .info-row.plain { grid-template-columns: minmax(0, 1fr); }
+.cost-head .timeline-title.long { font-size: var(--text-title); }
+.cta-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-sm); max-width: var(--measure); }
+.cta-card h3, .cta-title { font-size: var(--text-title); }
+.cta-card .link-quiet { justify-self: start; }
+
+/* real-photo-grid 계열(editor-145): 사진과 정보 상자가 글 순서대로 이어지는 한 열 장소 구획, 번호 있는 동선, 도입 여러 문단 */
+.prose-intro p + p { margin-top: var(--space-md); }
+.stories { padding-top: var(--space-xl); gap: var(--space-3xl); }
+.story-section { display: grid; gap: var(--space-md); max-width: var(--measure); }
+.story-section .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.story-body { display: grid; gap: var(--space-md); }
+.story-photo { margin: 0; }
+.story-photo img { width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.story-photo figcaption { padding-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.story-photo figcaption span + span::before { content: " · "; }
+.tl-step .tl-badge { margin-bottom: calc(var(--space-2xs) * -1); }
+.tl-meta { display: block; font-style: normal; color: var(--color-gold-2); }
+.app-course-box.early { margin-top: var(--space-xl); }
+.app-course-box .cta-title { font-size: var(--text-section); margin-bottom: var(--space-md); }
+@media (max-width: 40rem) { .story-section .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .route .tl-act:not(:first-child) { margin-top: var(--space-lg); } }
+.article-credit.tight { padding-bottom: var(--space-md); }
+.back-link { padding-bottom: var(--space-md); font-size: var(--text-sm); }
   </style>
 </head>
 <body>
 
   <header class="site-header">
-    <div class="header-inner">
+    <div class="header-inner container">
       <a href="https://nufunc.github.io/oneul-date/" class="header-logo">오늘 데이트 <span>매거진</span></a>
       <nav class="header-nav">
         <a href="https://nufunc.github.io/oneul-date/blog/">매거진 목록</a>
@@ -394,219 +325,196 @@
   </header>
 
   <main class="article-container">
-
     <article>
-      <header class="article-header">
-        <span class="badge-category">충남 논산 · 서원과 고택, 호수 드라이브 코스</span>
-        <h1 class="article-title">[충남 논산 드라이브] 돈암서원과 명재고택에서 관촉사, 탑정호, 선샤인랜드까지 하루 코스</h1>
-        <div class="article-meta">
-          <span>📅 2026.10.28</span>
-          <span>🚗 차량 이동 약 57km</span>
-          <span>💰 2인 입장료 20,000원</span>
-          <span>글: 오늘 데이트 에디토리얼 팀 / 사진: 한국관광공사</span>
+      <header class="article-header hero container">
+        <div class="hero-text">
+          <p class="hero-kicker badge-category"><span>충남 논산</span><span>서원과 고택, 호수 드라이브 코스</span></p>
+          <h1 class="article-title">[충남 논산 드라이브] 돈암서원과 명재고택에서 관촉사, 탑정호, 선샤인랜드까지 하루 코스</h1>
+          <div class="article-meta">
+            <span>2026.10.28</span>
+            <span>차량 이동 약 57km</span>
+            <span>2인 입장료 20,000원</span>
+            <span class="meta-credit">글: 오늘 데이트 에디토리얼 팀 / 사진: 한국관광공사</span>
+          </div>
+          <p><a class="btn" href="../../#c=1793188512325.9222.1790992480354.1790355372969.1793188512522.1791309530848.1789342066290">앱에서 코스 열기</a></p>
         </div>
       </header>
 
-      <div class="hero-image-wrap">
-        <img src="https://tong.visitkorea.or.kr/cms/resource/01/3588401_image2_1.JPG" alt="'凝道堂' 현판이 걸린 기와지붕 강당과 넓은 흙 마당, 하늘에 노을빛으로 물든 구름" class="hero-image" />
-        <p class="image-caption">논산 돈암서원의 강당 응도당</p>
+      <div class="container">
+        <figure class="hero-figure">
+          <img src="https://tong.visitkorea.or.kr/cms/resource/01/3588401_image2_1.JPG" alt="'凝道堂' 현판이 걸린 기와지붕 강당과 넓은 흙 마당, 하늘에 노을빛으로 물든 구름" class="hero-image" />
+          <figcaption>논산 돈암서원의 강당 응도당</figcaption>
+        </figure>
       </div>
 
-      <div class="prose-intro">
-        2019년 세계유산에 등재된 돈암서원에서 시작해 노성산 자락의 명재고택, 은진미륵이 선 관촉사, 출렁다리로 이어지는 탑정호 수변생태공원을 지나 드라마 '미스터 션샤인' 촬영지 선샤인스튜디오가 있는 선샤인랜드까지 차로 잇는 충남 논산 하루 코스예요. 명재고택은 월요일, 선샤인스튜디오는 수요일, 밀리터리 체험관과 1950스튜디오는 목요일에 쉬어요. 화요일, 금요일, 토요일, 일요일에 가면 다섯 곳이 모두 문을 열어요.
+      <div class="container">
+        <p class="prose-intro">2019년 세계유산에 등재된 돈암서원에서 시작해 노성산 자락의 명재고택, 은진미륵이 선 관촉사, 출렁다리로 이어지는 탑정호 수변생태공원을 지나 드라마 '미스터 션샤인' 촬영지 선샤인스튜디오가 있는 선샤인랜드까지 차로 잇는 충남 논산 하루 코스예요. 명재고택은 월요일, 선샤인스튜디오는 수요일, 밀리터리 체험관과 1950스튜디오는 목요일에 쉬어요. 화요일, 금요일, 토요일, 일요일에 가면 다섯 곳이 모두 문을 열어요.</p>
       </div>
 
       <!-- 동선 -->
-      <section class="timeline-card">
-        <h2 class="timeline-title">논산 하루 드라이브 동선</h2>
-        <div class="tl-act">오전: 연산면 돈암서원에서 노성면 명재고택으로</div>
-        <div class="tl-step"><span class="tl-time">09:30</span><div><span class="tl-place">돈암서원</span><span class="tl-note">상시 개방, 연중무휴, 무료</span></div></div>
-        <div class="tl-move">↓ 차로 약 14.2km (약 17분)</div>
-        <div class="tl-step"><span class="tl-time">10:50</span><div><span class="tl-place">명재고택</span><span class="tl-note">동절기 10:00~16:00, 매주 월요일 휴무, 무료</span></div></div>
-        <div class="tl-move">↓ 차로 약 11.1km (약 13분)</div>
-        <div class="tl-step"><span class="tl-time">12:05</span><div><span class="tl-place">반월소바 (점심, 고를 수 있음)</span><span class="tl-note">논산 반월동 분식집. 영업시간은 확인하지 못했어요</span></div></div>
-        <div class="tl-move">↓ 차로 약 4.1km (약 5분)</div>
-        <div class="tl-act">오후: 관촉사와 탑정호를 지나 연무읍 선샤인랜드로</div>
-        <div class="tl-step"><span class="tl-time">13:10</span><div><span class="tl-place">관촉사</span><span class="tl-note">08:00~20:00, 연중무휴, 무료</span></div></div>
-        <div class="tl-move">↓ 차로 약 10.6km (약 13분)</div>
-        <div class="tl-step"><span class="tl-time">14:25</span><div><span class="tl-place">탑정호 수변생태공원과 출렁다리</span><span class="tl-note">공원은 상시 개방, 무료. 출렁다리는 11월~2월 09:00~17:00 (입장 마감 16:30)</span></div></div>
-        <div class="tl-move">↓ 차로 약 17.5km (약 29분)</div>
-        <div class="tl-step"><span class="tl-time">16:00</span><div><span class="tl-place">선샤인랜드</span><span class="tl-note">선샤인스튜디오 10:00~18:00 (수요일 휴무), 밀리터리 체험관과 1950스튜디오 10:00~17:00 (목요일 휴무). 11월 15일 해 지는 시각 17:24 무렵</span></div></div>
-        <div class="tl-move">↓ 차로 약 13.3km (약 19분)</div>
-        <div class="tl-step"><span class="tl-time">18:20</span><div><span class="tl-place">경모네젓갈백반 (저녁, 고를 수 있음)</span><span class="tl-note">강경읍 한식당. 영업시간은 확인하지 못했어요</span></div></div>
-        <div class="tl-move">명소 다섯 곳 사이 차량 이동 합계 약 57km, 약 1시간 16분 (OSRM 경로 계산, 식당 구간 제외)</div>
+      <section class="timeline-card band">
+        <div class="container">
+          <h2 class="timeline-title">논산 하루 드라이브 동선</h2>
+          <div class="route" style="--n:7">
+            <div class="tl-act" style="--r:1; --c:1; --s:3">오전: 연산면 돈암서원에서 노성면 명재고택으로</div>
+            <div class="tl-step" style="--r:2; --c:1"><span class="tl-time">09:30</span><span class="tl-place">돈암서원</span><span class="tl-note">상시 개방, 연중무휴, 무료</span></div>
+            <div class="tl-move" style="--r:3; --c:1">차로 약 14.2km (약 17분)</div>
+            <div class="tl-step" style="--r:2; --c:2"><span class="tl-time">10:50</span><span class="tl-place">명재고택</span><span class="tl-note">동절기 10:00~16:00, 매주 월요일 휴무, 무료</span></div>
+            <div class="tl-move" style="--r:3; --c:2">차로 약 11.1km (약 13분)</div>
+            <div class="tl-step" style="--r:2; --c:3"><span class="tl-time">12:05</span><span class="tl-place">반월소바 (점심, 고를 수 있음)</span><span class="tl-note">논산 반월동 분식집. 영업시간은 확인하지 못했어요</span></div>
+            <div class="tl-move" style="--r:3; --c:3">차로 약 4.1km (약 5분)</div>
+            <div class="tl-act" style="--r:1; --c:4; --s:4">오후: 관촉사와 탑정호를 지나 연무읍 선샤인랜드로</div>
+            <div class="tl-step" style="--r:2; --c:4"><span class="tl-time">13:10</span><span class="tl-place">관촉사</span><span class="tl-note">08:00~20:00, 연중무휴, 무료</span></div>
+            <div class="tl-move" style="--r:3; --c:4">차로 약 10.6km (약 13분)</div>
+            <div class="tl-step" style="--r:2; --c:5"><span class="tl-time">14:25</span><span class="tl-place">탑정호 수변생태공원과 출렁다리</span><span class="tl-note">공원은 상시 개방, 무료. 출렁다리는 11월~2월 09:00~17:00 (입장 마감 16:30)</span></div>
+            <div class="tl-move" style="--r:3; --c:5">차로 약 17.5km (약 29분)</div>
+            <div class="tl-step" style="--r:2; --c:6"><span class="tl-time">16:00</span><span class="tl-place">선샤인랜드</span><span class="tl-note">선샤인스튜디오 10:00~18:00 (수요일 휴무), 밀리터리 체험관과 1950스튜디오 10:00~17:00 (목요일 휴무). 11월 15일 해 지는 시각 17:24 무렵</span></div>
+            <div class="tl-move" style="--r:3; --c:6">차로 약 13.3km (약 19분)</div>
+            <div class="tl-step" style="--r:2; --c:7"><span class="tl-time">18:20</span><span class="tl-place">경모네젓갈백반 (저녁, 고를 수 있음)</span><span class="tl-note">강경읍 한식당. 영업시간은 확인하지 못했어요</span></div>
+            <div class="tl-total" style="--r:4">명소 다섯 곳 사이 차량 이동 합계 약 57km, 약 1시간 16분 (OSRM 경로 계산, 식당 구간 제외)</div>
+          </div>
+        </div>
       </section>
 
-      <!-- 1. 논산 돈암서원 -->
-      <section class="spot-section">
-        <div class="spot-header">
-          <span class="spot-number">01</span>
-          <h2 class="spot-title">논산 돈암서원</h2>
-          <span class="spot-tag">유네스코 세계유산</span>
-        </div>
-        <div class="spot-image-wrap">
-          <img src="https://tong.visitkorea.or.kr/cms/resource/01/3588401_image2_1.JPG" alt="'凝道堂' 현판이 걸린 기와지붕 강당과 넓은 흙 마당, 하늘에 노을빛으로 물든 구름" class="spot-image" loading="lazy" />
-          <p class="image-caption">돈암서원 강당 응도당과 앞마당</p>
-        </div>
-        <p class="spot-desc">
+      <div class="container">
+        <div class="spots">
+          <section class="spot-section">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-number">01</span><h2 class="spot-title">논산 돈암서원</h2></div>
+              <p class="spot-tagline">유네스코 세계유산</p>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/01/3588401_image2_1.JPG" alt="'凝道堂' 현판이 걸린 기와지붕 강당과 넓은 흙 마당, 하늘에 노을빛으로 물든 구름" class="spot-image" loading="lazy" />
+              <figcaption>돈암서원 강당 응도당과 앞마당</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p class="spot-desc">
           첫 자리는 연산면의 돈암서원이에요. 사계 김장생(1548~1631)이 학문을 가르치던 터를 바탕으로 세운 서원이에요. 황강 김계휘가 세운 정회당과 김장생이 세운 양성당에서 공부한 제자들이 스승을 추모하며 돈암서원을 세웠어요. 2019년 7월 6일 아제르바이잔 바쿠에서 열린 제43차 세계유산위원회에서 '한국의 서원' 9곳 가운데 하나로 세계유산에 등재됐어요.
         </p>
-        <p class="spot-desc">
+              <p class="spot-desc">
           서원 안에는 사당 숭례사와 강당 응도당, 정회당과 양성당, 누각 산앙루, 장판각이 있고 서원의 연혁을 적은 원정비도 남아 있어요. 그 가운데 응도당은 고대의 가옥 제도를 본보기로 삼아 지은 건물로 이름나 있어요.
         </p>
-        <div class="spot-chips-row">
-          <a href="https://map.naver.com/p/search/%EB%85%BC%EC%82%B0%20%EB%8F%88%EC%95%94%EC%84%9C%EC%9B%90" target="_blank" rel="noopener noreferrer" class="spot-chip-btn map-chip">🗺️ 네이버 지도</a>
-          <a href="tmap://search?name=%EB%85%BC%EC%82%B0%20%EB%8F%88%EC%95%94%EC%84%9C%EC%9B%90" class="spot-chip-btn">🧭 T맵 길안내</a>
-          <a href="kakaotaxi://search?name=%EB%85%BC%EC%82%B0%20%EB%8F%88%EC%95%94%EC%84%9C%EC%9B%90" class="spot-chip-btn">🚕 카카오T 호출</a>
-        </div>
-        <div class="tip-box">
-          <div class="tip-box-title">💡 이용 정보</div>
-          • 주소: 충청남도 논산시 연산면 임3길 26-14<br>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EB%85%BC%EC%82%B0%20%EB%8F%88%EC%95%94%EC%84%9C%EC%9B%90" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도</a><a href="tmap://search?name=%EB%85%BC%EC%82%B0%20%EB%8F%88%EC%95%94%EC%84%9C%EC%9B%90" class="btn-naver-map link-quiet">T맵 길안내</a><a href="kakaotaxi://search?name=%EB%85%BC%EC%82%B0%20%EB%8F%88%EC%95%94%EC%84%9C%EC%9B%90" class="btn-naver-map link-quiet">카카오T 호출</a></div>
+              <div class="tip-box"><strong class="tip-title">이용 정보</strong>• 주소: 충청남도 논산시 연산면 임3길 26-14<br>
           • 운영 시간: 상시 개방, 연중무휴<br>
           • 입장료: 무료<br>
           • 주차: 가능. 화장실 있음<br>
-          • 문의: 041-733-9978
-        </div>
-      </section>
+          • 문의: 041-733-9978</div>
+            </div>
+          </section>
 
-      <!-- 2. 논산 명재고택 -->
-      <section class="spot-section">
-        <div class="spot-header">
-          <span class="spot-number">02</span>
-          <h2 class="spot-title">논산 명재고택</h2>
-          <span class="spot-tag">국가민속문화유산</span>
-        </div>
-        <div class="spot-image-wrap">
-          <img src="https://tong.visitkorea.or.kr/cms/resource/01/3577201_image2_1.jpg" alt="돌담 위에 선 기와집의 가운데 문간과 그 앞 돌계단, 노란 국화 화분" class="spot-image" loading="lazy" />
-          <p class="image-caption">명재고택 돌담과 문간으로 오르는 돌계단</p>
-        </div>
-        <p class="spot-desc">
+          <section class="spot-section flip">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-number">02</span><h2 class="spot-title">논산 명재고택</h2></div>
+              <p class="spot-tagline">국가민속문화유산</p>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/01/3577201_image2_1.jpg" alt="돌담 위에 선 기와집의 가운데 문간과 그 앞 돌계단, 노란 국화 화분" class="spot-image" loading="lazy" />
+              <figcaption>명재고택 돌담과 문간으로 오르는 돌계단</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p class="spot-desc">
           돈암서원에서 차로 약 14km, 17분이면 노성면의 명재고택이에요. 윤증선생고택이라고도 부르는 집으로, 마을을 향해 활짝 열려 있어요. 뒤로는 노성산 산줄기를 두르고, 앞에는 장방형의 커다란 연못을 두었어요.
         </p>
-        <p class="spot-desc">
+              <p class="spot-desc">
           연못 안 작은 원형 섬에는 고택과 함께 300년을 보낸 배롱나무가 곡선을 그리며 서 있어요. 연못을 지나 앞마당의 섬돌을 오르면 기단 위에 사랑채가 있어요. 1984년 국가민속문화유산으로 지정됐고, 한옥스테이와 다례, 천연염색, 전통음악공연 같은 체험 프로그램이 있어요.
         </p>
-        <div class="spot-chips-row">
-          <a href="https://map.naver.com/p/search/%EB%85%BC%EC%82%B0%20%EB%AA%85%EC%9E%AC%EA%B3%A0%ED%83%9D" target="_blank" rel="noopener noreferrer" class="spot-chip-btn map-chip">🗺️ 네이버 지도</a>
-          <a href="tmap://search?name=%EB%85%BC%EC%82%B0%20%EB%AA%85%EC%9E%AC%EA%B3%A0%ED%83%9D" class="spot-chip-btn">🧭 T맵 길안내</a>
-          <a href="kakaotaxi://search?name=%EB%85%BC%EC%82%B0%20%EB%AA%85%EC%9E%AC%EA%B3%A0%ED%83%9D" class="spot-chip-btn">🚕 카카오T 호출</a>
-        </div>
-        <div class="tip-box">
-          <div class="tip-box-title">💡 이용 정보</div>
-          • 주소: 충청남도 논산시 노성면 노성산성길 50<br>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EB%85%BC%EC%82%B0%20%EB%AA%85%EC%9E%AC%EA%B3%A0%ED%83%9D" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도</a><a href="tmap://search?name=%EB%85%BC%EC%82%B0%20%EB%AA%85%EC%9E%AC%EA%B3%A0%ED%83%9D" class="btn-naver-map link-quiet">T맵 길안내</a><a href="kakaotaxi://search?name=%EB%85%BC%EC%82%B0%20%EB%AA%85%EC%9E%AC%EA%B3%A0%ED%83%9D" class="btn-naver-map link-quiet">카카오T 호출</a></div>
+              <div class="tip-box"><strong class="tip-title">이용 정보</strong>• 주소: 충청남도 논산시 노성면 노성산성길 50<br>
           • 운영 시간: 하절기 10:00~17:00, 동절기 10:00~16:00<br>
           • 휴무: 매주 월요일<br>
           • 입장료: 무료<br>
           • 주차: 가능. 화장실 있음<br>
           • 문의: 041-735-1215<br>
-          • 점심: 차로 약 13분 거리인 논산 반월동 해월로에 분식집 반월소바(041-733-2210)가 있어요. 영업시간과 메뉴는 확인하지 못했으니 떠나기 전 전화로 확인하세요.
-        </div>
-      </section>
+          • 점심: 차로 약 13분 거리인 논산 반월동 해월로에 분식집 반월소바(041-733-2210)가 있어요. 영업시간과 메뉴는 확인하지 못했으니 떠나기 전 전화로 확인하세요.</div>
+            </div>
+          </section>
 
-      <!-- 3. 논산 관촉사 -->
-      <section class="spot-section">
-        <div class="spot-header">
-          <span class="spot-number">03</span>
-          <h2 class="spot-title">논산 관촉사와 은진미륵</h2>
-          <span class="spot-tag">논산 8경 제1경</span>
-        </div>
-        <div class="spot-image-wrap">
-          <img src="https://tong.visitkorea.or.kr/cms/resource_photo/64/4119964_image2_1.jpg" alt="높은 관을 쓴 석조 미륵보살입상과 뒤편 소나무 숲, 왼쪽 앞의 이끼 낀 바위" class="spot-image" loading="lazy" />
-          <p class="image-caption">관촉사 석조미륵보살입상(은진미륵)과 소나무</p>
-        </div>
-        <p class="spot-desc">
+          <section class="spot-section">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-number">03</span><h2 class="spot-title">논산 관촉사와 은진미륵</h2></div>
+              <p class="spot-tagline">논산 8경 제1경</p>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://tong.visitkorea.or.kr/cms/resource_photo/64/4119964_image2_1.jpg" alt="높은 관을 쓴 석조 미륵보살입상과 뒤편 소나무 숲, 왼쪽 앞의 이끼 낀 바위" class="spot-image" loading="lazy" />
+              <figcaption>관촉사 석조미륵보살입상(은진미륵)과 소나무</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p class="spot-desc">
           점심을 마치고 논산 시내 남쪽 반야산 동쪽 자락의 관촉사로 가요. 논산 8경 가운데 제1경으로 꼽히는 절이에요. 가장 큰 볼거리는 '은진미륵'이라 불리는 석조미륵보살입상이에요. 높이 18m의 석불로, 온화하고 자비로운 얼굴 때문에 '백제의 미소'로 불리기도 해요.
         </p>
-        <p class="spot-desc">
+              <p class="spot-desc">
           은진미륵 앞의 석등과 오층석탑, 석문도 귀중한 유물이에요. 석조미륵보살입상은 국보, 석등은 보물로 지정됐어요. 불경을 넣어 둔 윤장대는 축을 잡고 돌리면 경전을 읽는 것과 같다고 해요. 앞마당에 서면 논산평야가 한눈에 들어와요.
         </p>
-        <div class="spot-chips-row">
-          <a href="https://map.naver.com/p/search/%EB%85%BC%EC%82%B0%20%EA%B4%80%EC%B4%89%EC%82%AC" target="_blank" rel="noopener noreferrer" class="spot-chip-btn map-chip">🗺️ 네이버 지도</a>
-          <a href="tmap://search?name=%EB%85%BC%EC%82%B0%20%EA%B4%80%EC%B4%89%EC%82%AC" class="spot-chip-btn">🧭 T맵 길안내</a>
-          <a href="kakaotaxi://search?name=%EB%85%BC%EC%82%B0%20%EA%B4%80%EC%B4%89%EC%82%AC" class="spot-chip-btn">🚕 카카오T 호출</a>
-        </div>
-        <div class="tip-box">
-          <div class="tip-box-title">💡 이용 정보</div>
-          • 주소: 충청남도 논산시 관촉로1번길 25<br>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EB%85%BC%EC%82%B0%20%EA%B4%80%EC%B4%89%EC%82%AC" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도</a><a href="tmap://search?name=%EB%85%BC%EC%82%B0%20%EA%B4%80%EC%B4%89%EC%82%AC" class="btn-naver-map link-quiet">T맵 길안내</a><a href="kakaotaxi://search?name=%EB%85%BC%EC%82%B0%20%EA%B4%80%EC%B4%89%EC%82%AC" class="btn-naver-map link-quiet">카카오T 호출</a></div>
+              <div class="tip-box"><strong class="tip-title">이용 정보</strong>• 주소: 충청남도 논산시 관촉로1번길 25<br>
           • 운영 시간: 08:00~20:00, 연중무휴<br>
           • 입장료: 무료<br>
           • 주차: 가능. 화장실 있음<br>
-          • 문의: 041-736-5700
-        </div>
-      </section>
+          • 문의: 041-736-5700</div>
+            </div>
+          </section>
 
-      <!-- 4. 탑정호 수변생태공원 -->
-      <section class="spot-section">
-        <div class="spot-header">
-          <span class="spot-number">04</span>
-          <h2 class="spot-title">탑정호 수변생태공원과 출렁다리</h2>
-          <span class="spot-tag">충남 두 번째 저수지 · 600m 출렁다리</span>
-        </div>
-        <div class="spot-image-wrap">
-          <img src="https://tong.visitkorea.or.kr/cms/resource/59/3577059_image2_1.jpg" alt="마른 연잎이 선 습지 위로 놓인 나무 데크 다리와 오른쪽 물레방아, 뒤편의 단풍 든 나무" class="spot-image" loading="lazy" />
-          <p class="image-caption">탑정호 수변생태공원 습지 위 나무 데크와 물레방아</p>
-        </div>
-        <p class="spot-desc">
+          <section class="spot-section flip">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-number">04</span><h2 class="spot-title">탑정호 수변생태공원과 출렁다리</h2></div>
+              <p class="spot-tagline">충남 두 번째 저수지 · 600m 출렁다리</p>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/59/3577059_image2_1.jpg" alt="마른 연잎이 선 습지 위로 놓인 나무 데크 다리와 오른쪽 물레방아, 뒤편의 단풍 든 나무" class="spot-image" loading="lazy" />
+              <figcaption>탑정호 수변생태공원 습지 위 나무 데크와 물레방아</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p class="spot-desc">
           관촉사에서 차로 약 11km, 13분이면 부적면의 탑정호 수변생태공원이에요. 탑정호는 충청남도에서 두 번째로 큰 저수지예요. 대둔산 자락에서 내려오는 물줄기가 모이는 호수로 논산평야의 젖줄이고, 철새가 사철 날아드는 곳이에요. 공원 총면적은 48,574㎡이고 연꽃과 야생화 단지, 물억새, 관찰 보행로, 경관조명, 쉼터와 주차장이 있어요.
         </p>
-        <p class="spot-desc">
+              <p class="spot-desc">
           호수 쪽으로 가면 탑정호 출렁다리로 이어지는 데크 길을 걸을 수 있어요. 출렁다리는 길이 600m로, 호수 위에 놓인 출렁다리 가운데 가장 길다고 한국기록원(KRI)의 인정을 받았어요. 2020년 10월 15일 준공됐고, 밤에는 미디어파사드와 음악분수를 운영해요.
         </p>
-        <div class="spot-chips-row">
-          <a href="https://map.naver.com/p/search/%ED%83%91%EC%A0%95%ED%98%B8%20%EC%88%98%EB%B3%80%EC%83%9D%ED%83%9C%EA%B3%B5%EC%9B%90" target="_blank" rel="noopener noreferrer" class="spot-chip-btn map-chip">🗺️ 네이버 지도</a>
-          <a href="tmap://search?name=%ED%83%91%EC%A0%95%ED%98%B8%20%EC%88%98%EB%B3%80%EC%83%9D%ED%83%9C%EA%B3%B5%EC%9B%90" class="spot-chip-btn">🧭 T맵 길안내</a>
-          <a href="kakaotaxi://search?name=%ED%83%91%EC%A0%95%ED%98%B8%20%EC%88%98%EB%B3%80%EC%83%9D%ED%83%9C%EA%B3%B5%EC%9B%90" class="spot-chip-btn">🚕 카카오T 호출</a>
-        </div>
-        <div class="tip-box">
-          <div class="tip-box-title">💡 이용 정보</div>
-          • 주소: 공원 충청남도 논산시 부적면 부적로 721-10, 출렁다리 부적면 신풍리 769<br>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%ED%83%91%EC%A0%95%ED%98%B8%20%EC%88%98%EB%B3%80%EC%83%9D%ED%83%9C%EA%B3%B5%EC%9B%90" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도</a><a href="tmap://search?name=%ED%83%91%EC%A0%95%ED%98%B8%20%EC%88%98%EB%B3%80%EC%83%9D%ED%83%9C%EA%B3%B5%EC%9B%90" class="btn-naver-map link-quiet">T맵 길안내</a><a href="kakaotaxi://search?name=%ED%83%91%EC%A0%95%ED%98%B8%20%EC%88%98%EB%B3%80%EC%83%9D%ED%83%9C%EA%B3%B5%EC%9B%90" class="btn-naver-map link-quiet">카카오T 호출</a></div>
+              <div class="tip-box"><strong class="tip-title">이용 정보</strong>• 주소: 공원 충청남도 논산시 부적면 부적로 721-10, 출렁다리 부적면 신풍리 769<br>
           • 공원 운영 시간: 상시 개방, 연중무휴<br>
           • 출렁다리 운영 시간: 11월~2월 09:00~17:00 (입장 마감 16:30), 3월~5월과 9월~10월 09:00~18:00 (입장 마감 17:30), 6월~8월 09:00~20:00 (입장 마감 19:30). 날씨가 나쁘거나 시설을 보수할 때는 쉬어요. 미디어파사드와 음악분수 운영 시간은 누리집에서 확인하세요<br>
           • 입장료: 공원과 출렁다리 모두 무료<br>
           • 주차: 가능<br>
-          • 문의: 관리사무실 041-746-6645
-        </div>
-      </section>
+          • 문의: 관리사무실 041-746-6645</div>
+            </div>
+          </section>
 
-      <!-- 5. 논산 선샤인랜드 -->
-      <section class="spot-section">
-        <div class="spot-header">
-          <span class="spot-number">05</span>
-          <h2 class="spot-title">선샤인랜드와 선샤인스튜디오</h2>
-          <span class="spot-tag">드라마 '미스터 션샤인' 촬영지</span>
-        </div>
-        <div class="spot-image-wrap">
-          <img src="https://tong.visitkorea.or.kr/cms/resource/86/3534786_image2_1.jpg" alt="발코니가 있는 2층 서양식 건물과 덩굴이 감긴 기둥, 흰 울타리를 두른 앞뜰" class="spot-image" loading="lazy" />
-          <p class="image-caption">선샤인랜드 관광정보 대표 사진: 2층 서양식 건물과 앞뜰</p>
-        </div>
-        <p class="spot-desc">
+          <section class="spot-section">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-number">05</span><h2 class="spot-title">선샤인랜드와 선샤인스튜디오</h2></div>
+              <p class="spot-tagline">드라마 '미스터 션샤인' 촬영지</p>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/86/3534786_image2_1.jpg" alt="발코니가 있는 2층 서양식 건물과 덩굴이 감긴 기둥, 흰 울타리를 두른 앞뜰" class="spot-image" loading="lazy" />
+              <figcaption>선샤인랜드 관광정보 대표 사진: 2층 서양식 건물과 앞뜰</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p class="spot-desc">
           탑정호에서 차로 약 17km, 29분을 달리면 연무읍 선샤인랜드에 닿아요. 선샤인랜드는 밀리터리 체험관, 선샤인스튜디오, 1950스튜디오로 이루어진 복합문화공간이에요. 밀리터리 체험관에서는 VR 기술을 쓴 체험을 할 수 있고, 1950스튜디오는 1950년대 서울의 한 모퉁이를 재현했어요.
         </p>
-        <p class="spot-desc">
+              <p class="spot-desc">
           선샤인스튜디오는 드라마 '미스터 션샤인'의 촬영 세트장이에요. 약 6,000평에 근대 양식 건축물 5동, 기와집 19동, 초가 4동, 적산가옥 9동이 모여 1900년대 초 개화기 한성의 풍물을 재현했어요. 그 뒤 '파친코', '구미호뎐1938' 같은 시대극도 이곳에서 찍었어요. 개화기 의상을 빌려 입고 세트장을 걸어 볼 수 있어요.
         </p>
-        <div class="spot-chips-row">
-          <a href="https://map.naver.com/p/search/%EC%84%A0%EC%83%A4%EC%9D%B8%EB%9E%9C%EB%93%9C" target="_blank" rel="noopener noreferrer" class="spot-chip-btn map-chip">🗺️ 네이버 지도</a>
-          <a href="tmap://search?name=%EC%84%A0%EC%83%A4%EC%9D%B8%EB%9E%9C%EB%93%9C" class="spot-chip-btn">🧭 T맵 길안내</a>
-          <a href="kakaotaxi://search?name=%EC%84%A0%EC%83%A4%EC%9D%B8%EB%9E%9C%EB%93%9C" class="spot-chip-btn">🚕 카카오T 호출</a>
-        </div>
-        <div class="tip-box">
-          <div class="tip-box-title">💡 이용 정보</div>
-          • 주소: 선샤인랜드 충청남도 논산시 연무읍 봉황로 102, 선샤인스튜디오 봉황로 90<br>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EC%84%A0%EC%83%A4%EC%9D%B8%EB%9E%9C%EB%93%9C" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도</a><a href="tmap://search?name=%EC%84%A0%EC%83%A4%EC%9D%B8%EB%9E%9C%EB%93%9C" class="btn-naver-map link-quiet">T맵 길안내</a><a href="kakaotaxi://search?name=%EC%84%A0%EC%83%A4%EC%9D%B8%EB%9E%9C%EB%93%9C" class="btn-naver-map link-quiet">카카오T 호출</a></div>
+              <div class="tip-box"><strong class="tip-title">이용 정보</strong>• 주소: 선샤인랜드 충청남도 논산시 연무읍 봉황로 102, 선샤인스튜디오 봉황로 90<br>
           • 선샤인스튜디오: 10:00~18:00 (입장 마감 17:30), 매주 수요일 휴무. 성인 10,000원, 청소년 8,000원, 소인과 경로 6,000원. 의상 대여 요금은 확인하지 못했어요<br>
           • 밀리터리 체험관과 1950스튜디오: 10:00~17:00 (휴게 시간 12:00~13:00), 매주 목요일 휴무(목요일이 공휴일이면 운영하고 다음 날 휴관). 입장료 무료이고 VR 늑대전투(15,000원) 같은 체험은 따로 내요. 촬영이 있으면 1950스튜디오 입장이 제한돼요<br>
           • 주차: 무료<br>
           • 문의: 선샤인랜드 041-730-2955, 선샤인스튜디오 1811-7057<br>
           • 해 지는 시각: 선샤인랜드 일대는 11월 15일 17:24 무렵, 12월 1일 17:17 무렵이에요. 16:00 무렵 닿으면 밀리터리 체험관과 1950스튜디오는 문 닫기 전까지 1시간, 선샤인스튜디오는 입장 마감까지 1시간 30분이 남아요.<br>
-          • 저녁: 차로 약 19분 거리인 강경읍 옥녀봉로27번길에 한식당 경모네젓갈백반(041-745-1113)이 있어요. 영업시간은 확인하지 못했으니 떠나기 전 전화로 확인하세요.
+          • 저녁: 차로 약 19분 거리인 강경읍 옥녀봉로27번길에 한식당 경모네젓갈백반(041-745-1113)이 있어요. 영업시간은 확인하지 못했으니 떠나기 전 전화로 확인하세요.</div>
+            </div>
+          </section>
         </div>
-      </section>
 
-      <!-- 2인 비용 -->
-      <section class="budget-section">
-        <h2 class="budget-title">💰 2인 예상 입장료</h2>
-        <p>출처에서 확인한 입장 요금만 적은 2인 기준 경비예요.</p>
-        <div class="table-wrap">
+        <section class="cost-table-card">
+          <div class="cost-head">
+            <h2 class="timeline-title">2인 예상 입장료</h2>
+            <p>출처에서 확인한 입장 요금만 적은 2인 기준 경비예요.</p>
+          </div>
+          <div class="table-wrap">
           <table class="cost-table">
             <thead>
               <tr>
@@ -661,24 +569,23 @@
             </tbody>
           </table>
         </div>
-      </section>
+        </section>
 
-      <div class="source-notice">
-        사진 출처: 한국관광공사 TourAPI (공공누리 제1유형)
+        <footer class="article-credit tight">
+          <p>사진 출처: 한국관광공사 TourAPI (공공누리 제1유형)</p>
+        </footer>
+
+        <p class="back-link"><a class="link-quiet" href="https://nufunc.github.io/oneul-date/blog/">← 매거진 목록으로 돌아가기</a></p>
+
+        <div class="app-course-box">
+          <div>
+            <h2>이 코스 오늘 데이트에서 열기</h2>
+            <p>글에 나온 장소 7곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
+          </div>
+          <a class="btn app-action" href="../../#c=1793188512325.9222.1790992480354.1790355372969.1793188512522.1791309530848.1789342066290">앱에서 코스 열기</a>
+        </div>
       </div>
-
-      <div class="back-btn-wrap">
-        <a href="https://nufunc.github.io/oneul-date/blog/" class="back-btn">← 매거진 목록으로 돌아가기</a>
-      </div>
-
     </article>
-
-    <div class="app-course-box" style="margin: 40px 0 24px; padding: 20px 22px; background: var(--color-accent-light); border: 1px solid var(--color-border); border-radius: 14px;">
-      <strong style="display: block; font-size: 17px; color: var(--color-text-main); margin-bottom: 6px;">🗺️ 이 코스 오늘 데이트에서 열기</strong>
-      <p style="margin: 0 0 14px; font-size: 14.5px; line-height: 1.6; color: var(--color-text-main);">글에 나온 장소 7곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
-      <a href="../../#c=1793188512325.9222.1790992480354.1790355372969.1793188512522.1791309530848.1789342066290" style="display: inline-block; padding: 10px 18px; border-radius: 10px; background: var(--color-text-main); color: #ffffff; font-weight: 700; font-size: 15px; text-decoration: none;">앱에서 코스 열기 →</a>
-    </div>
-
   </main>
 
 </body>
