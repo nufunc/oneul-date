@@ -280,3 +280,11 @@ p.timeline-title { letter-spacing: -0.01em; overflow-wrap: break-word; }
   .table-wrap.amount-last td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
   .table-wrap.amount-last td:nth-child(4) { grid-column: auto; text-align: right; font-weight: 600; color: var(--color-ink); }
 }
+
+/* timeline-list 계열(editor-149: 한남·이태원, 목포, 남해): 출처 줄의 글쓴이(아바타 글자는 장식이라 숨김) */
+.credit-mark { display: none; }
+.credit-author strong { margin-right: var(--space-xs); color: var(--color-ink); font-weight: 600; }
+.article-credit p + p { margin-top: var(--space-xs); }
+.spot-head { grid-template-columns: minmax(0, 1fr); }
+.spot-num { white-space: nowrap; }
+.spot-header .spot-title { min-width: 0; overflow-wrap: break-word; }

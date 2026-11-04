@@ -29,6 +29,7 @@ const FAMILY_NAMES = [
   'spot-chips',
   'route-timeline',
   'spot-block',
+  'timeline-list',
 ];
 const FAMILIES = await Promise.all(FAMILY_NAMES.map(async (n) => (await import(`./hallmark_families/${n}.mjs`)).default));
 
@@ -42,7 +43,7 @@ export function snapshot(html, mainOnly = false) {
   if (mainOnly) {
     body = body.slice(body.indexOf('<main'), body.lastIndexOf('</main>'));
     // 사진 설명은 사진이 놓이는 칸이 달라져 본문 속 순서가 바뀌므로 따로 순서대로 견준다
-    const capRe = /<(div) class="photo-caption">([\s\S]*?)<\/\1>|<(figcaption)>([\s\S]*?)<\/figcaption>/g;
+    const capRe = /<(div) class="(?:photo|hero)-caption">([\s\S]*?)<\/\1>|<(figcaption)>([\s\S]*?)<\/figcaption>/g;
     captions = [...body.matchAll(capRe)].map((m) => tagText(m[2] ?? m[4]).replace(/\s+/g, ''));
     body = body.replace(capRe, '');
   }

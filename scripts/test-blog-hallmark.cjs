@@ -561,6 +561,61 @@ const original = `<!DOCTYPE html>
   assert.ok(bout.includes('<section class="story-section">') && bout.includes('<figure class="story-photo">') && bout.includes('<p class="drive-bridge">차로 10분 거리로 이동해요.</p>') && bout.includes('<div class="table-wrap amount-last">') && bout.includes('<ul class="map-list">') && /<a class="btn" href="[^"]*#c=/.test(bout), 'spot-block 계열의 장소 구획이나 경비표나 지도 목록이 새 틀이 아니다');
   assert.throws(() => convert(block.replace('<p class="spot-text">둘째 곳 설명이에요.</p>', '<blockquote>모름</blockquote>')), /모르는 요소/, 'spot-block 계열에서 모르는 요소가 있는데 변환이 실패하지 않았다');
 
+  // timeline-list 계열(한남·이태원, 목포, 남해): ul.timeline-list 동선, article.spot-section 안 spot-card, 지도 칩, 경비표 합계 행, author-card 출처
+  const tlist = `${head}<body>
+  <header class="site-header"><div class="header-inner"><a href="/oneul-date/blog/" class="header-logo">오늘 데이트 <span>매거진</span></a></div></header>
+  <main class="article-container">
+    <header class="article-header">
+      <span class="badge">시험 코스</span>
+      <h1>[시험] 한 줄 동선</h1>
+      <div class="meta-bar"><span>발행일: 2026. 10. 21</span><span>글: 시험 팀 / 사진: 시험</span></div>
+      <p class="lead-text">도입 한 문단이에요.</p>
+    </header>
+    <section class="timeline-card">
+      <div class="timeline-title"><span>🗺️</span> 시험 타임라인</div>
+      <ul class="timeline-list"><li class="timeline-item"><span class="timeline-time">10:30 ~ 12:00</span><strong>[스팟 1] 첫째 곳</strong> (산책)</li></ul>
+    </section>
+    <article class="spot-section">
+      <div class="spot-card">
+        <div class="spot-image-wrap"><img src="https://example.com/a.jpg" alt="첫째 곳" loading="lazy"><div class="spot-image-caption">첫째 곳 사진 설명</div></div>
+        <div class="spot-body">
+          <div class="spot-header-row"><div><span class="spot-num">Spot 01</span><h2 class="spot-name">첫째 곳</h2></div></div>
+          <div class="spot-chips"><a href="https://map.naver.com/p/search/a" class="spot-chip map-link" target="_blank" rel="noopener">네이버 지도 바로가기</a><a href="https://m.taxi.kakao.com/" class="spot-chip" target="_blank" rel="noopener">🚕 카카오T 호출</a></div>
+          <p class="spot-desc" style="margin-top: 16px;">첫째 곳 설명이에요.</p>
+          <div class="tip-box"><strong>💡 에디터 팁</strong>• 일찍 가요.<br>• 걸어요.</div>
+        </div>
+      </div>
+    </article>
+    <h2 class="spot-name" style="margin-top: 48px;">💰 시험 2인 예상 경비표</h2>
+    <div class="table-wrap"><table><thead><tr><th>구분</th><th>장소</th><th>2인 금액</th><th>비고</th></tr></thead><tbody><tr><td>전시</td><td>첫째 곳</td><td>0원</td><td>무료</td></tr><tr class="sum-row"><td colspan="2"><strong>2인 합계</strong></td><td><strong>0원</strong></td><td>식사 별도</td></tr></tbody></table></div>
+    <div class="app-course-box" style="margin: 40px 0 24px;"><strong style="display: block;">🗺️ 이 코스 오늘 데이트에서 열기</strong><p style="margin: 0;">앱에서 열어요.</p><a href="${COURSE}" style="display: inline-block;">앱에서 코스 열기 →</a></div>
+    <footer class="article-footer"><div class="author-card"><div class="author-avatar">오늘</div><div class="author-info"><strong>시험 팀</strong><span>시험 설명</span></div></div><p style="margin-bottom: 8px;">출처 안내예요.</p><p>변경 안내예요.</p></footer>
+  </main>
+</body>
+</html>`;
+  const tout = convert(tlist);
+  assert.deepStrictEqual(compare(tlist, tout), [], 'timeline-list 계열이 보존 비교를 통과하지 못했다');
+  assert.ok(tout.includes('<div class="route range" style="--n:1">') && tout.includes('<p class="timeline-title">시험 타임라인</p>') && /<section class="spot-section no-photo|<section class="spot-section">\s*<figure class="spot-photo spot-image-wrap">/.test(tout), 'timeline-list 계열의 동선이나 장소 구획이 새 틀이 아니다');
+  assert.ok(tout.includes('<div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/a" target="_blank" rel="noopener" class="btn-naver-map link-quiet">네이버 지도 바로가기</a>') && tout.includes('<strong class="tip-title">에디터 팁</strong>'), 'timeline-list 계열의 지도 칩이나 팁 상자가 새 틀이 아니다');
+  assert.ok(tout.includes('<tr class="cost-total-row">') && tout.includes('<table class="cost-table">') && tout.includes('<h2 class="timeline-title long">시험 2인 예상 경비표</h2>') && tout.includes('<footer class="article-credit">') && tout.includes('class="credit-mark" aria-hidden="true">오늘</span>') && /<a class="btn" href="[^"]*#c=/.test(tout), 'timeline-list 계열의 경비표나 출처나 앱 버튼이 새 틀이 아니다');
+  assert.throws(() => convert(tlist.replace('<p class="spot-desc" style="margin-top: 16px;">', '<blockquote>모름</blockquote><p class="spot-desc">')), /모르는 요소/, 'timeline-list 계열에서 모르는 요소가 있는데 변환이 실패하지 않았다');
+
+  // real-photo-flat의 머리 변형(부여, 속초): header.article-header + div.hero-img-wrap + 평문 도입 <p>, app-cta-banner, th 두 칸 합계 행, 지도 버튼 둘(&nbsp;)
+  const flatHero = flat
+    .replace('<header class="travel-header-bar"><div class="header-inner"><div class="header-title"><a href="../">← 📖 오늘 데이트 매거진</a></div></div></header>', '<header class="top-nav"><div class="nav-inner"><a href="../" class="nav-logo">📖 오늘 데이트 <span>매거진</span></a></div></header>')
+    .replace(/<span class="post-badge">[\s\S]*?<div class="lead-box">[\s\S]*?<\/div>\s*<div class="real-photo-card"><img src="https:\/\/example.com\/lead.jpg"[\s\S]*?<\/div><\/div>/, `<header class="article-header"><div class="badge-wrap"><span class="badge">시험</span><span class="badge">평면</span></div><h1 class="article-title">[시험] 평면 글</h1><div class="article-meta">글: 오늘 데이트 에디토리얼 팀 / 사진: 카카오맵 포토 리뷰</div></header>
+    <div class="hero-img-wrap"><img src="https://example.com/lead.jpg" alt="대표" class="hero-img"><div class="hero-caption">대표 사진 (출처: 시험)</div></div>
+    <p>평문 도입이에요.</p>`)
+    .replace('<tr style="font-weight: 700;"><td colspan="2">합계</td><td style="color: red;">0원</td><td></td></tr>', '<tr><th colspan="2" style="background:#eee;">합계</th><th colspan="2" style="color: red;">약 0원</th></tr>')
+    .replace('<a href="https://map.naver.com/p/search/a" class="map-btn" target="_blank" rel="noopener noreferrer">🧭 지도 보기</a>', '<a href="https://map.naver.com/p/search/a" class="map-btn" target="_blank" rel="noopener noreferrer">🧭 지도 보기</a>\n   &nbsp;\n   <a href="https://map.naver.com/p/search/b" class="map-btn" target="_blank" rel="noopener noreferrer">🧭 둘째 지도</a>')
+    .replace('<div class="app-course-box"', '<div class="app-cta-banner"><h3>앱이 궁금하다면?</h3><p>앱을 열어 보세요.</p><a href="../../" class="app-cta-btn">앱 열기 ↗</a></div>\n    <div class="app-course-box"');
+  const fhout = convert(flatHero);
+  assert.deepStrictEqual(compare(flatHero, fhout), [], 'flat 머리 변형이 보존 비교를 통과하지 못했다');
+  assert.ok(fhout.includes('<span>시험</span><span>평면</span>') && fhout.includes('<span class="meta-credit">글: 오늘 데이트 에디토리얼 팀 / 사진: 카카오맵 포토 리뷰</span>') && fhout.indexOf('<figure class="lead-photo">') < fhout.indexOf('<div class="prose-intro">평문 도입이에요.</div>'), 'flat 머리 변형의 머리나 대표 사진 순서가 새 틀이 아니다');
+  assert.ok(fhout.includes('<tr class="cost-total-row"><td colspan="2">합계</td><td colspan="2">약 0원</td></tr>'), 'flat 머리 변형의 합계 행이 새 틀이 아니다');
+  assert.ok(fhout.includes('</a>&nbsp;<a href="https://map.naver.com/p/search/b"') && fhout.includes('<div class="cta-card">') && fhout.includes('class="link-quiet">앱 열기</a>') && fhout.includes('<header class="site-header">') && !fhout.includes('top-nav'), 'flat 머리 변형의 지도 버튼 둘이나 앱 소개 배너나 머리가 새 틀이 아니다');
+  assert.ok(compare(flatHero, fhout.replace('대표 사진 (출처: 시험)', '다른 설명')).some((e) => /사진 설명/.test(e)), 'flat 머리 변형의 대표 사진 설명이 달라졌는데 compare가 잡지 못했다');
+
   assert.strictEqual(snapshot(out).links.length, snapshot(original).links.length + 1, '링크 수는 첫 화면 앱 버튼 하나만 늘어야 한다');
   console.log(`test-blog-hallmark: 변환 보존 비교, 새 틀 약속, 달라진 변환본 ${cases.length}건, 모르는 틀 실패 통과`);
 })().catch((e) => { console.error(e); process.exit(1); });

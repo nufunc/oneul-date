@@ -31,9 +31,9 @@ const innerOf = (el) => el.text.replace(/^<\w+[^>]*>/, '').replace(/<\/\w+>$/, '
 const has = (el, cls) => el.cls.split(/\s+/).includes(cls);
 
 function figureOf(el, cls) {
-  const img = el.text.match(/<img\b[^>]*\/?>/)?.[0] ?? fail('real-photo-card에 img가 없다');
-  const cap = el.text.match(/<div class="photo-caption">([\s\S]*?)<\/div>/)?.[1];
-  const rest = el.text.replace(img, '').replace(/<div class="photo-caption">[\s\S]*?<\/div>/, '').replace(/^<div[^>]*>|<\/div>$/g, '');
+  const img = el.text.match(/<img\b[^>]*\/?>/)?.[0] ?? fail('사진 칸에 img가 없다');
+  const cap = el.text.match(/<div class="(?:photo|hero)-caption">([\s\S]*?)<\/div>/)?.[1];
+  const rest = el.text.replace(img, '').replace(/<div class="(?:photo|hero)-caption">[\s\S]*?<\/div>/, '').replace(/^<div[^>]*>|<\/div>$/g, '');
   if (rest.trim()) fail(`real-photo-card에 모르는 요소가 있다: ${rest.trim().slice(0, 60)}`);
   return `<figure class="${cls}">
               ${img.replace(/\s*\/?>$/, ' />')}${cap ? `\n              <figcaption>${cap.trim()}</figcaption>` : ''}
@@ -69,9 +69,12 @@ function spotOf(g, n) {
       const t = inside.match(/^<strong>([\s\S]*?)<\/strong>\s*([\s\S]*)$/);
       body.push(t ? `<div class="tip-box"><strong class="tip-title">${stripLead(t[1])}</strong>${t[2].trim()}</div>` : `<div class="tip-box">${stripLead(inside)}</div>`);
     } else if (has(el, 'map-btn-wrap')) {
-      const m = innerOf(el).match(/^<a ([^>]*?)\s*class="map-btn"([^>]*)>\s*([\s\S]*?)\s*<\/a>$/);
-      if (!m) fail('map-btn-wrap 틀을 읽지 못했다');
-      body.push(`<div class="map-btn-wrap"><a ${(m[1] + m[2]).trim()} class="btn-naver-map link-quiet">${stripLead(m[3])}</a></div>`);
+      // 링크가 여럿이면 원문처럼 &nbsp;로 잇는다(글자 보존)
+      const raw = innerOf(el);
+      const links = [...raw.matchAll(/<a ([^>]*?)\s*class="map-btn"([^>]*)>\s*([\s\S]*?)\s*<\/a>/g)];
+      if (!links.length || raw.replace(/<a [\s\S]*?<\/a>/g, '').replace(/&nbsp;/g, '').trim()) fail('map-btn-wrap 틀을 읽지 못했다');
+      const sep = /&nbsp;/.test(raw) ? '&nbsp;' : '';
+      body.push(`<div class="map-btn-wrap">${links.map((m) => `<a ${(m[1] + m[2]).trim()} class="btn-naver-map link-quiet">${stripLead(m[3])}</a>`).join(sep)}</div>`);
     } else if (has(el, 'bridge-box')) body.push(`<p class="bridge">${innerOf(el)}</p>`);
     else if (el.tag === 'div' && !el.cls) body.push(`<div class="order-box">${innerOf(el).replace(/ style="[^"]*"/g, '')}</div>`);
     else fail(`장소 구획에 모르는 요소가 있다: ${el.tag}.${el.cls} (${tagText(g.h2 ?? '').slice(0, 30)})`);
@@ -96,12 +99,25 @@ function costSection(g) {
   const cols = (table.match(/<thead>[\s\S]*?<\/thead>/)?.[0].match(/<th\b/g) ?? []).length;
   table = table.replace(/<table\b[^>]*>/, `<table class="cost-table${cols === 3 ? ' cost-3' : ''}">`)
     .replace(/<tr style="[^"]*font-weight:\s*700[^"]*">/, '<tr class="cost-total-row">')
-    .replace(/<td([^>]*?) style="[^"]*"/g, '<td$1');
+    .replace(/<td([^>]*?) style="[^"]*"/g, '<td$1')
+    // 합계 행이 th 두 칸(colspan)인 글: 새 틀의 합계 행은 td다
+    .replace(/<tr>\s*(<th colspan="\d+"[^>]*>[\s\S]*?<\/th>\s*<th colspan="\d+"[^>]*>[\s\S]*?<\/th>)\s*<\/tr>/, (all, cells) => `<tr class="cost-total-row">${cells.replace(/<th( colspan="\d+")[^>]*>/g, '<td$1>').replace(/<\/th>/g, '</td>')}</tr>`);
   const ps = g.items.filter((e) => e.tag === 'p');
   const other = g.items.filter((e) => e !== wrapEl && e.tag !== 'p');
   if (other.length) fail(`경비표 구획에 모르는 요소가 있다: ${other[0].tag}.${other[0].cls}`);
   const sec = `<section class="cost-table-card"><h3 class="timeline-title">${g.h2}</h3>${ps.map((p) => p.text).join('')}<div class="table-wrap">${table}</div></section>`;
   return costOf(sec);
+}
+
+// 앱 소개 배너: h3, p, 링크(app-cta-btn)를 cta-card로 옮긴다. 끝의 ↗는 지운다.
+function ctaOf(el) {
+  const m = innerOf(el).match(/^<h3>([\s\S]*?)<\/h3>\s*<p>([\s\S]*?)<\/p>\s*<a (href="[^"]*") class="app-cta-btn">([\s\S]*?)<\/a>$/);
+  if (!m) fail('app-cta-banner 틀을 읽지 못했다');
+  return `<div class="cta-card">
+          <h3>${m[1]}</h3>
+          <p>${m[2]}</p>
+          <a ${m[3]} class="link-quiet">${m[4].replace(/\s*↗\s*$/, '').trim()}</a>
+        </div>`;
 }
 
 function mapSection(g) {
@@ -134,13 +150,32 @@ export default {
     const ch = children(main[1]);
 
     // 머리: 배지, h1, 메타, 도입, 대표 사진(첫 h2 앞의 real-photo-card)
-    const badge = ch.find((e) => has(e, 'post-badge')) ?? fail('post-badge를 찾지 못했다');
-    const h1 = ch.find((e) => e.tag === 'h1') ?? fail('h1을 찾지 못했다');
-    const subMeta = ch.find((e) => has(e, 'post-sub-meta')) ?? fail('post-sub-meta를 찾지 못했다');
-    const lead = ch.find((e) => has(e, 'lead-box')) ?? fail('lead-box를 찾지 못했다');
+    // 머리 변형: header.article-header(div.badge-wrap의 span.badge, h1.article-title, div.article-meta) + div.hero-img-wrap + 첫 h2 앞의 평문 <p>(도입). 대표 사진이 도입보다 앞이다.
+    const hdr = ch.find((e) => e.tag === 'header' && has(e, 'article-header'));
+    let badge, h1, subMeta, lead, kickerSpans, metaSpans, heroFirst = false;
+    if (hdr) {
+      const hh = hdr.text;
+      kickerSpans = [...(hh.match(/<div class="badge-wrap">([\s\S]*?)<\/div>/) ?? fail('badge-wrap을 찾지 못했다'))[1].matchAll(/<span class="badge">([\s\S]*?)<\/span>/g)].map((m) => m[1].trim());
+      const h1m = hh.match(/<h1 class="article-title">([\s\S]*?)<\/h1>/) ?? fail('h1.article-title을 찾지 못했다');
+      const metaText = hh.match(/<div class="article-meta">([\s\S]*?)<\/div>/)?.[1] ?? fail('article-meta를 찾지 못했다');
+      if (hh.replace(/<div class="badge-wrap">[\s\S]*?<\/div>|<h1 class="article-title">[\s\S]*?<\/h1>|<div class="article-meta">[\s\S]*?<\/div>|<\/?header[^>]*>/g, '').trim()) fail('머리에 모르는 요소가 있다');
+      if (/<(div|p|ul|ol|table|h[1-6])\b/.test(metaText) || !metaText.trim()) fail('article-meta 틀을 읽지 못했다');
+      h1 = { text: h1m[0] };
+      metaSpans = [metaText.trim()];
+      const firstH2 = ch.findIndex((e) => e.tag === 'h2');
+      lead = ch.find((e, i) => e.tag === 'p' && i < firstH2) ?? fail('첫 h2 앞의 도입 <p>를 찾지 못했다');
+      heroFirst = true;
+      badge = hdr; subMeta = hdr;
+    } else {
+      badge = ch.find((e) => has(e, 'post-badge')) ?? fail('post-badge를 찾지 못했다');
+      h1 = ch.find((e) => e.tag === 'h1') ?? fail('h1을 찾지 못했다');
+      subMeta = ch.find((e) => has(e, 'post-sub-meta')) ?? fail('post-sub-meta를 찾지 못했다');
+      lead = ch.find((e) => has(e, 'lead-box')) ?? fail('lead-box를 찾지 못했다');
+    }
     const used = new Set([badge, h1, subMeta, lead]);
     const leadPhotos = [];
     const tail = []; // 앱 코스 상자, 출처
+    const ctas = []; // 앱 소개 배너(app-cta-banner)
     const groups = [];
     let g = null;
     let seenH2 = false;
@@ -148,19 +183,20 @@ export default {
       if (used.has(e)) continue;
       if (e.tag === 'h2') { seenH2 = true; g = { h2: innerOf(e), items: [] }; groups.push(g); continue; }
       if (has(e, 'app-course-box') || has(e, 'footer-source') || e.tag === 'footer') { tail.push(e); continue; }
-      if (!seenH2 && has(e, 'real-photo-card') && !g) { leadPhotos.push(e); continue; }
+      if (has(e, 'app-cta-banner')) { ctas.push(e); continue; }
+      if (!seenH2 && (has(e, 'real-photo-card') || has(e, 'hero-img-wrap')) && !g) { leadPhotos.push(e); continue; }
       if (!g) { g = { h2: null, items: [] }; groups.push(g); }
       g.items.push(e);
     }
-    const spans = [...subMeta.text.matchAll(/<span>([\s\S]*?)<\/span>/g)].map((m) => m[1].trim()).filter((s) => s !== '•');
+    const spans = metaSpans ?? [...subMeta.text.matchAll(/<span>([\s\S]*?)<\/span>/g)].map((m) => m[1].trim()).filter((s) => s !== '•');
     if (!spans.length) fail('post-sub-meta에 span이 없다');
-    if (innerOf(subMeta).replace(/<span>[\s\S]*?<\/span>/g, '').replace(/•/g, '').trim()) fail('post-sub-meta에 모르는 요소가 있다');
+    if (!metaSpans && innerOf(subMeta).replace(/<span>[\s\S]*?<\/span>/g, '').replace(/•/g, '').trim()) fail('post-sub-meta에 모르는 요소가 있다');
     const metaHtml = spans.map((s) => (tagText(s).length <= 20 ? `<span>${s}</span>` : `<span class="meta-credit">${s}</span>`)).join('\n            ');
     const href = main[1].match(/href="([^"]*#c=[^"]*)"/)?.[1];
     const btn = href ? `\n          <p><a class="btn" href="${href}">앱에서 코스 열기</a></p>` : '';
     const hero = `<header class="article-header hero container">
         <div class="hero-text">
-          <p class="hero-kicker badge-category">${badge.text.replace(/<[^>]*>/g, '').split(' · ').map((s) => `<span>${s.trim()}</span>`).join('')}</p>
+          <p class="hero-kicker badge-category">${(kickerSpans ?? badge.text.replace(/<[^>]*>/g, '').split(' · ')).map((s) => `<span>${s.trim()}</span>`).join('')}</p>
           <h1 class="article-title">${innerOf(h1)}</h1>
           <div class="article-meta">
             ${metaHtml}
@@ -193,11 +229,12 @@ export default {
     // 도입: lead-box 안의 br은 문단 나눔이므로 그대로 둔다
     const lp = leadPhotos.map((p) => figureOf(p, 'lead-photo')).join('\n        ');
     const spotHtml = spotG.map((x, i) => spotOf(x, i + 1)).join('\n\n          ');
+    const introHtml = `<div class="prose-intro">${innerOf(lead)}</div>`;
     const inner = `
       ${hero}
 
       <div class="container">
-        <div class="prose-intro">${innerOf(lead)}</div>${lp ? `\n        ${lp}` : ''}
+        ${heroFirst ? `${lp}\n        ${introHtml}` : `${introHtml}${lp ? `\n        ${lp}` : ''}`}
       </div>
 
       <!-- 동선 -->
@@ -210,7 +247,7 @@ export default {
 
         <!-- 2인 예상 입장료 -->
         ${costSection(costG[0])}
-${postG.map((x) => `\n        ${isMap(x) ? mapSection(x) : closingSection(x)}\n`).join('')}${apps.length ? `\n        ${appBoxOf(apps[0].text)}\n` : ''}
+${postG.map((x) => `\n        ${isMap(x) ? mapSection(x) : closingSection(x)}\n`).join('')}${ctas.map((c) => `\n        ${ctaOf(c)}\n`).join('')}${apps.length ? `\n        ${appBoxOf(apps[0].text)}\n` : ''}
         <footer class="article-credit">
           ${credit}
         </footer>
@@ -219,7 +256,7 @@ ${postG.map((x) => `\n        ${isMap(x) ? mapSection(x) : closingSection(x)}\n`
 
     let out = html.replace(main[0], () => `<main class="article-container"><article>${inner}</article></main>`);
     out = out.replace(/<style>[\s\S]*?<\/style>/, () => `<style>\n${ctx.css}\n  </style>`);
-    out = out.replace(/<header class="travel-header-bar">[\s\S]*?<\/header>|<header class="site-header">[\s\S]*?<\/header>/, () => `<header class="site-header">
+    out = out.replace(/<header class="travel-header-bar">[\s\S]*?<\/header>|<header class="top-nav">[\s\S]*?<\/header>|<header class="site-header">[\s\S]*?<\/header>/, () => `<header class="site-header">
     <div class="header-inner container">
       <a href="https://nufunc.github.io/oneul-date/blog/" class="header-logo">오늘 데이트 <span>매거진</span></a>
       <nav class="header-nav">
