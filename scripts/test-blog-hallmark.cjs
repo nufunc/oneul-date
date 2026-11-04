@@ -300,6 +300,65 @@ const original = `<!DOCTYPE html>
   assert.ok(/<a class="btn" href="[^"]*#c=/.test(cout) && cout.includes('<footer class="site-footer">') && cout.includes('<p class="footer-line">출처: 시험</p>'), '장소 카드 계열의 앱 버튼이나 푸터가 새 틀이 아니다');
   assert.throws(() => convert(card.replace('<p class="spot-desc">둘째 곳 설명이에요.</p>', '<blockquote>모름</blockquote>')), /모르는 요소/, '장소 카드 계열에서 모르는 요소가 있는데 변환이 실패하지 않았다');
 
+  // 9. 정보 격자 계열(real-photo-grid): main 아래 h2·p·real-photo-card·info-grid가 한 줄로 이어지고, 사진은 글 순서 그대로 둔다
+  const grid = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>[시험] 격자 글</title>
+  <link rel="canonical" href="https://nufunc.github.io/oneul-date/blog/grid/">
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","headline":"격자","datePublished":"2026-10-30"}
+  </script>
+  <style>body { background: #fff; }</style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="/oneul-date/" class="header-logo">오늘 데이트 <span>매거진</span></a>
+      <nav class="header-nav"><a href="/oneul-date/blog/">매거진 목록</a></nav>
+    </div>
+  </header>
+  <main class="article-container">
+    <div class="post-badge">시험 지역 · 가을</div>
+    <h1>[시험] 격자 글 제목</h1>
+    <div class="post-meta"><span>작성일: 2026-10-30</span><span>·</span><span>글: 오늘 데이트 에디토리얼 팀 / 사진: 시험</span></div>
+    <p class="intro-lead">시험 도입이에요.</p>
+    <section class="course-summary-card">
+      <div class="summary-card-title">🗓️ 시험 동선 한눈에</div>
+      <div class="tl-act">오전 1막: 첫째</div>
+      <div class="tl-step"><span class="tl-time">10:00</span><span class="tl-place">첫째 곳</span><span class="tl-note">산책</span></div>
+      <div class="tl-move">↓ 차량 약 5km</div>
+      <div class="tl-step"><span class="tl-time">12:00</span><span class="tl-place">둘째 곳</span><span class="tl-note">점심</span></div>
+    </section>
+    <h2>1. 첫째 곳, 시험 제목</h2>
+    <p>첫째 곳 앞 문단이에요.</p>
+    <div class="real-photo-card"><img src="https://example.com/a.jpg" alt="첫째 곳 전경" loading="lazy"><div class="photo-caption"><span>첫째 곳 전경</span><span>출처: 시험</span></div></div>
+    <p>첫째 곳 뒤 문단이에요.</p>
+    <div class="info-grid"><div class="info-item"><span class="info-label">주소</span><span class="info-val">시험시 시험로 1</span></div><div class="info-item"><span class="info-label">입장료</span><span class="info-val">무료</span></div></div>
+    <div class="tip-box"><div class="tip-title">💡 에디터 팁</div>일찍 가요.</div>
+    <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/a" target="_blank" rel="noopener noreferrer" class="map-btn">🧭 네이버 지도로 확인하기</a></div>
+    <h2>💰 시험 경비</h2>
+    <div class="table-wrap"><table><thead><tr><th>구분</th><th>장소</th><th>금액</th><th>비고</th></tr></thead><tbody>
+      <tr><td>오전</td><td>첫째 곳</td><td>0원</td><td>무료</td></tr>
+      <tr style="background-color: #f8fafc; font-weight: 700;"><td colspan="2">합계</td><td style="color: red;">0원</td><td>무료 코스</td></tr>
+    </tbody></table></div>
+    <h2>📍 시험 지도</h2>
+    <ul class="spot-links"><li><a href="https://map.naver.com/p/search/a" target="_blank" rel="noopener noreferrer">🧭 첫째 곳</a></li></ul>
+    <section class="outro-card"><div class="outro-title">✨ 총평</div><p style="margin-bottom: 0;">시험 총평이에요.</p></section>
+    <div class="app-course-box" style="margin: 40px 0 24px;"><strong style="display: block;">🗺️ 이 코스 오늘 데이트에서 열기</strong><p style="margin: 0;">장소 2곳을 열어요.</p><a href="${COURSE}" style="display: inline-block;">앱에서 코스 열기 →</a></div>
+    <footer class="article-footer"><p>사진 출처: 시험</p><p style="margin-top: 6px;">© 2026 시험</p></footer>
+  </main>
+</body>
+</html>`;
+  const gout = convert(grid);
+  assert.deepStrictEqual(compare(grid, gout), [], '정보 격자 계열이 보존 비교를 통과하지 못했다');
+  assert.ok(gout.includes('<section class="story-section">') && gout.includes('<figure class="story-photo">') && gout.includes('<div class="spot-info-box info-wide">') && gout.includes('<p class="timeline-title">시험 동선 한눈에</p>'), '정보 격자 계열의 장소 구획이나 동선 제목이 새 틀이 아니다');
+  assert.ok(gout.indexOf('첫째 곳 앞 문단') < gout.indexOf('<figure class="story-photo">') && gout.indexOf('<figure class="story-photo">') < gout.indexOf('첫째 곳 뒤 문단'), '정보 격자 계열이 사진을 글 순서대로 두지 않았다');
+  assert.ok(gout.includes('<tr class="cost-total-row">') && gout.includes('<div class="cta-card">') && /<a class="btn" href="[^"]*#c=/.test(gout), '정보 격자 계열의 경비표, 마무리 상자, 앱 버튼이 새 틀이 아니다');
+  assert.throws(() => convert(grid.replace('<p>첫째 곳 뒤 문단이에요.</p>', '<blockquote>모름</blockquote>')), /모르는 요소/, '정보 격자 계열에서 모르는 요소가 있는데 변환이 실패하지 않았다');
+
   assert.strictEqual(snapshot(out).links.length, snapshot(original).links.length + 1, '링크 수는 첫 화면 앱 버튼 하나만 늘어야 한다');
   console.log(`test-blog-hallmark: 변환 보존 비교, 새 틀 약속, 달라진 변환본 ${cases.length}건, 모르는 틀 실패 통과`);
 })().catch((e) => { console.error(e); process.exit(1); });

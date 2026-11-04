@@ -7,7 +7,7 @@ import { fail, stripLead, tagText, costOf, appBoxOf } from '../hallmark_common.m
 const VOID = new Set(['img', 'br', 'hr', 'input', 'meta', 'link']);
 
 // 조각의 최상위 자식을 순서대로 뽑는다: [{ tag, cls, text }]. 주석은 버린다.
-function children(html) {
+export function children(html) {
   const out = [];
   const re = /<(\/?)(\w+)([^>]*?)(\/?)>/g;
   let depth = 0, start = 0, cur = null, last = 0;
