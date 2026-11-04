@@ -16,6 +16,9 @@
 
   <!-- Pretendard 웹폰트 -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700&display=swap&text=%26()%2C.0123456789%3A~%EA%B0%80%EA%B0%81%EA%B0%84%EA%B0%90%EA%B0%95%EA%B0%9C%EA%B1%B0%EA%B2%BD%EA%B3%84%EA%B3%A8%EA%B3%B5%EA%B3%BC%EA%B4%80%EA%B5%90%EA%B5%AC%EA%B5%AD%EA%B7%BC%EA%B8%B0%EA%B9%8C%EB%82%98%EB%82%99%EB%82%B8%EB%84%A4%EB%85%84%EB%85%B8%EB%88%84%EB%8A%94%EB%8A%98%EB%8B%A4%EB%8B%AC%EB%8B%AD%EB%8C%80%EB%8D%B0%EB%8F%84%EB%8F%99%EB%93%B1%EB%94%94%EB%9A%9C%EB%9E%98%EB%A0%88%EB%A0%A4%EB%A1%9C%EB%A6%AC%EB%A7%88%EB%A7%8C%EB%A7%9B%EB%A7%9E%EB%A7%A4%EB%A8%B9%EB%AA%A9%EB%AF%BC%EB%B0%94%EB%B0%B1%EB%B2%84%EB%B2%85%EB%B3%B5%EB%B6%80%EB%B6%88%EB%B6%89%EB%B9%84%EC%82%AC%EC%82%B0%EC%83%81%EC%83%9D%EC%84%9C%EC%84%A0%EC%84%B1%EC%8A%A4%EC%8B%9C%EC%8B%9D%EC%8B%A0%EC%96%80%EC%96%91%EC%96%BC%EC%97%90%EC%97%AC%EC%97%AD%EC%97%B4%EC%98%88%EC%98%A4%EC%99%80%EC%99%B8%EC%9A%B4%EC%9B%90%EC%9C%A0%EC%9C%BC%EC%9D%80%EC%9D%84%EC%9D%98%EC%9D%B4%EC%9D%B8%EC%9E%90%EC%9E%A5%EC%9E%AC%EC%A0%84%EC%A0%95%EC%A0%9C%EC%A1%B0%EC%A3%BC%EC%A4%80%EC%A4%91%EC%A7%80%EC%A7%84%EC%A7%9C%EC%B0%A8%EC%B2%9C%EC%B2%A0%EC%B4%88%EC%B4%9D%EC%B5%9C%EC%B6%94%EC%B6%98%EC%B6%9C%EC%BD%94%EC%BD%A4%ED%83%80%ED%84%B0%ED%85%94%ED%86%A0%ED%86%B5%ED%8A%B8%ED%8C%80%ED%8C%9F%ED%8F%89%ED%8F%AC%ED%91%9C%ED%95%98%ED%95%9C%ED%95%A9%ED%95%AD%ED%95%B4%ED%96%89%ED%98%84%ED%98%B8%ED%99%8D%ED%99%94%ED%99%9C" rel="stylesheet">
 
   <script type="application/ld+json">
 {
@@ -43,385 +46,274 @@
   </script>
 
   <style>
-    :root {
-      --color-primary: #1e293b;
-      --color-accent: #059669;
-      --color-accent-light: #ecfdf5;
-      --color-text-main: #334155;
-      --color-text-sub: #64748b;
-      --color-border: #e2e8f0;
-      --color-bg-page: #f8fafc;
-      --color-card-bg: #ffffff;
-      --color-warm: #d97706;
-      --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-    }
+/* hallmark-solstice: scripts/convert_blog_hallmark.mjs가 글의 <style>을 이 파일로 바꾼다 (Hallmark 2.0.0, 테마 Solstice, P-293) */
+:root {
+  color-scheme: light;
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-xs: 0.8125rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.125rem; --text-xl: 1.5625rem; --text-2xl: 1.953rem; --text-3xl: 2.441rem;
+  --text-hero: clamp(1.75rem, 1.6vw + 1.25rem, 2.75rem);
+  --text-section: clamp(1.75rem, 1.8vw + 1rem, 2.875rem); --text-title: clamp(1.25rem, 0.75vw + 0.875rem, 1.625rem); --text-lead: clamp(1.0625rem, 0.3vw + 0.95rem, 1.25rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-micro: 120ms; --dur-short: 220ms;
+  --container: 1200px; --measure: 680px; --gutter: 56px; --gap-columns: 40px; --section-gap: 120px;
+  --z-sticky-nav: 300;
+  --color-paper: oklch(94% 0.03 80); --color-paper-2: oklch(97% 0.02 85); --color-paper-3: oklch(89% 0.05 80);
+  --color-ink: oklch(27% 0.05 50); --color-ink-2: oklch(36% 0.05 50); --color-muted: oklch(48% 0.06 55);
+  --color-rule: oklch(84% 0.06 78);
+  --color-accent: oklch(54% 0.20 24); --color-accent-2: oklch(48% 0.19 24); --color-accent-ink: oklch(97% 0.02 85); --color-focus: oklch(54% 0.20 24);
+  --color-gold: oklch(74% 0.14 75); --color-gold-2: oklch(84% 0.11 80);
+  --color-band-text: oklch(94% 0.03 80); --color-band-muted: oklch(80% 0.05 75);
+  --color-hair-ink: color-mix(in oklab, var(--color-ink) 10%, transparent);
+  --font-display: "Noto Serif KR", "Nanum Myeongjo", ui-serif, serif;
+  --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --radius-card: 0; --radius-pill: 999px; --rule-hair: 1px; --rule-bar: 2px;
+  --shadow-card: 10px 10px 0 var(--color-paper-3);
+}
+@media (max-width: 60rem) { :root { --gutter: 24px; --section-gap: 88px; --gap-columns: 24px; } }
+@media (max-width: 40rem) { :root { --gutter: 16px; --section-gap: 64px; --gap-columns: 16px; } }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: var(--font-family);
-      background-color: var(--color-bg-page);
-      color: var(--color-text-main);
-      line-height: 1.8;
-      word-break: keep-all;
-      -webkit-font-smoothing: antialiased;
-    }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+html { scrollbar-color: var(--color-muted) var(--color-paper); scroll-padding-top: var(--space-3xl); }
+body { margin: 0; background: var(--color-paper); color: var(--color-ink-2); font-family: var(--font-family); font-size: var(--text-md); line-height: 1.75; word-break: keep-all; -webkit-font-smoothing: antialiased; }
+::selection { background: color-mix(in oklab, var(--color-gold) 40%, transparent); }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+a:hover { text-decoration-color: var(--color-accent); }
+article h1, article h2, article h3 { margin: 0; font-family: var(--font-display); font-weight: 700; color: var(--color-ink); line-height: 1.3; letter-spacing: -0.01em; overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+img { max-width: 100%; display: block; }
+.container { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); }
 
-    .site-header {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--color-border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .header-inner {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 14px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .header-logo {
-      font-weight: 800;
-      font-size: 1.15rem;
-      color: var(--color-primary);
-      text-decoration: none;
-    }
-    .header-logo span { color: var(--color-accent); }
-    .header-nav a {
-      color: var(--color-text-sub);
-      text-decoration: none;
-      font-size: 0.9rem;
-      margin-left: 16px;
-    }
+/* 44px 머리 링크 규칙: scripts/test-blog-related.cjs가 글마다 하나를 요구한다 */
+header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
 
-    .article-container {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 40px 20px 80px;
-    }
+/* Controls */
+.btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 var(--space-lg); border: 0; border-radius: var(--radius-pill); background: var(--color-accent); color: var(--color-accent-ink); font: 600 var(--text-md)/1 var(--font-family); text-decoration: none; cursor: pointer; transition: background-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out); }
+.btn:hover { background: var(--color-accent-2); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.link-quiet { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-ink); font-weight: 600; font-size: var(--text-sm); text-decoration: none; border-bottom: var(--rule-bar) solid var(--color-ink); transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out); }
+.link-quiet:hover { color: var(--color-accent); border-color: var(--color-accent); }
+.link-quiet:active { transform: translateY(1px); }
+.link-quiet:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
 
-    .article-header {
-      margin-bottom: 32px;
-    }
-    .badge {
-      display: inline-block;
-      background: var(--color-accent-light);
-      color: var(--color-accent);
-      font-weight: 700;
-      font-size: 0.8rem;
-      padding: 4px 10px;
-      border-radius: 6px;
-      margin-bottom: 12px;
-    }
-    h1 {
-      font-size: 1.85rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      line-height: 1.4;
-      letter-spacing: -0.02em;
-      margin-bottom: 16px;
-    }
-    .meta-info {
-      font-size: 0.88rem;
-      color: var(--color-text-sub);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      border-bottom: 1px solid var(--color-border);
-      padding-bottom: 20px;
-    }
+/* Nav */
+.site-header { position: sticky; top: 0; z-index: var(--z-sticky-nav); background: var(--color-paper); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.header-inner { display: flex; justify-content: space-between; align-items: center; min-height: 64px; }
+.header-logo { font-family: var(--font-display); font-size: var(--text-lg); color: var(--color-ink); text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; }
+.header-logo span { color: var(--color-accent); margin-left: 0.3em; }
+.header-logo:hover { color: var(--color-ink-2); }
+.header-nav { display: flex; gap: var(--space-lg); }
+.header-nav a { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--text-sm); color: var(--color-ink-2); text-decoration: none; }
+.header-nav a:hover { color: var(--color-ink); text-decoration: underline; text-decoration-color: var(--color-accent); }
+.header-nav a:active, .header-logo:active { transform: translateY(1px); }
 
-    /* 동선 요약 카드 */
-    .summary-card {
-      background: #ffffff;
-      border: 1px solid var(--color-border);
-      border-radius: 14px;
-      padding: 24px;
-      margin: 32px 0 40px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-    }
-    .summary-title {
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .route-steps {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      margin-top: 10px;
-    }
-    .route-step-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-    }
-    .step-num {
-      background: var(--color-primary);
-      color: #fff;
-      font-size: 0.75rem;
-      font-weight: 700;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-    .step-text {
-      font-size: 0.94rem;
-      color: var(--color-text-main);
-    }
-    .step-text strong {
-      color: var(--color-primary);
-    }
-    .step-note {
-      font-size: 0.84rem;
-      color: var(--color-text-sub);
-      margin-top: 2px;
-    }
-    .route-distance-summary {
-      margin-top: 18px;
-      padding-top: 14px;
-      border-top: 1px dashed var(--color-border);
-      font-size: 0.88rem;
-      color: var(--color-text-sub);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-    .route-distance-summary strong {
-      color: var(--color-accent);
-    }
+/* Hero */
+.hero { display: grid; padding-block: var(--space-2xl) var(--space-xl); }
+.hero-text { display: grid; gap: var(--space-lg); }
+.article-title { font-size: var(--text-hero); line-height: 1.3; max-width: 28ch; }
+.hero-kicker { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.hero-kicker span:first-child { color: var(--color-accent); font-weight: 600; }
+.article-meta { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-lg); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); font-variant-numeric: tabular-nums; }
+.article-meta .meta-credit { flex-basis: 100%; }
+/* 좁은 화면에서 칸마다 한 줄: 본문 글꼴(Pretendard)이 바뀔 때 줄 수가 달라져 아래 띠가 밀리는 것을 막는다 */
+@media (max-width: 40rem) { .article-meta { flex-direction: column; flex-wrap: nowrap; } }
+.spot-photo img { width: 100%; height: 100%; object-fit: cover; outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
 
-    h2 {
-      font-size: 1.45rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin-top: 48px;
-      margin-bottom: 18px;
-      letter-spacing: -0.01em;
-      line-height: 1.45;
-    }
+/* Lead */
+.prose-intro { max-width: var(--measure); padding-top: var(--space-xl); font-size: var(--text-lead); line-height: 1.8; color: var(--color-ink); padding-bottom: var(--space-3xl); }
 
-    p {
-      margin-bottom: 18px;
-      color: #334155;
-      font-size: 1rem;
-    }
+/* The day, on the brown band */
+.band { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl) var(--space-xl); }
+.band .timeline-title { color: var(--color-band-text); font-size: var(--text-section); margin-bottom: var(--space-xl); }
+.route { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: 0; padding: 0; }
+.tl-act { font-size: var(--text-sm); color: var(--color-gold-2); padding-bottom: var(--space-sm); }
+.tl-step { display: grid; align-content: start; gap: var(--space-2xs); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-gold); }
+.tl-time { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1; color: var(--color-band-text); font-variant-numeric: tabular-nums; }
+.tl-place { font-weight: 600; font-size: var(--text-lg); color: var(--color-band-text); }
+.tl-note { font-size: var(--text-sm); color: var(--color-band-muted); line-height: 1.6; }
+.tl-move { font-size: var(--text-sm); color: var(--color-band-muted); padding-block: var(--space-sm) var(--space-lg); }
+.tl-total { font-size: var(--text-sm); color: var(--color-band-muted); padding-top: var(--space-lg); margin-top: var(--space-lg); border-top: var(--rule-hair) solid color-mix(in oklab, var(--color-band-text) 25%, transparent); }
+/* spot-info-list 계열: 시간 범위(10:30 - 11:45)가 길어 시각 글자를 줄이고, 요약 상자와 번호 배지를 둔다 */
+.route.range .tl-time { font-size: var(--text-xl); }
+.route.range .tl-step { padding-bottom: var(--space-md); }
+.tl-badge { font-size: var(--text-xs); color: var(--color-gold-2); letter-spacing: 0.04em; }
+.tl-facts { display: grid; gap: var(--space-2xs) var(--space-lg); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.tl-facts strong { color: var(--color-gold-2); font-weight: 600; }
+@media (min-width: 60rem) {
+  .tl-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .route { grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); column-gap: var(--space-lg); }
+  .route > * { grid-row: var(--r); grid-column: var(--c) / span var(--s, 1); }
+  .tl-move { padding-bottom: 0; }
+  .tl-total { grid-column: 1 / -1; }
+}
 
-    .real-photo-card {
-      margin: 24px 0 28px;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
-      background: #000;
-    }
-    .real-photo-card img {
-      width: 100%;
-      height: auto;
-      max-height: 480px;
-      object-fit: cover;
-      display: block;
-    }
-    .photo-caption {
-      background: #ffffff;
-      padding: 10px 14px;
-      font-size: 0.84rem;
-      color: var(--color-text-sub);
-      border-top: 1px solid var(--color-border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
+/* Stops */
+.spots { padding-block: var(--section-gap) 0; display: grid; gap: var(--section-gap); }
+.spot-section { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "photo head" "photo body"; grid-template-rows: auto 1fr; column-gap: var(--gap-columns); row-gap: var(--space-md); align-items: start; padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); }
+.spot-section.flip { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-areas: "head photo" "body photo"; }
+.spot-section.no-photo { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "body"; }
+.spot-head { grid-area: head; display: grid; gap: var(--space-md); }
+.spot-photo { grid-area: photo; align-self: start; margin: 0; aspect-ratio: 4 / 5; width: 100%; background: var(--color-paper-3); position: sticky; top: 96px; }
+.spot-body { grid-area: body; display: grid; gap: var(--space-md); }
+.spot-header { display: flex; align-items: baseline; gap: var(--space-md); }
+.spot-num { font-family: var(--font-display); font-size: var(--text-3xl); line-height: 1; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+.spot-title { font-size: var(--text-section); }
+.spot-tagline { font-size: var(--text-lg); color: var(--color-ink); padding-bottom: var(--space-xs); }
+.spot-desc { max-width: 60ch; }
 
-    .info-grid {
-      background: #f8fafc;
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      padding: 18px 20px;
-      margin: 20px 0 24px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px 20px;
-    }
-    @media (max-width: 540px) {
-      .info-grid { grid-template-columns: 1fr; }
-    }
-    .info-item {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .info-label {
-      font-size: 0.76rem;
-      font-weight: 700;
-      color: var(--color-text-sub);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .info-val {
-      font-size: 0.92rem;
-      font-weight: 600;
-      color: var(--color-primary);
-    }
+.spot-info-box { margin: var(--space-xs) 0 0; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); }
+.info-row { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--space-md); padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.info-row:last-child { border-bottom: 0; }
+.info-label { color: var(--color-muted); }
+.info-val { color: var(--color-ink); font-weight: 400; font-variant-numeric: tabular-nums; }
+.map-btn-wrap { padding-top: var(--space-sm); }
+.tip-box { padding: var(--space-sm) var(--space-md); border-left: var(--rule-bar) solid var(--color-accent); background: var(--color-paper-2); font-size: var(--text-sm); color: var(--color-ink-2); line-height: 1.7; }
+.tip-box strong { color: var(--color-ink); font-weight: 600; }
+.tip-box .tip-title { display: block; margin-bottom: var(--space-2xs); }
 
-    .tip-box {
-      background: #fffbeb;
-      border: 1px solid #fde68a;
-      border-left: 4px solid #f59e0b;
-      padding: 16px 18px;
-      border-radius: 0 10px 10px 0;
-      margin: 22px 0 26px;
-      font-size: 0.92rem;
-      color: #92400e;
-      line-height: 1.7;
-    }
-    .tip-title {
-      font-weight: 800;
-      font-size: 0.9rem;
-      color: #78350f;
-      margin-bottom: 4px;
-    }
+/* Fees */
+.cost-table-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.cost-head { display: grid; gap: var(--space-md); align-content: start; }
+.cost-head .timeline-title { font-size: var(--text-section); }
+.cost-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.cost-table th { text-align: left; font-weight: 400; color: var(--color-muted); padding: var(--space-xs) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-bar) solid var(--color-ink); }
+.cost-table td { padding: var(--space-sm) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink-2); vertical-align: top; }
+.cost-table td:nth-child(2) { color: var(--color-ink); font-weight: 400; }
+.cost-3 .cost-total-row td:nth-child(2) { font-family: inherit; font-size: inherit; color: inherit; font-weight: 600; }
+.cost-3 .cost-total-row td:nth-child(3) { font-family: var(--font-display); font-size: var(--text-xl); color: var(--color-accent); font-weight: 700; }
+.cost-total-row td { border-bottom: 0; border-top: var(--rule-bar) solid var(--color-ink); color: var(--color-ink); font-weight: 600; }
+.cost-total-row td:nth-child(2) { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--color-accent); font-weight: 700; }
+@media (max-width: 600px) {
+  .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
+  .table-wrap thead { display: none; }
+  .table-wrap tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-sm); row-gap: var(--space-2xs); padding-block: var(--space-sm); border-bottom: var(--rule-hair) solid var(--color-rule); }
+  .table-wrap td { padding: 0; border: 0; }
+  .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: var(--text-xs); color: var(--color-muted); }
+  .table-wrap td:nth-child(3) { text-align: right; font-weight: 600; color: var(--color-ink); }
+  .table-wrap td:nth-child(4) { grid-column: 1 / -1; color: var(--color-muted); }
+  .table-wrap td:empty { display: none; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: var(--text-sm); color: var(--color-ink); }
+  .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; text-align: right; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
+  .table-wrap .cost-total-row { border-top: var(--rule-bar) solid var(--color-ink); border-bottom: 0; }
+}
 
-    .map-btn-wrap {
-      margin: 20px 0 32px;
-    }
-    .map-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #ffffff;
-      border: 1.5px solid #cbd5e1;
-      padding: 10px 18px;
-      border-radius: 8px;
-      font-size: 0.88rem;
-      font-weight: 700;
-      color: #0f172a;
-      text-decoration: none;
-      transition: all 0.15s ease;
-    }
-    .map-btn:hover {
-      border-color: var(--color-accent);
-      color: var(--color-accent);
-      background: var(--color-accent-light);
-    }
+/* Tips */
+.tips-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.tips-card .timeline-title { font-size: var(--text-section); align-self: start; }
+.tips-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-md); }
+.tips-list li { padding-bottom: var(--space-md); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.tips-list li:last-child { border-bottom: 0; }
+.tips-list strong { color: var(--color-ink); font-weight: 600; }
 
-    /* 비용표 */
-    .table-wrap {
-      margin: 32px 0 40px;
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      overflow: hidden;
-      background: #ffffff;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.9rem;
-      text-align: left;
-    }
-    thead {
-      background: #f1f5f9;
-      color: var(--color-primary);
-      font-weight: 700;
-    }
-    th, td {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--color-border);
-    }
-    tr:last-child td {
-      border-bottom: none;
-    }
+/* App course */
+.app-course-box { margin-top: var(--section-gap); display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--gap-columns); align-items: end; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-xl); }
+.app-course-box h2 { font-size: var(--text-section); margin-bottom: var(--space-md); }
+.app-course-box p { max-width: 52ch; }
+.app-course-box .app-action { justify-self: end; }
 
-    /* 비용표: 좁은 화면에서는 한 행을 카드 하나로 쌓는다 */
-    @media (max-width: 600px) {
-      .table-wrap { overflow-x: visible; }
-      .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
-      .table-wrap thead { display: none; }
-      .table-wrap tr {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        column-gap: 12px;
-        row-gap: 4px;
-        padding: 14px 16px;
-        border-bottom: 1px solid var(--color-border);
-      }
-      .table-wrap tr:last-child { border-bottom: none; }
-      .table-wrap td { padding: 0; border: none; }
-      .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: 0.78rem; font-weight: 700; color: var(--color-text-sub); }
-      .table-wrap td:nth-child(2) { font-weight: 700; }
-      .table-wrap td:nth-child(3) { max-width: 60vw; word-break: keep-all; text-align: right; font-weight: 700; }
-      .table-wrap td:nth-child(4) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
-      .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: inherit; color: inherit; }
-      .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; max-width: 60vw; word-break: keep-all; text-align: right; }
-      .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
-    }
+.article-credit { margin-top: var(--space-2xl); padding-block: var(--space-md) var(--space-3xl); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); }
 
-    .spot-links {
-      list-style: none;
-      padding: 0;
-      margin: 20px 0 32px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .spot-links li a {
-      color: #0f172a;
-      text-decoration: none;
-      font-size: 0.95rem;
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .spot-links li a:hover {
-      color: var(--color-accent);
-      text-decoration: underline;
-    }
+/* Footer mast */
+.site-footer { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl); }
+.footer-inner { display: grid; gap: var(--space-md); }
+.footer-mark { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1.2; color: var(--color-band-text); }
+.footer-line { color: var(--color-band-muted); font-size: var(--text-sm); }
+.footer-links { display: flex; flex-wrap: wrap; gap: var(--space-lg); }
+.footer-links a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-band-text); font-size: var(--text-sm); text-decoration: underline; text-decoration-color: var(--color-gold); }
+.footer-links a:hover { text-decoration-color: var(--color-accent); color: var(--color-gold-2); }
+.footer-links a:active { transform: translateY(1px); }
+.site-footer :focus-visible { outline-color: var(--color-gold-2); }
 
-    .outro-card {
-      background: #ffffff;
-      border: 1px solid var(--color-border);
-      border-radius: 14px;
-      padding: 26px;
-      margin-top: 40px;
-    }
-    .outro-title {
-      font-size: 1.1rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin-bottom: 12px;
-    }
+@media (max-width: 60rem) {
+  .hero, .spot-section, .spot-section.flip, .cost-table-card, .tips-card, .app-course-box { grid-template-columns: minmax(0, 1fr); }
+  .spot-section, .spot-section.flip { grid-template-areas: "head" "photo" "body"; grid-template-rows: auto; }
+  .spot-section.no-photo { grid-template-areas: "head" "body"; }
+  .hero { padding-block: var(--space-xl) var(--space-xl); }
+  .spot-photo { position: static; aspect-ratio: 16 / 10; }
+  .app-course-box { padding: var(--space-lg); }
+  .app-course-box .app-action { justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn, .link-quiet { transition: none; }
+  .btn:active, .link-quiet:active, .header-nav a:active, .header-logo:active, .footer-links a:active { transform: none; }
+}
 
-    .article-footer {
-      margin-top: 60px;
-      padding-top: 24px;
-      border-top: 1px solid var(--color-border);
-      font-size: 0.85rem;
-      color: var(--color-text-sub);
-      text-align: center;
-      line-height: 1.7;
-    }
-    header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
-    .header-nav a,.header-title a,.blog-tagline a{display:inline-block}
+/* real-photo-flat 계열(평면 글): 번호 있는 긴 장소 제목, 사진 설명, 안내 상자, 지도 목록 */
+.lead-photo { margin: 0 0 var(--space-3xl); }
+.lead-photo img { width: 100%; max-height: 520px; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.lead-photo figcaption, .body-photo figcaption { margin-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.spot-photo figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--space-xs) var(--space-sm); font-size: var(--text-xs); line-height: 1.5; color: var(--color-accent-ink); background: color-mix(in oklab, var(--color-ink) 78%, transparent); }
+.body-photo { margin: 0; }
+.body-photo img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.spot-section.flat .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.tl-lead { max-width: var(--measure); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.guide-box, .order-box { background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); color: var(--color-ink); }
+.guide-box h4, .order-box strong { margin: 0 0 var(--space-xs); font-family: var(--font-display); font-size: var(--text-md); color: var(--color-ink); display: block; }
+.guide-box ul, .order-box ul { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-2xs); }
+.bridge { padding-top: var(--space-xs); color: var(--color-muted); font-size: var(--text-sm); }
+.map-links { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-md); }
+.map-links .timeline-title { font-size: var(--text-section); }
+.map-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-xs); }
+.map-list a, .map-link-chip { display: flex; justify-content: space-between; gap: var(--space-md); align-items: center; min-height: 44px; padding-block: var(--space-xs); border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink); text-decoration: none; }
+.map-links-grid { display: grid; gap: 0; }
+.map-link-chip .btn-action { color: var(--color-accent); font-weight: 600; white-space: nowrap; }
+@media (max-width: 40rem) { .spot-section.flat .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .spot-photo { position: relative; } }
+
+/* spot-card 계열(editor-144): 대표 사진, 요약 상자, 본문 구획, 세부 코스, 이동 연결, 마무리 상자 */
+.hero-figure { margin: 0 0 var(--space-xl); }
+.hero-figure img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.hero-figure figcaption { padding-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-muted); }
+.summary-card { margin-bottom: var(--space-xl); background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-lg); font-size: var(--text-sm); }
+.summary-title, p.timeline-title, .cta-title { font-family: var(--font-display); font-weight: 700; line-height: 1.3; color: var(--color-ink); }
+.summary-title { font-size: var(--text-xl); margin-bottom: var(--space-sm); }
+p.timeline-title { letter-spacing: -0.01em; overflow-wrap: break-word; }
+.summary-list { margin: 0; padding: 0; list-style: none; display: grid; }
+.summary-list li { padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.summary-list li:last-child { border-bottom: 0; }
+.summary-list strong { color: var(--color-ink); font-weight: 600; }
+.prose-section { margin-top: var(--section-gap); max-width: var(--measure); display: grid; gap: var(--space-md); }
+.prose-section h2, .spots-title { font-size: var(--text-title); }
+.stops-section { margin-top: var(--section-gap); }
+.stops-section .spots { padding-top: var(--space-xl); }
+.spots.bridged { gap: 0; }
+.drive-bridge { margin: 0; padding-block: var(--space-xl); padding-left: var(--space-md); border-left: var(--rule-bar) solid var(--color-gold); font-size: var(--text-sm); color: var(--color-muted); }
+.drive-bridge strong { color: var(--color-ink); font-weight: 600; }
+.spot-header:has(.spot-badge) { flex-direction: column; align-items: flex-start; gap: var(--space-xs); }
+.spot-badge { font-size: var(--text-sm); font-weight: 600; color: var(--color-accent); }
+.spot-actions { display: flex; flex-wrap: wrap; gap: 0 var(--space-lg); }
+.info-wide .info-row { grid-template-columns: 5.5em minmax(0, 1fr); }
+.info-wide .info-row.plain { grid-template-columns: minmax(0, 1fr); }
+.cost-head .timeline-title.long { font-size: var(--text-title); }
+.cta-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-sm); max-width: var(--measure); }
+.cta-card h3, .cta-title { font-size: var(--text-title); }
+.cta-card .link-quiet { justify-self: start; }
+
+/* real-photo-grid 계열(editor-145): 사진과 정보 상자가 글 순서대로 이어지는 한 열 장소 구획, 번호 있는 동선, 도입 여러 문단 */
+.prose-intro p + p { margin-top: var(--space-md); }
+.stories { padding-top: var(--space-xl); gap: var(--space-3xl); }
+.story-section { display: grid; gap: var(--space-md); max-width: var(--measure); }
+.story-section .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.story-body { display: grid; gap: var(--space-md); }
+.story-photo { margin: 0; }
+.story-photo img { width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.story-photo figcaption { padding-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.story-photo figcaption span + span::before { content: " · "; }
+.tl-step .tl-badge { margin-bottom: calc(var(--space-2xs) * -1); }
+.tl-meta { display: block; font-style: normal; color: var(--color-gold-2); }
+.app-course-box.early { margin-top: var(--space-xl); }
+.app-course-box .cta-title { font-size: var(--text-section); margin-bottom: var(--space-md); }
+@media (max-width: 40rem) { .story-section .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .route .tl-act:not(:first-child) { margin-top: var(--space-lg); } }
   </style>
 </head>
 <body>
 
   <header class="site-header">
-    <div class="header-inner">
+    <div class="header-inner container">
       <a href="../" class="header-logo">오늘 데이트 <span>매거진</span></a>
       <nav class="header-nav">
         <a href="../../">추천 코스 홈</a>
@@ -431,316 +323,148 @@
   </header>
 
   <main class="article-container">
-    <header class="article-header">
-      <span class="badge">인천 개항장 · 당일 뚜벅이 감성 코스</span>
-      <h1>차이나타운 만다복 하얀짜장부터 대불호텔 전시관, 신포국제시장 닭강정과 자유공원 서해 노을까지 100년 시간 여행 데이트</h1>
-      <div class="meta-info">
-        <span>발행일: 2026년 10월 20일</span>
-        <span>글: 오늘 데이트 에디토리얼 팀 / 사진: 카카오맵 포토 리뷰</span>
-      </div>
-    </header>
+      <header class="article-header hero container">
+        <div class="hero-text">
+          <p class="hero-kicker badge-category"><span>인천 개항장</span><span>당일 뚜벅이 감성 코스</span></p>
+          <h1 class="article-title">차이나타운 만다복 하얀짜장부터 대불호텔 전시관, 신포국제시장 닭강정과 자유공원 서해 노을까지 100년 시간 여행 데이트</h1>
+          <div class="article-meta">
+            <span>발행일: 2026년 10월 20일</span>
+            <span class="meta-credit">글: 오늘 데이트 에디토리얼 팀 / 사진: 카카오맵 포토 리뷰</span>
+          </div>
+          <p><a class="btn" href="../../#c=152.803.1790559759715.3890.153">앱에서 코스 열기</a></p>
+        </div>
+      </header>
 
-    <!-- 인트로 -->
-    <p>
+      <div class="container">
+        <div class="prose-intro"><p>
       복잡한 도심 도로를 운전하거나 주차장을 찾아 헤맬 필요 없이, 지하철에 몸을 싣고 떠나는 인천 개항장 뚜벅이 여행은 가벼운 발걸음으로 100년 전 근대의 낭만을 마주할 수 있는 특별한 데이트예요. 수도권 전철 1호선과 수인분당선의 종착역인 인천역 1번 출구를 나서자마자 마주하는 붉은 홍등과 화려한 누각의 물결은 둘만의 하루를 이국적인 시간 여행으로 물들여줍니다.
     </p>
-    <p>
+        <p>
       140년 역사를 간직한 인천 차이나타운의 다채로운 골목 산책을 시작으로, 화학조미료 없이 재래식 춘장으로 맛을 낸 만다복의 하얀백년짜장 점심을 즐겨보세요. 이어 한국 최초의 서양식 호텔 터 위에 복원된 대불호텔 전시관과 1970년대 추억의 골목을 재현한 중구생활사전시관에서 개항기 근대사를 탐방하고, 신포국제시장의 매콤달콤한 원조신포닭강정으로 든든한 시장 먹거리를 누려봅니다. 하루의 피날레는 대한민국 최초의 서구식 공원인 자유공원 석정루에 올라 붉게 물드는 서해 바다의 환상적인 낙조를 함께 바라보는 완벽한 뚜벅이 하루 코스를 추천해 드립니다.
-    </p>
-
-    <!-- 동선 요약 카드 -->
-    <div class="summary-card">
-      <div class="summary-title">🧭 인천 개항장 & 차이나타운 뚜벅이 데이트 코스 동선</div>
-      <div class="route-steps">
-        <div class="route-step-item">
-          <div class="step-num">1</div>
-          <div>
-            <div class="step-text"><strong>11:30 · 인천 차이나타운</strong></div>
-            <div class="step-note">인천역 1번 출구 도보 1분 (150m) / 패루 중화가부터 붉은 홍등 거리와 삼국지 벽화거리 둘러보기</div>
-          </div>
-        </div>
-        <div class="route-step-item">
-          <div class="step-num">2</div>
-          <div>
-            <div class="step-text"><strong>12:30 · 만다복</strong></div>
-            <div class="step-note">차이나타운 중심 도보 5분 (220m) / 하얀백년짜장과 탕수육 중식 점심</div>
-          </div>
-        </div>
-        <div class="route-step-item">
-          <div class="step-num">3</div>
-          <div>
-            <div class="step-text"><strong>14:00 · 대불호텔 전시관 & 중구생활사전시관</strong></div>
-            <div class="step-note">개항장 거리 도보 6분 (450m) / 한국 최초 서양식 호텔 터와 1960~70년대 레트로 생활사 체험</div>
-          </div>
-        </div>
-        <div class="route-step-item">
-          <div class="step-num">4</div>
-          <div>
-            <div class="step-text"><strong>15:40 · 원조신포닭강정 (신포국제시장)</strong></div>
-            <div class="step-note">신포국제시장 골목 도보 12분 (860m) / 매콤달콤 닭강정</div>
-          </div>
-        </div>
-        <div class="route-step-item">
-          <div class="step-num">5</div>
-          <div>
-            <div class="step-text"><strong>16:45 · 인천 자유공원</strong></div>
-            <div class="step-note">신포시장에서 도보 11분 (860m) / 한국 최초 서구식 공원, 석정루·팔각정에서 내려다보는 서해 낙조 피날레</div>
-          </div>
-        </div>
+    </p></div>
       </div>
-      <div class="route-distance-summary">
-        🚶 <strong>총 보행 거리:</strong> 약 3.3km (순수 걷기 약 45분 / 100% 뚜벅이 코스, 차량 불필요)
-      </div>
-    </div>
 
-    <!-- 1절: 인천 차이나타운 -->
-    <h2>1. 인천 차이나타운, 붉은 홍등과 화려한 누각이 맞이하는 140년 역사의 거리</h2>
-    <p>
+      <!-- 동선 -->
+      <section class="timeline-card band">
+        <div class="container">
+          <p class="timeline-title">인천 개항장 & 차이나타운 뚜벅이 데이트 코스 동선</p>
+          <div class="route" style="--n:5">
+            <div class="tl-step" style="--r:2; --c:1"><span class="tl-badge">1</span><span class="tl-time">11:30</span><span class="tl-place">인천 차이나타운</span><span class="tl-note">인천역 1번 출구 도보 1분 (150m) / 패루 중화가부터 붉은 홍등 거리와 삼국지 벽화거리 둘러보기</span></div>
+            <div class="tl-step" style="--r:2; --c:2"><span class="tl-badge">2</span><span class="tl-time">12:30</span><span class="tl-place">만다복</span><span class="tl-note">차이나타운 중심 도보 5분 (220m) / 하얀백년짜장과 탕수육 중식 점심</span></div>
+            <div class="tl-step" style="--r:2; --c:3"><span class="tl-badge">3</span><span class="tl-time">14:00</span><span class="tl-place">대불호텔 전시관 & 중구생활사전시관</span><span class="tl-note">개항장 거리 도보 6분 (450m) / 한국 최초 서양식 호텔 터와 1960~70년대 레트로 생활사 체험</span></div>
+            <div class="tl-step" style="--r:2; --c:4"><span class="tl-badge">4</span><span class="tl-time">15:40</span><span class="tl-place">원조신포닭강정 (신포국제시장)</span><span class="tl-note">신포국제시장 골목 도보 12분 (860m) / 매콤달콤 닭강정</span></div>
+            <div class="tl-step" style="--r:2; --c:5"><span class="tl-badge">5</span><span class="tl-time">16:45</span><span class="tl-place">인천 자유공원</span><span class="tl-note">신포시장에서 도보 11분 (860m) / 한국 최초 서구식 공원, 석정루·팔각정에서 내려다보는 서해 낙조 피날레</span></div>
+            <div class="tl-total" style="--r:4"><strong>총 보행 거리:</strong> 약 3.3km (순수 걷기 약 45분 / 100% 뚜벅이 코스, 차량 불필요)</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="container">
+        <div class="spots stories">
+          <section class="story-section">
+            <h2 class="spot-title">1. 인천 차이나타운, 붉은 홍등과 화려한 누각이 맞이하는 140년 역사의 거리</h2>
+            <div class="story-body">
+              <p>
       인천 개항장 시간 여행의 출발점은 인천역 1번 출구 맞은편에 당당하게 자리 잡은 중화가 패루를 지나 마주하는 <strong>인천 차이나타운</strong>입니다. 1884년 청국 조계지가 설치되면서 형성된 이곳은 붉은 기둥과 황금빛 치장, 골목마다 나부끼는 붉은 홍등이 어우러져 마치 해외 여행지에 도착한 듯한 이국적인 설렘을 안겨줘요.
     </p>
-
-    <div class="real-photo-card">
-      <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/e95181184680d5312e5cabb6d279add0f7d4603d?original" alt="비 오는 날 인천 차이나타운 거리의 붉은 가로등과 중국풍 건물" loading="lazy">
-      <div class="photo-caption">
-        <span>비 오는 날 인천 차이나타운 거리의 붉은 가로등과 중국풍 건물</span>
-        <span>출처: 카카오맵 포토 리뷰</span>
-      </div>
-    </div>
-
-    <p>
+              <figure class="story-photo">
+              <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/e95181184680d5312e5cabb6d279add0f7d4603d?original" alt="비 오는 날 인천 차이나타운 거리의 붉은 가로등과 중국풍 건물" loading="lazy" />
+              <figcaption><span>비 오는 날 인천 차이나타운 거리의 붉은 가로등과 중국풍 건물</span><span>출처: 카카오맵 포토 리뷰</span></figcaption>
+            </figure>
+              <p>
       인천역에서 도보 1분이면 들어서는 완만한 언덕길을 따라 걷다 보면 전통 중국식 가옥과 대형 중식당들이 화려하게 펼쳐집니다. 한국 최초의 화교 사당인 의선당과 유비·관우·장비의 흥미진진한 고사가 벽화로 이어진 삼국지 벽화거리, 알록달록한 동화마을 골목까지 나란히 이어져 있어 두 손을 잡고 산책하며 다정한 커플 사진을 남기기에 참 좋아요.
     </p>
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">인천 제물포구 북성동2가 14</span></div><div class="info-row"><span class="info-label">접근성</span><span class="info-val">지하철 1호선·수인분당선 인천역 1번 출구 도보 1분 (150m)</span></div><div class="info-row"><span class="info-label">관람시간</span><span class="info-val">거리 연중 24시간 상시 개방 (연중무휴)</span></div><div class="info-row"><span class="info-label">입장료</span><span class="info-val">거리 관람 전면 무료</span></div></div>
+              <div class="tip-box"><strong class="tip-title">에디터 추천 팁</strong>차이나타운 중심부는 완만한 언덕길로 이어지므로 편안한 운동화나 단화를 신고 방문하시는 것이 좋아요. 청일조계지 경계 계단에 올라서면 왼쪽의 청나라 양식 석등과 오른쪽의 일본식 석등이 중앙 난간을 사이에 두고 확연히 나뉘는 독특한 역사의 현장을 한눈에 관찰할 수 있습니다.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%EC%9D%B8%EC%B2%9C%20%EC%B0%A8%EC%9D%B4%EB%82%98%ED%83%80%EC%9A%B4" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도로 인천 차이나타운 확인하기</a></div>
+            </div>
+          </section>
 
-    <div class="info-grid">
-      <div class="info-item">
-        <span class="info-label">주소</span>
-        <span class="info-val">인천 제물포구 북성동2가 14</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">접근성</span>
-        <span class="info-val">지하철 1호선·수인분당선 인천역 1번 출구 도보 1분 (150m)</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">관람시간</span>
-        <span class="info-val">거리 연중 24시간 상시 개방 (연중무휴)</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">입장료</span>
-        <span class="info-val">거리 관람 전면 무료</span>
-      </div>
-    </div>
-
-    <div class="tip-box">
-      <div class="tip-title">💡 에디터 추천 팁</div>
-      차이나타운 중심부는 완만한 언덕길로 이어지므로 편안한 운동화나 단화를 신고 방문하시는 것이 좋아요. 청일조계지 경계 계단에 올라서면 왼쪽의 청나라 양식 석등과 오른쪽의 일본식 석등이 중앙 난간을 사이에 두고 확연히 나뉘는 독특한 역사의 현장을 한눈에 관찰할 수 있습니다.
-    </div>
-
-    <div class="map-btn-wrap">
-      <a href="https://map.naver.com/p/search/%EC%9D%B8%EC%B2%9C%20%EC%B0%A8%EC%9D%B4%EB%82%98%ED%83%80%EC%9A%B4" target="_blank" rel="noopener noreferrer" class="map-btn">
-        🧭 네이버 지도로 인천 차이나타운 확인하기
-      </a>
-    </div>
-
-    <!-- 2절: 만다복 -->
-    <h2>2. 만다복, 재래식 춘장으로 맛을 낸 하얀백년짜장</h2>
-    <p>
+          <section class="story-section">
+            <h2 class="spot-title">2. 만다복, 재래식 춘장으로 맛을 낸 하얀백년짜장</h2>
+            <div class="story-body">
+              <p>
       차이나타운 중심 거리를 따라 약 5분(거리 220m) 정도 걸음을 옮기면, 웅장한 중국식 청벽돌 외관으로 고풍스러운 멋을 풍기는 전통 중식당 <strong>만다복</strong>에 도착합니다. 100년 전 화학조미료가 없던 시절의 짜장 조리법을 재현한 백년짜장으로 알려진 중식당이에요.
     </p>
-
-    <div class="real-photo-card">
-      <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/ebd86b7ffc4be824454e7fea232b9e40e52d3223?original" alt="만다복 현판과 출입문" loading="lazy">
-      <div class="photo-caption">
-        <span>만다복 현판과 출입문</span>
-        <span>출처: 카카오맵 포토 리뷰</span>
-      </div>
-    </div>
-
-    <p>
+              <figure class="story-photo">
+              <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/ebd86b7ffc4be824454e7fea232b9e40e52d3223?original" alt="만다복 현판과 출입문" loading="lazy" />
+              <figcaption><span>만다복 현판과 출입문</span><span>출처: 카카오맵 포토 리뷰</span></figcaption>
+            </figure>
+              <p>
       이곳의 대표 메뉴인 '하얀백년짜장'은 화학조미료를 넣지 않은 재래식 중국 전통 춘장으로 맛을 낸 짜장면이에요. 다진 고기 소스와 함께 나오는 맑은 닭육수, 간마늘을 취향에 맞춰 2~3스푼 부어 비벼 먹으면 은은하면서도 깊은 감칠맛이 입안 가득 감돌아요. 자극적인 단맛이나 기름진 느끼함 없이 담백하고 고소한 풍미가 일품이며, 바삭하게 튀겨내 새콤달콤한 소스를 곁들인 탕수육을 함께 나누면 든든하고 만족스러운 점심 식사가 완성됩니다.
     </p>
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">인천 제물포구 차이나타운로 36</span></div><div class="info-row"><span class="info-label">영업시간</span><span class="info-val">월 ~ 금 11:00 ~ 21:30, 토·일 10:30 ~ 21:30 (라스트오더 20:40 / 카카오맵 기준)</span></div><div class="info-row"><span class="info-label">대표메뉴</span><span class="info-val">하얀백년짜장 8,000원 / 백년짜장 8,000원 / 탕수육 24,000원 (네이버 플레이스 메뉴, 2026-11-01 확인)</span></div><div class="info-row"><span class="info-label">접근성</span><span class="info-val">차이나타운 중심부 위치, 인천역 1번 출구 도보 5분</span></div></div>
+              <div class="tip-box"><strong class="tip-title">에디터 추천 팁</strong>주말 점심시간에는 대기 줄이 길어질 수 있으니 11시 30분 이전이나 13시 30분 이후에 방문하시면 한결 여유롭게 식사하실 수 있어요. 하얀백년짜장을 비빌 때는 육수를 한 번에 다 붓지 말고 2스푼 정도 먼저 넣어 면을 촉촉하게 풀어준 뒤, 고기 소스의 질감을 음미하며 드시는 것을 권장해 드립니다.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%EB%A7%8C%EB%8B%A4%EB%B3%B5" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도로 만다복 확인하기</a></div>
+            </div>
+          </section>
 
-    <div class="info-grid">
-      <div class="info-item">
-        <span class="info-label">주소</span>
-        <span class="info-val">인천 제물포구 차이나타운로 36</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">영업시간</span>
-        <span class="info-val">월 ~ 금 11:00 ~ 21:30, 토·일 10:30 ~ 21:30 (라스트오더 20:40 / 카카오맵 기준)</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">대표메뉴</span>
-        <span class="info-val">하얀백년짜장 8,000원 / 백년짜장 8,000원 / 탕수육 24,000원 (네이버 플레이스 메뉴, 2026-11-01 확인)</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">접근성</span>
-        <span class="info-val">차이나타운 중심부 위치, 인천역 1번 출구 도보 5분</span>
-      </div>
-    </div>
-
-    <div class="tip-box">
-      <div class="tip-title">💡 에디터 추천 팁</div>
-      주말 점심시간에는 대기 줄이 길어질 수 있으니 11시 30분 이전이나 13시 30분 이후에 방문하시면 한결 여유롭게 식사하실 수 있어요. 하얀백년짜장을 비빌 때는 육수를 한 번에 다 붓지 말고 2스푼 정도 먼저 넣어 면을 촉촉하게 풀어준 뒤, 고기 소스의 질감을 음미하며 드시는 것을 권장해 드립니다.
-    </div>
-
-    <div class="map-btn-wrap">
-      <a href="https://map.naver.com/p/search/%EB%A7%8C%EB%8B%A4%EB%B3%B5" target="_blank" rel="noopener noreferrer" class="map-btn">
-        🧭 네이버 지도로 만다복 확인하기
-      </a>
-    </div>
-
-    <!-- 3절: 대불호텔 전시관 -->
-    <h2>3. 대불호텔 전시관 & 중구생활사전시관, 한국 최초 서양식 호텔 터와 레트로 감성 골목</h2>
-    <p>
+          <section class="story-section">
+            <h2 class="spot-title">3. 대불호텔 전시관 & 중구생활사전시관, 한국 최초 서양식 호텔 터와 레트로 감성 골목</h2>
+            <div class="story-body">
+              <p>
       만다복에서 맛있는 점심을 즐긴 뒤 청일조계지 경계 계단을 내려와 개항장 문화지구 거리로 약 6분(거리 450m) 정도 걸어가면, 고풍스러운 붉은 벽돌의 3층 건축물 <strong>대불호텔 전시관</strong>을 만날 수 있습니다. 개항기 인천항에 도착한 외국 외교관과 선교사들이 서울로 이동하기 전 머물던 대한민국 최초의 서양식 호텔 터 위에 복원된 뜻깊은 근대 문화유산이에요.
     </p>
-
-    <div class="real-photo-card">
-      <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/cedf4bcc2d9c87f0ce4ebf9af8d821b5f0f1cc0f?original" alt="대불호텔 전시관 안 재현 객실의 찬장과 샹들리에" loading="lazy">
-      <div class="photo-caption">
-        <span>대불호텔 전시관 안 재현 객실의 찬장과 샹들리에</span>
-        <span>출처: 카카오맵 포토 리뷰</span>
-      </div>
-    </div>
-
-    <p>
+              <figure class="story-photo">
+              <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/cedf4bcc2d9c87f0ce4ebf9af8d821b5f0f1cc0f?original" alt="대불호텔 전시관 안 재현 객실의 찬장과 샹들리에" loading="lazy" />
+              <figcaption><span>대불호텔 전시관 안 재현 객실의 찬장과 샹들리에</span><span>출처: 카카오맵 포토 리뷰</span></figcaption>
+            </figure>
+              <p>
       전시관에서는 실제 발굴된 대불호텔의 붉은 벽돌 초석과 개항기 호텔 역사를 살펴볼 수 있어요. 바로 옆 <strong>중구생활사전시관</strong>에는 1960~70년대 인천 중구의 옛 이발소, 극장, 음악다방, 달동네 골목길 풍경이 정교하게 펼쳐져요. 복고풍 소품과 옛 교복, 레트로 골목길을 배경으로 아기자기하고 정다운 기념사진을 남기며 시간 여행의 즐거움을 만끽할 수 있습니다.
     </p>
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">인천 제물포구 신포로23번길 101</span></div><div class="info-row"><span class="info-label">관람시간</span><span class="info-val">화 ~ 일 09:00 ~ 18:00 (입장 마감 17:30 / 매주 월요일 휴관)</span></div><div class="info-row"><span class="info-label">관람료</span><span class="info-val">대불호텔 전시관, 중구생활사전시관 성인 각 1,000원 (<a href="https://www.ktriptips.com/kor/culture/2994530" target="_blank" rel="noopener noreferrer">TourAPI</a>) / 5개관 통합관람 성인 3,400원 (카카오맵 기준)</span></div><div class="info-row"><span class="info-label">이웃 전시관</span><span class="info-val">중구생활사전시관 (신포로23번길 97, 바로 옆 건물)</span></div></div>
+              <div class="tip-box"><strong class="tip-title">에디터 추천 팁</strong>두 전시관은 성인 각 1,000원이라 둘 다 봐도 1인 2,000원이에요. 중구생활사전시관의 옛 음악다방 부스와 골목길 이발소 세트장은 은은한 조명 덕분에 레트로 감성의 커플 사진이 특히 예쁘게 나오는 명당입니다.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%EB%8C%80%EB%B6%88%ED%98%B8%ED%85%94%20%EC%A0%84%EC%8B%9C%EA%B4%80" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도로 대불호텔 전시관 확인하기</a></div>
+            </div>
+          </section>
 
-    <div class="info-grid">
-      <div class="info-item">
-        <span class="info-label">주소</span>
-        <span class="info-val">인천 제물포구 신포로23번길 101</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">관람시간</span>
-        <span class="info-val">화 ~ 일 09:00 ~ 18:00 (입장 마감 17:30 / 매주 월요일 휴관)</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">관람료</span>
-        <span class="info-val">대불호텔 전시관, 중구생활사전시관 성인 각 1,000원 (<a href="https://www.ktriptips.com/kor/culture/2994530" target="_blank" rel="noopener noreferrer">TourAPI</a>) / 5개관 통합관람 성인 3,400원 (카카오맵 기준)</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">이웃 전시관</span>
-        <span class="info-val">중구생활사전시관 (신포로23번길 97, 바로 옆 건물)</span>
-      </div>
-    </div>
-
-    <div class="tip-box">
-      <div class="tip-title">💡 에디터 추천 팁</div>
-      두 전시관은 성인 각 1,000원이라 둘 다 봐도 1인 2,000원이에요. 중구생활사전시관의 옛 음악다방 부스와 골목길 이발소 세트장은 은은한 조명 덕분에 레트로 감성의 커플 사진이 특히 예쁘게 나오는 명당입니다.
-    </div>
-
-    <div class="map-btn-wrap">
-      <a href="https://map.naver.com/p/search/%EB%8C%80%EB%B6%88%ED%98%B8%ED%85%94%20%EC%A0%84%EC%8B%9C%EA%B4%80" target="_blank" rel="noopener noreferrer" class="map-btn">
-        🧭 네이버 지도로 대불호텔 전시관 확인하기
-      </a>
-    </div>
-
-    <!-- 4절: 원조신포닭강정 -->
-    <h2>4. 원조신포닭강정, 매콤달콤한 닭강정과 신포국제시장 먹거리</h2>
-    <p>
+          <section class="story-section">
+            <h2 class="spot-title">4. 원조신포닭강정, 매콤달콤한 닭강정과 신포국제시장 먹거리</h2>
+            <div class="story-body">
+              <p>
       개항장 거리의 아기자기한 공방과 카페들을 구경하며 동쪽으로 약 12분(거리 860m) 정도 걸어가면, 인천의 대표 전통시장 <strong>신포국제시장</strong>에 닿습니다. 시장 입구에 들어서는 순간 고소한 기름 냄새와 달콤하고 알싸한 양념 향기가 코끝을 스치며 활기찬 시장 분위기를 전해줘요.
     </p>
-
-    <div class="real-photo-card">
-      <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/50d51713e76444815b55ebe5e788bf9a6f54fbf9?original" alt="신포국제시장 명물 원조신포닭강정 매콤달콤한 닭강정 비주얼" loading="lazy">
-      <div class="photo-caption">
-        <span>신포국제시장 명물 원조신포닭강정 매콤달콤한 닭강정 비주얼</span>
-        <span>출처: 카카오맵 포토 리뷰</span>
-      </div>
-    </div>
-
-    <p>
+              <figure class="story-photo">
+              <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/50d51713e76444815b55ebe5e788bf9a6f54fbf9?original" alt="신포국제시장 명물 원조신포닭강정 매콤달콤한 닭강정 비주얼" loading="lazy" />
+              <figcaption><span>신포국제시장 명물 원조신포닭강정 매콤달콤한 닭강정 비주얼</span><span>출처: 카카오맵 포토 리뷰</span></figcaption>
+            </figure>
+              <p>
       <strong>원조신포닭강정</strong>은 바삭하게 튀겨낸 닭고기를 고추를 넣은 매콤달콤한 소스에 버무려 내는 닭강정집이에요. 바삭바삭한 튀김옷 위로 윤기가 흐르는 매콤달콤한 소스가 쫀득하게 코팅되어 있어, 한 입 베어 물면 겉은 바삭하고 속은 부드러운 육즙이 입안 가득 번져요. 매장 안 홀에서 시원한 음료와 함께 갓 튀긴 닭강정을 편안하게 맛보고, 시장 골목길의 바삭한 공갈빵이나 에그타르트를 후식으로 즐기며 풍성한 시장의 온정을 느껴보세요.
     </p>
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">인천 제물포구 우현로49번길 3</span></div><div class="info-row"><span class="info-label">영업시간</span><span class="info-val">화 ~ 일 10:30 ~ 20:00 (매주 월요일 휴무 / 카카오맵 기준)</span></div><div class="info-row"><span class="info-label">대표메뉴</span><span class="info-val">닭강정 중 20,000원 / 닭강정 대 26,000원 / 후라이드 중 20,000원 (카카오맵 메뉴, 2026-07-10 갱신)</span></div><div class="info-row"><span class="info-label">접근성</span><span class="info-val">신포국제시장 닭강정 골목 입구 위치 (신포역 도보 5분)</span></div></div>
+              <div class="tip-box"><strong class="tip-title">에디터 추천 팁</strong>매콤한 청양고추 양념이 알싸한 편이므로 아삭한 치킨무와 함께 곁들이시거나, 매운맛을 달래줄 달콤한 시장 디저트를 미리 준비하시는 것도 좋은 방법입니다.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%EC%9B%90%EC%A1%B0%EC%8B%A0%ED%8F%AC%EB%8B%AD%EA%B0%95%EC%A0%95" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도로 원조신포닭강정 확인하기</a></div>
+            </div>
+          </section>
 
-    <div class="info-grid">
-      <div class="info-item">
-        <span class="info-label">주소</span>
-        <span class="info-val">인천 제물포구 우현로49번길 3</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">영업시간</span>
-        <span class="info-val">화 ~ 일 10:30 ~ 20:00 (매주 월요일 휴무 / 카카오맵 기준)</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">대표메뉴</span>
-        <span class="info-val">닭강정 중 20,000원 / 닭강정 대 26,000원 / 후라이드 중 20,000원 (카카오맵 메뉴, 2026-07-10 갱신)</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">접근성</span>
-        <span class="info-val">신포국제시장 닭강정 골목 입구 위치 (신포역 도보 5분)</span>
-      </div>
-    </div>
-
-    <div class="tip-box">
-      <div class="tip-title">💡 에디터 추천 팁</div>
-      매콤한 청양고추 양념이 알싸한 편이므로 아삭한 치킨무와 함께 곁들이시거나, 매운맛을 달래줄 달콤한 시장 디저트를 미리 준비하시는 것도 좋은 방법입니다.
-    </div>
-
-    <div class="map-btn-wrap">
-      <a href="https://map.naver.com/p/search/%EC%9B%90%EC%A1%B0%EC%8B%A0%ED%8F%AC%EB%8B%AD%EA%B0%95%EC%A0%95" target="_blank" rel="noopener noreferrer" class="map-btn">
-        🧭 네이버 지도로 원조신포닭강정 확인하기
-      </a>
-    </div>
-
-    <!-- 5절: 인천 자유공원 -->
-    <h2>5. 인천 자유공원, 대한민국 최초의 근대식 서구 공원에서 마주하는 서해 바다 낙조</h2>
-    <p>
+          <section class="story-section">
+            <h2 class="spot-title">5. 인천 자유공원, 대한민국 최초의 근대식 서구 공원에서 마주하는 서해 바다 낙조</h2>
+            <div class="story-body">
+              <p>
       신포시장에서 맛있는 간식을 즐긴 뒤 홍예문 방면의 호젓한 오르막길을 따라 약 11분(거리 860m) 정도 걸어 오르면, 응봉산 자락에 아늑하게 자리 잡은 <strong>인천 자유공원</strong>에 도착합니다. 1888년 개항 당시 각국 조계지에 머물던 외국인들이 함께 힘을 모아 조성한 대한민국 최초의 서구식 근대 공원으로, 당시에는 '만국공원'으로 불렸던 유서 깊은 도심 숲이에요.
     </p>
-
-    <div class="real-photo-card">
-      <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/adf137b3d6e640bbe852616214b61c5a984fc123?original" alt="인천 자유공원 맥아더 장군 동상과 봄 꽃나무" loading="lazy">
-      <div class="photo-caption">
-        <span>인천 자유공원 맥아더 장군 동상과 봄 꽃나무</span>
-        <span>출처: 카카오맵 포토 리뷰</span>
-      </div>
-    </div>
-
-    <p>
+              <figure class="story-photo">
+              <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/adf137b3d6e640bbe852616214b61c5a984fc123?original" alt="인천 자유공원 맥아더 장군 동상과 봄 꽃나무" loading="lazy" />
+              <figcaption><span>인천 자유공원 맥아더 장군 동상과 봄 꽃나무</span><span>출처: 카카오맵 포토 리뷰</span></figcaption>
+            </figure>
+              <p>
       키 큰 플라타너스와 벚나무 가로수길을 따라 걷다 보면 정상부에 자리한 2층 전통 누각 '석정루'와 팔각정에 다다르게 됩니다. 석정루 난간에 기대어 서면 시원한 바닷바람과 함께 인천항 갑문과 서해 바다, 멀리 월미도가 파노라마처럼 시원하게 눈앞에 펼쳐져요. 늦은 오후 해 질 녘 서쪽 하늘과 바다가 붉은 주황빛과 감미로운 보랏빛으로 물들어가는 석양은 뚜벅이 데이트의 피날레를 가장 로맨틱하게 장식해 줍니다. 해가 진 뒤 은은한 불빛이 켜지는 개항장 골목과 부두 크레인의 야경을 감상하며 완만한 내리막길을 10분만 걸어 내려오면 다시 인천역 1번 출구에 닿아 귀가도 매우 편리해요.
     </p>
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">인천 제물포구 송학동1가 11-1</span></div><div class="info-row"><span class="info-label">관람시간</span><span class="info-val">연중 24시간 상시 개방 (연중무휴)</span></div><div class="info-row"><span class="info-label">입장료</span><span class="info-val">전 구역 무료 개방</span></div><div class="info-row"><span class="info-label">교통편</span><span class="info-val">자유공원 광장에서 인천역 1번 출구까지 도보 10분 하산</span></div></div>
+              <div class="tip-box"><strong class="tip-title">에디터 추천 팁</strong>자유공원 내에서 바다 조망이 가장 탁월한 포인트는 바로 2층 누각 '석정루'예요. 일몰 시각 30분 전에 미리 도착해 벤치에 나란히 앉아 서해 쪽으로 지는 해를 감상해 보세요. 자유공원 일몰은 11월 1일 약 17:36, 11월 15일 약 17:23, 11월 30일 약 17:16이에요(NOAA 계산식). 공원에서 내려올 때는 근대 석조 아치 터널인 '홍예문' 길을 따라 걸으시면 은은한 가로등 불빛 아래 운치 있는 밤길 산책을 즐기실 수 있습니다.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%EC%9D%B8%EC%B2%9C%20%EC%9E%90%EC%9C%A0%EA%B3%B5%EC%9B%90" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도로 인천 자유공원 확인하기</a></div>
+            </div>
+          </section>
+        </div>
 
-    <div class="info-grid">
-      <div class="info-item">
-        <span class="info-label">주소</span>
-        <span class="info-val">인천 제물포구 송학동1가 11-1</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">관람시간</span>
-        <span class="info-val">연중 24시간 상시 개방 (연중무휴)</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">입장료</span>
-        <span class="info-val">전 구역 무료 개방</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">교통편</span>
-        <span class="info-val">자유공원 광장에서 인천역 1번 출구까지 도보 10분 하산</span>
-      </div>
-    </div>
-
-    <div class="tip-box">
-      <div class="tip-title">💡 에디터 추천 팁</div>
-      자유공원 내에서 바다 조망이 가장 탁월한 포인트는 바로 2층 누각 '석정루'예요. 일몰 시각 30분 전에 미리 도착해 벤치에 나란히 앉아 서해 쪽으로 지는 해를 감상해 보세요. 자유공원 일몰은 11월 1일 약 17:36, 11월 15일 약 17:23, 11월 30일 약 17:16이에요(NOAA 계산식). 공원에서 내려올 때는 근대 석조 아치 터널인 '홍예문' 길을 따라 걸으시면 은은한 가로등 불빛 아래 운치 있는 밤길 산책을 즐기실 수 있습니다.
-    </div>
-
-    <div class="map-btn-wrap">
-      <a href="https://map.naver.com/p/search/%EC%9D%B8%EC%B2%9C%20%EC%9E%90%EC%9C%A0%EA%B3%B5%EC%9B%90" target="_blank" rel="noopener noreferrer" class="map-btn">
-        🧭 네이버 지도로 인천 자유공원 확인하기
-      </a>
-    </div>
-
-    <!-- 비용표 -->
-    <h2>💰 인천 개항장 뚜벅이 데이트 2인 예상 여행 경비 정산표</h2>
-    <p>
+        <section class="cost-table-card">
+          <div class="cost-head">
+            <h2 class="timeline-title">인천 개항장 뚜벅이 데이트 2인 예상 여행 경비 정산표</h2>
+            <p>
       인천 차이나타운 골목 산책부터 만다복 하얀백년짜장 점심, 대불호텔 전시관 역사 관람, 신포국제시장 닭강정 간식과 자유공원 서해 노을까지 알차게 즐기는 2인 기준 예상 경비 내역이에요. 지하철 대중교통으로 손쉽게 다녀올 수 있고 골목과 공원 산책이 전면 무료로 개방되어 있어 6만 원대 예산으로 풍성하고 낭만적인 하루를 완성할 수 있습니다.
     </p>
-
-    <div class="table-wrap">
-      <table>
+          </div>
+          <div class="table-wrap"><table class="cost-table">
         <thead>
           <tr>
             <th>구분</th>
@@ -774,44 +498,48 @@
             <td>0원</td>
             <td>거리 및 공원 전 구역 무료 개방 / 상시 관람</td>
           </tr>
-          <tr style="background-color: #f8fafc; font-weight: 700;">
+          <tr class="cost-total-row">
             <td colspan="2">2인 총 예상 경비 합계</td>
-            <td style="color: var(--color-warm);">64,000원</td>
+            <td>64,000원</td>
             <td>지하철 교통비 제외 현장 지출 기준 (1인 32,000원)</td>
           </tr>
         </tbody>
-      </table>
-    </div>
+      </table></div>
+        </section>
 
-    <!-- 추천 스팟 네이버 지도 목록 -->
-    <h2>📍 코스 추천 스팟 네이버 지도 바로가기</h2>
-    <ul class="spot-links">
+        <section class="map-links">
+          <h2 class="timeline-title">코스 추천 스팟 네이버 지도 바로가기</h2>
+          <ul class="map-list">
       <li><a href="https://map.naver.com/p/search/%EC%9D%B8%EC%B2%9C%20%EC%B0%A8%EC%9D%B4%EB%82%98%ED%83%80%EC%9A%B4" target="_blank" rel="noopener noreferrer">🧭 인천 차이나타운 (인천 제물포구 북성동2가 14)</a></li>
       <li><a href="https://map.naver.com/p/search/%EB%A7%8C%EB%8B%A4%EB%B3%B5" target="_blank" rel="noopener noreferrer">🧭 만다복 (인천 제물포구 차이나타운로 36)</a></li>
       <li><a href="https://map.naver.com/p/search/%EB%8C%80%EB%B6%88%ED%98%B8%ED%85%94%20%EC%A0%84%EC%8B%9C%EA%B4%80" target="_blank" rel="noopener noreferrer">🧭 대불호텔 전시관 & 중구생활사전시관 (인천 제물포구 신포로23번길 101)</a></li>
       <li><a href="https://map.naver.com/p/search/%EC%9B%90%EC%A1%B0%EC%8B%A0%ED%8F%AC%EB%8B%AD%EA%B0%95%EC%A0%95" target="_blank" rel="noopener noreferrer">🧭 원조신포닭강정 (인천 제물포구 우현로49번길 3)</a></li>
       <li><a href="https://map.naver.com/p/search/%EC%9D%B8%EC%B2%9C%20%EC%9E%90%EC%9C%A0%EA%B3%B5%EC%9B%90" target="_blank" rel="noopener noreferrer">🧭 인천 자유공원 (인천 제물포구 송학동1가 11-1)</a></li>
     </ul>
+        </section>
 
-    <section class="outro-card">
-      <div class="outro-title">✨ 오늘 데이트 에디토리얼 팀 총평</div>
-      <p style="margin-bottom: 0;">
+        <div class="cta-card">
+          <p class="cta-title">오늘 데이트 에디토리얼 팀 총평</p>
+          <p>
         인천 개항장과 차이나타운 일대는 복잡한 운전이나 주차 걱정 없이, 지하철 인천역에서 내려 가벼운 발걸음으로 100년 전 근대의 숨결을 고스란히 느낄 수 있는 서울 근교 최고의 뚜벅이 데이트 명소예요. 붉은 홍등이 반기는 이국적인 차이나타운 골목부터 은은하고 담백한 전통 하얀백년짜장의 미식, 한국 최초 서양식 호텔의 우아한 건축미와 1970년대 추억의 골목길 체험, 신포국제시장의 바삭한 닭강정, 그리고 대한민국 최초의 근대 공원에서 마주하는 눈부신 서해 낙조까지 하루 동안 만나는 모든 풍경이 한 편의 시간 여행처럼 낭만적으로 다가옵니다. 이번 주말, 소중한 사람의 손을 잡고 지하철에 몸을 실어 100년 역사의 향기가 깃든 인천 개항장으로 감성 뚜벅이 여행을 떠나보시길 적극 추천해 드려요.
       </p>
-    </section>
+        </div>
 
-    <div class="app-course-box" style="margin: 40px 0 24px; padding: 20px 22px; background: var(--color-accent-light); border: 1px solid var(--color-border); border-radius: 14px;">
-      <strong style="display: block; font-size: 17px; color: var(--color-text-main); margin-bottom: 6px;">🗺️ 이 코스 오늘 데이트에서 열기</strong>
-      <p style="margin: 0 0 14px; font-size: 14.5px; line-height: 1.6; color: var(--color-text-main);">글에 나온 장소 5곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
-      <a href="../../#c=152.803.1790559759715.3890.153" style="display: inline-block; padding: 10px 18px; border-radius: 10px; background: var(--color-text-main); color: #ffffff; font-weight: 700; font-size: 15px; text-decoration: none;">앱에서 코스 열기 →</a>
-    </div>
+        <div class="app-course-box">
+          <div>
+            <h2>이 코스 오늘 데이트에서 열기</h2>
+            <p>글에 나온 장소 5곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
+          </div>
+          <a class="btn app-action" href="../../#c=152.803.1790559759715.3890.153">앱에서 코스 열기</a>
+        </div>
 
-    <footer class="article-footer">
-      <p>글: 오늘 데이트 에디토리얼 팀 / 사진: 카카오맵 포토 리뷰</p>
-      <p style="margin-top: 6px;">본 콘텐츠는 오늘 데이트 에디토리얼 팀에서 공개 데이터를 기반으로 기획·작성하였습니다.</p>
-      <p style="margin-top: 6px;">© 2026 오늘 데이트 (Oneul Date). 전국 엄선 스팟 데이터를 바탕으로 제작되었습니다.</p>
-    </footer>
-  </main>
+        <footer class="article-credit">
+          <p>글: 오늘 데이트 에디토리얼 팀 / 사진: 카카오맵 포토 리뷰</p>
+      <p>본 콘텐츠는 오늘 데이트 에디토리얼 팀에서 공개 데이터를 기반으로 기획·작성하였습니다.</p>
+      <p>© 2026 오늘 데이트 (Oneul Date). 전국 엄선 스팟 데이터를 바탕으로 제작되었습니다.</p>
+        </footer>
+      </div>
+    </main>
 
 </body>
 </html>

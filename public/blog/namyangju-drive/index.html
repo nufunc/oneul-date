@@ -16,6 +16,9 @@
 
   <!-- Pretendard 웹폰트 -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700&display=swap&text=%26()%2B%2C.%2F0123456789%3A~%EA%B0%80%EA%B0%95%EA%B1%B0%EA%B2%8C%EA%B2%B0%EA%B2%BD%EA%B3%84%EA%B3%B3%EA%B3%B5%EA%B3%BC%EA%B8%B0%EA%B9%8C%EB%82%A8%EB%82%AD%EB%82%B8%EB%84%88%EB%84%A4%EB%85%81%EB%85%B8%EB%8A%94%EB%8A%98%EB%8B%9D%EB%8B%A4%EB%8B%B9%EB%8D%B0%EB%8F%84%EB%8F%99%EB%93%9C%EB%94%94%EB%9D%BC%EB%9E%8C%EB%9F%AC%EB%A1%9C%EB%A5%98%EB%A6%AC%EB%A7%81%EB%A7%88%EB%A7%8C%EB%A7%A4%EB%A7%A8%EB%A8%B8%EB%AC%BC%EB%B0%94%EB%B2%84%EB%B2%A0%EB%B2%BD%EB%B3%80%EB%B3%84%EB%B6%80%EB%B6%81%EB%B6%84%EB%B6%89%EB%B7%B0%EB%B8%8C%EB%B9%84%EB%B9%9A%EC%82%B0%EC%83%81%EC%83%88%EC%83%9D%EC%84%9C%EC%84%A0%EC%88%98%EC%88%A8%EC%8A%A4%EC%8B%9C%EC%8B%AC%EC%95%88%EC%95%A4%EC%95%BC%EC%96%91%EC%96%B4%EC%96%BC%EC%97%90%EC%97%A0%EC%97%AC%EC%97%B4%EC%98%88%EC%98%A4%EC%98%A8%EC%99%80%EC%9B%90%EC%9C%A0%EC%9D%84%EC%9D%98%EC%9D%B4%EC%9D%B8%EC%A0%80%EC%A0%95%EC%A3%BC%EC%A7%80%EC%A7%84%EC%AA%BD%EC%B0%BD%EC%B2%9C%EC%B3%90%EC%B4%9D%EC%B6%94%EC%B9%9C%EC%B9%B4%EC%BB%A4%EC%BD%94%ED%82%A4%ED%83%88%ED%83%9C%ED%84%B0%ED%86%A0%ED%86%B5%ED%8A%B8%ED%8B%B1%ED%8C%80%ED%8C%94%ED%8C%9F%ED%8E%98%ED%8E%BC%ED%8F%89%ED%8F%AC%ED%91%9C%ED%95%98%ED%95%9C%ED%95%A9%ED%96%89%ED%9E%90" rel="stylesheet">
 
   <script type="application/ld+json">
 {
@@ -43,384 +46,274 @@
   </script>
 
   <style>
-    :root {
-      --color-primary: #1e293b;
-      --color-accent: #059669;
-      --color-accent-light: #ecfdf5;
-      --color-text-main: #334155;
-      --color-text-sub: #64748b;
-      --color-border: #e2e8f0;
-      --color-bg-page: #f8fafc;
-      --color-card-bg: #ffffff;
-      --color-warm: #d97706;
-      --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-    }
+/* hallmark-solstice: scripts/convert_blog_hallmark.mjs가 글의 <style>을 이 파일로 바꾼다 (Hallmark 2.0.0, 테마 Solstice, P-293) */
+:root {
+  color-scheme: light;
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-xs: 0.8125rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.125rem; --text-xl: 1.5625rem; --text-2xl: 1.953rem; --text-3xl: 2.441rem;
+  --text-hero: clamp(1.75rem, 1.6vw + 1.25rem, 2.75rem);
+  --text-section: clamp(1.75rem, 1.8vw + 1rem, 2.875rem); --text-title: clamp(1.25rem, 0.75vw + 0.875rem, 1.625rem); --text-lead: clamp(1.0625rem, 0.3vw + 0.95rem, 1.25rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-micro: 120ms; --dur-short: 220ms;
+  --container: 1200px; --measure: 680px; --gutter: 56px; --gap-columns: 40px; --section-gap: 120px;
+  --z-sticky-nav: 300;
+  --color-paper: oklch(94% 0.03 80); --color-paper-2: oklch(97% 0.02 85); --color-paper-3: oklch(89% 0.05 80);
+  --color-ink: oklch(27% 0.05 50); --color-ink-2: oklch(36% 0.05 50); --color-muted: oklch(48% 0.06 55);
+  --color-rule: oklch(84% 0.06 78);
+  --color-accent: oklch(54% 0.20 24); --color-accent-2: oklch(48% 0.19 24); --color-accent-ink: oklch(97% 0.02 85); --color-focus: oklch(54% 0.20 24);
+  --color-gold: oklch(74% 0.14 75); --color-gold-2: oklch(84% 0.11 80);
+  --color-band-text: oklch(94% 0.03 80); --color-band-muted: oklch(80% 0.05 75);
+  --color-hair-ink: color-mix(in oklab, var(--color-ink) 10%, transparent);
+  --font-display: "Noto Serif KR", "Nanum Myeongjo", ui-serif, serif;
+  --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --radius-card: 0; --radius-pill: 999px; --rule-hair: 1px; --rule-bar: 2px;
+  --shadow-card: 10px 10px 0 var(--color-paper-3);
+}
+@media (max-width: 60rem) { :root { --gutter: 24px; --section-gap: 88px; --gap-columns: 24px; } }
+@media (max-width: 40rem) { :root { --gutter: 16px; --section-gap: 64px; --gap-columns: 16px; } }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: var(--font-family);
-      background-color: var(--color-bg-page);
-      color: var(--color-text-main);
-      line-height: 1.8;
-      word-break: keep-all;
-      -webkit-font-smoothing: antialiased;
-    }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+html { scrollbar-color: var(--color-muted) var(--color-paper); scroll-padding-top: var(--space-3xl); }
+body { margin: 0; background: var(--color-paper); color: var(--color-ink-2); font-family: var(--font-family); font-size: var(--text-md); line-height: 1.75; word-break: keep-all; -webkit-font-smoothing: antialiased; }
+::selection { background: color-mix(in oklab, var(--color-gold) 40%, transparent); }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+a:hover { text-decoration-color: var(--color-accent); }
+article h1, article h2, article h3 { margin: 0; font-family: var(--font-display); font-weight: 700; color: var(--color-ink); line-height: 1.3; letter-spacing: -0.01em; overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+img { max-width: 100%; display: block; }
+.container { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); }
 
-    .site-header {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--color-border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .header-inner {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 14px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .header-logo {
-      font-weight: 800;
-      font-size: 1.15rem;
-      color: var(--color-primary);
-      text-decoration: none;
-    }
-    .header-logo span { color: var(--color-accent); }
-    .header-nav a {
-      color: var(--color-text-sub);
-      text-decoration: none;
-      font-size: 0.9rem;
-      margin-left: 16px;
-    }
+/* 44px 머리 링크 규칙: scripts/test-blog-related.cjs가 글마다 하나를 요구한다 */
+header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
 
-    .article-container {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 40px 20px 80px;
-    }
+/* Controls */
+.btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 var(--space-lg); border: 0; border-radius: var(--radius-pill); background: var(--color-accent); color: var(--color-accent-ink); font: 600 var(--text-md)/1 var(--font-family); text-decoration: none; cursor: pointer; transition: background-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out); }
+.btn:hover { background: var(--color-accent-2); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.link-quiet { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-ink); font-weight: 600; font-size: var(--text-sm); text-decoration: none; border-bottom: var(--rule-bar) solid var(--color-ink); transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out); }
+.link-quiet:hover { color: var(--color-accent); border-color: var(--color-accent); }
+.link-quiet:active { transform: translateY(1px); }
+.link-quiet:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
 
-    .article-header {
-      margin-bottom: 32px;
-    }
-    .badge {
-      display: inline-block;
-      background: var(--color-accent-light);
-      color: var(--color-accent);
-      font-weight: 700;
-      font-size: 0.8rem;
-      padding: 4px 10px;
-      border-radius: 6px;
-      margin-bottom: 12px;
-    }
-    h1 {
-      font-size: 1.85rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      line-height: 1.4;
-      letter-spacing: -0.02em;
-      margin-bottom: 16px;
-    }
-    .meta-info {
-      font-size: 0.88rem;
-      color: var(--color-text-sub);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      border-bottom: 1px solid var(--color-border);
-      padding-bottom: 20px;
-    }
+/* Nav */
+.site-header { position: sticky; top: 0; z-index: var(--z-sticky-nav); background: var(--color-paper); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.header-inner { display: flex; justify-content: space-between; align-items: center; min-height: 64px; }
+.header-logo { font-family: var(--font-display); font-size: var(--text-lg); color: var(--color-ink); text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; }
+.header-logo span { color: var(--color-accent); margin-left: 0.3em; }
+.header-logo:hover { color: var(--color-ink-2); }
+.header-nav { display: flex; gap: var(--space-lg); }
+.header-nav a { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--text-sm); color: var(--color-ink-2); text-decoration: none; }
+.header-nav a:hover { color: var(--color-ink); text-decoration: underline; text-decoration-color: var(--color-accent); }
+.header-nav a:active, .header-logo:active { transform: translateY(1px); }
 
-    /* 동선 요약 카드 */
-    .summary-card {
-      background: #ffffff;
-      border: 1px solid var(--color-border);
-      border-radius: 14px;
-      padding: 24px;
-      margin: 32px 0 40px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-    }
-    .summary-title {
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .route-steps {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      margin-top: 10px;
-    }
-    .route-step-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-    }
-    .step-num {
-      background: var(--color-primary);
-      color: #fff;
-      font-size: 0.75rem;
-      font-weight: 700;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-    .step-text {
-      font-size: 0.94rem;
-      color: var(--color-text-main);
-    }
-    .step-text strong {
-      color: var(--color-primary);
-    }
-    .step-note {
-      font-size: 0.84rem;
-      color: var(--color-text-sub);
-      margin-top: 2px;
-    }
-    .route-distance-summary {
-      margin-top: 18px;
-      padding-top: 14px;
-      border-top: 1px dashed var(--color-border);
-      font-size: 0.88rem;
-      color: var(--color-text-sub);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .route-distance-summary strong {
-      color: var(--color-accent);
-    }
+/* Hero */
+.hero { display: grid; padding-block: var(--space-2xl) var(--space-xl); }
+.hero-text { display: grid; gap: var(--space-lg); }
+.article-title { font-size: var(--text-hero); line-height: 1.3; max-width: 28ch; }
+.hero-kicker { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.hero-kicker span:first-child { color: var(--color-accent); font-weight: 600; }
+.article-meta { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-lg); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); font-variant-numeric: tabular-nums; }
+.article-meta .meta-credit { flex-basis: 100%; }
+/* 좁은 화면에서 칸마다 한 줄: 본문 글꼴(Pretendard)이 바뀔 때 줄 수가 달라져 아래 띠가 밀리는 것을 막는다 */
+@media (max-width: 40rem) { .article-meta { flex-direction: column; flex-wrap: nowrap; } }
+.spot-photo img { width: 100%; height: 100%; object-fit: cover; outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
 
-    h2 {
-      font-size: 1.45rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin-top: 48px;
-      margin-bottom: 18px;
-      letter-spacing: -0.01em;
-      line-height: 1.45;
-    }
+/* Lead */
+.prose-intro { max-width: var(--measure); padding-top: var(--space-xl); font-size: var(--text-lead); line-height: 1.8; color: var(--color-ink); padding-bottom: var(--space-3xl); }
 
-    p {
-      margin-bottom: 18px;
-      color: #334155;
-      font-size: 1rem;
-    }
+/* The day, on the brown band */
+.band { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl) var(--space-xl); }
+.band .timeline-title { color: var(--color-band-text); font-size: var(--text-section); margin-bottom: var(--space-xl); }
+.route { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: 0; padding: 0; }
+.tl-act { font-size: var(--text-sm); color: var(--color-gold-2); padding-bottom: var(--space-sm); }
+.tl-step { display: grid; align-content: start; gap: var(--space-2xs); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-gold); }
+.tl-time { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1; color: var(--color-band-text); font-variant-numeric: tabular-nums; }
+.tl-place { font-weight: 600; font-size: var(--text-lg); color: var(--color-band-text); }
+.tl-note { font-size: var(--text-sm); color: var(--color-band-muted); line-height: 1.6; }
+.tl-move { font-size: var(--text-sm); color: var(--color-band-muted); padding-block: var(--space-sm) var(--space-lg); }
+.tl-total { font-size: var(--text-sm); color: var(--color-band-muted); padding-top: var(--space-lg); margin-top: var(--space-lg); border-top: var(--rule-hair) solid color-mix(in oklab, var(--color-band-text) 25%, transparent); }
+/* spot-info-list 계열: 시간 범위(10:30 - 11:45)가 길어 시각 글자를 줄이고, 요약 상자와 번호 배지를 둔다 */
+.route.range .tl-time { font-size: var(--text-xl); }
+.route.range .tl-step { padding-bottom: var(--space-md); }
+.tl-badge { font-size: var(--text-xs); color: var(--color-gold-2); letter-spacing: 0.04em; }
+.tl-facts { display: grid; gap: var(--space-2xs) var(--space-lg); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.tl-facts strong { color: var(--color-gold-2); font-weight: 600; }
+@media (min-width: 60rem) {
+  .tl-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .route { grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); column-gap: var(--space-lg); }
+  .route > * { grid-row: var(--r); grid-column: var(--c) / span var(--s, 1); }
+  .tl-move { padding-bottom: 0; }
+  .tl-total { grid-column: 1 / -1; }
+}
 
-    .real-photo-card {
-      margin: 24px 0 28px;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
-      background: #000;
-    }
-    .real-photo-card img {
-      width: 100%;
-      height: auto;
-      max-height: 480px;
-      object-fit: cover;
-      display: block;
-    }
-    .photo-caption {
-      background: #ffffff;
-      padding: 10px 14px;
-      font-size: 0.84rem;
-      color: var(--color-text-sub);
-      border-top: 1px solid var(--color-border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
+/* Stops */
+.spots { padding-block: var(--section-gap) 0; display: grid; gap: var(--section-gap); }
+.spot-section { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "photo head" "photo body"; grid-template-rows: auto 1fr; column-gap: var(--gap-columns); row-gap: var(--space-md); align-items: start; padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); }
+.spot-section.flip { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-areas: "head photo" "body photo"; }
+.spot-section.no-photo { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "body"; }
+.spot-head { grid-area: head; display: grid; gap: var(--space-md); }
+.spot-photo { grid-area: photo; align-self: start; margin: 0; aspect-ratio: 4 / 5; width: 100%; background: var(--color-paper-3); position: sticky; top: 96px; }
+.spot-body { grid-area: body; display: grid; gap: var(--space-md); }
+.spot-header { display: flex; align-items: baseline; gap: var(--space-md); }
+.spot-num { font-family: var(--font-display); font-size: var(--text-3xl); line-height: 1; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+.spot-title { font-size: var(--text-section); }
+.spot-tagline { font-size: var(--text-lg); color: var(--color-ink); padding-bottom: var(--space-xs); }
+.spot-desc { max-width: 60ch; }
 
-    .info-grid {
-      background: #f8fafc;
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      padding: 18px 20px;
-      margin: 20px 0 24px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px 20px;
-    }
-    @media (max-width: 540px) {
-      .info-grid { grid-template-columns: 1fr; }
-    }
-    .info-item {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .info-label {
-      font-size: 0.76rem;
-      font-weight: 700;
-      color: var(--color-text-sub);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .info-val {
-      font-size: 0.92rem;
-      font-weight: 600;
-      color: var(--color-primary);
-    }
+.spot-info-box { margin: var(--space-xs) 0 0; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); }
+.info-row { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--space-md); padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.info-row:last-child { border-bottom: 0; }
+.info-label { color: var(--color-muted); }
+.info-val { color: var(--color-ink); font-weight: 400; font-variant-numeric: tabular-nums; }
+.map-btn-wrap { padding-top: var(--space-sm); }
+.tip-box { padding: var(--space-sm) var(--space-md); border-left: var(--rule-bar) solid var(--color-accent); background: var(--color-paper-2); font-size: var(--text-sm); color: var(--color-ink-2); line-height: 1.7; }
+.tip-box strong { color: var(--color-ink); font-weight: 600; }
+.tip-box .tip-title { display: block; margin-bottom: var(--space-2xs); }
 
-    .tip-box {
-      background: #fffbeb;
-      border: 1px solid #fde68a;
-      border-left: 4px solid #f59e0b;
-      padding: 16px 18px;
-      border-radius: 0 10px 10px 0;
-      margin: 22px 0 26px;
-      font-size: 0.92rem;
-      color: #92400e;
-      line-height: 1.7;
-    }
-    .tip-title {
-      font-weight: 800;
-      font-size: 0.9rem;
-      color: #78350f;
-      margin-bottom: 4px;
-    }
+/* Fees */
+.cost-table-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.cost-head { display: grid; gap: var(--space-md); align-content: start; }
+.cost-head .timeline-title { font-size: var(--text-section); }
+.cost-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.cost-table th { text-align: left; font-weight: 400; color: var(--color-muted); padding: var(--space-xs) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-bar) solid var(--color-ink); }
+.cost-table td { padding: var(--space-sm) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink-2); vertical-align: top; }
+.cost-table td:nth-child(2) { color: var(--color-ink); font-weight: 400; }
+.cost-3 .cost-total-row td:nth-child(2) { font-family: inherit; font-size: inherit; color: inherit; font-weight: 600; }
+.cost-3 .cost-total-row td:nth-child(3) { font-family: var(--font-display); font-size: var(--text-xl); color: var(--color-accent); font-weight: 700; }
+.cost-total-row td { border-bottom: 0; border-top: var(--rule-bar) solid var(--color-ink); color: var(--color-ink); font-weight: 600; }
+.cost-total-row td:nth-child(2) { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--color-accent); font-weight: 700; }
+@media (max-width: 600px) {
+  .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
+  .table-wrap thead { display: none; }
+  .table-wrap tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-sm); row-gap: var(--space-2xs); padding-block: var(--space-sm); border-bottom: var(--rule-hair) solid var(--color-rule); }
+  .table-wrap td { padding: 0; border: 0; }
+  .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: var(--text-xs); color: var(--color-muted); }
+  .table-wrap td:nth-child(3) { text-align: right; font-weight: 600; color: var(--color-ink); }
+  .table-wrap td:nth-child(4) { grid-column: 1 / -1; color: var(--color-muted); }
+  .table-wrap td:empty { display: none; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: var(--text-sm); color: var(--color-ink); }
+  .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; text-align: right; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
+  .table-wrap .cost-total-row { border-top: var(--rule-bar) solid var(--color-ink); border-bottom: 0; }
+}
 
-    .map-btn-wrap {
-      margin: 20px 0 32px;
-    }
-    .map-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #ffffff;
-      border: 1.5px solid #cbd5e1;
-      padding: 10px 18px;
-      border-radius: 8px;
-      font-size: 0.88rem;
-      font-weight: 700;
-      color: #0f172a;
-      text-decoration: none;
-      transition: all 0.15s ease;
-    }
-    .map-btn:hover {
-      border-color: var(--color-accent);
-      color: var(--color-accent);
-      background: var(--color-accent-light);
-    }
+/* Tips */
+.tips-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.tips-card .timeline-title { font-size: var(--text-section); align-self: start; }
+.tips-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-md); }
+.tips-list li { padding-bottom: var(--space-md); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.tips-list li:last-child { border-bottom: 0; }
+.tips-list strong { color: var(--color-ink); font-weight: 600; }
 
-    /* 비용표 */
-    .table-wrap {
-      margin: 32px 0 40px;
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      overflow: hidden;
-      background: #ffffff;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.9rem;
-      text-align: left;
-    }
-    thead {
-      background: #f1f5f9;
-      color: var(--color-primary);
-      font-weight: 700;
-    }
-    th, td {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--color-border);
-    }
-    tr:last-child td {
-      border-bottom: none;
-    }
+/* App course */
+.app-course-box { margin-top: var(--section-gap); display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--gap-columns); align-items: end; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-xl); }
+.app-course-box h2 { font-size: var(--text-section); margin-bottom: var(--space-md); }
+.app-course-box p { max-width: 52ch; }
+.app-course-box .app-action { justify-self: end; }
 
-    /* 비용표: 좁은 화면에서는 한 행을 카드 하나로 쌓는다 */
-    @media (max-width: 600px) {
-      .table-wrap { overflow-x: visible; }
-      .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
-      .table-wrap thead { display: none; }
-      .table-wrap tr {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        column-gap: 12px;
-        row-gap: 4px;
-        padding: 14px 16px;
-        border-bottom: 1px solid var(--color-border);
-      }
-      .table-wrap tr:last-child { border-bottom: none; }
-      .table-wrap td { padding: 0; border: none; }
-      .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: 0.78rem; font-weight: 700; color: var(--color-text-sub); }
-      .table-wrap td:nth-child(2) { font-weight: 700; }
-      .table-wrap td:nth-child(3) { max-width: 60vw; word-break: keep-all; text-align: right; font-weight: 700; }
-      .table-wrap td:nth-child(4) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
-      .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: inherit; color: inherit; }
-      .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; max-width: 60vw; word-break: keep-all; text-align: right; }
-      .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
-    }
+.article-credit { margin-top: var(--space-2xl); padding-block: var(--space-md) var(--space-3xl); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); }
 
-    .spot-links {
-      list-style: none;
-      padding: 0;
-      margin: 20px 0 32px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .spot-links li a {
-      color: #0f172a;
-      text-decoration: none;
-      font-size: 0.95rem;
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .spot-links li a:hover {
-      color: var(--color-accent);
-      text-decoration: underline;
-    }
+/* Footer mast */
+.site-footer { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl); }
+.footer-inner { display: grid; gap: var(--space-md); }
+.footer-mark { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1.2; color: var(--color-band-text); }
+.footer-line { color: var(--color-band-muted); font-size: var(--text-sm); }
+.footer-links { display: flex; flex-wrap: wrap; gap: var(--space-lg); }
+.footer-links a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-band-text); font-size: var(--text-sm); text-decoration: underline; text-decoration-color: var(--color-gold); }
+.footer-links a:hover { text-decoration-color: var(--color-accent); color: var(--color-gold-2); }
+.footer-links a:active { transform: translateY(1px); }
+.site-footer :focus-visible { outline-color: var(--color-gold-2); }
 
-    .outro-card {
-      background: #ffffff;
-      border: 1px solid var(--color-border);
-      border-radius: 14px;
-      padding: 26px;
-      margin-top: 40px;
-    }
-    .outro-title {
-      font-size: 1.1rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin-bottom: 12px;
-    }
+@media (max-width: 60rem) {
+  .hero, .spot-section, .spot-section.flip, .cost-table-card, .tips-card, .app-course-box { grid-template-columns: minmax(0, 1fr); }
+  .spot-section, .spot-section.flip { grid-template-areas: "head" "photo" "body"; grid-template-rows: auto; }
+  .spot-section.no-photo { grid-template-areas: "head" "body"; }
+  .hero { padding-block: var(--space-xl) var(--space-xl); }
+  .spot-photo { position: static; aspect-ratio: 16 / 10; }
+  .app-course-box { padding: var(--space-lg); }
+  .app-course-box .app-action { justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn, .link-quiet { transition: none; }
+  .btn:active, .link-quiet:active, .header-nav a:active, .header-logo:active, .footer-links a:active { transform: none; }
+}
 
-    .article-footer {
-      margin-top: 60px;
-      padding-top: 24px;
-      border-top: 1px solid var(--color-border);
-      font-size: 0.85rem;
-      color: var(--color-text-sub);
-      text-align: center;
-      line-height: 1.7;
-    }
-    header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
-    .header-nav a,.header-title a,.blog-tagline a{display:inline-block}
+/* real-photo-flat 계열(평면 글): 번호 있는 긴 장소 제목, 사진 설명, 안내 상자, 지도 목록 */
+.lead-photo { margin: 0 0 var(--space-3xl); }
+.lead-photo img { width: 100%; max-height: 520px; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.lead-photo figcaption, .body-photo figcaption { margin-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.spot-photo figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--space-xs) var(--space-sm); font-size: var(--text-xs); line-height: 1.5; color: var(--color-accent-ink); background: color-mix(in oklab, var(--color-ink) 78%, transparent); }
+.body-photo { margin: 0; }
+.body-photo img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.spot-section.flat .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.tl-lead { max-width: var(--measure); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.guide-box, .order-box { background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); color: var(--color-ink); }
+.guide-box h4, .order-box strong { margin: 0 0 var(--space-xs); font-family: var(--font-display); font-size: var(--text-md); color: var(--color-ink); display: block; }
+.guide-box ul, .order-box ul { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-2xs); }
+.bridge { padding-top: var(--space-xs); color: var(--color-muted); font-size: var(--text-sm); }
+.map-links { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-md); }
+.map-links .timeline-title { font-size: var(--text-section); }
+.map-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-xs); }
+.map-list a, .map-link-chip { display: flex; justify-content: space-between; gap: var(--space-md); align-items: center; min-height: 44px; padding-block: var(--space-xs); border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink); text-decoration: none; }
+.map-links-grid { display: grid; gap: 0; }
+.map-link-chip .btn-action { color: var(--color-accent); font-weight: 600; white-space: nowrap; }
+@media (max-width: 40rem) { .spot-section.flat .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .spot-photo { position: relative; } }
+
+/* spot-card 계열(editor-144): 대표 사진, 요약 상자, 본문 구획, 세부 코스, 이동 연결, 마무리 상자 */
+.hero-figure { margin: 0 0 var(--space-xl); }
+.hero-figure img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.hero-figure figcaption { padding-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-muted); }
+.summary-card { margin-bottom: var(--space-xl); background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-lg); font-size: var(--text-sm); }
+.summary-title, p.timeline-title, .cta-title { font-family: var(--font-display); font-weight: 700; line-height: 1.3; color: var(--color-ink); }
+.summary-title { font-size: var(--text-xl); margin-bottom: var(--space-sm); }
+p.timeline-title { letter-spacing: -0.01em; overflow-wrap: break-word; }
+.summary-list { margin: 0; padding: 0; list-style: none; display: grid; }
+.summary-list li { padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.summary-list li:last-child { border-bottom: 0; }
+.summary-list strong { color: var(--color-ink); font-weight: 600; }
+.prose-section { margin-top: var(--section-gap); max-width: var(--measure); display: grid; gap: var(--space-md); }
+.prose-section h2, .spots-title { font-size: var(--text-title); }
+.stops-section { margin-top: var(--section-gap); }
+.stops-section .spots { padding-top: var(--space-xl); }
+.spots.bridged { gap: 0; }
+.drive-bridge { margin: 0; padding-block: var(--space-xl); padding-left: var(--space-md); border-left: var(--rule-bar) solid var(--color-gold); font-size: var(--text-sm); color: var(--color-muted); }
+.drive-bridge strong { color: var(--color-ink); font-weight: 600; }
+.spot-header:has(.spot-badge) { flex-direction: column; align-items: flex-start; gap: var(--space-xs); }
+.spot-badge { font-size: var(--text-sm); font-weight: 600; color: var(--color-accent); }
+.spot-actions { display: flex; flex-wrap: wrap; gap: 0 var(--space-lg); }
+.info-wide .info-row { grid-template-columns: 5.5em minmax(0, 1fr); }
+.info-wide .info-row.plain { grid-template-columns: minmax(0, 1fr); }
+.cost-head .timeline-title.long { font-size: var(--text-title); }
+.cta-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-sm); max-width: var(--measure); }
+.cta-card h3, .cta-title { font-size: var(--text-title); }
+.cta-card .link-quiet { justify-self: start; }
+
+/* real-photo-grid 계열(editor-145): 사진과 정보 상자가 글 순서대로 이어지는 한 열 장소 구획, 번호 있는 동선, 도입 여러 문단 */
+.prose-intro p + p { margin-top: var(--space-md); }
+.stories { padding-top: var(--space-xl); gap: var(--space-3xl); }
+.story-section { display: grid; gap: var(--space-md); max-width: var(--measure); }
+.story-section .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.story-body { display: grid; gap: var(--space-md); }
+.story-photo { margin: 0; }
+.story-photo img { width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.story-photo figcaption { padding-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.story-photo figcaption span + span::before { content: " · "; }
+.tl-step .tl-badge { margin-bottom: calc(var(--space-2xs) * -1); }
+.tl-meta { display: block; font-style: normal; color: var(--color-gold-2); }
+.app-course-box.early { margin-top: var(--space-xl); }
+.app-course-box .cta-title { font-size: var(--text-section); margin-bottom: var(--space-md); }
+@media (max-width: 40rem) { .story-section .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .route .tl-act:not(:first-child) { margin-top: var(--space-lg); } }
   </style>
 </head>
 <body>
 
   <header class="site-header">
-    <div class="header-inner">
+    <div class="header-inner container">
       <a href="../" class="header-logo">오늘 데이트 <span>매거진</span></a>
       <nav class="header-nav">
         <a href="../../">추천 코스 홈</a>
@@ -430,261 +323,128 @@
   </header>
 
   <main class="article-container">
-    <header class="article-header">
-      <span class="badge">경기 남양주 · 가을 리버뷰 드라이브 코스</span>
-      <h1>물의정원부터 북한강 통창 뷰 라온숨, 한강 노을 엠키친앤카페와 새벽까지 여는 포러데이 팔당까지 가을 리버뷰 힐링 데이트</h1>
-      <div class="meta-info">
-        <span>발행일: 2026년 10월 20일</span>
-        <span>글: 오늘 데이트 에디토리얼 팀 / 사진: 카카오맵 포토 리뷰</span>
-      </div>
-    </header>
+      <header class="article-header hero container">
+        <div class="hero-text">
+          <p class="hero-kicker badge-category"><span>경기 남양주</span><span>가을 리버뷰 드라이브 코스</span></p>
+          <h1 class="article-title">물의정원부터 북한강 통창 뷰 라온숨, 한강 노을 엠키친앤카페와 새벽까지 여는 포러데이 팔당까지 가을 리버뷰 힐링 데이트</h1>
+          <div class="article-meta">
+            <span>발행일: 2026년 10월 20일</span>
+            <span class="meta-credit">글: 오늘 데이트 에디토리얼 팀 / 사진: 카카오맵 포토 리뷰</span>
+          </div>
+          <p><a class="btn" href="../../#c=699.3353.276.472">앱에서 코스 열기</a></p>
+        </div>
+      </header>
 
-    <!-- 인트로 -->
-    <p>
+      <div class="container">
+        <div class="prose-intro"><p>
       서울 근교에서 가장 아름다운 수변 풍경을 자랑하는 경기 남양주는 굽이쳐 흐르는 북한강과 시원하게 펼쳐진 한강의 가을 정취를 온전히 누릴 수 있는 낭만 드라이브 명소예요. 선선하게 불어오는 강바람을 맞으며 달리는 강변 도로부터 여유로운 수변 산책, 감성 가득한 리버뷰 다이닝까지 하루를 온통 낭만으로 채우기 좋은 힐링 여행지입니다.
     </p>
-    <p>
+        <p>
       광활한 북한강 둔치에 황화코스모스와 은빛 억새가 일렁이는 물의정원 수변 산책을 시작으로, 통창 너머로 시원한 강물이 펼쳐지는 대형 베이커리 카페 라온숨에서 향긋한 커피 한 잔의 여유를 누려보세요. 늦은 오후에는 한강 낙조를 감상하며 파스타를 즐기는 엠키친앤카페에서 로맨틱한 디너를 맛보고, 다음 날 새벽 2시 30분까지 여는 강변 카페 포러데이 팔당에서 홍콩와플과 따뜻한 커피로 하루를 마무리하는 알찬 드라이브 코스를 추천해 드립니다.
-    </p>
-
-    <!-- 동선 요약 카드 -->
-    <div class="summary-card">
-      <div class="summary-title">🧭 경기 남양주 가을 리버뷰 & 심야 드라이브 코스 동선</div>
-      <div class="route-steps">
-        <div class="route-step-item">
-          <div class="step-num">1</div>
-          <div>
-            <div class="step-text"><strong>14:00 · 남양주 물의정원</strong></div>
-            <div class="step-note">북한강 수변 생태공원 억새·코스모스길과 뱃나들이교 힐링 산책</div>
-          </div>
-        </div>
-        <div class="route-step-item">
-          <div class="step-num">2</div>
-          <div>
-            <div class="step-text"><strong>15:00 · 라온숨</strong></div>
-            <div class="step-note">통창 너머 북한강 조망과 베이커리 카페 (차량 7.6km, 약 8분 이동)</div>
-          </div>
-        </div>
-        <div class="route-step-item">
-          <div class="step-num">3</div>
-          <div>
-            <div class="step-text"><strong>17:00 · 엠키친앤카페</strong></div>
-            <div class="step-note">한강 일몰 감상과 파스타 이탈리안 디너 (차량 21.0km, 약 24분 이동)</div>
-          </div>
-        </div>
-        <div class="route-step-item">
-          <div class="step-num">4</div>
-          <div>
-            <div class="step-text"><strong>19:00 · 포러데이 팔당</strong></div>
-            <div class="step-note">다음 날 02:30까지 여는 팔당 강변 카페의 홍콩와플 디저트 (차량 0.8km, 약 1분 이동)</div>
-          </div>
-        </div>
+    </p></div>
       </div>
-      <div class="route-distance-summary">
-        🚗 <strong>총 주행 거리:</strong> 약 29.4km (차량 순수 이동 약 34분 소요 / 쾌적한 강변 드라이브)
-      </div>
-    </div>
 
-    <!-- 1절: 물의정원 -->
-    <h2>1. 물의정원, 북한강 물결과 바람이 빚어낸 낭만 수변 생태공원</h2>
-    <p>
+      <!-- 동선 -->
+      <section class="timeline-card band">
+        <div class="container">
+          <p class="timeline-title">경기 남양주 가을 리버뷰 & 심야 드라이브 코스 동선</p>
+          <div class="route" style="--n:4">
+            <div class="tl-step" style="--r:2; --c:1"><span class="tl-badge">1</span><span class="tl-time">14:00</span><span class="tl-place">남양주 물의정원</span><span class="tl-note">북한강 수변 생태공원 억새·코스모스길과 뱃나들이교 힐링 산책</span></div>
+            <div class="tl-step" style="--r:2; --c:2"><span class="tl-badge">2</span><span class="tl-time">15:00</span><span class="tl-place">라온숨</span><span class="tl-note">통창 너머 북한강 조망과 베이커리 카페 (차량 7.6km, 약 8분 이동)</span></div>
+            <div class="tl-step" style="--r:2; --c:3"><span class="tl-badge">3</span><span class="tl-time">17:00</span><span class="tl-place">엠키친앤카페</span><span class="tl-note">한강 일몰 감상과 파스타 이탈리안 디너 (차량 21.0km, 약 24분 이동)</span></div>
+            <div class="tl-step" style="--r:2; --c:4"><span class="tl-badge">4</span><span class="tl-time">19:00</span><span class="tl-place">포러데이 팔당</span><span class="tl-note">다음 날 02:30까지 여는 팔당 강변 카페의 홍콩와플 디저트 (차량 0.8km, 약 1분 이동)</span></div>
+            <div class="tl-total" style="--r:4"><strong>총 주행 거리:</strong> 약 29.4km (차량 순수 이동 약 34분 소요 / 쾌적한 강변 드라이브)</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="container">
+        <div class="spots stories">
+          <section class="story-section">
+            <h2 class="spot-title">1. 물의정원, 북한강 물결과 바람이 빚어낸 낭만 수변 생태공원</h2>
+            <div class="story-body">
+              <p>
       남양주 가을 리버뷰 드라이브의 첫 여정은 북한강과 조안면 운길산 자락이 평온하게 맞닿은 수변 생태 명소, <strong>물의정원</strong>에서 시작합니다. 북한강 둔치에 조성된 수변 공원으로, 초가을부터 늦가을까지 물결치는 황화코스모스와 은빛 억새가 장관을 이루는 곳이에요.
     </p>
-
-    <div class="real-photo-card">
-      <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/59435766dcedf64f7b7087a551358bb0d7223b91?original" alt="물의정원 양귀비 꽃밭과 뱃나들이교 (초여름 사진)" loading="lazy">
-      <div class="photo-caption">
-        <span>물의정원 양귀비 꽃밭과 뱃나들이교 (초여름 사진)</span>
-        <span>출처: 카카오맵 포토 리뷰</span>
-      </div>
-    </div>
-
-    <p>
+              <figure class="story-photo">
+              <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/59435766dcedf64f7b7087a551358bb0d7223b91?original" alt="물의정원 양귀비 꽃밭과 뱃나들이교 (초여름 사진)" loading="lazy" />
+              <figcaption><span>물의정원 양귀비 꽃밭과 뱃나들이교 (초여름 사진)</span><span>출처: 카카오맵 포토 리뷰</span></figcaption>
+            </figure>
+              <p>
       물의정원의 상징인 뱃나들이교를 건너면 강변을 따라 고즈넉하게 조성된 '물마음길'과 '강변산책길'이 아늑하게 이어져요. 수면 위로 길게 가지를 드리운 버드나무와 잔잔한 강물이 어우러져 어디서 카메라를 들어도 감성 가득한 인생 사진을 남길 수 있습니다. 맑고 상쾌한 가을 공기를 마시며 두 손을 꼭 잡고 강변을 걷는 것만으로도 복잡했던 일상의 스트레스가 자연스럽게 날아가는 평온함을 선사합니다.
     </p>
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">경기 남양주시 조안면 북한강로 398</span></div><div class="info-row"><span class="info-label">관람시간</span><span class="info-val">출처를 찾지 못했어요. 방문 전 남양주시 안내를 확인해 주세요</span></div><div class="info-row"><span class="info-label">입장료</span><span class="info-val">전 구역 무료 개방</span></div><div class="info-row"><span class="info-label">주차안내</span><span class="info-val">무료 주차 (카카오맵 기준)</span></div></div>
+              <div class="tip-box"><strong class="tip-title">에디터 추천 팁</strong>산책로 일대에 그늘이 많지 않으므로 낮 시간대에는 가벼운 모자나 양산을 챙기시면 한결 편안하고 여유롭게 거니실 수 있습니다.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%EB%82%A8%EC%96%91%EC%A3%BC%20%EB%AC%BC%EC%9D%98%EC%A0%95%EC%9B%90" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도로 물의정원 확인하기</a></div>
+            </div>
+          </section>
 
-    <div class="info-grid">
-      <div class="info-item">
-        <span class="info-label">주소</span>
-        <span class="info-val">경기 남양주시 조안면 북한강로 398</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">관람시간</span>
-        <span class="info-val">출처를 찾지 못했어요. 방문 전 남양주시 안내를 확인해 주세요</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">입장료</span>
-        <span class="info-val">전 구역 무료 개방</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">주차안내</span>
-        <span class="info-val">무료 주차 (카카오맵 기준)</span>
-      </div>
-    </div>
-
-    <div class="tip-box">
-      <div class="tip-title">💡 에디터 추천 팁</div>
-      산책로 일대에 그늘이 많지 않으므로 낮 시간대에는 가벼운 모자나 양산을 챙기시면 한결 편안하고 여유롭게 거니실 수 있습니다.
-    </div>
-
-    <div class="map-btn-wrap">
-      <a href="https://map.naver.com/p/search/%EB%82%A8%EC%96%91%EC%A3%BC%20%EB%AC%BC%EC%9D%98%EC%A0%95%EC%9B%90" target="_blank" rel="noopener noreferrer" class="map-btn">
-        🧭 네이버 지도로 물의정원 확인하기
-      </a>
-    </div>
-
-    <!-- 2절: 라온숨 -->
-    <h2>2. 라온숨, 통창 너머로 북한강이 펼쳐지는 베이커리 카페</h2>
-    <p>
+          <section class="story-section">
+            <h2 class="spot-title">2. 라온숨, 통창 너머로 북한강이 펼쳐지는 베이커리 카페</h2>
+            <div class="story-body">
+              <p>
       물의정원에서 북한강을 오른편에 두고 강변 도로를 따라 시원하게 8분(거리 약 7.6km) 정도 달리면, 웅장한 유리 건물로 눈길을 사로잡는 대형 복합 문화 베이커리 카페 <strong>라온숨</strong>에 도착합니다. 건물이 큰 통창으로 마감되어 있어 맑은 북한강의 푸른 물결을 파노라마로 감상할 수 있는 명소예요.
     </p>
-
-    <div class="real-photo-card">
-      <img src="https://t1.kakaocdn.net/mystore/82D96BB633C447D59F8E1908C44067E7" alt="라온숨 전면 통창 너머로 시원하게 펼쳐지는 북한강 리버뷰 전경" loading="lazy">
-      <div class="photo-caption">
-        <span>라온숨 전면 통창 너머로 시원하게 펼쳐지는 북한강 리버뷰</span>
-        <span>출처: 카카오맵 포토 리뷰</span>
-      </div>
-    </div>
-
-    <p>
+              <figure class="story-photo">
+              <img src="https://t1.kakaocdn.net/mystore/82D96BB633C447D59F8E1908C44067E7" alt="라온숨 전면 통창 너머로 시원하게 펼쳐지는 북한강 리버뷰 전경" loading="lazy" />
+              <figcaption><span>라온숨 전면 통창 너머로 시원하게 펼쳐지는 북한강 리버뷰</span><span>출처: 카카오맵 포토 리뷰</span></figcaption>
+            </figure>
+              <p>
       강변이 한눈에 들어오는 창가 자리에 나란히 앉아 시그니처 쑥크림라떼를 음미하며 힐링의 시간을 가져보세요. 밤늦게까지 문을 열어 저녁 뒤에 다시 들르기에도 좋아요.
     </p>
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">경기 남양주시 화도읍 북한강로 1146</span></div><div class="info-row"><span class="info-label">영업시간</span><span class="info-val">10:00 ~ 01:00, 금·토 10:00 ~ 03:00, 연중무휴 (2026년 11월 카카오맵 기준)</span></div><div class="info-row"><span class="info-label">대표메뉴</span><span class="info-val">쑥크림라떼 9,000원 (카카오맵 메뉴, 2026-10-27 갱신)</span></div><div class="info-row"><span class="info-label">주차안내</span><span class="info-val">무료 주차 (카카오맵 기준)</span></div></div>
+              <div class="tip-box"><strong class="tip-title">에디터 추천 팁</strong>주말 피크 타임에는 창가 좌석이 빠르게 만석이 될 수 있으므로, 카운터에서 주문하기 전에 먼저 원하는 층의 좌석을 확인하시는 것을 추천합니다.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%EB%9D%BC%EC%98%A8%EC%88%A8" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도로 라온숨 확인하기</a></div>
+            </div>
+          </section>
 
-    <div class="info-grid">
-      <div class="info-item">
-        <span class="info-label">주소</span>
-        <span class="info-val">경기 남양주시 화도읍 북한강로 1146</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">영업시간</span>
-        <span class="info-val">10:00 ~ 01:00, 금·토 10:00 ~ 03:00, 연중무휴 (2026년 11월 카카오맵 기준)</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">대표메뉴</span>
-        <span class="info-val">쑥크림라떼 9,000원 (카카오맵 메뉴, 2026-10-27 갱신)</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">주차안내</span>
-        <span class="info-val">무료 주차 (카카오맵 기준)</span>
-      </div>
-    </div>
-
-    <div class="tip-box">
-      <div class="tip-title">💡 에디터 추천 팁</div>
-      주말 피크 타임에는 창가 좌석이 빠르게 만석이 될 수 있으므로, 카운터에서 주문하기 전에 먼저 원하는 층의 좌석을 확인하시는 것을 추천합니다.
-    </div>
-
-    <div class="map-btn-wrap">
-      <a href="https://map.naver.com/p/search/%EB%9D%BC%EC%98%A8%EC%88%A8" target="_blank" rel="noopener noreferrer" class="map-btn">
-        🧭 네이버 지도로 라온숨 확인하기
-      </a>
-    </div>
-
-    <!-- 3절: 엠키친앤카페 -->
-    <h2>3. 엠키친앤카페, 붉게 물드는 한강 노을을 마주하는 로맨틱 이탈리안 다이닝</h2>
-    <p>
+          <section class="story-section">
+            <h2 class="spot-title">3. 엠키친앤카페, 붉게 물드는 한강 노을을 마주하는 로맨틱 이탈리안 다이닝</h2>
+            <div class="story-body">
+              <p>
       라온숨에서 북한강과 남한강이 합쳐져 큰 물줄기를 이루는 팔당 방면으로 약 24분(거리 약 21.0km) 드라이브를 즐기면, 한강변 언덕에 포근하게 자리 잡은 이탈리안 다이닝 <strong>엠키친앤카페</strong>를 만날 수 있습니다. 한강을 마주 보는 널찍한 통유리창 너머로 건너편 하남 검단산과 잔잔한 강물이 한눈에 들어오는 탁월한 조망을 자랑해요.
     </p>
-
-    <div class="real-photo-card">
-      <img src="https://t1.kakaocdn.net/mystore/60CBE85C98104C17803ACF0C61A9405A" alt="엠키친앤카페 앞 한강 일몰" loading="lazy">
-      <div class="photo-caption">
-        <span>엠키친앤카페 앞 한강 일몰</span>
-        <span>출처: 카카오맵 포토 리뷰</span>
-      </div>
-    </div>
-
-    <p>
+              <figure class="story-photo">
+              <img src="https://t1.kakaocdn.net/mystore/60CBE85C98104C17803ACF0C61A9405A" alt="엠키친앤카페 앞 한강 일몰" loading="lazy" />
+              <figcaption><span>엠키친앤카페 앞 한강 일몰</span><span>출처: 카카오맵 포토 리뷰</span></figcaption>
+            </figure>
+              <p>
       이곳의 가장 매력적인 순간은 해 질 녘에 마주하는 한강 일몰입니다. 서쪽 하늘이 붉은빛과 감미로운 보랏빛으로 물들어가는 골든아워에 빠네 파스타와 탈리아텔레를 함께 맛보면 둘만의 식사 시간이 더욱 특별해져요.
     </p>
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">경기 남양주시 와부읍 경강로 832</span></div><div class="info-row"><span class="info-label">영업시간</span><span class="info-val">매일 11:20 ~ 22:00 (2026년 11월 카카오맵 기준)</span></div><div class="info-row"><span class="info-label">메뉴구성</span><span class="info-val">빠네 파스타 27,000원 / 트러플 탈리아텔레 39,000원 / 양송이 수프 9,000원 (카카오맵 메뉴, 2025-07-11 갱신)</span></div><div class="info-row"><span class="info-label">주차안내</span><span class="info-val">전용 주차 가능 (카카오맵 기준)</span></div></div>
+              <div class="tip-box"><strong class="tip-title">에디터 추천 팁</strong>일몰을 바라보며 식사하고 싶다면 일몰보다 30분쯤 일찍 도착하세요. 남양주 일몰은 10월 20일 약 17:48, 11월 1일 약 17:33, 11월 30일 약 17:14(NOAA 계산식)라 11월에는 17시 전후 도착이 맞아요.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%EC%97%A0%ED%82%A4%EC%B9%9C%EC%95%A4%EC%B9%B4%ED%8E%98" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도로 엠키친앤카페 확인하기</a></div>
+            </div>
+          </section>
 
-    <div class="info-grid">
-      <div class="info-item">
-        <span class="info-label">주소</span>
-        <span class="info-val">경기 남양주시 와부읍 경강로 832</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">영업시간</span>
-        <span class="info-val">매일 11:20 ~ 22:00 (2026년 11월 카카오맵 기준)</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">메뉴구성</span>
-        <span class="info-val">빠네 파스타 27,000원 / 트러플 탈리아텔레 39,000원 / 양송이 수프 9,000원 (카카오맵 메뉴, 2025-07-11 갱신)</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">주차안내</span>
-        <span class="info-val">전용 주차 가능 (카카오맵 기준)</span>
-      </div>
-    </div>
-
-    <div class="tip-box">
-      <div class="tip-title">💡 에디터 추천 팁</div>
-      일몰을 바라보며 식사하고 싶다면 일몰보다 30분쯤 일찍 도착하세요. 남양주 일몰은 10월 20일 약 17:48, 11월 1일 약 17:33, 11월 30일 약 17:14(NOAA 계산식)라 11월에는 17시 전후 도착이 맞아요.
-    </div>
-
-    <div class="map-btn-wrap">
-      <a href="https://map.naver.com/p/search/%EC%97%A0%ED%82%A4%EC%B9%9C%EC%95%A4%EC%B9%B4%ED%8E%98" target="_blank" rel="noopener noreferrer" class="map-btn">
-        🧭 네이버 지도로 엠키친앤카페 확인하기
-      </a>
-    </div>
-
-    <!-- 4절: 포러데이 팔당 -->
-    <h2>4. 포러데이 팔당, 새벽 2시 30분까지 여는 한강 쪽 심야 카페</h2>
-    <p>
+          <section class="story-section">
+            <h2 class="spot-title">4. 포러데이 팔당, 새벽 2시 30분까지 여는 한강 쪽 심야 카페</h2>
+            <div class="story-body">
+              <p>
       엠키친앤카페에서 로맨틱한 저녁 식사를 마친 뒤 차로 단 1분(거리 약 0.8km)만 이동하면, 남양주 하루 드라이브의 마지막을 환상적으로 장식할 심야 리버뷰 카페 <strong>포러데이 팔당</strong>에 도착합니다. 평일과 주말을 가리지 않고 매일 다음 날 새벽 2시 30분까지 문을 여는 서울 근교 대표 심야 드라이브 명소로, 밤이 깊어질수록 낭만적인 분위기가 더욱 짙어지는 곳이에요.
     </p>
-
-    <div class="real-photo-card">
-      <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/c0cd14f26467e738241cf677fc05e35ce2b8a417?original" alt="포러데이 팔당 잔잔한 한강 야경과 아늑한 강변 야외 정원 전경" loading="lazy">
-      <div class="photo-caption">
-        <span>포러데이 팔당 잔잔한 한강 야경과 아늑한 강변 야외 정원</span>
-        <span>출처: 카카오맵 포토 리뷰</span>
-      </div>
-    </div>
-
-    <p>
+              <figure class="story-photo">
+              <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/c0cd14f26467e738241cf677fc05e35ce2b8a417?original" alt="포러데이 팔당 잔잔한 한강 야경과 아늑한 강변 야외 정원 전경" loading="lazy" />
+              <figcaption><span>포러데이 팔당 잔잔한 한강 야경과 아늑한 강변 야외 정원</span><span>출처: 카카오맵 포토 리뷰</span></figcaption>
+            </figure>
+              <p>
       카카오맵 시설 정보에 테라스와 프라이빗룸, 단체석이 있고, 강 쪽 소나무 사이 야외 좌석에는 줄 전구가 걸려 있어요(카카오맵 포토 리뷰). 네이버 플레이스에 반려동물 동반이 가능하다고 나와 있어 반려견과 함께 들르기도 좋아요. 홍콩와플에 따뜻한 라떼를 곁들이며 밤늦도록 둘만의 이야기를 나누어 보세요.
     </p>
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">경기 남양주시 와부읍 경강로926번길 8-7</span></div><div class="info-row"><span class="info-label">영업시간</span><span class="info-val">매일 10:30 ~ 다음 날 02:30 (2026년 11월 카카오맵 기준)</span></div><div class="info-row"><span class="info-label">대표메뉴</span><span class="info-val">아메리카노 6,500원 / 카페라떼 7,000원 (카카오맵 메뉴, 2026-09-08 갱신) / 홍콩와플 14,000원 (오늘 데이트 등록 정보)</span></div><div class="info-row"><span class="info-label">주차안내</span><span class="info-val">매장 앞 주차 가능 (카카오맵 기준)</span></div></div>
+              <div class="tip-box"><strong class="tip-title">에디터 추천 팁</strong>가을밤 강변은 도심보다 쌀쌀할 수 있으니 겉옷을 챙겨 오세요. 매일 다음 날 02:30까지 열어 저녁 식사 뒤 늦게 도착해도 서두르지 않고 디저트를 즐길 수 있어요.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%ED%8F%AC%EB%9F%AC%EB%8D%B0%EC%9D%B4%20%ED%8C%94%EB%8B%B9" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도로 포러데이 팔당 확인하기</a></div>
+            </div>
+          </section>
+        </div>
 
-    <div class="info-grid">
-      <div class="info-item">
-        <span class="info-label">주소</span>
-        <span class="info-val">경기 남양주시 와부읍 경강로926번길 8-7</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">영업시간</span>
-        <span class="info-val">매일 10:30 ~ 다음 날 02:30 (2026년 11월 카카오맵 기준)</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">대표메뉴</span>
-        <span class="info-val">아메리카노 6,500원 / 카페라떼 7,000원 (카카오맵 메뉴, 2026-09-08 갱신) / 홍콩와플 14,000원 (오늘 데이트 등록 정보)</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">주차안내</span>
-        <span class="info-val">매장 앞 주차 가능 (카카오맵 기준)</span>
-      </div>
-    </div>
-
-    <div class="tip-box">
-      <div class="tip-title">💡 에디터 추천 팁</div>
-      가을밤 강변은 도심보다 쌀쌀할 수 있으니 겉옷을 챙겨 오세요. 매일 다음 날 02:30까지 열어 저녁 식사 뒤 늦게 도착해도 서두르지 않고 디저트를 즐길 수 있어요.
-    </div>
-
-    <div class="map-btn-wrap">
-      <a href="https://map.naver.com/p/search/%ED%8F%AC%EB%9F%AC%EB%8D%B0%EC%9D%B4%20%ED%8C%94%EB%8B%B9" target="_blank" rel="noopener noreferrer" class="map-btn">
-        🧭 네이버 지도로 포러데이 팔당 확인하기
-      </a>
-    </div>
-
-    <!-- 비용표 -->
-    <h2>💰 남양주 리버뷰 드라이브 2인 예상 여행 경비 정산표</h2>
-    <p>
+        <section class="cost-table-card">
+          <div class="cost-head">
+            <h2 class="timeline-title">남양주 리버뷰 드라이브 2인 예상 여행 경비 정산표</h2>
+            <p>
       물의정원 수변 산책부터 라온숨 통창 리버뷰 카페, 엠키친앤카페 이탈리안 디너와 포러데이 팔당 심야 카페까지 여유롭게 즐기는 2인 기준 예상 경비 내역이에요. 물의정원 입장이 무료라 부담 없이 알차고 감성적인 하루를 완성할 수 있습니다.
     </p>
-
-    <div class="table-wrap">
-      <table>
+          </div>
+          <div class="table-wrap"><table class="cost-table">
         <thead>
           <tr>
             <th>구분</th>
@@ -718,43 +478,47 @@
             <td>27,000원</td>
             <td>아메리카노 2잔 13,000원 (카카오맵 메뉴) + 홍콩와플 14,000원 (오늘 데이트 등록 정보)</td>
           </tr>
-          <tr style="background-color: #f8fafc; font-weight: 700;">
+          <tr class="cost-total-row">
             <td colspan="2">2인 총 예상 경비 합계</td>
-            <td style="color: var(--color-warm);">111,000원</td>
+            <td>111,000원</td>
             <td>저녁 66,000원 + 카페 2곳 45,000원 (유류비 별도 / 1인 55,500원)</td>
           </tr>
         </tbody>
-      </table>
-    </div>
+      </table></div>
+        </section>
 
-    <!-- 추천 스팟 네이버 지도 목록 -->
-    <h2>📍 코스 추천 스팟 네이버 지도 바로가기</h2>
-    <ul class="spot-links">
+        <section class="map-links">
+          <h2 class="timeline-title">코스 추천 스팟 네이버 지도 바로가기</h2>
+          <ul class="map-list">
       <li><a href="https://map.naver.com/p/search/%EB%82%A8%EC%96%91%EC%A3%BC%20%EB%AC%BC%EC%9D%98%EC%A0%95%EC%9B%90" target="_blank" rel="noopener noreferrer">🧭 남양주 물의정원 (경기 남양주시 조안면 북한강로 398)</a></li>
       <li><a href="https://map.naver.com/p/search/%EB%9D%BC%EC%98%A8%EC%88%A8" target="_blank" rel="noopener noreferrer">🧭 라온숨 (경기 남양주시 화도읍 북한강로 1146)</a></li>
       <li><a href="https://map.naver.com/p/search/%EC%97%A0%ED%82%A4%EC%B9%9C%EC%95%A4%EC%B9%B4%ED%8E%98" target="_blank" rel="noopener noreferrer">🧭 엠키친앤카페 (경기 남양주시 와부읍 경강로 832)</a></li>
       <li><a href="https://map.naver.com/p/search/%ED%8F%AC%EB%9F%AC%EB%8D%B0%EC%9D%B4%20%ED%8C%94%EB%8B%B9" target="_blank" rel="noopener noreferrer">🧭 포러데이 팔당 (경기 남양주시 와부읍 경강로926번길 8-7)</a></li>
     </ul>
+        </section>
 
-    <section class="outro-card">
-      <div class="outro-title">✨ 오늘 데이트 에디토리얼 팀 총평</div>
-      <p style="margin-bottom: 0;">
+        <div class="cta-card">
+          <p class="cta-title">오늘 데이트 에디토리얼 팀 총평</p>
+          <p>
         경기 남양주는 유려한 북한강 물줄기를 따라 달리는 낮 드라이브부터 한강을 붉게 물들이는 저녁 노을 다이닝, 그리고 새벽까지 여는 강변 카페에서 보내는 늦은 밤까지 하루의 모든 순간이 낭만으로 채워지는 특별한 코스예요. 사방이 탁 트인 물의정원의 자연 속 산책과 감각적인 리버뷰 카페, 그리고 밤늦도록 여유로운 쉼을 선사하는 팔당 강변의 밤공기는 바쁜 일상 속에서 서로에게 잊지 못할 힐링의 시간을 선물해 줍니다. 이번 주말, 차창을 열고 상쾌한 강바람을 맞으며 남양주로의 감성 리버뷰 드라이브를 떠나보시길 적극 추천해 드립니다.
       </p>
-    </section>
+        </div>
 
-    <div class="app-course-box" style="margin: 40px 0 24px; padding: 20px 22px; background: var(--color-accent-light); border: 1px solid var(--color-border); border-radius: 14px;">
-      <strong style="display: block; font-size: 17px; color: var(--color-text-main); margin-bottom: 6px;">🗺️ 이 코스 오늘 데이트에서 열기</strong>
-      <p style="margin: 0 0 14px; font-size: 14.5px; line-height: 1.6; color: var(--color-text-main);">글에 나온 장소 4곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
-      <a href="../../#c=699.3353.276.472" style="display: inline-block; padding: 10px 18px; border-radius: 10px; background: var(--color-text-main); color: #ffffff; font-weight: 700; font-size: 15px; text-decoration: none;">앱에서 코스 열기 →</a>
-    </div>
+        <div class="app-course-box">
+          <div>
+            <h2>이 코스 오늘 데이트에서 열기</h2>
+            <p>글에 나온 장소 4곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
+          </div>
+          <a class="btn app-action" href="../../#c=699.3353.276.472">앱에서 코스 열기</a>
+        </div>
 
-    <footer class="article-footer">
-      <p>사진: 카카오맵 포토 리뷰</p>
-      <p style="margin-top: 6px;">본 콘텐츠는 오늘 데이트 에디토리얼 팀에서 공개 데이터를 기반으로 기획·작성하였습니다.</p>
-      <p style="margin-top: 6px;">© 2026 오늘 데이트 (Oneul Date). 전국 엄선 스팟 데이터를 바탕으로 제작되었습니다.</p>
-    </footer>
-  </main>
+        <footer class="article-credit">
+          <p>사진: 카카오맵 포토 리뷰</p>
+      <p>본 콘텐츠는 오늘 데이트 에디토리얼 팀에서 공개 데이터를 기반으로 기획·작성하였습니다.</p>
+      <p>© 2026 오늘 데이트 (Oneul Date). 전국 엄선 스팟 데이터를 바탕으로 제작되었습니다.</p>
+        </footer>
+      </div>
+    </main>
 
 </body>
 </html>

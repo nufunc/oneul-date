@@ -16,6 +16,9 @@
 
   <!-- Pretendard 웹폰트 -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700&display=swap&text=%2C.%2F0123456789%3A%5B%5Dm~%C2%B7%EA%B0%80%EA%B0%90%EA%B0%95%EA%B0%9C%EA%B1%B0%EA%B1%B4%EA%B2%8C%EA%B2%BD%EA%B3%84%EA%B3%A0%EA%B3%BC%EA%B4%80%EA%B4%B4%EA%B5%90%EA%B5%AC%EA%B8%88%EA%B8%B0%EA%B8%B8%EA%B9%8C%EB%82%98%EB%82%A0%EB%82%B4%EB%82%B8%EB%84%88%EB%84%89%EB%84%A4%EB%85%84%EB%85%B8%EB%88%88%EB%8A%90%EB%8A%91%EB%8A%94%EB%8A%98%EB%8B%AC%EB%8B%B9%EB%8C%80%EB%8D%B0%EB%8F%84%EB%8F%8B%EB%8F%8C%EB%8F%99%EB%94%94%EB%9A%9D%EB%9E%91%EB%A0%88%EB%A0%B9%EB%A1%9C%EB%A3%BB%EB%A5%B8%EB%A5%BC%EB%A6%AC%EB%A7%8C%EB%A7%9B%EB%A7%9D%EB%A7%A4%EB%A8%B8%EB%AC%BC%EB%B0%8F%EB%B0%94%EB%B0%98%EB%B0%A9%EB%B0%B0%EB%B2%84%EB%B3%80%EB%B3%84%EB%B3%B4%EB%B6%88%EB%B9%84%EB%B9%9A%EC%82%AC%EC%83%81%EC%84%9C%EC%84%9D%EC%84%A0%EC%84%B1%EC%86%94%EC%86%9F%EC%86%A1%EC%88%98%EC%88%B2%EC%8A%A4%EC%8B%9D%EC%8B%A0%EC%8B%A4%EC%8B%AC%EC%95%84%EC%95%94%EC%95%BD%EC%96%B4%EC%97%90%EC%97%AC%EC%97%B4%EC%98%81%EC%98%88%EC%98%A4%EC%9A%B0%EC%9B%90%EC%9B%94%EC%9C%84%EC%9C%A0%EC%9D%80%EC%9D%84%EC%9D%8C%EC%9D%B4%EC%9D%B8%EC%9D%BC%EC%9E%84%EC%9E%85%EC%9E%87%EC%A0%84%EC%A0%88%EC%A0%90%EC%A3%BC%EC%A6%88%EC%A6%90%EC%A7%80%EC%A7%84%EC%A7%95%EC%B0%BD%EC%B2%9C%EC%B2%AD%EC%B4%9D%EC%B6%94%EC%B9%B4%EC%BB%AC%EC%BD%94%EC%BD%A4%ED%83%80%ED%84%B0%ED%86%B5%ED%8A%B8%ED%8B%B0%ED%8C%9F%ED%8E%98%ED%8F%89%ED%8F%AC%ED%91%B8%ED%94%BC%ED%95%9C%ED%95%A9%ED%96%89%ED%96%A5%ED%98%95%ED%98%BC%ED%99%A9" rel="stylesheet">
 
   <script type="application/ld+json">
 {
@@ -43,354 +46,274 @@
   </script>
 
   <style>
-    :root {
-      --color-primary: #1e293b;
-      --color-accent: #059669;
-      --color-accent-light: #ecfdf5;
-      --color-text-main: #334155;
-      --color-text-sub: #64748b;
-      --color-border: #e2e8f0;
-      --color-bg-page: #f8fafc;
-      --color-card-bg: #ffffff;
-      --color-warm: #d97706;
-      --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-    }
+/* hallmark-solstice: scripts/convert_blog_hallmark.mjs가 글의 <style>을 이 파일로 바꾼다 (Hallmark 2.0.0, 테마 Solstice, P-293) */
+:root {
+  color-scheme: light;
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-xs: 0.8125rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.125rem; --text-xl: 1.5625rem; --text-2xl: 1.953rem; --text-3xl: 2.441rem;
+  --text-hero: clamp(1.75rem, 1.6vw + 1.25rem, 2.75rem);
+  --text-section: clamp(1.75rem, 1.8vw + 1rem, 2.875rem); --text-title: clamp(1.25rem, 0.75vw + 0.875rem, 1.625rem); --text-lead: clamp(1.0625rem, 0.3vw + 0.95rem, 1.25rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-micro: 120ms; --dur-short: 220ms;
+  --container: 1200px; --measure: 680px; --gutter: 56px; --gap-columns: 40px; --section-gap: 120px;
+  --z-sticky-nav: 300;
+  --color-paper: oklch(94% 0.03 80); --color-paper-2: oklch(97% 0.02 85); --color-paper-3: oklch(89% 0.05 80);
+  --color-ink: oklch(27% 0.05 50); --color-ink-2: oklch(36% 0.05 50); --color-muted: oklch(48% 0.06 55);
+  --color-rule: oklch(84% 0.06 78);
+  --color-accent: oklch(54% 0.20 24); --color-accent-2: oklch(48% 0.19 24); --color-accent-ink: oklch(97% 0.02 85); --color-focus: oklch(54% 0.20 24);
+  --color-gold: oklch(74% 0.14 75); --color-gold-2: oklch(84% 0.11 80);
+  --color-band-text: oklch(94% 0.03 80); --color-band-muted: oklch(80% 0.05 75);
+  --color-hair-ink: color-mix(in oklab, var(--color-ink) 10%, transparent);
+  --font-display: "Noto Serif KR", "Nanum Myeongjo", ui-serif, serif;
+  --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --radius-card: 0; --radius-pill: 999px; --rule-hair: 1px; --rule-bar: 2px;
+  --shadow-card: 10px 10px 0 var(--color-paper-3);
+}
+@media (max-width: 60rem) { :root { --gutter: 24px; --section-gap: 88px; --gap-columns: 24px; } }
+@media (max-width: 40rem) { :root { --gutter: 16px; --section-gap: 64px; --gap-columns: 16px; } }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: var(--font-family);
-      background-color: var(--color-bg-page);
-      color: var(--color-text-main);
-      line-height: 1.8;
-      word-break: keep-all;
-      -webkit-font-smoothing: antialiased;
-    }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+html { scrollbar-color: var(--color-muted) var(--color-paper); scroll-padding-top: var(--space-3xl); }
+body { margin: 0; background: var(--color-paper); color: var(--color-ink-2); font-family: var(--font-family); font-size: var(--text-md); line-height: 1.75; word-break: keep-all; -webkit-font-smoothing: antialiased; }
+::selection { background: color-mix(in oklab, var(--color-gold) 40%, transparent); }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+a:hover { text-decoration-color: var(--color-accent); }
+article h1, article h2, article h3 { margin: 0; font-family: var(--font-display); font-weight: 700; color: var(--color-ink); line-height: 1.3; letter-spacing: -0.01em; overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+img { max-width: 100%; display: block; }
+.container { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); }
 
-    .site-header {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--color-border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .header-inner {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 14px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .header-logo {
-      font-weight: 800;
-      font-size: 1.15rem;
-      color: var(--color-primary);
-      text-decoration: none;
-    }
-    .header-logo span { color: var(--color-accent); }
-    .header-nav a {
-      color: var(--color-text-sub);
-      text-decoration: none;
-      font-size: 0.9rem;
-      margin-left: 16px;
-    }
+/* 44px 머리 링크 규칙: scripts/test-blog-related.cjs가 글마다 하나를 요구한다 */
+header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
 
-    .article-container {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 36px 20px 80px;
-      background: var(--color-card-bg);
-      border-left: 1px solid var(--color-border);
-      border-right: 1px solid var(--color-border);
-      min-height: 100vh;
-    }
+/* Controls */
+.btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 var(--space-lg); border: 0; border-radius: var(--radius-pill); background: var(--color-accent); color: var(--color-accent-ink); font: 600 var(--text-md)/1 var(--font-family); text-decoration: none; cursor: pointer; transition: background-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out); }
+.btn:hover { background: var(--color-accent-2); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.link-quiet { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-ink); font-weight: 600; font-size: var(--text-sm); text-decoration: none; border-bottom: var(--rule-bar) solid var(--color-ink); transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out); }
+.link-quiet:hover { color: var(--color-accent); border-color: var(--color-accent); }
+.link-quiet:active { transform: translateY(1px); }
+.link-quiet:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
 
-    .post-badge {
-      display: inline-block;
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--color-accent);
-      background: var(--color-accent-light);
-      padding: 4px 12px;
-      border-radius: 20px;
-      margin-bottom: 16px;
-    }
+/* Nav */
+.site-header { position: sticky; top: 0; z-index: var(--z-sticky-nav); background: var(--color-paper); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.header-inner { display: flex; justify-content: space-between; align-items: center; min-height: 64px; }
+.header-logo { font-family: var(--font-display); font-size: var(--text-lg); color: var(--color-ink); text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; }
+.header-logo span { color: var(--color-accent); margin-left: 0.3em; }
+.header-logo:hover { color: var(--color-ink-2); }
+.header-nav { display: flex; gap: var(--space-lg); }
+.header-nav a { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--text-sm); color: var(--color-ink-2); text-decoration: none; }
+.header-nav a:hover { color: var(--color-ink); text-decoration: underline; text-decoration-color: var(--color-accent); }
+.header-nav a:active, .header-logo:active { transform: translateY(1px); }
 
-    h1 {
-      font-size: 1.85rem;
-      font-weight: 800;
-      line-height: 1.4;
-      color: var(--color-primary);
-      margin-bottom: 16px;
-      letter-spacing: -0.02em;
-    }
+/* Hero */
+.hero { display: grid; padding-block: var(--space-2xl) var(--space-xl); }
+.hero-text { display: grid; gap: var(--space-lg); }
+.article-title { font-size: var(--text-hero); line-height: 1.3; max-width: 28ch; }
+.hero-kicker { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.hero-kicker span:first-child { color: var(--color-accent); font-weight: 600; }
+.article-meta { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-lg); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); font-variant-numeric: tabular-nums; }
+.article-meta .meta-credit { flex-basis: 100%; }
+/* 좁은 화면에서 칸마다 한 줄: 본문 글꼴(Pretendard)이 바뀔 때 줄 수가 달라져 아래 띠가 밀리는 것을 막는다 */
+@media (max-width: 40rem) { .article-meta { flex-direction: column; flex-wrap: nowrap; } }
+.spot-photo img { width: 100%; height: 100%; object-fit: cover; outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
 
-    .post-meta {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      font-size: 0.86rem;
-      color: var(--color-text-sub);
-      padding-bottom: 24px;
-      margin-bottom: 30px;
-      border-bottom: 1px solid var(--color-border);
-    }
+/* Lead */
+.prose-intro { max-width: var(--measure); padding-top: var(--space-xl); font-size: var(--text-lead); line-height: 1.8; color: var(--color-ink); padding-bottom: var(--space-3xl); }
 
-    .intro-lead {
-      font-size: 1.08rem;
-      line-height: 1.85;
-      color: #1e293b;
-      margin-bottom: 32px;
-      font-weight: 450;
-    }
+/* The day, on the brown band */
+.band { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl) var(--space-xl); }
+.band .timeline-title { color: var(--color-band-text); font-size: var(--text-section); margin-bottom: var(--space-xl); }
+.route { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: 0; padding: 0; }
+.tl-act { font-size: var(--text-sm); color: var(--color-gold-2); padding-bottom: var(--space-sm); }
+.tl-step { display: grid; align-content: start; gap: var(--space-2xs); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-gold); }
+.tl-time { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1; color: var(--color-band-text); font-variant-numeric: tabular-nums; }
+.tl-place { font-weight: 600; font-size: var(--text-lg); color: var(--color-band-text); }
+.tl-note { font-size: var(--text-sm); color: var(--color-band-muted); line-height: 1.6; }
+.tl-move { font-size: var(--text-sm); color: var(--color-band-muted); padding-block: var(--space-sm) var(--space-lg); }
+.tl-total { font-size: var(--text-sm); color: var(--color-band-muted); padding-top: var(--space-lg); margin-top: var(--space-lg); border-top: var(--rule-hair) solid color-mix(in oklab, var(--color-band-text) 25%, transparent); }
+/* spot-info-list 계열: 시간 범위(10:30 - 11:45)가 길어 시각 글자를 줄이고, 요약 상자와 번호 배지를 둔다 */
+.route.range .tl-time { font-size: var(--text-xl); }
+.route.range .tl-step { padding-bottom: var(--space-md); }
+.tl-badge { font-size: var(--text-xs); color: var(--color-gold-2); letter-spacing: 0.04em; }
+.tl-facts { display: grid; gap: var(--space-2xs) var(--space-lg); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.tl-facts strong { color: var(--color-gold-2); font-weight: 600; }
+@media (min-width: 60rem) {
+  .tl-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .route { grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); column-gap: var(--space-lg); }
+  .route > * { grid-row: var(--r); grid-column: var(--c) / span var(--s, 1); }
+  .tl-move { padding-bottom: 0; }
+  .tl-total { grid-column: 1 / -1; }
+}
 
-    .course-summary-card {
-      background: #f1f5f9;
-      border-radius: 14px;
-      padding: 24px;
-      margin-bottom: 40px;
-      border: 1px solid #cbd5e1;
-    }
-    .summary-card-title {
-      font-weight: 800;
-      font-size: 1.05rem;
-      color: var(--color-primary);
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .tl-act {
-      font-weight: 700;
-      font-size: 0.88rem;
-      color: var(--color-accent);
-      margin-top: 14px;
-      margin-bottom: 4px;
-    }
-    .tl-step {
-      display: flex;
-      gap: 12px;
-      align-items: baseline;
-      padding: 4px 0;
-    }
-    .tl-time {
-      font-weight: 800;
-      font-size: 0.9rem;
-      color: var(--color-primary);
-      min-width: 45px;
-    }
-    .tl-place {
-      font-weight: 700;
-      font-size: 0.95rem;
-      color: #0f172a;
-    }
-    .tl-note {
-      font-size: 0.88rem;
-      color: var(--color-text-sub);
-      margin-left: 6px;
-    }
-    .tl-move {
-      font-size: 0.82rem;
-      color: #64748b;
-      padding-left: 57px;
-      margin: 4px 0 8px;
-    }
+/* Stops */
+.spots { padding-block: var(--section-gap) 0; display: grid; gap: var(--section-gap); }
+.spot-section { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "photo head" "photo body"; grid-template-rows: auto 1fr; column-gap: var(--gap-columns); row-gap: var(--space-md); align-items: start; padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); }
+.spot-section.flip { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-areas: "head photo" "body photo"; }
+.spot-section.no-photo { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "body"; }
+.spot-head { grid-area: head; display: grid; gap: var(--space-md); }
+.spot-photo { grid-area: photo; align-self: start; margin: 0; aspect-ratio: 4 / 5; width: 100%; background: var(--color-paper-3); position: sticky; top: 96px; }
+.spot-body { grid-area: body; display: grid; gap: var(--space-md); }
+.spot-header { display: flex; align-items: baseline; gap: var(--space-md); }
+.spot-num { font-family: var(--font-display); font-size: var(--text-3xl); line-height: 1; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+.spot-title { font-size: var(--text-section); }
+.spot-tagline { font-size: var(--text-lg); color: var(--color-ink); padding-bottom: var(--space-xs); }
+.spot-desc { max-width: 60ch; }
 
-    h2 {
-      font-size: 1.45rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin-top: 48px;
-      margin-bottom: 18px;
-      letter-spacing: -0.01em;
-      line-height: 1.45;
-    }
+.spot-info-box { margin: var(--space-xs) 0 0; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); }
+.info-row { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--space-md); padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.info-row:last-child { border-bottom: 0; }
+.info-label { color: var(--color-muted); }
+.info-val { color: var(--color-ink); font-weight: 400; font-variant-numeric: tabular-nums; }
+.map-btn-wrap { padding-top: var(--space-sm); }
+.tip-box { padding: var(--space-sm) var(--space-md); border-left: var(--rule-bar) solid var(--color-accent); background: var(--color-paper-2); font-size: var(--text-sm); color: var(--color-ink-2); line-height: 1.7; }
+.tip-box strong { color: var(--color-ink); font-weight: 600; }
+.tip-box .tip-title { display: block; margin-bottom: var(--space-2xs); }
 
-    p {
-      margin-bottom: 18px;
-      color: #334155;
-      font-size: 1rem;
-    }
+/* Fees */
+.cost-table-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.cost-head { display: grid; gap: var(--space-md); align-content: start; }
+.cost-head .timeline-title { font-size: var(--text-section); }
+.cost-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.cost-table th { text-align: left; font-weight: 400; color: var(--color-muted); padding: var(--space-xs) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-bar) solid var(--color-ink); }
+.cost-table td { padding: var(--space-sm) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink-2); vertical-align: top; }
+.cost-table td:nth-child(2) { color: var(--color-ink); font-weight: 400; }
+.cost-3 .cost-total-row td:nth-child(2) { font-family: inherit; font-size: inherit; color: inherit; font-weight: 600; }
+.cost-3 .cost-total-row td:nth-child(3) { font-family: var(--font-display); font-size: var(--text-xl); color: var(--color-accent); font-weight: 700; }
+.cost-total-row td { border-bottom: 0; border-top: var(--rule-bar) solid var(--color-ink); color: var(--color-ink); font-weight: 600; }
+.cost-total-row td:nth-child(2) { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--color-accent); font-weight: 700; }
+@media (max-width: 600px) {
+  .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
+  .table-wrap thead { display: none; }
+  .table-wrap tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-sm); row-gap: var(--space-2xs); padding-block: var(--space-sm); border-bottom: var(--rule-hair) solid var(--color-rule); }
+  .table-wrap td { padding: 0; border: 0; }
+  .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: var(--text-xs); color: var(--color-muted); }
+  .table-wrap td:nth-child(3) { text-align: right; font-weight: 600; color: var(--color-ink); }
+  .table-wrap td:nth-child(4) { grid-column: 1 / -1; color: var(--color-muted); }
+  .table-wrap td:empty { display: none; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: var(--text-sm); color: var(--color-ink); }
+  .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; text-align: right; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
+  .table-wrap .cost-total-row { border-top: var(--rule-bar) solid var(--color-ink); border-bottom: 0; }
+}
 
-    .real-photo-card {
-      margin: 24px 0 28px;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
-      background: #000;
-    }
-    .real-photo-card img {
-      width: 100%;
-      height: auto;
-      max-height: 480px;
-      object-fit: cover;
-      display: block;
-    }
-    .photo-caption {
-      background: #ffffff;
-      padding: 10px 14px;
-      font-size: 0.84rem;
-      color: var(--color-text-sub);
-      border-top: 1px solid var(--color-border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+/* Tips */
+.tips-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.tips-card .timeline-title { font-size: var(--text-section); align-self: start; }
+.tips-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-md); }
+.tips-list li { padding-bottom: var(--space-md); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.tips-list li:last-child { border-bottom: 0; }
+.tips-list strong { color: var(--color-ink); font-weight: 600; }
 
-    .info-grid {
-      background: #f8fafc;
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      padding: 18px 20px;
-      margin: 20px 0 24px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px 20px;
-    }
-    @media (max-width: 540px) {
-      .info-grid { grid-template-columns: 1fr; }
-    }
-    .info-item {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .info-label {
-      font-size: 0.76rem;
-      font-weight: 700;
-      color: var(--color-text-sub);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .info-val {
-      font-size: 0.92rem;
-      font-weight: 600;
-      color: var(--color-primary);
-    }
+/* App course */
+.app-course-box { margin-top: var(--section-gap); display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--gap-columns); align-items: end; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-xl); }
+.app-course-box h2 { font-size: var(--text-section); margin-bottom: var(--space-md); }
+.app-course-box p { max-width: 52ch; }
+.app-course-box .app-action { justify-self: end; }
 
-    .tip-box {
-      background: #fffbeb;
-      border: 1px solid #fde68a;
-      border-left: 4px solid #f59e0b;
-      padding: 16px 18px;
-      border-radius: 0 10px 10px 0;
-      margin: 22px 0 26px;
-      font-size: 0.92rem;
-      color: #92400e;
-      line-height: 1.7;
-    }
-    .tip-title {
-      font-weight: 800;
-      font-size: 0.9rem;
-      color: #78350f;
-      margin-bottom: 4px;
-    }
+.article-credit { margin-top: var(--space-2xl); padding-block: var(--space-md) var(--space-3xl); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); }
 
-    .map-btn-wrap {
-      margin: 20px 0 32px;
-    }
-    .map-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #ffffff;
-      border: 1.5px solid #cbd5e1;
-      padding: 10px 18px;
-      border-radius: 8px;
-      font-size: 0.88rem;
-      font-weight: 700;
-      color: #0f172a;
-      text-decoration: none;
-      transition: all 0.15s ease;
-    }
-    .map-btn:hover {
-      border-color: var(--color-accent);
-      color: var(--color-accent);
-      background: var(--color-accent-light);
-    }
+/* Footer mast */
+.site-footer { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl); }
+.footer-inner { display: grid; gap: var(--space-md); }
+.footer-mark { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1.2; color: var(--color-band-text); }
+.footer-line { color: var(--color-band-muted); font-size: var(--text-sm); }
+.footer-links { display: flex; flex-wrap: wrap; gap: var(--space-lg); }
+.footer-links a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-band-text); font-size: var(--text-sm); text-decoration: underline; text-decoration-color: var(--color-gold); }
+.footer-links a:hover { text-decoration-color: var(--color-accent); color: var(--color-gold-2); }
+.footer-links a:active { transform: translateY(1px); }
+.site-footer :focus-visible { outline-color: var(--color-gold-2); }
 
-    /* 비용표 */
-    .table-wrap {
-      margin: 32px 0 40px;
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      overflow: hidden;
-      background: #ffffff;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.9rem;
-      text-align: left;
-    }
-    thead {
-      background: #f1f5f9;
-      color: var(--color-primary);
-      font-weight: 700;
-    }
-    th, td {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--color-border);
-    }
-    tr:last-child td {
-      border-bottom: none;
-    }
+@media (max-width: 60rem) {
+  .hero, .spot-section, .spot-section.flip, .cost-table-card, .tips-card, .app-course-box { grid-template-columns: minmax(0, 1fr); }
+  .spot-section, .spot-section.flip { grid-template-areas: "head" "photo" "body"; grid-template-rows: auto; }
+  .spot-section.no-photo { grid-template-areas: "head" "body"; }
+  .hero { padding-block: var(--space-xl) var(--space-xl); }
+  .spot-photo { position: static; aspect-ratio: 16 / 10; }
+  .app-course-box { padding: var(--space-lg); }
+  .app-course-box .app-action { justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn, .link-quiet { transition: none; }
+  .btn:active, .link-quiet:active, .header-nav a:active, .header-logo:active, .footer-links a:active { transform: none; }
+}
 
-    /* 비용표: 좁은 화면에서는 한 행을 카드 하나로 쌓는다 */
-    @media (max-width: 600px) {
-      .table-wrap { overflow-x: visible; }
-      .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
-      .table-wrap thead { display: none; }
-      .table-wrap tr {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        column-gap: 12px;
-        row-gap: 4px;
-        padding: 14px 16px;
-        border-bottom: 1px solid var(--color-border);
-      }
-      .table-wrap tr:last-child { border-bottom: none; }
-      .table-wrap td { padding: 0; border: none; }
-      .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: 0.78rem; font-weight: 700; color: var(--color-text-sub); }
-      .table-wrap td:nth-child(2) { font-weight: 700; }
-      .table-wrap td:nth-child(3) { max-width: 60vw; word-break: keep-all; text-align: right; font-weight: 700; }
-      .table-wrap td:nth-child(4) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
-      .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: inherit; color: inherit; }
-      .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; max-width: 60vw; word-break: keep-all; text-align: right; }
-      .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; white-space: normal; text-align: left; font-size: 0.85rem; font-weight: 400; color: var(--color-text-sub); }
-    }
+/* real-photo-flat 계열(평면 글): 번호 있는 긴 장소 제목, 사진 설명, 안내 상자, 지도 목록 */
+.lead-photo { margin: 0 0 var(--space-3xl); }
+.lead-photo img { width: 100%; max-height: 520px; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.lead-photo figcaption, .body-photo figcaption { margin-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.spot-photo figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--space-xs) var(--space-sm); font-size: var(--text-xs); line-height: 1.5; color: var(--color-accent-ink); background: color-mix(in oklab, var(--color-ink) 78%, transparent); }
+.body-photo { margin: 0; }
+.body-photo img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.spot-section.flat .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.tl-lead { max-width: var(--measure); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.guide-box, .order-box { background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); color: var(--color-ink); }
+.guide-box h4, .order-box strong { margin: 0 0 var(--space-xs); font-family: var(--font-display); font-size: var(--text-md); color: var(--color-ink); display: block; }
+.guide-box ul, .order-box ul { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-2xs); }
+.bridge { padding-top: var(--space-xs); color: var(--color-muted); font-size: var(--text-sm); }
+.map-links { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-md); }
+.map-links .timeline-title { font-size: var(--text-section); }
+.map-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-xs); }
+.map-list a, .map-link-chip { display: flex; justify-content: space-between; gap: var(--space-md); align-items: center; min-height: 44px; padding-block: var(--space-xs); border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink); text-decoration: none; }
+.map-links-grid { display: grid; gap: 0; }
+.map-link-chip .btn-action { color: var(--color-accent); font-weight: 600; white-space: nowrap; }
+@media (max-width: 40rem) { .spot-section.flat .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .spot-photo { position: relative; } }
 
-    .outro-card {
-      background: #f8fafc;
-      border-radius: 12px;
-      padding: 24px;
-      margin: 40px 0 32px;
-      border: 1px solid var(--color-border);
-    }
-    .outro-title {
-      font-weight: 800;
-      font-size: 1.05rem;
-      color: var(--color-primary);
-      margin-bottom: 12px;
-    }
+/* spot-card 계열(editor-144): 대표 사진, 요약 상자, 본문 구획, 세부 코스, 이동 연결, 마무리 상자 */
+.hero-figure { margin: 0 0 var(--space-xl); }
+.hero-figure img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.hero-figure figcaption { padding-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-muted); }
+.summary-card { margin-bottom: var(--space-xl); background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-lg); font-size: var(--text-sm); }
+.summary-title, p.timeline-title, .cta-title { font-family: var(--font-display); font-weight: 700; line-height: 1.3; color: var(--color-ink); }
+.summary-title { font-size: var(--text-xl); margin-bottom: var(--space-sm); }
+p.timeline-title { letter-spacing: -0.01em; overflow-wrap: break-word; }
+.summary-list { margin: 0; padding: 0; list-style: none; display: grid; }
+.summary-list li { padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.summary-list li:last-child { border-bottom: 0; }
+.summary-list strong { color: var(--color-ink); font-weight: 600; }
+.prose-section { margin-top: var(--section-gap); max-width: var(--measure); display: grid; gap: var(--space-md); }
+.prose-section h2, .spots-title { font-size: var(--text-title); }
+.stops-section { margin-top: var(--section-gap); }
+.stops-section .spots { padding-top: var(--space-xl); }
+.spots.bridged { gap: 0; }
+.drive-bridge { margin: 0; padding-block: var(--space-xl); padding-left: var(--space-md); border-left: var(--rule-bar) solid var(--color-gold); font-size: var(--text-sm); color: var(--color-muted); }
+.drive-bridge strong { color: var(--color-ink); font-weight: 600; }
+.spot-header:has(.spot-badge) { flex-direction: column; align-items: flex-start; gap: var(--space-xs); }
+.spot-badge { font-size: var(--text-sm); font-weight: 600; color: var(--color-accent); }
+.spot-actions { display: flex; flex-wrap: wrap; gap: 0 var(--space-lg); }
+.info-wide .info-row { grid-template-columns: 5.5em minmax(0, 1fr); }
+.info-wide .info-row.plain { grid-template-columns: minmax(0, 1fr); }
+.cost-head .timeline-title.long { font-size: var(--text-title); }
+.cta-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-sm); max-width: var(--measure); }
+.cta-card h3, .cta-title { font-size: var(--text-title); }
+.cta-card .link-quiet { justify-self: start; }
 
-    .article-footer {
-      margin-top: 50px;
-      padding-top: 24px;
-      border-top: 1px solid var(--color-border);
-      font-size: 0.85rem;
-      color: var(--color-text-sub);
-      text-align: center;
-    }
-    header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
-    .header-nav a,.header-title a,.blog-tagline a{display:inline-block}
+/* real-photo-grid 계열(editor-145): 사진과 정보 상자가 글 순서대로 이어지는 한 열 장소 구획, 번호 있는 동선, 도입 여러 문단 */
+.prose-intro p + p { margin-top: var(--space-md); }
+.stories { padding-top: var(--space-xl); gap: var(--space-3xl); }
+.story-section { display: grid; gap: var(--space-md); max-width: var(--measure); }
+.story-section .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.story-body { display: grid; gap: var(--space-md); }
+.story-photo { margin: 0; }
+.story-photo img { width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.story-photo figcaption { padding-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.story-photo figcaption span + span::before { content: " · "; }
+.tl-step .tl-badge { margin-bottom: calc(var(--space-2xs) * -1); }
+.tl-meta { display: block; font-style: normal; color: var(--color-gold-2); }
+.app-course-box.early { margin-top: var(--space-xl); }
+.app-course-box .cta-title { font-size: var(--text-section); margin-bottom: var(--space-md); }
+@media (max-width: 40rem) { .story-section .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .route .tl-act:not(:first-child) { margin-top: var(--space-lg); } }
   </style>
 </head>
 <body>
 
   <header class="site-header">
-    <div class="header-inner">
+    <div class="header-inner container">
       <a href="/oneul-date/" class="header-logo">오늘 데이트 <span>매거진</span></a>
       <nav class="header-nav">
         <a href="/oneul-date/">홈</a>
@@ -400,309 +323,151 @@
   </header>
 
   <main class="article-container">
-    <div class="post-badge">강원 영월 가을 힐링 데이트</div>
-    <h1>[영월] 청령포 솔숲에서 사랑방식당 오징어구이, 카페 느리게·선돌 기암괴석과 한반도지형 노을까지 잇는 가을 데이트 코스</h1>
+      <header class="article-header hero container">
+        <div class="hero-text">
+          <p class="hero-kicker badge-category"><span>강원 영월 가을 힐링 데이트</span></p>
+          <h1 class="article-title">[영월] 청령포 솔숲에서 사랑방식당 오징어구이, 카페 느리게·선돌 기암괴석과 한반도지형 노을까지 잇는 가을 데이트 코스</h1>
+          <div class="article-meta">
+            <span>작성일: 2026-10-14</span>
+            <span class="meta-credit">글: 오늘 데이트 에디토리얼 팀 / 사진: 카카오맵 포토 리뷰 및 업체 등록 사진</span>
+            <span>지역: 강원특별자치도 영월군</span>
+          </div>
+          <p><a class="btn" href="../../#c=1252.1258.1255.1254">앱에서 코스 열기</a></p>
+        </div>
+      </header>
 
-    <div class="post-meta">
-      <span>작성일: 2026-10-14</span>
-      <span>·</span>
-      <span>글: 오늘 데이트 에디토리얼 팀 / 사진: 카카오맵 포토 리뷰 및 업체 등록 사진</span>
-      <span>·</span>
-      <span>지역: 강원특별자치도 영월군</span>
-    </div>
-
-    <p class="intro-lead">
+      <div class="container">
+        <div class="prose-intro"><p class="intro-lead">
       청명한 가을바람이 불어오는 10월의 강원 영월은 굽이쳐 흐르는 푸른 서강 물길과 웅장한 기암괴석, 그리고 수백 년 세월을 간직한 울창한 솔숲이 어우러져 깊은 평온을 선사해요. 삼면이 강물로 둘러싸인 천혜의 요새 청령포에서 나룻배를 타고 건너가 만나는 단종 어소와 관음송 솔숲길 아침 산책, 갓 볶아낸 매콤달콤한 오징어구이로 입맛을 돋우는 사랑방식당 점심, 영월 청령포로 감성 카페 느리게의 여유로운 쉼, 70m 높이의 두 갈래 기암절벽 선돌 조망, 그리고 굽이치는 평창강이 한반도를 쏙 빼닮은 한반도지형 전망대의 가을 노을 피날레까지 잇는 당일 힐링 코스를 소개합니다.
-    </p>
-
-    <!-- 코스 타임라인 요약 상자 -->
-    <section class="course-summary-card">
-      <div class="summary-card-title">🗓️ 영월 가을 감성 당일 코스 동선 한눈에 보기</div>
-
-      <div class="tl-act">오전 1막: 삼면이 강물로 둘러싸인 솔숲 비경</div>
-      <div class="tl-step">
-        <span class="tl-time">10:30</span>
-        <span class="tl-place">청령포</span>
-        <span class="tl-note">명승 제50호 나룻배 도선 건너기, 단종 어소와 수령 600년 관음송 솔숲길 산책</span>
+    </p></div>
       </div>
-      <div class="tl-move">↓ 차량 약 1.9km (약 4분 소요, 영월읍내 방면)</div>
 
-      <div class="tl-act">점심 2막: 불향 가득 매콤달콤 오징어구이 로컬 노포</div>
-      <div class="tl-step">
-        <span class="tl-time">12:30</span>
-        <span class="tl-place">사랑방식당</span>
-        <span class="tl-note">영월 현지인들이 즐겨 찾는 오징어구이와 따끈한 밥 한 그릇 점심 식사</span>
-      </div>
-      <div class="tl-move">↓ 차량 약 1.6km (약 2~3분 소요, 청령포로 방면)</div>
+      <!-- 동선 -->
+      <section class="timeline-card band">
+        <div class="container">
+          <p class="timeline-title">영월 가을 감성 당일 코스 동선 한눈에 보기</p>
+          <div class="route" style="--n:5">
+            <div class="tl-act" style="--r:1; --c:1">오전 1막: 삼면이 강물로 둘러싸인 솔숲 비경</div>
+            <div class="tl-step" style="--r:2; --c:1"><span class="tl-time">10:30</span><span class="tl-place">청령포</span><span class="tl-note">명승 제50호 나룻배 도선 건너기, 단종 어소와 수령 600년 관음송 솔숲길 산책</span></div>
+            <div class="tl-move" style="--r:3; --c:1">차량 약 1.9km (약 4분 소요, 영월읍내 방면)</div>
+            <div class="tl-act" style="--r:1; --c:2">점심 2막: 불향 가득 매콤달콤 오징어구이 로컬 노포</div>
+            <div class="tl-step" style="--r:2; --c:2"><span class="tl-time">12:30</span><span class="tl-place">사랑방식당</span><span class="tl-note">영월 현지인들이 즐겨 찾는 오징어구이와 따끈한 밥 한 그릇 점심 식사</span></div>
+            <div class="tl-move" style="--r:3; --c:2">차량 약 1.6km (약 2~3분 소요, 청령포로 방면)</div>
+            <div class="tl-act" style="--r:1; --c:3">오후 3막: 서강 둑길 옆 아늑한 감성 카페 쉼</div>
+            <div class="tl-step" style="--r:2; --c:3"><span class="tl-time">13:45</span><span class="tl-place">카페 느리게</span><span class="tl-note">고즈넉한 도로변 아늑한 실내에서 즐기는 시그니처 크림라떼와 티타임</span></div>
+            <div class="tl-move" style="--r:3; --c:3">차량 약 9.2km (약 12~15분 소요, 소나기재 방면)</div>
+            <div class="tl-act" style="--r:1; --c:4">오후 4막: 서강 절벽 위 70m 높이 두 갈래 바위 절경</div>
+            <div class="tl-step" style="--r:2; --c:4"><span class="tl-time">15:15</span><span class="tl-place">선돌</span><span class="tl-note">명승 제76호 소나기재 숲길 산책로와 서강을 굽어보는 신선암 기암괴석 조망</span></div>
+            <div class="tl-move" style="--r:3; --c:4">차량 약 13.8km (약 19~20분 소요, 한반도면 방면)</div>
+            <div class="tl-act" style="--r:1; --c:5">저녁 5막: 삼면을 에워싼 평창강 물길과 한반도 형상 노을</div>
+            <div class="tl-step" style="--r:2; --c:5"><span class="tl-time">17:00</span><span class="tl-place">한반도지형 전망대</span><span class="tl-note">명승 제75호 솔숲 탐방로 산책 후 만나는 삼면 감입곡류천 가을 황혼 피날레</span></div>
+          </div>
+        </div>
+      </section>
 
-      <div class="tl-act">오후 3막: 서강 둑길 옆 아늑한 감성 카페 쉼</div>
-      <div class="tl-step">
-        <span class="tl-time">13:45</span>
-        <span class="tl-place">카페 느리게</span>
-        <span class="tl-note">고즈넉한 도로변 아늑한 실내에서 즐기는 시그니처 크림라떼와 티타임</span>
-      </div>
-      <div class="tl-move">↓ 차량 약 9.2km (약 12~15분 소요, 소나기재 방면)</div>
-
-      <div class="tl-act">오후 4막: 서강 절벽 위 70m 높이 두 갈래 바위 절경</div>
-      <div class="tl-step">
-        <span class="tl-time">15:15</span>
-        <span class="tl-place">선돌</span>
-        <span class="tl-note">명승 제76호 소나기재 숲길 산책로와 서강을 굽어보는 신선암 기암괴석 조망</span>
-      </div>
-      <div class="tl-move">↓ 차량 약 13.8km (약 19~20분 소요, 한반도면 방면)</div>
-
-      <div class="tl-act">저녁 5막: 삼면을 에워싼 평창강 물길과 한반도 형상 노을</div>
-      <div class="tl-step">
-        <span class="tl-time">17:00</span>
-        <span class="tl-place">한반도지형 전망대</span>
-        <span class="tl-note">명승 제75호 솔숲 탐방로 산책 후 만나는 삼면 감입곡류천 가을 황혼 피날레</span>
-      </div>
-    </section>
-
-    <!-- 1절: 청령포 -->
-    <h2>1. 청령포, 나룻배를 타고 건너가는 서강 물길과 수령 600년 관음송 솔숲</h2>
-    <p>
+      <div class="container">
+        <div class="spots stories">
+          <section class="story-section">
+            <h2 class="spot-title">1. 청령포, 나룻배를 타고 건너가는 서강 물길과 수령 600년 관음송 솔숲</h2>
+            <div class="story-body">
+              <p>
       영월 가을 여행의 첫 목적지는 남면 광천리에 자리한 명승 제50호 <strong>청령포</strong>예요. 삼면이 맑고 깊은 서강 물길로 둘러싸이고 뒤편은 험준한 육육봉의 벼랑으로 막혀 있어 배를 타지 않고는 드나들 수 없는 천혜의 고립지이자 조선 제6대 임금 단종의 유배지로 유서 깊은 곳입니다.
     </p>
-
-    <div class="real-photo-card">
-      <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/c6f060d5cbe16a89b6f353d6062bc8b9c5bbb295?original" alt="소나무 숲에 둘러싸인 청령포 단종 어소 본채 기와집 전경" loading="lazy">
-      <div class="photo-caption">
-        <span>소나무 숲에 둘러싸인 청령포 단종 어소 본채 기와집 전경</span>
-        <span>출처: 카카오맵 포토 리뷰</span>
-      </div>
-    </div>
-
-    <p>
+              <figure class="story-photo">
+              <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/c6f060d5cbe16a89b6f353d6062bc8b9c5bbb295?original" alt="소나무 숲에 둘러싸인 청령포 단종 어소 본채 기와집 전경" loading="lazy" />
+              <figcaption><span>소나무 숲에 둘러싸인 청령포 단종 어소 본채 기와집 전경</span><span>출처: 카카오맵 포토 리뷰</span></figcaption>
+            </figure>
+              <p>
       매표소 앞 선착장에서 모터 나룻배를 타고 잔잔한 서강 물결을 2~3분쯤 가르면 자갈밭이 펼쳐진 청령포 기슭에 닿게 됩니다. 자갈밭을 지나 숲으로 들어서면 하늘을 향해 곧게 뻗은 울창한 소나무들이 장관을 이뤄요. 단종이 머물던 기와집 어소와 함께, 당시 단종의 비통한 모습을 보았고(觀) 오열하는 소리를 들었다(音) 하여 이름 붙여진 천연기념물 <strong>관음송</strong>이 수령 600년의 거대한 자태로 서 있어 고즈넉한 감동을 선사합니다.
     </p>
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">강원특별자치도 영월군 남면 광천리 산 68</span></div><div class="info-row"><span class="info-label">관람시간</span><span class="info-val">09:00 ~ 18:00 (입장 마감 17:00 / 매주 월요일 휴일, 공휴일이면 다음 평일 휴관)</span></div><div class="info-row"><span class="info-label">입장료</span><span class="info-val">성인 3,000원, 청소년·군인 2,500원, 어린이 2,000원, 경로 1,000원 (2026년 기준)</span></div><div class="info-row"><span class="info-label">주차안내</span><span class="info-val">청령포 매표소 인근 주차 가능 (무료 이용)</span></div></div>
+              <div class="tip-box"><strong class="tip-title">에디터 추천 팁</strong>단종 어소를 둘러본 뒤 뒤편 솔숲 계단을 따라 노산대에 올라가 보세요. 단종이 한양을 바라보며 시름을 달랬다는 절벽 위 노산대와 망향탑에 서면 유유히 흐르는 서강 물길과 강 건너 들녘이 파노라마처럼 펼쳐집니다. 숲길 산책로는 흙길과 목재 데크로 잘 정비되어 있어 걷기 편안해요.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%EC%B2%AD%EB%A0%B9%ED%8F%AC" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도로 청령포 확인하기</a></div>
+            </div>
+          </section>
 
-    <div class="info-grid">
-      <div class="info-item">
-        <span class="info-label">주소</span>
-        <span class="info-val">강원특별자치도 영월군 남면 광천리 산 68</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">관람시간</span>
-        <span class="info-val">09:00 ~ 18:00 (입장 마감 17:00 / 매주 월요일 휴일, 공휴일이면 다음 평일 휴관)</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">입장료</span>
-        <span class="info-val">성인 3,000원, 청소년·군인 2,500원, 어린이 2,000원, 경로 1,000원 (2026년 기준)</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">주차안내</span>
-        <span class="info-val">청령포 매표소 인근 주차 가능 (무료 이용)</span>
-      </div>
-    </div>
-
-    <div class="tip-box">
-      <div class="tip-title">💡 에디터 추천 팁</div>
-      단종 어소를 둘러본 뒤 뒤편 솔숲 계단을 따라 노산대에 올라가 보세요. 단종이 한양을 바라보며 시름을 달랬다는 절벽 위 노산대와 망향탑에 서면 유유히 흐르는 서강 물길과 강 건너 들녘이 파노라마처럼 펼쳐집니다. 숲길 산책로는 흙길과 목재 데크로 잘 정비되어 있어 걷기 편안해요.
-    </div>
-
-    <div class="map-btn-wrap">
-      <a href="https://map.naver.com/p/search/%EC%B2%AD%EB%A0%B9%ED%8F%AC" target="_blank" rel="noopener noreferrer" class="map-btn">
-        🧭 네이버 지도로 청령포 확인하기
-      </a>
-    </div>
-
-    <!-- 2절: 사랑방식당 -->
-    <h2>2. 사랑방식당, 불향 머금은 매콤달콤한 오징어구이로 입맛 돋우는 로컬 점심</h2>
-    <p>
+          <section class="story-section">
+            <h2 class="spot-title">2. 사랑방식당, 불향 머금은 매콤달콤한 오징어구이로 입맛 돋우는 로컬 점심</h2>
+            <div class="story-body">
+              <p>
       청령포의 호젓한 숲길 산책을 마친 뒤에는 차량으로 약 4분 거리인 영월읍 절무리골길에 위치한 <strong>사랑방식당</strong>에서 든든한 점심 식사를 즐겨보세요. 영월 현지 주민들은 물론 영월을 찾는 여행객들 사이에서 오랜 시간 사랑받아 온 향토 식당입니다.
     </p>
-
-    <div class="real-photo-card">
-      <img src="https://t1.kakaocdn.net/fiy_reboot/place/6BFB7ED3F37E490EA2805C39C30F5E00" alt="오징어 그림 간판이 걸려 있는 영월 사랑방식당 건물 외관" loading="lazy">
-      <div class="photo-caption">
-        <span>오징어 그림 간판이 걸려 있는 영월 사랑방식당 건물 외관</span>
-        <span>출처: 카카오맵 업체 등록 사진</span>
-      </div>
-    </div>
-
-    <p>
+              <figure class="story-photo">
+              <img src="https://t1.kakaocdn.net/fiy_reboot/place/6BFB7ED3F37E490EA2805C39C30F5E00" alt="오징어 그림 간판이 걸려 있는 영월 사랑방식당 건물 외관" loading="lazy" />
+              <figcaption><span>오징어 그림 간판이 걸려 있는 영월 사랑방식당 건물 외관</span><span>출처: 카카오맵 업체 등록 사진</span></figcaption>
+            </figure>
+              <p>
       사랑방식당의 대표 메뉴는 매콤하면서도 입에 착 감기는 감칠맛이 일품인 <strong>오징어구이</strong>예요. 신선한 오징어에 매콤달콤한 양념과 채소를 듬뿍 넣어 자작하게 볶아내는 방식으로, 쫄깃한 오징어의 식감과 은은하게 배어 있는 불향이 밥도둑 역할을 톡톡히 합니다.
     </p>
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">강원특별자치도 영월군 영월읍 절무리골길 12</span></div><div class="info-row"><span class="info-label">영업시간</span><span class="info-val">매일 11:30 ~ 19:30 (카카오맵 장소 정보 기준)</span></div><div class="info-row"><span class="info-label">대표메뉴</span><span class="info-val">오징어구이(1인 13,000~14,000원 선), 밥류</span></div><div class="info-row"><span class="info-label">주차안내</span><span class="info-val">식당 전용 주차 공간 및 인근 골목 주차 가능 (무료)</span></div></div>
+              <div class="tip-box"><strong class="tip-title">에디터 추천 팁</strong>오징어구이를 어느 정도 드신 뒤 대접에 밥과 상추, 참기름, 김가루를 넣고 남은 양념에 비벼 드시면 빼놓을 수 없는 별미예요. 매콤한 양념과 아삭한 채소가 어우러져 든든하면서도 만족스러운 식사가 완성됩니다.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%EC%98%81%EC%9B%94%20%EC%82%AC%EB%9E%91%EB%B0%A9%EC%8B%9D%EB%8B%B9" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도로 영월 사랑방식당 확인하기</a></div>
+            </div>
+          </section>
 
-    <div class="info-grid">
-      <div class="info-item">
-        <span class="info-label">주소</span>
-        <span class="info-val">강원특별자치도 영월군 영월읍 절무리골길 12</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">영업시간</span>
-        <span class="info-val">매일 11:30 ~ 19:30 (카카오맵 장소 정보 기준)</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">대표메뉴</span>
-        <span class="info-val">오징어구이(1인 13,000~14,000원 선), 밥류</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">주차안내</span>
-        <span class="info-val">식당 전용 주차 공간 및 인근 골목 주차 가능 (무료)</span>
-      </div>
-    </div>
-
-    <div class="tip-box">
-      <div class="tip-title">💡 에디터 추천 팁</div>
-      오징어구이를 어느 정도 드신 뒤 대접에 밥과 상추, 참기름, 김가루를 넣고 남은 양념에 비벼 드시면 빼놓을 수 없는 별미예요. 매콤한 양념과 아삭한 채소가 어우러져 든든하면서도 만족스러운 식사가 완성됩니다.
-    </div>
-
-    <div class="map-btn-wrap">
-      <a href="https://map.naver.com/p/search/%EC%98%81%EC%9B%94%20%EC%82%AC%EB%9E%91%EB%B0%A9%EC%8B%9D%EB%8B%B9" target="_blank" rel="noopener noreferrer" class="map-btn">
-        🧭 네이버 지도로 영월 사랑방식당 확인하기
-      </a>
-    </div>
-
-    <!-- 3절: 카페 느리게 -->
-    <h2>3. 카페 느리게, 고즈넉한 도로변 아늑한 실내에서 즐기는 티타임</h2>
-    <p>
+          <section class="story-section">
+            <h2 class="spot-title">3. 카페 느리게, 고즈넉한 도로변 아늑한 실내에서 즐기는 티타임</h2>
+            <div class="story-body">
+              <p>
       점심 식사를 마친 후 향할 곳은 영월 청령포로에 자리 잡은 감성 카페 <strong>카페 느리게</strong>예요. 영월 읍내의 번잡함을 살짝 벗어나 한적한 도로변에 자리하고 있어, 여행 중 커피 한 잔과 함께 숨을 고르며 여유로운 대화를 나누기에 좋은 공간입니다.
     </p>
-
-    <div class="real-photo-card">
-      <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/620596c4d209817fac926ff64c47c12783f21555?original" alt="따뜻한 조명과 테이블이 놓인 카페 느리게 실내 전경" loading="lazy">
-      <div class="photo-caption">
-        <span>따뜻한 조명과 테이블이 놓인 카페 느리게 실내 전경</span>
-        <span>출처: 카카오맵 포토 리뷰</span>
-      </div>
-    </div>
-
-    <p>
+              <figure class="story-photo">
+              <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/620596c4d209817fac926ff64c47c12783f21555?original" alt="따뜻한 조명과 테이블이 놓인 카페 느리게 실내 전경" loading="lazy" />
+              <figcaption><span>따뜻한 조명과 테이블이 놓인 카페 느리게 실내 전경</span><span>출처: 카카오맵 포토 리뷰</span></figcaption>
+            </figure>
+              <p>
       화이트 톤의 벽돌과 따스한 원목, 감각적인 조명이 조화를 이루는 실내는 높은 천장 구조로 답답함 없이 아늑한 분위기를 자아내요. 고소하고 달콤한 <strong>보리크림라떼</strong>와 옥수수크림라떼는 영월 로컬 감성을 담아낸 시그니처 음료로, 부드러운 크림과 커피의 조화가 무척 매력적입니다.
     </p>
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">강원특별자치도 영월군 영월읍 청령포로 37</span></div><div class="info-row"><span class="info-label">영업시간</span><span class="info-val">매일 11:00 ~ 20:00 (라스트오더 19:30, 카카오맵 장소 정보 기준)</span></div><div class="info-row"><span class="info-label">대표메뉴</span><span class="info-val">보리크림라떼(약 6,000원 선), 아메리카노, 디저트</span></div><div class="info-row"><span class="info-label">주차안내</span><span class="info-val">카페 앞 전용 주차장 구비 (무료 이용 가능)</span></div></div>
+              <div class="tip-box"><strong class="tip-title">에디터 추천 팁</strong>달콤한 크림라떼를 즐기신다면 크림을 먼저 스푼으로 떠 맛본 뒤 커피와 함께 천천히 음미해 보세요. 창가 자리에 앉아 가을 햇살을 받으며 도란도란 다음 코스 이야기를 나누기 좋습니다.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%EC%98%81%EC%9B%94%20%EC%B9%B4%ED%8E%98%20%EB%8A%90%EB%A6%AC%EA%B2%8C" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도로 카페 느리게 확인하기</a></div>
+            </div>
+          </section>
 
-    <div class="info-grid">
-      <div class="info-item">
-        <span class="info-label">주소</span>
-        <span class="info-val">강원특별자치도 영월군 영월읍 청령포로 37</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">영업시간</span>
-        <span class="info-val">매일 11:00 ~ 20:00 (라스트오더 19:30, 카카오맵 장소 정보 기준)</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">대표메뉴</span>
-        <span class="info-val">보리크림라떼(약 6,000원 선), 아메리카노, 디저트</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">주차안내</span>
-        <span class="info-val">카페 앞 전용 주차장 구비 (무료 이용 가능)</span>
-      </div>
-    </div>
-
-    <div class="tip-box">
-      <div class="tip-title">💡 에디터 추천 팁</div>
-      달콤한 크림라떼를 즐기신다면 크림을 먼저 스푼으로 떠 맛본 뒤 커피와 함께 천천히 음미해 보세요. 창가 자리에 앉아 가을 햇살을 받으며 도란도란 다음 코스 이야기를 나누기 좋습니다.
-    </div>
-
-    <div class="map-btn-wrap">
-      <a href="https://map.naver.com/p/search/%EC%98%81%EC%9B%94%20%EC%B9%B4%ED%8E%98%20%EB%8A%90%EB%A6%AC%EA%B2%8C" target="_blank" rel="noopener noreferrer" class="map-btn">
-        🧭 네이버 지도로 카페 느리게 확인하기
-      </a>
-    </div>
-
-    <!-- 4절: 선돌 -->
-    <h2>4. 선돌, 서강 푸른 물길 위로 우뚝 솟은 70m 기암괴석과 신선암 절경</h2>
-    <p>
+          <section class="story-section">
+            <h2 class="spot-title">4. 선돌, 서강 푸른 물길 위로 우뚝 솟은 70m 기암괴석과 신선암 절경</h2>
+            <div class="story-body">
+              <p>
       카페에서 휴식을 취한 뒤에는 소나기재 고갯마루를 향해 서북쪽으로 약 12분쯤 달려보세요. 방절리 서강 강변 절벽에 우뚝 솟아 있는 명승 제76호 <strong>영월 선돌</strong>을 만나게 됩니다.
     </p>
-
-    <div class="real-photo-card">
-      <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/75b782c058db922475c5531f23179c4c5dc2dd35?original" alt="서강 물길을 굽어보는 영월 선돌 기암절벽과 주변 산천 전경" loading="lazy">
-      <div class="photo-caption">
-        <span>서강 물길을 굽어보는 영월 선돌 기암절벽과 주변 산천 전경</span>
-        <span>출처: 카카오맵 포토 리뷰</span>
-      </div>
-    </div>
-
-    <p>
+              <figure class="story-photo">
+              <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/75b782c058db922475c5531f23179c4c5dc2dd35?original" alt="서강 물길을 굽어보는 영월 선돌 기암절벽과 주변 산천 전경" loading="lazy" />
+              <figcaption><span>서강 물길을 굽어보는 영월 선돌 기암절벽과 주변 산천 전경</span><span>출처: 카카오맵 포토 리뷰</span></figcaption>
+            </figure>
+              <p>
       선돌 주차장에서 피톤치드 가득한 솔숲 데크길을 따라 가볍게 걸어 들어가면 바위 절벽 위에 마련된 전망대에 닿게 됩니다. 발아래로는 마치 거대한 칼로 바위를 쪼개놓은 듯한 높이 약 70m의 두 갈래 웅장한 바위 기둥이 서강 푸른 물길을 굽어보며 서 있어요. 깎아지른 절벽 틈 사이로 흐르는 유유한 강물과 강 건너 평화로운 시골 마을, 첩첩산중 능선이 한 폭의 진경산수화 같은 비경을 연출합니다.
     </p>
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">강원특별자치도 영월군 영월읍 방절리 769-4</span></div><div class="info-row"><span class="info-label">관람시간</span><span class="info-val">연중 상시 개방 (일출 전 ~ 일몰 후)</span></div><div class="info-row"><span class="info-label">입장료</span><span class="info-val">전면 무료 개방</span></div><div class="info-row"><span class="info-label">주차안내</span><span class="info-val">소나기재 선돌 주차장 완비 (무료 이용)</span></div></div>
+              <div class="tip-box"><strong class="tip-title">에디터 추천 팁</strong>전망 데크에 서면 선돌과 서강을 넓은 화각으로 한눈에 담을 수 있고, 솟구친 바위 절벽의 웅장함을 더욱 생생하게 체감할 수 있습니다.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%EC%98%81%EC%9B%94%20%EC%84%A0%EB%8F%8C" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도로 영월 선돌 확인하기</a></div>
+            </div>
+          </section>
 
-    <div class="info-grid">
-      <div class="info-item">
-        <span class="info-label">주소</span>
-        <span class="info-val">강원특별자치도 영월군 영월읍 방절리 769-4</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">관람시간</span>
-        <span class="info-val">연중 상시 개방 (일출 전 ~ 일몰 후)</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">입장료</span>
-        <span class="info-val">전면 무료 개방</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">주차안내</span>
-        <span class="info-val">소나기재 선돌 주차장 완비 (무료 이용)</span>
-      </div>
-    </div>
-
-    <div class="tip-box">
-      <div class="tip-title">💡 에디터 추천 팁</div>
-      전망 데크에 서면 선돌과 서강을 넓은 화각으로 한눈에 담을 수 있고, 솟구친 바위 절벽의 웅장함을 더욱 생생하게 체감할 수 있습니다.
-    </div>
-
-    <div class="map-btn-wrap">
-      <a href="https://map.naver.com/p/search/%EC%98%81%EC%9B%94%20%EC%84%A0%EB%8F%8C" target="_blank" rel="noopener noreferrer" class="map-btn">
-        🧭 네이버 지도로 영월 선돌 확인하기
-      </a>
-    </div>
-
-    <!-- 5절: 한반도지형 전망대 -->
-    <h2>5. 한반도지형 전망대, 평창강 물길이 빚어낸 한반도 형상과 황혼 노을 피날레</h2>
-    <p>
+          <section class="story-section">
+            <h2 class="spot-title">5. 한반도지형 전망대, 평창강 물길이 빚어낸 한반도 형상과 황혼 노을 피날레</h2>
+            <div class="story-body">
+              <p>
       영월 가을 데이트의 대미를 장식할 하이라이트는 한반도면 옹정리에 위치한 명승 제75호 <strong>한반도지형</strong>입니다. 서강의 상류인 평창강과 주천강이 합류하기 전, 사행천을 이루며 굽이쳐 흐르는 강물이 선암마을 삼면을 에워싸며 깎아내려 우리나라 삼면 바다와 동고서저 지형을 놀랍도록 빼닮은 형상을 빚어낸 명승이에요.
     </p>
-
-    <div class="real-photo-card">
-      <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/f6135278243a3555bb3c4cc172b278528d610e56?original" alt="전망대에서 내려다본 평창강 물길과 한반도지형 전경" loading="lazy">
-      <div class="photo-caption">
-        <span>전망대에서 내려다본 평창강 물길과 한반도지형 전경</span>
-        <span>출처: 카카오맵 포토 리뷰</span>
-      </div>
-    </div>
-
-    <p>
+              <figure class="story-photo">
+              <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/f6135278243a3555bb3c4cc172b278528d610e56?original" alt="전망대에서 내려다본 평창강 물길과 한반도지형 전경" loading="lazy" />
+              <figcaption><span>전망대에서 내려다본 평창강 물길과 한반도지형 전경</span><span>출처: 카카오맵 포토 리뷰</span></figcaption>
+            </figure>
+              <p>
       탐방로 입구 주차장에 차를 대고 완만한 능선을 따라 조성된 오솔길과 목재 데크를 15~20분쯤 걸어 오르면 시야가 탁 트이는 전망대에 다다르게 됩니다. 동쪽은 높은 절벽을 이루고 서쪽은 완만한 모래펄을 형성하며 강물 위로 오롯이 솟아 있는 한반도 형상은 바라볼수록 자연의 신비로움에 탄성을 자아내게 해요. 가을 저녁 17시 50분 전후, 서쪽 하늘이 붉은 황금빛으로 물들어가며 강물 위로 잔잔하게 번지는 낙조는 하루 여정의 감동적인 마침표를 장식합니다.
     </p>
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">주소</span><span class="info-val">강원특별자치도 영월군 한반도면 옹정리 산 141-1</span></div><div class="info-row"><span class="info-label">관람시간</span><span class="info-val">연중 상시 개방</span></div><div class="info-row"><span class="info-label">입장료</span><span class="info-val">전면 무료 개방</span></div><div class="info-row"><span class="info-label">주차안내</span><span class="info-val">한반도지형 탐방로 주차장 (무료 이용)</span></div></div>
+              <div class="tip-box"><strong class="tip-title">에디터 추천 팁</strong>주차장에서 전망대까지 이어지는 숲길은 약간의 오르막과 내리막 계단이 포함되어 있으므로 편안한 운동화를 착용하시는 것을 추천해요. 10월 중순 영월 일몰은 17시 50분 전후이므로 17시 무렵 숲길 산책을 시작하시면 해 질 녘 골든아워의 눈부신 노을 풍경을 온전히 담으실 수 있습니다.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%EC%98%81%EC%9B%94%20%ED%95%9C%EB%B0%98%EB%8F%84%EC%A7%80%ED%98%95" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도로 영월 한반도지형 확인하기</a></div>
+            </div>
+          </section>
+        </div>
 
-    <div class="info-grid">
-      <div class="info-item">
-        <span class="info-label">주소</span>
-        <span class="info-val">강원특별자치도 영월군 한반도면 옹정리 산 141-1</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">관람시간</span>
-        <span class="info-val">연중 상시 개방</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">입장료</span>
-        <span class="info-val">전면 무료 개방</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">주차안내</span>
-        <span class="info-val">한반도지형 탐방로 주차장 (무료 이용)</span>
-      </div>
-    </div>
-
-    <div class="tip-box">
-      <div class="tip-title">💡 에디터 추천 팁</div>
-      주차장에서 전망대까지 이어지는 숲길은 약간의 오르막과 내리막 계단이 포함되어 있으므로 편안한 운동화를 착용하시는 것을 추천해요. 10월 중순 영월 일몰은 17시 50분 전후이므로 17시 무렵 숲길 산책을 시작하시면 해 질 녘 골든아워의 눈부신 노을 풍경을 온전히 담으실 수 있습니다.
-    </div>
-
-    <div class="map-btn-wrap">
-      <a href="https://map.naver.com/p/search/%EC%98%81%EC%9B%94%20%ED%95%9C%EB%B0%98%EB%8F%84%EC%A7%80%ED%98%95" target="_blank" rel="noopener noreferrer" class="map-btn">
-        🧭 네이버 지도로 영월 한반도지형 확인하기
-      </a>
-    </div>
-
-    <!-- 2인 예상 여행 경비 표 -->
-    <h2>💰 영월 당일 데이트 2인 예상 여행 경비</h2>
-    <div class="table-wrap">
-      <table>
+        <section class="cost-table-card">
+          <div class="cost-head">
+            <h2 class="timeline-title">영월 당일 데이트 2인 예상 여행 경비</h2>
+          </div>
+          <div class="table-wrap"><table class="cost-table">
         <thead>
           <tr>
             <th>구분</th>
@@ -742,43 +507,47 @@
             <td>0원</td>
             <td>명승 제75호 전망대 및 탐방로 주차장 전면 무료 개방</td>
           </tr>
-          <tr style="background-color: #f8fafc; font-weight: 700;">
+          <tr class="cost-total-row">
             <td colspan="2">2인 총 예상 경비 합계</td>
-            <td style="color: var(--color-warm);">약 43,000 ~ 47,000원</td>
+            <td>약 43,000 ~ 47,000원</td>
             <td>주유 및 개인 교통비 별도 / 1인 약 2.2~2.4만 원</td>
           </tr>
         </tbody>
-      </table>
-    </div>
+      </table></div>
+        </section>
 
-    <!-- 추천 스팟 네이버 지도 목록 -->
-    <h2>📍 코스 추천 스팟 네이버 지도 바로가기</h2>
-    <ul>
+        <section class="map-links">
+          <h2 class="timeline-title">코스 추천 스팟 네이버 지도 바로가기</h2>
+          <ul class="map-list">
       <li><a href="https://map.naver.com/p/search/%EC%B2%AD%EB%A0%B9%ED%8F%AC" target="_blank" rel="noopener noreferrer">청령포 (강원특별자치도 영월군 남면 광천리 산 68)</a></li>
       <li><a href="https://map.naver.com/p/search/%EC%98%81%EC%9B%94%20%EC%82%AC%EB%9E%91%EB%B0%A9%EC%8B%9D%EB%8B%B9" target="_blank" rel="noopener noreferrer">사랑방식당 (강원특별자치도 영월군 영월읍 절무리골길 12)</a></li>
       <li><a href="https://map.naver.com/p/search/%EC%98%81%EC%9B%94%20%EC%B9%B4%ED%8E%98%20%EB%8A%90%EB%A6%AC%EA%B2%8C" target="_blank" rel="noopener noreferrer">카페 느리게 (강원특별자치도 영월군 영월읍 청령포로 37)</a></li>
       <li><a href="https://map.naver.com/p/search/%EC%98%81%EC%9B%94%20%EC%84%A0%EB%8F%8C" target="_blank" rel="noopener noreferrer">선돌 (강원특별자치도 영월군 영월읍 방절리 769-4)</a></li>
       <li><a href="https://map.naver.com/p/search/%EC%98%81%EC%9B%94%20%ED%95%9C%EB%B0%98%EB%8F%84%EC%A7%80%ED%98%95" target="_blank" rel="noopener noreferrer">한반도지형 전망대 (강원특별자치도 영월군 한반도면 옹정리 산 141-1)</a></li>
     </ul>
+        </section>
 
-    <section class="outro-card">
-      <div class="outro-title">✨ 에디터 코스 총평</div>
-      <p style="margin-bottom: 0;">
+        <div class="cta-card">
+          <p class="cta-title">에디터 코스 총평</p>
+          <p>
         강원 영월은 굽이치는 서강 물길을 따라 조선 왕조의 애달픈 역사가 깃든 솔숲과 기암절벽, 그리고 자연이 조각해 낸 한반도 지형의 신비로움까지 한 코스에 오롯이 담아낸 명품 여행지예요. 선선한 가을바람과 함께 물길을 건너고 능선을 거닐며, 소중한 사람과 함께 오래도록 기억에 남을 특별한 가을 하루를 만들어 보세요.
       </p>
-    </section>
+        </div>
 
-    <div class="app-course-box" style="margin: 40px 0 24px; padding: 20px 22px; background: var(--color-accent-light); border: 1px solid var(--color-border); border-radius: 14px;">
-      <strong style="display: block; font-size: 17px; color: var(--color-text-main); margin-bottom: 6px;">🗺️ 이 코스 오늘 데이트에서 열기</strong>
-      <p style="margin: 0 0 14px; font-size: 14.5px; line-height: 1.6; color: var(--color-text-main);">글에 나온 장소 4곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
-      <a href="../../#c=1252.1258.1255.1254" style="display: inline-block; padding: 10px 18px; border-radius: 10px; background: var(--color-text-main); color: #ffffff; font-weight: 700; font-size: 15px; text-decoration: none;">앱에서 코스 열기 →</a>
-    </div>
+        <div class="app-course-box">
+          <div>
+            <h2>이 코스 오늘 데이트에서 열기</h2>
+            <p>글에 나온 장소 4곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
+          </div>
+          <a class="btn app-action" href="../../#c=1252.1258.1255.1254">앱에서 코스 열기</a>
+        </div>
 
-    <footer class="article-footer">
-      <p>사진 출처: 카카오맵 포토 리뷰 및 업체 등록 사진</p>
-      <p style="margin-top: 6px;">© 2026 오늘 데이트 (Oneul Date). 전국 엄선 스팟 데이터를 바탕으로 제작되었습니다.</p>
-    </footer>
-  </main>
+        <footer class="article-credit">
+          <p>사진 출처: 카카오맵 포토 리뷰 및 업체 등록 사진</p>
+      <p>© 2026 오늘 데이트 (Oneul Date). 전국 엄선 스팟 데이터를 바탕으로 제작되었습니다.</p>
+        </footer>
+      </div>
+    </main>
 
 </body>
 </html>
