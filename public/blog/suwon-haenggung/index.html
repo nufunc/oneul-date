@@ -16,6 +16,9 @@
   
   <!-- Pretendard 웹폰트 -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700&display=swap&text=%26'()%2B%2C.0123456789%3ADO%5B%5Daelntu~%EA%B0%80%EA%B1%B0%EA%B2%8C%EA%B2%AC%EA%B2%BD%EA%B3%84%EA%B3%A8%EA%B3%B5%EA%B3%BC%EA%B3%BD%EA%B6%81%EA%B8%88%EA%B8%B0%EA%B8%B8%EA%B9%8C%EA%BB%98%EB%82%98%EB%82%AD%EB%82%AE%EB%84%A4%EB%85%81%EB%85%B8%EB%88%88%EB%8A%94%EB%8A%98%EB%8B%88%EB%8B%89%EB%8B%AD%EB%8B%B9%EB%8C%95%EB%8D%B0%EB%8F%84%EB%8F%99%EB%90%9C%EB%91%98%EB%93%9C%EB%93%A4%EB%93%B1%EB%94%94%EB%94%B0%EB%95%8C%EB%9B%B0%EB%9D%BC%EB%9E%8C%EB%9E%98%EB%9F%B0%EB%A0%88%EB%A0%A4%EB%A1%9C%EB%A1%9D%EB%A3%8C%EB%A3%A8%EB%A5%98%EB%A5%B8%EB%A5%BC%EB%A6%AC%EB%A7%88%EB%A7%8C%EB%A7%A4%EB%A9%8D%EB%A9%B0%EB%AA%A9%EB%AA%BB%EB%AC%B8%EB%AC%BC%EB%AF%B8%EB%B0%94%EB%B0%98%EB%B0%A9%EB%B2%84%EB%B3%B4%EB%B6%80%EB%B8%8C%EB%B8%94%EB%B9%84%EC%82%AC%EC%83%81%EC%84%9C%EC%84%A0%EC%84%B1%EC%86%8C%EC%86%A5%EC%88%98%EC%8A%A4%EC%8A%AC%EC%8B%9C%EC%8B%A0%EC%8D%A8%EC%95%84%EC%95%88%EC%95%A1%EC%95%BC%EC%96%91%EC%97%90%EC%97%AC%EC%97%B0%EC%97%B4%EC%98%81%EC%98%88%EC%98%A4%EC%99%80%EC%99%B8%EC%9A%A9%EC%9A%B0%EC%9A%B4%EC%9B%90%EC%9C%A0%EC%9D%84%EC%9D%8C%EC%9D%98%EC%9D%B4%EC%9D%B8%EC%9E%94%EC%9E%A5%EC%A0%80%EC%A0%84%EC%A0%90%EC%A0%95%EC%A0%9C%EC%A3%BC%EC%A6%88%EC%A7%80%EC%A7%84%EC%B0%A8%EC%B2%9C%EC%B6%94%EC%B9%98%EC%BB%A4%EC%BD%94%ED%81%AC%ED%84%B0%ED%85%8C%ED%86%B5%ED%8A%B8%ED%8C%9F%ED%8F%AC%ED%91%B8%ED%92%8D%ED%94%BC%ED%95%98%ED%95%9C%ED%95%A8%ED%95%A9%ED%96%89%ED%99%8D%ED%99%94%ED%9B%84" rel="stylesheet">
   
   <script type="application/ld+json">
 {
@@ -43,494 +46,441 @@
   </script>
 
   <style>
-    :root {
-      --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-      --bg-page: #fbfaf8;
-      --bg-card: #ffffff;
-      --color-primary: #1c1917;
-      --color-accent: #0f766e;
-      --color-accent-light: #f0fdfa;
-      --color-accent-border: #99f6e4;
-      --color-warm: #b45309;
-      --color-text-main: #292524;
-      --color-text-sub: #57534e;
-      --color-text-faint: #78716c;
-      --color-border: #e7e5e4;
-      --color-tip-bg: #fffbeb;
-      --color-tip-border: #fde68a;
-      --color-tip-text: #92400e;
-      --color-bridge-bg: #f5f5f4;
-      --max-width: 780px;
-    }
+/* hallmark-solstice: scripts/convert_blog_hallmark.mjs가 글의 <style>을 이 파일로 바꾼다 (Hallmark 2.0.0, 테마 Solstice, P-293) */
+:root {
+  color-scheme: light;
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-xs: 0.8125rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.125rem; --text-xl: 1.5625rem; --text-2xl: 1.953rem; --text-3xl: 2.441rem;
+  --text-hero: clamp(1.75rem, 1.6vw + 1.25rem, 2.75rem);
+  --text-section: clamp(1.75rem, 1.8vw + 1rem, 2.875rem); --text-title: clamp(1.25rem, 0.75vw + 0.875rem, 1.625rem); --text-lead: clamp(1.0625rem, 0.3vw + 0.95rem, 1.25rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-micro: 120ms; --dur-short: 220ms;
+  --container: 1200px; --measure: 680px; --gutter: 56px; --gap-columns: 40px; --section-gap: 120px;
+  --z-sticky-nav: 300;
+  --color-paper: oklch(94% 0.03 80); --color-paper-2: oklch(97% 0.02 85); --color-paper-3: oklch(89% 0.05 80);
+  --color-ink: oklch(27% 0.05 50); --color-ink-2: oklch(36% 0.05 50); --color-muted: oklch(48% 0.06 55);
+  --color-rule: oklch(84% 0.06 78);
+  --color-accent: oklch(54% 0.20 24); --color-accent-2: oklch(48% 0.19 24); --color-accent-ink: oklch(97% 0.02 85); --color-focus: oklch(54% 0.20 24);
+  --color-gold: oklch(74% 0.14 75); --color-gold-2: oklch(84% 0.11 80);
+  --color-band-text: oklch(94% 0.03 80); --color-band-muted: oklch(80% 0.05 75);
+  --color-hair-ink: color-mix(in oklab, var(--color-ink) 10%, transparent);
+  --font-display: "Noto Serif KR", "Nanum Myeongjo", ui-serif, serif;
+  --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --radius-card: 0; --radius-pill: 999px; --rule-hair: 1px; --rule-bar: 2px;
+  --shadow-card: 10px 10px 0 var(--color-paper-3);
+}
+@media (max-width: 60rem) { :root { --gutter: 24px; --section-gap: 88px; --gap-columns: 24px; } }
+@media (max-width: 40rem) { :root { --gutter: 16px; --section-gap: 64px; --gap-columns: 16px; } }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+html { scrollbar-color: var(--color-muted) var(--color-paper); scroll-padding-top: var(--space-3xl); }
+body { margin: 0; background: var(--color-paper); color: var(--color-ink-2); font-family: var(--font-family); font-size: var(--text-md); line-height: 1.75; word-break: keep-all; -webkit-font-smoothing: antialiased; }
+::selection { background: color-mix(in oklab, var(--color-gold) 40%, transparent); }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+a:hover { text-decoration-color: var(--color-accent); }
+article h1, article h2, article h3 { margin: 0; font-family: var(--font-display); font-weight: 700; color: var(--color-ink); line-height: 1.3; letter-spacing: -0.01em; overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+img { max-width: 100%; display: block; }
+.container { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); }
 
-    body {
-      font-family: var(--font-family);
-      background-color: var(--bg-page);
-      color: var(--color-text-main);
-      line-height: 1.85;
-      letter-spacing: -0.02em;
-      word-break: keep-all;
-      -webkit-font-smoothing: antialiased;
-    }
+/* 44px 머리 링크 규칙: scripts/test-blog-related.cjs가 글마다 하나를 요구한다 */
+header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
 
-    /* 상단 네비게이션 바 */
-    .travel-header-bar {
-      background: rgba(255, 255, 255, 0.95);
-      border-bottom: 1px solid var(--color-border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(10px);
-    }
-    .header-inner {
-      max-width: var(--max-width);
-      margin: 0 auto;
-      padding: 14px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .header-title {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--color-primary);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .header-meta {
-      font-size: 13px;
-      color: var(--color-text-faint);
-    }
+/* Controls */
+.btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 var(--space-lg); border: 0; border-radius: var(--radius-pill); background: var(--color-accent); color: var(--color-accent-ink); font: 600 var(--text-md)/1 var(--font-family); text-decoration: none; cursor: pointer; transition: background-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out); }
+.btn:hover { background: var(--color-accent-2); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.link-quiet { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-ink); font-weight: 600; font-size: var(--text-sm); text-decoration: none; border-bottom: var(--rule-bar) solid var(--color-ink); transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out); }
+.link-quiet:hover { color: var(--color-accent); border-color: var(--color-accent); }
+.link-quiet:active { transform: translateY(1px); }
+.link-quiet:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
 
-    /* 본문 래퍼 */
-    .article-wrap {
-      max-width: var(--max-width);
-      margin: 0 auto;
-      background: var(--bg-card);
-      padding: 48px 32px 64px;
-      border-left: 1px solid var(--color-border);
-      border-right: 1px solid var(--color-border);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
-    }
-    @media (max-width: 640px) {
-      .article-wrap {
-        padding: 24px 18px 48px;
-        border: none;
-      }
-    }
+/* Nav */
+.site-header { position: sticky; top: 0; z-index: var(--z-sticky-nav); background: var(--color-paper); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.header-inner { display: flex; justify-content: space-between; align-items: center; min-height: 64px; }
+.header-logo { font-family: var(--font-display); font-size: var(--text-lg); color: var(--color-ink); text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; }
+.header-logo span { color: var(--color-accent); margin-left: 0.3em; }
+.header-logo:hover { color: var(--color-ink-2); }
+.header-nav { display: flex; gap: var(--space-lg); }
+.header-nav a { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--text-sm); color: var(--color-ink-2); text-decoration: none; }
+.header-nav a:hover { color: var(--color-ink); text-decoration: underline; text-decoration-color: var(--color-accent); }
+.header-nav a:active, .header-logo:active { transform: translateY(1px); }
 
-    .post-badge {
-      display: inline-block;
-      background: var(--color-accent-light);
-      color: var(--color-accent);
-      font-size: 12px;
-      font-weight: 700;
-      padding: 4px 12px;
-      border-radius: 6px;
-      margin-bottom: 14px;
-      border: 1px solid var(--color-accent-border);
-    }
+/* Hero */
+.hero { display: grid; padding-block: var(--space-2xl) var(--space-xl); }
+.hero-text { display: grid; gap: var(--space-lg); }
+.article-title { font-size: var(--text-hero); line-height: 1.3; max-width: 28ch; }
+.hero-kicker { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.hero-kicker span:first-child { color: var(--color-accent); font-weight: 600; }
+.article-meta { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-lg); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); font-variant-numeric: tabular-nums; }
+.article-meta .meta-credit { flex-basis: 100%; }
+/* 좁은 화면에서 칸마다 한 줄: 본문 글꼴(Pretendard)이 바뀔 때 줄 수가 달라져 아래 띠가 밀리는 것을 막는다 */
+@media (max-width: 40rem) { .article-meta { flex-direction: column; flex-wrap: nowrap; } }
+.spot-photo img { width: 100%; height: 100%; object-fit: cover; outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
 
-    h1 {
-      font-size: 26px;
-      line-height: 1.45;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin-bottom: 16px;
-    }
-    @media (max-width: 640px) {
-      h1 { font-size: 22px; }
-    }
+/* Lead */
+.prose-intro { max-width: var(--measure); padding-top: var(--space-xl); font-size: var(--text-lead); line-height: 1.8; color: var(--color-ink); padding-bottom: var(--space-3xl); }
 
-    .post-sub-meta {
-      font-size: 13px;
-      color: var(--color-text-faint);
-      margin-bottom: 24px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      border-bottom: 1px solid var(--color-border);
-      padding-bottom: 16px;
-    }
-
-    .lead-box {
-      background: var(--color-bridge-bg);
-      border-left: 4px solid var(--color-accent);
-      padding: 18px 22px;
-      border-radius: 0 8px 8px 0;
-      font-size: 15.5px;
-      color: var(--color-text-sub);
-      margin-bottom: 32px;
-      line-height: 1.8;
-    }
-
-    .real-photo-card {
-      margin: 32px 0;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid var(--color-border);
-      background: #fafaf9;
-    }
-    .real-photo-card img {
-      width: 100%;
-      height: auto;
-      display: block;
-      max-height: 480px;
-      object-fit: cover;
-    }
-    .photo-caption {
-      padding: 11px 16px;
-      font-size: 12.5px;
-      color: var(--color-text-faint);
-      text-align: center;
-      background: #ffffff;
-      border-top: 1px solid #f5f5f4;
-    }
-
-    h2 {
-      font-size: 21px;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin: 44px 0 16px 0;
-      padding-bottom: 10px;
-      border-bottom: 2px solid var(--color-primary);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    h3 {
-      font-size: 17px;
-      font-weight: 700;
-      color: var(--color-primary);
-      margin: 24px 0 10px 0;
-    }
-
-    p {
-      margin-bottom: 16px;
-      font-size: 15.5px;
-      color: var(--color-text-main);
-      line-height: 1.85;
-    }
-
-    .timeline-card {
-      background: #fafaf9;
-      border: 1px solid var(--color-border);
-      border-radius: 10px;
-      padding: 18px 20px;
-      margin: 24px 0 32px;
-      font-size: 15px;
-      line-height: 1.5;
-      color: #334155;
-    }
-    .tl-act { font-weight: 700; font-size: 13px; color: #64748b; margin: 18px 0 8px; }
-    .tl-act:first-child { margin-top: 0; }
-    .tl-step { display: flex; gap: 12px; align-items: baseline; padding: 6px 0; }
-    .tl-time { flex: none; min-width: 46px; font-weight: 700; font-variant-numeric: tabular-nums; color: #0f766e; }
-    .tl-place { font-weight: 700; color: #1e293b; }
-    .tl-note { display: block; font-size: 13px; color: #64748b; margin-top: 2px; }
-    .tl-move { font-size: 12.5px; color: #94a3b8; padding: 0 0 0 58px; }
-    @media (max-width: 640px) {
-      .timeline-card { padding: 14px 16px; }
-    }
-
-    .tip-box {
-      background: var(--color-tip-bg);
-      border: 1px solid var(--color-tip-border);
-      border-radius: 10px;
-      padding: 16px 20px;
-      margin: 24px 0;
-      font-size: 14px;
-      color: var(--color-tip-text);
-      line-height: 1.7;
-    }
-    .tip-box strong.tip-title {
-      color: #78350f;
-      display: block;
-      margin-bottom: 8px;
-      font-size: 14.5px;
-    }
-    .tip-box ul {
-      padding-left: 18px;
-      margin: 0;
-    }
-    .tip-box li {
-      margin-bottom: 5px;
-    }
-
-    .table-wrap {
-      overflow-x: auto;
-      margin: 28px 0;
-      border-radius: 8px;
-      border: 1px solid var(--color-border);
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-      text-align: left;
-    }
-    th, td {
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--color-border);
-    }
-    th {
-      background: #f5f5f4;
-      font-weight: 700;
-      color: var(--color-primary);
-      white-space: nowrap;
-    }
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-/* 비용표: 좁은 화면에서는 한 행을 카드 하나로 쌓는다 */
-@media (max-width: 600px) {
-  .table-wrap { overflow-x: visible; }
-  .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
-  .table-wrap thead { display: none; }
-  .table-wrap tr {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    column-gap: 12px;
-    row-gap: 4px;
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--color-border);
-  }
-  .table-wrap tr:last-child { border-bottom: none; }
-  .table-wrap td { padding: 0; border: none; }
-  .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: 0.78rem; font-weight: 700; color: var(--color-text-sub); }
-  .table-wrap td:nth-child(2) { font-weight: 700; }
-  .table-wrap td:nth-child(3) { max-width: 60vw; word-break: keep-all; text-align: right; font-weight: 700; }
-  .table-wrap td:nth-child(4) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
-  .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: inherit; color: inherit; }
-  .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; max-width: 60vw; word-break: keep-all; text-align: right; }
-  .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; white-space: normal; text-align: left; font-size: 0.85rem; font-weight: 400; color: var(--color-text-sub); }
+/* The day, on the brown band */
+.band { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl) var(--space-xl); }
+.band .timeline-title { color: var(--color-band-text); font-size: var(--text-section); margin-bottom: var(--space-xl); }
+.route { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: 0; padding: 0; }
+.tl-act { font-size: var(--text-sm); color: var(--color-gold-2); padding-bottom: var(--space-sm); }
+.tl-step { display: grid; align-content: start; gap: var(--space-2xs); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-gold); }
+.tl-time { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1; color: var(--color-band-text); font-variant-numeric: tabular-nums; }
+.tl-place { font-weight: 600; font-size: var(--text-lg); color: var(--color-band-text); }
+.tl-note { font-size: var(--text-sm); color: var(--color-band-muted); line-height: 1.6; }
+.tl-move { font-size: var(--text-sm); color: var(--color-band-muted); padding-block: var(--space-sm) var(--space-lg); }
+.tl-total { font-size: var(--text-sm); color: var(--color-band-muted); padding-top: var(--space-lg); margin-top: var(--space-lg); border-top: var(--rule-hair) solid color-mix(in oklab, var(--color-band-text) 25%, transparent); }
+/* spot-info-list 계열: 시간 범위(10:30 - 11:45)가 길어 시각 글자를 줄이고, 요약 상자와 번호 배지를 둔다 */
+.route.range .tl-time { font-size: var(--text-xl); }
+.route.range .tl-step { padding-bottom: var(--space-md); }
+.tl-badge { font-size: var(--text-xs); color: var(--color-gold-2); letter-spacing: 0.04em; }
+.tl-facts { display: grid; gap: var(--space-2xs) var(--space-lg); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.tl-facts strong { color: var(--color-gold-2); font-weight: 600; }
+@media (min-width: 60rem) {
+  .tl-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .route { grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); column-gap: var(--space-lg); }
+  .route > * { grid-row: var(--r); grid-column: var(--c) / span var(--s, 1); }
+  .tl-move { padding-bottom: 0; }
+  .tl-total { grid-column: 1 / -1; }
 }
 
+/* Stops */
+.spots { padding-block: var(--section-gap) 0; display: grid; gap: var(--section-gap); }
+.spot-section { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "photo head" "photo body"; grid-template-rows: auto 1fr; column-gap: var(--gap-columns); row-gap: var(--space-md); align-items: start; padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); }
+.spot-section.flip { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-areas: "head photo" "body photo"; }
+.spot-section.no-photo { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "body"; }
+.spot-head { grid-area: head; display: grid; gap: var(--space-md); }
+.spot-photo { grid-area: photo; align-self: start; margin: 0; aspect-ratio: 4 / 5; width: 100%; background: var(--color-paper-3); position: sticky; top: 96px; }
+.spot-body { grid-area: body; display: grid; gap: var(--space-md); }
+.spot-header { display: flex; align-items: baseline; gap: var(--space-md); }
+.spot-num { font-family: var(--font-display); font-size: var(--text-3xl); line-height: 1; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+.spot-title { font-size: var(--text-section); }
+.spot-tagline { font-size: var(--text-lg); color: var(--color-ink); padding-bottom: var(--space-xs); }
+.spot-desc { max-width: 60ch; }
 
-    .map-links-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 12px;
-      margin: 20px 0 32px;
-    }
-    .map-link-chip {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      text-decoration: none;
-      color: var(--color-text-main);
-      font-size: 14px;
-      font-weight: 600;
-      transition: all 0.2s ease;
-    }
-    .map-link-chip:hover {
-      background: #f0fdf4;
-      border-color: #86efac;
-      color: #15803d;
-      transform: translateY(-1px);
-    }
-    .map-link-chip span.btn-action {
-      font-size: 12px;
-      color: #00843d;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 3px;
-    }
+.spot-info-box { margin: var(--space-xs) 0 0; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); }
+.info-row { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--space-md); padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.info-row:last-child { border-bottom: 0; }
+.info-label { color: var(--color-muted); }
+.info-val { color: var(--color-ink); font-weight: 400; font-variant-numeric: tabular-nums; }
+.map-btn-wrap { padding-top: var(--space-sm); }
+.tip-box { padding: var(--space-sm) var(--space-md); border-left: var(--rule-bar) solid var(--color-accent); background: var(--color-paper-2); font-size: var(--text-sm); color: var(--color-ink-2); line-height: 1.7; }
+.tip-box strong { color: var(--color-ink); font-weight: 600; }
+.tip-box .tip-title { display: block; margin-bottom: var(--space-2xs); }
 
-    .footer-source {
-      margin-top: 48px;
-      padding-top: 24px;
-      border-top: 1px solid var(--color-border);
-      font-size: 12.5px;
-      color: var(--color-text-faint);
-      text-align: center;
-      line-height: 1.8;
-    }
-    header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
-    .header-nav a,.header-title a,.blog-tagline a{display:inline-block}
+/* Fees */
+.cost-table-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.cost-head { display: grid; gap: var(--space-md); align-content: start; }
+.cost-head .timeline-title { font-size: var(--text-section); }
+.cost-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.cost-table th { text-align: left; font-weight: 400; color: var(--color-muted); padding: var(--space-xs) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-bar) solid var(--color-ink); }
+.cost-table td { padding: var(--space-sm) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink-2); vertical-align: top; }
+.cost-table td:nth-child(2) { color: var(--color-ink); font-weight: 400; }
+.cost-3 .cost-total-row td:nth-child(2) { font-family: inherit; font-size: inherit; color: inherit; font-weight: 600; }
+.cost-3 .cost-total-row td:nth-child(3) { font-family: var(--font-display); font-size: var(--text-xl); color: var(--color-accent); font-weight: 700; }
+.cost-total-row td { border-bottom: 0; border-top: var(--rule-bar) solid var(--color-ink); color: var(--color-ink); font-weight: 600; }
+.cost-total-row td:nth-child(2) { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--color-accent); font-weight: 700; }
+@media (max-width: 600px) {
+  .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
+  .table-wrap thead { display: none; }
+  .table-wrap tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-sm); row-gap: var(--space-2xs); padding-block: var(--space-sm); border-bottom: var(--rule-hair) solid var(--color-rule); }
+  .table-wrap td { padding: 0; border: 0; }
+  .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: var(--text-xs); color: var(--color-muted); }
+  .table-wrap td:nth-child(3) { text-align: right; font-weight: 600; color: var(--color-ink); }
+  .table-wrap td:nth-child(4) { grid-column: 1 / -1; color: var(--color-muted); }
+  .table-wrap td:empty { display: none; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: var(--text-sm); color: var(--color-ink); }
+  .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; text-align: right; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
+  .table-wrap .cost-total-row { border-top: var(--rule-bar) solid var(--color-ink); border-bottom: 0; }
+}
+
+/* Tips */
+.tips-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.tips-card .timeline-title { font-size: var(--text-section); align-self: start; }
+.tips-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-md); }
+.tips-list li { padding-bottom: var(--space-md); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.tips-list li:last-child { border-bottom: 0; }
+.tips-list strong { color: var(--color-ink); font-weight: 600; }
+
+/* App course */
+.app-course-box { margin-top: var(--section-gap); display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--gap-columns); align-items: end; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-xl); }
+.app-course-box h2 { font-size: var(--text-section); margin-bottom: var(--space-md); }
+.app-course-box p { max-width: 52ch; }
+.app-course-box .app-action { justify-self: end; }
+
+.article-credit { margin-top: var(--space-2xl); padding-block: var(--space-md) var(--space-3xl); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); }
+
+/* Footer mast */
+.site-footer { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl); }
+.footer-inner { display: grid; gap: var(--space-md); }
+.footer-mark { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1.2; color: var(--color-band-text); }
+.footer-line { color: var(--color-band-muted); font-size: var(--text-sm); }
+.footer-links { display: flex; flex-wrap: wrap; gap: var(--space-lg); }
+.footer-links a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-band-text); font-size: var(--text-sm); text-decoration: underline; text-decoration-color: var(--color-gold); }
+.footer-links a:hover { text-decoration-color: var(--color-accent); color: var(--color-gold-2); }
+.footer-links a:active { transform: translateY(1px); }
+.site-footer :focus-visible { outline-color: var(--color-gold-2); }
+
+@media (max-width: 60rem) {
+  .hero, .spot-section, .spot-section.flip, .cost-table-card, .tips-card, .app-course-box { grid-template-columns: minmax(0, 1fr); }
+  .spot-section, .spot-section.flip { grid-template-areas: "head" "photo" "body"; grid-template-rows: auto; }
+  .spot-section.no-photo { grid-template-areas: "head" "body"; }
+  .hero { padding-block: var(--space-xl) var(--space-xl); }
+  .spot-photo { position: static; aspect-ratio: 16 / 10; }
+  .app-course-box { padding: var(--space-lg); }
+  .app-course-box .app-action { justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn, .link-quiet { transition: none; }
+  .btn:active, .link-quiet:active, .header-nav a:active, .header-logo:active, .footer-links a:active { transform: none; }
+}
+
+/* real-photo-flat 계열(평면 글): 번호 있는 긴 장소 제목, 사진 설명, 안내 상자, 지도 목록 */
+.lead-photo { margin: 0 0 var(--space-3xl); }
+.lead-photo img { width: 100%; max-height: 520px; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.lead-photo figcaption, .body-photo figcaption { margin-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.spot-photo figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--space-xs) var(--space-sm); font-size: var(--text-xs); line-height: 1.5; color: var(--color-accent-ink); background: color-mix(in oklab, var(--color-ink) 78%, transparent); }
+.body-photo { margin: 0; }
+.body-photo img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.spot-section.flat .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.tl-lead { max-width: var(--measure); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.guide-box, .order-box { background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); color: var(--color-ink); }
+.guide-box h4, .order-box strong { margin: 0 0 var(--space-xs); font-family: var(--font-display); font-size: var(--text-md); color: var(--color-ink); display: block; }
+.guide-box ul, .order-box ul { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-2xs); }
+.bridge { padding-top: var(--space-xs); color: var(--color-muted); font-size: var(--text-sm); }
+.map-links { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-md); }
+.map-links .timeline-title { font-size: var(--text-section); }
+.map-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-xs); }
+.map-list a, .map-link-chip { display: flex; justify-content: space-between; gap: var(--space-md); align-items: center; min-height: 44px; padding-block: var(--space-xs); border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink); text-decoration: none; }
+.map-links-grid { display: grid; gap: 0; }
+.map-link-chip .btn-action { color: var(--color-accent); font-weight: 600; white-space: nowrap; }
+@media (max-width: 40rem) { .spot-section.flat .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .spot-photo { position: relative; } }
+
+/* spot-card 계열(editor-144): 대표 사진, 요약 상자, 본문 구획, 세부 코스, 이동 연결, 마무리 상자 */
+.hero-figure { margin: 0 0 var(--space-xl); }
+.hero-figure img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.hero-figure figcaption { padding-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-muted); }
+.summary-card { margin-bottom: var(--space-xl); background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-lg); font-size: var(--text-sm); }
+.summary-title, p.timeline-title, .cta-title { font-family: var(--font-display); font-weight: 700; line-height: 1.3; color: var(--color-ink); }
+.summary-title { font-size: var(--text-xl); margin-bottom: var(--space-sm); }
+p.timeline-title { letter-spacing: -0.01em; overflow-wrap: break-word; }
+.summary-list { margin: 0; padding: 0; list-style: none; display: grid; }
+.summary-list li { padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.summary-list li:last-child { border-bottom: 0; }
+.summary-list strong { color: var(--color-ink); font-weight: 600; }
+.prose-section { margin-top: var(--section-gap); max-width: var(--measure); display: grid; gap: var(--space-md); }
+.prose-section h2, .spots-title { font-size: var(--text-title); }
+.stops-section { margin-top: var(--section-gap); }
+.stops-section .spots { padding-top: var(--space-xl); }
+.spots.bridged { gap: 0; }
+.drive-bridge { margin: 0; padding-block: var(--space-xl); padding-left: var(--space-md); border-left: var(--rule-bar) solid var(--color-gold); font-size: var(--text-sm); color: var(--color-muted); }
+.drive-bridge strong { color: var(--color-ink); font-weight: 600; }
+.spot-header:has(.spot-badge) { flex-direction: column; align-items: flex-start; gap: var(--space-xs); }
+.spot-badge { font-size: var(--text-sm); font-weight: 600; color: var(--color-accent); }
+.spot-actions { display: flex; flex-wrap: wrap; gap: 0 var(--space-lg); }
+.info-wide .info-row { grid-template-columns: 5.5em minmax(0, 1fr); }
+.info-wide .info-row.plain { grid-template-columns: minmax(0, 1fr); }
+.cost-head .timeline-title.long { font-size: var(--text-title); }
+.cta-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-sm); max-width: var(--measure); }
+.cta-card h3, .cta-title { font-size: var(--text-title); }
+.cta-card .link-quiet { justify-self: start; }
   </style>
 </head>
 <body>
 
   <!-- 최상단 헤더 바 -->
-  <header class="travel-header-bar">
-    <div class="header-inner">
-      <div class="header-title"><a href="../" style="text-decoration:none; color:inherit; font-weight:700;">← 📖 오늘 데이트 매거진</a></div>
-      <div class="header-meta">경기 수원 행궁동 편</div>
+  <header class="site-header">
+    <div class="header-inner container">
+      <a href="https://nufunc.github.io/oneul-date/blog/" class="header-logo">오늘 데이트 <span>매거진</span></a>
+      <nav class="header-nav">
+        <a href="https://nufunc.github.io/oneul-date/">홈으로</a>
+        <a href="https://nufunc.github.io/oneul-date/blog/">전체 코스</a>
+      </nav>
     </div>
   </header>
 
-  <main class="article-wrap">
-    <span class="post-badge">반려견 동반 데이트</span>
-    <h1>[수원 행궁동 반려견 동반 데이트] 화성 성곽길부터 방화수류정 피크닉, 통닭거리 야외 테이블까지 댕댕이와 함께한 하루</h1>
-    
-    <div class="post-sub-meta">
-      <span>작성일: 2026. 10.</span>
-      <span>•</span>
-      <span>글: 오늘 데이트 에디토리얼 팀</span>
-      <span>•</span>
-      <span>사진: 한국관광공사 TourAPI, 카카오맵, 네이버 플레이스</span>
-      <span>•</span>
-      <span>2인+1견 예상 경비: 본문 표 참고</span>
-      <span>•</span>
-      <span>소요 시간: 약 8시간 30분 코스</span>
-    </div>
+  <main class="article-container"><article>
+      <header class="article-header hero container">
+        <div class="hero-text">
+          <p class="hero-kicker badge-category"><span>반려견 동반 데이트</span></p>
+          <h1 class="article-title">[수원 행궁동 반려견 동반 데이트] 화성 성곽길부터 방화수류정 피크닉, 통닭거리 야외 테이블까지 댕댕이와 함께한 하루</h1>
+          <div class="article-meta">
+            <span>작성일: 2026. 10.</span>
+            <span>글: 오늘 데이트 에디토리얼 팀</span>
+            <span class="meta-credit">사진: 한국관광공사 TourAPI, 카카오맵, 네이버 플레이스</span>
+            <span>2인+1견 예상 경비: 본문 표 참고</span>
+            <span>소요 시간: 약 8시간 30분 코스</span>
+          </div>
+          <p><a class="btn" href="../../#c=441.1789268587425.489.3905">앱에서 코스 열기</a></p>
+        </div>
+      </header>
 
-    <div class="lead-box">
-      <strong>"주말에 우리 집 반려견도 함께, 눈치 보지 않고 여유롭게 즐길 수 있는 감성 데이트 코스는 없을까?"</strong><br>
-      강아지를 키우는 반려인 커플이라면 주말 데이트 장소를 정할 때 늘 '애견 동반 가능 여부'를 가장 먼저 검색하게 돼요. 유네스코 세계문화유산인 수원화성을 품은 <strong>수원 행궁동</strong>은 푸른 잔디와 완만한 성곽 산책로, 마당과 테라스를 활짝 열어둔 펫프렌들리 브런치 카페, 그리고 방화수류정의 평화로운 용연 연못까지 <strong>반려견과 함께하기에 전국에서 손꼽히는 힐링 명소</strong>랍니다. 화성행궁 주차 꿀팁부터 강아지와 편안하게 즐기는 브런치, 방화수류정 잔디밭 쉼, 화홍문 성곽 뷰 테라스 카페, 그리고 노포 감성 가득한 통닭거리 야외 테이블 야식까지! 2인+1견 예상 경비와 실전 꿀팁을 알차게 담은 코스를 생생하게 들려드릴게요.
-    </div>
+      <div class="container">
+        <div class="prose-intro"><strong>"주말에 우리 집 반려견도 함께, 눈치 보지 않고 여유롭게 즐길 수 있는 감성 데이트 코스는 없을까?"</strong><br>
+      강아지를 키우는 반려인 커플이라면 주말 데이트 장소를 정할 때 늘 '애견 동반 가능 여부'를 가장 먼저 검색하게 돼요. 유네스코 세계문화유산인 수원화성을 품은 <strong>수원 행궁동</strong>은 푸른 잔디와 완만한 성곽 산책로, 마당과 테라스를 활짝 열어둔 펫프렌들리 브런치 카페, 그리고 방화수류정의 평화로운 용연 연못까지 <strong>반려견과 함께하기에 전국에서 손꼽히는 힐링 명소</strong>랍니다. 화성행궁 주차 꿀팁부터 강아지와 편안하게 즐기는 브런치, 방화수류정 잔디밭 쉼, 화홍문 성곽 뷰 테라스 카페, 그리고 노포 감성 가득한 통닭거리 야외 테이블 야식까지! 2인+1견 예상 경비와 실전 꿀팁을 알차게 담은 코스를 생생하게 들려드릴게요.</div>
+        <figure class="lead-photo">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/50/2662050_image2_1.jpg" alt="방화수류정과 용연 연못 전경" />
+              <figcaption>푸른 연못과 수양버들이 어우러져 한 폭의 동양화를 연출하는 방화수류정 (사진 출처: 한국관광공사 TourAPI 공공누리 제1유형)</figcaption>
+            </figure>
+      </div>
 
-    <div class="real-photo-card">
-      <img src="https://tong.visitkorea.or.kr/cms/resource/50/2662050_image2_1.jpg" alt="방화수류정과 용연 연못 전경" />
-      <div class="photo-caption">푸른 연못과 수양버들이 어우러져 한 폭의 동양화를 연출하는 방화수류정 (사진 출처: 한국관광공사 TourAPI 공공누리 제1유형)</div>
-    </div>
+      <!-- 동선 -->
+      <section class="timeline-card band">
+        <div class="container">
+          <h2 class="timeline-title">한눈에 보는 수원 행궁동 반려견 동반 추천 동선</h2>
+          <div class="route" style="--n:7">
+            <div class="tl-act" style="--r:1; --c:1; --s:2">낮 1막: 편리한 주차와 신풍동 브런치</div>
+            <div class="tl-step" style="--r:2; --c:1"><span class="tl-time">11:30</span><span class="tl-place">화성행궁 공영주차장 주차 → 슬로우써니사이드</span><span class="tl-note">신풍동 골목 브런치, 반려견 동반은 사전 확인</span></div>
+            <div class="tl-move" style="--r:3; --c:1">도보 6분</div>
+            <div class="tl-step" style="--r:2; --c:2"><span class="tl-time">13:00</span><span class="tl-place">화서문 & 장안공원 잔디마당</span><span class="tl-note">넓은 잔디밭에서 가벼운 뛰뛰 & 매너 배변 산책</span></div>
+            <div class="tl-act" style="--r:1; --c:3; --s:3">오후 2막: 고즈넉한 성곽길 바람과 방화수류정 용연 힐링</div>
+            <div class="tl-step" style="--r:2; --c:3"><span class="tl-time">14:15</span><span class="tl-place">수원화성 성곽 둘레길</span><span class="tl-note">화서문 → 장안문 → 북암문으로 이어지는 바람 솔솔 성곽길 산책</span></div>
+            <div class="tl-move" style="--r:3; --c:3">도보 5분</div>
+            <div class="tl-step" style="--r:2; --c:4"><span class="tl-time">15:30</span><span class="tl-place">방화수류정 & 용연 연못</span><span class="tl-note">수양버들 아래 돗자리 펴고 즐기는 연못 멍때리기 쉼</span></div>
+            <div class="tl-move" style="--r:3; --c:4">도보 4분</div>
+            <div class="tl-step" style="--r:2; --c:5"><span class="tl-time">17:00</span><span class="tl-place">정지영커피로스터즈 화홍문점</span><span class="tl-note">화홍문 7연수문이 내려다보이는 야외 테라스</span></div>
+            <div class="tl-act" style="--r:1; --c:6; --s:2">저녁 3막: 수원 통닭거리 야외 야장 테이블의 낭만</div>
+            <div class="tl-step" style="--r:2; --c:6"><span class="tl-time">18:30</span><span class="tl-place">수원 통닭거리 진미통닭</span><span class="tl-note">가마솥에 튀겨낸 바삭한 통닭 & 야외 테이블 반려견 동반 야식</span></div>
+            <div class="tl-move" style="--r:3; --c:6">도보 8분</div>
+            <div class="tl-step" style="--r:2; --c:7"><span class="tl-time">20:00</span><span class="tl-place">화성행궁 주차장 복귀 및 편안한 귀가</span></div>
+          </div>
+          <p class="tl-lead">영업시간, 주차 요금, 휴무는 바뀔 수 있어 방문 전에 각 장소의 네이버 지도 정보에서 확인해 주세요.</p>
+        </div>
+      </section>
 
-    <h2>🧭 한눈에 보는 수원 행궁동 반려견 동반 추천 동선</h2>
-    <div class="timeline-card">
-      <div class="tl-act">낮 1막: 편리한 주차와 신풍동 브런치</div>
-      <div class="tl-step"><span class="tl-time">11:30</span><div><span class="tl-place">화성행궁 공영주차장 주차 → 슬로우써니사이드</span><span class="tl-note">신풍동 골목 브런치, 반려견 동반은 사전 확인</span></div></div>
-      <div class="tl-move">↓ 도보 6분</div>
-      <div class="tl-step"><span class="tl-time">13:00</span><div><span class="tl-place">화서문 & 장안공원 잔디마당</span><span class="tl-note">넓은 잔디밭에서 가벼운 뛰뛰 & 매너 배변 산책</span></div></div>
-      <div class="tl-act">오후 2막: 고즈넉한 성곽길 바람과 방화수류정 용연 힐링</div>
-      <div class="tl-step"><span class="tl-time">14:15</span><div><span class="tl-place">수원화성 성곽 둘레길</span><span class="tl-note">화서문 → 장안문 → 북암문으로 이어지는 바람 솔솔 성곽길 산책</span></div></div>
-      <div class="tl-move">↓ 도보 5분</div>
-      <div class="tl-step"><span class="tl-time">15:30</span><div><span class="tl-place">방화수류정 & 용연 연못</span><span class="tl-note">수양버들 아래 돗자리 펴고 즐기는 연못 멍때리기 쉼</span></div></div>
-      <div class="tl-move">↓ 도보 4분</div>
-      <div class="tl-step"><span class="tl-time">17:00</span><div><span class="tl-place">정지영커피로스터즈 화홍문점</span><span class="tl-note">화홍문 7연수문이 내려다보이는 야외 테라스</span></div></div>
-      <div class="tl-act">저녁 3막: 수원 통닭거리 야외 야장 테이블의 낭만</div>
-      <div class="tl-step"><span class="tl-time">18:30</span><div><span class="tl-place">수원 통닭거리 진미통닭</span><span class="tl-note">가마솥에 튀겨낸 바삭한 통닭 & 야외 테이블 반려견 동반 야식</span></div></div>
-      <div class="tl-move">↓ 도보 8분</div>
-      <div class="tl-step"><span class="tl-time">20:00</span><div><span class="tl-place">화성행궁 주차장 복귀 및 편안한 귀가</span></div></div>
-    </div>
-    <p>영업시간, 주차 요금, 휴무는 바뀔 수 있어 방문 전에 각 장소의 네이버 지도 정보에서 확인해 주세요.</p>
-
-    <h2>1. 오전 11:30, 화성행궁 여유로운 주차 & 신풍동 골목 브런치, '슬로우써니사이드'</h2>
-    <p>수원 행궁동 반려견 데이트의 시작은 넓고 쾌적한 <strong>화성행궁 노외 공영주차장</strong>에 차를 대는 것부터 출발해요. 주차 공간이 넉넉하고 1일 주차 요금도 4,000원으로 매우 저렴해 반려견과 함께 올 때 가장 추천하는 주차 거점이에요.</p>
-
-    <div class="real-photo-card">
-      <img src="https://tong.visitkorea.or.kr/cms/resource/58/4087958_image2_1.jpg" alt="수원 화성행궁 전경" />
-      <div class="photo-caption">조선의 멋과 고즈넉한 기와 정취가 펼쳐지는 수원 화성행궁 (사진 출처: 한국관광공사 TourAPI 공공누리 제1유형)</div>
-    </div>
-
-    <p>주차를 마친 뒤 신풍동 골목으로 걸어가면 브런치 카페 <strong>'슬로우써니사이드'</strong>(수원 팔달구 신풍로45번길 13)가 나와요.</p>
-
-    <div class="real-photo-card">
-      <img src="https://t1.kakaocdn.net/mystore/8C9AB6AB187543D4A9267E7E8CFF7578" alt="슬로우써니사이드 입구" />
-      <div class="photo-caption">신풍로45번길 골목의 슬로우써니사이드 입구 (사진 출처: 카카오맵)</div>
-    </div>
-
-    <p>대표 메뉴는 <strong>써니 플레이트(16,500원)</strong>와 <strong>바질 잠봉 파스타(17,000원)</strong>이고, 1인 브런치는 15,000원~20,000원 선으로 등록돼 있어요.</p>
-    <p>반려견 동반 가능 여부와 동반 가능한 좌석은 이 글에서 확인하지 못했어요. 강아지와 함께라면 방문 전에 매장에 꼭 문의해 주세요.</p>
-
-    <div class="tip-box">
-      <strong class="tip-title">💡 슬로우써니사이드 & 주차 실전 꿀팁</strong>
+      <div class="container">
+        <div class="spots">
+          <section class="spot-section flat">
+            <div class="spot-head">
+              <h2 class="spot-title">1. 오전 11:30, 화성행궁 여유로운 주차 & 신풍동 골목 브런치, '슬로우써니사이드'</h2>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/58/4087958_image2_1.jpg" alt="수원 화성행궁 전경" />
+              <figcaption>조선의 멋과 고즈넉한 기와 정취가 펼쳐지는 수원 화성행궁 (사진 출처: 한국관광공사 TourAPI 공공누리 제1유형)</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p>수원 행궁동 반려견 데이트의 시작은 넓고 쾌적한 <strong>화성행궁 노외 공영주차장</strong>에 차를 대는 것부터 출발해요. 주차 공간이 넉넉하고 1일 주차 요금도 4,000원으로 매우 저렴해 반려견과 함께 올 때 가장 추천하는 주차 거점이에요.</p>
+              <p>주차를 마친 뒤 신풍동 골목으로 걸어가면 브런치 카페 <strong>'슬로우써니사이드'</strong>(수원 팔달구 신풍로45번길 13)가 나와요.</p>
+              <p>대표 메뉴는 <strong>써니 플레이트(16,500원)</strong>와 <strong>바질 잠봉 파스타(17,000원)</strong>이고, 1인 브런치는 15,000원~20,000원 선으로 등록돼 있어요.</p>
+              <p>반려견 동반 가능 여부와 동반 가능한 좌석은 이 글에서 확인하지 못했어요. 강아지와 함께라면 방문 전에 매장에 꼭 문의해 주세요.</p>
+              <div class="tip-box"><strong class="tip-title">💡 슬로우써니사이드 & 주차 실전 꿀팁</strong>
       <ul>
         <li><strong>주차 팁</strong>: 화성행궁 주차장이나 연무대 공영주차장을 이용할 수 있어요.</li>
         <li><strong>반려견 동반 확인</strong>: 동반이 가능하다고 안내받았다면 실내에서는 매너벨트를 착용하거나 리드줄을 짧게 잡고, 의자 위에는 개인 담요나 방석을 깔아 주세요.</li>
-      </ul>
-    </div>
+      </ul></div>
+              <figure class="body-photo">
+              <img src="https://t1.kakaocdn.net/mystore/8C9AB6AB187543D4A9267E7E8CFF7578" alt="슬로우써니사이드 입구" />
+              <figcaption>신풍로45번길 골목의 슬로우써니사이드 입구 (사진 출처: 카카오맵)</figcaption>
+            </figure>
+            </div>
+          </section>
 
-    <h2>2. 낮 13:00, 푸른 잔디에서 신나게 뛰뛰, '화서문' & '장안공원 잔디마당'</h2>
-    <p>브런치를 마친 뒤에는 소화도 시키고 강아지의 에너지도 발산시켜 줄 겸 보물 제403호인 <strong>'화서문'</strong>과 바로 맞닿아 있는 <strong>'장안공원'</strong>으로 걸어가 보세요.</p>
-
-    <div class="real-photo-card">
-      <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/41e395f3e989d8ec818fd08a02439bc29b29174e?original" alt="장안공원 잔디밭과 화서문 성곽" />
-      <div class="photo-caption">성곽을 따라 잔디밭과 산책로가 이어지는 장안공원 (사진 출처: 카카오맵)</div>
-    </div>
-
-    <p>장안공원은 성곽 외곽을 따라 길게 뻗은 도심 공원으로, 탁 트인 잔디밭과 울창한 느티나무 그늘이 잘 가꾸어져 있어요. 흙냄새와 풀 내음을 맡자마자 신나서 꼬리를 흔들며 뛰노는 반려견의 모습을 보는 것만으로도 흐뭇한 미소가 절로 번져요.</p>
-    <p>장안공원 산책로를 따라 걷다 보면 성벽 너머로 옛 정취가 묻어나는 화서문과 서북공심돈의 웅장한 실루엣이 한눈에 들어와요. 푸른 잔디와 웅장한 조선의 성곽을 배경으로 강아지와 함께 찍는 산책 사진은 인생샷을 건지기에 그만이에요.</p>
-
-    <div class="tip-box">
-      <strong class="tip-title">💡 장안공원 산책 에티켓 팁</strong>
+          <section class="spot-section flat flip">
+            <div class="spot-head">
+              <h2 class="spot-title">2. 낮 13:00, 푸른 잔디에서 신나게 뛰뛰, '화서문' & '장안공원 잔디마당'</h2>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/41e395f3e989d8ec818fd08a02439bc29b29174e?original" alt="장안공원 잔디밭과 화서문 성곽" />
+              <figcaption>성곽을 따라 잔디밭과 산책로가 이어지는 장안공원 (사진 출처: 카카오맵)</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p>브런치를 마친 뒤에는 소화도 시키고 강아지의 에너지도 발산시켜 줄 겸 보물 제403호인 <strong>'화서문'</strong>과 바로 맞닿아 있는 <strong>'장안공원'</strong>으로 걸어가 보세요.</p>
+              <p>장안공원은 성곽 외곽을 따라 길게 뻗은 도심 공원으로, 탁 트인 잔디밭과 울창한 느티나무 그늘이 잘 가꾸어져 있어요. 흙냄새와 풀 내음을 맡자마자 신나서 꼬리를 흔들며 뛰노는 반려견의 모습을 보는 것만으로도 흐뭇한 미소가 절로 번져요.</p>
+              <p>장안공원 산책로를 따라 걷다 보면 성벽 너머로 옛 정취가 묻어나는 화서문과 서북공심돈의 웅장한 실루엣이 한눈에 들어와요. 푸른 잔디와 웅장한 조선의 성곽을 배경으로 강아지와 함께 찍는 산책 사진은 인생샷을 건지기에 그만이에요.</p>
+              <div class="tip-box"><strong class="tip-title">💡 장안공원 산책 에티켓 팁</strong>
       <ul>
         <li><strong>필수 지참</strong>: 배변 봉투와 물티슈, 그리고 강아지 수분 보충을 위한 휴대용 물병을 꼭 챙겨주세요.</li>
         <li><strong>리드줄 규정</strong>: 2m 이내 안전 리드줄 착용은 필수이며, 다른 산책 반려견과의 안전거리를 지켜주시면 좋아요.</li>
-      </ul>
-    </div>
+      </ul></div>
+            </div>
+          </section>
 
-    <h2>3. 오후 14:15, 성곽을 따라 부는 시원한 바람, '수원화성 성곽 둘레길'</h2>
-    <p>강아지의 가벼운 배변과 운동을 마친 뒤에는 수원화성의 정취를 온몸으로 느낄 수 있는 <strong>성곽 둘레길 코스</strong>로 진입해 보세요. 화서문에서 출발해 장안문을 거쳐 북암문까지 이어지는 북쪽 성곽길은 경사가 완만하고 보행로가 넓어 강아지와 함께 걷기에 최적의 코스예요.</p>
-
-    <div class="real-photo-card">
-      <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/62580d9dcc1d70a048d70d4d3dc2d43207440a6c?original" alt="수원화성" />
-      <div class="photo-caption">수원화성 (사진 출처: 카카오맵)</div>
-    </div>
-
-    <p>성벽의 총안(총구멍) 너머로 내려다보이는 행궁동의 아기자기한 기와지붕들과 현대적인 도심 빌딩이 어우러진 풍경이 무척 이색적이에요. 높은 지대 덕분에 살랑살랑 불어오는 시원한 성곽 바람을 맞으며 걷다 보면 복잡했던 머릿속이 맑아지는 기분이 든답니다.</p>
-    <p>성벽의 벽돌 길은 한낮에도 뜨겁지 않아 강아지 발바닥 패드에 무리가 가지 않아요. 호기심 어린 눈망울로 성벽 틈새 바람 냄새를 킁킁 맡으며 씩씩하게 앞장서 걷는 강아지의 발걸음도 한결 가벼워져요.</p>
-
-    <div class="tip-box">
-      <strong class="tip-title">💡 성곽 둘레길 산책 팁</strong>
+          <section class="spot-section flat">
+            <div class="spot-head">
+              <h2 class="spot-title">3. 오후 14:15, 성곽을 따라 부는 시원한 바람, '수원화성 성곽 둘레길'</h2>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/62580d9dcc1d70a048d70d4d3dc2d43207440a6c?original" alt="수원화성" />
+              <figcaption>수원화성 (사진 출처: 카카오맵)</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p>강아지의 가벼운 배변과 운동을 마친 뒤에는 수원화성의 정취를 온몸으로 느낄 수 있는 <strong>성곽 둘레길 코스</strong>로 진입해 보세요. 화서문에서 출발해 장안문을 거쳐 북암문까지 이어지는 북쪽 성곽길은 경사가 완만하고 보행로가 넓어 강아지와 함께 걷기에 최적의 코스예요.</p>
+              <p>성벽의 총안(총구멍) 너머로 내려다보이는 행궁동의 아기자기한 기와지붕들과 현대적인 도심 빌딩이 어우러진 풍경이 무척 이색적이에요. 높은 지대 덕분에 살랑살랑 불어오는 시원한 성곽 바람을 맞으며 걷다 보면 복잡했던 머릿속이 맑아지는 기분이 든답니다.</p>
+              <p>성벽의 벽돌 길은 한낮에도 뜨겁지 않아 강아지 발바닥 패드에 무리가 가지 않아요. 호기심 어린 눈망울로 성벽 틈새 바람 냄새를 킁킁 맡으며 씩씩하게 앞장서 걷는 강아지의 발걸음도 한결 가벼워져요.</p>
+              <div class="tip-box"><strong class="tip-title">💡 성곽 둘레길 산책 팁</strong>
       <ul>
         <li><strong>진입 안내</strong>: 성곽 위 일부 가파른 계단 구간은 소형견의 경우 안고 이동하시는 것이 안전해요.</li>
         <li><strong>관람료</strong>: 수원화성 성곽길은 상시 무료 개방되어 있어 시간 제약 없이 자유롭게 둘러보실 수 있어요.</li>
-      </ul>
-    </div>
+      </ul></div>
+            </div>
+          </section>
 
-    <h2>4. 오후 15:30, 수양버들 아래 연못 멍때리기, '방화수류정' & '용연'</h2>
-    <p>성곽길을 따라 북암문을 통과하면, 수원화성에서 가장 아름다운 풍광을 자랑하는 정자 <strong>'방화수류정(訪花隨柳亭)'</strong>과 그 아래 고요하게 펼쳐진 연못 <strong>'용연(龍池)'</strong>이 눈앞에 나타나요.</p>
-    <p>'꽃을 찾고 버들을 따라 노닌다'는 이름처럼, 연못 주변으로 늘어진 커다란 수양버들과 초록빛 잔디 언덕은 마치 조선 시대의 비밀 정원에 들어온 듯한 평화로움을 줘요. 잔디밭 그늘 아래 피크닉 매트를 펴고 앉아 잔잔한 연못 물결을 바라보는 순간, 일상의 번잡함은 온데간데없이 사라져요.</p>
-    <p>강아지와 함께 부드러운 풀밭 위에서 솔솔 부는 바람을 맞으며 평온하게 멍때리는 시간을 가져 보세요. 연못 주변을 천천히 돌며 오리들이 헤엄치는 모습을 구경하고, 나무 그늘 아래서 강아지와 눈을 맞추며 도란도란 나누는 대화는 가장 따뜻한 힐링의 순간이 될 거예요.</p>
-
-    <div class="tip-box">
-      <strong class="tip-title">💡 방화수류정 & 용연 피크닉 팁</strong>
+          <section class="spot-section flat no-photo">
+            <div class="spot-head">
+              <h2 class="spot-title">4. 오후 15:30, 수양버들 아래 연못 멍때리기, '방화수류정' & '용연'</h2>
+            </div>
+            <div class="spot-body">
+              <p>성곽길을 따라 북암문을 통과하면, 수원화성에서 가장 아름다운 풍광을 자랑하는 정자 <strong>'방화수류정(訪花隨柳亭)'</strong>과 그 아래 고요하게 펼쳐진 연못 <strong>'용연(龍池)'</strong>이 눈앞에 나타나요.</p>
+              <p>'꽃을 찾고 버들을 따라 노닌다'는 이름처럼, 연못 주변으로 늘어진 커다란 수양버들과 초록빛 잔디 언덕은 마치 조선 시대의 비밀 정원에 들어온 듯한 평화로움을 줘요. 잔디밭 그늘 아래 피크닉 매트를 펴고 앉아 잔잔한 연못 물결을 바라보는 순간, 일상의 번잡함은 온데간데없이 사라져요.</p>
+              <p>강아지와 함께 부드러운 풀밭 위에서 솔솔 부는 바람을 맞으며 평온하게 멍때리는 시간을 가져 보세요. 연못 주변을 천천히 돌며 오리들이 헤엄치는 모습을 구경하고, 나무 그늘 아래서 강아지와 눈을 맞추며 도란도란 나누는 대화는 가장 따뜻한 힐링의 순간이 될 거예요.</p>
+              <div class="tip-box"><strong class="tip-title">💡 방화수류정 & 용연 피크닉 팁</strong>
       <ul>
         <li><strong>피크닉 용품</strong>: 가벼운 개인 돗자리 하나만 챙겨오셔도 충분히 근사한 쉼을 즐기실 수 있어요.</li>
         <li><strong>정자 보호</strong>: 국보급 문화재인 방화수류정 누각 내부에는 신발 착용 및 반려견 출입이 제한되므로, 연못 주변 잔디마당과 수변 산책로를 이용해 주세요.</li>
-      </ul>
-    </div>
+      </ul></div>
+            </div>
+          </section>
 
-    <h2>5. 오후 17:00, 화홍문 물소리와 함께하는 테라스 커피, '정지영커피로스터즈 화홍문점'</h2>
-    <p>용연에서 꿀 같은 쉼을 누린 뒤, 시원한 커피 한잔을 마시러 바로 맞닿아 있는 <strong>'정지영커피로스터즈 화홍문점'</strong>으로 발걸음을 옮겨 보세요.</p>
+          <section class="spot-section flat">
+            <div class="spot-head">
+              <h2 class="spot-title">5. 오후 17:00, 화홍문 물소리와 함께하는 테라스 커피, '정지영커피로스터즈 화홍문점'</h2>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://ldb-phinf.pstatic.net/20211216_185/1639645187407R02Xo_JPEG/%C5%A9%B1%E2%BA%AF%C8%AFphdtd_photo499.jpg" alt="정지영커피로스터즈 화홍문점 창가 좌석과 수원천 버드나무" referrerpolicy="no-referrer" />
+              <figcaption>큰 창 아래 창가 좌석 너머로 수원천 버드나무가 보이는 정지영커피로스터즈 화홍문점 실내 (사진 출처: 네이버 플레이스 업체 사진)</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p>용연에서 꿀 같은 쉼을 누린 뒤, 시원한 커피 한잔을 마시러 바로 맞닿아 있는 <strong>'정지영커피로스터즈 화홍문점'</strong>으로 발걸음을 옮겨 보세요.</p>
+              <p>수원을 대표하는 로스터리 카페인 이곳은 화홍문의 7연수문과 수원천이 시원하게 내려다보이는 감각적인 테라스 좌석을 갖추고 있어요. 야외 테라스 및 옥상 루프탑은 반려견 동반이 자유롭게 가능해 많은 반려인들이 즐겨 찾는 명소예요.</p>
+              <p>메뉴와 가격은 네이버 지도에서 확인해 주세요. 반려견 음료가 있는지도 방문 전에 매장에 문의해 주세요. 시원한 수원천 물소리를 들으며 붉게 물들어가는 행궁동의 노을을 감상하기에 최고의 쉼터예요.</p>
+            </div>
+          </section>
 
-    <div class="real-photo-card">
-      <img src="https://ldb-phinf.pstatic.net/20211216_185/1639645187407R02Xo_JPEG/%C5%A9%B1%E2%BA%AF%C8%AFphdtd_photo499.jpg" alt="정지영커피로스터즈 화홍문점 창가 좌석과 수원천 버드나무" referrerpolicy="no-referrer" />
-      <div class="photo-caption">큰 창 아래 창가 좌석 너머로 수원천 버드나무가 보이는 정지영커피로스터즈 화홍문점 실내 (사진 출처: 네이버 플레이스 업체 사진)</div>
-    </div>
-
-    <p>수원을 대표하는 로스터리 카페인 이곳은 화홍문의 7연수문과 수원천이 시원하게 내려다보이는 감각적인 테라스 좌석을 갖추고 있어요. 야외 테라스 및 옥상 루프탑은 반려견 동반이 자유롭게 가능해 많은 반려인들이 즐겨 찾는 명소예요.</p>
-    <p>메뉴와 가격은 네이버 지도에서 확인해 주세요. 반려견 음료가 있는지도 방문 전에 매장에 문의해 주세요. 시원한 수원천 물소리를 들으며 붉게 물들어가는 행궁동의 노을을 감상하기에 최고의 쉼터예요.</p>
-
-    <h2>6. 저녁 18:30, 가마솥 통닭과 시원한 야장 노포의 낭만, '수원 통닭거리 진미통닭'</h2>
-    <p>해 질 무렵 행궁동 골목을 지나 수원천을 따라 남수동 방향으로 8분 정도 걸어 내려오면, 고소한 기름 냄새가 온 거리를 가득 채우는 <strong>'수원 통닭거리'</strong>가 나타나요. 50년 넘는 역사를 지닌 수원 대표 미식 골목으로, 영화 &lt;극한직업&gt;의 수원왕갈비통닭 모티브로도 유명한 곳이에요.</p>
-
-    <div class="real-photo-card">
-      <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/90b64678e9808466b0fbcb63b9c8be8e23c671f5?original" alt="진미통닭" />
-      <div class="photo-caption">진미통닭 (사진 출처: 카카오맵)</div>
-    </div>
-
-    <p>수원 통닭거리의 <strong>'진미통닭'</strong>에서 야외 야장 테이블에 자리를 잡아 보세요. 실내 매장과 달리 바깥 야외 테이블석은 반려견을 유모차나 이동 가방에 앉히거나 얌전히 발밑에 두면 눈치 보지 않고 동반 식사가 가능하답니다.</p>
-    <p>갓 튀겨낸 <strong>후라이드 통닭</strong>과 시원한 생맥주를 주문해 보세요. 후라이드는 19,000원으로 등록돼 있어요. 대형 무쇠 가마솥에 높은 온도로 튀겨내어 껍질은 과자처럼 파삭하고 속살은 육즙이 촉촉하게 배어 나와요. 시원한 저녁 바람 속에서 복작복작 활기찬 노포 야장의 감성을 누리며 데이트의 대미를 장식할 수 있어요.</p>
-
-    <div class="tip-box">
-      <strong class="tip-title">💡 통닭거리 야외 이용 꿀팁</strong>
+          <section class="spot-section flat flip">
+            <div class="spot-head">
+              <h2 class="spot-title">6. 저녁 18:30, 가마솥 통닭과 시원한 야장 노포의 낭만, '수원 통닭거리 진미통닭'</h2>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/90b64678e9808466b0fbcb63b9c8be8e23c671f5?original" alt="진미통닭" />
+              <figcaption>진미통닭 (사진 출처: 카카오맵)</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p>해 질 무렵 행궁동 골목을 지나 수원천을 따라 남수동 방향으로 8분 정도 걸어 내려오면, 고소한 기름 냄새가 온 거리를 가득 채우는 <strong>'수원 통닭거리'</strong>가 나타나요. 50년 넘는 역사를 지닌 수원 대표 미식 골목으로, 영화 &lt;극한직업&gt;의 수원왕갈비통닭 모티브로도 유명한 곳이에요.</p>
+              <p>수원 통닭거리의 <strong>'진미통닭'</strong>에서 야외 야장 테이블에 자리를 잡아 보세요. 실내 매장과 달리 바깥 야외 테이블석은 반려견을 유모차나 이동 가방에 앉히거나 얌전히 발밑에 두면 눈치 보지 않고 동반 식사가 가능하답니다.</p>
+              <p>갓 튀겨낸 <strong>후라이드 통닭</strong>과 시원한 생맥주를 주문해 보세요. 후라이드는 19,000원으로 등록돼 있어요. 대형 무쇠 가마솥에 높은 온도로 튀겨내어 껍질은 과자처럼 파삭하고 속살은 육즙이 촉촉하게 배어 나와요. 시원한 저녁 바람 속에서 복작복작 활기찬 노포 야장의 감성을 누리며 데이트의 대미를 장식할 수 있어요.</p>
+              <div class="tip-box"><strong class="tip-title">💡 통닭거리 야외 이용 꿀팁</strong>
       <ul>
         <li><strong>강아지 간식</strong>: 튀긴 닭고기는 염분과 뼈 때문에 강아지에게 절대 주시면 안 되므로, 집에서 챙겨온 강아지 전용 간식을 주며 함께 식사 시간을 즐겨주세요.</li>
         <li><strong>주차장 복귀</strong>: 식사 후 수원천 산책로를 따라 8분 정도 천천히 걸어 올라오시면 처음 차를 댔던 화성행궁 주차장에 편안하게 도착해요.</li>
-      </ul>
-    </div>
+      </ul></div>
+            </div>
+          </section>
+        </div>
 
-    <h2>💰 2인 + 반려견 1견 예상 경비</h2>
-    <p>수원 행궁동 코스를 2인 기준으로 따랐을 때의 예상 경비예요. 넓은 공원과 성곽길 위주로 걸어 입장료는 들지 않고, 금액이 등록되지 않은 곳은 지도에서 확인해 주세요.</p>
-    
-    <div class="table-wrap">
-      <table>
+        <!-- 2인 예상 입장료 -->
+        <section class="cost-table-card">
+          <div class="cost-head">
+            <h2 class="timeline-title">2인 + 반려견 1견 예상 경비</h2>
+            <p>수원 행궁동 코스를 2인 기준으로 따랐을 때의 예상 경비예요. 넓은 공원과 성곽길 위주로 걸어 입장료는 들지 않고, 금액이 등록되지 않은 곳은 지도에서 확인해 주세요.</p>
+          </div>
+          <div class="table-wrap"><table class="cost-table">
         <thead>
           <tr>
             <th>구분</th>
@@ -582,19 +532,19 @@
             <td>16,000원</td>
             <td>수도권 근교 자차 이동 기준</td>
           </tr>
-          <tr style="font-weight: 700; background: #fafaf9;">
+          <tr class="cost-total-row">
             <td colspan="2">등록된 금액 합계</td>
-            <td style="color: #0f766e; font-size: 15px;">72,500원</td>
+            <td>72,500원</td>
             <td>정지영커피와 음료는 제외</td>
           </tr>
         </tbody>
-      </table>
-    </div>
+      </table></div>
+        </section>
 
-    <h2>🗺️ 방문 스팟 네이버 지도 바로가기</h2>
-    <p>각 장소의 정확한 위치, 실시간 영업시간 및 상세 정보는 아래 개별 네이버 지도 링크를 통해 손쉽게 확인하실 수 있어요:</p>
-
-    <div class="map-links-grid">
+        <section class="map-links">
+          <h2 class="timeline-title">방문 스팟 네이버 지도 바로가기</h2>
+          <p>각 장소의 정확한 위치, 실시간 영업시간 및 상세 정보는 아래 개별 네이버 지도 링크를 통해 손쉽게 확인하실 수 있어요:</p>
+          <div class="map-links-grid">
       <a href="https://map.naver.com/p/search/%ED%99%94%EC%84%B1%ED%96%89%EA%B6%81%20%EC%A3%BC%EC%B0%A8%EC%9E%A5" target="_blank" rel="noopener noreferrer" class="map-link-chip">
         <span>화성행궁 공영주차장</span>
         <span class="btn-action">지도 보기 ↗</span>
@@ -628,22 +578,36 @@
         <span class="btn-action">지도 보기 ↗</span>
       </a>
     </div>
+        </section>
 
-    <h2>💌 데이트를 마치며</h2>
-    <p>반려견과 함께하는 여행은 언제나 챙겨야 할 것도 많고 신경 쓸 것도 적지 않지만, 풀밭을 신나게 뛰놀고 만족스러운 표정으로 단잠에 빠져드는 강아지의 모습을 보면 그 어떤 피로도 눈 녹듯 사라져요. 수원 행궁동은 사람에게도, 반려견에게도 다정하게 문을 열어주는 고마운 공간들이 가득한 곳이에요.</p>
-    <p>이번 주말, 사랑하는 연인의 손을 잡고 소중한 반려견과 함께 수원 행궁동의 고즈넉한 성곽길로 행복한 힐링 산책을 떠나보시는 건 어떨까요? 🐾🌿</p>
+        <section class="map-links">
+          <h2 class="timeline-title">데이트를 마치며</h2>
+          <p>반려견과 함께하는 여행은 언제나 챙겨야 할 것도 많고 신경 쓸 것도 적지 않지만, 풀밭을 신나게 뛰놀고 만족스러운 표정으로 단잠에 빠져드는 강아지의 모습을 보면 그 어떤 피로도 눈 녹듯 사라져요. 수원 행궁동은 사람에게도, 반려견에게도 다정하게 문을 열어주는 고마운 공간들이 가득한 곳이에요.</p>
+          <p>이번 주말, 사랑하는 연인의 손을 잡고 소중한 반려견과 함께 수원 행궁동의 고즈넉한 성곽길로 행복한 힐링 산책을 떠나보시는 건 어떨까요? 🐾🌿</p>
+        </section>
 
-    <div class="app-course-box" style="margin: 40px 0 24px; padding: 20px 22px; background: var(--color-tip-bg); border: 1px solid var(--color-tip-border); border-radius: 14px;">
-      <strong style="display: block; font-size: 17px; color: var(--color-tip-text); margin-bottom: 6px;">🗺️ 이 코스 오늘 데이트에서 열기</strong>
-      <p style="margin: 0 0 14px; font-size: 14.5px; line-height: 1.6; color: var(--color-tip-text);">글에 나온 장소 4곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
-      <a href="../../#c=441.1789268587425.489.3905" style="display: inline-block; padding: 10px 18px; border-radius: 10px; background: var(--color-accent); color: #ffffff; font-weight: 700; font-size: 15px; text-decoration: none;">앱에서 코스 열기 →</a>
+        <div class="app-course-box">
+          <div>
+            <h2>이 코스 오늘 데이트에서 열기</h2>
+            <p>글에 나온 장소 4곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
+          </div>
+          <a class="btn app-action" href="../../#c=441.1789268587425.489.3905">앱에서 코스 열기</a>
+        </div>
+
+        <footer class="article-credit">
+          <p>사진 출처: 한국관광공사 TourAPI (공공누리 제1유형 상업적 이용 및 변형 무료 허용), 일부 장소 사진은 카카오맵<br>
+      본 글은 공개 데이터를 바탕으로 정리한 여행 코스 가이드입니다.</p>
+        </footer>
+      </div>
+    </article></main>
+
+  <footer class="site-footer">
+    <div class="footer-inner container">
+      <p class="footer-mark"><strong>오늘 데이트 (Oneul Date)</strong></p>
+      <p class="footer-line">전국 데이트 & 여행 코스 큐레이션 매거진</p>
+      <p class="footer-links"><a href="https://nufunc.github.io/oneul-date/">홈으로 가기</a><a href="https://nufunc.github.io/oneul-date/blog/">매거진 전체보기</a></p>
     </div>
-
-    <div class="footer-source">
-      사진 출처: 한국관광공사 TourAPI (공공누리 제1유형 상업적 이용 및 변형 무료 허용), 일부 장소 사진은 카카오맵<br>
-      본 글은 공개 데이터를 바탕으로 정리한 여행 코스 가이드입니다.
-    </div>
-  </main>
+  </footer>
 
 </body>
 </html>

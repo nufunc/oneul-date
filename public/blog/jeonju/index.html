@@ -24,6 +24,9 @@
 
   <!-- Pretendard 웹폰트 -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700&display=swap&text=!%26'()%2C.0123456789%3ADO%5B%5Daelntuy~%C2%B7%E6%99%AF%E8%8C%B6%EA%B0%80%EA%B0%90%EA%B1%B0%EA%B2%8C%EA%B2%BD%EA%B3%84%EA%B3%A0%EA%B3%A8%EA%B3%BC%EA%B4%80%EA%B5%90%EA%B5%AD%EA%B8%88%EA%B8%B0%EA%B9%83%EB%81%BC%EB%82%98%EB%82%9C%EB%82%A8%EB%84%A4%EB%88%88%EB%8A%94%EB%8A%98%EB%8A%A6%EB%8B%AC%EB%8C%80%EB%8D%B0%EB%8F%84%EB%8F%99%EB%90%9C%EB%92%A4%EB%93%9C%EB%93%B1%EB%9D%BC%EB%9E%8C%EB%9E%91%EB%9E%98%EB%A0%B4%EB%A1%80%EB%A1%9C%EB%A1%9D%EB%A5%BC%EB%A7%88%EB%A7%8C%EB%A7%91%EB%A7%A4%EB%A9%B0%EB%AA%A9%EB%AC%B4%EB%AC%B8%EB%AC%BC%EB%B0%94%EB%B0%95%EB%B0%A5%EB%B0%A9%EB%B2%84%EB%B2%97%EB%B2%A0%EB%B3%B4%EB%B3%B8%EB%B6%80%EB%B6%84%EB%B9%84%EC%82%AC%EC%82%B0%EC%83%81%EC%84%9C%EC%84%A0%EC%84%B1%EC%85%98%EC%86%8C%EC%86%8D%EC%88%99%EC%88%9C%EC%88%A0%EC%88%B2%EC%89%BC%EC%8A%A4%EC%8B%9C%EC%8B%9D%EC%95%84%EC%95%88%EC%95%A1%EC%95%BC%EC%96%B4%EC%97%90%EC%97%AC%EC%97%B4%EC%98%88%EC%98%A4%EC%98%A5%EC%99%84%EC%99%B8%EC%9A%B8%EC%9B%83%EC%9B%90%EC%9D%80%EC%9D%84%EC%9D%98%EC%9D%B4%EC%9D%B8%EC%9D%BC%EC%9E%A5%EC%A0%84%EC%A0%90%EC%A0%9C%EC%A1%B0%EC%A3%BC%EC%A6%90%EC%A7%80%EC%A7%84%EC%A7%91%EC%AB%84%EC%B0%A8%EC%B0%BB%EC%B0%BD%EC%B1%85%EC%B2%AB%EC%B2%B4%EC%B9%98%EC%B9%A8%EC%B9%BC%EC%BD%94%EC%BD%A9%ED%81%AC%ED%85%8C%ED%86%A0%ED%86%B5%ED%8A%B8%ED%8C%8C%ED%8C%90%ED%8C%9F%ED%8E%9C%ED%8E%B8%ED%91%9C%ED%92%8D%ED%94%BC%ED%95%98%ED%95%99%ED%95%9C%ED%95%A9%ED%96%89%ED%96%A5%ED%98%84%ED%99%94%ED%9B%84" rel="stylesheet">
   
   <!-- JSON-LD 구조화 데이터 -->
   <script type="application/ld+json">
@@ -52,468 +55,427 @@
   </script>
 
   <style>
-    :root {
-      --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-      --bg-page: #fbfaf8;
-      --bg-card: #ffffff;
-      --color-primary: #1c1917;
-      --color-accent: #0f766e;
-      --color-accent-light: #f0fdfa;
-      --color-accent-border: #99f6e4;
-      --color-warm: #b45309;
-      --color-text-main: #292524;
-      --color-text-sub: #57534e;
-      --color-text-faint: #78716c;
-      --color-border: #e7e5e4;
-      --color-tip-bg: #fffbeb;
-      --color-tip-border: #fde68a;
-      --color-tip-text: #92400e;
-      --color-bridge-bg: #f5f5f4;
-      --max-width: 780px;
-    }
+/* hallmark-solstice: scripts/convert_blog_hallmark.mjs가 글의 <style>을 이 파일로 바꾼다 (Hallmark 2.0.0, 테마 Solstice, P-293) */
+:root {
+  color-scheme: light;
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-xs: 0.8125rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.125rem; --text-xl: 1.5625rem; --text-2xl: 1.953rem; --text-3xl: 2.441rem;
+  --text-hero: clamp(1.75rem, 1.6vw + 1.25rem, 2.75rem);
+  --text-section: clamp(1.75rem, 1.8vw + 1rem, 2.875rem); --text-title: clamp(1.25rem, 0.75vw + 0.875rem, 1.625rem); --text-lead: clamp(1.0625rem, 0.3vw + 0.95rem, 1.25rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-micro: 120ms; --dur-short: 220ms;
+  --container: 1200px; --measure: 680px; --gutter: 56px; --gap-columns: 40px; --section-gap: 120px;
+  --z-sticky-nav: 300;
+  --color-paper: oklch(94% 0.03 80); --color-paper-2: oklch(97% 0.02 85); --color-paper-3: oklch(89% 0.05 80);
+  --color-ink: oklch(27% 0.05 50); --color-ink-2: oklch(36% 0.05 50); --color-muted: oklch(48% 0.06 55);
+  --color-rule: oklch(84% 0.06 78);
+  --color-accent: oklch(54% 0.20 24); --color-accent-2: oklch(48% 0.19 24); --color-accent-ink: oklch(97% 0.02 85); --color-focus: oklch(54% 0.20 24);
+  --color-gold: oklch(74% 0.14 75); --color-gold-2: oklch(84% 0.11 80);
+  --color-band-text: oklch(94% 0.03 80); --color-band-muted: oklch(80% 0.05 75);
+  --color-hair-ink: color-mix(in oklab, var(--color-ink) 10%, transparent);
+  --font-display: "Noto Serif KR", "Nanum Myeongjo", ui-serif, serif;
+  --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --radius-card: 0; --radius-pill: 999px; --rule-hair: 1px; --rule-bar: 2px;
+  --shadow-card: 10px 10px 0 var(--color-paper-3);
+}
+@media (max-width: 60rem) { :root { --gutter: 24px; --section-gap: 88px; --gap-columns: 24px; } }
+@media (max-width: 40rem) { :root { --gutter: 16px; --section-gap: 64px; --gap-columns: 16px; } }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+html { scrollbar-color: var(--color-muted) var(--color-paper); scroll-padding-top: var(--space-3xl); }
+body { margin: 0; background: var(--color-paper); color: var(--color-ink-2); font-family: var(--font-family); font-size: var(--text-md); line-height: 1.75; word-break: keep-all; -webkit-font-smoothing: antialiased; }
+::selection { background: color-mix(in oklab, var(--color-gold) 40%, transparent); }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+a:hover { text-decoration-color: var(--color-accent); }
+article h1, article h2, article h3 { margin: 0; font-family: var(--font-display); font-weight: 700; color: var(--color-ink); line-height: 1.3; letter-spacing: -0.01em; overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+img { max-width: 100%; display: block; }
+.container { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); }
 
-    body {
-      font-family: var(--font-family);
-      background-color: var(--bg-page);
-      color: var(--color-text-main);
-      line-height: 1.85;
-      letter-spacing: -0.02em;
-      word-break: keep-all;
-      -webkit-font-smoothing: antialiased;
-    }
+/* 44px 머리 링크 규칙: scripts/test-blog-related.cjs가 글마다 하나를 요구한다 */
+header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
 
-    .travel-header-bar {
-      background: rgba(255, 255, 255, 0.95);
-      border-bottom: 1px solid var(--color-border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(10px);
-    }
-    .header-inner {
-      max-width: var(--max-width);
-      margin: 0 auto;
-      padding: 14px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .header-title {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--color-primary);
-    }
-    .header-meta {
-      font-size: 13px;
-      color: var(--color-text-faint);
-    }
+/* Controls */
+.btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 var(--space-lg); border: 0; border-radius: var(--radius-pill); background: var(--color-accent); color: var(--color-accent-ink); font: 600 var(--text-md)/1 var(--font-family); text-decoration: none; cursor: pointer; transition: background-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out); }
+.btn:hover { background: var(--color-accent-2); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.link-quiet { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-ink); font-weight: 600; font-size: var(--text-sm); text-decoration: none; border-bottom: var(--rule-bar) solid var(--color-ink); transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out); }
+.link-quiet:hover { color: var(--color-accent); border-color: var(--color-accent); }
+.link-quiet:active { transform: translateY(1px); }
+.link-quiet:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
 
-    .article-wrap {
-      max-width: var(--max-width);
-      margin: 0 auto;
-      background: var(--bg-card);
-      padding: 48px 32px 64px;
-      border-left: 1px solid var(--color-border);
-      border-right: 1px solid var(--color-border);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
-    }
-    @media (max-width: 640px) {
-      .article-wrap { padding: 24px 18px 48px; border: none; }
-    }
+/* Nav */
+.site-header { position: sticky; top: 0; z-index: var(--z-sticky-nav); background: var(--color-paper); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.header-inner { display: flex; justify-content: space-between; align-items: center; min-height: 64px; }
+.header-logo { font-family: var(--font-display); font-size: var(--text-lg); color: var(--color-ink); text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; }
+.header-logo span { color: var(--color-accent); margin-left: 0.3em; }
+.header-logo:hover { color: var(--color-ink-2); }
+.header-nav { display: flex; gap: var(--space-lg); }
+.header-nav a { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--text-sm); color: var(--color-ink-2); text-decoration: none; }
+.header-nav a:hover { color: var(--color-ink); text-decoration: underline; text-decoration-color: var(--color-accent); }
+.header-nav a:active, .header-logo:active { transform: translateY(1px); }
 
-    .post-badge {
-      display: inline-block;
-      background: var(--color-accent-light);
-      color: var(--color-accent);
-      font-size: 12px;
-      font-weight: 700;
-      padding: 4px 12px;
-      border-radius: 6px;
-      margin-bottom: 14px;
-      border: 1px solid var(--color-accent-border);
-    }
+/* Hero */
+.hero { display: grid; padding-block: var(--space-2xl) var(--space-xl); }
+.hero-text { display: grid; gap: var(--space-lg); }
+.article-title { font-size: var(--text-hero); line-height: 1.3; max-width: 28ch; }
+.hero-kicker { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.hero-kicker span:first-child { color: var(--color-accent); font-weight: 600; }
+.article-meta { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-lg); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); font-variant-numeric: tabular-nums; }
+.article-meta .meta-credit { flex-basis: 100%; }
+/* 좁은 화면에서 칸마다 한 줄: 본문 글꼴(Pretendard)이 바뀔 때 줄 수가 달라져 아래 띠가 밀리는 것을 막는다 */
+@media (max-width: 40rem) { .article-meta { flex-direction: column; flex-wrap: nowrap; } }
+.spot-photo img { width: 100%; height: 100%; object-fit: cover; outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
 
-    h1 {
-      font-size: 26px;
-      line-height: 1.45;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin-bottom: 16px;
-    }
-    @media (max-width: 640px) {
-      h1 { font-size: 22px; }
-    }
+/* Lead */
+.prose-intro { max-width: var(--measure); padding-top: var(--space-xl); font-size: var(--text-lead); line-height: 1.8; color: var(--color-ink); padding-bottom: var(--space-3xl); }
 
-    .post-sub-meta {
-      font-size: 13px;
-      color: var(--color-text-faint);
-      margin-bottom: 24px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      border-bottom: 1px solid var(--color-border);
-      padding-bottom: 16px;
-    }
-
-    .lead-box {
-      background: var(--color-bridge-bg);
-      border-left: 4px solid var(--color-accent);
-      padding: 18px 22px;
-      border-radius: 0 8px 8px 0;
-      font-size: 15.5px;
-      color: var(--color-text-sub);
-      margin-bottom: 32px;
-      line-height: 1.8;
-    }
-
-    .real-photo-card {
-      margin: 32px 0;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid var(--color-border);
-      background: #fafaf9;
-    }
-    .real-photo-card img {
-      width: 100%;
-      height: auto;
-      display: block;
-      max-height: 480px;
-      object-fit: cover;
-    }
-    .photo-caption {
-      padding: 11px 16px;
-      font-size: 12.5px;
-      color: var(--color-text-faint);
-      text-align: center;
-      background: #ffffff;
-      border-top: 1px solid #f5f5f4;
-    }
-
-    h2 {
-      font-size: 21px;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin: 44px 0 16px 0;
-      padding-bottom: 10px;
-      border-bottom: 2px solid var(--color-primary);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    p {
-      margin-bottom: 16px;
-      font-size: 15.5px;
-      color: var(--color-text-main);
-      line-height: 1.85;
-    }
-
-    .timeline-card {
-      background: #fafaf9;
-      border: 1px solid var(--color-border);
-      border-radius: 10px;
-      padding: 18px 20px;
-      margin: 24px 0 32px;
-      font-size: 15px;
-      line-height: 1.5;
-      color: #334155;
-    }
-    .tl-act { font-weight: 700; font-size: 13px; color: #64748b; margin: 18px 0 8px; }
-    .tl-act:first-child { margin-top: 0; }
-    .tl-step { display: flex; gap: 12px; align-items: baseline; padding: 6px 0; }
-    .tl-time { flex: none; min-width: 46px; font-weight: 700; font-variant-numeric: tabular-nums; color: #0f766e; }
-    .tl-place { font-weight: 700; color: #1e293b; }
-    .tl-note { display: block; font-size: 13px; color: #64748b; margin-top: 2px; }
-    .tl-move { font-size: 12.5px; color: #94a3b8; padding: 0 0 0 58px; }
-    @media (max-width: 640px) {
-      .timeline-card { padding: 14px 16px; }
-    }
-
-    .tip-box {
-      background: var(--color-tip-bg);
-      border: 1px solid var(--color-tip-border);
-      border-radius: 10px;
-      padding: 16px 20px;
-      margin: 24px 0;
-      font-size: 14px;
-      color: var(--color-tip-text);
-      line-height: 1.7;
-    }
-    .tip-box strong.tip-title {
-      color: #78350f;
-      display: block;
-      margin-bottom: 8px;
-      font-size: 14.5px;
-    }
-    .tip-box ul {
-      padding-left: 18px;
-      margin: 0;
-    }
-    .tip-box li {
-      margin-bottom: 5px;
-    }
-
-    .table-wrap {
-      overflow-x: auto;
-      margin: 28px 0;
-      border-radius: 8px;
-      border: 1px solid var(--color-border);
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-      text-align: left;
-    }
-    th, td {
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--color-border);
-    }
-    th {
-      background: #f5f5f4;
-      font-weight: 700;
-      color: var(--color-primary);
-      white-space: nowrap;
-    }
-    tr:last-child td { border-bottom: none; }
-
-/* 비용표: 좁은 화면에서는 한 행을 카드 하나로 쌓는다 */
-@media (max-width: 600px) {
-  .table-wrap { overflow-x: visible; }
-  .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
-  .table-wrap thead { display: none; }
-  .table-wrap tr {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    column-gap: 12px;
-    row-gap: 4px;
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--color-border);
-  }
-  .table-wrap tr:last-child { border-bottom: none; }
-  .table-wrap td { padding: 0; border: none; }
-  .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: 0.78rem; font-weight: 700; color: var(--color-text-sub); }
-  .table-wrap td:nth-child(2) { font-weight: 700; }
-  .table-wrap td:nth-child(3) { max-width: 60vw; word-break: keep-all; text-align: right; font-weight: 700; }
-  .table-wrap td:nth-child(4) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
-  .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: inherit; color: inherit; }
-  .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; max-width: 60vw; word-break: keep-all; text-align: right; }
-  .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; white-space: normal; text-align: left; font-size: 0.85rem; font-weight: 400; color: var(--color-text-sub); }
+/* The day, on the brown band */
+.band { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl) var(--space-xl); }
+.band .timeline-title { color: var(--color-band-text); font-size: var(--text-section); margin-bottom: var(--space-xl); }
+.route { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: 0; padding: 0; }
+.tl-act { font-size: var(--text-sm); color: var(--color-gold-2); padding-bottom: var(--space-sm); }
+.tl-step { display: grid; align-content: start; gap: var(--space-2xs); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-gold); }
+.tl-time { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1; color: var(--color-band-text); font-variant-numeric: tabular-nums; }
+.tl-place { font-weight: 600; font-size: var(--text-lg); color: var(--color-band-text); }
+.tl-note { font-size: var(--text-sm); color: var(--color-band-muted); line-height: 1.6; }
+.tl-move { font-size: var(--text-sm); color: var(--color-band-muted); padding-block: var(--space-sm) var(--space-lg); }
+.tl-total { font-size: var(--text-sm); color: var(--color-band-muted); padding-top: var(--space-lg); margin-top: var(--space-lg); border-top: var(--rule-hair) solid color-mix(in oklab, var(--color-band-text) 25%, transparent); }
+/* spot-info-list 계열: 시간 범위(10:30 - 11:45)가 길어 시각 글자를 줄이고, 요약 상자와 번호 배지를 둔다 */
+.route.range .tl-time { font-size: var(--text-xl); }
+.route.range .tl-step { padding-bottom: var(--space-md); }
+.tl-badge { font-size: var(--text-xs); color: var(--color-gold-2); letter-spacing: 0.04em; }
+.tl-facts { display: grid; gap: var(--space-2xs) var(--space-lg); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.tl-facts strong { color: var(--color-gold-2); font-weight: 600; }
+@media (min-width: 60rem) {
+  .tl-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .route { grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); column-gap: var(--space-lg); }
+  .route > * { grid-row: var(--r); grid-column: var(--c) / span var(--s, 1); }
+  .tl-move { padding-bottom: 0; }
+  .tl-total { grid-column: 1 / -1; }
 }
 
+/* Stops */
+.spots { padding-block: var(--section-gap) 0; display: grid; gap: var(--section-gap); }
+.spot-section { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "photo head" "photo body"; grid-template-rows: auto 1fr; column-gap: var(--gap-columns); row-gap: var(--space-md); align-items: start; padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); }
+.spot-section.flip { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-areas: "head photo" "body photo"; }
+.spot-section.no-photo { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "body"; }
+.spot-head { grid-area: head; display: grid; gap: var(--space-md); }
+.spot-photo { grid-area: photo; align-self: start; margin: 0; aspect-ratio: 4 / 5; width: 100%; background: var(--color-paper-3); position: sticky; top: 96px; }
+.spot-body { grid-area: body; display: grid; gap: var(--space-md); }
+.spot-header { display: flex; align-items: baseline; gap: var(--space-md); }
+.spot-num { font-family: var(--font-display); font-size: var(--text-3xl); line-height: 1; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+.spot-title { font-size: var(--text-section); }
+.spot-tagline { font-size: var(--text-lg); color: var(--color-ink); padding-bottom: var(--space-xs); }
+.spot-desc { max-width: 60ch; }
 
-    .map-links-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 12px;
-      margin: 20px 0 32px;
-    }
-    .map-link-chip {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      text-decoration: none;
-      color: var(--color-text-main);
-      font-size: 14px;
-      font-weight: 600;
-      transition: all 0.2s ease;
-    }
-    .map-link-chip:hover {
-      background: #f0fdf4;
-      border-color: #86efac;
-      color: #15803d;
-      transform: translateY(-1px);
-    }
-    .map-link-chip span.btn-action {
-      font-size: 12px;
-      color: #00843d;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 3px;
-    }
+.spot-info-box { margin: var(--space-xs) 0 0; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); }
+.info-row { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--space-md); padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.info-row:last-child { border-bottom: 0; }
+.info-label { color: var(--color-muted); }
+.info-val { color: var(--color-ink); font-weight: 400; font-variant-numeric: tabular-nums; }
+.map-btn-wrap { padding-top: var(--space-sm); }
+.tip-box { padding: var(--space-sm) var(--space-md); border-left: var(--rule-bar) solid var(--color-accent); background: var(--color-paper-2); font-size: var(--text-sm); color: var(--color-ink-2); line-height: 1.7; }
+.tip-box strong { color: var(--color-ink); font-weight: 600; }
+.tip-box .tip-title { display: block; margin-bottom: var(--space-2xs); }
 
-    .footer-source {
-      margin-top: 48px;
-      padding-top: 24px;
-      border-top: 1px solid var(--color-border);
-      font-size: 12.5px;
-      color: var(--color-text-faint);
-      text-align: center;
-      line-height: 1.8;
-    }
-    header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
-    .header-nav a,.header-title a,.blog-tagline a{display:inline-block}
+/* Fees */
+.cost-table-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.cost-head { display: grid; gap: var(--space-md); align-content: start; }
+.cost-head .timeline-title { font-size: var(--text-section); }
+.cost-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.cost-table th { text-align: left; font-weight: 400; color: var(--color-muted); padding: var(--space-xs) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-bar) solid var(--color-ink); }
+.cost-table td { padding: var(--space-sm) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink-2); vertical-align: top; }
+.cost-table td:nth-child(2) { color: var(--color-ink); font-weight: 400; }
+.cost-3 .cost-total-row td:nth-child(2) { font-family: inherit; font-size: inherit; color: inherit; font-weight: 600; }
+.cost-3 .cost-total-row td:nth-child(3) { font-family: var(--font-display); font-size: var(--text-xl); color: var(--color-accent); font-weight: 700; }
+.cost-total-row td { border-bottom: 0; border-top: var(--rule-bar) solid var(--color-ink); color: var(--color-ink); font-weight: 600; }
+.cost-total-row td:nth-child(2) { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--color-accent); font-weight: 700; }
+@media (max-width: 600px) {
+  .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
+  .table-wrap thead { display: none; }
+  .table-wrap tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-sm); row-gap: var(--space-2xs); padding-block: var(--space-sm); border-bottom: var(--rule-hair) solid var(--color-rule); }
+  .table-wrap td { padding: 0; border: 0; }
+  .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: var(--text-xs); color: var(--color-muted); }
+  .table-wrap td:nth-child(3) { text-align: right; font-weight: 600; color: var(--color-ink); }
+  .table-wrap td:nth-child(4) { grid-column: 1 / -1; color: var(--color-muted); }
+  .table-wrap td:empty { display: none; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: var(--text-sm); color: var(--color-ink); }
+  .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; text-align: right; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
+  .table-wrap .cost-total-row { border-top: var(--rule-bar) solid var(--color-ink); border-bottom: 0; }
+}
+
+/* Tips */
+.tips-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.tips-card .timeline-title { font-size: var(--text-section); align-self: start; }
+.tips-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-md); }
+.tips-list li { padding-bottom: var(--space-md); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.tips-list li:last-child { border-bottom: 0; }
+.tips-list strong { color: var(--color-ink); font-weight: 600; }
+
+/* App course */
+.app-course-box { margin-top: var(--section-gap); display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--gap-columns); align-items: end; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-xl); }
+.app-course-box h2 { font-size: var(--text-section); margin-bottom: var(--space-md); }
+.app-course-box p { max-width: 52ch; }
+.app-course-box .app-action { justify-self: end; }
+
+.article-credit { margin-top: var(--space-2xl); padding-block: var(--space-md) var(--space-3xl); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); }
+
+/* Footer mast */
+.site-footer { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl); }
+.footer-inner { display: grid; gap: var(--space-md); }
+.footer-mark { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1.2; color: var(--color-band-text); }
+.footer-line { color: var(--color-band-muted); font-size: var(--text-sm); }
+.footer-links { display: flex; flex-wrap: wrap; gap: var(--space-lg); }
+.footer-links a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-band-text); font-size: var(--text-sm); text-decoration: underline; text-decoration-color: var(--color-gold); }
+.footer-links a:hover { text-decoration-color: var(--color-accent); color: var(--color-gold-2); }
+.footer-links a:active { transform: translateY(1px); }
+.site-footer :focus-visible { outline-color: var(--color-gold-2); }
+
+@media (max-width: 60rem) {
+  .hero, .spot-section, .spot-section.flip, .cost-table-card, .tips-card, .app-course-box { grid-template-columns: minmax(0, 1fr); }
+  .spot-section, .spot-section.flip { grid-template-areas: "head" "photo" "body"; grid-template-rows: auto; }
+  .spot-section.no-photo { grid-template-areas: "head" "body"; }
+  .hero { padding-block: var(--space-xl) var(--space-xl); }
+  .spot-photo { position: static; aspect-ratio: 16 / 10; }
+  .app-course-box { padding: var(--space-lg); }
+  .app-course-box .app-action { justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn, .link-quiet { transition: none; }
+  .btn:active, .link-quiet:active, .header-nav a:active, .header-logo:active, .footer-links a:active { transform: none; }
+}
+
+/* real-photo-flat 계열(평면 글): 번호 있는 긴 장소 제목, 사진 설명, 안내 상자, 지도 목록 */
+.lead-photo { margin: 0 0 var(--space-3xl); }
+.lead-photo img { width: 100%; max-height: 520px; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.lead-photo figcaption, .body-photo figcaption { margin-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.spot-photo figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--space-xs) var(--space-sm); font-size: var(--text-xs); line-height: 1.5; color: var(--color-accent-ink); background: color-mix(in oklab, var(--color-ink) 78%, transparent); }
+.body-photo { margin: 0; }
+.body-photo img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.spot-section.flat .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.tl-lead { max-width: var(--measure); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.guide-box, .order-box { background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); color: var(--color-ink); }
+.guide-box h4, .order-box strong { margin: 0 0 var(--space-xs); font-family: var(--font-display); font-size: var(--text-md); color: var(--color-ink); display: block; }
+.guide-box ul, .order-box ul { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-2xs); }
+.bridge { padding-top: var(--space-xs); color: var(--color-muted); font-size: var(--text-sm); }
+.map-links { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-md); }
+.map-links .timeline-title { font-size: var(--text-section); }
+.map-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-xs); }
+.map-list a, .map-link-chip { display: flex; justify-content: space-between; gap: var(--space-md); align-items: center; min-height: 44px; padding-block: var(--space-xs); border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink); text-decoration: none; }
+.map-links-grid { display: grid; gap: 0; }
+.map-link-chip .btn-action { color: var(--color-accent); font-weight: 600; white-space: nowrap; }
+@media (max-width: 40rem) { .spot-section.flat .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .spot-photo { position: relative; } }
+
+/* spot-card 계열(editor-144): 대표 사진, 요약 상자, 본문 구획, 세부 코스, 이동 연결, 마무리 상자 */
+.hero-figure { margin: 0 0 var(--space-xl); }
+.hero-figure img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.hero-figure figcaption { padding-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-muted); }
+.summary-card { margin-bottom: var(--space-xl); background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-lg); font-size: var(--text-sm); }
+.summary-title, p.timeline-title, .cta-title { font-family: var(--font-display); font-weight: 700; line-height: 1.3; color: var(--color-ink); }
+.summary-title { font-size: var(--text-xl); margin-bottom: var(--space-sm); }
+p.timeline-title { letter-spacing: -0.01em; overflow-wrap: break-word; }
+.summary-list { margin: 0; padding: 0; list-style: none; display: grid; }
+.summary-list li { padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.summary-list li:last-child { border-bottom: 0; }
+.summary-list strong { color: var(--color-ink); font-weight: 600; }
+.prose-section { margin-top: var(--section-gap); max-width: var(--measure); display: grid; gap: var(--space-md); }
+.prose-section h2, .spots-title { font-size: var(--text-title); }
+.stops-section { margin-top: var(--section-gap); }
+.stops-section .spots { padding-top: var(--space-xl); }
+.spots.bridged { gap: 0; }
+.drive-bridge { margin: 0; padding-block: var(--space-xl); padding-left: var(--space-md); border-left: var(--rule-bar) solid var(--color-gold); font-size: var(--text-sm); color: var(--color-muted); }
+.drive-bridge strong { color: var(--color-ink); font-weight: 600; }
+.spot-header:has(.spot-badge) { flex-direction: column; align-items: flex-start; gap: var(--space-xs); }
+.spot-badge { font-size: var(--text-sm); font-weight: 600; color: var(--color-accent); }
+.spot-actions { display: flex; flex-wrap: wrap; gap: 0 var(--space-lg); }
+.info-wide .info-row { grid-template-columns: 5.5em minmax(0, 1fr); }
+.info-wide .info-row.plain { grid-template-columns: minmax(0, 1fr); }
+.cost-head .timeline-title.long { font-size: var(--text-title); }
+.cta-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-sm); max-width: var(--measure); }
+.cta-card h3, .cta-title { font-size: var(--text-title); }
+.cta-card .link-quiet { justify-self: start; }
   </style>
 </head>
 <body>
 
   <!-- 최상단 헤더 네비게이션 -->
-  <header class="travel-header-bar">
-    <div class="header-inner">
-      <div class="header-title"><a href="../" style="text-decoration:none; color:inherit; font-weight:700;">← 📖 오늘 데이트 매거진</a></div>
-      <div class="header-meta">전북 전주 편</div>
+  <header class="site-header">
+    <div class="header-inner container">
+      <a href="https://nufunc.github.io/oneul-date/blog/" class="header-logo">오늘 데이트 <span>매거진</span></a>
+      <nav class="header-nav">
+        <a href="https://nufunc.github.io/oneul-date/">홈으로</a>
+        <a href="https://nufunc.github.io/oneul-date/blog/">전체 코스</a>
+      </nav>
     </div>
   </header>
 
-  <main class="article-wrap">
-    <span class="post-badge">1박 2일 한옥쉼</span>
-    <h1>[전주 1박2일 여행] 한옥마을 인파를 벗어나 만난 완판본 골목과 한옥 쉼표! 현대옥·완판본문화관·차경·사랑나무 한옥펜션·조점례피순대·베테랑</h1>
-    
-    <div class="post-sub-meta">
-      <span>작성일: 2026. 10.</span>
-      <span>•</span>
-      <span>글: 오늘 데이트 에디토리얼 팀</span>
-      <span>•</span>
-      <span>사진: 카카오맵</span>
-      <span>•</span>
-      <span>2인 예상 경비: 본문 표 참고</span>
-      <span>•</span>
-      <span>소요 시간: 1박 2일 한옥쉼</span>
-    </div>
+  <main class="article-container"><article>
+      <header class="article-header hero container">
+        <div class="hero-text">
+          <p class="hero-kicker badge-category"><span>1박 2일 한옥쉼</span></p>
+          <h1 class="article-title">[전주 1박2일 여행] 한옥마을 인파를 벗어나 만난 완판본 골목과 한옥 쉼표! 현대옥·완판본문화관·차경·사랑나무 한옥펜션·조점례피순대·베테랑</h1>
+          <div class="article-meta">
+            <span>작성일: 2026. 10.</span>
+            <span>글: 오늘 데이트 에디토리얼 팀</span>
+            <span>사진: 카카오맵</span>
+            <span>2인 예상 경비: 본문 표 참고</span>
+            <span>소요 시간: 1박 2일 한옥쉼</span>
+          </div>
+          <p><a class="btn" href="../../#c=6776.1515.3795.1790947950480.6777.1791033879154">앱에서 코스 열기</a></p>
+        </div>
+      </header>
 
-    <div class="lead-box">
-      <strong>"주말 전주 한옥마을의 북적임을 살짝 비껴서면, 시간이 멈춘 듯한 고요한 서학동 예술마을과 대나무 숲 돌담길이 다정하게 펼쳐져요. 1박 2일 힐링 코스를 정리해 전해드려요."</strong><br>
-      오늘 데이트 에디토리얼 팀이 정리한 전북 전주 여행 코스입니다. 복잡한 관광지 인파를 벗어나 만난 알짜배기 동선과 감성 스팟을 생생하게 전해드려요.
-    </div>
-
-    
-    <div class="real-photo-card">
-      <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/3d55f3b706f061abf3dc312a1cf275bc952c988a?original" alt="전주 경기전" />
-      <div class="photo-caption">전주 경기전 (사진 출처: 카카오맵)</div>
-    </div>
-
-    <h2>🧭 한눈에 보는 [전주] 한옥마을 인파를 벗어나 만난 완판본 골목과 한옥 쉼표 동선</h2>
-    <div class="timeline-card">
-      <div class="tl-act">Day 1: 원도심의 깊은 맛과 한옥 쉼</div>
-      <div class="tl-step"><span class="tl-time">12:00</span><div><span class="tl-place">현대옥 남부시장점</span><span class="tl-note">토렴식 남부시장 콩나물국밥 &amp; 삶아 넣은 오징어사리</span></div></div>
-      <div class="tl-step"><span class="tl-time">13:10</span><div><span class="tl-place">경기전 돌담길 산책 &amp; 완판본문화관</span><span class="tl-note">울창한 대나무 숲길과 목판 인쇄 체험</span></div></div>
-      <div class="tl-step"><span class="tl-time">14:30</span><div><span class="tl-place">차경</span><span class="tl-note">한옥 서까래 아래 즐기는 블렌딩 티와 양갱 플레이트</span></div></div>
-      <div class="tl-step"><span class="tl-time">16:00</span><div><span class="tl-place">서학동 예술마을 산책 후 한옥마을 안 &#39;사랑나무 한옥펜션&#39; 체크인</span></div></div>
-      <div class="tl-step"><span class="tl-time">19:30</span><div><span class="tl-place">조점례남문피순대 포장</span><span class="tl-note">잡내 없이 고소한 원조 피순대와 시원한 모주 야식</span></div></div>
-      <div class="tl-act">Day 2: 든든한 로컬 면식과 여운</div>
-      <div class="tl-step"><span class="tl-time">11:00</span><div><span class="tl-place">느긋한 체크아웃</span></div></div>
-      <div class="tl-step"><span class="tl-time">11:30</span><div><span class="tl-place">베테랑분식 본점</span><span class="tl-note">경기전길 국숫집에서 늦은 아침</span></div></div>
-      <div class="tl-step"><span class="tl-time">13:00</span><div><span class="tl-place">자만벽화마을 산책 후 기분 좋은 귀가</span></div></div>
-    </div>
-    <p>영업시간, 주차 요금, 휴무는 바뀔 수 있어 방문 전에 각 장소의 네이버 지도 정보에서 확인해 주세요.</p>
-
-    <!-- 스팟별 상세 섹션 -->
-    
-    <h2>1. 오전 12:00, 토렴식 콩나물국밥의 원조, 속을 달래는 맑고 칼칼한 첫 끼, '현대옥 남부시장점'</h2>
-    <p>전주에 도착하자마자 곧장 남부시장 골목 안쪽에 위치한 현대옥 본래 터를 찾아가 보세요. 팔팔 끓이지 않고 따뜻한 육수를 밥 위에 여러 번 부어내는 토렴식 국밥이라 밥알 하나하나에 깊은 감칠맛이 고스란히 배어있답니다. 마늘과 청양고추의 알싸함이 적당해서 장거리 이동으로 지친 속이 확 풀리는 기분이에요. 쫄깃하게 데쳐낸 오징어사리를 추가해 국물에 듬뿍 얹어 먹으면 식감까지 완벽해요.</p>
-    
-      <div class="real-photo-card">
-        <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/b16c40d5da715faf509a2e3ef41069a3e40d7ef4?original" alt="전주남부시장 현대옥 남부시장점" loading="lazy" />
-        <div class="photo-caption">전주남부시장 현대옥 남부시장점 (사진 출처: 카카오맵)</div>
+      <div class="container">
+        <div class="prose-intro"><strong>"주말 전주 한옥마을의 북적임을 살짝 비껴서면, 시간이 멈춘 듯한 고요한 서학동 예술마을과 대나무 숲 돌담길이 다정하게 펼쳐져요. 1박 2일 힐링 코스를 정리해 전해드려요."</strong><br>
+      오늘 데이트 에디토리얼 팀이 정리한 전북 전주 여행 코스입니다. 복잡한 관광지 인파를 벗어나 만난 알짜배기 동선과 감성 스팟을 생생하게 전해드려요.</div>
+        <figure class="lead-photo">
+              <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/3d55f3b706f061abf3dc312a1cf275bc952c988a?original" alt="전주 경기전" />
+              <figcaption>전주 경기전 (사진 출처: 카카오맵)</figcaption>
+            </figure>
       </div>
-    
-      <div style="margin: 16px 0; background: #fafaf9; padding: 12px 16px; border-radius: 8px; border: 1px solid #e7e5e4;">
-        <strong style="display:block; font-size:13.5px; color:#1c1917; margin-bottom:6px;">🧾 추천 주문 내역 (금액은 등록된 가격이에요)</strong>
-        <ul style="padding-left:18px; font-size:13.5px; color:#44403c; line-height:1.7;">
+
+      <!-- 동선 -->
+      <section class="timeline-card band">
+        <div class="container">
+          <h2 class="timeline-title">한눈에 보는 [전주] 한옥마을 인파를 벗어나 만난 완판본 골목과 한옥 쉼표 동선</h2>
+          <div class="route" style="--n:8">
+            <div class="tl-act" style="--r:1; --c:1; --s:5">Day 1: 원도심의 깊은 맛과 한옥 쉼</div>
+            <div class="tl-step" style="--r:2; --c:1"><span class="tl-time">12:00</span><span class="tl-place">현대옥 남부시장점</span><span class="tl-note">토렴식 남부시장 콩나물국밥 &amp; 삶아 넣은 오징어사리</span></div>
+            <div class="tl-step" style="--r:2; --c:2"><span class="tl-time">13:10</span><span class="tl-place">경기전 돌담길 산책 &amp; 완판본문화관</span><span class="tl-note">울창한 대나무 숲길과 목판 인쇄 체험</span></div>
+            <div class="tl-step" style="--r:2; --c:3"><span class="tl-time">14:30</span><span class="tl-place">차경</span><span class="tl-note">한옥 서까래 아래 즐기는 블렌딩 티와 양갱 플레이트</span></div>
+            <div class="tl-step" style="--r:2; --c:4"><span class="tl-time">16:00</span><span class="tl-place">서학동 예술마을 산책 후 한옥마을 안 &#39;사랑나무 한옥펜션&#39; 체크인</span></div>
+            <div class="tl-step" style="--r:2; --c:5"><span class="tl-time">19:30</span><span class="tl-place">조점례남문피순대 포장</span><span class="tl-note">잡내 없이 고소한 원조 피순대와 시원한 모주 야식</span></div>
+            <div class="tl-act" style="--r:1; --c:6; --s:3">Day 2: 든든한 로컬 면식과 여운</div>
+            <div class="tl-step" style="--r:2; --c:6"><span class="tl-time">11:00</span><span class="tl-place">느긋한 체크아웃</span></div>
+            <div class="tl-step" style="--r:2; --c:7"><span class="tl-time">11:30</span><span class="tl-place">베테랑분식 본점</span><span class="tl-note">경기전길 국숫집에서 늦은 아침</span></div>
+            <div class="tl-step" style="--r:2; --c:8"><span class="tl-time">13:00</span><span class="tl-place">자만벽화마을 산책 후 기분 좋은 귀가</span></div>
+          </div>
+          <p class="tl-lead">영업시간, 주차 요금, 휴무는 바뀔 수 있어 방문 전에 각 장소의 네이버 지도 정보에서 확인해 주세요.</p>
+        </div>
+      </section>
+
+      <div class="container">
+        <div class="spots">
+          <section class="spot-section flat">
+            <div class="spot-head">
+              <h2 class="spot-title">1. 오전 12:00, 토렴식 콩나물국밥의 원조, 속을 달래는 맑고 칼칼한 첫 끼, '현대옥 남부시장점'</h2>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/b16c40d5da715faf509a2e3ef41069a3e40d7ef4?original" alt="전주남부시장 현대옥 남부시장점" loading="lazy" />
+              <figcaption>전주남부시장 현대옥 남부시장점 (사진 출처: 카카오맵)</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p>전주에 도착하자마자 곧장 남부시장 골목 안쪽에 위치한 현대옥 본래 터를 찾아가 보세요. 팔팔 끓이지 않고 따뜻한 육수를 밥 위에 여러 번 부어내는 토렴식 국밥이라 밥알 하나하나에 깊은 감칠맛이 고스란히 배어있답니다. 마늘과 청양고추의 알싸함이 적당해서 장거리 이동으로 지친 속이 확 풀리는 기분이에요. 쫄깃하게 데쳐낸 오징어사리를 추가해 국물에 듬뿍 얹어 먹으면 식감까지 완벽해요.</p>
+              <div class="order-box"><strong>🧾 추천 주문 내역 (금액은 등록된 가격이에요)</strong>
+        <ul>
           <li><strong>남부시장식 콩나물국밥 2그릇</strong>: 16,000원</li><li><strong>오징어사리 1접시</strong>: 3,000원</li>
-        </ul>
-      </div>
-    
-      <div class="tip-box">
-        <strong class="tip-title">💡 현대옥 남부시장점 방문 실전 꿀팁</strong>
+        </ul></div>
+              <div class="tip-box"><strong class="tip-title">💡 현대옥 남부시장점 방문 실전 꿀팁</strong>
         <ul>
           <li>수란 맛있게 먹는 법: 국밥에 넣지 마시고, 김을 잘게 찢어 넣은 뒤 국물을 너덧 숟가락 끼얹어 먼저 호로록 드시는 것을 추천해요.</li><li>주차: 남부시장 천변공영주차장을 이용할 수 있어요.</li>
-        </ul>
-      </div>
-    
-    <h2>2. 오후 13:10, 울창한 대나무 숲 바람과 책 만드는 장인의 향기, '경기전 &amp; 완판본문화관'</h2>
-    <p>국밥으로 든든하게 배를 채운 뒤, 경기전 정문으로 걸어가 보세요. 태조 이성계의 어진을 모신 정전도 멋있지만, 바람이 불 때마다 사각사각 잎 부딪히는 소리가 나는 대나무 숲길은 연인들이 도란도란 손잡고 걷기에 더없이 낭만적이에요. 경기전을 나와 전주천 쪽으로 조금만 걸으면 조선시대 한글 방각본 소설을 찍어내던 완판본문화관을 만날 수 있어요. 고즈넉한 한옥 마당에서 직접 전통 목판에 먹을 칠하고 한지에 인출해보는 체험은 여행의 깊이를 더해준답니다.</p>
-    
-      <div class="real-photo-card">
-        <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/6921a8847b8ed45e02af798eb46a55dee763d4ea?original" alt="전주한옥마을" loading="lazy" />
-        <div class="photo-caption">전주한옥마을 (사진 출처: 카카오맵)</div>
-      </div>
-    
-      <div style="margin: 16px 0; background: #fafaf9; padding: 12px 16px; border-radius: 8px; border: 1px solid #e7e5e4;">
-        <strong style="display:block; font-size:13.5px; color:#1c1917; margin-bottom:6px;">🧾 추천 주문 내역</strong>
-        <ul style="padding-left:18px; font-size:13.5px; color:#44403c; line-height:1.7;">
+        </ul></div>
+            </div>
+          </section>
+
+          <section class="spot-section flat flip">
+            <div class="spot-head">
+              <h2 class="spot-title">2. 오후 13:10, 울창한 대나무 숲 바람과 책 만드는 장인의 향기, '경기전 &amp; 완판본문화관'</h2>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/6921a8847b8ed45e02af798eb46a55dee763d4ea?original" alt="전주한옥마을" loading="lazy" />
+              <figcaption>전주한옥마을 (사진 출처: 카카오맵)</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p>국밥으로 든든하게 배를 채운 뒤, 경기전 정문으로 걸어가 보세요. 태조 이성계의 어진을 모신 정전도 멋있지만, 바람이 불 때마다 사각사각 잎 부딪히는 소리가 나는 대나무 숲길은 연인들이 도란도란 손잡고 걷기에 더없이 낭만적이에요. 경기전을 나와 전주천 쪽으로 조금만 걸으면 조선시대 한글 방각본 소설을 찍어내던 완판본문화관을 만날 수 있어요. 고즈넉한 한옥 마당에서 직접 전통 목판에 먹을 칠하고 한지에 인출해보는 체험은 여행의 깊이를 더해준답니다.</p>
+              <div class="order-box"><strong>🧾 추천 주문 내역</strong>
+        <ul>
           <li><strong>경기전 입장료</strong>: 1만원 미만으로 등록돼 있어요</li><li><strong>전통 목판 인출 체험</strong>: 지도에서 확인</li>
-        </ul>
-      </div>
-    
-      <div class="tip-box">
-        <strong class="tip-title">💡 경기전 &amp; 완판본문화관 방문 실전 꿀팁</strong>
+        </ul></div>
+              <div class="tip-box"><strong class="tip-title">💡 경기전 &amp; 완판본문화관 방문 실전 꿀팁</strong>
         <ul>
           <li>포토존 팁: 경기전 대나무 숲길 중앙은 인파가 많으니, 숲 끝자락 돌담 쪽에서 역광으로 촬영하시면 인생 사진을 남기실 수 있어요.</li><li>완판본문화관: 관람료는 무료이며 목판 인쇄 체험은 현장에서 바로 신청 가능해요.</li>
-        </ul>
-      </div>
-    
-    <h2>3. 오후 14:30, 차를 마시며 풍경을 바라보는 감성 한옥 찻집, '차경 (茶景)'</h2>
-    <p>다리를 쉬어 가기 좋은 &#39;차경&#39;은 &#39;차를 마시며 풍경을 바라본다&#39;는 이름답게 고요하고 우아한 분위기가 흐르는 한옥 찻집이에요. 낮은 격자창 너머로 단정한 돌마당이 보이고, 서까래 아래 은은한 차향이 가득해요. 블렌딩 티에 양갱 플레이트를 곁들이면 차와 디저트를 함께 즐길 수 있어요.</p>
-    
-      <div class="real-photo-card">
-        <img src="https://t1.daumcdn.net/localfiy/searchregister_584125430" alt="전주 차경" loading="lazy" />
-        <div class="photo-caption">전주 차경 (사진 출처: 카카오맵)</div>
-      </div>
-    
-      <div style="margin: 16px 0; background: #fafaf9; padding: 12px 16px; border-radius: 8px; border: 1px solid #e7e5e4;">
-        <strong style="display:block; font-size:13.5px; color:#1c1917; margin-bottom:6px;">🧾 추천 주문 내역 (금액은 등록된 가격이에요)</strong>
-        <ul style="padding-left:18px; font-size:13.5px; color:#44403c; line-height:1.7;">
+        </ul></div>
+            </div>
+          </section>
+
+          <section class="spot-section flat">
+            <div class="spot-head">
+              <h2 class="spot-title">3. 오후 14:30, 차를 마시며 풍경을 바라보는 감성 한옥 찻집, '차경 (茶景)'</h2>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://t1.daumcdn.net/localfiy/searchregister_584125430" alt="전주 차경" loading="lazy" />
+              <figcaption>전주 차경 (사진 출처: 카카오맵)</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p>다리를 쉬어 가기 좋은 &#39;차경&#39;은 &#39;차를 마시며 풍경을 바라본다&#39;는 이름답게 고요하고 우아한 분위기가 흐르는 한옥 찻집이에요. 낮은 격자창 너머로 단정한 돌마당이 보이고, 서까래 아래 은은한 차향이 가득해요. 블렌딩 티에 양갱 플레이트를 곁들이면 차와 디저트를 함께 즐길 수 있어요.</p>
+              <div class="order-box"><strong>🧾 추천 주문 내역 (금액은 등록된 가격이에요)</strong>
+        <ul>
           <li><strong>차경 블렌딩 티</strong>: 6,500원</li><li><strong>양갱 플레이트</strong>: 6,000원</li>
-        </ul>
-      </div>
-    
-      <div class="tip-box">
-        <strong class="tip-title">💡 차경 (茶景) 방문 실전 꿀팁</strong>
+        </ul></div>
+              <div class="tip-box"><strong class="tip-title">💡 차경 (茶景) 방문 실전 꿀팁</strong>
         <ul>
           <li>이용 팁: 조용한 쉼을 지향하는 공간이라 목소리를 낮춰 담소를 나누는 것이 기본 매너예요.</li>
-        </ul>
-      </div>
-    
-    <h2>4. 오후 16:30, 서학동 예술마을 산책 뒤 한옥마을 숙소, '사랑나무 한옥펜션'</h2>
-    <p>한옥마을 번화가를 지나 남천교 청연루를 건너면 예술가들이 모여 사는 서학동 예술마을이 나와요. 골목을 천천히 걸은 뒤에는 다리를 다시 건너 숙소 <strong>&#39;사랑나무 한옥펜션&#39;</strong>에 체크인해요. 전주시 완산구 은행로 96, 한옥마을 안에 있는 한옥 숙소로 한국관광공사 숙박 정보에 올라 있어요.</p>
-    <p>객실 구성과 편의시설, 요금은 날짜와 예약 경로에 따라 달라요. 예약 전에 네이버 지도의 숙소 정보에서 확인해 주세요.</p>
+        </ul></div>
+            </div>
+          </section>
 
-    <h2>5. 오후 19:30, 숙소에서 편안하게 즐기는 진하고 쫄깃한 소울 야식, '조점례남문피순대'</h2>
-    <p>저녁엔 숙소 밖으로 나가지 않고 남부시장에서 포장해 온 원조 피순대를 펼치는 것도 좋아요. 일반 당면 순대와 달리 선지와 갖은 채소, 찹쌀이 꽉 들어차 있어 녹진하고 진한 풍미가 입안 가득 맴돌아요. 전라도 특유의 초고추장에 들깨가루를 섞은 소스에 푹 찍어 깻잎에 싸 먹으면 시원한 전주 모주와 잘 어울려요.</p>
-    
-      <div class="real-photo-card">
-        <img src="https://t1.kakaocdn.net/mystore/FD54F6D91EBF4EEBA545FAACAB3EDEFA" alt="전주남부시장 조점례남문피순대" loading="lazy" />
-        <div class="photo-caption">전주남부시장 조점례남문피순대 (사진 출처: 카카오맵)</div>
-      </div>
-    
-      <div style="margin: 16px 0; background: #fafaf9; padding: 12px 16px; border-radius: 8px; border: 1px solid #e7e5e4;">
-        <strong style="display:block; font-size:13.5px; color:#1c1917; margin-bottom:6px;">🧾 추천 주문 내역</strong>
-        <ul style="padding-left:18px; font-size:13.5px; color:#44403c; line-height:1.7;">
+          <section class="spot-section flat no-photo">
+            <div class="spot-head">
+              <h2 class="spot-title">4. 오후 16:30, 서학동 예술마을 산책 뒤 한옥마을 숙소, '사랑나무 한옥펜션'</h2>
+            </div>
+            <div class="spot-body">
+              <p>한옥마을 번화가를 지나 남천교 청연루를 건너면 예술가들이 모여 사는 서학동 예술마을이 나와요. 골목을 천천히 걸은 뒤에는 다리를 다시 건너 숙소 <strong>&#39;사랑나무 한옥펜션&#39;</strong>에 체크인해요. 전주시 완산구 은행로 96, 한옥마을 안에 있는 한옥 숙소로 한국관광공사 숙박 정보에 올라 있어요.</p>
+              <p>객실 구성과 편의시설, 요금은 날짜와 예약 경로에 따라 달라요. 예약 전에 네이버 지도의 숙소 정보에서 확인해 주세요.</p>
+            </div>
+          </section>
+
+          <section class="spot-section flat">
+            <div class="spot-head">
+              <h2 class="spot-title">5. 오후 19:30, 숙소에서 편안하게 즐기는 진하고 쫄깃한 소울 야식, '조점례남문피순대'</h2>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://t1.kakaocdn.net/mystore/FD54F6D91EBF4EEBA545FAACAB3EDEFA" alt="전주남부시장 조점례남문피순대" loading="lazy" />
+              <figcaption>전주남부시장 조점례남문피순대 (사진 출처: 카카오맵)</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p>저녁엔 숙소 밖으로 나가지 않고 남부시장에서 포장해 온 원조 피순대를 펼치는 것도 좋아요. 일반 당면 순대와 달리 선지와 갖은 채소, 찹쌀이 꽉 들어차 있어 녹진하고 진한 풍미가 입안 가득 맴돌아요. 전라도 특유의 초고추장에 들깨가루를 섞은 소스에 푹 찍어 깻잎에 싸 먹으면 시원한 전주 모주와 잘 어울려요.</p>
+              <div class="order-box"><strong>🧾 추천 주문 내역</strong>
+        <ul>
           <li><strong>피순대 (소)</strong>: 15,000원으로 등록돼 있어요</li><li><strong>전주 전통 모주 1병</strong>: 지도에서 확인</li>
-        </ul>
-      </div>
-    
-    
-    <h2>6. 오전 11:30 (Day 2), 체크아웃 뒤 늦은 아침, '베테랑분식 본점'</h2>
-    <p>푹 자고 일어나 느긋하게 체크아웃한 뒤에는 경기전길에 있는 국숫집 &#39;베테랑분식&#39;에 들러 보세요. 메뉴와 가격은 네이버 지도에서 확인해 주세요.</p>
-    
-      <div class="real-photo-card">
-        <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/86dfa8ccd24049a00c4c9597c7d0dc30a97ce281?original" alt="베테랑" loading="lazy" />
-        <div class="photo-caption">베테랑 (사진 출처: 카카오맵)</div>
-      </div>
-    
-      <div style="margin: 16px 0; background: #fafaf9; padding: 12px 16px; border-radius: 8px; border: 1px solid #e7e5e4;">
-        <strong style="display:block; font-size:13.5px; color:#1c1917; margin-bottom:6px;">🧾 추천 주문 내역</strong>
-        <ul style="padding-left:18px; font-size:13.5px; color:#44403c; line-height:1.7;">
-          <li><strong>메뉴와 가격</strong>: 지도에서 확인</li>
-        </ul>
-      </div>
-    
-    
+        </ul></div>
+            </div>
+          </section>
 
-    <!-- 예산 정산표 -->
-    
-    <h2>💰 2인 예상 경비</h2>
-    <div class="table-wrap">
-      <table>
+          <section class="spot-section flat flip">
+            <div class="spot-head">
+              <h2 class="spot-title">6. 오전 11:30 (Day 2), 체크아웃 뒤 늦은 아침, '베테랑분식 본점'</h2>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/86dfa8ccd24049a00c4c9597c7d0dc30a97ce281?original" alt="베테랑" loading="lazy" />
+              <figcaption>베테랑 (사진 출처: 카카오맵)</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p>푹 자고 일어나 느긋하게 체크아웃한 뒤에는 경기전길에 있는 국숫집 &#39;베테랑분식&#39;에 들러 보세요. 메뉴와 가격은 네이버 지도에서 확인해 주세요.</p>
+              <div class="order-box"><strong>🧾 추천 주문 내역</strong>
+        <ul>
+          <li><strong>메뉴와 가격</strong>: 지도에서 확인</li>
+        </ul></div>
+            </div>
+          </section>
+        </div>
+
+        <!-- 2인 예상 입장료 -->
+        <section class="cost-table-card">
+          <div class="cost-head">
+            <h2 class="timeline-title">2인 예상 경비</h2>
+          </div>
+          <div class="table-wrap"><table class="cost-table">
         <thead>
           <tr>
             <th>구분</th>
@@ -527,63 +489,64 @@
           <tr>
             <td>Day 1 점심</td>
             <td>현대옥 남부시장점 (콩나물국밥 2 + 오징어사리)</td>
-            <td style="font-weight:600;">19,000원</td>
-            <td style="color:#78716c;">토렴식 시원한 국물</td>
+            <td>19,000원</td>
+            <td>토렴식 시원한 국물</td>
           </tr>
           <tr>
             <td>문화/체험</td>
             <td>경기전 입장료 &amp; 완판본 목판 인쇄 체험 (2인)</td>
-            <td style="font-weight:600;">지도에서 확인</td>
-            <td style="color:#78716c;">경기전 입장료 1만원 미만 등록</td>
+            <td>지도에서 확인</td>
+            <td>경기전 입장료 1만원 미만 등록</td>
           </tr>
           <tr>
             <td>디저트</td>
             <td>차경 (블렌딩 티 2 + 양갱 플레이트)</td>
-            <td style="font-weight:600;">19,000원</td>
-            <td style="color:#78716c;">고즈넉한 한옥 마당</td>
+            <td>19,000원</td>
+            <td>고즈넉한 한옥 마당</td>
           </tr>
           <tr>
             <td>숙소 (1박)</td>
             <td>사랑나무 한옥펜션 (요금은 날짜별로 확인)</td>
-            <td style="font-weight:600;">별도</td>
-            <td style="color:#78716c;">한옥마을 안 한옥 숙소</td>
+            <td>별도</td>
+            <td>한옥마을 안 한옥 숙소</td>
           </tr>
           <tr>
             <td>야식</td>
             <td>조점례남문피순대 피순대(소) 포장</td>
-            <td style="font-weight:600;">15,000원</td>
-            <td style="color:#78716c;">모주는 지도에서 확인</td>
+            <td>15,000원</td>
+            <td>모주는 지도에서 확인</td>
           </tr>
           <tr>
             <td>Day 2 아침</td>
             <td>베테랑분식 본점 (2인 식사)</td>
-            <td style="font-weight:600;">지도에서 확인</td>
-            <td style="color:#78716c;">메뉴와 가격은 지도에서 확인</td>
+            <td>지도에서 확인</td>
+            <td>메뉴와 가격은 지도에서 확인</td>
           </tr>
           <tr>
             <td>간식/기념품</td>
             <td>풍년제과 수제 초코파이 2개 포장</td>
-            <td style="font-weight:600;">5,000원</td>
-            <td style="color:#78716c;">달콤한 귀갓길 간식</td>
+            <td>5,000원</td>
+            <td>달콤한 귀갓길 간식</td>
           </tr>
           <tr>
             <td>교통 (대중교통)</td>
             <td>전주 KTX 왕복 및 시내 이동 (2인 기준)</td>
-            <td style="font-weight:600;">출발지별로 확인</td>
-            <td style="color:#78716c;">한옥마을 도보 뚜벅이</td>
+            <td>출발지별로 확인</td>
+            <td>한옥마을 도보 뚜벅이</td>
           </tr>
-          <tr style="font-weight: 700; background: #fafaf9;">
+          <tr class="cost-total-row">
             <td colspan="2">등록된 금액 합계 (숙박 제외)</td>
-            <td style="color: #059669; font-size: 15px;">58,000원</td>
+            <td>58,000원</td>
             <td>경기전, 베테랑, 교통은 제외</td>
           </tr>
         </tbody>
-      </table>
-    </div>
+      </table></div>
+        </section>
 
-    <h2>🗺️ 방문 스팟 네이버 지도 바로가기</h2>
-    <p>각 장소의 정확한 위치, 실시간 영업시간 및 상세 정보는 아래 네이버 지도 링크를 통해 손쉽게 확인하실 수 있어요:</p>
-    <div class="map-links-grid">
+        <section class="map-links">
+          <h2 class="timeline-title">방문 스팟 네이버 지도 바로가기</h2>
+          <p>각 장소의 정확한 위치, 실시간 영업시간 및 상세 정보는 아래 네이버 지도 링크를 통해 손쉽게 확인하실 수 있어요:</p>
+          <div class="map-links-grid">
       
       <a href="https://map.naver.com/p/search/%EC%A0%84%EC%A3%BC%20%ED%98%84%EB%8C%80%EC%98%A5%20%EB%82%A8%EB%B6%80%EC%8B%9C%EC%9E%A5%EC%A0%90" target="_blank" rel="noopener noreferrer" class="map-link-chip">
         <span>현대옥 남부시장점 (한식 / 국밥)</span>
@@ -610,22 +573,35 @@
         <span class="btn-action">지도 보기 ↗</span>
       </a>
     </div>
+        </section>
 
-    
-    <h2>💌 여행을 마치며</h2>
-    <p>전주는 흔히 화려하고 떠들썩한 먹거리 골목으로만 기억되기 쉽지만, 한 발짝만 물러서면 조선의 기록을 지켜온 고요한 돌담과 예술가들의 골목이 다정하게 숨 쉬고 있어요. 바쁜 일상에서 벗어나 고즈넉한 한옥의 하룻밤과 든든한 한 끼로 마음을 채우고 싶을 때, 이번 주말 사랑하는 사람의 손을 잡고 전주로 향해보시는 건 어떨까요? 🍁</p>
+        <section class="map-links">
+          <h2 class="timeline-title">여행을 마치며</h2>
+          <p>전주는 흔히 화려하고 떠들썩한 먹거리 골목으로만 기억되기 쉽지만, 한 발짝만 물러서면 조선의 기록을 지켜온 고요한 돌담과 예술가들의 골목이 다정하게 숨 쉬고 있어요. 바쁜 일상에서 벗어나 고즈넉한 한옥의 하룻밤과 든든한 한 끼로 마음을 채우고 싶을 때, 이번 주말 사랑하는 사람의 손을 잡고 전주로 향해보시는 건 어떨까요? 🍁</p>
+        </section>
 
-    <div class="app-course-box" style="margin: 40px 0 24px; padding: 20px 22px; background: var(--color-tip-bg); border: 1px solid var(--color-tip-border); border-radius: 14px;">
-      <strong style="display: block; font-size: 17px; color: var(--color-tip-text); margin-bottom: 6px;">🗺️ 이 코스 오늘 데이트에서 열기</strong>
-      <p style="margin: 0 0 14px; font-size: 14.5px; line-height: 1.6; color: var(--color-tip-text);">글에 나온 장소 6곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
-      <a href="../../#c=6776.1515.3795.1790947950480.6777.1791033879154" style="display: inline-block; padding: 10px 18px; border-radius: 10px; background: var(--color-accent); color: #ffffff; font-weight: 700; font-size: 15px; text-decoration: none;">앱에서 코스 열기 →</a>
+        <div class="app-course-box">
+          <div>
+            <h2>이 코스 오늘 데이트에서 열기</h2>
+            <p>글에 나온 장소 6곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
+          </div>
+          <a class="btn app-action" href="../../#c=6776.1515.3795.1790947950480.6777.1791033879154">앱에서 코스 열기</a>
+        </div>
+
+        <footer class="article-credit">
+          <p>사진 출처: 카카오맵<br>
+      본 글은 공개 데이터를 바탕으로 정리한 여행 코스 가이드입니다.</p>
+        </footer>
+      </div>
+    </article></main>
+
+  <footer class="site-footer">
+    <div class="footer-inner container">
+      <p class="footer-mark"><strong>오늘 데이트 (Oneul Date)</strong></p>
+      <p class="footer-line">전국 데이트 & 여행 코스 큐레이션 매거진</p>
+      <p class="footer-links"><a href="https://nufunc.github.io/oneul-date/">홈으로 가기</a><a href="https://nufunc.github.io/oneul-date/blog/">매거진 전체보기</a></p>
     </div>
-
-    <div class="footer-source">
-      사진 출처: 카카오맵<br>
-      본 글은 공개 데이터를 바탕으로 정리한 여행 코스 가이드입니다.
-    </div>
-  </main>
+  </footer>
 
 </body>
 </html>

@@ -16,6 +16,9 @@
 
   <!-- Pretendard 웹폰트 -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700&display=swap&text=()%2C.0123456789%3ADO%5B%5Daelntu~%EA%B0%80%EA%B0%81%EA%B0%88%EA%B0%95%EA%B1%B0%EA%B1%B7%EA%B2%B0%EA%B2%BD%EA%B3%81%EA%B3%A0%EA%B3%A1%EA%B3%BC%EA%B8%B0%EA%B8%B8%EA%B9%8C%EB%82%9C%EB%82%AD%EB%84%A4%EB%8A%94%EB%8A%98%EB%8B%B9%EB%8D%B0%EB%8F%84%EB%8F%99%EB%91%90%EB%91%98%EB%93%9C%EB%9D%BC%EB%9E%8C%EB%9F%AC%EB%A0%81%EB%A0%88%EB%A1%9C%EB%A6%AC%EB%A7%91%EB%A7%A4%EB%A9%B4%EB%AA%85%EB%AC%B4%EB%AC%B8%EB%AC%BC%EB%B0%94%EB%B0%98%EB%B0%A9%EB%B0%AD%EB%B0%B8%EB%B2%84%EB%B3%80%EB%B6%80%EB%B8%8C%EB%B9%84%EB%B9%9B%EC%82%B0%EC%83%81%EC%83%88%EC%84%9C%EC%84%9D%EC%84%A0%EC%84%B1%EC%86%8C%EC%88%98%EC%88%A8%EC%88%AF%EC%8A%A4%EC%95%84%EC%95%94%EC%96%B4%EC%96%B5%EC%97%90%EC%97%AC%EC%97%B4%EC%98%88%EC%98%A4%EC%99%80%EC%9A%A9%EC%9A%B4%EC%9B%94%EC%9C%A1%EC%9D%80%EC%9D%84%EC%9D%B4%EC%9D%B8%EC%9D%BC%EC%9E%87%EC%9E%A5%EC%A0%88%EC%A0%95%EC%A1%B0%EC%A3%BC%EC%A4%80%EC%A6%99%EC%A7%80%EC%A7%84%EC%B0%B8%EC%B1%84%EC%B2%9C%EC%B6%94%EC%B6%9C%EC%B9%98%EC%BD%94%ED%84%B0%ED%8A%B8%ED%8F%AC%ED%8F%AD%ED%94%BC%ED%95%9C%ED%96%89%ED%96%A5%ED%98%84%ED%98%91%ED%98%B8%ED%99%94" rel="stylesheet">
 
   <script type="application/ld+json">
 {
@@ -43,529 +46,433 @@
   </script>
 
   <style>
-    :root {
-      --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-      --bg-page: #fbfaf8;
-      --bg-card: #ffffff;
-      --color-primary: #1c1917;
-      --color-accent: #0f766e;
-      --color-accent-light: #f0fdfa;
-      --color-accent-border: #99f6e4;
-      --color-warm: #b45309;
-      --color-text-main: #292524;
-      --color-text-sub: #57534e;
-      --color-text-faint: #78716c;
-      --color-border: #e7e5e4;
-      --color-tip-bg: #fffbeb;
-      --color-tip-border: #fde68a;
-      --color-tip-text: #92400e;
-      --color-bridge-bg: #f5f5f4;
-      --max-width: 780px;
-    }
+/* hallmark-solstice: scripts/convert_blog_hallmark.mjs가 글의 <style>을 이 파일로 바꾼다 (Hallmark 2.0.0, 테마 Solstice, P-293) */
+:root {
+  color-scheme: light;
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-xs: 0.8125rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.125rem; --text-xl: 1.5625rem; --text-2xl: 1.953rem; --text-3xl: 2.441rem;
+  --text-hero: clamp(1.75rem, 1.6vw + 1.25rem, 2.75rem);
+  --text-section: clamp(1.75rem, 1.8vw + 1rem, 2.875rem); --text-title: clamp(1.25rem, 0.75vw + 0.875rem, 1.625rem); --text-lead: clamp(1.0625rem, 0.3vw + 0.95rem, 1.25rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-micro: 120ms; --dur-short: 220ms;
+  --container: 1200px; --measure: 680px; --gutter: 56px; --gap-columns: 40px; --section-gap: 120px;
+  --z-sticky-nav: 300;
+  --color-paper: oklch(94% 0.03 80); --color-paper-2: oklch(97% 0.02 85); --color-paper-3: oklch(89% 0.05 80);
+  --color-ink: oklch(27% 0.05 50); --color-ink-2: oklch(36% 0.05 50); --color-muted: oklch(48% 0.06 55);
+  --color-rule: oklch(84% 0.06 78);
+  --color-accent: oklch(54% 0.20 24); --color-accent-2: oklch(48% 0.19 24); --color-accent-ink: oklch(97% 0.02 85); --color-focus: oklch(54% 0.20 24);
+  --color-gold: oklch(74% 0.14 75); --color-gold-2: oklch(84% 0.11 80);
+  --color-band-text: oklch(94% 0.03 80); --color-band-muted: oklch(80% 0.05 75);
+  --color-hair-ink: color-mix(in oklab, var(--color-ink) 10%, transparent);
+  --font-display: "Noto Serif KR", "Nanum Myeongjo", ui-serif, serif;
+  --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --radius-card: 0; --radius-pill: 999px; --rule-hair: 1px; --rule-bar: 2px;
+  --shadow-card: 10px 10px 0 var(--color-paper-3);
+}
+@media (max-width: 60rem) { :root { --gutter: 24px; --section-gap: 88px; --gap-columns: 24px; } }
+@media (max-width: 40rem) { :root { --gutter: 16px; --section-gap: 64px; --gap-columns: 16px; } }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+html { scrollbar-color: var(--color-muted) var(--color-paper); scroll-padding-top: var(--space-3xl); }
+body { margin: 0; background: var(--color-paper); color: var(--color-ink-2); font-family: var(--font-family); font-size: var(--text-md); line-height: 1.75; word-break: keep-all; -webkit-font-smoothing: antialiased; }
+::selection { background: color-mix(in oklab, var(--color-gold) 40%, transparent); }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+a:hover { text-decoration-color: var(--color-accent); }
+article h1, article h2, article h3 { margin: 0; font-family: var(--font-display); font-weight: 700; color: var(--color-ink); line-height: 1.3; letter-spacing: -0.01em; overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+img { max-width: 100%; display: block; }
+.container { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); }
 
-    body {
-      font-family: var(--font-family);
-      background-color: var(--bg-page);
-      color: var(--color-text-main);
-      line-height: 1.85;
-      letter-spacing: -0.02em;
-      word-break: keep-all;
-      -webkit-font-smoothing: antialiased;
-    }
+/* 44px 머리 링크 규칙: scripts/test-blog-related.cjs가 글마다 하나를 요구한다 */
+header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
 
-    /* 상단 네비게이션 바 */
-    .travel-header-bar {
-      background: rgba(255, 255, 255, 0.95);
-      border-bottom: 1px solid var(--color-border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(10px);
-    }
-    .header-inner {
-      max-width: var(--max-width);
-      margin: 0 auto;
-      padding: 14px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .header-title {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--color-primary);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .header-meta {
-      font-size: 13px;
-      color: var(--color-text-faint);
-    }
+/* Controls */
+.btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 var(--space-lg); border: 0; border-radius: var(--radius-pill); background: var(--color-accent); color: var(--color-accent-ink); font: 600 var(--text-md)/1 var(--font-family); text-decoration: none; cursor: pointer; transition: background-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out); }
+.btn:hover { background: var(--color-accent-2); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.link-quiet { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-ink); font-weight: 600; font-size: var(--text-sm); text-decoration: none; border-bottom: var(--rule-bar) solid var(--color-ink); transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out); }
+.link-quiet:hover { color: var(--color-accent); border-color: var(--color-accent); }
+.link-quiet:active { transform: translateY(1px); }
+.link-quiet:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
 
-    /* 본문 래퍼 */
-    .article-wrap {
-      max-width: var(--max-width);
-      margin: 0 auto;
-      background: var(--bg-card);
-      padding: 48px 32px 64px;
-      border-left: 1px solid var(--color-border);
-      border-right: 1px solid var(--color-border);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
-    }
+/* Nav */
+.site-header { position: sticky; top: 0; z-index: var(--z-sticky-nav); background: var(--color-paper); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.header-inner { display: flex; justify-content: space-between; align-items: center; min-height: 64px; }
+.header-logo { font-family: var(--font-display); font-size: var(--text-lg); color: var(--color-ink); text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; }
+.header-logo span { color: var(--color-accent); margin-left: 0.3em; }
+.header-logo:hover { color: var(--color-ink-2); }
+.header-nav { display: flex; gap: var(--space-lg); }
+.header-nav a { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--text-sm); color: var(--color-ink-2); text-decoration: none; }
+.header-nav a:hover { color: var(--color-ink); text-decoration: underline; text-decoration-color: var(--color-accent); }
+.header-nav a:active, .header-logo:active { transform: translateY(1px); }
 
-    .post-badge {
-      display: inline-block;
-      background: var(--color-accent-light);
-      color: var(--color-accent);
-      border: 1px solid var(--color-accent-border);
-      font-size: 12.5px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 6px;
-      margin-bottom: 14px;
-    }
+/* Hero */
+.hero { display: grid; padding-block: var(--space-2xl) var(--space-xl); }
+.hero-text { display: grid; gap: var(--space-lg); }
+.article-title { font-size: var(--text-hero); line-height: 1.3; max-width: 28ch; }
+.hero-kicker { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.hero-kicker span:first-child { color: var(--color-accent); font-weight: 600; }
+.article-meta { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-lg); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); font-variant-numeric: tabular-nums; }
+.article-meta .meta-credit { flex-basis: 100%; }
+/* 좁은 화면에서 칸마다 한 줄: 본문 글꼴(Pretendard)이 바뀔 때 줄 수가 달라져 아래 띠가 밀리는 것을 막는다 */
+@media (max-width: 40rem) { .article-meta { flex-direction: column; flex-wrap: nowrap; } }
+.spot-photo img { width: 100%; height: 100%; object-fit: cover; outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
 
-    h1 {
-      font-size: 26px;
-      font-weight: 800;
-      line-height: 1.45;
-      color: var(--color-primary);
-      margin-bottom: 16px;
-      letter-spacing: -0.03em;
-    }
+/* Lead */
+.prose-intro { max-width: var(--measure); padding-top: var(--space-xl); font-size: var(--text-lead); line-height: 1.8; color: var(--color-ink); padding-bottom: var(--space-3xl); }
 
-    .post-sub-meta {
-      font-size: 13px;
-      color: var(--color-text-faint);
-      margin-bottom: 24px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      border-bottom: 1px solid var(--color-border);
-      padding-bottom: 16px;
-    }
-
-    .lead-box {
-      background: var(--color-bridge-bg);
-      border-left: 4px solid var(--color-accent);
-      padding: 18px 22px;
-      border-radius: 0 8px 8px 0;
-      font-size: 15.5px;
-      color: var(--color-text-sub);
-      margin-bottom: 32px;
-      line-height: 1.8;
-    }
-
-    .real-photo-card {
-      margin: 32px 0;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid var(--color-border);
-      background: #fafaf9;
-    }
-    .real-photo-card img {
-      width: 100%;
-      height: auto;
-      display: block;
-      max-height: 480px;
-      object-fit: cover;
-    }
-    .photo-caption {
-      padding: 11px 16px;
-      font-size: 12.5px;
-      color: var(--color-text-faint);
-      text-align: center;
-      background: #ffffff;
-      border-top: 1px solid #f5f5f4;
-    }
-
-    h2 {
-      font-size: 21px;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin: 44px 0 16px 0;
-      padding-bottom: 10px;
-      border-bottom: 2px solid var(--color-primary);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    h3 {
-      font-size: 17px;
-      font-weight: 700;
-      color: var(--color-primary);
-      margin: 24px 0 10px 0;
-    }
-
-    p {
-      margin-bottom: 16px;
-      font-size: 15.5px;
-      color: var(--color-text-main);
-      line-height: 1.85;
-    }
-
-    .timeline-card {
-      background: #fafaf9;
-      border: 1px solid var(--color-border);
-      border-radius: 10px;
-      padding: 18px 20px;
-      margin: 24px 0 32px;
-      font-size: 15px;
-      line-height: 1.5;
-      color: #334155;
-    }
-    .tl-act { font-weight: 700; font-size: 13px; color: #64748b; margin: 18px 0 8px; }
-    .tl-act:first-child { margin-top: 0; }
-    .tl-step { display: flex; gap: 12px; align-items: baseline; padding: 6px 0; }
-    .tl-time { flex: none; min-width: 46px; font-weight: 700; font-variant-numeric: tabular-nums; color: #0f766e; }
-    .tl-place { font-weight: 700; color: #1e293b; }
-    .tl-note { display: block; font-size: 13px; color: #64748b; margin-top: 2px; }
-    .tl-move { font-size: 12.5px; color: #94a3b8; padding: 0 0 0 58px; }
-    @media (max-width: 640px) {
-      .timeline-card { padding: 14px 16px; }
-    }
-
-    .tip-box {
-      background: var(--color-tip-bg);
-      border: 1px solid var(--color-tip-border);
-      border-radius: 10px;
-      padding: 16px 20px;
-      margin: 24px 0;
-      font-size: 14px;
-      color: var(--color-tip-text);
-      line-height: 1.7;
-    }
-    .tip-box strong.tip-title {
-      color: #78350f;
-      display: block;
-      margin-bottom: 8px;
-      font-size: 14.5px;
-    }
-    .tip-box ul {
-      padding-left: 18px;
-      margin: 0;
-    }
-    .tip-box li {
-      margin-bottom: 5px;
-    }
-
-    .table-wrap {
-      overflow-x: auto;
-      margin: 28px 0;
-      border-radius: 8px;
-      border: 1px solid var(--color-border);
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-      text-align: left;
-    }
-    th, td {
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--color-border);
-    }
-    th {
-      background: #f5f5f4;
-      font-weight: 700;
-      color: var(--color-primary);
-      white-space: nowrap;
-    }
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-/* 비용표: 좁은 화면에서는 한 행을 카드 하나로 쌓는다 */
-@media (max-width: 600px) {
-  .table-wrap { overflow-x: visible; }
-  .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
-  .table-wrap thead { display: none; }
-  .table-wrap tr {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    column-gap: 12px;
-    row-gap: 4px;
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--color-border);
-  }
-  .table-wrap tr:last-child { border-bottom: none; }
-  .table-wrap td { padding: 0; border: none; }
-  .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: 0.78rem; font-weight: 700; color: var(--color-text-sub); }
-  .table-wrap td:nth-child(2) { font-weight: 700; }
-  .table-wrap td:nth-child(3) { max-width: 60vw; word-break: keep-all; text-align: right; font-weight: 700; }
-  .table-wrap td:nth-child(4) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
-  .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: inherit; color: inherit; }
-  .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; max-width: 60vw; word-break: keep-all; text-align: right; }
-  .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; white-space: normal; text-align: left; font-size: 0.85rem; font-weight: 400; color: var(--color-text-sub); }
+/* The day, on the brown band */
+.band { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl) var(--space-xl); }
+.band .timeline-title { color: var(--color-band-text); font-size: var(--text-section); margin-bottom: var(--space-xl); }
+.route { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: 0; padding: 0; }
+.tl-act { font-size: var(--text-sm); color: var(--color-gold-2); padding-bottom: var(--space-sm); }
+.tl-step { display: grid; align-content: start; gap: var(--space-2xs); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-gold); }
+.tl-time { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1; color: var(--color-band-text); font-variant-numeric: tabular-nums; }
+.tl-place { font-weight: 600; font-size: var(--text-lg); color: var(--color-band-text); }
+.tl-note { font-size: var(--text-sm); color: var(--color-band-muted); line-height: 1.6; }
+.tl-move { font-size: var(--text-sm); color: var(--color-band-muted); padding-block: var(--space-sm) var(--space-lg); }
+.tl-total { font-size: var(--text-sm); color: var(--color-band-muted); padding-top: var(--space-lg); margin-top: var(--space-lg); border-top: var(--rule-hair) solid color-mix(in oklab, var(--color-band-text) 25%, transparent); }
+/* spot-info-list 계열: 시간 범위(10:30 - 11:45)가 길어 시각 글자를 줄이고, 요약 상자와 번호 배지를 둔다 */
+.route.range .tl-time { font-size: var(--text-xl); }
+.route.range .tl-step { padding-bottom: var(--space-md); }
+.tl-badge { font-size: var(--text-xs); color: var(--color-gold-2); letter-spacing: 0.04em; }
+.tl-facts { display: grid; gap: var(--space-2xs) var(--space-lg); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.tl-facts strong { color: var(--color-gold-2); font-weight: 600; }
+@media (min-width: 60rem) {
+  .tl-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .route { grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); column-gap: var(--space-lg); }
+  .route > * { grid-row: var(--r); grid-column: var(--c) / span var(--s, 1); }
+  .tl-move { padding-bottom: 0; }
+  .tl-total { grid-column: 1 / -1; }
 }
 
+/* Stops */
+.spots { padding-block: var(--section-gap) 0; display: grid; gap: var(--section-gap); }
+.spot-section { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "photo head" "photo body"; grid-template-rows: auto 1fr; column-gap: var(--gap-columns); row-gap: var(--space-md); align-items: start; padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); }
+.spot-section.flip { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-areas: "head photo" "body photo"; }
+.spot-section.no-photo { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "body"; }
+.spot-head { grid-area: head; display: grid; gap: var(--space-md); }
+.spot-photo { grid-area: photo; align-self: start; margin: 0; aspect-ratio: 4 / 5; width: 100%; background: var(--color-paper-3); position: sticky; top: 96px; }
+.spot-body { grid-area: body; display: grid; gap: var(--space-md); }
+.spot-header { display: flex; align-items: baseline; gap: var(--space-md); }
+.spot-num { font-family: var(--font-display); font-size: var(--text-3xl); line-height: 1; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+.spot-title { font-size: var(--text-section); }
+.spot-tagline { font-size: var(--text-lg); color: var(--color-ink); padding-bottom: var(--space-xs); }
+.spot-desc { max-width: 60ch; }
 
-    .map-links-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 12px;
-      margin: 20px 0 32px;
-    }
-    .map-link-chip {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      text-decoration: none;
-      color: var(--color-text-main);
-      font-weight: 600;
-      font-size: 14px;
-      transition: all 0.15s ease;
-    }
-    .map-link-chip:hover {
-      background: #f1f5f9;
-      border-color: #cbd5e1;
-    }
-    .map-link-chip span.btn-action {
-      font-size: 12.5px;
-      color: var(--color-accent);
-      font-weight: 700;
-    }
+.spot-info-box { margin: var(--space-xs) 0 0; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); }
+.info-row { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--space-md); padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.info-row:last-child { border-bottom: 0; }
+.info-label { color: var(--color-muted); }
+.info-val { color: var(--color-ink); font-weight: 400; font-variant-numeric: tabular-nums; }
+.map-btn-wrap { padding-top: var(--space-sm); }
+.tip-box { padding: var(--space-sm) var(--space-md); border-left: var(--rule-bar) solid var(--color-accent); background: var(--color-paper-2); font-size: var(--text-sm); color: var(--color-ink-2); line-height: 1.7; }
+.tip-box strong { color: var(--color-ink); font-weight: 600; }
+.tip-box .tip-title { display: block; margin-bottom: var(--space-2xs); }
 
-    .footer-source {
-      margin-top: 48px;
-      padding-top: 24px;
-      border-top: 1px solid var(--color-border);
-      font-size: 12.5px;
-      color: var(--color-text-faint);
-      line-height: 1.6;
-      text-align: center;
-    }
+/* Fees */
+.cost-table-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.cost-head { display: grid; gap: var(--space-md); align-content: start; }
+.cost-head .timeline-title { font-size: var(--text-section); }
+.cost-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.cost-table th { text-align: left; font-weight: 400; color: var(--color-muted); padding: var(--space-xs) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-bar) solid var(--color-ink); }
+.cost-table td { padding: var(--space-sm) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink-2); vertical-align: top; }
+.cost-table td:nth-child(2) { color: var(--color-ink); font-weight: 400; }
+.cost-3 .cost-total-row td:nth-child(2) { font-family: inherit; font-size: inherit; color: inherit; font-weight: 600; }
+.cost-3 .cost-total-row td:nth-child(3) { font-family: var(--font-display); font-size: var(--text-xl); color: var(--color-accent); font-weight: 700; }
+.cost-total-row td { border-bottom: 0; border-top: var(--rule-bar) solid var(--color-ink); color: var(--color-ink); font-weight: 600; }
+.cost-total-row td:nth-child(2) { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--color-accent); font-weight: 700; }
+@media (max-width: 600px) {
+  .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
+  .table-wrap thead { display: none; }
+  .table-wrap tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-sm); row-gap: var(--space-2xs); padding-block: var(--space-sm); border-bottom: var(--rule-hair) solid var(--color-rule); }
+  .table-wrap td { padding: 0; border: 0; }
+  .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: var(--text-xs); color: var(--color-muted); }
+  .table-wrap td:nth-child(3) { text-align: right; font-weight: 600; color: var(--color-ink); }
+  .table-wrap td:nth-child(4) { grid-column: 1 / -1; color: var(--color-muted); }
+  .table-wrap td:empty { display: none; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: var(--text-sm); color: var(--color-ink); }
+  .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; text-align: right; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
+  .table-wrap .cost-total-row { border-top: var(--rule-bar) solid var(--color-ink); border-bottom: 0; }
+}
 
-    @media (max-width: 640px) {
-      .article-wrap {
-        padding: 28px 18px 48px;
-      }
-      h1 {
-        font-size: 22px;
-      }
-      h2 {
-        font-size: 18px;
-      }
-    }
-    header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
-    .header-nav a,.header-title a,.blog-tagline a{display:inline-block}
+/* Tips */
+.tips-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.tips-card .timeline-title { font-size: var(--text-section); align-self: start; }
+.tips-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-md); }
+.tips-list li { padding-bottom: var(--space-md); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.tips-list li:last-child { border-bottom: 0; }
+.tips-list strong { color: var(--color-ink); font-weight: 600; }
+
+/* App course */
+.app-course-box { margin-top: var(--section-gap); display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--gap-columns); align-items: end; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-xl); }
+.app-course-box h2 { font-size: var(--text-section); margin-bottom: var(--space-md); }
+.app-course-box p { max-width: 52ch; }
+.app-course-box .app-action { justify-self: end; }
+
+.article-credit { margin-top: var(--space-2xl); padding-block: var(--space-md) var(--space-3xl); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); }
+
+/* Footer mast */
+.site-footer { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl); }
+.footer-inner { display: grid; gap: var(--space-md); }
+.footer-mark { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1.2; color: var(--color-band-text); }
+.footer-line { color: var(--color-band-muted); font-size: var(--text-sm); }
+.footer-links { display: flex; flex-wrap: wrap; gap: var(--space-lg); }
+.footer-links a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-band-text); font-size: var(--text-sm); text-decoration: underline; text-decoration-color: var(--color-gold); }
+.footer-links a:hover { text-decoration-color: var(--color-accent); color: var(--color-gold-2); }
+.footer-links a:active { transform: translateY(1px); }
+.site-footer :focus-visible { outline-color: var(--color-gold-2); }
+
+@media (max-width: 60rem) {
+  .hero, .spot-section, .spot-section.flip, .cost-table-card, .tips-card, .app-course-box { grid-template-columns: minmax(0, 1fr); }
+  .spot-section, .spot-section.flip { grid-template-areas: "head" "photo" "body"; grid-template-rows: auto; }
+  .spot-section.no-photo { grid-template-areas: "head" "body"; }
+  .hero { padding-block: var(--space-xl) var(--space-xl); }
+  .spot-photo { position: static; aspect-ratio: 16 / 10; }
+  .app-course-box { padding: var(--space-lg); }
+  .app-course-box .app-action { justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn, .link-quiet { transition: none; }
+  .btn:active, .link-quiet:active, .header-nav a:active, .header-logo:active, .footer-links a:active { transform: none; }
+}
+
+/* real-photo-flat 계열(평면 글): 번호 있는 긴 장소 제목, 사진 설명, 안내 상자, 지도 목록 */
+.lead-photo { margin: 0 0 var(--space-3xl); }
+.lead-photo img { width: 100%; max-height: 520px; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.lead-photo figcaption, .body-photo figcaption { margin-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.spot-photo figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--space-xs) var(--space-sm); font-size: var(--text-xs); line-height: 1.5; color: var(--color-accent-ink); background: color-mix(in oklab, var(--color-ink) 78%, transparent); }
+.body-photo { margin: 0; }
+.body-photo img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.spot-section.flat .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.tl-lead { max-width: var(--measure); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.guide-box, .order-box { background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); color: var(--color-ink); }
+.guide-box h4, .order-box strong { margin: 0 0 var(--space-xs); font-family: var(--font-display); font-size: var(--text-md); color: var(--color-ink); display: block; }
+.guide-box ul, .order-box ul { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-2xs); }
+.bridge { padding-top: var(--space-xs); color: var(--color-muted); font-size: var(--text-sm); }
+.map-links { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-md); }
+.map-links .timeline-title { font-size: var(--text-section); }
+.map-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-xs); }
+.map-list a, .map-link-chip { display: flex; justify-content: space-between; gap: var(--space-md); align-items: center; min-height: 44px; padding-block: var(--space-xs); border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink); text-decoration: none; }
+.map-links-grid { display: grid; gap: 0; }
+.map-link-chip .btn-action { color: var(--color-accent); font-weight: 600; white-space: nowrap; }
+@media (max-width: 40rem) { .spot-section.flat .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .spot-photo { position: relative; } }
+
+/* spot-card 계열(editor-144): 대표 사진, 요약 상자, 본문 구획, 세부 코스, 이동 연결, 마무리 상자 */
+.hero-figure { margin: 0 0 var(--space-xl); }
+.hero-figure img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.hero-figure figcaption { padding-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-muted); }
+.summary-card { margin-bottom: var(--space-xl); background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-lg); font-size: var(--text-sm); }
+.summary-title, p.timeline-title, .cta-title { font-family: var(--font-display); font-weight: 700; line-height: 1.3; color: var(--color-ink); }
+.summary-title { font-size: var(--text-xl); margin-bottom: var(--space-sm); }
+p.timeline-title { letter-spacing: -0.01em; overflow-wrap: break-word; }
+.summary-list { margin: 0; padding: 0; list-style: none; display: grid; }
+.summary-list li { padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.summary-list li:last-child { border-bottom: 0; }
+.summary-list strong { color: var(--color-ink); font-weight: 600; }
+.prose-section { margin-top: var(--section-gap); max-width: var(--measure); display: grid; gap: var(--space-md); }
+.prose-section h2, .spots-title { font-size: var(--text-title); }
+.stops-section { margin-top: var(--section-gap); }
+.stops-section .spots { padding-top: var(--space-xl); }
+.spots.bridged { gap: 0; }
+.drive-bridge { margin: 0; padding-block: var(--space-xl); padding-left: var(--space-md); border-left: var(--rule-bar) solid var(--color-gold); font-size: var(--text-sm); color: var(--color-muted); }
+.drive-bridge strong { color: var(--color-ink); font-weight: 600; }
+.spot-header:has(.spot-badge) { flex-direction: column; align-items: flex-start; gap: var(--space-xs); }
+.spot-badge { font-size: var(--text-sm); font-weight: 600; color: var(--color-accent); }
+.spot-actions { display: flex; flex-wrap: wrap; gap: 0 var(--space-lg); }
+.info-wide .info-row { grid-template-columns: 5.5em minmax(0, 1fr); }
+.info-wide .info-row.plain { grid-template-columns: minmax(0, 1fr); }
+.cost-head .timeline-title.long { font-size: var(--text-title); }
+.cta-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-sm); max-width: var(--measure); }
+.cta-card h3, .cta-title { font-size: var(--text-title); }
+.cta-card .link-quiet { justify-self: start; }
   </style>
 </head>
 <body>
 
   <!-- 상단 헤더 -->
-  <header class="travel-header-bar">
-    <div class="header-inner">
-      <div class="header-title">
-        <span>🌾</span>
-        <span>오늘 데이트 매거진</span>
-      </div>
-      <div class="header-meta">경기 포천 가을 여행</div>
+  <header class="site-header">
+    <div class="header-inner container">
+      <a href="https://nufunc.github.io/oneul-date/blog/" class="header-logo">오늘 데이트 <span>매거진</span></a>
+      <nav class="header-nav">
+        <a href="https://nufunc.github.io/oneul-date/">홈으로</a>
+        <a href="https://nufunc.github.io/oneul-date/blog/">전체 코스</a>
+      </nav>
     </div>
   </header>
 
   <!-- 본문 컨테이너 -->
-  <main class="article-wrap">
-    <div class="post-badge">지역 여행 가이드 • 경기 포천</div>
-    <h1>[포천 당일치기 여행] 명성산 은빛 억새밭과 산정호수, 아트밸리부터 이동갈비까지 잇는 가을 드라이브 코스</h1>
-    
-    <div class="post-sub-meta">
-      <span>작성: 오늘 데이트 에디토리얼 팀</span>
-      <span>•</span>
-      <span>발행: 2026년 10월 10일</span>
-      <span>•</span>
-      <span>테마: 가을 억새꽃 & 호수 둘레길 산책</span>
-    </div>
-
-    <div class="lead-box">
-      매년 10월이 되면 경기 북부 포천은 명성산 자락을 가득 메우는 은빛 억새꽃 물결과 맑고 잔잔한 산정호수의 호반 풍경으로 가을의 절정을 맞이합니다. 버려진 화강암 채석장을 예술 공간으로 탈바꿈시킨 포천 아트밸리에서 일정을 시작해, 한탄강 유네스코 지질공원의 비둘기낭폭포, 산정호수 수변 데크길과 명성산 억새밭 능선, 그리고 포천의 오랜 명물인 숯불 이동갈비까지 잇는 당일 드라이브 코스를 정리했습니다.
-    </div>
-
-    <!-- 대표 사진: 명성산 억새밭 전경 -->
-    <div class="real-photo-card">
-      <img src="https://tong.visitkorea.or.kr/cms/resource/00/3011200_image2_1.jpg" alt="은빛 억새 물결이 장관을 이루는 명성산 능선 데크길과 팔각정 전망대" loading="lazy">
-      <div class="photo-caption">은빛 억새 물결이 장관을 이루는 명성산 능선 데크길과 팔각정 전망대 (사진 출처: 한국관광공사 TourAPI)</div>
-    </div>
-
-    <!-- 하루 추천 동선 요약 -->
-    <h2>🧭 포천 가을 억새와 호반 당일 추천 동선</h2>
-    <div class="timeline-card">
-      <div class="tl-act">오전 1막: 폐채석장의 예술적 재탄생</div>
-      <div class="tl-step">
-        <span class="tl-time">10:00</span>
-        <div>
-          <span class="tl-place">포천 아트밸리</span>
-          <span class="tl-note">천주호 에메랄드빛 호수와 화강암 절벽, 조각공원 산책</span>
+  <main class="article-container"><article>
+      <header class="article-header hero container">
+        <div class="hero-text">
+          <p class="hero-kicker badge-category"><span>지역 여행 가이드 • 경기 포천</span></p>
+          <h1 class="article-title">[포천 당일치기 여행] 명성산 은빛 억새밭과 산정호수, 아트밸리부터 이동갈비까지 잇는 가을 드라이브 코스</h1>
+          <div class="article-meta">
+            <span>작성: 오늘 데이트 에디토리얼 팀</span>
+            <span>발행: 2026년 10월 10일</span>
+            <span class="meta-credit">테마: 가을 억새꽃 & 호수 둘레길 산책</span>
+          </div>
+          <p><a class="btn" href="../../#c=4601.1789996563432.4602.1790933435351.4931">앱에서 코스 열기</a></p>
         </div>
-      </div>
-      <div class="tl-move">차량 이동 약 22km (영북면 방향 약 25분)</div>
+      </header>
 
-      <div class="tl-act">낮 2막: 지질학적 신비의 협곡 폭포</div>
-      <div class="tl-step">
-        <span class="tl-time">11:30</span>
-        <div>
-          <span class="tl-place">비둘기낭폭포</span>
-          <span class="tl-note">한탄강 주상절리 협곡 사이로 흐르는 천연기념물 폭포 관람</span>
+      <div class="container">
+        <div class="prose-intro">매년 10월이 되면 경기 북부 포천은 명성산 자락을 가득 메우는 은빛 억새꽃 물결과 맑고 잔잔한 산정호수의 호반 풍경으로 가을의 절정을 맞이합니다. 버려진 화강암 채석장을 예술 공간으로 탈바꿈시킨 포천 아트밸리에서 일정을 시작해, 한탄강 유네스코 지질공원의 비둘기낭폭포, 산정호수 수변 데크길과 명성산 억새밭 능선, 그리고 포천의 오랜 명물인 숯불 이동갈비까지 잇는 당일 드라이브 코스를 정리했습니다.</div>
+        <figure class="lead-photo">
+              <img src="https://tong.visitkorea.or.kr/cms/resource/00/3011200_image2_1.jpg" alt="은빛 억새 물결이 장관을 이루는 명성산 능선 데크길과 팔각정 전망대" loading="lazy" />
+              <figcaption>은빛 억새 물결이 장관을 이루는 명성산 능선 데크길과 팔각정 전망대 (사진 출처: 한국관광공사 TourAPI)</figcaption>
+            </figure>
+      </div>
+
+      <!-- 동선 -->
+      <section class="timeline-card band">
+        <div class="container">
+          <h2 class="timeline-title">포천 가을 억새와 호반 당일 추천 동선</h2>
+          <div class="route" style="--n:5">
+            <div class="tl-act" style="--r:1; --c:1">오전 1막: 폐채석장의 예술적 재탄생</div>
+            <div class="tl-step" style="--r:2; --c:1"><span class="tl-time">10:00</span><span class="tl-place">포천 아트밸리</span><span class="tl-note">천주호 에메랄드빛 호수와 화강암 절벽, 조각공원 산책</span></div>
+            <div class="tl-move" style="--r:3; --c:1">차량 이동 약 22km (영북면 방향 약 25분)</div>
+            <div class="tl-act" style="--r:1; --c:2">낮 2막: 지질학적 신비의 협곡 폭포</div>
+            <div class="tl-step" style="--r:2; --c:2"><span class="tl-time">11:30</span><span class="tl-place">비둘기낭폭포</span><span class="tl-note">한탄강 주상절리 협곡 사이로 흐르는 천연기념물 폭포 관람</span></div>
+            <div class="tl-move" style="--r:3; --c:2">차량 이동 약 12km (산정호수 상동주차장 약 15분)</div>
+            <div class="tl-act" style="--r:1; --c:3; --s:2">오후 3막: 잔잔한 호반과 은빛 억새 능선</div>
+            <div class="tl-step" style="--r:2; --c:3"><span class="tl-time">12:30</span><span class="tl-place">산정호수</span><span class="tl-note">상동주차장 앞 산정호수로411번길 식당가에서 점심 식사 후 호숫가 데크 산책</span></div>
+            <div class="tl-move" style="--r:3; --c:3">산정호수 상동 등산로 진입 도보 연결</div>
+            <div class="tl-step" style="--r:2; --c:4"><span class="tl-time">13:30</span><span class="tl-place">명성산 억새밭</span><span class="tl-note">등룡폭포 거쳐 억새 군락지 능선 트레킹 및 억새꽃 조망</span></div>
+            <div class="tl-move" style="--r:3; --c:4">하산 후 산정호수 둘레길 산책, 차량 이동 약 15분 안팎</div>
+            <div class="tl-act" style="--r:1; --c:5">저녁 4막: 포천의 유서 깊은 로컬 미식</div>
+            <div class="tl-step" style="--r:2; --c:5"><span class="tl-time">18:30</span><span class="tl-place">포천 이동폭포갈비</span><span class="tl-note">참숯 불판에 구워내는 정통 포천 이동양념갈비 저녁 식사</span></div>
+          </div>
         </div>
-      </div>
-      <div class="tl-move">차량 이동 약 12km (산정호수 상동주차장 약 15분)</div>
+      </section>
 
-      <div class="tl-act">오후 3막: 잔잔한 호반과 은빛 억새 능선</div>
-      <div class="tl-step">
-        <span class="tl-time">12:30</span>
-        <div>
-          <span class="tl-place">산정호수</span>
-          <span class="tl-note">상동주차장 앞 산정호수로411번길 식당가에서 점심 식사 후 호숫가 데크 산책</span>
-        </div>
-      </div>
-      <div class="tl-move">산정호수 상동 등산로 진입 도보 연결</div>
-
-      <div class="tl-step">
-        <span class="tl-time">13:30</span>
-        <div>
-          <span class="tl-place">명성산 억새밭</span>
-          <span class="tl-note">등룡폭포 거쳐 억새 군락지 능선 트레킹 및 억새꽃 조망</span>
-        </div>
-      </div>
-      <div class="tl-move">하산 후 산정호수 둘레길 산책, 차량 이동 약 15분 안팎</div>
-
-      <div class="tl-act">저녁 4막: 포천의 유서 깊은 로컬 미식</div>
-      <div class="tl-step">
-        <span class="tl-time">18:30</span>
-        <div>
-          <span class="tl-place">포천 이동폭포갈비</span>
-          <span class="tl-note">참숯 불판에 구워내는 정통 포천 이동양념갈비 저녁 식사</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- 1. 포천 아트밸리 -->
-    <h2>1. 화강암 채석장에서 피어난 호수와 조각, 포천 아트밸리</h2>
-    <p>
+      <div class="container">
+        <div class="spots">
+          <section class="spot-section flat">
+            <div class="spot-head">
+              <h2 class="spot-title">1. 화강암 채석장에서 피어난 호수와 조각, 포천 아트밸리</h2>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/83dbf119a9c275ba30ac332a695b86831c76c900?original" alt="포천 아트밸리 진입로 잔디밭의 대형 글자 조형물" loading="lazy" />
+              <figcaption>포천 아트밸리 진입로 잔디밭의 대형 글자 조형물 (사진 출처: 카카오맵)</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p>
       수도권에서 구리포천고속도로를 따라 포천에 진입하면 첫 여정으로 <strong>포천 아트밸리</strong>를 찾습니다. 경기 포천시 신북면 아트밸리로 234에 자리한 이곳은 과거 근대 산업화 시기 화강암을 캐내던 채석장이 방치되어 있던 부지를 포천시가 친환경 복합 문화예술공간으로 재생한 명소입니다.
     </p>
-    <p>
+              <p>
       단지 내 핵심 볼거리인 '천주호'는 화강암을 파내어 생긴 거대한 웅덩이에 빗물과 샘물이 유입되어 형성된 인공 호수로, 수심 25m에 달하는 맑은 에메랄드빛 수면과 병풍처럼 둘러선 50m 화강암 절벽이 웅장한 대조를 이룹니다. 입구에서 경사로를 따라 모노레일을 탑승하거나 완만한 보행로를 걸어 조각공원과 전망데크를 두루 둘러볼 수 있습니다.
     </p>
-
-    <!-- 사진: 포천 아트밸리 진입로 조형물 -->
-    <div class="real-photo-card">
-      <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/83dbf119a9c275ba30ac332a695b86831c76c900?original" alt="포천 아트밸리 진입로 잔디밭의 대형 글자 조형물" loading="lazy">
-      <div class="photo-caption">포천 아트밸리 진입로 잔디밭의 대형 글자 조형물 (사진 출처: 카카오맵)</div>
-    </div>
-
-    <div class="tip-box">
-      <strong class="tip-title">📌 포천 아트밸리 이용 안내</strong>
+              <div class="tip-box"><strong class="tip-title">📌 포천 아트밸리 이용 안내</strong>
       <ul>
         <li><strong>입장료:</strong> 성인 6,000원, 청소년 4,000원, 어린이 2,000원입니다. (천문과학관 관람료 포함)</li>
         <li><strong>모노레일 이용:</strong> 별도 요금이 부과되는 선택 이용 시설입니다. 경사가 가파르므로 이동 편의에 따라 탑승을 선택할 수 있습니다.</li>
         <li><strong>주차 및 휴장:</strong> 넓은 야외 주차장이 무료로 운영되며, 매월 첫째 주 화요일은 정기 휴장일입니다.</li>
-      </ul>
-    </div>
+      </ul></div>
+            </div>
+          </section>
 
-    <!-- 2. 비둘기낭폭포 -->
-    <h2>2. 현무암 주상절리 협곡에 숨은 비경, 비둘기낭폭포</h2>
-    <p>
+          <section class="spot-section flat flip">
+            <div class="spot-head">
+              <h2 class="spot-title">2. 현무암 주상절리 협곡에 숨은 비경, 비둘기낭폭포</h2>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/6d9fa95d4f583f7b89f3a8d9ccf4f665cd4216ad?original" alt="현무암 주상절리 협곡 사이로 흐르는 비둘기낭폭포와 푸른 소" loading="lazy" />
+              <figcaption>현무암 주상절리 협곡 사이로 흐르는 비둘기낭폭포와 푸른 소 (사진 출처: 카카오맵)</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p>
       아트밸리에서 북쪽으로 22km 이동해 한탄강 유네스코 세계지질공원 권역에 접어들면 국가지정 천연기념물 제537호인 <strong>비둘기낭폭포</strong>에 닿습니다. 경기 포천시 영북면 대회산리에 위치하며, 과거 비둘기들이 서식하던 동굴과 낭떠러지라는 데서 이름이 붙었습니다.
     </p>
-    <p>
+              <p>
       약 50만 년 전에서 10만 년 전 사이 북한 평강군 오리산 일대에서 분출한 용암이 한탄강을 따라 흐르다 식으면서 형성된 현무암 주상절리와 침식 하식동굴이 고스란히 보존되어 있습니다. 깎아지른 검은 암벽 사이로 푸른빛의 깊은 소(沼)가 형성되어 있어 신비로운 지질학적 풍경을 가까이서 관찰할 수 있습니다.
     </p>
-
-    <!-- 사진: 비둘기낭폭포 협곡 -->
-    <div class="real-photo-card">
-      <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/6d9fa95d4f583f7b89f3a8d9ccf4f665cd4216ad?original" alt="현무암 주상절리 협곡 사이로 흐르는 비둘기낭폭포와 푸른 소" loading="lazy">
-      <div class="photo-caption">현무암 주상절리 협곡 사이로 흐르는 비둘기낭폭포와 푸른 소 (사진 출처: 카카오맵)</div>
-    </div>
-
-    <div class="tip-box">
-      <strong class="tip-title">📌 비둘기낭폭포 관람 팁</strong>
+              <div class="tip-box"><strong class="tip-title">📌 비둘기낭폭포 관람 팁</strong>
       <ul>
         <li><strong>입장료 및 주차:</strong> 관람료와 주차비 모두 무료입니다.</li>
         <li><strong>관람 소요시간:</strong> 지질공원 탐방안내소 주차장에서 목재 계단을 내려가 폭포 전망데크를 둘러보는 데 왕복 30~40분 정도 소요됩니다.</li>
-      </ul>
-    </div>
+      </ul></div>
+            </div>
+          </section>
 
-    <!-- 3. 산정호수 -->
-    <h2>3. 맑은 호수 수면을 곁에 두고 걷는 수변 둘레길, 산정호수</h2>
-    <p>
+          <section class="spot-section flat">
+            <div class="spot-head">
+              <h2 class="spot-title">3. 맑은 호수 수면을 곁에 두고 걷는 수변 둘레길, 산정호수</h2>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/8ac06c7b19a81c3d8d63a84fd4d573915c15fbdf?original" alt="산정호수 수변을 따라 길게 이어진 나무 데크 둘레길" loading="lazy" />
+              <figcaption>산정호수 수변을 따라 길게 이어진 나무 데크 둘레길 (사진 출처: 카카오맵)</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p>
       비둘기낭폭포에서 영북면 내륙으로 12km 이동하면 포천의 대표적인 국민관광지인 <strong>산정호수</strong>에 도착합니다. '산속에 있는 우물과 같은 호수'라는 이름처럼, 해발 923m의 명성산과 망봉산, 망무봉이 호수를 병풍처럼 둘러싸고 있습니다.
     </p>
-    <p>
+              <p>
       호수 가장자리를 따라 약 3.2km 길이로 조성된 수변 데크 산책로인 '궁예길'은 수면 위를 걷는 듯한 부교 구간과 소나무 숲길이 자연스럽게 이어집니다. 가을철 잔잔한 수면에 푸른 하늘과 붉게 물들어가는 능선이 비치는 호반 정취를 감상하며 여유롭게 산책하기 좋습니다.
     </p>
-
-    <!-- 사진: 산정호수 수변 데크길 -->
-    <div class="real-photo-card">
-      <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/8ac06c7b19a81c3d8d63a84fd4d573915c15fbdf?original" alt="산정호수 수변을 따라 길게 이어진 나무 데크 둘레길" loading="lazy">
-      <div class="photo-caption">산정호수 수변을 따라 길게 이어진 나무 데크 둘레길 (사진 출처: 카카오맵)</div>
-    </div>
-
-    <div class="tip-box">
-      <strong class="tip-title">📌 산정호수 이용 팁</strong>
+              <div class="tip-box"><strong class="tip-title">📌 산정호수 이용 팁</strong>
       <ul>
         <li><strong>입장료 및 주차:</strong> 호수 입장료는 무료이며, 주차요금은 소형차 기준 1일 2,000원입니다.</li>
         <li><strong>주차 위치:</strong> 명성산 등산로 및 상가 편의시설과 바로 연결되는 상동주차장에 주차하는 것이 코스 동선상 편리합니다.</li>
         <li><strong>점심:</strong> 산정호수 입구 산정호수로411번길에 식당 20여 곳이 모여 있어 트레킹 전에 점심을 먹기 좋습니다(카카오맵 반경 500m 음식점 검색 기준).</li>
-      </ul>
-    </div>
+      </ul></div>
+            </div>
+          </section>
 
-    <!-- 4. 명성산 억새밭 -->
-    <h2>4. 10월 가을바람에 출렁이는 은빛 물결, 명성산 억새밭</h2>
-    <p>
+          <section class="spot-section flat no-photo">
+            <div class="spot-head">
+              <h2 class="spot-title">4. 10월 가을바람에 출렁이는 은빛 물결, 명성산 억새밭</h2>
+            </div>
+            <div class="spot-body">
+              <p>
       산정호수 상동주차장 인근에서 시작되는 등산로를 따라 오르면 전국적인 억새 명소인 <strong>명성산 억새밭</strong> 군락지가 펼쳐집니다. 완만한 계곡길을 따라 비선폭포와 등룡폭포를 지나 약 1시간 30분에서 2시간 정도 트레킹을 이어가면 해발 800m 능선부 분지에 이릅니다.
     </p>
-    <p>
+              <p>
       고원 능선을 따라 억새꽃이 빽빽하게 군락을 이루고 있으며, 잘 정비된 목재 데크길과 팔각정 전망대가 마련되어 있습니다. 포천시와 포천문화관광재단이 주최하는 제29회 '산정호수 명성산 억새꽃축제'는 2026년 10월 16일(금)부터 10월 18일(일)까지 산정호수와 명성산 일원에서 개최되어 가을 햇살에 은빛으로 반짝이는 억새 물결을 만끽할 수 있습니다.
     </p>
-
-    <div class="tip-box">
-      <strong class="tip-title">📌 명성산 억새밭 트레킹 팁</strong>
+              <div class="tip-box"><strong class="tip-title">📌 명성산 억새밭 트레킹 팁</strong>
       <ul>
         <li><strong>코스 안내:</strong> 상동주차장 → 책바위 입구 → 비선폭포 → 등룡폭포 → 억새군락지 팔각정 코스가 가장 완만하며, 왕복 약 3시간~3시간 30분 소요됩니다.</li>
         <li><strong>준비물:</strong> 등산로 초중반에 돌길과 계곡 구간이 포함되므로 접지력이 좋은 트레킹화나 등산화 착용을 권장하며, 충분한 식수와 방한 바람막이를 챙기는 것이 좋습니다.</li>
-      </ul>
-    </div>
+      </ul></div>
+            </div>
+          </section>
 
-    <!-- 5. 포천 이동폭포갈비 -->
-    <h2>5. 은은한 참숯 향과 부드러운 육즙, 포천 이동폭포갈비</h2>
-    <p>
+          <section class="spot-section flat">
+            <div class="spot-head">
+              <h2 class="spot-title">5. 은은한 참숯 향과 부드러운 육즙, 포천 이동폭포갈비</h2>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/3907c93cfdca24877fb1394e249365e927763c02?original" alt="숯불 불판 위에서 구워지는 포천 이동 양념 소갈비" loading="lazy" />
+              <figcaption>숯불 불판 위에서 구워지는 포천 이동 양념 소갈비 (사진 출처: 카카오맵)</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p>
       산정호수와 명성산 트레킹을 마친 뒤 남동쪽 이동면 방면으로 차량 약 15분 안팎 이동해 포천 여행의 대표 미식인 <strong>포천 이동갈비</strong>로 하루를 마무리합니다. 포천시 이동면 화동로 일대는 반세기 넘게 이동갈비 골목을 형성하고 있습니다.
     </p>
-    <p>
+              <p>
       화동로 2070에 위치한 이동폭포갈비는 시원한 인공폭포가 흐르는 정원 경관을 갖추고 있으며, 숯불 석쇠 위에서 노릇하게 구워내는 이동양념갈비가 대표 메뉴입니다. 간장과 양파, 마늘을 베이스로 한 은은한 양념이 갈빗살에 고루 배어 있어 과하지 않은 단맛과 부드러운 식감이 특징입니다.
     </p>
-
-    <!-- 사진: 숯불 이동갈비 굽는 모습 -->
-    <div class="real-photo-card">
-      <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/3907c93cfdca24877fb1394e249365e927763c02?original" alt="숯불 불판 위에서 구워지는 포천 이동 양념 소갈비" loading="lazy">
-      <div class="photo-caption">숯불 불판 위에서 구워지는 포천 이동 양념 소갈비 (사진 출처: 카카오맵)</div>
-    </div>
-
-    <div class="tip-box">
-      <strong class="tip-title">📌 이동갈비 식사 안내</strong>
+              <div class="tip-box"><strong class="tip-title">📌 이동갈비 식사 안내</strong>
       <ul>
         <li><strong>메뉴 및 가격:</strong> 이동갈비 1인 43,000원, 생갈비 49,000원이며, 동치미 메밀냉면과 된장찌개 식사를 곁들일 수 있습니다.</li>
         <li><strong>주차:</strong> 대형 전용 주차장을 완비하고 있어 주차가 편리합니다. 주말 저녁에는 가족 단위 방문객이 많아 대기가 발생할 수 있습니다.</li>
-      </ul>
-    </div>
+      </ul></div>
+            </div>
+          </section>
+        </div>
 
-    <!-- 2인 기준 예상 경비 요약 표 -->
-    <h2>📊 2인 기준 포천 당일 코스 예상 비용 정리</h2>
-    <div class="table-wrap">
-      <table>
+        <!-- 2인 예상 입장료 -->
+        <section class="cost-table-card">
+          <div class="cost-head">
+            <h2 class="timeline-title">2인 기준 포천 당일 코스 예상 비용 정리</h2>
+          </div>
+          <div class="table-wrap"><table class="cost-table">
         <thead>
           <tr>
             <th>구분</th>
@@ -612,12 +519,12 @@
             <td><strong>유류비/톨게이트비 제외 현장 기준 (모노레일, 점심 별도)</strong></td>
           </tr>
         </tbody>
-      </table>
-    </div>
+      </table></div>
+        </section>
 
-    <!-- 개별 스팟 지도 링크 -->
-    <h2>🗺️ 방문 장소 네이버 지도 바로가기</h2>
-    <div class="map-links-grid">
+        <section class="map-links">
+          <h2 class="timeline-title">방문 장소 네이버 지도 바로가기</h2>
+          <div class="map-links-grid">
       <a href="https://map.naver.com/p/search/%ED%8F%AC%EC%B2%9C%20%EC%95%84%ED%8A%B8%EB%B0%B8%EB%A6%AC" target="_blank" rel="noopener noreferrer" class="map-link-chip">
         <span>포천 아트밸리 (신북면 아트밸리로)</span>
         <span class="btn-action">지도 보기 ↗</span>
@@ -639,18 +546,30 @@
         <span class="btn-action">지도 보기 ↗</span>
       </a>
     </div>
+        </section>
 
-    <div class="app-course-box" style="margin: 40px 0 24px; padding: 20px 22px; background: var(--color-accent-light); border: 1px solid var(--color-border); border-radius: 14px;">
-      <strong style="display: block; font-size: 17px; color: var(--color-text-main); margin-bottom: 6px;">🗺️ 이 코스 오늘 데이트에서 열기</strong>
-      <p style="margin: 0 0 14px; font-size: 14.5px; line-height: 1.6; color: var(--color-text-main);">글에 나온 장소 5곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
-      <a href="../../#c=4601.1789996563432.4602.1790933435351.4931" style="display: inline-block; padding: 10px 18px; border-radius: 10px; background: var(--color-text-main); color: #ffffff; font-weight: 700; font-size: 15px; text-decoration: none;">앱에서 코스 열기 →</a>
-    </div>
+        <div class="app-course-box">
+          <div>
+            <h2>이 코스 오늘 데이트에서 열기</h2>
+            <p>글에 나온 장소 5곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
+          </div>
+          <a class="btn app-action" href="../../#c=4601.1789996563432.4602.1790933435351.4931">앱에서 코스 열기</a>
+        </div>
 
-    <div class="footer-source">
-      글: 오늘 데이트 에디토리얼 팀 • 사진: 한국관광공사, 카카오맵<br>
-      상세 관람시간과 휴무일은 각 시설 및 관광지의 최신 공지를 확인해 주세요.
+        <footer class="article-credit">
+          <p>글: 오늘 데이트 에디토리얼 팀 • 사진: 한국관광공사, 카카오맵<br>
+      상세 관람시간과 휴무일은 각 시설 및 관광지의 최신 공지를 확인해 주세요.</p>
+        </footer>
+      </div>
+    </article></main>
+
+  <footer class="site-footer">
+    <div class="footer-inner container">
+      <p class="footer-mark"><strong>오늘 데이트 (Oneul Date)</strong></p>
+      <p class="footer-line">전국 데이트 & 여행 코스 큐레이션 매거진</p>
+      <p class="footer-links"><a href="https://nufunc.github.io/oneul-date/">홈으로 가기</a><a href="https://nufunc.github.io/oneul-date/blog/">매거진 전체보기</a></p>
     </div>
-  </main>
+  </footer>
 
 </body>
 </html>

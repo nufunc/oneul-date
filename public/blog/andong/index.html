@@ -16,6 +16,9 @@
 
   <!-- Pretendard 웹폰트 -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700&display=swap&text=%26()%2C.0123456789%3ADO%5B%5Daelmntu~%C2%B7%EA%B0%80%EA%B0%84%EA%B0%90%EA%B0%95%EA%B0%9C%EA%B1%B0%EA%B1%B4%EA%B2%BD%EA%B3%84%EA%B3%BC%EA%B5%90%EA%B5%AC%EA%B5%AD%EA%B8%B0%EA%B9%83%EA%B9%8C%EB%82%99%EB%82%B4%EB%84%A4%EB%85%81%EB%85%84%EB%85%90%EB%85%B8%EB%88%88%EB%8A%94%EB%8A%98%EB%8B%AC%EB%8B%AD%EB%8B%B9%EB%8C%80%EB%8D%B0%EB%8F%84%EB%8F%8C%EB%8F%99%EB%9E%91%EB%A0%A4%EB%A1%9C%EB%A3%A8%EB%A6%84%EB%A6%AC%EB%A7%88%EB%A7%8C%EB%A7%98%EB%A7%9D%EB%A7%A4%EB%A9%B4%EB%AA%A8%EB%AA%A9%EB%AC%B8%EB%AC%BC%EB%AF%B8%EB%B0%94%EB%B0%98%EB%B0%9B%EB%B0%B1%EB%B2%84%EB%B2%A0%EB%B2%BD%EB%B3%91%EB%B3%B4%EB%B6%80%EB%B9%84%EB%B9%9B%EC%82%AC%EC%82%B0%EC%83%81%EC%84%9C%EC%84%A0%EC%84%B1%EC%84%B8%EC%8A%A4%EC%8A%B9%EC%8B%9C%EC%95%84%EC%95%88%EC%95%89%EC%95%94%EC%95%BC%EC%95%BD%EC%96%91%EC%97%90%EC%97%AC%EC%97%B0%EC%97%B4%EC%98%81%EC%98%88%EC%98%A4%EC%98%A8%EC%9A%94%EC%9A%A9%EC%9B%90%EC%9B%94%EC%9C%84%EC%9C%A0%EC%9D%84%EC%9D%91%EC%9D%98%EC%9D%B4%EC%9D%B8%EC%9D%BC%EC%9E%90%EC%9E%A5%EC%A0%80%EC%A0%84%EC%A0%88%EC%A0%90%EC%A0%95%EC%A0%9C%EC%A1%B0%EC%A4%80%EC%A7%80%EC%A7%84%EC%A7%AD%EC%AB%84%EC%B0%9C%EC%B0%B8%EC%B1%85%EC%B2%9C%EC%B3%90%EC%B4%9D%EC%B5%9C%EC%B6%94%EC%B6%95%EC%BB%A4%EC%BD%94%EC%BD%A4%ED%83%91%ED%83%9D%ED%84%B0%ED%86%B5%ED%8A%B8%ED%8C%9F%ED%8E%BC%ED%91%9C%ED%95%98%ED%95%9C%ED%95%A9%ED%96%89%ED%98%84%ED%98%B8%ED%9A%8C" rel="stylesheet">
 
   <script type="application/ld+json">
 {
@@ -43,499 +46,326 @@
   </script>
 
   <style>
-    :root {
-      --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-      --bg-page: #fbfaf8;
-      --bg-card: #ffffff;
-      --color-primary: #1c1917;
-      --color-accent: #0284c7;
-      --color-accent-light: #f0f9ff;
-      --color-accent-border: #bae6fd;
-      --color-warm: #0369a1;
-      --color-text-main: #292524;
-      --color-text-sub: #57534e;
-      --color-text-faint: #78716c;
-      --color-border: #e7e5e4;
-      --color-tip-bg: #f0f9ff;
-      --color-tip-border: #bae6fd;
-      --color-tip-text: #0369a1;
-      --color-bridge-bg: #f5f5f4;
-      --max-width: 780px;
-    }
+/* hallmark-solstice: scripts/convert_blog_hallmark.mjs가 글의 <style>을 이 파일로 바꾼다 (Hallmark 2.0.0, 테마 Solstice, P-293) */
+:root {
+  color-scheme: light;
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-xs: 0.8125rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.125rem; --text-xl: 1.5625rem; --text-2xl: 1.953rem; --text-3xl: 2.441rem;
+  --text-hero: clamp(1.75rem, 1.6vw + 1.25rem, 2.75rem);
+  --text-section: clamp(1.75rem, 1.8vw + 1rem, 2.875rem); --text-title: clamp(1.25rem, 0.75vw + 0.875rem, 1.625rem); --text-lead: clamp(1.0625rem, 0.3vw + 0.95rem, 1.25rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-micro: 120ms; --dur-short: 220ms;
+  --container: 1200px; --measure: 680px; --gutter: 56px; --gap-columns: 40px; --section-gap: 120px;
+  --z-sticky-nav: 300;
+  --color-paper: oklch(94% 0.03 80); --color-paper-2: oklch(97% 0.02 85); --color-paper-3: oklch(89% 0.05 80);
+  --color-ink: oklch(27% 0.05 50); --color-ink-2: oklch(36% 0.05 50); --color-muted: oklch(48% 0.06 55);
+  --color-rule: oklch(84% 0.06 78);
+  --color-accent: oklch(54% 0.20 24); --color-accent-2: oklch(48% 0.19 24); --color-accent-ink: oklch(97% 0.02 85); --color-focus: oklch(54% 0.20 24);
+  --color-gold: oklch(74% 0.14 75); --color-gold-2: oklch(84% 0.11 80);
+  --color-band-text: oklch(94% 0.03 80); --color-band-muted: oklch(80% 0.05 75);
+  --color-hair-ink: color-mix(in oklab, var(--color-ink) 10%, transparent);
+  --font-display: "Noto Serif KR", "Nanum Myeongjo", ui-serif, serif;
+  --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --radius-card: 0; --radius-pill: 999px; --rule-hair: 1px; --rule-bar: 2px;
+  --shadow-card: 10px 10px 0 var(--color-paper-3);
+}
+@media (max-width: 60rem) { :root { --gutter: 24px; --section-gap: 88px; --gap-columns: 24px; } }
+@media (max-width: 40rem) { :root { --gutter: 16px; --section-gap: 64px; --gap-columns: 16px; } }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+html { scrollbar-color: var(--color-muted) var(--color-paper); scroll-padding-top: var(--space-3xl); }
+body { margin: 0; background: var(--color-paper); color: var(--color-ink-2); font-family: var(--font-family); font-size: var(--text-md); line-height: 1.75; word-break: keep-all; -webkit-font-smoothing: antialiased; }
+::selection { background: color-mix(in oklab, var(--color-gold) 40%, transparent); }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+a:hover { text-decoration-color: var(--color-accent); }
+article h1, article h2, article h3 { margin: 0; font-family: var(--font-display); font-weight: 700; color: var(--color-ink); line-height: 1.3; letter-spacing: -0.01em; overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+img { max-width: 100%; display: block; }
+.container { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); }
 
-    body {
-      font-family: var(--font-family);
-      background-color: var(--bg-page);
-      color: var(--color-text-main);
-      line-height: 1.8;
-      word-break: keep-all;
-      letter-spacing: -0.01em;
-      -webkit-font-smoothing: antialiased;
-    }
+/* 44px 머리 링크 규칙: scripts/test-blog-related.cjs가 글마다 하나를 요구한다 */
+header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
 
-    .site-header {
-      background: #ffffff;
-      border-bottom: 1px solid var(--color-border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
+/* Controls */
+.btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 var(--space-lg); border: 0; border-radius: var(--radius-pill); background: var(--color-accent); color: var(--color-accent-ink); font: 600 var(--text-md)/1 var(--font-family); text-decoration: none; cursor: pointer; transition: background-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out); }
+.btn:hover { background: var(--color-accent-2); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.link-quiet { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-ink); font-weight: 600; font-size: var(--text-sm); text-decoration: none; border-bottom: var(--rule-bar) solid var(--color-ink); transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out); }
+.link-quiet:hover { color: var(--color-accent); border-color: var(--color-accent); }
+.link-quiet:active { transform: translateY(1px); }
+.link-quiet:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
 
-    .header-inner {
-      max-width: var(--max-width);
-      margin: 0 auto;
-      padding: 14px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+/* Nav */
+.site-header { position: sticky; top: 0; z-index: var(--z-sticky-nav); background: var(--color-paper); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.header-inner { display: flex; justify-content: space-between; align-items: center; min-height: 64px; }
+.header-logo { font-family: var(--font-display); font-size: var(--text-lg); color: var(--color-ink); text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; }
+.header-logo span { color: var(--color-accent); margin-left: 0.3em; }
+.header-logo:hover { color: var(--color-ink-2); }
+.header-nav { display: flex; gap: var(--space-lg); }
+.header-nav a { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--text-sm); color: var(--color-ink-2); text-decoration: none; }
+.header-nav a:hover { color: var(--color-ink); text-decoration: underline; text-decoration-color: var(--color-accent); }
+.header-nav a:active, .header-logo:active { transform: translateY(1px); }
 
-    .brand-link {
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+/* Hero */
+.hero { display: grid; padding-block: var(--space-2xl) var(--space-xl); }
+.hero-text { display: grid; gap: var(--space-lg); }
+.article-title { font-size: var(--text-hero); line-height: 1.3; max-width: 28ch; }
+.hero-kicker { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.hero-kicker span:first-child { color: var(--color-accent); font-weight: 600; }
+.article-meta { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-lg); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); font-variant-numeric: tabular-nums; }
+.article-meta .meta-credit { flex-basis: 100%; }
+/* 좁은 화면에서 칸마다 한 줄: 본문 글꼴(Pretendard)이 바뀔 때 줄 수가 달라져 아래 띠가 밀리는 것을 막는다 */
+@media (max-width: 40rem) { .article-meta { flex-direction: column; flex-wrap: nowrap; } }
+.spot-photo img { width: 100%; height: 100%; object-fit: cover; outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
 
-    .brand-badge {
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: var(--color-accent);
-      background: var(--color-accent-light);
-      padding: 2px 7px;
-      border-radius: 12px;
-      border: 1px solid var(--color-accent-border);
-    }
+/* Lead */
+.prose-intro { max-width: var(--measure); padding-top: var(--space-xl); font-size: var(--text-lead); line-height: 1.8; color: var(--color-ink); padding-bottom: var(--space-3xl); }
 
-    .header-nav {
-      display: flex;
-      gap: 16px;
-    }
-
-    .header-nav a {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--color-text-sub);
-      text-decoration: none;
-      transition: color 0.15s;
-    }
-
-    .header-nav a:hover {
-      color: var(--color-accent);
-    }
-
-    .article-wrap {
-      max-width: var(--max-width);
-      margin: 0 auto;
-      padding: 40px 20px 80px;
-    }
-
-    .post-badge {
-      display: inline-block;
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--color-accent);
-      background: var(--color-accent-light);
-      padding: 4px 10px;
-      border-radius: 6px;
-      border: 1px solid var(--color-accent-border);
-      margin-bottom: 14px;
-    }
-
-    h1 {
-      font-size: 1.85rem;
-      font-weight: 800;
-      line-height: 1.4;
-      color: var(--color-primary);
-      margin-bottom: 14px;
-      letter-spacing: -0.02em;
-    }
-
-    .post-sub-meta {
-      font-size: 0.88rem;
-      color: var(--color-text-faint);
-      margin-bottom: 28px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .lead-box {
-      background: #ffffff;
-      border-left: 4px solid var(--color-accent);
-      border-top: 1px solid var(--color-border);
-      border-right: 1px solid var(--color-border);
-      border-bottom: 1px solid var(--color-border);
-      padding: 20px 22px;
-      border-radius: 0 10px 10px 0;
-      font-size: 1rem;
-      color: var(--color-text-sub);
-      margin-bottom: 32px;
-      line-height: 1.85;
-    }
-
-    .real-photo-card {
-      background: #ffffff;
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      overflow: hidden;
-      margin: 28px 0;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-    }
-
-    .real-photo-card img {
-      width: 100%;
-      height: auto;
-      display: block;
-      object-fit: cover;
-      max-height: 480px;
-    }
-
-    .photo-caption {
-      padding: 10px 16px;
-      font-size: 0.82rem;
-      color: var(--color-text-faint);
-      background: #fafaf9;
-      border-top: 1px solid var(--color-border);
-      text-align: center;
-    }
-
-    h2 {
-      font-size: 1.45rem;
-      font-weight: 700;
-      color: var(--color-primary);
-      margin: 44px 0 18px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      letter-spacing: -0.01em;
-    }
-
-    h3 {
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--color-primary);
-      margin: 28px 0 12px;
-    }
-
-    p {
-      margin-bottom: 16px;
-      font-size: 0.98rem;
-      color: var(--color-text-main);
-    }
-
-    .tip-box {
-      background-color: var(--color-tip-bg);
-      border: 1px solid var(--color-tip-border);
-      border-radius: 10px;
-      padding: 16px 18px;
-      margin: 20px 0 24px;
-      font-size: 0.9rem;
-      color: var(--color-tip-text);
-      line-height: 1.7;
-    }
-
-    .tip-box strong {
-      display: inline-block;
-      margin-bottom: 4px;
-      color: #0369a1;
-    }
-
-    .bridge-box {
-      background: var(--color-bridge-bg);
-      border-radius: 10px;
-      padding: 16px 18px;
-      margin: 28px 0;
-      font-size: 0.92rem;
-      color: var(--color-text-sub);
-      border-left: 3px solid #d6d3d1;
-    }
-
-    .map-btn-wrap {
-      margin: 18px 0 28px;
-    }
-
-    .map-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #00843d;
-      color: #ffffff;
-      padding: 10px 18px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-size: 0.88rem;
-      font-weight: 600;
-      transition: background 0.15s ease;
-    }
-
-    .map-btn:hover {
-      background: #007a37;
-    }
-
-    .timeline-card {
-      background: #ffffff;
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      padding: 24px 22px;
-      margin: 28px 0 36px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
-    }
-
-    .tl-act {
-      font-weight: 700;
-      color: var(--color-accent);
-      font-size: 0.95rem;
-      margin: 16px 0 8px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .tl-act:first-child {
-      margin-top: 0;
-    }
-
-    .tl-step {
-      display: flex;
-      align-items: baseline;
-      padding: 6px 0;
-      font-size: 0.92rem;
-    }
-
-    .tl-time {
-      font-weight: 700;
-      color: var(--color-warm);
-      min-width: 62px;
-      font-size: 0.88rem;
-    }
-
-    .tl-place {
-      font-weight: 600;
-      color: var(--color-primary);
-    }
-
-    .tl-note {
-      font-size: 0.85rem;
-      color: var(--color-text-faint);
-      margin-left: 6px;
-    }
-
-    .tl-move {
-      font-size: 0.8rem;
-      color: var(--color-text-faint);
-      padding-left: 62px;
-      margin-bottom: 8px;
-    }
-
-    .table-wrap {
-      overflow-x: auto;
-      margin: 24px 0 32px;
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      background: #ffffff;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.88rem;
-      text-align: left;
-    }
-
-    th {
-      background: #fafaf9;
-      color: var(--color-text-sub);
-      font-weight: 700;
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--color-border);
-    }
-
-    td {
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--color-border);
-      color: var(--color-text-main);
-    }
-
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-/* 비용표: 좁은 화면에서는 한 행을 카드 하나로 쌓는다 */
-@media (max-width: 600px) {
-  .table-wrap { overflow-x: visible; }
-  .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
-  .table-wrap thead { display: none; }
-  .table-wrap tr {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    column-gap: 12px;
-    row-gap: 4px;
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--color-border);
-  }
-  .table-wrap tr:last-child { border-bottom: none; }
-  .table-wrap td { padding: 0; border: none; }
-  .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: 0.78rem; font-weight: 700; color: var(--color-text-sub); }
-  .table-wrap td:nth-child(2) { font-weight: 700; }
-  .table-wrap td:nth-child(3) { max-width: 60vw; word-break: keep-all; text-align: right; font-weight: 700; }
-  .table-wrap td:nth-child(4) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
-  .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: inherit; color: inherit; }
-  .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; max-width: 60vw; word-break: keep-all; text-align: right; }
-  .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; white-space: normal; text-align: left; font-size: 0.85rem; font-weight: 400; color: var(--color-text-sub); }
+/* The day, on the brown band */
+.band { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl) var(--space-xl); }
+.band .timeline-title { color: var(--color-band-text); font-size: var(--text-section); margin-bottom: var(--space-xl); }
+.route { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: 0; padding: 0; }
+.tl-act { font-size: var(--text-sm); color: var(--color-gold-2); padding-bottom: var(--space-sm); }
+.tl-step { display: grid; align-content: start; gap: var(--space-2xs); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-gold); }
+.tl-time { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1; color: var(--color-band-text); font-variant-numeric: tabular-nums; }
+.tl-place { font-weight: 600; font-size: var(--text-lg); color: var(--color-band-text); }
+.tl-note { font-size: var(--text-sm); color: var(--color-band-muted); line-height: 1.6; }
+.tl-move { font-size: var(--text-sm); color: var(--color-band-muted); padding-block: var(--space-sm) var(--space-lg); }
+.tl-total { font-size: var(--text-sm); color: var(--color-band-muted); padding-top: var(--space-lg); margin-top: var(--space-lg); border-top: var(--rule-hair) solid color-mix(in oklab, var(--color-band-text) 25%, transparent); }
+/* spot-info-list 계열: 시간 범위(10:30 - 11:45)가 길어 시각 글자를 줄이고, 요약 상자와 번호 배지를 둔다 */
+.route.range .tl-time { font-size: var(--text-xl); }
+.route.range .tl-step { padding-bottom: var(--space-md); }
+.tl-badge { font-size: var(--text-xs); color: var(--color-gold-2); letter-spacing: 0.04em; }
+.tl-facts { display: grid; gap: var(--space-2xs) var(--space-lg); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.tl-facts strong { color: var(--color-gold-2); font-weight: 600; }
+@media (min-width: 60rem) {
+  .tl-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .route { grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); column-gap: var(--space-lg); }
+  .route > * { grid-row: var(--r); grid-column: var(--c) / span var(--s, 1); }
+  .tl-move { padding-bottom: 0; }
+  .tl-total { grid-column: 1 / -1; }
 }
 
+/* Stops */
+.spots { padding-block: var(--section-gap) 0; display: grid; gap: var(--section-gap); }
+.spot-section { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "photo head" "photo body"; grid-template-rows: auto 1fr; column-gap: var(--gap-columns); row-gap: var(--space-md); align-items: start; padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); }
+.spot-section.flip { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-areas: "head photo" "body photo"; }
+.spot-section.no-photo { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "body"; }
+.spot-head { grid-area: head; display: grid; gap: var(--space-md); }
+.spot-photo { grid-area: photo; align-self: start; margin: 0; aspect-ratio: 4 / 5; width: 100%; background: var(--color-paper-3); position: sticky; top: 96px; }
+.spot-body { grid-area: body; display: grid; gap: var(--space-md); }
+.spot-header { display: flex; align-items: baseline; gap: var(--space-md); }
+.spot-num { font-family: var(--font-display); font-size: var(--text-3xl); line-height: 1; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+.spot-title { font-size: var(--text-section); }
+.spot-tagline { font-size: var(--text-lg); color: var(--color-ink); padding-bottom: var(--space-xs); }
+.spot-desc { max-width: 60ch; }
 
-    .guide-box {
-      background: #ffffff;
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      padding: 22px;
-      margin: 28px 0;
-    }
+.spot-info-box { margin: var(--space-xs) 0 0; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); }
+.info-row { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--space-md); padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.info-row:last-child { border-bottom: 0; }
+.info-label { color: var(--color-muted); }
+.info-val { color: var(--color-ink); font-weight: 400; font-variant-numeric: tabular-nums; }
+.map-btn-wrap { padding-top: var(--space-sm); }
+.tip-box { padding: var(--space-sm) var(--space-md); border-left: var(--rule-bar) solid var(--color-accent); background: var(--color-paper-2); font-size: var(--text-sm); color: var(--color-ink-2); line-height: 1.7; }
+.tip-box strong { color: var(--color-ink); font-weight: 600; }
+.tip-box .tip-title { display: block; margin-bottom: var(--space-2xs); }
 
-    .guide-box h4 {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--color-primary);
-      margin-bottom: 10px;
-    }
+/* Fees */
+.cost-table-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.cost-head { display: grid; gap: var(--space-md); align-content: start; }
+.cost-head .timeline-title { font-size: var(--text-section); }
+.cost-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.cost-table th { text-align: left; font-weight: 400; color: var(--color-muted); padding: var(--space-xs) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-bar) solid var(--color-ink); }
+.cost-table td { padding: var(--space-sm) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink-2); vertical-align: top; }
+.cost-table td:nth-child(2) { color: var(--color-ink); font-weight: 400; }
+.cost-3 .cost-total-row td:nth-child(2) { font-family: inherit; font-size: inherit; color: inherit; font-weight: 600; }
+.cost-3 .cost-total-row td:nth-child(3) { font-family: var(--font-display); font-size: var(--text-xl); color: var(--color-accent); font-weight: 700; }
+.cost-total-row td { border-bottom: 0; border-top: var(--rule-bar) solid var(--color-ink); color: var(--color-ink); font-weight: 600; }
+.cost-total-row td:nth-child(2) { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--color-accent); font-weight: 700; }
+@media (max-width: 600px) {
+  .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
+  .table-wrap thead { display: none; }
+  .table-wrap tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-sm); row-gap: var(--space-2xs); padding-block: var(--space-sm); border-bottom: var(--rule-hair) solid var(--color-rule); }
+  .table-wrap td { padding: 0; border: 0; }
+  .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: var(--text-xs); color: var(--color-muted); }
+  .table-wrap td:nth-child(3) { text-align: right; font-weight: 600; color: var(--color-ink); }
+  .table-wrap td:nth-child(4) { grid-column: 1 / -1; color: var(--color-muted); }
+  .table-wrap td:empty { display: none; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: var(--text-sm); color: var(--color-ink); }
+  .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; text-align: right; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
+  .table-wrap .cost-total-row { border-top: var(--rule-bar) solid var(--color-ink); border-bottom: 0; }
+}
 
-    .guide-box ul {
-      list-style-type: none;
-      padding-left: 0;
-    }
+/* Tips */
+.tips-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.tips-card .timeline-title { font-size: var(--text-section); align-self: start; }
+.tips-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-md); }
+.tips-list li { padding-bottom: var(--space-md); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.tips-list li:last-child { border-bottom: 0; }
+.tips-list strong { color: var(--color-ink); font-weight: 600; }
 
-    .guide-box li {
-      font-size: 0.9rem;
-      color: var(--color-text-sub);
-      margin-bottom: 6px;
-      position: relative;
-      padding-left: 14px;
-    }
+/* App course */
+.app-course-box { margin-top: var(--section-gap); display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--gap-columns); align-items: end; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-xl); }
+.app-course-box h2 { font-size: var(--text-section); margin-bottom: var(--space-md); }
+.app-course-box p { max-width: 52ch; }
+.app-course-box .app-action { justify-self: end; }
 
-    .guide-box li::before {
-      content: "•";
-      position: absolute;
-      left: 0;
-      color: var(--color-accent);
-      font-weight: bold;
-    }
+.article-credit { margin-top: var(--space-2xl); padding-block: var(--space-md) var(--space-3xl); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); }
 
-    .article-footer {
-      border-top: 1px solid var(--color-border);
-      padding-top: 36px;
-      margin-top: 60px;
-      font-size: 0.88rem;
-      color: var(--color-text-faint);
-      text-align: center;
-    }
-    header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
-    .header-nav a,.header-title a,.blog-tagline a{display:inline-block}
+/* Footer mast */
+.site-footer { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl); }
+.footer-inner { display: grid; gap: var(--space-md); }
+.footer-mark { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1.2; color: var(--color-band-text); }
+.footer-line { color: var(--color-band-muted); font-size: var(--text-sm); }
+.footer-links { display: flex; flex-wrap: wrap; gap: var(--space-lg); }
+.footer-links a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-band-text); font-size: var(--text-sm); text-decoration: underline; text-decoration-color: var(--color-gold); }
+.footer-links a:hover { text-decoration-color: var(--color-accent); color: var(--color-gold-2); }
+.footer-links a:active { transform: translateY(1px); }
+.site-footer :focus-visible { outline-color: var(--color-gold-2); }
+
+@media (max-width: 60rem) {
+  .hero, .spot-section, .spot-section.flip, .cost-table-card, .tips-card, .app-course-box { grid-template-columns: minmax(0, 1fr); }
+  .spot-section, .spot-section.flip { grid-template-areas: "head" "photo" "body"; grid-template-rows: auto; }
+  .spot-section.no-photo { grid-template-areas: "head" "body"; }
+  .hero { padding-block: var(--space-xl) var(--space-xl); }
+  .spot-photo { position: static; aspect-ratio: 16 / 10; }
+  .app-course-box { padding: var(--space-lg); }
+  .app-course-box .app-action { justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn, .link-quiet { transition: none; }
+  .btn:active, .link-quiet:active, .header-nav a:active, .header-logo:active, .footer-links a:active { transform: none; }
+}
+
+/* real-photo-flat 계열(평면 글): 번호 있는 긴 장소 제목, 사진 설명, 안내 상자, 지도 목록 */
+.lead-photo { margin: 0 0 var(--space-3xl); }
+.lead-photo img { width: 100%; max-height: 520px; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.lead-photo figcaption, .body-photo figcaption { margin-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.spot-photo figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--space-xs) var(--space-sm); font-size: var(--text-xs); line-height: 1.5; color: var(--color-accent-ink); background: color-mix(in oklab, var(--color-ink) 78%, transparent); }
+.body-photo { margin: 0; }
+.body-photo img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.spot-section.flat .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.tl-lead { max-width: var(--measure); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.guide-box, .order-box { background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); color: var(--color-ink); }
+.guide-box h4, .order-box strong { margin: 0 0 var(--space-xs); font-family: var(--font-display); font-size: var(--text-md); color: var(--color-ink); display: block; }
+.guide-box ul, .order-box ul { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-2xs); }
+.bridge { padding-top: var(--space-xs); color: var(--color-muted); font-size: var(--text-sm); }
+.map-links { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-md); }
+.map-links .timeline-title { font-size: var(--text-section); }
+.map-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-xs); }
+.map-list a, .map-link-chip { display: flex; justify-content: space-between; gap: var(--space-md); align-items: center; min-height: 44px; padding-block: var(--space-xs); border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink); text-decoration: none; }
+.map-links-grid { display: grid; gap: 0; }
+.map-link-chip .btn-action { color: var(--color-accent); font-weight: 600; white-space: nowrap; }
+@media (max-width: 40rem) { .spot-section.flat .spot-title { font-size: var(--text-lg); } }
+@media (max-width: 60rem) { .spot-photo { position: relative; } }
+
+/* spot-card 계열(editor-144): 대표 사진, 요약 상자, 본문 구획, 세부 코스, 이동 연결, 마무리 상자 */
+.hero-figure { margin: 0 0 var(--space-xl); }
+.hero-figure img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.hero-figure figcaption { padding-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-muted); }
+.summary-card { margin-bottom: var(--space-xl); background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-lg); font-size: var(--text-sm); }
+.summary-title, p.timeline-title, .cta-title { font-family: var(--font-display); font-weight: 700; line-height: 1.3; color: var(--color-ink); }
+.summary-title { font-size: var(--text-xl); margin-bottom: var(--space-sm); }
+p.timeline-title { letter-spacing: -0.01em; overflow-wrap: break-word; }
+.summary-list { margin: 0; padding: 0; list-style: none; display: grid; }
+.summary-list li { padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.summary-list li:last-child { border-bottom: 0; }
+.summary-list strong { color: var(--color-ink); font-weight: 600; }
+.prose-section { margin-top: var(--section-gap); max-width: var(--measure); display: grid; gap: var(--space-md); }
+.prose-section h2, .spots-title { font-size: var(--text-title); }
+.stops-section { margin-top: var(--section-gap); }
+.stops-section .spots { padding-top: var(--space-xl); }
+.spots.bridged { gap: 0; }
+.drive-bridge { margin: 0; padding-block: var(--space-xl); padding-left: var(--space-md); border-left: var(--rule-bar) solid var(--color-gold); font-size: var(--text-sm); color: var(--color-muted); }
+.drive-bridge strong { color: var(--color-ink); font-weight: 600; }
+.spot-header:has(.spot-badge) { flex-direction: column; align-items: flex-start; gap: var(--space-xs); }
+.spot-badge { font-size: var(--text-sm); font-weight: 600; color: var(--color-accent); }
+.spot-actions { display: flex; flex-wrap: wrap; gap: 0 var(--space-lg); }
+.info-wide .info-row { grid-template-columns: 5.5em minmax(0, 1fr); }
+.info-wide .info-row.plain { grid-template-columns: minmax(0, 1fr); }
+.cost-head .timeline-title.long { font-size: var(--text-title); }
+.cta-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-sm); max-width: var(--measure); }
+.cta-card h3, .cta-title { font-size: var(--text-title); }
+.cta-card .link-quiet { justify-self: start; }
   </style>
 </head>
 <body>
 
   <header class="site-header">
-    <div class="header-inner">
-      <a href="https://nufunc.github.io/oneul-date/" class="brand-link">
-        오늘 데이트 <span class="brand-badge">매거진</span>
-      </a>
+    <div class="header-inner container">
+      <a href="https://nufunc.github.io/oneul-date/blog/" class="header-logo">오늘 데이트 <span>매거진</span></a>
       <nav class="header-nav">
-        <a href="https://nufunc.github.io/oneul-date/blog/">전체 글</a>
-        <a href="https://nufunc.github.io/oneul-date/">데이트 코스 추천</a>
+        <a href="https://nufunc.github.io/oneul-date/">홈으로</a>
+        <a href="https://nufunc.github.io/oneul-date/blog/">전체 코스</a>
       </nav>
     </div>
   </header>
 
-  <main class="article-wrap">
-    <span class="post-badge">가을 고택·호반 감성</span>
-    <h1>[안동] 병산서원 만대루에서 부용대 하회마을 조망, 구시장 원조 안동찜닭과 맘모스베이커리·월영교 야경까지</h1>
-    <div class="post-sub-meta">
-      <span>글: 오늘 데이트 에디토리얼 팀</span>
-      <span>•</span>
-      <span>사진: 카카오맵</span>
-      <span>•</span>
-      <span>발행: 2026년 10월 11일</span>
-    </div>
+  <main class="article-container"><article>
+      <header class="article-header hero container">
+        <div class="hero-text">
+          <p class="hero-kicker badge-category"><span>가을 고택·호반 감성</span></p>
+          <h1 class="article-title">[안동] 병산서원 만대루에서 부용대 하회마을 조망, 구시장 원조 안동찜닭과 맘모스베이커리·월영교 야경까지</h1>
+          <div class="article-meta">
+            <span>글: 오늘 데이트 에디토리얼 팀</span>
+            <span>사진: 카카오맵</span>
+            <span>발행: 2026년 10월 11일</span>
+          </div>
+          <p><a class="btn" href="../../#c=1309.1790734959482.1314.1307.5661">앱에서 코스 열기</a></p>
+        </div>
+      </header>
 
-    <div class="lead-box">
-      굽이쳐 흐르는 낙동강 물줄기와 수백 년 전통의 고즈넉한 한옥들이 어우러지는 선비의 고장, 경북 안동으로 떠나는 가을 감성 여행 코스예요. 유네스코 세계유산 병산서원의 만대루 너머로 펼쳐지는 병풍 기암절벽을 바라보며 아침 사색을 즐기고, 64m 깎아지른 부용대 정상에 올라 낙동강이 감싸 안은 하회마을의 물돌이동 파노라마를 굽어보세요. 점심에는 안동구시장 찜닭골목의 오랜 노포에서 참간장 양념에 당면이 푸짐한 원조 안동찜닭을 맛보고, 1974년에 문을 연 맘모스베이커리에서 달콤한 크림치즈빵으로 쉬어간 뒤, 국내 최장 387m 목책교 월영교 위로 내려앉는 황금빛 노을과 안동호 달빛 야경으로 하루를 우아하게 마무리할 수 있어요.
-    </div>
-
-    <!-- 대표 사진 카드: 병산서원 만대루 -->
-    <div class="real-photo-card">
-      <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/c02a28c8481c6947a344ae6f99330252d5746244?original" alt="병산서원 돌담과 협문, 꽃 핀 배롱나무" loading="lazy">
-      <div class="photo-caption">병산서원 돌담과 협문, 꽃 핀 배롱나무 (출처: 카카오맵)</div>
-    </div>
-
-    <h2>🗺️ 가을 안동 유네스코 세계유산 &amp; 호반 감성 당일 동선 개요</h2>
-    <p>
-      안동 서쪽의 고즈넉한 세계유산 문화유적지(병산서원·부용대)에서 출발해 안동 원도심 구시장의 전통 미식(현대찜닭·맘모스베이커리)을 거쳐, 동쪽 안동호의 낭만적인 야경 명소(월영교)로 자연스럽게 이어지는 당일 동선이에요.
-    </p>
-
-    <div class="timeline-card">
-      <div class="tl-act">오전: 낙동강 절경을 품은 서원 사색</div>
-      <div class="tl-step">
-        <span class="tl-time">11:00</span>
-        <span class="tl-place">병산서원</span>
-        <span class="tl-note">유네스코 세계유산 만대루와 낙동강 병풍 절벽 산책</span>
+      <div class="container">
+        <div class="prose-intro">굽이쳐 흐르는 낙동강 물줄기와 수백 년 전통의 고즈넉한 한옥들이 어우러지는 선비의 고장, 경북 안동으로 떠나는 가을 감성 여행 코스예요. 유네스코 세계유산 병산서원의 만대루 너머로 펼쳐지는 병풍 기암절벽을 바라보며 아침 사색을 즐기고, 64m 깎아지른 부용대 정상에 올라 낙동강이 감싸 안은 하회마을의 물돌이동 파노라마를 굽어보세요. 점심에는 안동구시장 찜닭골목의 오랜 노포에서 참간장 양념에 당면이 푸짐한 원조 안동찜닭을 맛보고, 1974년에 문을 연 맘모스베이커리에서 달콤한 크림치즈빵으로 쉬어간 뒤, 국내 최장 387m 목책교 월영교 위로 내려앉는 황금빛 노을과 안동호 달빛 야경으로 하루를 우아하게 마무리할 수 있어요.</div>
+        <figure class="lead-photo">
+              <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/c02a28c8481c6947a344ae6f99330252d5746244?original" alt="병산서원 돌담과 협문, 꽃 핀 배롱나무" loading="lazy" />
+              <figcaption>병산서원 돌담과 협문, 꽃 핀 배롱나무 (출처: 카카오맵)</figcaption>
+            </figure>
       </div>
-      <div class="tl-move">차량 이동 약 22분 (직선거리 약 3.2km, 낙동강 우회)</div>
 
-      <div class="tl-act">낮: 하회마을을 한눈에 내려다보는 절벽 조망</div>
-      <div class="tl-step">
-        <span class="tl-time">12:30</span>
-        <span class="tl-place">부용대 (하회마을 조망)</span>
-        <span class="tl-note">64m 깎아지른 기암절벽 위에서 굽어보는 하회마을 물돌이동 파노라마</span>
-      </div>
-      <div class="tl-move">차량 이동 약 32분 (직선거리 약 19.0km)</div>
+      <!-- 동선 -->
+      <section class="timeline-card band">
+        <div class="container">
+          <h2 class="timeline-title">가을 안동 유네스코 세계유산 &amp; 호반 감성 당일 동선 개요</h2>
+          <p class="tl-lead">안동 서쪽의 고즈넉한 세계유산 문화유적지(병산서원·부용대)에서 출발해 안동 원도심 구시장의 전통 미식(현대찜닭·맘모스베이커리)을 거쳐, 동쪽 안동호의 낭만적인 야경 명소(월영교)로 자연스럽게 이어지는 당일 동선이에요.</p>
+          <div class="route" style="--n:5">
+            <div class="tl-act" style="--r:1; --c:1">오전: 낙동강 절경을 품은 서원 사색</div>
+            <div class="tl-step" style="--r:2; --c:1"><span class="tl-time">11:00</span><span class="tl-place">병산서원</span><span class="tl-note">유네스코 세계유산 만대루와 낙동강 병풍 절벽 산책</span></div>
+            <div class="tl-move" style="--r:3; --c:1">차량 이동 약 22분 (직선거리 약 3.2km, 낙동강 우회)</div>
+            <div class="tl-act" style="--r:1; --c:2">낮: 하회마을을 한눈에 내려다보는 절벽 조망</div>
+            <div class="tl-step" style="--r:2; --c:2"><span class="tl-time">12:30</span><span class="tl-place">부용대 (하회마을 조망)</span><span class="tl-note">64m 깎아지른 기암절벽 위에서 굽어보는 하회마을 물돌이동 파노라마</span></div>
+            <div class="tl-move" style="--r:3; --c:2">차량 이동 약 32분 (직선거리 약 19.0km)</div>
+            <div class="tl-act" style="--r:1; --c:3">점심: 안동구시장 원조 참간장 미식</div>
+            <div class="tl-step" style="--r:2; --c:3"><span class="tl-time">14:00</span><span class="tl-place">안동 현대찜닭</span><span class="tl-note">안동구시장 찜닭골목 대표 노포 참간장 당면 찜닭 미식</span></div>
+            <div class="tl-move" style="--r:3; --c:3">도보 이동 약 4분 (직선거리 약 0.29km)</div>
+            <div class="tl-act" style="--r:1; --c:4">오후: 1974년 개업 빵집 쉼</div>
+            <div class="tl-step" style="--r:2; --c:4"><span class="tl-time">15:30</span><span class="tl-place">맘모스베이커리</span><span class="tl-note">1974년 창업 미쉐린 그린가이드 소개 시그니처 크림치즈빵 간식 쉼</span></div>
+            <div class="tl-move" style="--r:3; --c:4">차량 이동 약 8분 (직선거리 약 3.0km)</div>
+            <div class="tl-act" style="--r:1; --c:5">저녁: 안동호 달빛 목책교 피날레</div>
+            <div class="tl-step" style="--r:2; --c:5"><span class="tl-time">17:30</span><span class="tl-place">월영교 &amp; 월영정</span><span class="tl-note">국내 최장 387m 목책 인도교 노을과 안동호 달빛 조명 야경</span></div>
+          </div>
+        </div>
+      </section>
 
-      <div class="tl-act">점심: 안동구시장 원조 참간장 미식</div>
-      <div class="tl-step">
-        <span class="tl-time">14:00</span>
-        <span class="tl-place">안동 현대찜닭</span>
-        <span class="tl-note">안동구시장 찜닭골목 대표 노포 참간장 당면 찜닭 미식</span>
-      </div>
-      <div class="tl-move">도보 이동 약 4분 (직선거리 약 0.29km)</div>
-
-      <div class="tl-act">오후: 1974년 개업 빵집 쉼</div>
-      <div class="tl-step">
-        <span class="tl-time">15:30</span>
-        <span class="tl-place">맘모스베이커리</span>
-        <span class="tl-note">1974년 창업 미쉐린 그린가이드 소개 시그니처 크림치즈빵 간식 쉼</span>
-      </div>
-      <div class="tl-move">차량 이동 약 8분 (직선거리 약 3.0km)</div>
-
-      <div class="tl-act">저녁: 안동호 달빛 목책교 피날레</div>
-      <div class="tl-step">
-        <span class="tl-time">17:30</span>
-        <span class="tl-place">월영교 &amp; 월영정</span>
-        <span class="tl-note">국내 최장 387m 목책 인도교 노을과 안동호 달빛 조명 야경</span>
-      </div>
-    </div>
-
-    <!-- 1절: 병산서원 -->
-    <h2>1. 조선 건축의 백미, 자연과 조응하는 유네스코 세계유산 병산서원</h2>
-    <p>
+      <div class="container">
+        <div class="spots">
+          <section class="spot-section flat no-photo">
+            <div class="spot-head">
+              <h2 class="spot-title">1. 조선 건축의 백미, 자연과 조응하는 유네스코 세계유산 병산서원</h2>
+            </div>
+            <div class="spot-body">
+              <p>
       안동 여행의 첫 정류장은 서애 류성룡 선생의 학문과 덕행을 기리는 유네스코 세계유산 병산서원이에요. 화산 자락이 낙동강을 감싸 안는 천혜의 배산임수 명당에 자리 잡고 있어, 한국 전통 건축 가운데 자연과의 조화가 가장 빼어난 서원으로 손꼽혀요. 복례문을 지나 경내로 들어서면 누하진입(樓下進入) 방식으로 2층 누각 만대루 아래를 통과해 강당인 입교당에 닿게 돼요.
     </p>
-    <p>
+              <p>
       입교당 대청마루에 걸터앉아 만대루를 바라보면, 만대루의 일곱 칸 기둥 사이사이가 마치 자연 액자처럼 낙동강 백사장과 병산(屛山)의 푸른 암벽을 그림처럼 담아내요. 서원 앞뜰에 서 있는 배롱나무 고목의 고즈넉한 자태와 바람에 스치는 강물 소리가 번잡한 일상을 잊고 깊은 평온을 누리게 해줘요.
     </p>
-
-    <div class="guide-box">
-      <h4>📍 병산서원 이용 안내</h4>
+              <div class="guide-box">
+      <h4>병산서원 이용 안내</h4>
       <ul>
         <li>주소: 경상북도 안동시 풍천면 병산길 386</li>
         <li>지정: 유네스코 세계유산 '한국의 서원' 등재, 사적, 만대루 보물</li>
@@ -544,39 +374,29 @@
         <li>주차: 서원 입구 공영 주차장 완비 (무료)</li>
       </ul>
     </div>
+              <div class="tip-box"><strong class="tip-title">에디터 관람 팁:</strong>만대루는 문화재 보호를 위해 누각 위로 직접 올라갈 수 없지만, 입교당 대청마루 중앙에 앉아 바라보는 '차경(借景, 자연을 빌려온 경치)' 구도가 가장 아름다워요.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%EB%B3%91%EC%82%B0%EC%84%9C%EC%9B%90" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도로 병산서원 확인하기</a></div>
+              <p class="bridge">선비의 절개와 자연의 조화를 마음 깊이 담았다면, 차량으로 약 22분(직선거리 약 3.2km, 낙동강 우회 도로) 이동해 하회마을을 가장 높은 곳에서 굽어보는 부용대로 향해봐요.</p>
+            </div>
+          </section>
 
-    <div class="tip-box">
-      <strong>💡 에디터 관람 팁:</strong>
-      만대루는 문화재 보호를 위해 누각 위로 직접 올라갈 수 없지만, 입교당 대청마루 중앙에 앉아 바라보는 '차경(借景, 자연을 빌려온 경치)' 구도가 가장 아름다워요.
-    </div>
-
-    <div class="map-btn-wrap">
-      <a href="https://map.naver.com/p/search/%EB%B3%91%EC%82%B0%EC%84%9C%EC%9B%90" target="_blank" rel="noopener noreferrer" class="map-btn">
-        🧭 네이버 지도로 병산서원 확인하기
-      </a>
-    </div>
-
-    <div class="bridge-box">
-      선비의 절개와 자연의 조화를 마음 깊이 담았다면, 차량으로 약 22분(직선거리 약 3.2km, 낙동강 우회 도로) 이동해 하회마을을 가장 높은 곳에서 굽어보는 부용대로 향해봐요.
-    </div>
-
-    <!-- 2절: 부용대 -->
-    <h2>2. 낙동강 물돌이 하회마을이 한눈에 펼쳐지는 64m 기암절벽, 부용대</h2>
-    <p>
+          <section class="spot-section flat flip">
+            <div class="spot-head">
+              <h2 class="spot-title">2. 낙동강 물돌이 하회마을이 한눈에 펼쳐지는 64m 기암절벽, 부용대</h2>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/92de8506d136ec0254eead1f2eb9c9fd9c57476a?original" alt="부용대에서 내려다본 하회마을" loading="lazy" />
+              <figcaption>부용대에서 내려다본 하회마을 (출처: 카카오맵)</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p>
       부용대(芙蓉臺)는 태백산맥의 맨 끝자락에 위치한 해발 64m 높이의 깎아지른 바위 절벽이에요. '부용(芙蓉)'은 연꽃을 뜻하며, 옛 문헌에는 북애(北厓)로도 기록된 명승이에요. 옥연정사와 화천서원 옆 솔숲길을 따라 완만한 흙길을 약 5분 정도 걸어 오르면 정상 전망대에 닿을 수 있어요.
     </p>
-    <p>
+              <p>
       정상 난간에 서면 낙동강 물줄기가 S자로 부드럽게 휘감아 도는 하회마을의 전경이 시원하게 펼쳐져요. 만송정 솔숲의 울창한 송림과 전통 기와지붕, 황금빛으로 물들어가는 가을 들판이 한눈에 들어와 감탄을 자아내요. 하회마을 안쪽 골목을 걸을 때와는 또 다른 웅장한 공간감을 선사하는 안동 최고의 조망 명소예요.
     </p>
-
-    <!-- 사진 카드: 부용대 -->
-    <div class="real-photo-card">
-      <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/92de8506d136ec0254eead1f2eb9c9fd9c57476a?original" alt="부용대에서 내려다본 하회마을" loading="lazy">
-      <div class="photo-caption">부용대에서 내려다본 하회마을 (출처: 카카오맵)</div>
-    </div>
-
-    <div class="guide-box">
-      <h4>📍 부용대 이용 안내</h4>
+              <div class="guide-box">
+      <h4>부용대 이용 안내</h4>
       <ul>
         <li>주소: 경북 안동시 풍천면 광덕솔밭길 72 (화천서원 방면 진입)</li>
         <li>입장료: 무료 입장</li>
@@ -584,39 +404,29 @@
         <li>주차: 화천서원 입구 주차장 이용 가능 (무료, 카카오맵 표기)</li>
       </ul>
     </div>
+              <div class="tip-box"><strong class="tip-title">에디터 조망 팁:</strong>절벽 지형 특성상 난간 너머는 가파른 벼랑이므로 안전선 안쪽에서 관람해야 해요. 정오 무렵 방문하면 하회마을 전역에 햇살이 고루 비쳐 맑고 선명한 풍경 사진을 담기 좋아요.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%EB%B6%80%EC%9A%A9%EB%8C%80" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도로 부용대 확인하기</a></div>
+              <p class="bridge">탁 트인 절경을 감상한 뒤에는, 차량으로 약 32분(직선거리 약 19.0km) 이동해 안동 원도심 안동구시장 찜닭골목에서 풍성한 점심 식사를 즐겨봐요.</p>
+            </div>
+          </section>
 
-    <div class="tip-box">
-      <strong>💡 에디터 조망 팁:</strong>
-      절벽 지형 특성상 난간 너머는 가파른 벼랑이므로 안전선 안쪽에서 관람해야 해요. 정오 무렵 방문하면 하회마을 전역에 햇살이 고루 비쳐 맑고 선명한 풍경 사진을 담기 좋아요.
-    </div>
-
-    <div class="map-btn-wrap">
-      <a href="https://map.naver.com/p/search/%EB%B6%80%EC%9A%A9%EB%8C%80" target="_blank" rel="noopener noreferrer" class="map-btn">
-        🧭 네이버 지도로 부용대 확인하기
-      </a>
-    </div>
-
-    <div class="bridge-box">
-      탁 트인 절경을 감상한 뒤에는, 차량으로 약 32분(직선거리 약 19.0km) 이동해 안동 원도심 안동구시장 찜닭골목에서 풍성한 점심 식사를 즐겨봐요.
-    </div>
-
-    <!-- 3절: 안동 현대찜닭 -->
-    <h2>3. 달콤짭조름한 참간장 양념과 쫄깃한 당면, 안동 현대찜닭</h2>
-    <p>
+          <section class="spot-section flat">
+            <div class="spot-head">
+              <h2 class="spot-title">3. 달콤짭조름한 참간장 양념과 쫄깃한 당면, 안동 현대찜닭</h2>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/1b7dded169eacb4088ca87f7d382c18108dc2736?original" alt="안동구시장 찜닭골목 노포에서 참간장 양념에 졸여낸 푸짐한 안동찜닭" loading="lazy" />
+              <figcaption>안동구시장 찜닭골목 노포에서 참간장 양념에 졸여낸 푸짐한 안동찜닭 (출처: 카카오맵)</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p>
       안동구시장 서문 안쪽으로 길게 이어진 안동 찜닭골목은 원조 찜닭의 진수를 맛볼 수 있는 미식의 성지예요. 그중에서도 현대찜닭은 오랜 세월 자리를 지켜온 대표 노포로, 신선한 국내산 닭고기와 풍성한 채소, 쫄깃한 당면이 조화를 이루는 정통 안동찜닭을 선보여요.
     </p>
-    <p>
+              <p>
       커다란 무쇠 솥에서 센 불로 끓여내는 안동찜닭은 은은한 캐러멜빛 참간장 소스에 청양고추의 칼칼함이 더해져 물리지 않고 끝까지 개운해요. 포슬포슬하게 잘 익은 큼직한 감자와 양념을 듬뿍 머금은 당면을 먼저 건져 먹은 뒤, 부드러운 닭고기 살을 발라 밥 위에 올려 비벼 먹으면 든든하고 만족스러운 한 끼가 완성돼요.
     </p>
-
-    <!-- 사진 카드: 현대찜닭 -->
-    <div class="real-photo-card">
-      <img src="https://t1.daumcdn.net/local/kakaomapPhoto/review/1b7dded169eacb4088ca87f7d382c18108dc2736?original" alt="안동구시장 찜닭골목 노포에서 참간장 양념에 졸여낸 푸짐한 안동찜닭" loading="lazy">
-      <div class="photo-caption">안동구시장 찜닭골목 노포에서 참간장 양념에 졸여낸 푸짐한 안동찜닭 (출처: 카카오맵)</div>
-    </div>
-
-    <div class="guide-box">
-      <h4>📍 안동 현대찜닭 메뉴 및 이용 안내</h4>
+              <div class="guide-box">
+      <h4>안동 현대찜닭 메뉴 및 이용 안내</h4>
       <ul>
         <li>주소: 경상북도 안동시 번영1길 47 (남문동, 안동구시장 찜닭골목 내)</li>
         <li>대표 메뉴: 안동찜닭(중) 32,000원 / 안동찜닭(대) 48,000원 / 순살찜닭 37,000원 (카카오맵 메뉴, 2026-11-01 조회)</li>
@@ -624,39 +434,29 @@
         <li>주차: 안동구시장 공영주차장 이용 권장 (카카오맵 안내)</li>
       </ul>
     </div>
+              <div class="tip-box"><strong class="tip-title">에디터 미식 팁:</strong>뼈를 바르기 번거롭다면 순살찜닭(37,000원, 카카오맵 메뉴)을 고를 수 있어요.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%EC%95%88%EB%8F%99%20%ED%98%84%EB%8C%80%EC%B0%9C%EB%8B%AD" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도로 안동 현대찜닭 확인하기</a></div>
+              <p class="bridge">푸짐한 찜닭으로 배를 채운 뒤, 구시장 골목을 빠져나와 도보로 약 4분(직선거리 약 290m) 거리에 위치한 맘모스베이커리로 걸어가 디저트 쉼을 가져봐요.</p>
+            </div>
+          </section>
 
-    <div class="tip-box">
-      <strong>💡 에디터 미식 팁:</strong>
-      뼈를 바르기 번거롭다면 순살찜닭(37,000원, 카카오맵 메뉴)을 고를 수 있어요.
-    </div>
-
-    <div class="map-btn-wrap">
-      <a href="https://map.naver.com/p/search/%EC%95%88%EB%8F%99%20%ED%98%84%EB%8C%80%EC%B0%9C%EB%8B%AD" target="_blank" rel="noopener noreferrer" class="map-btn">
-        🧭 네이버 지도로 안동 현대찜닭 확인하기
-      </a>
-    </div>
-
-    <div class="bridge-box">
-      푸짐한 찜닭으로 배를 채운 뒤, 구시장 골목을 빠져나와 도보로 약 4분(직선거리 약 290m) 거리에 위치한 맘모스베이커리로 걸어가 디저트 쉼을 가져봐요.
-    </div>
-
-    <!-- 4절: 맘모스베이커리 -->
-    <h2>4. 1974년부터 사랑받아온 전통 제과점, 맘모스베이커리</h2>
-    <p>
+          <section class="spot-section flat flip">
+            <div class="spot-head">
+              <h2 class="spot-title">4. 1974년부터 사랑받아온 전통 제과점, 맘모스베이커리</h2>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://t1.kakaocdn.net/mystore/90CFA473164846078C706A80C9BD882E" alt="1974년 개업해 반세기 역사를 이어온 맘모스베이커리 외관" loading="lazy" />
+              <figcaption>1974년 개업해 반세기 역사를 이어온 맘모스베이커리 외관 (출처: 카카오맵)</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p>
       안동 문화광장길 중앙에 자리한 맘모스베이커리는 1974년에 문을 열어 50여 년 동안 안동 시민과 전국의 빵 애호가들에게 사랑받아온 명소예요. 미쉐린 그린가이드 한국편 등에 소개된 제과점으로, 오랜 전통과 클래식한 분위기를 간직하고 있어요.
     </p>
-    <p>
+              <p>
       이곳의 시그니처 메뉴인 크림치즈빵(2,900원, 카카오맵 메뉴)은 쫄깃하면서도 부드러운 하얀 빵 속에 진하고 새콤달콤한 크림치즈가 아낌없이 꽉 채워져 있어요. 겉면에 살짝 뿌려진 파슬리 가루가 향을 더하며, 한 입 베어 무는 순간 입안 가득 퍼지는 고소한 치즈의 풍미가 일품이에요. 매장 내부의 카페 공간에서 커피나 차와 함께 가벼운 디저트 티타임을 즐기기 좋아요.
     </p>
-
-    <!-- 사진 카드: 맘모스베이커리 -->
-    <div class="real-photo-card">
-      <img src="https://t1.kakaocdn.net/mystore/90CFA473164846078C706A80C9BD882E" alt="1974년 개업해 반세기 역사를 이어온 맘모스베이커리 외관" loading="lazy">
-      <div class="photo-caption">1974년 개업해 반세기 역사를 이어온 맘모스베이커리 외관 (출처: 카카오맵)</div>
-    </div>
-
-    <div class="guide-box">
-      <h4>📍 맘모스베이커리 이용 안내</h4>
+              <div class="guide-box">
+      <h4>맘모스베이커리 이용 안내</h4>
       <ul>
         <li>주소: 경상북도 안동시 문화광장길 34 (남부동 본점)</li>
         <li>대표 메뉴: 크림치즈빵 2,900원 / 유자파운드 18,000원 / 아메리카노 4,000원 (카카오맵 메뉴, 2026-11-01 조회)</li>
@@ -664,39 +464,29 @@
         <li>주차: 원도심 문화광장 인근 공영주차장 또는 구시장 주차장 이용</li>
       </ul>
     </div>
+              <div class="tip-box"><strong class="tip-title">에디터 디저트 팁:</strong>크림치즈빵은 워낙 인기가 많아 갓 구워져 나오는 시간대에는 줄을 서는 경우가 많지만 회전율이 빨라요. 당일 바로 먹을 분량 외에 포장용 빵을 함께 구매해 여행길 간식으로 챙겨도 훌륭해요.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%EC%95%88%EB%8F%99%20%EB%A7%98%EB%AA%A8%EC%8A%A4%EB%B2%A0%EC%9D%B4%EC%BB%A4%EB%A6%AC" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도로 맘모스베이커리 확인하기</a></div>
+              <p class="bridge">달콤한 디저트로 당을 충전했다면, 차량으로 약 8분(직선거리 약 3.0km) 이동해 해 질 녘 노을과 화려한 조명이 어우러지는 안동의 대표 야경 명소 월영교로 향해봐요.</p>
+            </div>
+          </section>
 
-    <div class="tip-box">
-      <strong>💡 에디터 디저트 팁:</strong>
-      크림치즈빵은 워낙 인기가 많아 갓 구워져 나오는 시간대에는 줄을 서는 경우가 많지만 회전율이 빨라요. 당일 바로 먹을 분량 외에 포장용 빵을 함께 구매해 여행길 간식으로 챙겨도 훌륭해요.
-    </div>
-
-    <div class="map-btn-wrap">
-      <a href="https://map.naver.com/p/search/%EC%95%88%EB%8F%99%20%EB%A7%98%EB%AA%A8%EC%8A%A4%EB%B2%A0%EC%9D%B4%EC%BB%A4%EB%A6%AC" target="_blank" rel="noopener noreferrer" class="map-btn">
-        🧭 네이버 지도로 맘모스베이커리 확인하기
-      </a>
-    </div>
-
-    <div class="bridge-box">
-      달콤한 디저트로 당을 충전했다면, 차량으로 약 8분(직선거리 약 3.0km) 이동해 해 질 녘 노을과 화려한 조명이 어우러지는 안동의 대표 야경 명소 월영교로 향해봐요.
-    </div>
-
-    <!-- 5절: 월영교 -->
-    <h2>5. 국내 최장 387m 목책교 위로 내려앉는 저녁 노을과 달빛 야경, 월영교</h2>
-    <p>
+          <section class="spot-section flat">
+            <div class="spot-head">
+              <h2 class="spot-title">5. 국내 최장 387m 목책교 위로 내려앉는 저녁 노을과 달빛 야경, 월영교</h2>
+            </div>
+            <figure class="spot-photo spot-image-wrap">
+              <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/0ec25e9a0e7515439371b42104cb2172a74e6540?original" alt="안동호 수면 너머로 펼쳐지는 월영교 일대 수변 풍경" loading="lazy" />
+              <figcaption>안동호 수면 너머로 펼쳐지는 월영교 일대 수변 풍경 (출처: 카카오맵)</figcaption>
+            </figure>
+            <div class="spot-body">
+              <p>
       안동호 하류를 가로지르는 월영교(月映橋)는 총길이 387m, 너비 3.6m에 이르는 국내에서 가장 긴 목책 인도교예요. 조선 중기 먼저 세상을 떠난 남편을 그리워하며 자신의 머리카락을 엮어 미투리를 만든 이응태 부인의 애절한 사랑 이야기(원이 엄마 설화)를 모티프로 삼아 미투리 형상으로 조형되었어요.
     </p>
-    <p>
+              <p>
       다리 한가운데에는 팔각정 형태의 누각인 월영정(月映亭)이 자리 잡고 있어 안동호의 시원한 수변 바람을 맞으며 쉬어가기 좋아요. 해 질 무렵 서쪽 하늘이 붉게 물들기 시작하면 목책 난간과 월영정에 은은한 황금빛 조명이 켜지며 수면 위로 낭만적인 반영이 펼쳐져요. 어둠이 내리면 형형색색의 조명을 밝힌 초승달 모양의 문보트(Moon Boat)들이 호수 위를 유영하며 몽환적이고 로맨틱한 가을밤 풍경을 완성해요.
     </p>
-
-    <!-- 사진 카드: 월영교 -->
-    <div class="real-photo-card">
-      <img src="https://t1.kakaocdn.net/local/kakaomapPhoto/review/0ec25e9a0e7515439371b42104cb2172a74e6540?original" alt="안동호 수면 너머로 펼쳐지는 월영교 일대 수변 풍경" loading="lazy">
-      <div class="photo-caption">안동호 수면 너머로 펼쳐지는 월영교 일대 수변 풍경 (출처: 카카오맵)</div>
-    </div>
-
-    <div class="guide-box">
-      <h4>📍 월영교 이용 안내</h4>
+              <div class="guide-box">
+      <h4>월영교 이용 안내</h4>
       <ul>
         <li>주소: 경상북도 안동시 상아동 569 (석주로 203)</li>
         <li>시설 제원: 길이 387m, 너비 3.6m (국내 최장 목책 인도교)</li>
@@ -705,26 +495,21 @@
         <li>주차: 월영교 앞 공영 주차장 이용 가능 (무료, 카카오맵 표기)</li>
       </ul>
     </div>
+              <div class="tip-box"><strong class="tip-title">에디터 야경 팁:</strong>10월 안동의 일몰 시각은 약 17:40~17:55 안팎이므로, 17시 30분경 도착해 다리를 건너며 노을빛과 조명이 교차하는 매직아워를 감상해보세요. 다리 건너편 산책로를 따라 안동민속촌 방향으로 걸으면 월영교 전체의 조명 반영을 한눈에 담을 수 있어요.</div>
+              <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/%EC%9B%94%EC%98%81%EA%B5%90" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도로 월영교 확인하기</a></div>
+            </div>
+          </section>
+        </div>
 
-    <div class="tip-box">
-      <strong>💡 에디터 야경 팁:</strong>
-      10월 안동의 일몰 시각은 약 17:40~17:55 안팎이므로, 17시 30분경 도착해 다리를 건너며 노을빛과 조명이 교차하는 매직아워를 감상해보세요. 다리 건너편 산책로를 따라 안동민속촌 방향으로 걸으면 월영교 전체의 조명 반영을 한눈에 담을 수 있어요.
-    </div>
-
-    <div class="map-btn-wrap">
-      <a href="https://map.naver.com/p/search/%EC%9B%94%EC%98%81%EA%B5%90" target="_blank" rel="noopener noreferrer" class="map-btn">
-        🧭 네이버 지도로 월영교 확인하기
-      </a>
-    </div>
-
-    <!-- 비용표 -->
-    <h2>💰 2인 기준 예상 여행 경비 정산표</h2>
-    <p>
+        <!-- 2인 예상 입장료 -->
+        <section class="cost-table-card">
+          <div class="cost-head">
+            <h2 class="timeline-title">2인 기준 예상 여행 경비 정산표</h2>
+            <p>
       유네스코 세계유산 서원 사색과 원조 안동찜닭 식사, 베이커리 디저트, 야경 산책을 포함한 2인 총 예상 비용 정산표예요. 주요 유적지와 목책교가 무료 개방되어 있어 매우 알차고 합리적인 당일 여행을 즐길 수 있어요.
     </p>
-
-    <div class="table-wrap">
-      <table>
+          </div>
+          <div class="table-wrap"><table class="cost-table">
         <thead>
           <tr>
             <th>구분</th>
@@ -764,36 +549,48 @@
             <td>0원</td>
             <td>387m 목책 인도교 및 야경 무료 관람 (주차 무료)</td>
           </tr>
-          <tr style="background-color: #fafaf9; font-weight: 700;">
+          <tr class="cost-total-row">
             <td colspan="2">2인 총 예상 비용 합계</td>
-            <td style="color: var(--color-warm);">약 45,800원</td>
+            <td>약 45,800원</td>
             <td>문보트 선택 탑승 시 28,000원 추가 (합계 약 73,800원)</td>
           </tr>
         </tbody>
-      </table>
-    </div>
+      </table></div>
+        </section>
 
-    <!-- 추천 스팟 네이버 지도 목록 -->
-    <h2>📍 코스 추천 스팟 네이버 지도 바로가기</h2>
-    <ul>
+        <section class="map-links">
+          <h2 class="timeline-title">코스 추천 스팟 네이버 지도 바로가기</h2>
+          <ul class="map-list">
       <li><a href="https://map.naver.com/p/search/%EB%B3%91%EC%82%B0%EC%84%9C%EC%9B%90" target="_blank" rel="noopener noreferrer">병산서원 (경상북도 안동시 풍천면 병산길 386)</a></li>
       <li><a href="https://map.naver.com/p/search/%EB%B6%80%EC%9A%A9%EB%8C%80" target="_blank" rel="noopener noreferrer">부용대 (경북 안동시 풍천면 광덕솔밭길 72)</a></li>
       <li><a href="https://map.naver.com/p/search/%EC%95%88%EB%8F%99%20%ED%98%84%EB%8C%80%EC%B0%9C%EB%8B%AD" target="_blank" rel="noopener noreferrer">안동 현대찜닭 (경상북도 안동시 번영1길 47)</a></li>
       <li><a href="https://map.naver.com/p/search/%EC%95%88%EB%8F%99%20%EB%A7%98%EB%AA%A8%EC%8A%A4%EB%B2%A0%EC%9D%B4%EC%BB%A4%EB%A6%AC" target="_blank" rel="noopener noreferrer">맘모스베이커리 (경상북도 안동시 문화광장길 34)</a></li>
       <li><a href="https://map.naver.com/p/search/%EC%9B%94%EC%98%81%EA%B5%90" target="_blank" rel="noopener noreferrer">월영교 (경상북도 안동시 상아동 569)</a></li>
     </ul>
+        </section>
 
-    <div class="app-course-box" style="margin: 40px 0 24px; padding: 20px 22px; background: var(--color-accent-light); border: 1px solid var(--color-border); border-radius: 14px;">
-      <strong style="display: block; font-size: 17px; color: var(--color-text-main); margin-bottom: 6px;">🗺️ 이 코스 오늘 데이트에서 열기</strong>
-      <p style="margin: 0 0 14px; font-size: 14.5px; line-height: 1.6; color: var(--color-text-main);">글에 나온 장소 5곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
-      <a href="../../#c=1309.1790734959482.1314.1307.5661" style="display: inline-block; padding: 10px 18px; border-radius: 10px; background: var(--color-text-main); color: #ffffff; font-weight: 700; font-size: 15px; text-decoration: none;">앱에서 코스 열기 →</a>
-    </div>
+        <div class="app-course-box">
+          <div>
+            <h2>이 코스 오늘 데이트에서 열기</h2>
+            <p>글에 나온 장소 5곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
+          </div>
+          <a class="btn app-action" href="../../#c=1309.1790734959482.1314.1307.5661">앱에서 코스 열기</a>
+        </div>
 
-    <footer class="article-footer">
-      <p>© 2026 오늘 데이트 (Oneul Date). 전국 엄선 스팟 데이터를 바탕으로 제작되었습니다.</p>
+        <footer class="article-credit">
+          <p>© 2026 오늘 데이트 (Oneul Date). 전국 엄선 스팟 데이터를 바탕으로 제작되었습니다.</p>
       <p style="margin-top: 6px; font-size: 0.8rem;">본 콘텐츠의 사진은 카카오맵을 바탕으로 제공됩니다.</p>
-    </footer>
-  </main>
+        </footer>
+      </div>
+    </article></main>
+
+  <footer class="site-footer">
+    <div class="footer-inner container">
+      <p class="footer-mark"><strong>오늘 데이트 (Oneul Date)</strong></p>
+      <p class="footer-line">전국 데이트 & 여행 코스 큐레이션 매거진</p>
+      <p class="footer-links"><a href="https://nufunc.github.io/oneul-date/">홈으로 가기</a><a href="https://nufunc.github.io/oneul-date/blog/">매거진 전체보기</a></p>
+    </div>
+  </footer>
 
 </body>
 </html>
