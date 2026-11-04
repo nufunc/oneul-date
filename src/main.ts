@@ -2181,10 +2181,14 @@ function courseTitle(cond: NonNullable<AppState['courseConditions']>, course: Co
     return region ? `❤️ 찜한 코스 · ${region}` : '❤️ 찜한 코스';
   }
   // 켠 테마 칩 이름을 적는다. 맞춤 코스 탭에는 분위기 입력이 없어 고르지 않은 '모든 분위기'를 적지 않는다(P-280)
-  const region = regionsLabel(cond.regions, cond.subZones);
-  const theme = cond.categoryKey && cond.categoryKey !== 'ALL' ? SPOT_EXPLORE_CATEGORIES.find((c) => c.key === cond.categoryKey) : undefined;
+  return areaThemeLabel(regionsLabel(cond.regions, cond.subZones), cond.mood, cond.categoryKey);
+}
+
+/** 지역 라벨 뒤에 켠 테마 칩(`이모지 이름`)을 붙인다. 칩이 없고 분위기도 ALL이면 지역만. 코스 제목과 복사 글 머리줄이 함께 쓴다 */
+function areaThemeLabel(region: string, mood: string, categoryKey?: string): string {
+  const theme = categoryKey && categoryKey !== 'ALL' ? SPOT_EXPLORE_CATEGORIES.find((c) => c.key === categoryKey) : undefined;
   if (theme) return `${region} · ${theme.emoji} ${theme.label}`;
-  return cond.mood === 'ALL' ? region : `${region} · ${moodLabel(cond.mood)}`;
+  return mood === 'ALL' ? region : `${region} · ${moodLabel(mood)}`;
 }
 
 function moodLabel(moodKey: string): string {
@@ -2926,13 +2930,13 @@ async function formatCourseTextAsync(
   regionKeys: string[],
   moodKey: string,
   zoneKeys: string[] = [],
+  categoryKey?: string,
 ): Promise<string> {
   const blocks: string[] = [];
-  const regionText = regionsLabel(regionKeys, zoneKeys);
-  const moodText = moodLabel(moodKey);
+  const headText = areaThemeLabel(regionsLabel(regionKeys, zoneKeys), moodKey, categoryKey);
   const story = generateCourseStory(steps, byId, moodKey, false);
 
-  blocks.push(`💖 [오늘 데이트 코스] ${regionText} · ${moodText}\n✨ "${story}"`);
+  blocks.push(`💖 [오늘 데이트 코스] ${headText}\n✨ "${story}"`);
 
   const filled = steps.filter((st): st is CourseStep & { spotId: number } => st.spotId !== null);
 
@@ -2981,7 +2985,7 @@ async function formatCourseTextAsync(
   }
 
   // 전체 코스 웹 바로가기 링크
-  const shareUrl = buildShareUrl(filled.map((s) => s.spotId));
+  const shareUrl = buildShareUrl(filled.map((s) => s.spotId), categoryKey);
   blocks.push(`🔗 전체 코스 및 길찾기 열기:\n${shareUrl}`);
 
   return blocks.join('\n\n');
@@ -5841,6 +5845,8 @@ function bindResultEvents(area: HTMLElement): void {
         state.courseConditions.regions,
         state.courseConditions.mood,
         state.courseConditions.subZones,
+        // 칩은 지역으로 만든 코스에서만 싣는다(🔗 공유와 같은 규칙)
+        state.courseConditions.anchorId || state.courseConditions.fromSaved ? undefined : state.courseConditions.categoryKey,
       );
       await copyOrShowText(text, '📋 코스가 복사되었어요');
     } catch {
@@ -7176,7 +7182,8 @@ function renderReceiverView(steps: CourseStep[]): void {
   // 수신자 뷰 액션 이벤트 바인딩
   document.getElementById('btn-receiver-copy')?.addEventListener('click', async () => {
     try {
-      const text = await formatCourseTextAsync(steps, spotById, [], 'ALL', []);
+      const area = sharedArea();
+      const text = await formatCourseTextAsync(steps, spotById, area.regions, 'ALL', area.subZones, sharedCategoryKey);
       await copyOrShowText(text, '📋 코스가 복사되었어요');
     } catch {
       showToast('복사하지 못했어요');
@@ -7510,6 +7517,7 @@ function renderOverlayContent(): void {
             normalizeRegionCond(item.conditions.region),
             item.conditions.mood,
             item.conditions.subZones || [],
+            item.conditions.categoryKey,
           );
           // 제외 안내를 먼저 띄우면 바로 이 토스트가 덮어써 한 번에 합친다
           await copyOrShowText(text, dropped > 0 ? `📋 ${dropped}곳을 빼고 코스를 복사했어요` : '📋 코스가 복사되었어요');

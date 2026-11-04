@@ -12,7 +12,7 @@ const cut = (from, to) => {
   assert(start >= 0, `src/main.ts에 ${from}이 없다`);
   return src.slice(start, src.indexOf(to, start) + to.length);
 };
-const code = cut('async function formatCourseTextAsync', '\n}\n');
+const code = cut('function areaThemeLabel', '\n}\n') + cut('async function formatCourseTextAsync', '\n}\n');
 
 let fetchCalls = 0;
 const stubs = {
@@ -23,6 +23,7 @@ const stubs = {
   generateCourseStory: (_steps, _byId, mood) => `템플릿 총평 ${mood}`,
   regionsLabel: () => '성수',
   moodLabel: () => '감성',
+  SPOT_EXPLORE_CATEGORIES: [],
   naverMapUrl: (s) => `https://map.example/${s.id}`,
   getCleanSpotSummary: () => '',
   getDistanceKm: () => 0.5,
