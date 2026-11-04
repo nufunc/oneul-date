@@ -24,30 +24,34 @@ function routeA(card) {
 
 // 동선 B: route-step-item(번호, 이름·시각, 설명). 번호는 tl-badge로, 시각이 앞에 있으면 tl-time으로 둔다.
 function routeB(card) {
-  const raw = innerOf(card);
-  const title = raw.match(/<div class="summary-title">([\s\S]*?)<\/div>/)?.[1] ?? fail('summary-title을 찾지 못했다');
+  // 포항: 제목이 h2.summary-title(아이콘 svg 포함)이고 step-text 안에 step-note가 들어 있어, 고창 등의 틀(제목 div, step-note가 형제)로 맞춘다.
+  const raw = innerOf(card).replace(/<div class="step-text">\s*(<strong>[\s\S]*?<\/strong>)\s*<div class="step-note">([\s\S]*?)<\/div>\s*<\/div>/g, '<div><div class="step-text">$1</div><div class="step-note">$2</div></div>');
+  const titleRe = /<(div|h2)\b[^>]*class="summary-title"[^>]*>([\s\S]*?)<\/\1>/;
+  const tm = raw.match(titleRe) ?? fail('summary-title을 찾지 못했다');
+  const title = tm[2].replace(/\s+/g, ' ');
   const items = [...raw.matchAll(/<div class="route-step-item">\s*<div class="step-num">(\d+)<\/div>\s*<div>\s*<div class="step-text">([\s\S]*?)<\/div>\s*<div class="step-note">([\s\S]*?)<\/div>\s*<\/div>\s*<\/div>/g)];
   if (!items.length) fail('route-step-item을 읽지 못했다');
   // 끝의 거리 요약 줄은 동선 아래 합계 줄(tl-total)로 둔다
   const dist = raw.match(/<div class="route-distance-summary">([\s\S]*?)<\/div>/)?.[1];
-  const rest = raw.replace(/<div class="route-distance-summary">[\s\S]*?<\/div>/, '').replace(/<div class="summary-title">[\s\S]*?<\/div>/, '').replace(/<div class="route-steps">|<\/div>\s*$/g, '').replace(/<div class="route-step-item">[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/g, '');
+  const rest = raw.replace(/<div class="route-distance-summary">[\s\S]*?<\/div>/, '').replace(titleRe, '').replace(/<div class="route-steps">|<\/div>\s*$/g, '').replace(/<div class="route-step-item">[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/g, '');
   if (rest.trim()) fail(`route-steps에 모르는 요소가 있다: ${rest.trim().slice(0, 80)}`);
   const steps = items.map((m) => {
     const note = m[3].trim();
-    const a = m[2].trim().match(/^<strong>\s*(\d{1,2}:\d{2}(?:\s*~\s*\d{1,2}:\d{2})?)\s*·\s*([\s\S]*?)<\/strong>$/);
+    const a = m[2].trim().match(/^<strong>\s*((?:오전|오후)?\s*\d{1,2}:\d{2}(?:\s*~\s*\d{1,2}:\d{2})?)\s*·\s*([\s\S]*?)<\/strong>$/);
     if (a) return `<div class="tl-step"><span class="tl-time">${a[1]}</span><div><span class="tl-place">${a[2].trim()}</span><span class="tl-note">${note}</span></div></div>`;
     const b = m[2].trim().match(/^<strong>([\s\S]*?)<\/strong>\s*([\s\S]*)$/);
     if (!b) fail(`route-step-item ${m[1]}: step-text를 읽지 못했다`);
     const meta = b[2].trim() ? `<em class="tl-meta">${b[2].trim()}</em>` : '';
     return `<div class="tl-step"><span class="tl-time"></span><div><span class="tl-place">${b[1].trim()}</span><span class="tl-note">${meta}${note}</span></div></div>`;
   });
-  return { title: tagText(title).trim(), body: steps.join('') + (dist ? `<div class="tl-move">${stripLead(dist).replace(/\s+/g, ' ')}</div>` : ''), nums: items.map((m) => m[1]) };
+  return { title: tagText(title).trim(), h2: tm[1] === 'h2', body: steps.join('') + (dist ? `<div class="tl-move">${stripLead(dist).replace(/\s+/g, ' ')}</div>` : ''), nums: items.map((m) => m[1]) };
 }
 
 function timelineOf(card, kind) {
   const r = kind === 'A' ? routeA(card) : routeB(card);
   const sec = `<section class="timeline-card"><h3 class="timeline-title">${r.title}</h3>${r.body}</section>`;
-  let out = spotInfoStep.timeline(sec).replace(/<h2 class="timeline-title">([\s\S]*?)<\/h2>/, '<p class="timeline-title">$1</p>');
+  let out = spotInfoStep.timeline(sec);
+  if (!r.h2) out = out.replace(/<h2 class="timeline-title">([\s\S]*?)<\/h2>/, '<p class="timeline-title">$1</p>');
   if (r.nums) {
     let i = 0;
     out = out.replace(/(<div class="tl-step" style="[^"]*">)/g, (m) => `${m}<span class="tl-badge">${r.nums[i++]}</span>`);
@@ -55,7 +59,7 @@ function timelineOf(card, kind) {
   return out.replace(/<span class="tl-time"><\/span>/g, '');
 }
 
-function figureOf(el) {
+export function figureOf(el) {
   const img = el.text.match(/<img\b[^>]*\/?>/)?.[0] ?? fail('real-photo-card에 img가 없다');
   const cap = el.text.match(/<div class="photo-caption">([\s\S]*?)<\/div>/)?.[1];
   const rest = el.text.replace(img, '').replace(/<div class="photo-caption">[\s\S]*?<\/div>/, '').replace(/^<div[^>]*>|<\/div>$/g, '');
@@ -65,22 +69,23 @@ function figureOf(el) {
             </figure>`;
 }
 
-function infoOf(el, h2) {
+export function infoOf(el, h2) {
   const rows = [...el.text.matchAll(/<div class="info-item">\s*<span class="info-label">([\s\S]*?)<\/span>\s*<span class="info-val">([\s\S]*?)<\/span>\s*<\/div>/g)];
   const left = el.text.replace(/<div class="info-item">[\s\S]*?<\/div>/g, '').replace(/^<div class="info-grid">|<\/div>$/g, '').trim();
   if (!rows.length || left) fail(`info-grid에 모르는 요소가 있다(${tagText(h2).slice(0, 20)}): ${left.slice(0, 60)}`);
   return `<div class="spot-info-box info-wide">${rows.map((r) => `<div class="info-row"><span class="info-label">${r[1].trim()}</span><span class="info-val">${r[2].trim()}</span></div>`).join('')}</div>`;
 }
 
-function tipOf(el) {
+export function tipOf(el) {
   const t = innerOf(el).match(/^<div class="tip-title">([\s\S]*?)<\/div>\s*([\s\S]*)$/);
   return t ? `<div class="tip-box"><strong class="tip-title">${stripLead(t[1])}</strong>${t[2].trim()}</div>` : `<div class="tip-box">${stripLead(innerOf(el))}</div>`;
 }
 
-function mapBtnOf(el) {
-  const m = innerOf(el).match(/^<a ([^>]*?)\s*class="map-btn"([^>]*)>\s*([\s\S]*?)\s*<\/a>$/);
-  if (!m) fail('map-btn-wrap 틀을 읽지 못했다');
-  return `<div class="map-btn-wrap"><a ${(m[1] + m[2]).trim()} class="btn-naver-map link-quiet">${stripLead(m[3])}</a></div>`;
+export function mapBtnOf(el) {
+  const raw = innerOf(el);
+  const links = [...raw.matchAll(/<a ([^>]*?)\s*class="map-btn"([^>]*)>\s*([\s\S]*?)\s*<\/a>/g)];
+  if (!links.length || raw.replace(/<a [\s\S]*?<\/a>/g, '').trim()) fail('map-btn-wrap 틀을 읽지 못했다');
+  return `<div class="map-btn-wrap${links.length > 1 ? ' multi' : ''}">${links.map((m) => `<a ${(m[1] + m[2]).trim()} class="btn-naver-map link-quiet">${stripLead(m[3])}</a>`).join('')}</div>`;
 }
 
 function spotOf(g, n) {
@@ -127,10 +132,10 @@ function mapSection(g) {
 
 function ctaOf(el) {
   const raw = innerOf(el);
-  const h3 = raw.match(/^<h3>([\s\S]*?)<\/h3>/);
+  const h3 = raw.match(/^<h3\b[^>]*>([\s\S]*?)<\/h3>/);
   const t = h3 ?? raw.match(/^<div class="outro-title">([\s\S]*?)<\/div>/) ?? fail('outro-card 제목을 읽지 못했다');
   const rest = raw.slice(t[0].length).trim();
-  if (!/^<p\b[^>]*>[\s\S]*<\/p>$/.test(rest) || (rest.match(/<p\b/g) ?? []).length !== 1) fail('outro-card 본문 틀을 읽지 못했다');
+  if (!/^(?:<p\b[^>]*>[\s\S]*?<\/p>\s*)+$/.test(rest)) fail('outro-card 본문 틀을 읽지 못했다');
   const head = h3 ? `<h3>${stripLead(t[1])}</h3>` : `<p class="cta-title">${stripLead(t[1])}</p>`;
   return `<div class="cta-card">
           ${head}
@@ -141,11 +146,14 @@ function ctaOf(el) {
 export default {
   name: 'real-photo-grid',
   matchPage: (html) => /<(?:main|article) class="article-container">/.test(html) && /<div class="info-grid">/.test(html) && /class="real-photo-card"/.test(html)
-    && (/class="course-summary-card"/.test(html) || (/<div class="summary-card">/.test(html) && /class="route-step-item"/.test(html))) && !/<main[^>]*>\s*<article>/.test(html),
+    && (/class="course-summary-card"/.test(html) || (/<(?:div|section) class="summary-card">/.test(html) && /class="route-step-item"/.test(html))) && (/class="route-step-item"/.test(html) || !/<main[^>]*>\s*<article>/.test(html)),
   convertPage(html, ctx) {
     const wrap = html.match(/<(main|article) class="article-container">([\s\S]*?)<\/\1>/) ?? fail('article-container를 찾지 못했다');
     const tag = wrap[1];
-    const ch = children(wrap[2]);
+    // 포항: main 안에 article이 하나 더 있다. 안쪽을 읽고 같은 틀로 다시 감싼다.
+    const nested = children(wrap[2]);
+    const art = nested.length === 1 && nested[0].tag === 'article' && !nested[0].cls ? nested[0] : null;
+    const ch = art ? children(innerOf(art)) : nested;
 
     // 머리: A(post-badge, h1, post-meta) 또는 B(header.article-header)
     let kicker, h1, spans;
@@ -188,17 +196,20 @@ export default {
     if (si < 0) fail('동선 요약 상자를 찾지 못했다');
     const kind = has(ch[si], 'course-summary-card') ? 'A' : 'B';
     const intro = ch.slice(0, si).filter((e) => !used.has(e));
-    if (!intro.length || intro.some((e) => e.tag !== 'p')) fail('도입이 p가 아니다');
     const early = [];
+    const introAfter = []; // 포항: 도입 문단이 동선 상자 뒤에 있다
     const groups = [];
     const tail = [];
     let g = null;
     for (const e of ch.slice(si + 1)) {
       if (e.tag === 'h2') { g = { h2: innerOf(e), items: [] }; groups.push(g); continue; }
-      if (has(e, 'outro-card') || has(e, 'app-course-box') || e.tag === 'footer') { tail.push(e); continue; }
+      if (has(e, 'outro-card') || has(e, 'app-course-box') || e.tag === 'footer' || (g && has(e, 'app-link-card'))) { tail.push(e); continue; }
+      if (!g && e.tag === 'p') { introAfter.push(e); continue; }
       if (!g) { if (has(e, 'app-link-card')) { early.push(e); continue; } fail(`동선 상자 다음에 모르는 요소가 있다: ${e.tag}.${e.cls}`); }
       g.items.push(e);
     }
+    if (intro.some((e) => e.tag !== 'p') || !(intro.length || introAfter.length)) fail('도입이 p가 아니다');
+    if (intro.length && introAfter.length) fail('도입 문단이 동선 상자 앞뒤에 모두 있다');
     const costG = groups.filter((x) => x.items.some((e) => has(e, 'table-wrap')));
     if (costG.length !== 1) fail(`경비표 구획이 ${costG.length}개다(1개여야 한다)`);
     const isMap = (x) => x !== costG[0] && x.items.some((e) => e.tag === 'ul') && x.items.every((e) => e.tag === 'p' || e.tag === 'ul');
@@ -219,41 +230,42 @@ export default {
     const cta = tail.filter((e) => has(e, 'outro-card'));
     const apps = tail.filter((e) => has(e, 'app-course-box'));
     const credits = tail.filter((e) => e.tag === 'footer');
-    if (cta.length > 1 || apps.length > 1 || credits.length > 1 || tail.length !== cta.length + apps.length + credits.length) fail('맺음 요소(outro-card, app-course-box, footer)가 맞지 않는다');
+    const links = tail.filter((e) => has(e, 'app-link-card'));
+    if (cta.length > 1 || apps.length > 1 || links.length > 1 || credits.length > 1 || tail.length !== cta.length + apps.length + links.length + credits.length) fail('맺음 요소(outro-card, app-course-box, footer)가 맞지 않는다');
 
-    const earlyHtml = early.map((e) => {
+    const appLinkOf = (e, cls) => {
       const m = e.text.match(/^<div class="app-link-card">\s*<div class="app-link-title">([\s\S]*?)<\/div>\s*<div class="app-link-desc">([\s\S]*?)<\/div>\s*<a href="([^"]*)"[^>]*>([\s\S]*?)<\/a>\s*<\/div>$/);
       if (!m) fail('app-link-card 틀을 읽지 못했다');
-      return `<div class="container">
-        <div class="app-course-box early">
+      return `<div class="${cls}">
           <div>
             <p class="cta-title">${stripLead(m[1])}</p>
             <p>${m[2].trim()}</p>
           </div>
           <a class="btn app-action" href="${m[3]}">${m[4].trim()}</a>
-        </div>
-      </div>`;
-    }).join('\n');
+        </div>`;
+    };
+    const earlyHtml = early.map((e) => `<div class="container">
+        ${appLinkOf(e, 'app-course-box early')}
+      </div>`).join('\n');
 
+    const introHtml = `<div class="container">
+        <div class="prose-intro">${[...intro, ...introAfter].map((p) => noStyle(p.text)).join('\n        ')}</div>
+      </div>`;
     const inner = `
       ${hero}
-
-      <div class="container">
-        <div class="prose-intro">${intro.map((p) => noStyle(p.text)).join('\n        ')}</div>
-      </div>
-
+${introAfter.length ? '' : `\n      ${introHtml}\n`}
       <!-- 동선 -->
       ${timelineOf(ch[si], kind)}
-${earlyHtml ? `\n      ${earlyHtml}\n` : ''}
+${introAfter.length ? `\n      ${introHtml}\n` : ''}${earlyHtml ? `\n      ${earlyHtml}\n` : ''}
       <div class="container">
         ${secs.join('\n\n        ')}
-${cta.length ? `\n        ${ctaOf(cta[0])}\n` : ''}${apps.length ? `\n        ${appBoxOf(apps[0].text)}\n` : ''}${credits.length ? `
+${cta.length ? `\n        ${ctaOf(cta[0])}\n` : ''}${links.length ? `\n        ${appLinkOf(links[0], 'app-course-box')}\n` : ''}${apps.length ? `\n        ${appBoxOf(apps[0].text)}\n` : ''}${credits.length ? `
         <footer class="article-credit">
           ${noStyle(innerOf(credits[0]))}
         </footer>
 ` : ''}      </div>
     `;
-    let out = html.replace(wrap[0], () => `<${tag} class="article-container">${inner}</${tag}>`);
+    let out = html.replace(wrap[0], () => `<${tag} class="article-container">${art ? `<article>${inner}</article>` : inner}</${tag}>`);
     out = out.replace(/<style>[\s\S]*?<\/style>/, () => `<style>\n${ctx.css}\n  </style>`);
     out = out.replace('<div class="header-inner">', '<div class="header-inner container">');
     return ctx.finish(out);

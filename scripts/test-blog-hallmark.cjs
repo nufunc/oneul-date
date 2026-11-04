@@ -715,6 +715,70 @@ const original = `<!DOCTYPE html>
   assert.ok(clout.includes('<header class="site-header">') && clout.includes('<span class="header-note">시험 모음 편</span>') && clout.includes('<footer class="site-footer">') && !/#c=/.test(clout), 'course-list 계열의 머리나 푸터가 새 틀이 아니거나 없던 코스 링크가 생겼다');
   assert.throws(() => convert(clist.replace('<span class="course-mood">분위기 2</span>', '<blockquote>모름</blockquote>')), /course-mood/, 'course-list 계열에서 틀이 어긋났는데 변환이 실패하지 않았다');
 
+  const jday = (n, extra) => `<h2 class="spot-heading"><span class="day-badge">Day ${n}</span> ${n}. 시험 곳 ${n}</h2>
+      <p class="spot-desc">시험 곳 ${n} 설명이에요.</p>${extra}
+      <div class="info-grid"><div class="info-item"><span class="info-label">주소</span><span class="info-val">제주 시험로 ${n}</span></div></div>
+      <div class="tip-box"><div class="tip-title">💡 에디토리얼 팁</div>팁 ${n}이에요.</div>
+      <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/${n}" target="_blank" rel="noopener noreferrer" class="map-btn"><span>네이버 지도에서 ${n} 확인하기</span></a></div>`;
+  const jeju = `${wrapHead('[시험] 제주 글')}
+  <header class="nav-header"><div class="nav-inner"><a href="/oneul-date/blog/" class="brand-logo"><span>오늘 데이트 매거진</span></a><a href="/oneul-date/blog/" class="nav-back">← 매거진 목록으로</a></div></header>
+  <main class="post-container">
+    <article>
+      <div class="post-header"><span class="post-category">제주 시리즈 · 시험권</span><h1 class="post-title">[시험] 제주 글</h1><div class="post-meta"><span>작성일: 2026. 10. 16</span><span class="divider">/</span><span>글: 시험 팀</span></div></div>
+      <div class="intro-box"><p>도입 하나예요.</p><p>도입 둘이에요.</p></div>
+      <div class="route-summary"><h3>🧭 시험 동선</h3><div class="route-days"><div class="route-day-item"><div class="route-day-title">1일차 : 공항 → 시험 곳 1</div><div class="route-stat">첫날 이동 설명이에요.</div></div><div class="route-day-item"><div class="route-day-title">2일차 : 시험 곳 2</div><div class="route-stat">둘째 날 설명이에요.</div></div></div></div>
+      ${jday(1, '\n      <div class="photo-card"><img src="https://example.com/j1.jpg" alt="제주 사진" loading="lazy"><div class="photo-caption"><span>사진 설명</span><span>출처: 시험</span></div></div>')}
+      ${jday(2, '')}
+      <h2>💰 시험 경비표</h2>
+      <div class="table-wrap"><table><thead><tr><th>구분</th><th>항목</th><th>비용</th><th>비고</th></tr></thead><tbody><tr><td data-label="구분">입장료</td><td data-label="항목">시험 곳</td><td data-label="비용">1,000원</td><td data-label="비고">2인</td></tr><tr class="total-row"><td data-label="구분">합계</td><td data-label="항목">총</td><td data-label="비용">1,000원</td><td data-label="비고">제외</td></tr></tbody></table></div>
+      <div class="map-collection"><h3>📍 지도 바로가기</h3><ul class="map-list"><li class="map-list-item"><a href="https://map.naver.com/p/search/1" target="_blank" rel="noopener noreferrer"><span>1. 시험 곳 1</span><span>지도 열기 ↗</span></a></li></ul></div>
+      <div class="app-course-box" style="margin: 40px 0;"><strong style="display:block;">🗺️ 이 코스 열기</strong><p style="margin:0;">코스를 앱에서 열어요.</p><a href="${COURSE}" style="padding:10px;">앱에서 코스 열기 →</a></div>
+      <footer class="post-footer"><div class="editorial-badge">시험 팀 큐레이션</div><p>안내 문단이에요.</p><p style="margin-top: 8px;">맺음 문단이에요.</p></footer>
+    </article>
+  </main>
+</body>
+</html>`;
+  const jout = convert(jeju);
+  assert.deepStrictEqual(compare(jeju, jout), [], 'jeju-days 계열이 보존 비교를 통과하지 못했다');
+  assert.ok(jout.includes('<div class="tl-act" style="--r:1; --c:2">2일차</div>') && jout.includes('<h2 class="timeline-title">시험 동선</h2>') && jout.includes('<h2 class="spot-title"><span class="day-badge">Day 1</span> 1. 시험 곳 1</h2>') && jout.includes('<figure class="story-photo">'), 'jeju-days 계열의 동선이나 장소 구획이 새 틀이 아니다');
+  assert.ok(jout.includes('<tr class="cost-total-row">') && jout.includes('<section class="map-links">') && jout.includes('<footer class="article-credit">') && jout.includes('<header class="site-header">') && !jout.includes('nav-header') && !jout.includes('class="divider"'), 'jeju-days 계열의 경비표, 지도 목록, 푸터, 머리 바가 새 틀이 아니다');
+  assert.throws(() => convert(jeju.replace('<p class="spot-desc">시험 곳 2 설명이에요.</p>', '<blockquote>모름</blockquote>')), /모르는 요소/, 'jeju-days 계열에서 모르는 요소가 있는데 변환이 실패하지 않았다');
+
+  // 포항 틀: main 안 article, 제목이 h2인 동선 상자, 동선 뒤의 도입 문단, 링크 둘인 지도 버튼, 문단 둘인 맺음 상자, 맺음의 앱 소개 배너
+  const poh = (extraMap) => `${wrapHead('[시험] 포항 글')}
+  <header class="site-header"><div class="header-inner"><a href="../" class="header-logo">오늘 데이트 <span>매거진</span></a></div></header>
+  <main class="article-container">
+    <article>
+      <header class="article-header"><span class="badge">경북 포항 · 시험</span><h1>[시험] 포항 글</h1><div class="meta-info"><span>작성일: 2026-10-16</span><span>글: 시험 팀</span></div></header>
+      <section class="summary-card"><h2 class="summary-title" style="margin-top:0;"><svg width="20" height="20"><circle cx="12" cy="12" r="10"></circle></svg>
+        시험 동선 요약</h2><div class="route-steps">
+        <div class="route-step-item"><div class="step-num">1</div><div class="step-text"><strong>오전 09:30 · 첫째 곳</strong><div class="step-note">첫째 설명이에요.</div></div></div>
+        <div class="route-step-item"><div class="step-num">2</div><div class="step-text"><strong>오후 13:15 · 둘째 곳</strong><div class="step-note">둘째 설명이에요.</div></div></div>
+      </div></section>
+      <p>동선 뒤 도입이에요.</p>
+      <h2>1. 첫째 곳 제목</h2>
+      <p>첫째 문단이에요.</p>
+      <div class="real-photo-card"><img src="https://example.com/p1.jpg" alt="포항 사진" loading="lazy"><div class="photo-caption"><span>설명</span></div></div>
+      <div class="info-grid"><div class="info-item"><span class="info-label">주소</span><span class="info-val">포항 시험로</span></div></div>
+      <div class="tip-box"><div class="tip-title">에디터 꿀팁: 시험</div>팁이에요.</div>
+      <div class="map-btn-wrap" style="display:flex;"><a href="https://map.naver.com/p/search/a" target="_blank" rel="noopener noreferrer" class="map-btn"><svg width="16" height="16"><path d="M1 1"></path></svg>첫째 길찾기</a>${extraMap}</div>
+      <h2>시험 예산</h2>
+      <div class="table-wrap"><table><thead><tr><th>구분</th><th>항목</th><th>금액</th><th>참고</th></tr></thead><tbody><tr><td>오전</td><td>첫째 곳</td><td>0원</td><td>무료</td></tr><tr style="background:#f8fafc; font-weight:700;"><td colspan="2">합계</td><td style="color:red;">0원</td><td>무료</td></tr></tbody></table></div>
+      <section class="outro-card"><h3 class="outro-title">마치며</h3><p style="margin-bottom:10px;">맺음 하나예요.</p><p style="margin-bottom:0;">맺음 둘이에요.</p></section>
+      <div class="app-link-card"><div class="app-link-title">앱 소개</div><div class="app-link-desc">앱 설명이에요.</div><a href="../../" class="app-link-btn">둘러보기</a></div>
+      <div class="app-course-box" style="margin: 40px 0;"><strong style="display:block;">🗺️ 이 코스 열기</strong><p style="margin:0;">코스를 앱에서 열어요.</p><a href="${COURSE}" style="padding:10px;">앱에서 코스 열기 →</a></div>
+      <footer class="article-footer"><p>안내예요.</p></footer>
+    </article>
+  </main>
+</body>
+</html>`;
+  const pin = poh('<a href="https://map.naver.com/p/search/b" target="_blank" rel="noopener noreferrer" class="map-btn">둘째 길찾기</a>');
+  const pout = convert(pin);
+  assert.deepStrictEqual(compare(pin, pout), [], '포항 틀이 보존 비교를 통과하지 못했다');
+  assert.ok(pout.includes('<main class="article-container"><article>') && pout.includes('<h2 class="timeline-title">시험 동선 요약</h2>') && pout.indexOf('class="timeline-card') < pout.indexOf('동선 뒤 도입이에요.') && pout.includes('<span class="tl-time">오전 09:30</span>'), '포항 틀의 article 감싸기, 동선 제목(h2), 동선 뒤 도입이 새 틀이 아니다');
+  assert.strictEqual((pout.match(/class="btn-naver-map link-quiet"/g) ?? []).length, 2, '포항 틀의 지도 링크 둘이 모두 남아야 한다');
+  assert.ok(pout.includes('<div class="cta-card">') && pout.includes('<p>맺음 둘이에요.</p>') && pout.includes('<div class="app-course-box">') && pout.includes('<tr class="cost-total-row">'), '포항 틀의 맺음 상자, 앱 소개 배너, 경비표 합계 행이 새 틀이 아니다');
+
   assert.strictEqual(snapshot(out).links.length, snapshot(original).links.length + 1, '링크 수는 첫 화면 앱 버튼 하나만 늘어야 한다');
   console.log(`test-blog-hallmark: 변환 보존 비교, 새 틀 약속, 달라진 변환본 ${cases.length}건, 모르는 틀 실패 통과`);
 })().catch((e) => { console.error(e); process.exit(1); });

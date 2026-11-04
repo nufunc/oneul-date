@@ -32,6 +32,7 @@ const FAMILY_NAMES = [
   'timeline-list',
   'itinerary-spots',
   'course-list',
+  'jeju-days',
 ];
 const FAMILIES = await Promise.all(FAMILY_NAMES.map(async (n) => (await import(`./hallmark_families/${n}.mjs`)).default));
 
@@ -49,6 +50,7 @@ export function snapshot(html, mainOnly = false) {
     captions = [...body.matchAll(capRe)].map((m) => tagText(m[2] ?? m[4]).replace(/\s+/g, ''));
     body = body.replace(capRe, '');
   }
+  body = body.replace(/<span class="divider">\/<\/span>/g, '');
   const norm = (s) => tagText(s).replace(/[\p{Extended_Pictographic}️‍↓→·•:]/gu, '').replace(/\s+/g, '');
   const links = [...body.matchAll(/<a\b[^>]*\shref="([^"]*)"/g)].map((m) => m[1]).sort();
   const imgs = [...body.matchAll(/<img\b[^>]*>/g)].map((m) => `${m[0].match(/\ssrc="([^"]*)"/)?.[1]}|${m[0].match(/\salt="([^"]*)"/)?.[1]}`);
