@@ -616,6 +616,105 @@ const original = `<!DOCTYPE html>
   assert.ok(fhout.includes('</a>&nbsp;<a href="https://map.naver.com/p/search/b"') && fhout.includes('<div class="cta-card">') && fhout.includes('class="link-quiet">앱 열기</a>') && fhout.includes('<header class="site-header">') && !fhout.includes('top-nav'), 'flat 머리 변형의 지도 버튼 둘이나 앱 소개 배너나 머리가 새 틀이 아니다');
   assert.ok(compare(flatHero, fhout.replace('대표 사진 (출처: 시험)', '다른 설명')).some((e) => /사진 설명/.test(e)), 'flat 머리 변형의 대표 사진 설명이 달라졌는데 compare가 잡지 못했다');
 
+  // itinerary-spots 계열(군산)과 course-list 계열(서울·경기 20선): 둘 다 main.article-wrap 아래 평면 구조라 머리·푸터까지 모듈이 읽는다
+  const wrapHead = (title) => `<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>${title}</title>
+  <meta name="description" content="시험 글">
+  <link rel="canonical" href="https://nufunc.github.io/oneul-date/blog/test/">
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","headline":"${title}"}
+  </script>
+  <style>body { background: #fff; }</style>
+</head>
+<body>`;
+  const itin = `${wrapHead('[시험] 일정 글')}
+  <header class="blog-header">
+    <div class="header-inner">
+      <a href="../" class="blog-brand" style="text-decoration:none;"><span class="blog-title-text">← 📖 오늘 데이트 매거진</span><span class="blog-sub-text">시험 편</span></a>
+      <a href="#naver-map-section" class="header-share-btn">🗺️ 지도 바로가기</a>
+    </div>
+  </header>
+  <main class="article-wrap">
+    <span class="post-category-tag">시험 당일치기 코스</span>
+    <h1 class="post-title">[시험] 일정 글</h1>
+    <p class="post-subtitle">부제예요.</p>
+    <div class="post-meta-row"><div class="author-profile"><div class="author-avatar">🚗</div><span>글: 시험 팀</span></div><span>·</span><span>사진: 한국관광공사 TourAPI, 카카오맵</span><span>·</span><span>2026. 10. 05.</span></div>
+    <div class="post-lead"><strong>"첫 줄이에요."</strong><br>도입 문단이에요.</div>
+    <div class="itinerary-card">
+      <div class="itinerary-title"><span>🧭</span><span>시험 동선</span></div>
+      <div class="itinerary-section-title">🌅 오전 1막: 첫 막</div>
+      <ul class="itinerary-list"><li><span class="time">10:30</span><span><strong>첫째 곳</strong> : 설명 하나</span></li></ul>
+      <div class="itinerary-section-title" style="color:#000;">🌊 오후 2막: 둘째 막</div>
+      <ul class="itinerary-list"><li><span class="time" style="color:#000;">14:00</span><span><strong>둘째 곳</strong> : 설명 둘</span></li></ul>
+    </div>
+    <p class="spot-desc">영업시간은 바뀔 수 있어요.</p>
+    <div class="youtube-embed-card"><div class="video-header"><span>🎬 참고 영상</span><span style="font-size:12px;">유튜브 '시험'</span></div><div class="video-iframe-wrap"><iframe src="https://www.youtube.com/embed/abc" title="시험 영상" allowfullscreen></iframe></div><div class="video-caption">영상 설명 <a href="https://www.youtube.com/watch?v=abc" target="_blank" rel="noopener">원본</a></div></div>
+    <section class="spot-section">
+      <span class="spot-badge">SPOT 01 · 10:30 AM</span>
+      <h2 class="spot-heading">첫째 곳 제목</h2>
+      <p class="spot-desc">첫째 곳 앞 문단이에요.</p>
+      <div class="article-photo"><img src="https://example.com/a.jpg" alt="첫째" loading="lazy"><div class="photo-caption">첫째 사진 (사진 출처: 시험)</div></div>
+      <div class="tip-box"><div class="tip-box-title">💡 첫째 곳 팁</div><ul><li><strong>주차:</strong> 공영주차장이에요.</li></ul></div>
+    </section>
+    <div class="transition-bridge" style="background:#eee;"><div class="bridge-icon">🚗</div><div><strong>차량 7분:</strong> 둘째 곳으로 가요.</div></div>
+    <section class="spot-section">
+      <span class="spot-badge" style="background:#000;">SPOT 02 · 14:00</span>
+      <h2 class="spot-heading">둘째 곳 제목</h2>
+      <p class="spot-desc">둘째 곳 문단이에요.</p>
+    </section>
+    <section style="margin: 44px 0;">
+      <h2 style="font-size: 20px;">💰 2인 예상 경비</h2>
+      <p style="font-size: 14px;">경비 설명이에요.</p>
+      <div class="table-container"><table class="expense-table"><thead><tr><th>구분</th><th>지출 항목</th><th>금액</th><th>비고</th></tr></thead><tbody>
+        <tr><td><strong>식사</strong></td><td>첫째 곳</td><td>10,000원</td><td>점심</td></tr>
+        <tr class="total-row"><td colspan="2"><strong>합계</strong></td><td><strong>10,000원</strong></td><td><strong>둘째 곳 제외</strong></td></tr>
+      </tbody></table></div>
+    </section>
+    <section id="naver-map-section" class="map-action-card"><div class="map-action-title">🗺️ 지도 바로가기</div><div class="map-action-desc">지도 설명이에요.</div><div class="spot-links-grid"><a href="https://map.naver.com/p/search/a" target="_blank" rel="noopener" class="spot-link-chip">🍜 첫째 곳</a></div></section>
+    <div class="tag-list"><span class="tag-item">#시험</span><span class="tag-item">#일정</span></div>
+    <div class="app-course-box" style="margin: 40px 0;"><strong style="display:block;">🗺️ 이 코스 열기</strong><p style="margin:0;">코스를 앱에서 열어요.</p><a href="${COURSE}" style="padding:10px;">앱에서 코스 열기 →</a></div>
+  </main>
+  <footer class="blog-footer"><p>© 2026 오늘 데이트. All rights reserved.</p><p class="footer-license">사진 출처: 한국관광공사 TourAPI</p></footer>
+</body>
+</html>`;
+  const itout = convert(itin);
+  assert.deepStrictEqual(compare(itin, itout), [], 'itinerary-spots 계열이 보존 비교를 통과하지 못했다');
+  assert.strictEqual((itout.match(/<div class="route" /g) ?? []).length, 2, 'itinerary-spots 계열의 동선은 막마다 route 하나여야 한다');
+  assert.ok(itout.includes('<p class="tl-total">영업시간은 바뀔 수 있어요.</p>') && itout.includes('<span class="spot-num">SPOT 01</span><span>10:30 AM</span>') && itout.includes('<p class="drive-bridge"><strong>차량 7분:</strong> 둘째 곳으로 가요.</p>') && itout.includes('<figure class="story-photo">'), 'itinerary-spots 계열의 안내 문단이나 장소 구획이 새 틀이 아니다');
+  assert.ok(itout.includes('<section class="video-card">') && itout.includes('<div class="video-frame"><iframe ') && itout.includes('<tr class="cost-total-row">') && itout.includes('<p class="tag-list"><span>#시험</span>') && itout.includes('<ul class="map-list">') && /<a class="btn" href="[^"]*#c=/.test(itout), 'itinerary-spots 계열의 영상, 경비표, 태그, 지도 목록, 앱 버튼이 새 틀이 아니다');
+  assert.ok(itout.includes('<span class="header-note">시험 편</span>') && itout.includes('<p class="footer-line">사진 출처: 한국관광공사 TourAPI</p>') && !itout.includes('blog-footer'), 'itinerary-spots 계열의 머리나 푸터(사진 출처 줄)가 새 틀이 아니다');
+  assert.throws(() => convert(itin.replace('<p class="spot-desc">둘째 곳 문단이에요.</p>', '<blockquote>모름</blockquote>')), /모르는 요소/, 'itinerary-spots 계열에서 모르는 요소가 있는데 변환이 실패하지 않았다');
+
+  const stop = (name, hop) => `<li class="spot-item"><div class="spot-head"><strong>${name}</strong> <span class="spot-cat">카페</span></div><div class="spot-addr">서울 시험로 1</div><p class="spot-desc">${name} 설명이에요.</p><div class="spot-foot">${hop ? `<span class="spot-hop">${hop}</span>` : ''}<a href="https://map.naver.com/p/search/${name}" target="_blank" rel="noopener noreferrer" class="spot-map">지도 보기 ↗</a></div></li>`;
+  const course = (n, a, b) => `<section class="course" id="course-${n}"><h2>${n}. ${a}</h2><span class="course-mood">분위기 ${n}</span><p>코스 ${n} 설명이에요.</p><div class="real-photo-card"><img src="https://example.com/c${n}.jpg" alt="사진 ${n}" loading="lazy" /><div class="photo-caption">사진 ${n} (사진 출처: 카카오맵)</div></div><ol class="spot-list">${stop(a + '1')}${stop(b + '2', '앞 장소에서 직선 약 50m')}</ol><a href="#toc" class="back-toc">↑ 목차로</a></section>`;
+  const clist = `${wrapHead('[시험] 코스 모음')}
+  <header class="travel-header-bar"><div class="header-inner"><div class="header-title"><a href="../" style="text-decoration:none;">← 📖 오늘 데이트 매거진</a></div><div class="header-meta">시험 모음 편</div></div></header>
+  <main class="article-wrap">
+    <span class="post-badge">동네별 코스 모음</span>
+    <h1>[시험] 코스 모음</h1>
+    <div class="post-sub-meta"><span>작성일: 2026. 10.</span><span>•</span><span>코스 2개, 장소 4곳</span></div>
+    <div class="lead-box"><strong>"어느 동네로 갈까?"</strong><br>도입 문단이에요.</div>
+    <nav class="toc-box" id="toc"><strong>🧭 코스 2개 바로가기</strong><ol><li><a href="#course-1">1. 가동</a> <span class="toc-mood">분위기 1</span></li><li><a href="#course-2">2. 나동</a> <span class="toc-mood">분위기 2</span></li></ol></nav>
+    ${course(1, '가동', '가')}
+    ${course(2, '나동', '나')}
+    <h2>💌 코스를 고를 때</h2>
+    <p>맺음 문단이에요.</p>
+    <p>앱은 <a href="../../" style="color: red;">오늘 데이트 앱</a>에서 봐요.</p>
+    <div class="footer-source">사진 출처: 시험<br>본 글은 시험용이에요.</div>
+  </main>
+</body>
+</html>`;
+  const clout = convert(clist);
+  assert.deepStrictEqual(compare(clist, clout), [], 'course-list 계열이 보존 비교를 통과하지 못했다');
+  assert.ok(clout.includes('<nav class="map-links toc" id="toc">') && clout.includes('<li><a href="#course-1">1. 가동</a><span class="toc-mood">분위기 1</span></li>') && clout.includes('<section class="spot-section flat course flip" id="course-2">') && clout.includes('<figure class="spot-photo spot-image-wrap">'), 'course-list 계열의 목차나 코스 구획이 새 틀이 아니다');
+  assert.ok(clout.includes('<p class="stop-foot"><span class="stop-hop">앞 장소에서 직선 약 50m</span><a href="https://map.naver.com/p/search/나2" target="_blank" rel="noopener noreferrer" class="link-quiet">지도 보기</a></p>') && clout.includes('<a href="#toc" class="back-toc link-quiet">↑ 목차로</a>'), 'course-list 계열의 장소 목록이나 목차 돌아가기가 새 틀이 아니다');
+  assert.ok(clout.includes('<header class="site-header">') && clout.includes('<span class="header-note">시험 모음 편</span>') && clout.includes('<footer class="site-footer">') && !/#c=/.test(clout), 'course-list 계열의 머리나 푸터가 새 틀이 아니거나 없던 코스 링크가 생겼다');
+  assert.throws(() => convert(clist.replace('<span class="course-mood">분위기 2</span>', '<blockquote>모름</blockquote>')), /course-mood/, 'course-list 계열에서 틀이 어긋났는데 변환이 실패하지 않았다');
+
   assert.strictEqual(snapshot(out).links.length, snapshot(original).links.length + 1, '링크 수는 첫 화면 앱 버튼 하나만 늘어야 한다');
   console.log(`test-blog-hallmark: 변환 보존 비교, 새 틀 약속, 달라진 변환본 ${cases.length}건, 모르는 틀 실패 통과`);
 })().catch((e) => { console.error(e); process.exit(1); });

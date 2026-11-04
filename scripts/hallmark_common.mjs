@@ -203,3 +203,32 @@ ${tips.length ? `
 }
 
 export const readCss = () => fs.readFileSync(path.join(HERE, 'blog_hallmark.css'), 'utf-8').trimEnd();
+
+// 페이지 틀 전체를 읽는 계열(itinerary-spots, course-list)이 같이 쓰는 머리·푸터 틀.
+// spans: 글쓴이 줄의 칸들. 20자를 넘는 칸(출처 등)은 한 줄을 다 쓴다.
+export function pageHeroOf({ kicker, title, quote, spans, href }) {
+  const metaHtml = spans.map((s) => (tagText(s).length <= 20 ? `<span>${s}</span>` : `<span class="meta-credit">${s}</span>`)).join('\n            ');
+  return `<header class="article-header hero container">
+        <div class="hero-text">
+          <p class="hero-kicker badge-category"><span>${kicker}</span></p>
+          <h1 class="article-title">${title}</h1>${quote ? `\n          <p class="hero-quote">${quote}</p>` : ''}
+          <div class="article-meta">
+            ${metaHtml}
+          </div>${href ? `\n          <p><a class="btn" href="${href}">앱에서 코스 열기</a></p>` : ''}
+        </div>
+      </header>`;
+}
+
+export const siteHeaderHtml = (href, note) => `<header class="site-header">
+    <div class="header-inner container">
+      <a href="${href}" class="header-logo">← 오늘 데이트 <span>매거진</span></a>
+      <span class="header-note">${note}</span>
+    </div>
+  </header>`;
+
+export const siteFooterHtml = (inner) => `<footer class="site-footer">
+    <div class="footer-inner container">
+      ${inner}
+      <p class="footer-links"><a href="https://nufunc.github.io/oneul-date/">홈으로 가기</a><a href="https://nufunc.github.io/oneul-date/blog/">매거진 전체보기</a></p>
+    </div>
+  </footer>`;

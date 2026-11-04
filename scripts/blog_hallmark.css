@@ -288,3 +288,28 @@ p.timeline-title { letter-spacing: -0.01em; overflow-wrap: break-word; }
 .spot-head { grid-template-columns: minmax(0, 1fr); }
 .spot-num { white-space: nowrap; }
 .spot-header .spot-title { min-width: 0; overflow-wrap: break-word; }
+
+/* itinerary-spots 계열(editor-150: 군산): 동선 아래 안내 문단, 참고 영상 카드, 해시태그 줄 */
+.video-card { margin-top: var(--section-gap); max-width: var(--measure); display: grid; gap: var(--space-sm); }
+.video-title { font-family: var(--font-display); font-size: var(--text-title); line-height: 1.3; color: var(--color-ink); }
+.video-source, .video-caption { font-size: var(--text-sm); color: var(--color-muted); }
+.video-frame { aspect-ratio: 16 / 9; background: var(--color-paper-3); }
+.video-frame iframe { display: block; width: 100%; height: 100%; border: 0; }
+.tag-list { margin-top: var(--space-xl); display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+
+/* course-list 계열(editor-150: 서울·경기 20선): 목차, 코스 구획의 분위기 줄, 장소 목록 */
+.toc-list { margin: 0; padding: 0; list-style: none; display: grid; column-gap: var(--gap-columns); }
+.toc-list li { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0 var(--space-md); min-height: 44px; padding-block: var(--space-xs); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.toc-list a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-ink); text-decoration: none; }
+.toc-mood, .course-mood { font-size: var(--text-sm); color: var(--color-muted); }
+.course-mood { color: var(--color-accent); font-weight: 600; }
+.stop-list { margin: 0; padding: 0; list-style: none; display: grid; }
+.stop { display: grid; gap: var(--space-2xs); padding-block: var(--space-md); border-top: var(--rule-hair) solid var(--color-rule); }
+.stop-name { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--space-sm); }
+.stop-name strong { font-size: var(--text-md); font-weight: 700; color: var(--color-ink); }
+.stop-cat, .stop-addr, .stop-hop { font-size: var(--text-xs); color: var(--color-muted); }
+.stop-desc { font-size: var(--text-sm); }
+.stop-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 var(--space-md); }
+.stop-foot .link-quiet { margin-left: auto; }
+.back-toc { justify-self: start; }
+@media (min-width: 60rem) { .toc-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
