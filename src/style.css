@@ -2624,6 +2624,25 @@ button {
   white-space: nowrap;
 }
 
+/* 🚀 직후 📋 🔗 💾 막대가 첫 화면 밖 124~679px 아래라 저장하려면 더 내려야 했다. 사용자가 코스를 만든 뒤
+   (#results-area[data-engaged], main.ts markResultsEngaged)에만 화면 아래에 붙이고 문서 끝에서는 제자리로 돌아간다.
+   첫 로드의 기본 코스에는 붙이지 않는다. 값은 받은 코스 저장 막대와 같다(P-295, P-238) */
+#results-area[data-engaged] .result-actions.result-actions-3 {
+  position: sticky;
+  bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  z-index: 5;
+  padding: 8px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Tab으로 옮긴 초점 요소가 붙은 막대 뒤로 들어가지 않게 그 높이만큼 위에서 멈춘다 */
+#results-area[data-engaged] :is(a, button) {
+  scroll-margin-bottom: 80px;
+}
+
 /* 분위기 pill '⋯ 더보기' / '접기' */
 .pill-more {
   background: transparent;
@@ -3654,6 +3673,11 @@ button {
 /* 받은 코스 화면은 저장 막대(.receiver-actions-bar: 화면 아래 8px, 높이 62px)가 붙어 있어 토스트가
    '💾 보관함 저장'을 가렸다. 막대가 있을 때만 막대 위 14px로 올린다(P-267) */
 body:has(.receiver-actions-bar) .toast-msg {
+  bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+}
+
+/* 코스 결과 막대(#results-area[data-engaged], P-295)도 같은 높이라 같은 값으로 올린다 */
+body:has(#results-area[data-engaged] .result-actions-3) .toast-msg {
   bottom: calc(84px + env(safe-area-inset-bottom, 0px));
 }
 

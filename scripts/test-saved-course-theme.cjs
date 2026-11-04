@@ -46,7 +46,7 @@ const litJs = ts.transpileModule(`return (${lit[1]});`, { compilerOptions: { tar
 const makeItem = new Function('state', 'ids', 'courseTitle', litJs);
 
 const restoreJs = ['SLOT_ORDER', 'normalizeRegionCond', 'restoreCourse'].map((n) => toJs(decls.get(n))).join('\n');
-const RSTUBS = ['state', 'updateModeView', 'renderConditions', 'renderResults', 'document', 'cancelOverlayFocusReturn'];
+const RSTUBS = ['state', 'updateModeView', 'renderConditions', 'renderResults', 'document', 'cancelOverlayFocusReturn', 'markResultsEngaged'];
 const makeRestore = new Function(...RSTUBS, `${restoreJs}\nreturn restoreCourse;`);
 
 const noop = () => {};
@@ -56,7 +56,7 @@ const steps = [{ slot: 'day', spotId: 1 }, { slot: 'evening', spotId: 2 }];
 // 저장한 항목을 JSON으로 거쳐(localStorage와 같게) 불러오고, 제목과 다시 추천 테마를 돌려준다
 const restoreThenRegenerate = (item, screenCategory) => {
   const state = { mainMode: 'course', regions: [], subZones: [], slots: {}, course: null, courseConditions: null, courseCategory: screenCategory, moodPreset: null };
-  makeRestore(state, noop, noop, noop, fakeDoc, noop)(JSON.parse(JSON.stringify(item)), steps.map((s) => ({ ...s })));
+  makeRestore(state, noop, noop, noop, fakeDoc, noop, noop)(JSON.parse(JSON.stringify(item)), steps.map((s) => ({ ...s })));
   const title = courseTitle(state.courseConditions, state.course);
   const calls = [];
   const generateCourse = (...args) => {

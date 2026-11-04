@@ -4426,6 +4426,11 @@ function paintSpotsProgress(): void {
   if (status && status.textContent !== text) status.textContent = text;
 }
 
+// 사용자가 코스를 만든 뒤에만 결과 막대(📋 🔗 💾)를 화면 아래에 붙인다. 첫 로드의 기본 코스에는 켜지 않는다(P-295)
+function markResultsEngaged(): void {
+  document.getElementById('results-area')?.setAttribute('data-engaged', '');
+}
+
 function triggerCourseGeneration(): void {
   // 숙박 키워드(호텔, 숙소, 호캉스, 리조트, 펜션, 글램핑) 검색 시 stay 슬롯 자동 활성화
   if (state.searchQuery && /호텔|숙소|숙박|호캉스|리조트|펜션|글램핑|스테이|모텔|풀빌라|게스트하우스|캠핑|카라반|료칸|감성숙소/.test(state.searchQuery)) {
@@ -4483,6 +4488,7 @@ function triggerCourseGeneration(): void {
     searchFallback: state.searchQuery && !hasMatchedSpot ? { query: state.searchQuery, byFilter } : undefined,
   };
   addRecentSpotIds(courseSpotIds());
+  markResultsEngaged();
   renderResults();
   // 모바일에서는 결과가 버튼 바로 아래 화면 밖에서 시작해 눌러도 변화가 보이지 않았다. 결과가 화면 아래쪽이면 그리로 내린다
   const resultsEl = document.getElementById('results-area');
@@ -5783,6 +5789,7 @@ function refreshTransitDividers(): void {
 /** 동일 조건 스냅샷으로 모든 스텝 재생성 (체감 랜덤 보정 적용) */
 function regenerateCourse(): void {
   if (!state.course || !state.courseConditions) return;
+  markResultsEngaged();
   // 앵커 코스는 같은 앵커 주변에서 다시 뽑는다(가까운 후보 가운데 무작위라 매번 달라진다)
   const anchor = state.courseConditions.anchorId ? spotById.get(state.courseConditions.anchorId) : undefined;
   if (anchor) {
@@ -6800,6 +6807,7 @@ function bindDiscoveryCardEvents(root: ParentNode, area: HTMLElement): void {
       showToast(filled > 1
         ? `✨ '${anchorSpot.name}' 중심 맞춤 코스를 완성했어요! 🚀`
         : `'${anchorSpot.name}' 주변에서 함께 갈 장소를 찾지 못했어요`);
+      markResultsEngaged();
       const resultsEl = document.getElementById('results-area');
       if (resultsEl) {
         resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -8158,6 +8166,7 @@ function restoreCourse(item: SavedCourse, steps: CourseStep[]): void {
     updateModeView();
   }
   renderConditions();
+  markResultsEngaged();
   renderResults();
   document.getElementById('results-area')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   // 화면이 결과로 옮겨 가므로 시트를 연 맨 위 버튼 대신 불러온 코스의 첫 상호명으로 포커스를 준다
