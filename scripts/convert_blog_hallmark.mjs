@@ -27,6 +27,8 @@ const FAMILY_NAMES = [
   'spot-card',
   'real-photo-grid',
   'spot-chips',
+  'route-timeline',
+  'spot-block',
 ];
 const FAMILIES = await Promise.all(FAMILY_NAMES.map(async (n) => (await import(`./hallmark_families/${n}.mjs`)).default));
 
@@ -44,7 +46,7 @@ export function snapshot(html, mainOnly = false) {
     captions = [...body.matchAll(capRe)].map((m) => tagText(m[2] ?? m[4]).replace(/\s+/g, ''));
     body = body.replace(capRe, '');
   }
-  const norm = (s) => tagText(s).replace(/[\p{Extended_Pictographic}️‍↓→·•]/gu, '').replace(/\s+/g, '');
+  const norm = (s) => tagText(s).replace(/[\p{Extended_Pictographic}️‍↓→·•:]/gu, '').replace(/\s+/g, '');
   const links = [...body.matchAll(/<a\b[^>]*\shref="([^"]*)"/g)].map((m) => m[1]).sort();
   const imgs = [...body.matchAll(/<img\b[^>]*>/g)].map((m) => `${m[0].match(/\ssrc="([^"]*)"/)?.[1]}|${m[0].match(/\salt="([^"]*)"/)?.[1]}`);
   const ld = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => JSON.stringify(JSON.parse(m[1])));

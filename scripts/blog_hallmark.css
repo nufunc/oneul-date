@@ -213,7 +213,7 @@ header:not(.article-header) a{min-height:44px;align-content:center;align-items:c
 .map-links-grid { display: grid; gap: 0; }
 .map-link-chip .btn-action { color: var(--color-accent); font-weight: 600; white-space: nowrap; }
 @media (max-width: 40rem) { .spot-section.flat .spot-title { font-size: var(--text-lg); } }
-@media (max-width: 60rem) { .spot-photo { position: relative; } }
+@media (max-width: 60rem) { .spot-photo { position: relative; top: auto; } }
 
 /* spot-card 계열(editor-144): 대표 사진, 요약 상자, 본문 구획, 세부 코스, 이동 연결, 마무리 상자 */
 .hero-figure { margin: 0 0 var(--space-xl); }
@@ -262,3 +262,21 @@ p.timeline-title { letter-spacing: -0.01em; overflow-wrap: break-word; }
 @media (max-width: 60rem) { .route .tl-act:not(:first-child) { margin-top: var(--space-lg); } }
 .article-credit.tight { padding-bottom: var(--space-md); }
 .back-link { padding-bottom: var(--space-md); font-size: var(--text-sm); }
+
+/* route-timeline 계열(editor-147: 보령, 거제, 고성): 사진 설명의 출처 줄, 시각 범위 동선 */
+.spot-photo figcaption .cap-src { display: block; }
+.spot-number { white-space: nowrap; }
+
+/* spot-block 계열(editor-147: 강릉, 경주): 머리 바 메모, 인용문, 날마다 나뉜 동선, 장소 분류 줄, 팁 목록, 금액이 끝 칸인 경비표 */
+.header-inner:has(.header-note) { flex-wrap: wrap; gap: 0 var(--space-md); }
+.header-note { font-size: var(--text-sm); color: var(--color-muted); }
+.hero-quote { max-width: var(--measure); font-size: var(--text-lead); line-height: 1.7; color: var(--color-ink); }
+.route + .route { margin-top: var(--space-xl); }
+.story-kicker { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.story-kicker .spot-num { font-size: var(--text-xl); }
+.stories.bridged .story-section + .story-section { margin-top: var(--space-3xl); }
+.tip-box ul { margin: 0; padding-left: 1.1em; display: grid; gap: var(--space-2xs); }
+@media (max-width: 600px) {
+  .table-wrap.amount-last td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
+  .table-wrap.amount-last td:nth-child(4) { grid-column: auto; text-align: right; font-weight: 600; color: var(--color-ink); }
+}

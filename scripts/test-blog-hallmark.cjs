@@ -436,6 +436,131 @@ const original = `<!DOCTYPE html>
   assert.ok(chout.includes('<section class="cost-table-card">') && chout.includes('<p class="back-link">') && chout.includes('<footer class="article-credit tight">') && /<a class="btn" href="[^"]*#c=/.test(chout), '지도 칩 줄 계열의 경비표, 돌아가기, 앱 버튼이 새 틀이 아니다');
   assert.throws(() => convert(chips.replace('<p class="spot-desc">둘째 곳 설명이에요.</p>', '<blockquote>모름</blockquote>')), /모르는 요소/, '지도 칩 줄 계열에서 모르는 요소가 있는데 변환이 실패하지 않았다');
 
+  // route-timeline 계열(보령, 거제, 고성): article.spot-section과 route-timeline이 main 아래에 평평하게 이어지는 틀
+  const head = original.slice(0, original.indexOf('<body>'));
+  const route = `${head}<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="https://nufunc.github.io/oneul-date/" class="header-logo">오늘 데이트 <span>매거진</span></a>
+      <nav class="header-nav"><a href="https://nufunc.github.io/oneul-date/blog/">전체 글 보기</a></nav>
+    </div>
+  </header>
+  <main class="article-container">
+    <header class="article-header">
+      <span class="badge">시험도 · 바다 드라이브</span>
+      <h1>[시험도 드라이브] 하루 코스</h1>
+      <div class="meta-info"><span>발행일: 2026년 10월 21일</span><span>·</span><span>글: 시험 팀 / 사진: 시험</span></div>
+    </header>
+    <div class="intro-box">시험도는 바다와 숲을 하루에 둘러보는 코스예요.</div>
+    <section class="overview-card">
+      <h2 class="overview-title">🚗 시험도 타임라인</h2>
+      <p style="margin: 0 0 12px;">휴무일을 확인하세요.</p>
+      <div class="route-timeline">
+        <div class="timeline-item"><span class="timeline-time">10:30 ~ 11:50</span><span class="timeline-name"><strong>[스팟 1] 첫째 곳</strong> (바이크 탑승)</span></div>
+        <div class="timeline-item"><span class="timeline-time">12:00 ~ 13:30</span><span class="timeline-name"><strong>[스팟 2] 둘째 곳</strong> (산책)</span><span class="timeline-dist">(차량 6.6km · 약 10분)</span></div>
+      </div>
+    </section>
+    <article class="spot-section">
+      <div class="spot-header"><div><span class="spot-number">SPOT 1</span><h2 class="spot-title">첫째 곳</h2><div class="spot-chips"><span class="chip">칩 하나</span><span class="chip">칩 둘</span></div></div></div>
+      <div class="spot-image-wrap"><img src="https://example.com/a.jpg" alt="첫째 곳 전경" class="spot-image" loading="lazy"><div class="image-caption">첫째 곳 사진<span style="display: block; margin-top: 4px;">출처: 시험</span></div></div>
+      <ul class="spot-info-list"><li><span class="spot-info-label">주소</span><span class="spot-info-val">시험시 시험로 1</span></li></ul>
+      <p class="spot-desc">첫째 곳 설명이에요.</p>
+      <div class="tip-box"><div class="tip-box-title">💡 에디터 방문 팁</div>일찍 가세요.</div>
+      <div class="action-chips"><a href="https://map.naver.com/p/search/a" target="_blank" rel="noopener noreferrer" class="btn-map">🧭 네이버 지도에서 위치 보기</a></div>
+    </article>
+    <section class="cost-section">
+      <h2 class="cost-title">💰 2인 예상 경비표</h2>
+      <p class="cost-sub">시험 경비예요.</p>
+      <div class="table-wrap"><table><thead><tr><th>구분</th><th>장소</th><th>2인 금액</th><th>비고</th></tr></thead><tbody><tr><td>입장</td><td>첫째 곳</td><td>1,000원</td><td>시험</td></tr><tr style="background-color: #f8fafc; font-weight: 700;"><td colspan="2">합계</td><td style="color: red;">1,000원</td><td>별도</td></tr></tbody></table></div>
+    </section>
+    <div class="conclusion-box"><h2 class="conclusion-title">✨ 에디터 총평</h2><p>총평 하나예요.</p><p>총평 둘이에요.</p></div>
+    <div class="app-course-box" style="margin: 40px 0 24px;">
+      <strong style="display: block;">🗺️ 이 코스 오늘 데이트에서 열기</strong>
+      <p style="margin: 0;">시험 코스를 앱에서 열어요.</p>
+      <a href="${COURSE}" style="display: inline-block;">앱에서 코스 열기 →</a>
+    </div>
+  </main>
+  <footer class="site-footer">
+    <div class="footer-links"><a href="https://nufunc.github.io/oneul-date/">오늘 데이트 홈</a><a href="https://nufunc.github.io/oneul-date/blog/">블로그 매거진 전체보기</a></div>
+    <p>© 2026 오늘 데이트</p>
+  </footer>
+</body>
+</html>
+`;
+  const rout = convert(route);
+  assert.deepStrictEqual(compare(route, rout), [], 'route-timeline 계열이 보존 비교를 통과하지 못했다');
+  assert.ok(rout.includes('<div class="route range" style="--n:2">') && rout.includes('<em class="tl-meta">(차량 6.6km · 약 10분)</em>') && rout.includes('<p class="spot-tagline">칩 하나 · 칩 둘</p>'), 'route-timeline 계열의 동선이나 칩 줄이 새 틀이 아니다');
+  assert.ok(rout.includes('<span class="cap-src">출처: 시험</span>') && rout.includes('<table class="cost-table">') && rout.includes('<tr class="cost-total-row">') && rout.includes('<section class="prose-section">') && /<a class="btn" href="[^"]*#c=/.test(rout), 'route-timeline 계열의 사진 출처나 경비표나 총평이 새 틀이 아니다');
+  assert.throws(() => convert(route.replace('<p class="spot-desc">첫째 곳 설명이에요.</p>', '<blockquote>모름</blockquote>')), /모르는 요소/, 'route-timeline 계열에서 모르는 요소가 있는데 변환이 실패하지 않았다');
+
+  // spot-block 계열(강릉, 경주): article.article-card 안에 동선 상자, 장소 구획, 이동 연결, 경비표, 지도 상자, 에필로그가 이어지는 틀
+  const block = `${head}<body>
+  <header class="travel-header-bar">
+    <div class="header-inner">
+      <div class="blog-tagline"><a href="../" style="text-decoration:none;">← 📖 오늘 데이트 매거진</a></div>
+      <div class="read-time">시험 1박 2일 편</div>
+    </div>
+  </header>
+  <main class="article-container">
+    <article class="article-card">
+      <span class="post-badge">시험 1박 2일 여행 코스</span>
+      <h1 class="post-title">[시험 1박 2일 여행] 쉼 코스</h1>
+      <div class="post-quote">"조용한 시험 여행이에요."</div>
+      <div class="post-meta-row"><div class="author-info"><div class="author-avatar">🌊</div><div><div>시험 팀</div><div style="font-size: 12px;">2026. 10.</div></div></div><div>시험시 일대</div></div>
+      <div class="content-photo"><img src="https://example.com/h.jpg" alt="대표 사진" loading="lazy"><div class="photo-caption">대표 사진 설명이에요.</div></div>
+      <p class="lead-paragraph">도입 하나예요.</p>
+      <p class="lead-paragraph">도입 <strong>둘</strong>이에요.</p>
+      <div class="itinerary-box">
+        <div class="itinerary-header"><span>🗺️</span> 시험 동선 요약</div>
+        <div style="margin-bottom: 14px;"><span class="day-pill">Day 1</span><span style="font-size: 13px;">첫날 이야기</span></div>
+        <div class="itinerary-step"><span class="time-tag">12:00</span><span><strong>첫째 곳</strong> : 점심 먹기</span></div>
+        <div style="margin: 20px 0 14px;"><span class="day-pill">Day 2</span><span style="font-size: 13px;">둘째 날 이야기</span></div>
+        <div class="itinerary-step"><span class="time-tag">11:00</span><span>느긋한 체크아웃</span></div>
+      </div>
+      <p class="spot-text">영업시간은 바뀔 수 있어요.</p>
+      <section class="spot-block">
+        <div class="spot-badge-wrap"><span class="spot-num">SPOT 01</span><span class="spot-category-label">점심 & 산책</span></div>
+        <h2 class="spot-title">첫째 곳, 골목의 식당</h2>
+        <p class="spot-text">첫째 곳 설명이에요.</p>
+        <div class="content-photo"><img src="https://example.com/a.jpg" alt="첫째 곳 전경" loading="lazy"><div class="photo-caption">첫째 곳 사진 설명이에요.</div></div>
+        <div class="tip-card"><div class="tip-card-title">💡 방문 꿀팁</div><ul><li><strong>주차</strong>: 공영주차장</li></ul></div>
+      </section>
+      <div class="bridge-card"><span class="bridge-icon">🚗</span><div>차로 10분 거리로 이동해요.</div></div>
+      <section class="spot-block">
+        <div class="spot-badge-wrap"><span class="spot-num">SPOT 02</span><span class="spot-category-label">아침</span></div>
+        <h2 class="spot-title">둘째 곳</h2>
+        <p class="spot-text">둘째 곳 설명이에요.</p>
+      </section>
+      <div style="margin: 50px 0 20px; display: inline-block;"><span style="font-weight: 800;">☀️ Day 2: 아침과 여운</span></div>
+      <section class="expense-section">
+        <div class="expense-title"><span>💰</span> 2인 예상 경비</div>
+        <p class="expense-desc">경비 설명이에요.</p>
+        <div class="table-responsive"><table class="expense-table"><thead><tr><th>구분</th><th>항목</th><th>상세</th><th style="text-align: right;">금액</th></tr></thead><tbody><tr><td><strong>점심</strong></td><td>첫째 곳</td><td>국수</td><td style="text-align: right;">9,000원</td></tr><tr class="total-row"><td colspan="3"><strong>합계</strong></td><td style="text-align: right;">9,000원</td></tr></tbody></table></div>
+      </section>
+      <section class="map-box">
+        <div class="map-box-title">🧭 지도 바로가기</div>
+        <div class="map-box-desc">아래 링크에서 확인하세요:</div>
+        <div style="display: flex;"><a class="naver-btn" style="padding: 8px;" href="https://map.naver.com/p/search/a" target="_blank" rel="noopener noreferrer">🍜 첫째 곳</a></div>
+      </section>
+      <section style="margin-top: 48px;"><h3 style="font-size: 20px;">에필로그: 위로</h3><p class="spot-text">에필로그 하나예요.</p><p class="spot-text" style="margin-bottom: 0;">에필로그 둘이에요.</p></section>
+      <div class="app-course-box" style="margin: 40px 0 24px;">
+        <strong style="display: block;">🗺️ 이 코스 오늘 데이트에서 열기</strong>
+        <p style="margin: 0;">시험 코스를 앱에서 열어요.</p>
+        <a href="${COURSE}" style="display: inline-block;">앱에서 코스 열기 →</a>
+      </div>
+    </article>
+  </main>
+  <footer class="site-footer"><div>본 글은 시험용 안내입니다.</div><div class="source-credit">사진 출처: 시험</div></footer>
+</body>
+</html>
+`;
+  const bout = convert(block);
+  assert.deepStrictEqual(compare(block, bout), [], 'spot-block 계열이 보존 비교를 통과하지 못했다');
+  assert.ok(bout.includes('<header class="site-header">') && bout.includes('<span class="header-note">시험 1박 2일 편</span>') && bout.includes('<p class="hero-quote">') && bout.includes('<figure class="hero-figure">'), 'spot-block 계열의 머리가 새 틀이 아니다');
+  assert.strictEqual((bout.match(/<div class="route" /g) ?? []).length, 2, 'spot-block 계열의 동선은 날마다 route 하나여야 한다');
+  assert.ok(bout.includes('<section class="story-section">') && bout.includes('<figure class="story-photo">') && bout.includes('<p class="drive-bridge">차로 10분 거리로 이동해요.</p>') && bout.includes('<div class="table-wrap amount-last">') && bout.includes('<ul class="map-list">') && /<a class="btn" href="[^"]*#c=/.test(bout), 'spot-block 계열의 장소 구획이나 경비표나 지도 목록이 새 틀이 아니다');
+  assert.throws(() => convert(block.replace('<p class="spot-text">둘째 곳 설명이에요.</p>', '<blockquote>모름</blockquote>')), /모르는 요소/, 'spot-block 계열에서 모르는 요소가 있는데 변환이 실패하지 않았다');
+
   assert.strictEqual(snapshot(out).links.length, snapshot(original).links.length + 1, '링크 수는 첫 화면 앱 버튼 하나만 늘어야 한다');
   console.log(`test-blog-hallmark: 변환 보존 비교, 새 틀 약속, 달라진 변환본 ${cases.length}건, 모르는 틀 실패 통과`);
 })().catch((e) => { console.error(e); process.exit(1); });
