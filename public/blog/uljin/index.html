@@ -16,6 +16,9 @@
 
   <!-- Pretendard 웹폰트 -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700&display=swap&text=%26%2C.0123456789%3A%5B%5D~%EA%B1%B0%EA%B2%BD%EA%B3%84%EA%B3%BC%EA%B4%80%EA%B5%AD%EA%B5%B4%EA%B7%B8%EA%B8%B0%EA%B9%8C%EB%82%98%EB%82%B4%EB%85%B8%EB%8A%94%EB%8A%98%EB%8B%A4%EB%8B%B7%EB%8C%80%EB%8D%94%EB%8D%B0%EB%8F%84%EB%8F%99%EB%93%9C%EB%93%B1%EB%94%94%EB%94%B0%EB%9D%BC%EB%9E%84%EB%A0%88%EB%A1%9C%EB%A1%A4%EB%A3%8C%EB%A3%A8%EB%A5%98%EB%A5%BC%EB%A6%AC%EB%A6%BD%EB%A7%81%EB%A7%8C%EB%A7%9D%EB%A7%A4%EB%A9%94%EB%B0%94%EB%B2%88%EB%B3%80%EB%B3%84%EB%B3%B4%EB%B6%80%EB%B6%81%EB%B8%8C%EB%B9%84%EC%82%AC%EC%83%81%EC%84%9C%EC%84%A0%EC%84%B1%EC%84%B8%EC%85%98%EC%86%8D%EC%8A%A4%EC%8B%9C%EC%8B%9D%EC%95%88%EC%95%BD%EC%96%91%EC%96%B4%EC%96%BC%EC%97%90%EC%97%AC%EC%97%B4%EC%98%88%EC%98%A4%EC%9A%94%EC%9A%B8%EC%9B%90%EC%9C%A0%EC%9D%80%EC%9D%84%EC%9D%8C%EC%9D%B4%EC%9D%B8%EC%9D%BC%EC%9E%85%EC%9E%87%EC%9E%91%EC%9E%A5%EC%A0%84%EC%A3%BC%EC%A3%BD%EC%A7%80%EC%A7%84%EC%B0%A8%EC%B4%9D%EC%B9%B4%EC%BD%94%ED%81%90%ED%84%B0%ED%86%A0%ED%8A%B8%ED%8A%B9%ED%8F%89%ED%94%84%ED%95%98%ED%95%99%ED%95%9C%ED%95%A9%ED%95%B4%ED%96%88%ED%96%89%ED%99%95%ED%9E%90" rel="stylesheet">
 
   <script type="application/ld+json">
 {
@@ -43,456 +46,256 @@
   </script>
 
   <style>
-    :root {
-      --color-primary: #1e293b;
-      --color-accent: #0284c7;
-      --color-accent-light: #e0f2fe;
-      --color-text-main: #334155;
-      --color-text-sub: #64748b;
-      --color-border: #e2e8f0;
-      --color-bg-page: #f8fafc;
-      --color-card-bg: #ffffff;
-      --color-warm: #0369a1;
-      --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-    }
+/* hallmark-solstice: scripts/convert_blog_hallmark.mjs가 글의 <style>을 이 파일로 바꾼다 (Hallmark 2.0.0, 테마 Solstice, P-293) */
+:root {
+  color-scheme: light;
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-xs: 0.8125rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.125rem; --text-xl: 1.5625rem; --text-2xl: 1.953rem; --text-3xl: 2.441rem;
+  --text-hero: clamp(1.75rem, 1.6vw + 1.25rem, 2.75rem);
+  --text-section: clamp(1.75rem, 1.8vw + 1rem, 2.875rem); --text-title: clamp(1.25rem, 0.75vw + 0.875rem, 1.625rem); --text-lead: clamp(1.0625rem, 0.3vw + 0.95rem, 1.25rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-micro: 120ms; --dur-short: 220ms;
+  --container: 1200px; --measure: 680px; --gutter: 56px; --gap-columns: 40px; --section-gap: 120px;
+  --z-sticky-nav: 300;
+  --color-paper: oklch(94% 0.03 80); --color-paper-2: oklch(97% 0.02 85); --color-paper-3: oklch(89% 0.05 80);
+  --color-ink: oklch(27% 0.05 50); --color-ink-2: oklch(36% 0.05 50); --color-muted: oklch(48% 0.06 55);
+  --color-rule: oklch(84% 0.06 78);
+  --color-accent: oklch(54% 0.20 24); --color-accent-2: oklch(48% 0.19 24); --color-accent-ink: oklch(97% 0.02 85); --color-focus: oklch(54% 0.20 24);
+  --color-gold: oklch(74% 0.14 75); --color-gold-2: oklch(84% 0.11 80);
+  --color-band-text: oklch(94% 0.03 80); --color-band-muted: oklch(80% 0.05 75);
+  --color-hair-ink: color-mix(in oklab, var(--color-ink) 10%, transparent);
+  --font-display: "Noto Serif KR", "Nanum Myeongjo", ui-serif, serif;
+  --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --radius-card: 0; --radius-pill: 999px; --rule-hair: 1px; --rule-bar: 2px;
+  --shadow-card: 10px 10px 0 var(--color-paper-3);
+}
+@media (max-width: 60rem) { :root { --gutter: 24px; --section-gap: 88px; --gap-columns: 24px; } }
+@media (max-width: 40rem) { :root { --gutter: 16px; --section-gap: 64px; --gap-columns: 16px; } }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: var(--font-family);
-      background-color: var(--color-bg-page);
-      color: var(--color-text-main);
-      line-height: 1.8;
-      word-break: keep-all;
-      -webkit-font-smoothing: antialiased;
-    }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+html { scrollbar-color: var(--color-muted) var(--color-paper); scroll-padding-top: var(--space-3xl); }
+body { margin: 0; background: var(--color-paper); color: var(--color-ink-2); font-family: var(--font-family); font-size: var(--text-md); line-height: 1.75; word-break: keep-all; -webkit-font-smoothing: antialiased; }
+::selection { background: color-mix(in oklab, var(--color-gold) 40%, transparent); }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+a:hover { text-decoration-color: var(--color-accent); }
+article h1, article h2, article h3 { margin: 0; font-family: var(--font-display); font-weight: 700; color: var(--color-ink); line-height: 1.3; letter-spacing: -0.01em; overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+img { max-width: 100%; display: block; }
+.container { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); }
 
-    .site-header {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--color-border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .header-inner {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 14px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .header-logo {
-      font-weight: 800;
-      font-size: 1.15rem;
-      color: var(--color-primary);
-      text-decoration: none;
-    }
-    .header-logo span { color: var(--color-accent); }
-    .header-nav a {
-      color: var(--color-text-sub);
-      text-decoration: none;
-      font-size: 0.9rem;
-      margin-left: 16px;
-    }
+/* 44px 머리 링크 규칙: scripts/test-blog-related.cjs가 글마다 하나를 요구한다 */
+header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
 
-    .article-container {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 40px 20px 80px;
-    }
+/* Controls */
+.btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 var(--space-lg); border: 0; border-radius: var(--radius-pill); background: var(--color-accent); color: var(--color-accent-ink); font: 600 var(--text-md)/1 var(--font-family); text-decoration: none; cursor: pointer; transition: background-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out); }
+.btn:hover { background: var(--color-accent-2); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.link-quiet { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-ink); font-weight: 600; font-size: var(--text-sm); text-decoration: none; border-bottom: var(--rule-bar) solid var(--color-ink); transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out); }
+.link-quiet:hover { color: var(--color-accent); border-color: var(--color-accent); }
+.link-quiet:active { transform: translateY(1px); }
+.link-quiet:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
 
-    .article-header {
-      margin-bottom: 36px;
-      text-align: center;
-    }
-    .badge-category {
-      display: inline-block;
-      background: var(--color-accent-light);
-      color: var(--color-accent);
-      font-weight: 700;
-      font-size: 0.85rem;
-      padding: 6px 14px;
-      border-radius: 20px;
-      margin-bottom: 16px;
-      letter-spacing: -0.3px;
-    }
-    .article-title {
-      font-size: 2.1rem;
-      font-weight: 800;
-      line-height: 1.35;
-      color: var(--color-primary);
-      margin-bottom: 16px;
-      letter-spacing: -0.5px;
-    }
-    .article-meta {
-      font-size: 0.9rem;
-      color: var(--color-text-sub);
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 4px 16px;
-    }
+/* Nav */
+.site-header { position: sticky; top: 0; z-index: var(--z-sticky-nav); background: var(--color-paper); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.header-inner { display: flex; justify-content: space-between; align-items: center; min-height: 64px; }
+.header-logo { font-family: var(--font-display); font-size: var(--text-lg); color: var(--color-ink); text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; }
+.header-logo span { color: var(--color-accent); margin-left: 0.3em; }
+.header-logo:hover { color: var(--color-ink-2); }
+.header-nav { display: flex; gap: var(--space-lg); }
+.header-nav a { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--text-sm); color: var(--color-ink-2); text-decoration: none; }
+.header-nav a:hover { color: var(--color-ink); text-decoration: underline; text-decoration-color: var(--color-accent); }
+.header-nav a:active, .header-logo:active { transform: translateY(1px); }
 
-    .hero-image-wrap {
-      margin: 0 -20px 36px;
-      position: relative;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
-    }
-    .hero-image {
-      width: 100%;
-      height: 420px;
-      object-fit: cover;
-      display: block;
-    }
-    .hero-caption {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 24px 20px 14px;
-      background: linear-gradient(transparent, rgba(0,0,0,0.7));
-      color: #fff;
-      font-size: 0.88rem;
-      text-align: right;
-    }
+/* Hero */
+.hero { display: grid; padding-block: var(--space-2xl) var(--space-xl); }
+.hero-text { display: grid; gap: var(--space-lg); }
+.article-title { font-size: var(--text-hero); line-height: 1.3; max-width: 28ch; }
+.hero-kicker { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.hero-kicker span:first-child { color: var(--color-accent); font-weight: 600; }
+.article-meta { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-lg); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); font-variant-numeric: tabular-nums; }
+.article-meta .meta-credit { flex-basis: 100%; }
+/* 좁은 화면에서 칸마다 한 줄: 본문 글꼴(Pretendard)이 바뀔 때 줄 수가 달라져 아래 띠가 밀리는 것을 막는다 */
+@media (max-width: 40rem) { .article-meta { flex-direction: column; flex-wrap: nowrap; } }
+.spot-photo img { width: 100%; height: 100%; object-fit: cover; outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
 
-    .summary-box {
-      background: #ffffff;
-      border: 1px solid var(--color-border);
-      border-left: 5px solid var(--color-accent);
-      padding: 24px;
-      border-radius: 12px;
-      margin-bottom: 40px;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.03);
-    }
-    .summary-title {
-      font-weight: 700;
-      font-size: 1.05rem;
-      margin-bottom: 12px;
-      color: var(--color-primary);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .summary-list {
-      list-style: none;
-      font-size: 0.95rem;
-      color: var(--color-text-main);
-    }
-    .summary-list li {
-      margin-bottom: 8px;
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-    }
-    .summary-list li::before {
-      content: "•";
-      color: var(--color-accent);
-      font-weight: bold;
-    }
+/* Lead */
+.prose-intro { max-width: var(--measure); padding-top: var(--space-xl); font-size: var(--text-lead); line-height: 1.8; color: var(--color-ink); padding-bottom: var(--space-3xl); }
 
-    .timeline-card {
-      background: #ffffff;
-      border: 1px solid var(--color-border);
-      border-radius: 16px;
-      padding: 24px;
-      margin-bottom: 40px;
-    }
-    .timeline-title { font-weight: 700; font-size: 1.05rem; color: var(--color-primary); margin-bottom: 12px; }
-    .tl-act { font-weight: 700; font-size: 13px; color: #64748b; margin: 18px 0 8px; }
-    .timeline-title + .tl-act { margin-top: 0; }
-    .tl-step { display: flex; gap: 12px; align-items: baseline; padding: 6px 0; }
-    .tl-time { flex: none; min-width: 46px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--color-accent); }
-    .tl-place { font-weight: 700; color: #1e293b; }
-    .tl-note { display: block; font-size: 13px; color: #64748b; margin-top: 2px; }
-    .tl-move { font-size: 12.5px; color: #94a3b8; padding: 0 0 0 58px; }
-    @media (max-width: 640px) {
-      .timeline-card { padding: 14px 16px; }
-    }
+/* The day, on the brown band */
+.band { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl) var(--space-xl); }
+.band .timeline-title { color: var(--color-band-text); font-size: var(--text-section); margin-bottom: var(--space-xl); }
+.route { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: 0; padding: 0; }
+.tl-act { font-size: var(--text-sm); color: var(--color-gold-2); padding-bottom: var(--space-sm); }
+.tl-step { display: grid; align-content: start; gap: var(--space-2xs); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-gold); }
+.tl-time { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1; color: var(--color-band-text); font-variant-numeric: tabular-nums; }
+.tl-place { font-weight: 600; font-size: var(--text-lg); color: var(--color-band-text); }
+.tl-note { font-size: var(--text-sm); color: var(--color-band-muted); line-height: 1.6; }
+.tl-move { font-size: var(--text-sm); color: var(--color-band-muted); padding-block: var(--space-sm) var(--space-lg); }
+.tl-total { font-size: var(--text-sm); color: var(--color-band-muted); padding-top: var(--space-lg); margin-top: var(--space-lg); border-top: var(--rule-hair) solid color-mix(in oklab, var(--color-band-text) 25%, transparent); }
+/* spot-info-list 계열: 시간 범위(10:30 - 11:45)가 길어 시각 글자를 줄이고, 요약 상자와 번호 배지를 둔다 */
+.route.range .tl-time { font-size: var(--text-xl); }
+.route.range .tl-step { padding-bottom: var(--space-md); }
+.tl-badge { font-size: var(--text-xs); color: var(--color-gold-2); letter-spacing: 0.04em; }
+.tl-facts { display: grid; gap: var(--space-2xs) var(--space-lg); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.tl-facts strong { color: var(--color-gold-2); font-weight: 600; }
+@media (min-width: 60rem) {
+  .tl-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .route { grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); column-gap: var(--space-lg); }
+  .route > * { grid-row: var(--r); grid-column: var(--c) / span var(--s, 1); }
+  .tl-move { padding-bottom: 0; }
+  .tl-total { grid-column: 1 / -1; }
+}
 
-    .content-section {
-      margin-bottom: 56px;
-    }
-    .content-section h2 {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin-bottom: 20px;
-      position: relative;
-      padding-bottom: 10px;
-      border-bottom: 2px solid var(--color-border);
-    }
+/* Stops */
+.spots { padding-block: var(--section-gap) 0; display: grid; gap: var(--section-gap); }
+.spot-section { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "photo head" "photo body"; grid-template-rows: auto 1fr; column-gap: var(--gap-columns); row-gap: var(--space-md); align-items: start; padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); }
+.spot-section.flip { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-areas: "head photo" "body photo"; }
+.spot-section.no-photo { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "body"; }
+.spot-head { grid-area: head; display: grid; gap: var(--space-md); }
+.spot-photo { grid-area: photo; align-self: start; margin: 0; aspect-ratio: 4 / 5; width: 100%; background: var(--color-paper-3); position: sticky; top: 96px; }
+.spot-body { grid-area: body; display: grid; gap: var(--space-md); }
+.spot-header { display: flex; align-items: baseline; gap: var(--space-md); }
+.spot-num { font-family: var(--font-display); font-size: var(--text-3xl); line-height: 1; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+.spot-title { font-size: var(--text-section); }
+.spot-tagline { font-size: var(--text-lg); color: var(--color-ink); padding-bottom: var(--space-xs); }
+.spot-desc { max-width: 60ch; }
 
-    .spot-card {
-      background: var(--color-card-bg);
-      border-radius: 16px;
-      border: 1px solid var(--color-border);
-      overflow: hidden;
-      margin-bottom: 36px;
-      box-shadow: 0 6px 16px -2px rgba(0,0,0,0.04);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .spot-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 24px -4px rgba(0,0,0,0.07);
-    }
-    .spot-image-wrap {
-      width: 100%;
-      height: 320px;
-      position: relative;
-      overflow: hidden;
-    }
-    .spot-image {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    .spot-badge {
-      position: absolute;
-      top: 16px;
-      left: 16px;
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(4px);
-      color: #fff;
-      font-size: 0.8rem;
-      font-weight: 700;
-      padding: 6px 12px;
-      border-radius: 8px;
-      letter-spacing: 0.5px;
-    }
-    .spot-content {
-      padding: 24px 24px 20px;
-    }
-    .spot-title-wrap {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .spot-title {
-      font-size: 1.35rem;
-      font-weight: 800;
-      color: var(--color-primary);
-    }
-    .spot-category {
-      font-size: 0.85rem;
-      color: var(--color-accent);
-      font-weight: 600;
-    }
-    .spot-info-list {
-      list-style: none;
-      font-size: 0.9rem;
-      color: var(--color-text-sub);
-      margin-bottom: 18px;
-      padding: 12px 14px;
-      background: var(--color-bg-page);
-      border-radius: 8px;
-    }
-    .spot-info-list li {
-      margin-bottom: 4px;
-    }
-    .spot-info-list li:last-child {
-      margin-bottom: 0;
-    }
-    .spot-desc {
-      font-size: 0.98rem;
-      color: var(--color-text-main);
-      margin-bottom: 20px;
-      line-height: 1.85;
-    }
+.spot-info-box { margin: var(--space-xs) 0 0; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); }
+.info-row { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--space-md); padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.info-row:last-child { border-bottom: 0; }
+.info-label { color: var(--color-muted); }
+.info-val { color: var(--color-ink); font-weight: 400; font-variant-numeric: tabular-nums; }
+.map-btn-wrap { padding-top: var(--space-sm); }
+.tip-box { padding: var(--space-sm) var(--space-md); border-left: var(--rule-bar) solid var(--color-accent); background: var(--color-paper-2); font-size: var(--text-sm); color: var(--color-ink-2); line-height: 1.7; }
+.tip-box strong { color: var(--color-ink); font-weight: 600; }
+.tip-box .tip-title { display: block; margin-bottom: var(--space-2xs); }
 
-    .spot-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px dashed var(--color-border);
-    }
-    .action-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      padding: 8px 14px;
-      border-radius: 8px;
-      text-decoration: none;
-      transition: all 0.2s ease;
-    }
-    .chip-map {
-      background: #00843d;
-      color: #ffffff;
-    }
-    .chip-map:hover {
-      background: #007a37;
-    }
-    .chip-tmap {
-      background: #1e293b;
-      color: #ffffff;
-    }
-    .chip-tmap:hover {
-      background: #334155;
-    }
-    .chip-taxi {
-      background: #fee500;
-      color: #191919;
-    }
-    .chip-taxi:hover {
-      background: #ebd200;
-    }
+/* Fees */
+.cost-table-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.cost-head { display: grid; gap: var(--space-md); align-content: start; }
+.cost-head .timeline-title { font-size: var(--text-section); }
+.cost-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.cost-table th { text-align: left; font-weight: 400; color: var(--color-muted); padding: var(--space-xs) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-bar) solid var(--color-ink); }
+.cost-table td { padding: var(--space-sm) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink-2); vertical-align: top; }
+.cost-table td:nth-child(2) { color: var(--color-ink); font-weight: 400; }
+.cost-3 .cost-total-row td:nth-child(2) { font-family: inherit; font-size: inherit; color: inherit; font-weight: 600; }
+.cost-3 .cost-total-row td:nth-child(3) { font-family: var(--font-display); font-size: var(--text-xl); color: var(--color-accent); font-weight: 700; }
+.cost-total-row td { border-bottom: 0; border-top: var(--rule-bar) solid var(--color-ink); color: var(--color-ink); font-weight: 600; }
+.cost-total-row td:nth-child(2) { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--color-accent); font-weight: 700; }
+@media (max-width: 600px) {
+  .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
+  .table-wrap thead { display: none; }
+  .table-wrap tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-sm); row-gap: var(--space-2xs); padding-block: var(--space-sm); border-bottom: var(--rule-hair) solid var(--color-rule); }
+  .table-wrap td { padding: 0; border: 0; }
+  .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: var(--text-xs); color: var(--color-muted); }
+  .table-wrap td:nth-child(3) { text-align: right; font-weight: 600; color: var(--color-ink); }
+  .table-wrap td:nth-child(4) { grid-column: 1 / -1; color: var(--color-muted); }
+  .table-wrap td:empty { display: none; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: var(--text-sm); color: var(--color-ink); }
+  .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; text-align: right; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
+  .table-wrap .cost-total-row { border-top: var(--rule-bar) solid var(--color-ink); border-bottom: 0; }
+}
 
-    .tip-box {
-      background: #fffbeb;
-      border: 1px solid #fef3c7;
-      border-radius: 10px;
-      padding: 14px 16px;
-      font-size: 0.9rem;
-      color: #92400e;
-      margin-top: 16px;
-      display: flex;
-      gap: 8px;
-    }
-    .tip-icon { font-size: 1.1rem; flex-shrink: 0; }
+/* Tips */
+.tips-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.tips-card .timeline-title { font-size: var(--text-section); align-self: start; }
+.tips-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-md); }
+.tips-list li { padding-bottom: var(--space-md); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.tips-list li:last-child { border-bottom: 0; }
+.tips-list strong { color: var(--color-ink); font-weight: 600; }
 
-    .drive-bridge {
-      background: #f1f5f9;
-      border-radius: 12px;
-      padding: 16px 20px;
-      margin: -12px 0 36px;
-      font-size: 0.9rem;
-      color: var(--color-text-sub);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .bridge-icon { font-size: 1.2rem; }
+/* App course */
+.app-course-box { margin-top: var(--section-gap); display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--gap-columns); align-items: end; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-xl); }
+.app-course-box h2 { font-size: var(--text-section); margin-bottom: var(--space-md); }
+.app-course-box p { max-width: 52ch; }
+.app-course-box .app-action { justify-self: end; }
 
-    .table-wrap {
-      overflow-x: auto;
-      margin: 24px 0;
-      border-radius: 12px;
-      border: 1px solid var(--color-border);
-      background: #fff;
-    }
-    .cost-table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-      font-size: 0.92rem;
-    }
-    .cost-table th, .cost-table td {
-      padding: 14px 18px;
-      border-bottom: 1px solid var(--color-border);
-    }
-    .cost-table th {
-      background: var(--color-bg-page);
-      font-weight: 700;
-      color: var(--color-primary);
-    }
-    .cost-table tr:last-child td {
-      border-bottom: none;
-    }
-    .cost-total-row {
-      font-weight: 800;
-      background: var(--color-accent-light);
-      color: var(--color-accent);
-    }
+.article-credit { margin-top: var(--space-2xl); padding-block: var(--space-md) var(--space-3xl); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); }
 
-    /* 비용표: 좁은 화면에서는 한 행을 카드 하나로 쌓는다 */
-    @media (max-width: 600px) {
-      .table-wrap { overflow-x: visible; }
-      .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
-      .table-wrap thead { display: none; }
-      .table-wrap tr {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        column-gap: 12px;
-        row-gap: 4px;
-        padding: 14px 16px;
-        border-bottom: 1px solid var(--color-border);
-      }
-      .table-wrap tr:last-child { border-bottom: none; }
-      .table-wrap td { padding: 0; border: none; }
-      .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: 0.78rem; font-weight: 700; color: var(--color-text-sub); }
-      .table-wrap td:nth-child(2) { font-weight: 700; }
-      .table-wrap td:nth-child(3) { max-width: 60vw; word-break: keep-all; text-align: right; font-weight: 700; }
-      .table-wrap td:nth-child(4) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
-      .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: inherit; color: inherit; }
-      .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; max-width: 60vw; word-break: keep-all; text-align: right; }
-      .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; max-width: none; text-align: left; font-size: 0.85rem; font-weight: 400; color: var(--color-text-sub); }
-    }
+/* Footer mast */
+.site-footer { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl); }
+.footer-inner { display: grid; gap: var(--space-md); }
+.footer-mark { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1.2; color: var(--color-band-text); }
+.footer-line { color: var(--color-band-muted); font-size: var(--text-sm); }
+.footer-links { display: flex; flex-wrap: wrap; gap: var(--space-lg); }
+.footer-links a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-band-text); font-size: var(--text-sm); text-decoration: underline; text-decoration-color: var(--color-gold); }
+.footer-links a:hover { text-decoration-color: var(--color-accent); color: var(--color-gold-2); }
+.footer-links a:active { transform: translateY(1px); }
+.site-footer :focus-visible { outline-color: var(--color-gold-2); }
 
-    .cta-card {
-      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-      color: #ffffff;
-      border-radius: 16px;
-      padding: 36px 28px;
-      text-align: center;
-      margin-top: 50px;
-      box-shadow: 0 12px 24px -4px rgba(2, 132, 199, 0.25);
-    }
-    .cta-card h3 {
-      font-size: 1.45rem;
-      font-weight: 800;
-      margin-bottom: 12px;
-    }
-    .cta-card p {
-      font-size: 0.95rem;
-      opacity: 0.92;
-      margin-bottom: 24px;
-      line-height: 1.6;
-    }
-    .btn-cta {
-      display: inline-block;
-      background: #ffffff;
-      color: #0369a1;
-      font-weight: 700;
-      font-size: 0.95rem;
-      padding: 12px 24px;
-      border-radius: 10px;
-      text-decoration: none;
-      transition: background 0.2s ease, transform 0.2s ease;
-    }
-    .btn-cta:hover {
-      background: #f0fdf4;
-      transform: translateY(-2px);
-    }
+@media (max-width: 60rem) {
+  .hero, .spot-section, .spot-section.flip, .cost-table-card, .tips-card, .app-course-box { grid-template-columns: minmax(0, 1fr); }
+  .spot-section, .spot-section.flip { grid-template-areas: "head" "photo" "body"; grid-template-rows: auto; }
+  .spot-section.no-photo { grid-template-areas: "head" "body"; }
+  .hero { padding-block: var(--space-xl) var(--space-xl); }
+  .spot-photo { position: static; aspect-ratio: 16 / 10; }
+  .app-course-box { padding: var(--space-lg); }
+  .app-course-box .app-action { justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn, .link-quiet { transition: none; }
+  .btn:active, .link-quiet:active, .header-nav a:active, .header-logo:active, .footer-links a:active { transform: none; }
+}
 
-    .site-footer {
-      border-top: 1px solid var(--color-border);
-      padding: 30px 20px;
-      text-align: center;
-      font-size: 0.85rem;
-      color: var(--color-text-sub);
-      background: #fff;
-    }
-    .source-credit {
-      margin-top: 8px;
-      font-size: 0.8rem;
-      color: #94a3b8;
-    }
+/* real-photo-flat 계열(평면 글): 번호 있는 긴 장소 제목, 사진 설명, 안내 상자, 지도 목록 */
+.lead-photo { margin: 0 0 var(--space-3xl); }
+.lead-photo img { width: 100%; max-height: 520px; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.lead-photo figcaption, .body-photo figcaption { margin-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.spot-photo figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--space-xs) var(--space-sm); font-size: var(--text-xs); line-height: 1.5; color: var(--color-accent-ink); background: color-mix(in oklab, var(--color-ink) 78%, transparent); }
+.body-photo { margin: 0; }
+.body-photo img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.spot-section.flat .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.tl-lead { max-width: var(--measure); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.guide-box, .order-box { background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); color: var(--color-ink); }
+.guide-box h4, .order-box strong { margin: 0 0 var(--space-xs); font-family: var(--font-display); font-size: var(--text-md); color: var(--color-ink); display: block; }
+.guide-box ul, .order-box ul { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-2xs); }
+.bridge { padding-top: var(--space-xs); color: var(--color-muted); font-size: var(--text-sm); }
+.map-links { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-md); }
+.map-links .timeline-title { font-size: var(--text-section); }
+.map-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-xs); }
+.map-list a, .map-link-chip { display: flex; justify-content: space-between; gap: var(--space-md); align-items: center; min-height: 44px; padding-block: var(--space-xs); border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink); text-decoration: none; }
+.map-links-grid { display: grid; gap: 0; }
+.map-link-chip .btn-action { color: var(--color-accent); font-weight: 600; white-space: nowrap; }
+@media (max-width: 40rem) { .spot-section.flat .spot-title { font-size: var(--text-lg); } }
 
-    @media (max-width: 640px) {
-      .article-title { font-size: 1.65rem; }
-      .hero-image { height: 280px; }
-      .spot-image-wrap { height: 220px; }
-      .spot-content { padding: 18px 16px; }
-    }
-    header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
-    .header-nav a,.header-title a,.blog-tagline a{display:inline-block}
+/* spot-card 계열(editor-144): 대표 사진, 요약 상자, 본문 구획, 세부 코스, 이동 연결, 마무리 상자 */
+.hero-figure { margin: 0 0 var(--space-xl); }
+.hero-figure img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.hero-figure figcaption { padding-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-muted); }
+.summary-card { margin-bottom: var(--space-xl); background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-lg); font-size: var(--text-sm); }
+.summary-title, p.timeline-title, .cta-title { font-family: var(--font-display); font-weight: 700; line-height: 1.3; color: var(--color-ink); }
+.summary-title { font-size: var(--text-xl); margin-bottom: var(--space-sm); }
+p.timeline-title { letter-spacing: -0.01em; overflow-wrap: break-word; }
+.summary-list { margin: 0; padding: 0; list-style: none; display: grid; }
+.summary-list li { padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.summary-list li:last-child { border-bottom: 0; }
+.summary-list strong { color: var(--color-ink); font-weight: 600; }
+.prose-section { margin-top: var(--section-gap); max-width: var(--measure); display: grid; gap: var(--space-md); }
+.prose-section h2, .spots-title { font-size: var(--text-title); }
+.stops-section { margin-top: var(--section-gap); }
+.stops-section .spots { padding-top: var(--space-xl); }
+.spots.bridged { gap: 0; }
+.drive-bridge { margin: 0; padding-block: var(--space-xl); padding-left: var(--space-md); border-left: var(--rule-bar) solid var(--color-gold); font-size: var(--text-sm); color: var(--color-muted); }
+.drive-bridge strong { color: var(--color-ink); font-weight: 600; }
+.spot-header:has(.spot-badge) { flex-direction: column; align-items: flex-start; gap: var(--space-xs); }
+.spot-badge { font-size: var(--text-sm); font-weight: 600; color: var(--color-accent); }
+.spot-actions { display: flex; flex-wrap: wrap; gap: 0 var(--space-lg); }
+.info-wide .info-row { grid-template-columns: 5.5em minmax(0, 1fr); }
+.info-wide .info-row.plain { grid-template-columns: minmax(0, 1fr); }
+.cost-head .timeline-title.long { font-size: var(--text-title); }
+.cta-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-sm); max-width: var(--measure); }
+.cta-card h3, .cta-title { font-size: var(--text-title); }
+.cta-card .link-quiet { justify-self: start; }
   </style>
 </head>
 <body>
 
   <header class="site-header">
-    <div class="header-inner">
+    <div class="header-inner container">
       <a href="../" class="header-logo">오늘 데이트 <span>매거진</span></a>
       <nav class="header-nav">
         <a href="../../">메인 홈</a>
@@ -502,243 +305,180 @@
   </header>
 
   <main class="article-container">
-
     <article>
-      <header class="article-header">
-        <span class="badge-category">경북 울진 · 오션 드라이브 코스</span>
-        <h1 class="article-title">[경북 울진 오션 드라이브] 국립해양과학관 바닷속전망대부터 죽변해안스카이레일 하트해변, 죽변등대, 성류굴과 은어다리 노을까지 에메랄드 동해 힐링 코스</h1>
-        <div class="article-meta">
-          <span>발행일: 2026. 10. 25</span>
-          <span>🚗 총 이동 약 23.7km</span>
-          <span>💰 성류굴 2인 1만 원, 죽변등대 무료</span>
-          <span>글: 오늘 데이트 에디토리얼 팀 / 사진: 한국관광공사</span>
+      <header class="article-header hero container">
+        <div class="hero-text">
+          <p class="hero-kicker badge-category"><span>경북 울진</span><span>오션 드라이브 코스</span></p>
+          <h1 class="article-title">[경북 울진 오션 드라이브] 국립해양과학관 바닷속전망대부터 죽변해안스카이레일 하트해변, 죽변등대, 성류굴과 은어다리 노을까지 에메랄드 동해 힐링 코스</h1>
+          <div class="article-meta">
+            <span>발행일: 2026. 10. 25</span>
+            <span>총 이동 약 23.7km</span>
+            <span>성류굴 2인 1만 원, 죽변등대 무료</span>
+            <span class="meta-credit">글: 오늘 데이트 에디토리얼 팀 / 사진: 한국관광공사</span>
+          </div>
+          <p><a class="btn" href="../../#c=1275.1273.4092.1279.1283">앱에서 코스 열기</a></p>
         </div>
       </header>
 
-      <div class="hero-image-wrap">
-        <img class="hero-image" src="https://tong.visitkorea.or.kr/cms/resource/70/4017070_image2_1.jpg" alt="경북 울진 죽변 해안의 바위와 모래사장을 따라 놓인 레일 위를 달리는 스카이레일 차량" />
-        <div class="hero-caption">바위 해안을 따라 놓인 레일 위의 죽변해안스카이레일 차량</div>
+      <div class="container">
+        <figure class="hero-figure">
+          <img class="hero-image" src="https://tong.visitkorea.or.kr/cms/resource/70/4017070_image2_1.jpg" alt="경북 울진 죽변 해안의 바위와 모래사장을 따라 놓인 레일 위를 달리는 스카이레일 차량" />
+          <figcaption>바위 해안을 따라 놓인 레일 위의 죽변해안스카이레일 차량</figcaption>
+        </figure>
       </div>
 
-      <div class="summary-box">
-        <div class="summary-title">
-          <span>🌊</span> 오늘 데이트 큐레이션 요약
-        </div>
-        <ul class="summary-list">
+      <div class="container">
+        <div class="summary-card">
+          <p class="summary-title">오늘 데이트 큐레이션 요약</p>
+          <ul class="summary-list">
           <li><strong>코스 테마</strong>: 해양과학관 바닷속전망대와 해안 스카이레일, 1910년 등대, 동굴을 거쳐 일몰 전 은어다리까지</li>
           <li><strong>추천 동선</strong>: 국립해양과학관 & 바닷속전망대 → 죽변해안스카이레일 & 하트해변 → 죽변등대 → 울진 성류굴 → 울진은어다리</li>
           <li><strong>소요 시간</strong>: 약 6시간 20분 (죽변면~근남면 차량 이동 약 23.7km, 운전 약 34분)</li>
           <li><strong>예상 경비</strong>: 출처에서 확인한 입장료는 성류굴 2인 10,000원과 죽변등대 무료예요. 나머지 요금은 아래 표에 적었어요</li>
         </ul>
+        </div>
       </div>
 
-      <!-- 동선 타임라인 -->
-      <section class="timeline-card">
-        <h2 class="timeline-title">울진 오션 드라이브 동선</h2>
-        <div class="tl-act">오전: 죽변면 해양과학길</div>
-        <div class="tl-step"><span class="tl-time">10:30</span><div><span class="tl-place">국립해양과학관 &amp; 바닷속전망대</span><span class="tl-note">과학관 09:30~17:00, 매주 월요일 휴관</span></div></div>
-        <div class="tl-move">↓ 점심 뒤 차로 약 3.0km (약 5분)</div>
-        <div class="tl-act">오후: 죽변 해안</div>
-        <div class="tl-step"><span class="tl-time">13:00</span><div><span class="tl-place">죽변해안스카이레일 &amp; 하트해변</span><span class="tl-note">운행 시간과 요금은 공식 예매처에서 확인</span></div></div>
-        <div class="tl-move">↓ 차로 약 0.5km (약 2분)</div>
-        <div class="tl-step"><span class="tl-time">14:15</span><div><span class="tl-place">죽변등대</span><span class="tl-note">09:00~18:00, 연중무휴, 입장 무료</span></div></div>
-        <div class="tl-move">↓ 차로 약 15.5km (약 19분)</div>
-        <div class="tl-act">해 질 녘: 근남면</div>
-        <div class="tl-step"><span class="tl-time">15:30</span><div><span class="tl-place">울진 성류굴</span><span class="tl-note">동절기 17:00에 닫고 16:30까지 입장, 매주 월요일 휴관</span></div></div>
-        <div class="tl-move">↓ 차로 약 4.7km (약 8분)</div>
-        <div class="tl-step"><span class="tl-time">16:50</span><div><span class="tl-place">울진은어다리</span><span class="tl-note">11월 15일 일몰 17:14, 12월 7일 일몰 17:06</span></div></div>
-        <div class="tl-move">차량 이동 합계 약 23.7km, 약 34분 (OSRM 경로 계산)</div>
+      <!-- 동선 -->
+      <section class="timeline-card band">
+        <div class="container">
+          <h2 class="timeline-title">울진 오션 드라이브 동선</h2>
+          <div class="route" style="--n:5">
+            <div class="tl-act" style="--r:1; --c:1">오전: 죽변면 해양과학길</div>
+            <div class="tl-step" style="--r:2; --c:1"><span class="tl-time">10:30</span><span class="tl-place">국립해양과학관 &amp; 바닷속전망대</span><span class="tl-note">과학관 09:30~17:00, 매주 월요일 휴관</span></div>
+            <div class="tl-move" style="--r:3; --c:1">점심 뒤 차로 약 3.0km (약 5분)</div>
+            <div class="tl-act" style="--r:1; --c:2; --s:2">오후: 죽변 해안</div>
+            <div class="tl-step" style="--r:2; --c:2"><span class="tl-time">13:00</span><span class="tl-place">죽변해안스카이레일 &amp; 하트해변</span><span class="tl-note">운행 시간과 요금은 공식 예매처에서 확인</span></div>
+            <div class="tl-move" style="--r:3; --c:2">차로 약 0.5km (약 2분)</div>
+            <div class="tl-step" style="--r:2; --c:3"><span class="tl-time">14:15</span><span class="tl-place">죽변등대</span><span class="tl-note">09:00~18:00, 연중무휴, 입장 무료</span></div>
+            <div class="tl-move" style="--r:3; --c:3">차로 약 15.5km (약 19분)</div>
+            <div class="tl-act" style="--r:1; --c:4; --s:2">해 질 녘: 근남면</div>
+            <div class="tl-step" style="--r:2; --c:4"><span class="tl-time">15:30</span><span class="tl-place">울진 성류굴</span><span class="tl-note">동절기 17:00에 닫고 16:30까지 입장, 매주 월요일 휴관</span></div>
+            <div class="tl-move" style="--r:3; --c:4">차로 약 4.7km (약 8분)</div>
+            <div class="tl-step" style="--r:2; --c:5"><span class="tl-time">16:50</span><span class="tl-place">울진은어다리</span><span class="tl-note">11월 15일 일몰 17:14, 12월 7일 일몰 17:06</span></div>
+            <div class="tl-total" style="--r:4">차량 이동 합계 약 23.7km, 약 34분 (OSRM 경로 계산)</div>
+          </div>
+        </div>
       </section>
 
-      <section class="content-section">
-        <h2>1. 프롤로그: 동해안 7번 국도를 따라 만나는 울진</h2>
+      <div class="container">
+        <section class="prose-section">
+          <h2>1. 프롤로그: 동해안 7번 국도를 따라 만나는 울진</h2>
         <p>
           동해안 7번 국도를 따라 남쪽으로 내려가면 경상북도 울진군에 닿아요. 이 코스는 북쪽 죽변면의 바다에서 시작해 남쪽 근남면의 동굴과 다리에서 끝나요.
         </p>
         <p>
           바다 위로 393m 뻗은 해상 통로 끝의 바닷속전망대가 있는 국립해양과학관, 해안 레일을 달리는 죽변해안스카이레일과 하트해변, 1910년에 세운 죽변등대, 약 915m 길이의 성류굴을 차례로 들르고, 해가 지기 전에 울진은어다리에 닿는 순서예요.
         </p>
-      </section>
+        </section>
 
-      <section class="content-section">
-        <h2>2. 세부 코스 안내</h2>
-
-        <!-- 스팟 1: 국립해양과학관 & 바닷속전망대 -->
-        <div class="spot-card">
-          <div class="spot-image-wrap">
-            <img class="spot-image" src="https://tong.visitkorea.or.kr/cms/resource_photo/59/4074459_image2_1.jpg" alt="국립해양과학관 글자를 단 은색 곡선 건물 정면과 앞쪽의 빈 주차장" />
-            <span class="spot-badge">1막 · 10:30</span>
-          </div>
-          <div class="spot-content">
-            <div class="spot-title-wrap">
-              <h3 class="spot-title">국립해양과학관 &amp; 바닷속전망대</h3>
-              <span class="spot-category">393m 해상 통로 끝의 바닷속전망대</span>
+        <section class="stops-section">
+          <h2 class="spots-title">2. 세부 코스 안내</h2>
+          <div class="spots bridged">
+          <section class="spot-section">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-badge">1막 · 10:30</span><h3 class="spot-title">국립해양과학관 &amp; 바닷속전망대</h3></div>
+              <p class="spot-tagline">393m 해상 통로 끝의 바닷속전망대</p>
             </div>
-            <ul class="spot-info-list">
-              <li>📍 경상북도 울진군 죽변면 해양과학길 8</li>
-              <li>⏰ 과학관 09:30~17:00 (입장 마감 16:30)</li>
-              <li>⏰ 바닷속전망대 3~10월 09:30~17:30 (입장 마감 17:00), 11~2월 09:30~17:00 (입장 마감 16:30)</li>
-              <li>🗓️ 매주 월요일 (공휴일이면 다음 날), 1월 1일, 설·추석 당일 휴관</li>
-            </ul>
-            <p class="spot-desc">
+            <figure class="spot-photo spot-image-wrap">
+              <img class="spot-image" src="https://tong.visitkorea.or.kr/cms/resource_photo/59/4074459_image2_1.jpg" alt="국립해양과학관 글자를 단 은색 곡선 건물 정면과 앞쪽의 빈 주차장" />
+            </figure>
+            <div class="spot-body">
+              <div class="spot-info-box info-wide"><div class="info-row plain"><span class="info-val">경상북도 울진군 죽변면 해양과학길 8</span></div><div class="info-row plain"><span class="info-val">과학관 09:30~17:00 (입장 마감 16:30)</span></div><div class="info-row plain"><span class="info-val">바닷속전망대 3~10월 09:30~17:30 (입장 마감 17:00), 11~2월 09:30~17:00 (입장 마감 16:30)</span></div><div class="info-row plain"><span class="info-val">매주 월요일 (공휴일이면 다음 날), 1월 1일, 설·추석 당일 휴관</span></div></div>
+              <p class="spot-desc">
               울진 드라이브의 첫 장소는 죽변면 해양과학길의 국립해양과학관이에요. 한국관광공사 TourAPI는 이곳을 국내 유일한 해양과학 전문 교육·전시·체험 기관으로 소개해요. 바다 위로 393m 뻗은 해상 통로를 걸어가면 끝에 바닷속전망대가 있어요.
             </p>
-            <div class="tip-box">
-              <span class="tip-icon">💡</span>
-              <div>바닷속전망대는 과학관과 운영 시간이 달라요. 11월부터 2월까지는 16:30에 입장을 마감하니 오전에 먼저 들르는 편이 좋아요. 관람료는 출처에서 확인하지 못했어요.</div>
+              <div class="tip-box">바닷속전망대는 과학관과 운영 시간이 달라요. 11월부터 2월까지는 16:30에 입장을 마감하니 오전에 먼저 들르는 편이 좋아요. 관람료는 출처에서 확인하지 못했어요.</div>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EC%9A%B8%EC%A7%84%20%EA%B5%AD%EB%A6%BD%ED%95%B4%EC%96%91%EA%B3%BC%ED%95%99%EA%B4%80" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도</a><a href="https://tmap.life/search?q=%EC%9A%B8%EC%A7%84%20%EA%B5%AD%EB%A6%BD%ED%95%B4%EC%96%91%EA%B3%BC%ED%95%99%EA%B4%80" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">T맵 길안내</a><a href="https://t.kakao.com/launch?destination=%EA%B2%BD%EC%83%81%EB%B6%81%EB%8F%84%20%EC%9A%B8%EC%A7%84%EA%B5%B0%20%EC%A3%BD%EB%B3%80%EB%A9%B4%20%ED%95%B4%EC%96%91%EA%B3%BC%ED%95%99%EA%B4%80%EA%B8%B8%208" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">카카오T 호출</a></div>
             </div>
-            <div class="spot-actions">
-              <a href="https://map.naver.com/p/search/%EC%9A%B8%EC%A7%84%20%EA%B5%AD%EB%A6%BD%ED%95%B4%EC%96%91%EA%B3%BC%ED%95%99%EA%B4%80" target="_blank" rel="noopener noreferrer" class="action-chip chip-map">🗺️ 네이버 지도</a>
-              <a href="https://tmap.life/search?q=%EC%9A%B8%EC%A7%84%20%EA%B5%AD%EB%A6%BD%ED%95%B4%EC%96%91%EA%B3%BC%ED%95%99%EA%B4%80" target="_blank" rel="noopener noreferrer" class="action-chip chip-tmap">🧭 T맵 길안내</a>
-              <a href="https://t.kakao.com/launch?destination=%EA%B2%BD%EC%83%81%EB%B6%81%EB%8F%84%20%EC%9A%B8%EC%A7%84%EA%B5%B0%20%EC%A3%BD%EB%B3%80%EB%A9%B4%20%ED%95%B4%EC%96%91%EA%B3%BC%ED%95%99%EA%B4%80%EA%B8%B8%208" target="_blank" rel="noopener noreferrer" class="action-chip chip-taxi">🚕 카카오T 호출</a>
-            </div>
-          </div>
-        </div>
+          </section>
 
-        <div class="drive-bridge">
-          <span class="bridge-icon">🚗</span>
-          <div>국립해양과학관에서 죽변해안스카이레일 승차장까지 차로 약 3.0km, 약 5분이에요. 점심은 이 사이에 드세요.</div>
-        </div>
+          <p class="drive-bridge">국립해양과학관에서 죽변해안스카이레일 승차장까지 차로 약 3.0km, 약 5분이에요. 점심은 이 사이에 드세요.</p>
 
-        <!-- 스팟 2: 죽변해안스카이레일 & 하트해변 -->
-        <div class="spot-card">
-          <div class="spot-image-wrap">
-            <img class="spot-image" src="https://tong.visitkorea.or.kr/cms/resource/70/4017070_image2_1.jpg" alt="바위 해안과 모래사장을 따라 놓인 레일 위를 달리는 흰색과 파란색 스카이레일 차량" />
-            <span class="spot-badge">2막 · 13:00</span>
-          </div>
-          <div class="spot-content">
-            <div class="spot-title-wrap">
-              <h3 class="spot-title">죽변해안스카이레일 &amp; 하트해변</h3>
-              <span class="spot-category">해안 레일을 달리는 스카이레일과 드라마 촬영지</span>
+          <section class="spot-section flip">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-badge">2막 · 13:00</span><h3 class="spot-title">죽변해안스카이레일 &amp; 하트해변</h3></div>
+              <p class="spot-tagline">해안 레일을 달리는 스카이레일과 드라마 촬영지</p>
             </div>
-            <ul class="spot-info-list">
-              <li>📍 경상북도 울진군 죽변면 죽변중앙로 235-12 (승차장)</li>
-              <li>⏰ 운행 시간과 요금은 출처에서 확인하지 못했어요. 방문 전 공식 예매처에서 확인하세요</li>
-            </ul>
-            <p class="spot-desc">
+            <figure class="spot-photo spot-image-wrap">
+              <img class="spot-image" src="https://tong.visitkorea.or.kr/cms/resource/70/4017070_image2_1.jpg" alt="바위 해안과 모래사장을 따라 놓인 레일 위를 달리는 흰색과 파란색 스카이레일 차량" />
+            </figure>
+            <div class="spot-body">
+              <div class="spot-info-box info-wide"><div class="info-row plain"><span class="info-val">경상북도 울진군 죽변면 죽변중앙로 235-12 (승차장)</span></div><div class="info-row plain"><span class="info-val">운행 시간과 요금은 출처에서 확인하지 못했어요. 방문 전 공식 예매처에서 확인하세요</span></div></div>
+              <p class="spot-desc">
               죽변해안스카이레일은 죽변 해안을 따라 놓인 레일 위를 작은 차량이 달리는 시설이에요. 레일이 지나는 하트해변은 SBS 드라마 '폭풍 속으로' 촬영지예요.
             </p>
-            <div class="spot-actions">
-              <a href="https://map.naver.com/p/search/%EC%A3%BD%EB%B3%80%ED%95%B4%EC%95%88%EC%8A%A4%EC%B9%B4%EC%9D%B4%EB%A0%88%EC%9D%BC" target="_blank" rel="noopener noreferrer" class="action-chip chip-map">🗺️ 네이버 지도</a>
-              <a href="https://tmap.life/search?q=%EC%A3%BD%EB%B3%80%ED%95%B4%EC%95%88%EC%8A%A4%EC%B9%B4%EC%9D%B4%EB%A0%88%EC%9D%BC" target="_blank" rel="noopener noreferrer" class="action-chip chip-tmap">🧭 T맵 길안내</a>
-              <a href="https://t.kakao.com/launch?destination=%EA%B2%BD%EC%83%81%EB%B6%81%EB%8F%84%20%EC%9A%B8%EC%A7%84%EA%B5%B0%20%EC%A3%BD%EB%B3%80%EB%A9%B4%20%EC%A3%BD%EB%B3%80%EC%A4%91%EC%95%99%EB%A1%9C%20235-12" target="_blank" rel="noopener noreferrer" class="action-chip chip-taxi">🚕 카카오T 호출</a>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EC%A3%BD%EB%B3%80%ED%95%B4%EC%95%88%EC%8A%A4%EC%B9%B4%EC%9D%B4%EB%A0%88%EC%9D%BC" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도</a><a href="https://tmap.life/search?q=%EC%A3%BD%EB%B3%80%ED%95%B4%EC%95%88%EC%8A%A4%EC%B9%B4%EC%9D%B4%EB%A0%88%EC%9D%BC" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">T맵 길안내</a><a href="https://t.kakao.com/launch?destination=%EA%B2%BD%EC%83%81%EB%B6%81%EB%8F%84%20%EC%9A%B8%EC%A7%84%EA%B5%B0%20%EC%A3%BD%EB%B3%80%EB%A9%B4%20%EC%A3%BD%EB%B3%80%EC%A4%91%EC%95%99%EB%A1%9C%20235-12" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">카카오T 호출</a></div>
             </div>
-          </div>
-        </div>
+          </section>
 
-        <div class="drive-bridge">
-          <span class="bridge-icon">🚗</span>
-          <div>스카이레일 승차장에서 죽변등대까지 차로 약 0.5km, 약 2분이에요.</div>
-        </div>
+          <p class="drive-bridge">스카이레일 승차장에서 죽변등대까지 차로 약 0.5km, 약 2분이에요.</p>
 
-        <!-- 스팟 3: 죽변등대 -->
-        <div class="spot-card">
-          <div class="spot-image-wrap">
-            <img class="spot-image" src="https://tong.visitkorea.or.kr/cms/resource/30/4102030_image2_1.jpg" alt="붉은 벽돌 길 끝에 선 흰 팔각 등대와 양옆의 소나무" />
-            <span class="spot-badge">3막 · 14:15</span>
-          </div>
-          <div class="spot-content">
-            <div class="spot-title-wrap">
-              <h3 class="spot-title">죽변등대</h3>
-              <span class="spot-category">1910년에 세운 팔각형 흰 등대</span>
+          <section class="spot-section">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-badge">3막 · 14:15</span><h3 class="spot-title">죽변등대</h3></div>
+              <p class="spot-tagline">1910년에 세운 팔각형 흰 등대</p>
             </div>
-            <ul class="spot-info-list">
-              <li>📍 경상북도 울진군 죽변면 등대길 52</li>
-              <li>⏰ 09:00~18:00, 연중무휴</li>
-              <li>💰 입장 무료</li>
-            </ul>
-            <p class="spot-desc">
+            <figure class="spot-photo spot-image-wrap">
+              <img class="spot-image" src="https://tong.visitkorea.or.kr/cms/resource/30/4102030_image2_1.jpg" alt="붉은 벽돌 길 끝에 선 흰 팔각 등대와 양옆의 소나무" />
+            </figure>
+            <div class="spot-body">
+              <div class="spot-info-box info-wide"><div class="info-row plain"><span class="info-val">경상북도 울진군 죽변면 등대길 52</span></div><div class="info-row plain"><span class="info-val">09:00~18:00, 연중무휴</span></div><div class="info-row plain"><span class="info-val">입장 무료</span></div></div>
+              <p class="spot-desc">
               하트해변과 같은 등대길에 죽변등대가 있어요. 1910년 11월에 세운 팔각형 콘크리트 등대로 4층, 높이 15.6m예요. 지도에서는 같은 주소의 죽변항로표지관리소로도 나와요.
             </p>
-            <div class="spot-actions">
-              <a href="https://map.naver.com/p/search/%EC%A3%BD%EB%B3%80%EB%93%B1%EB%8C%80" target="_blank" rel="noopener noreferrer" class="action-chip chip-map">🗺️ 네이버 지도</a>
-              <a href="https://tmap.life/search?q=%EC%A3%BD%EB%B3%80%EB%93%B1%EB%8C%80" target="_blank" rel="noopener noreferrer" class="action-chip chip-tmap">🧭 T맵 길안내</a>
-              <a href="https://t.kakao.com/launch?destination=%EA%B2%BD%EC%83%81%EB%B6%81%EB%8F%84%20%EC%9A%B8%EC%A7%84%EA%B5%B0%20%EC%A3%BD%EB%B3%80%EB%A9%B4%20%EB%93%B1%EB%8C%80%EA%B8%B8%2052" target="_blank" rel="noopener noreferrer" class="action-chip chip-taxi">🚕 카카오T 호출</a>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EC%A3%BD%EB%B3%80%EB%93%B1%EB%8C%80" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도</a><a href="https://tmap.life/search?q=%EC%A3%BD%EB%B3%80%EB%93%B1%EB%8C%80" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">T맵 길안내</a><a href="https://t.kakao.com/launch?destination=%EA%B2%BD%EC%83%81%EB%B6%81%EB%8F%84%20%EC%9A%B8%EC%A7%84%EA%B5%B0%20%EC%A3%BD%EB%B3%80%EB%A9%B4%20%EB%93%B1%EB%8C%80%EA%B8%B8%2052" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">카카오T 호출</a></div>
             </div>
-          </div>
-        </div>
+          </section>
 
-        <div class="drive-bridge">
-          <span class="bridge-icon">🚗</span>
-          <div>죽변등대에서 남쪽 근남면 성류굴까지 차로 약 15.5km, 약 19분이에요.</div>
-        </div>
+          <p class="drive-bridge">죽변등대에서 남쪽 근남면 성류굴까지 차로 약 15.5km, 약 19분이에요.</p>
 
-        <!-- 스팟 4: 울진 성류굴 -->
-        <div class="spot-card">
-          <div class="spot-image-wrap">
-            <img class="spot-image" src="https://tong.visitkorea.or.kr/cms/resource/37/3459437_image2_1.jpg" alt="'성류굴' 글자를 단 인조 바위 입구와 안으로 이어지는 돌계단" />
-            <span class="spot-badge">4막 · 15:30</span>
-          </div>
-          <div class="spot-content">
-            <div class="spot-title-wrap">
-              <h3 class="spot-title">울진 성류굴</h3>
-              <span class="spot-category">수중동굴 구간을 포함해 약 915m인 동굴</span>
+          <section class="spot-section flip">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-badge">4막 · 15:30</span><h3 class="spot-title">울진 성류굴</h3></div>
+              <p class="spot-tagline">수중동굴 구간을 포함해 약 915m인 동굴</p>
             </div>
-            <ul class="spot-info-list">
-              <li>📍 경상북도 울진군 근남면 성류굴로 221</li>
-              <li>⏰ 하절기 09:00~18:00, 11월부터 동절기 09:00~17:00 (마감 30분 전까지 입장)</li>
-              <li>🗓️ 매주 월요일 휴관</li>
-              <li>💰 어른 5,000원 (2인 10,000원)</li>
-              <li>🚗 근처 주차장: 성류굴유원지 주차장, 성류굴 북쪽주차장 (요금은 확인하지 못했어요)</li>
-            </ul>
-            <p class="spot-desc">
+            <figure class="spot-photo spot-image-wrap">
+              <img class="spot-image" src="https://tong.visitkorea.or.kr/cms/resource/37/3459437_image2_1.jpg" alt="'성류굴' 글자를 단 인조 바위 입구와 안으로 이어지는 돌계단" />
+            </figure>
+            <div class="spot-body">
+              <div class="spot-info-box info-wide"><div class="info-row plain"><span class="info-val">경상북도 울진군 근남면 성류굴로 221</span></div><div class="info-row plain"><span class="info-val">하절기 09:00~18:00, 11월부터 동절기 09:00~17:00 (마감 30분 전까지 입장)</span></div><div class="info-row plain"><span class="info-val">매주 월요일 휴관</span></div><div class="info-row plain"><span class="info-val">어른 5,000원 (2인 10,000원)</span></div><div class="info-row plain"><span class="info-val">근처 주차장: 성류굴유원지 주차장, 성류굴 북쪽주차장 (요금은 확인하지 못했어요)</span></div></div>
+              <p class="spot-desc">
               죽변등대에서 남쪽으로 내려가면 근남면 성류굴에 닿아요. 수중동굴 구간을 포함해 길이가 약 915m인 동굴이에요. TourAPI는 보천태자가 굴 안에 절을 세워 성인이 머물렀다는 이야기를 이름의 유래로 적고 있어요.
             </p>
-            <div class="tip-box">
-              <span class="tip-icon">💡</span>
-              <div>동절기에는 17:00에 닫고 16:30까지만 들어갈 수 있어서 이 코스는 15:30 도착으로 잡았어요. 앞 일정이 늦어지면 성류굴을 먼저 들르세요.</div>
+              <div class="tip-box">동절기에는 17:00에 닫고 16:30까지만 들어갈 수 있어서 이 코스는 15:30 도착으로 잡았어요. 앞 일정이 늦어지면 성류굴을 먼저 들르세요.</div>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EC%84%B1%EB%A5%98%EA%B5%B4" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도</a><a href="https://tmap.life/search?q=%EC%84%B1%EB%A5%98%EA%B5%B4" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">T맵 길안내</a><a href="https://t.kakao.com/launch?destination=%EA%B2%BD%EC%83%81%EB%B6%81%EB%8F%84%20%EC%9A%B8%EC%A7%84%EA%B5%B0%20%EA%B7%BC%EB%82%A8%EB%A9%B4%20%EC%84%B1%EB%A5%98%EA%B5%B4%EB%A1%9C%20221" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">카카오T 호출</a></div>
             </div>
-            <div class="spot-actions">
-              <a href="https://map.naver.com/p/search/%EC%84%B1%EB%A5%98%EA%B5%B4" target="_blank" rel="noopener noreferrer" class="action-chip chip-map">🗺️ 네이버 지도</a>
-              <a href="https://tmap.life/search?q=%EC%84%B1%EB%A5%98%EA%B5%B4" target="_blank" rel="noopener noreferrer" class="action-chip chip-tmap">🧭 T맵 길안내</a>
-              <a href="https://t.kakao.com/launch?destination=%EA%B2%BD%EC%83%81%EB%B6%81%EB%8F%84%20%EC%9A%B8%EC%A7%84%EA%B5%B0%20%EA%B7%BC%EB%82%A8%EB%A9%B4%20%EC%84%B1%EB%A5%98%EA%B5%B4%EB%A1%9C%20221" target="_blank" rel="noopener noreferrer" class="action-chip chip-taxi">🚕 카카오T 호출</a>
-            </div>
-          </div>
-        </div>
+          </section>
 
-        <div class="drive-bridge">
-          <span class="bridge-icon">🚗</span>
-          <div>성류굴에서 울진은어다리까지 차로 약 4.7km, 약 8분이에요.</div>
-        </div>
+          <p class="drive-bridge">성류굴에서 울진은어다리까지 차로 약 4.7km, 약 8분이에요.</p>
 
-        <!-- 스팟 5: 울진은어다리 -->
-        <div class="spot-card">
-          <div class="spot-image-wrap">
-            <img class="spot-image" src="https://tong.visitkorea.or.kr/cms/resource/98/2995798_image2_1.jpg" alt="은어 모양 은색 구조물을 얹은 흰 다리와 물에 비친 다리" />
-            <span class="spot-badge">5막 · 16:50</span>
-          </div>
-          <div class="spot-content">
-            <div class="spot-title-wrap">
-              <h3 class="spot-title">울진은어다리</h3>
-              <span class="spot-category">은어 모양 구조물을 얹은 243m 다리</span>
+          <section class="spot-section">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-badge">5막 · 16:50</span><h3 class="spot-title">울진은어다리</h3></div>
+              <p class="spot-tagline">은어 모양 구조물을 얹은 243m 다리</p>
             </div>
-            <ul class="spot-info-list">
-              <li>📍 경상북도 울진군 근남면 수산리</li>
-              <li>⏰ 상시 개방</li>
-              <li>🚗 울진은어다리 공영주차장 (근남면 수산리 190-9, 요금은 확인하지 못했어요)</li>
-            </ul>
-            <p class="spot-desc">
+            <figure class="spot-photo spot-image-wrap">
+              <img class="spot-image" src="https://tong.visitkorea.or.kr/cms/resource/98/2995798_image2_1.jpg" alt="은어 모양 은색 구조물을 얹은 흰 다리와 물에 비친 다리" />
+            </figure>
+            <div class="spot-body">
+              <div class="spot-info-box info-wide"><div class="info-row plain"><span class="info-val">경상북도 울진군 근남면 수산리</span></div><div class="info-row plain"><span class="info-val">상시 개방</span></div><div class="info-row plain"><span class="info-val">울진은어다리 공영주차장 (근남면 수산리 190-9, 요금은 확인하지 못했어요)</span></div></div>
+              <p class="spot-desc">
               하루의 마지막 장소는 근남면 수산리의 울진은어다리예요. 2015년에 놓은 길이 243m, 폭 3m의 다리로, 다리 위에 은어 모양 구조물이 얹혀 있어요.
             </p>
-            <div class="tip-box">
-              <span class="tip-icon">💡</span>
-              <div>16:50에 도착하면 해가 지기 전에 다리를 걸을 수 있어요. 은어다리 좌표로 낸 일몰 시각은 10월 25일 17:34, 11월 15일 17:14, 12월 7일 17:06이에요.</div>
+              <div class="tip-box">16:50에 도착하면 해가 지기 전에 다리를 걸을 수 있어요. 은어다리 좌표로 낸 일몰 시각은 10월 25일 17:34, 11월 15일 17:14, 12월 7일 17:06이에요.</div>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EC%9A%B8%EC%A7%84%EC%9D%80%EC%96%B4%EB%8B%A4%EB%A6%AC" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도</a><a href="https://tmap.life/search?q=%EC%9A%B8%EC%A7%84%EC%9D%80%EC%96%B4%EB%8B%A4%EB%A6%AC" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">T맵 길안내</a><a href="https://t.kakao.com/launch?destination=%EA%B2%BD%EC%83%81%EB%B6%81%EB%8F%84%20%EC%9A%B8%EC%A7%84%EA%B5%B0%20%EA%B7%BC%EB%82%A8%EB%A9%B4%20%EC%88%98%EC%82%B0%EB%A6%AC%20190-9" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">카카오T 호출</a></div>
             </div>
-            <div class="spot-actions">
-              <a href="https://map.naver.com/p/search/%EC%9A%B8%EC%A7%84%EC%9D%80%EC%96%B4%EB%8B%A4%EB%A6%AC" target="_blank" rel="noopener noreferrer" class="action-chip chip-map">🗺️ 네이버 지도</a>
-              <a href="https://tmap.life/search?q=%EC%9A%B8%EC%A7%84%EC%9D%80%EC%96%B4%EB%8B%A4%EB%A6%AC" target="_blank" rel="noopener noreferrer" class="action-chip chip-tmap">🧭 T맵 길안내</a>
-              <a href="https://t.kakao.com/launch?destination=%EA%B2%BD%EC%83%81%EB%B6%81%EB%8F%84%20%EC%9A%B8%EC%A7%84%EA%B5%B0%20%EA%B7%BC%EB%82%A8%EB%A9%B4%20%EC%88%98%EC%82%B0%EB%A6%AC%20190-9" target="_blank" rel="noopener noreferrer" class="action-chip chip-taxi">🚕 카카오T 호출</a>
-            </div>
+          </section>
           </div>
-        </div>
+        </section>
 
-      </section>
-
-      <section class="content-section">
-        <h2>3. 울진 1일 오션 드라이브 2인 예상 여행 경비</h2>
-        <p>출처에서 확인한 입장 요금만 더한 2인 기준 경비예요.</p>
-
-        <div class="table-wrap">
+        <section class="cost-table-card">
+          <div class="cost-head">
+            <h2 class="timeline-title long">3. 울진 1일 오션 드라이브 2인 예상 여행 경비</h2>
+            <p>출처에서 확인한 입장 요금만 더한 2인 기준 경비예요.</p>
+          </div>
+          <div class="table-wrap">
           <table class="cost-table">
             <thead>
               <tr>
@@ -787,37 +527,40 @@
             </tbody>
           </table>
         </div>
-      </section>
+        </section>
 
-      <section class="content-section">
-        <h2>4. 에디토리얼 총평: 바다에서 동굴까지 하루에 잇는 울진</h2>
+        <section class="prose-section">
+          <h2>4. 에디토리얼 총평: 바다에서 동굴까지 하루에 잇는 울진</h2>
         <p>
           울진 하루 코스는 죽변면의 국립해양과학관과 해안 스카이레일, 죽변등대에서 시작해 근남면의 성류굴과 울진은어다리에서 끝나요. 차로 움직이는 거리는 약 23.7km예요.
         </p>
         <p>
           동절기에는 바닷속전망대와 성류굴 모두 16:30에 입장을 마감하니 오후 일정을 늦추지 않는 편이 좋아요. 은어다리에는 해가 지기 전에 닿도록 16:50 도착으로 잡았어요.
         </p>
-      </section>
+        </section>
 
-      <div class="cta-card">
-        <h3>오늘 울진에서 특별한 하루를 시작해 보세요</h3>
-        <p>지금 내 취향과 분위기에 딱 맞는 전국 데이트 코스를 '오늘 데이트'에서 바로 확인해 보세요.</p>
-        <a href="../../" class="btn-cta">오늘 데이트 코스 찾기</a>
+        <div class="cta-card">
+          <h3>오늘 울진에서 특별한 하루를 시작해 보세요</h3>
+          <p>지금 내 취향과 분위기에 딱 맞는 전국 데이트 코스를 '오늘 데이트'에서 바로 확인해 보세요.</p>
+          <a href="../../" class="link-quiet">오늘 데이트 코스 찾기</a>
+        </div>
+
+        <div class="app-course-box">
+          <div>
+            <h2>이 코스 오늘 데이트에서 열기</h2>
+            <p>글에 나온 장소 5곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
+          </div>
+          <a class="btn app-action" href="../../#c=1275.1273.4092.1279.1283">앱에서 코스 열기</a>
+        </div>
       </div>
-
     </article>
-
-    <div class="app-course-box" style="margin: 40px 0 24px; padding: 20px 22px; background: var(--color-accent-light); border: 1px solid var(--color-border); border-radius: 14px;">
-      <strong style="display: block; font-size: 17px; color: var(--color-text-main); margin-bottom: 6px;">🗺️ 이 코스 오늘 데이트에서 열기</strong>
-      <p style="margin: 0 0 14px; font-size: 14.5px; line-height: 1.6; color: var(--color-text-main);">글에 나온 장소 5곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
-      <a href="../../#c=1275.1273.4092.1279.1283" style="display: inline-block; padding: 10px 18px; border-radius: 10px; background: var(--color-text-main); color: #ffffff; font-weight: 700; font-size: 15px; text-decoration: none;">앱에서 코스 열기 →</a>
-    </div>
-
   </main>
 
   <footer class="site-footer">
-    <p>&copy; 2026 오늘 데이트 (Oneul Date). All rights reserved.</p>
-    <p class="source-credit">사진 출처: 한국관광공사 TourAPI (공공누리 제1유형 출처표기 조건부 상업적 이용 가능)</p>
+    <div class="footer-inner container">
+      <p class="footer-line">&copy; 2026 오늘 데이트 (Oneul Date). All rights reserved.</p>
+      <p class="footer-line">사진 출처: 한국관광공사 TourAPI (공공누리 제1유형 출처표기 조건부 상업적 이용 가능)</p>
+    </div>
   </footer>
 
 </body>

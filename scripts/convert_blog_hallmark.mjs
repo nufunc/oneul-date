@@ -23,16 +23,25 @@ const SERIF_BASE = 'https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@
 const FAMILY_NAMES = [
   'spot-info-step',
   'spot-info-list',
-  'spot-card',
+  'real-photo-flat',
 ];
 const FAMILIES = await Promise.all(FAMILY_NAMES.map(async (n) => (await import(`./hallmark_families/${n}.mjs`)).default));
 
 // 변환 전후에 같아야 하는 것들을 뽑는다.
-export function snapshot(html) {
+// mainOnly: 옛 머리·푸터 틀이 새 틀과 달라 <main> 안만 견주는 글(real-photo-flat 계열)
+export function snapshot(html, mainOnly = false) {
   const bodyAt = html.indexOf('<body');
   const head = html.slice(0, bodyAt < 0 ? 0 : bodyAt);
-  const body = bodyAt < 0 ? html : html.slice(bodyAt);
-  const norm = (s) => tagText(s).replace(/[\p{Extended_Pictographic}️‍↓→·]/gu, '').replace(/\s+/g, '');
+  let body = bodyAt < 0 ? html : html.slice(bodyAt);
+  let captions = [];
+  if (mainOnly) {
+    body = body.slice(body.indexOf('<main'), body.lastIndexOf('</main>'));
+    // 사진 설명은 사진이 놓이는 칸이 달라져 본문 속 순서가 바뀌므로 따로 순서대로 견준다
+    const capRe = /<(div) class="photo-caption">([\s\S]*?)<\/\1>|<(figcaption)>([\s\S]*?)<\/figcaption>/g;
+    captions = [...body.matchAll(capRe)].map((m) => tagText(m[2] ?? m[4]).replace(/\s+/g, ''));
+    body = body.replace(capRe, '');
+  }
+  const norm = (s) => tagText(s).replace(/[\p{Extended_Pictographic}️‍↓→·•]/gu, '').replace(/\s+/g, '');
   const links = [...body.matchAll(/<a\b[^>]*\shref="([^"]*)"/g)].map((m) => m[1]).sort();
   const imgs = [...body.matchAll(/<img\b[^>]*>/g)].map((m) => `${m[0].match(/\ssrc="([^"]*)"/)?.[1]}|${m[0].match(/\salt="([^"]*)"/)?.[1]}`);
   const ld = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => JSON.stringify(JSON.parse(m[1])));
@@ -41,14 +50,15 @@ export function snapshot(html) {
   const headings = [...body.matchAll(/<(h[1-6])\b[^>]*>([\s\S]*?)<\/\1>|<div class="app-course-box"[^>]*>\s*<strong[^>]*>([\s\S]*?)<\/strong>/g)].map((m) => norm(m[2] ?? m[3]));
   // 첫 화면과 하단 상자의 같은 버튼 문구는 개수가 달라지므로 비교에서 뺀다
   const text = norm(body.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, '')).replaceAll('앱에서코스열기', '');
-  return { links, imgs, ld, metas, headings, text };
+  return { links, imgs, ld, metas, headings, text, captions };
 }
 
 // 원본(before)과 변환본(after)의 보존 항목을 견줘 달라진 것을 문장으로 돌려준다. 빈 배열이면 보존.
 export function compare(before, after) {
   const errors = [];
-  const a = snapshot(before);
-  const b = snapshot(after);
+  const mainOnly = before.includes('<main class="article-wrap">');
+  const a = snapshot(before, mainOnly);
+  const b = snapshot(after, mainOnly);
   const courseHref = before.match(/href="([^"]*#c=[^"]*)"/)?.[1];
   const left = [...b.links];
   for (const href of a.links) {
@@ -61,6 +71,7 @@ export function compare(before, after) {
   if (JSON.stringify(a.ld) !== JSON.stringify(b.ld)) errors.push('JSON-LD가 달라졌다');
   if (JSON.stringify(a.metas) !== JSON.stringify(b.metas)) errors.push('메타(title, meta, canonical)가 달라졌다');
   if (JSON.stringify(a.headings) !== JSON.stringify(b.headings)) errors.push(`헤딩 글자가 달라졌다: ${a.headings.join(' | ')} → ${b.headings.join(' | ')}`);
+  if (JSON.stringify(a.captions) !== JSON.stringify(b.captions)) errors.push('사진 설명이 달라졌다');
   if (a.text !== b.text) errors.push('본문 글자가 달라졌다(이모지, ↓→, 가운뎃점, 공백은 제외하고 비교)');
   return errors;
 }
@@ -69,7 +80,7 @@ export function compare(before, after) {
 
 // 제목 글꼴(Noto Serif KR 700)이 그리는 글자만 받도록 text= 인수를 만든다.
 function serifLink(html) {
-  const sel = [/<h[1-3]\b[^>]*>([\s\S]*?)<\/h[1-3]>/g, /<span class="(?:tl-time|spot-num)">([\s\S]*?)<\/span>/g, /<a [^>]*class="header-logo"[^>]*>([\s\S]*?)<\/a>/g, /<p class="footer-mark">([\s\S]*?)<\/p>/g, /<p class="(?:timeline-title|summary-title|cta-title)">([\s\S]*?)<\/p>/g];
+  const sel = [/<h[1-3]\b[^>]*>([\s\S]*?)<\/h[1-3]>/g, /<span class="(?:tl-time|spot-num)">([\s\S]*?)<\/span>/g, /<a [^>]*class="header-logo"[^>]*>([\s\S]*?)<\/a>/g, /<p class="footer-mark">([\s\S]*?)<\/p>/g];
   const cost = html.match(/<tr class="cost-total-row">([\s\S]*?)<\/tr>/)?.[1] ?? '';
   let chars = '0123456789,.:~';
   for (const re of sel) for (const m of html.matchAll(re)) chars += tagText(m[1]);

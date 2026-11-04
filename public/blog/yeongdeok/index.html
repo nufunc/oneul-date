@@ -16,6 +16,9 @@
 
   <!-- Pretendard 웹폰트 -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@700&display=swap&text=%26%2C.0123456789%3A%5B%5D~%EA%B0%90%EA%B1%B0%EA%B2%BD%EA%B3%84%EA%B3%A0%EA%B3%B5%EA%B7%B8%EA%B8%B0%EA%B9%8C%EA%BB%98%EB%82%98%EB%82%B4%EB%8A%98%EB%8B%A8%EB%8C%80%EB%8D%95%EB%8D%B0%EB%8F%84%EB%8F%99%EB%93%9C%EB%93%B1%EB%9D%BC%EB%9E%98%EB%A0%A5%EB%A1%9C%EB%A3%8C%EB%A3%A8%EB%A5%98%EB%A5%BC%EB%A7%8C%EB%A7%90%EB%A7%9D%EB%A7%9E%EB%A7%A4%EB%B0%9C%EB%B3%80%EB%B3%84%EB%B3%B4%EB%B6%80%EB%B6%81%EB%B6%88%EB%B8%8C%EB%B8%94%EB%B9%84%EC%82%AC%EC%82%B0%EC%82%BC%EC%83%81%EC%84%9C%EC%84%A0%EC%84%B1%EC%84%B8%EC%85%98%EC%88%98%EC%8A%A4%EC%8B%9D%EC%8B%AC%EC%95%88%EC%95%BD%EC%97%90%EC%97%AC%EC%97%B4%EC%98%81%EC%98%88%EC%98%A4%EC%99%80%EC%99%84%EC%9A%94%EC%9A%95%EC%9B%90%EC%9C%A0%EC%9D%8C%EC%9D%98%EC%9D%B4%EC%9D%B8%EC%9D%BC%EC%9E%A5%EC%A0%84%EC%A3%BD%EC%A7%80%EC%A7%84%EC%B0%BD%EC%B6%95%EC%BD%94%ED%84%B0%ED%8A%B8%ED%8C%9F%ED%8F%AC%ED%92%8D%ED%95%84%ED%95%A8%ED%95%A9%ED%95%AD%ED%95%B4%ED%95%B5%ED%96%89" rel="stylesheet">
 
   <script type="application/ld+json">
 {
@@ -43,426 +46,256 @@
   </script>
 
   <style>
-    :root {
-      --color-primary: #0f172a;
-      --color-accent: #0ea5e9;
-      --color-accent-light: #f0f9ff;
-      --color-text-main: #334155;
-      --color-text-sub: #64748b;
-      --color-border: #e2e8f0;
-      --color-bg-page: #f8fafc;
-      --color-card-bg: #ffffff;
-      --color-warm: #0284c7;
-      --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-    }
+/* hallmark-solstice: scripts/convert_blog_hallmark.mjs가 글의 <style>을 이 파일로 바꾼다 (Hallmark 2.0.0, 테마 Solstice, P-293) */
+:root {
+  color-scheme: light;
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-xs: 0.8125rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.125rem; --text-xl: 1.5625rem; --text-2xl: 1.953rem; --text-3xl: 2.441rem;
+  --text-hero: clamp(1.75rem, 1.6vw + 1.25rem, 2.75rem);
+  --text-section: clamp(1.75rem, 1.8vw + 1rem, 2.875rem); --text-title: clamp(1.25rem, 0.75vw + 0.875rem, 1.625rem); --text-lead: clamp(1.0625rem, 0.3vw + 0.95rem, 1.25rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-micro: 120ms; --dur-short: 220ms;
+  --container: 1200px; --measure: 680px; --gutter: 56px; --gap-columns: 40px; --section-gap: 120px;
+  --z-sticky-nav: 300;
+  --color-paper: oklch(94% 0.03 80); --color-paper-2: oklch(97% 0.02 85); --color-paper-3: oklch(89% 0.05 80);
+  --color-ink: oklch(27% 0.05 50); --color-ink-2: oklch(36% 0.05 50); --color-muted: oklch(48% 0.06 55);
+  --color-rule: oklch(84% 0.06 78);
+  --color-accent: oklch(54% 0.20 24); --color-accent-2: oklch(48% 0.19 24); --color-accent-ink: oklch(97% 0.02 85); --color-focus: oklch(54% 0.20 24);
+  --color-gold: oklch(74% 0.14 75); --color-gold-2: oklch(84% 0.11 80);
+  --color-band-text: oklch(94% 0.03 80); --color-band-muted: oklch(80% 0.05 75);
+  --color-hair-ink: color-mix(in oklab, var(--color-ink) 10%, transparent);
+  --font-display: "Noto Serif KR", "Nanum Myeongjo", ui-serif, serif;
+  --font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --radius-card: 0; --radius-pill: 999px; --rule-hair: 1px; --rule-bar: 2px;
+  --shadow-card: 10px 10px 0 var(--color-paper-3);
+}
+@media (max-width: 60rem) { :root { --gutter: 24px; --section-gap: 88px; --gap-columns: 24px; } }
+@media (max-width: 40rem) { :root { --gutter: 16px; --section-gap: 64px; --gap-columns: 16px; } }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: var(--font-family);
-      background-color: var(--color-bg-page);
-      color: var(--color-text-main);
-      line-height: 1.75;
-      letter-spacing: -0.2px;
-      word-break: keep-all;
-    }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+html { scrollbar-color: var(--color-muted) var(--color-paper); scroll-padding-top: var(--space-3xl); }
+body { margin: 0; background: var(--color-paper); color: var(--color-ink-2); font-family: var(--font-family); font-size: var(--text-md); line-height: 1.75; word-break: keep-all; -webkit-font-smoothing: antialiased; }
+::selection { background: color-mix(in oklab, var(--color-gold) 40%, transparent); }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+a:hover { text-decoration-color: var(--color-accent); }
+article h1, article h2, article h3 { margin: 0; font-family: var(--font-display); font-weight: 700; color: var(--color-ink); line-height: 1.3; letter-spacing: -0.01em; overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+img { max-width: 100%; display: block; }
+.container { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); }
 
-    .site-header {
-      background: #ffffff;
-      border-bottom: 1px solid var(--color-border);
-      position: sticky;
-      top: 0;
-      z-index: 50;
-    }
-    .header-inner {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 14px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .header-logo {
-      font-weight: 800;
-      font-size: 1.1rem;
-      color: var(--color-primary);
-      text-decoration: none;
-    }
-    .header-logo span { color: var(--color-accent); }
-    .header-nav a {
-      color: var(--color-text-sub);
-      text-decoration: none;
-      font-size: 0.9rem;
-      margin-left: 16px;
-    }
+/* 44px 머리 링크 규칙: scripts/test-blog-related.cjs가 글마다 하나를 요구한다 */
+header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
 
-    .article-container {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 40px 20px 80px;
-    }
+/* Controls */
+.btn { display: inline-flex; align-items: center; min-height: 48px; padding: 0 var(--space-lg); border: 0; border-radius: var(--radius-pill); background: var(--color-accent); color: var(--color-accent-ink); font: 600 var(--text-md)/1 var(--font-family); text-decoration: none; cursor: pointer; transition: background-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out); }
+.btn:hover { background: var(--color-accent-2); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.link-quiet { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-ink); font-weight: 600; font-size: var(--text-sm); text-decoration: none; border-bottom: var(--rule-bar) solid var(--color-ink); transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out); }
+.link-quiet:hover { color: var(--color-accent); border-color: var(--color-accent); }
+.link-quiet:active { transform: translateY(1px); }
+.link-quiet:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
 
-    .article-header {
-      margin-bottom: 36px;
-    }
-    .article-tag-wrap {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 14px;
-    }
-    .article-tag {
-      background: var(--color-accent-light);
-      color: var(--color-accent);
-      font-size: 0.85rem;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 6px;
-    }
-    .article-title {
-      font-size: 2rem;
-      font-weight: 800;
-      line-height: 1.35;
-      color: var(--color-primary);
-      margin-bottom: 14px;
-    }
-    .article-meta {
-      font-size: 0.9rem;
-      color: var(--color-text-sub);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px 16px;
-    }
+/* Nav */
+.site-header { position: sticky; top: 0; z-index: var(--z-sticky-nav); background: var(--color-paper); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.header-inner { display: flex; justify-content: space-between; align-items: center; min-height: 64px; }
+.header-logo { font-family: var(--font-display); font-size: var(--text-lg); color: var(--color-ink); text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; }
+.header-logo span { color: var(--color-accent); margin-left: 0.3em; }
+.header-logo:hover { color: var(--color-ink-2); }
+.header-nav { display: flex; gap: var(--space-lg); }
+.header-nav a { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--text-sm); color: var(--color-ink-2); text-decoration: none; }
+.header-nav a:hover { color: var(--color-ink); text-decoration: underline; text-decoration-color: var(--color-accent); }
+.header-nav a:active, .header-logo:active { transform: translateY(1px); }
 
-    .lead-box {
-      background: #ffffff;
-      border: 1px solid var(--color-border);
-      border-left: 4px solid var(--color-accent);
-      padding: 20px 24px;
-      border-radius: 8px;
-      margin-bottom: 36px;
-      font-size: 1.05rem;
-      line-height: 1.8;
-      color: var(--color-text-main);
-    }
+/* Hero */
+.hero { display: grid; padding-block: var(--space-2xl) var(--space-xl); }
+.hero-text { display: grid; gap: var(--space-lg); }
+.article-title { font-size: var(--text-hero); line-height: 1.3; max-width: 28ch; }
+.hero-kicker { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-md); font-size: var(--text-sm); color: var(--color-muted); }
+.hero-kicker span:first-child { color: var(--color-accent); font-weight: 600; }
+.article-meta { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-lg); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); font-variant-numeric: tabular-nums; }
+.article-meta .meta-credit { flex-basis: 100%; }
+/* 좁은 화면에서 칸마다 한 줄: 본문 글꼴(Pretendard)이 바뀔 때 줄 수가 달라져 아래 띠가 밀리는 것을 막는다 */
+@media (max-width: 40rem) { .article-meta { flex-direction: column; flex-wrap: nowrap; } }
+.spot-photo img { width: 100%; height: 100%; object-fit: cover; outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
 
-    .summary-card {
-      background: #ffffff;
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 40px;
-      box-shadow: 0 4px 12px -2px rgba(0,0,0,0.03);
-    }
-    .summary-title {
-      font-weight: 800;
-      font-size: 1.05rem;
-      color: var(--color-primary);
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .summary-list {
-      list-style: none;
-    }
-    .summary-list li {
-      font-size: 0.95rem;
-      color: var(--color-text-main);
-      margin-bottom: 8px;
-      position: relative;
-      padding-left: 20px;
-      line-height: 1.6;
-    }
-    .summary-list li::before {
-      content: "•";
-      position: absolute;
-      left: 4px;
-      color: var(--color-accent);
-      font-weight: 900;
-    }
+/* Lead */
+.prose-intro { max-width: var(--measure); padding-top: var(--space-xl); font-size: var(--text-lead); line-height: 1.8; color: var(--color-ink); padding-bottom: var(--space-3xl); }
 
-    .content-section {
-      margin-bottom: 48px;
-    }
-    .content-section h2 {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin-bottom: 20px;
-      position: relative;
-      padding-bottom: 10px;
-      border-bottom: 2px solid var(--color-border);
-    }
+/* The day, on the brown band */
+.band { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl) var(--space-xl); }
+.band .timeline-title { color: var(--color-band-text); font-size: var(--text-section); margin-bottom: var(--space-xl); }
+.route { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: 0; padding: 0; }
+.tl-act { font-size: var(--text-sm); color: var(--color-gold-2); padding-bottom: var(--space-sm); }
+.tl-step { display: grid; align-content: start; gap: var(--space-2xs); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-gold); }
+.tl-time { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1; color: var(--color-band-text); font-variant-numeric: tabular-nums; }
+.tl-place { font-weight: 600; font-size: var(--text-lg); color: var(--color-band-text); }
+.tl-note { font-size: var(--text-sm); color: var(--color-band-muted); line-height: 1.6; }
+.tl-move { font-size: var(--text-sm); color: var(--color-band-muted); padding-block: var(--space-sm) var(--space-lg); }
+.tl-total { font-size: var(--text-sm); color: var(--color-band-muted); padding-top: var(--space-lg); margin-top: var(--space-lg); border-top: var(--rule-hair) solid color-mix(in oklab, var(--color-band-text) 25%, transparent); }
+/* spot-info-list 계열: 시간 범위(10:30 - 11:45)가 길어 시각 글자를 줄이고, 요약 상자와 번호 배지를 둔다 */
+.route.range .tl-time { font-size: var(--text-xl); }
+.route.range .tl-step { padding-bottom: var(--space-md); }
+.tl-badge { font-size: var(--text-xs); color: var(--color-gold-2); letter-spacing: 0.04em; }
+.tl-facts { display: grid; gap: var(--space-2xs) var(--space-lg); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.tl-facts strong { color: var(--color-gold-2); font-weight: 600; }
+@media (min-width: 60rem) {
+  .tl-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .route { grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); column-gap: var(--space-lg); }
+  .route > * { grid-row: var(--r); grid-column: var(--c) / span var(--s, 1); }
+  .tl-move { padding-bottom: 0; }
+  .tl-total { grid-column: 1 / -1; }
+}
 
-    .spot-card {
-      background: var(--color-card-bg);
-      border-radius: 16px;
-      border: 1px solid var(--color-border);
-      overflow: hidden;
-      margin-bottom: 36px;
-      box-shadow: 0 6px 16px -2px rgba(0,0,0,0.04);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .spot-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 24px -4px rgba(0,0,0,0.07);
-    }
-    .spot-image-wrap {
-      width: 100%;
-      height: 320px;
-      position: relative;
-      overflow: hidden;
-    }
-    .spot-image {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    .spot-badge {
-      position: absolute;
-      top: 16px;
-      left: 16px;
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(4px);
-      color: #fff;
-      font-size: 0.8rem;
-      font-weight: 700;
-      padding: 6px 12px;
-      border-radius: 8px;
-      letter-spacing: 0.5px;
-    }
-    .spot-content {
-      padding: 24px 24px 20px;
-    }
-    .spot-title-wrap {
-      margin-bottom: 12px;
-    }
-    .spot-title {
-      font-size: 1.35rem;
-      font-weight: 800;
-      color: var(--color-primary);
-      margin-bottom: 4px;
-    }
-    .spot-category {
-      font-size: 0.88rem;
-      color: var(--color-accent);
-      font-weight: 600;
-    }
-    .spot-info-list {
-      list-style: none;
-      background: #f8fafc;
-      padding: 14px 16px;
-      border-radius: 8px;
-      margin: 14px 0 16px;
-      font-size: 0.9rem;
-      color: var(--color-text-main);
-    }
-    .spot-info-list li {
-      margin-bottom: 6px;
-      display: flex;
-      align-items: baseline;
-      gap: 6px;
-    }
-    .spot-info-list li:last-child { margin-bottom: 0; }
+/* Stops */
+.spots { padding-block: var(--section-gap) 0; display: grid; gap: var(--section-gap); }
+.spot-section { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "photo head" "photo body"; grid-template-rows: auto 1fr; column-gap: var(--gap-columns); row-gap: var(--space-md); align-items: start; padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); }
+.spot-section.flip { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-areas: "head photo" "body photo"; }
+.spot-section.no-photo { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "body"; }
+.spot-head { grid-area: head; display: grid; gap: var(--space-md); }
+.spot-photo { grid-area: photo; align-self: start; margin: 0; aspect-ratio: 4 / 5; width: 100%; background: var(--color-paper-3); position: sticky; top: 96px; }
+.spot-body { grid-area: body; display: grid; gap: var(--space-md); }
+.spot-header { display: flex; align-items: baseline; gap: var(--space-md); }
+.spot-num { font-family: var(--font-display); font-size: var(--text-3xl); line-height: 1; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+.spot-title { font-size: var(--text-section); }
+.spot-tagline { font-size: var(--text-lg); color: var(--color-ink); padding-bottom: var(--space-xs); }
+.spot-desc { max-width: 60ch; }
 
-    .spot-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
-    }
-    .action-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 7px 12px;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.15s ease;
-    }
-    .chip-naver {
-      background: #00843d;
-      color: #ffffff;
-    }
-    .chip-naver:hover {
-      background: #007a37;
-    }
-    .chip-tmap {
-      background: #e2e8f0;
-      color: #1e293b;
-    }
-    .chip-tmap:hover {
-      background: #cbd5e1;
-    }
-    .chip-kakao {
-      background: #fee500;
-      color: #191919;
-    }
-    .chip-kakao:hover {
-      background: #fdd835;
-    }
+.spot-info-box { margin: var(--space-xs) 0 0; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); }
+.info-row { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--space-md); padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.info-row:last-child { border-bottom: 0; }
+.info-label { color: var(--color-muted); }
+.info-val { color: var(--color-ink); font-weight: 400; font-variant-numeric: tabular-nums; }
+.map-btn-wrap { padding-top: var(--space-sm); }
+.tip-box { padding: var(--space-sm) var(--space-md); border-left: var(--rule-bar) solid var(--color-accent); background: var(--color-paper-2); font-size: var(--text-sm); color: var(--color-ink-2); line-height: 1.7; }
+.tip-box strong { color: var(--color-ink); font-weight: 600; }
+.tip-box .tip-title { display: block; margin-bottom: var(--space-2xs); }
 
-    .spot-desc {
-      font-size: 0.98rem;
-      line-height: 1.8;
-      color: var(--color-text-main);
-      margin-bottom: 16px;
-    }
-    .tip-box {
-      background: #fffbeb;
-      border: 1px solid #fef3c7;
-      border-radius: 8px;
-      padding: 12px 16px;
-      font-size: 0.88rem;
-      color: #92400e;
-      line-height: 1.6;
-      display: flex;
-      gap: 8px;
-    }
-    .tip-icon { font-size: 1.1rem; flex-shrink: 0; }
+/* Fees */
+.cost-table-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.cost-head { display: grid; gap: var(--space-md); align-content: start; }
+.cost-head .timeline-title { font-size: var(--text-section); }
+.cost-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.cost-table th { text-align: left; font-weight: 400; color: var(--color-muted); padding: var(--space-xs) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-bar) solid var(--color-ink); }
+.cost-table td { padding: var(--space-sm) var(--space-sm) var(--space-sm) 0; border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink-2); vertical-align: top; }
+.cost-table td:nth-child(2) { color: var(--color-ink); font-weight: 400; }
+.cost-3 .cost-total-row td:nth-child(2) { font-family: inherit; font-size: inherit; color: inherit; font-weight: 600; }
+.cost-3 .cost-total-row td:nth-child(3) { font-family: var(--font-display); font-size: var(--text-xl); color: var(--color-accent); font-weight: 700; }
+.cost-total-row td { border-bottom: 0; border-top: var(--rule-bar) solid var(--color-ink); color: var(--color-ink); font-weight: 600; }
+.cost-total-row td:nth-child(2) { font-family: var(--font-display); font-size: var(--text-2xl); color: var(--color-accent); font-weight: 700; }
+@media (max-width: 600px) {
+  .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
+  .table-wrap thead { display: none; }
+  .table-wrap tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-sm); row-gap: var(--space-2xs); padding-block: var(--space-sm); border-bottom: var(--rule-hair) solid var(--color-rule); }
+  .table-wrap td { padding: 0; border: 0; }
+  .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: var(--text-xs); color: var(--color-muted); }
+  .table-wrap td:nth-child(3) { text-align: right; font-weight: 600; color: var(--color-ink); }
+  .table-wrap td:nth-child(4) { grid-column: 1 / -1; color: var(--color-muted); }
+  .table-wrap td:empty { display: none; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: var(--text-sm); color: var(--color-ink); }
+  .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; text-align: right; }
+  .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; text-align: left; font-weight: 400; color: var(--color-muted); }
+  .table-wrap .cost-total-row { border-top: var(--rule-bar) solid var(--color-ink); border-bottom: 0; }
+}
 
-    .drive-bridge {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 20px;
-      background: #ffffff;
-      border: 1px dashed var(--color-border);
-      border-radius: 10px;
-      margin-bottom: 36px;
-      font-size: 0.92rem;
-      color: var(--color-text-sub);
-    }
-    .bridge-icon { font-size: 1.2rem; }
+/* Tips */
+.tips-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--gap-columns); }
+.tips-card .timeline-title { font-size: var(--text-section); align-self: start; }
+.tips-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-md); }
+.tips-list li { padding-bottom: var(--space-md); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.tips-list li:last-child { border-bottom: 0; }
+.tips-list strong { color: var(--color-ink); font-weight: 600; }
 
-    .table-wrap {
-      overflow-x: auto;
-      margin: 24px 0;
-      border-radius: 12px;
-      border: 1px solid var(--color-border);
-      background: #fff;
-    }
-    .cost-table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-      font-size: 0.92rem;
-    }
-    .cost-table th, .cost-table td {
-      padding: 14px 18px;
-      border-bottom: 1px solid var(--color-border);
-    }
-    .cost-table th {
-      background: var(--color-bg-page);
-      font-weight: 700;
-      color: var(--color-primary);
-    }
-    .cost-table tr:last-child td {
-      border-bottom: none;
-    }
-    .cost-total-row {
-      font-weight: 800;
-      background: var(--color-accent-light);
-      color: var(--color-accent);
-    }
+/* App course */
+.app-course-box { margin-top: var(--section-gap); display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--gap-columns); align-items: end; background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-xl); }
+.app-course-box h2 { font-size: var(--text-section); margin-bottom: var(--space-md); }
+.app-course-box p { max-width: 52ch; }
+.app-course-box .app-action { justify-self: end; }
 
-    .timeline-card {
-      background: #ffffff;
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      padding: 20px 24px;
-      margin-bottom: 40px;
-    }
-    .timeline-title { font-weight: 700; font-size: 1.05rem; color: var(--color-primary); margin-bottom: 12px; }
-    .tl-act { font-weight: 700; font-size: 13px; color: #64748b; margin: 18px 0 8px; }
-    .timeline-title + .tl-act { margin-top: 0; }
-    .tl-step { display: flex; gap: 12px; align-items: baseline; padding: 6px 0; }
-    .tl-time { flex: none; min-width: 46px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--color-accent); }
-    .tl-place { font-weight: 700; color: #1e293b; }
-    .tl-note { display: block; font-size: 13px; color: #64748b; margin-top: 2px; }
-    .tl-move { font-size: 12.5px; color: #94a3b8; padding: 0 0 0 58px; }
-    @media (max-width: 640px) {
-      .timeline-card { padding: 14px 16px; }
-    }
+.article-credit { margin-top: var(--space-2xl); padding-block: var(--space-md) var(--space-3xl); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); }
 
-    /* 비용표: 좁은 화면에서는 한 행을 카드 하나로 쌓는다 */
-    @media (max-width: 600px) {
-      .table-wrap { overflow-x: visible; }
-      .table-wrap table, .table-wrap tbody, .table-wrap td { display: block; }
-      .table-wrap thead { display: none; }
-      .table-wrap tr {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        column-gap: 12px;
-        row-gap: 4px;
-        padding: 14px 16px;
-        border-bottom: 1px solid var(--color-border);
-      }
-      .table-wrap tr:last-child { border-bottom: none; }
-      .table-wrap td { padding: 0; border: none; }
-      .table-wrap td:nth-child(1) { grid-column: 1 / -1; font-size: 0.78rem; font-weight: 700; color: var(--color-text-sub); }
-      .table-wrap td:nth-child(2) { font-weight: 700; }
-      .table-wrap td:nth-child(3) { max-width: 60vw; word-break: keep-all; text-align: right; font-weight: 700; }
-      .table-wrap td:nth-child(4) { grid-column: 1 / -1; font-size: 0.85rem; color: var(--color-text-sub); }
-      .table-wrap tr:has(td[colspan]) td:nth-child(1) { grid-column: 1; font-size: inherit; color: inherit; }
-      .table-wrap tr:has(td[colspan]) td:nth-child(2) { grid-column: 2; max-width: 60vw; word-break: keep-all; text-align: right; }
-      .table-wrap tr:has(td[colspan]) td:nth-child(3) { grid-column: 1 / -1; max-width: none; text-align: left; font-size: 0.85rem; font-weight: 400; color: var(--color-text-sub); }
-    }
-    .cta-card {
-      background: linear-gradient(135deg, #0f172a 0%, #0369a1 100%);
-      color: #ffffff;
-      border-radius: 16px;
-      padding: 36px 28px;
-      text-align: center;
-      margin: 48px 0;
-    }
-    .cta-card h3 {
-      font-size: 1.4rem;
-      font-weight: 800;
-      margin-bottom: 10px;
-    }
-    .cta-card p {
-      font-size: 0.95rem;
-      color: #cbd5e1;
-      margin-bottom: 24px;
-    }
-    .cta-btn {
-      display: inline-block;
-      background: var(--color-accent);
-      color: #ffffff;
-      font-weight: 700;
-      padding: 12px 28px;
-      border-radius: 30px;
-      text-decoration: none;
-      transition: background 0.15s ease;
-    }
-    .cta-btn:hover {
-      background: #0284c7;
-    }
+/* Footer mast */
+.site-footer { background: var(--color-ink); color: var(--color-band-text); padding-block: var(--space-2xl); }
+.footer-inner { display: grid; gap: var(--space-md); }
+.footer-mark { font-family: var(--font-display); font-size: var(--text-2xl); line-height: 1.2; color: var(--color-band-text); }
+.footer-line { color: var(--color-band-muted); font-size: var(--text-sm); }
+.footer-links { display: flex; flex-wrap: wrap; gap: var(--space-lg); }
+.footer-links a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-band-text); font-size: var(--text-sm); text-decoration: underline; text-decoration-color: var(--color-gold); }
+.footer-links a:hover { text-decoration-color: var(--color-accent); color: var(--color-gold-2); }
+.footer-links a:active { transform: translateY(1px); }
+.site-footer :focus-visible { outline-color: var(--color-gold-2); }
 
-    .site-footer {
-      border-top: 1px solid var(--color-border);
-      background: #ffffff;
-      padding: 32px 20px;
-      text-align: center;
-      font-size: 0.85rem;
-      color: var(--color-text-sub);
-    }
-    .source-credit {
-      margin-top: 6px;
-      font-size: 0.8rem;
-      color: #94a3b8;
-    }
-    header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
-    .header-nav a,.header-title a,.blog-tagline a{display:inline-block}
+@media (max-width: 60rem) {
+  .hero, .spot-section, .spot-section.flip, .cost-table-card, .tips-card, .app-course-box { grid-template-columns: minmax(0, 1fr); }
+  .spot-section, .spot-section.flip { grid-template-areas: "head" "photo" "body"; grid-template-rows: auto; }
+  .spot-section.no-photo { grid-template-areas: "head" "body"; }
+  .hero { padding-block: var(--space-xl) var(--space-xl); }
+  .spot-photo { position: static; aspect-ratio: 16 / 10; }
+  .app-course-box { padding: var(--space-lg); }
+  .app-course-box .app-action { justify-self: start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn, .link-quiet { transition: none; }
+  .btn:active, .link-quiet:active, .header-nav a:active, .header-logo:active, .footer-links a:active { transform: none; }
+}
+
+/* real-photo-flat 계열(평면 글): 번호 있는 긴 장소 제목, 사진 설명, 안내 상자, 지도 목록 */
+.lead-photo { margin: 0 0 var(--space-3xl); }
+.lead-photo img { width: 100%; max-height: 520px; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.lead-photo figcaption, .body-photo figcaption { margin-top: var(--space-xs); font-size: var(--text-xs); color: var(--color-muted); }
+.spot-photo figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--space-xs) var(--space-sm); font-size: var(--text-xs); line-height: 1.5; color: var(--color-accent-ink); background: color-mix(in oklab, var(--color-ink) 78%, transparent); }
+.body-photo { margin: 0; }
+.body-photo img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; filter: sepia(0.2) saturate(0.95); }
+.spot-section.flat .spot-title { font-size: var(--text-xl); line-height: 1.4; }
+.tl-lead { max-width: var(--measure); margin: calc(var(--space-md) * -1) 0 var(--space-xl); font-size: var(--text-sm); color: var(--color-band-muted); }
+.guide-box, .order-box { background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); box-shadow: var(--shadow-card); padding: var(--space-md) var(--space-lg); font-size: var(--text-sm); color: var(--color-ink); }
+.guide-box h4, .order-box strong { margin: 0 0 var(--space-xs); font-family: var(--font-display); font-size: var(--text-md); color: var(--color-ink); display: block; }
+.guide-box ul, .order-box ul { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-2xs); }
+.bridge { padding-top: var(--space-xs); color: var(--color-muted); font-size: var(--text-sm); }
+.map-links { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-md); }
+.map-links .timeline-title { font-size: var(--text-section); }
+.map-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-xs); }
+.map-list a, .map-link-chip { display: flex; justify-content: space-between; gap: var(--space-md); align-items: center; min-height: 44px; padding-block: var(--space-xs); border-bottom: var(--rule-hair) solid var(--color-rule); color: var(--color-ink); text-decoration: none; }
+.map-links-grid { display: grid; gap: 0; }
+.map-link-chip .btn-action { color: var(--color-accent); font-weight: 600; white-space: nowrap; }
+@media (max-width: 40rem) { .spot-section.flat .spot-title { font-size: var(--text-lg); } }
+
+/* spot-card 계열(editor-144): 대표 사진, 요약 상자, 본문 구획, 세부 코스, 이동 연결, 마무리 상자 */
+.hero-figure { margin: 0 0 var(--space-xl); }
+.hero-figure img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--color-paper-3); outline: var(--rule-hair) solid var(--color-hair-ink); outline-offset: -1px; filter: sepia(0.2) saturate(0.95); }
+.hero-figure figcaption { padding-top: var(--space-xs); font-size: var(--text-sm); color: var(--color-muted); }
+.summary-card { margin-bottom: var(--space-xl); background: var(--color-paper-2); border: var(--rule-bar) solid var(--color-ink); outline: var(--rule-hair) solid var(--color-gold); outline-offset: -7px; box-shadow: var(--shadow-card); padding: var(--space-lg); font-size: var(--text-sm); }
+.summary-title, p.timeline-title, .cta-title { font-family: var(--font-display); font-weight: 700; line-height: 1.3; color: var(--color-ink); }
+.summary-title { font-size: var(--text-xl); margin-bottom: var(--space-sm); }
+p.timeline-title { letter-spacing: -0.01em; overflow-wrap: break-word; }
+.summary-list { margin: 0; padding: 0; list-style: none; display: grid; }
+.summary-list li { padding-block: var(--space-xs); border-bottom: var(--rule-hair) dotted var(--color-gold); }
+.summary-list li:last-child { border-bottom: 0; }
+.summary-list strong { color: var(--color-ink); font-weight: 600; }
+.prose-section { margin-top: var(--section-gap); max-width: var(--measure); display: grid; gap: var(--space-md); }
+.prose-section h2, .spots-title { font-size: var(--text-title); }
+.stops-section { margin-top: var(--section-gap); }
+.stops-section .spots { padding-top: var(--space-xl); }
+.spots.bridged { gap: 0; }
+.drive-bridge { margin: 0; padding-block: var(--space-xl); padding-left: var(--space-md); border-left: var(--rule-bar) solid var(--color-gold); font-size: var(--text-sm); color: var(--color-muted); }
+.drive-bridge strong { color: var(--color-ink); font-weight: 600; }
+.spot-header:has(.spot-badge) { flex-direction: column; align-items: flex-start; gap: var(--space-xs); }
+.spot-badge { font-size: var(--text-sm); font-weight: 600; color: var(--color-accent); }
+.spot-actions { display: flex; flex-wrap: wrap; gap: 0 var(--space-lg); }
+.info-wide .info-row { grid-template-columns: 5.5em minmax(0, 1fr); }
+.info-wide .info-row.plain { grid-template-columns: minmax(0, 1fr); }
+.cost-head .timeline-title.long { font-size: var(--text-title); }
+.cta-card { margin-top: var(--section-gap); padding-top: var(--space-lg); border-top: var(--rule-bar) solid var(--color-ink); display: grid; gap: var(--space-sm); max-width: var(--measure); }
+.cta-card h3, .cta-title { font-size: var(--text-title); }
+.cta-card .link-quiet { justify-self: start; }
   </style>
 </head>
 <body>
 
   <header class="site-header">
-    <div class="header-inner">
+    <div class="header-inner container">
       <a href="../../" class="header-logo">오늘 데이트 <span>매거진</span></a>
       <nav class="header-nav">
         <a href="../../blog/">전체 글 목록</a>
@@ -472,274 +305,168 @@
   </header>
 
   <main class="article-container">
-
     <article>
-      <header class="article-header">
-        <div class="article-tag-wrap">
-          <span class="article-tag">경북 영덕</span>
-          <span class="article-tag">블루로드 오션 드라이브</span>
-          <span class="article-tag">동해 해안도로 & 힐링 쉼</span>
-        </div>
-        <h1 class="article-title">[경북 영덕 감성 드라이브] 삼사해상공원부터 창포말등대 해안도로, 풍력발전단지, 축산항 죽도산전망대, 고래불해변까지 블루로드 오션 코스</h1>
-        <div class="article-meta">
-          <span>발행일: 2026년 10월 27일</span>
-          <span>글: 오늘 데이트 에디토리얼 팀 / 사진: 한국관광공사</span>
+      <header class="article-header hero container">
+        <div class="hero-text">
+          <p class="hero-kicker badge-category"><span>경북 영덕</span><span>블루로드 오션 드라이브</span><span>동해 해안도로 & 힐링 쉼</span></p>
+          <h1 class="article-title">[경북 영덕 감성 드라이브] 삼사해상공원부터 창포말등대 해안도로, 풍력발전단지, 축산항 죽도산전망대, 고래불해변까지 블루로드 오션 코스</h1>
+          <div class="article-meta">
+            <span>발행일: 2026년 10월 27일</span>
+            <span class="meta-credit">글: 오늘 데이트 에디토리얼 팀 / 사진: 한국관광공사</span>
+          </div>
+          <p><a class="btn" href="../../#c=1294.4093.1290.1289.1293">앱에서 코스 열기</a></p>
         </div>
       </header>
 
-      <div class="lead-box">
-        경상북도 영덕군은 강구면에서 축산면까지 이어지는 해안도로를 따라 공원과 등대, 풍력발전단지, 항구 전망대, 긴 백사장을 하루에 둘러볼 수 있는 동해안 여행지예요.
-        강구항 남쪽 언덕의 삼사해상공원에서 출발해 영덕해맞이공원의 창포말등대와 그 위 언덕의 영덕풍력발전단지, 축산항을 360도로 내려다보는 죽도산전망대를 거쳐, 해 질 무렵 20리 백사장 고래불해수욕장에서 하루를 마무리하는 해안 드라이브 코스를 소개해요.
+      <div class="container">
+        <p class="prose-intro">경상북도 영덕군은 강구면에서 축산면까지 이어지는 해안도로를 따라 공원과 등대, 풍력발전단지, 항구 전망대, 긴 백사장을 하루에 둘러볼 수 있는 동해안 여행지예요.
+        강구항 남쪽 언덕의 삼사해상공원에서 출발해 영덕해맞이공원의 창포말등대와 그 위 언덕의 영덕풍력발전단지, 축산항을 360도로 내려다보는 죽도산전망대를 거쳐, 해 질 무렵 20리 백사장 고래불해수욕장에서 하루를 마무리하는 해안 드라이브 코스를 소개해요.</p>
       </div>
 
-      <div class="summary-card">
-        <div class="summary-title">
-          <span>🧭</span> 영덕 1일 블루로드 감성 오션 드라이브 코스 핵심 요약
-        </div>
-        <ul class="summary-list">
+      <div class="container">
+        <div class="summary-card">
+          <p class="summary-title">영덕 1일 블루로드 감성 오션 드라이브 코스 핵심 요약</p>
+          <ul class="summary-list">
           <li><strong>코스 테마</strong>: 강구항 남쪽 언덕 공원에서 시작해 해맞이공원 등대와 풍력발전단지, 축산항 전망대를 거쳐 20리 백사장에서 해 질 녘을 맞는 동해 해안 드라이브</li>
           <li><strong>추천 동선</strong>: 삼사해상공원 → 창포말등대 → 영덕풍력발전단지 → 죽도산전망대 → 고래불해수욕장</li>
           <li><strong>소요 시간</strong>: 약 7시간 50분 (10:00~17:50, 차량 이동 약 41.6km 약 64분, OSRM 경로 계산)</li>
           <li><strong>예상 경비</strong>: 2인 입장료 0원 (다섯 곳 모두 입장 무료, TourAPI. 식사, 음료, 유류비 별도)</li>
           <li><strong>휴무 확인</strong>: 죽도산전망대는 10:00~17:00 운영, 매주 월요일 휴무</li>
         </ul>
+        </div>
       </div>
 
-      <section class="timeline-card">
-        <div class="timeline-title">영덕 해안 드라이브 동선</div>
-        <div class="tl-act">오전: 강구와 창포리 해안</div>
-        <div class="tl-step"><span class="tl-time">10:00</span><div><span class="tl-place">삼사해상공원</span><span class="tl-note">상시 개방, 입장 무료</span></div></div>
-        <div class="tl-move">↓ 차로 약 10.8km (약 13분)</div>
-        <div class="tl-step"><span class="tl-time">11:25</span><div><span class="tl-place">창포말등대</span><span class="tl-note">영덕해맞이공원, 상시 개방</span></div></div>
-        <div class="tl-move">↓ 점심 뒤 차로 약 3.2km (약 7분)</div>
-        <div class="tl-act">오후: 풍력단지와 축산항</div>
-        <div class="tl-step"><span class="tl-time">13:50</span><div><span class="tl-place">영덕풍력발전단지</span><span class="tl-note">상시 개방, 입장 무료</span></div></div>
-        <div class="tl-move">↓ 차로 약 14.2km (약 21분)</div>
-        <div class="tl-step"><span class="tl-time">15:15</span><div><span class="tl-place">죽도산전망대</span><span class="tl-note">10:00~17:00, 매주 월요일 휴무</span></div></div>
-        <div class="tl-move">↓ 차로 약 13.4km (약 24분)</div>
-        <div class="tl-act">해 질 녘: 병곡면 백사장</div>
-        <div class="tl-step"><span class="tl-time">16:45</span><div><span class="tl-place">고래불해수욕장</span><span class="tl-note">11월 2일 일몰 17:25, 시민박명 끝 17:52</span></div></div>
+      <!-- 동선 -->
+      <section class="timeline-card band">
+        <div class="container">
+          <p class="timeline-title">영덕 해안 드라이브 동선</p>
+          <div class="route" style="--n:5">
+            <div class="tl-act" style="--r:1; --c:1; --s:2">오전: 강구와 창포리 해안</div>
+            <div class="tl-step" style="--r:2; --c:1"><span class="tl-time">10:00</span><span class="tl-place">삼사해상공원</span><span class="tl-note">상시 개방, 입장 무료</span></div>
+            <div class="tl-move" style="--r:3; --c:1">차로 약 10.8km (약 13분)</div>
+            <div class="tl-step" style="--r:2; --c:2"><span class="tl-time">11:25</span><span class="tl-place">창포말등대</span><span class="tl-note">영덕해맞이공원, 상시 개방</span></div>
+            <div class="tl-move" style="--r:3; --c:2">점심 뒤 차로 약 3.2km (약 7분)</div>
+            <div class="tl-act" style="--r:1; --c:3; --s:2">오후: 풍력단지와 축산항</div>
+            <div class="tl-step" style="--r:2; --c:3"><span class="tl-time">13:50</span><span class="tl-place">영덕풍력발전단지</span><span class="tl-note">상시 개방, 입장 무료</span></div>
+            <div class="tl-move" style="--r:3; --c:3">차로 약 14.2km (약 21분)</div>
+            <div class="tl-step" style="--r:2; --c:4"><span class="tl-time">15:15</span><span class="tl-place">죽도산전망대</span><span class="tl-note">10:00~17:00, 매주 월요일 휴무</span></div>
+            <div class="tl-move" style="--r:3; --c:4">차로 약 13.4km (약 24분)</div>
+            <div class="tl-act" style="--r:1; --c:5">해 질 녘: 병곡면 백사장</div>
+            <div class="tl-step" style="--r:2; --c:5"><span class="tl-time">16:45</span><span class="tl-place">고래불해수욕장</span><span class="tl-note">11월 2일 일몰 17:25, 시민박명 끝 17:52</span></div>
+          </div>
+        </div>
       </section>
 
-      <section class="content-section">
-        <h2>1. 영덕 1일 블루로드 오션 드라이브 5대 스팟 상세 안내</h2>
-
-        <!-- 스팟 1: 삼사해상공원 -->
-        <div class="spot-card">
-          <div class="spot-image-wrap">
-            <img class="spot-image" src="https://tong.visitkorea.or.kr/cms/resource/55/4076755_image2_1.jpg" alt="언덕 위 2층 누각으로 오르는 돌계단과 2025 글자 조형물, 앞쪽의 분홍 철쭉이 보이는 영덕 삼사해상공원" />
-            <span class="spot-badge">스팟 01</span>
-          </div>
-          <div class="spot-content">
-            <div class="spot-title-wrap">
-              <h3 class="spot-title">삼사해상공원</h3>
-              <span class="spot-category">강구항 남쪽 언덕의 망향탑과 경북대종 & 동해 조망 공원</span>
+      <div class="container">
+        <section class="stops-section">
+          <h2 class="spots-title">1. 영덕 1일 블루로드 오션 드라이브 5대 스팟 상세 안내</h2>
+          <div class="spots bridged">
+          <section class="spot-section">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-badge">스팟 01</span><h3 class="spot-title">삼사해상공원</h3></div>
+              <p class="spot-tagline">강구항 남쪽 언덕의 망향탑과 경북대종 & 동해 조망 공원</p>
             </div>
-            <ul class="spot-info-list">
-              <li>📍 <strong>위치</strong>: 경상북도 영덕군 강구면 해상공원길 92</li>
-              <li>⏰ <strong>운영 시간</strong>: 상시 개방, 연중무휴 (TourAPI)</li>
-              <li>🎫 <strong>입장료</strong>: 무료 (TourAPI)</li>
-              <li>🅿️ <strong>주차</strong>: 주차 가능 (TourAPI)</li>
-            </ul>
-            <div class="spot-actions">
-              <a href="https://map.naver.com/p/search/%EC%82%BC%EC%82%AC%ED%95%B4%EC%83%81%EA%B3%B5%EC%9B%90" target="_blank" rel="noopener noreferrer" class="action-chip chip-naver">
-                🧭 네이버 지도 바로가기 ↗
-              </a>
-              <a href="https://tmap.life/route?name=%EC%82%BC%EC%82%AC%ED%95%B4%EC%83%81%EA%B3%B5%EC%9B%90" target="_blank" rel="noopener noreferrer" class="action-chip chip-tmap">
-                🚗 T맵 길안내
-              </a>
-              <a href="https://m.taxi.kakao.com/" target="_blank" rel="noopener noreferrer" class="action-chip chip-kakao">
-                🚕 카카오T
-              </a>
-            </div>
-            <p class="spot-desc">
+            <figure class="spot-photo spot-image-wrap">
+              <img class="spot-image" src="https://tong.visitkorea.or.kr/cms/resource/55/4076755_image2_1.jpg" alt="언덕 위 2층 누각으로 오르는 돌계단과 2025 글자 조형물, 앞쪽의 분홍 철쭉이 보이는 영덕 삼사해상공원" />
+            </figure>
+            <div class="spot-body">
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">위치:</span><span class="info-val">경상북도 영덕군 강구면 해상공원길 92</span></div><div class="info-row"><span class="info-label">운영 시간:</span><span class="info-val">상시 개방, 연중무휴 (TourAPI)</span></div><div class="info-row"><span class="info-label">입장료:</span><span class="info-val">무료 (TourAPI)</span></div><div class="info-row"><span class="info-label">주차:</span><span class="info-val">주차 가능 (TourAPI)</span></div></div>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EC%82%BC%EC%82%AC%ED%95%B4%EC%83%81%EA%B3%B5%EC%9B%90" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도 바로가기</a><a href="https://tmap.life/route?name=%EC%82%BC%EC%82%AC%ED%95%B4%EC%83%81%EA%B3%B5%EC%9B%90" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">T맵 길안내</a><a href="https://m.taxi.kakao.com/" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">카카오T</a></div>
+              <p class="spot-desc">
               삼사해상공원은 영덕군 강구항 남쪽, 동해 바다가 시원하게 내려다보이는 언덕에 자리한 공원이에요. 이북 5도민의 망향의 설움을 달래려고 1995년에 세운 망향탑과 경북 개도 100주년 기념사업으로 만든 경북대종이 있고, 공연장과 폭포도 함께 있어요.
             </p>
-            <div class="tip-box">
-              <span class="tip-icon">💡</span>
-              <div><strong>방문 팁</strong>: 1997년 1월 1일에 처음 연 해맞이축제가 해마다 이곳에서 열리고, 5월부터 10월까지 매주 토요일 오후에는 지역 음악 동호회의 주말 공연이 열려요 (TourAPI).</div>
+              <div class="tip-box"><strong>방문 팁</strong>: 1997년 1월 1일에 처음 연 해맞이축제가 해마다 이곳에서 열리고, 5월부터 10월까지 매주 토요일 오후에는 지역 음악 동호회의 주말 공연이 열려요 (TourAPI).</div>
             </div>
-          </div>
-        </div>
+          </section>
 
-        <div class="drive-bridge">
-          <span class="bridge-icon">🚗</span>
-          <div><strong>드라이브 이동</strong>: 삼사해상공원에서 강구항을 지나 창포말등대까지 약 10.8km (차량 약 13분, OSRM 경로 계산)</div>
-        </div>
+          <p class="drive-bridge"><strong>드라이브 이동</strong>: 삼사해상공원에서 강구항을 지나 창포말등대까지 약 10.8km (차량 약 13분, OSRM 경로 계산)</p>
 
-        <!-- 스팟 2: 창포말등대 & 블루로드 해안도로 -->
-        <div class="spot-card">
-          <div class="spot-image-wrap">
-            <img class="spot-image" src="https://tong.visitkorea.or.kr/cms/resource/14/3520014_image2_1.jpg" alt="꼭대기에 붉은 등롱을 얹은 흰 등탑을 집게발 모양 조형물이 감싸고 있는 영덕 창포말등대" style="object-position: center 30%;" />
-            <span class="spot-badge">스팟 02</span>
-          </div>
-          <div class="spot-content">
-            <div class="spot-title-wrap">
-              <h3 class="spot-title">창포말등대 & 영덕해맞이공원</h3>
-              <span class="spot-category">해맞이공원의 랜드마크 등대 & 나무 계단 해안 산책로</span>
+          <section class="spot-section flip">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-badge">스팟 02</span><h3 class="spot-title">창포말등대 & 영덕해맞이공원</h3></div>
+              <p class="spot-tagline">해맞이공원의 랜드마크 등대 & 나무 계단 해안 산책로</p>
             </div>
-            <ul class="spot-info-list">
-              <li>📍 <strong>위치</strong>: 경상북도 영덕군 영덕읍 창포리 산 5-5</li>
-              <li>⏰ <strong>운영 시간</strong>: 상시 개방, 연중무휴 (TourAPI 영덕해맞이공원)</li>
-              <li>🎫 <strong>입장료</strong>: 무료 (TourAPI 영덕해맞이공원)</li>
-              <li>🅿️ <strong>주차</strong>: 주차 가능 (TourAPI 영덕해맞이공원)</li>
-            </ul>
-            <div class="spot-actions">
-              <a href="https://map.naver.com/p/search/%EC%B0%BD%ED%8F%AC%EB%A7%90%EB%93%B1%EB%8C%80" target="_blank" rel="noopener noreferrer" class="action-chip chip-naver">
-                🧭 네이버 지도 바로가기 ↗
-              </a>
-              <a href="https://tmap.life/route?name=%EC%B0%BD%ED%8F%AC%EB%A7%90%EB%93%B1%EB%8C%80" target="_blank" rel="noopener noreferrer" class="action-chip chip-tmap">
-                🚗 T맵 길안내
-              </a>
-              <a href="https://m.taxi.kakao.com/" target="_blank" rel="noopener noreferrer" class="action-chip chip-kakao">
-                🚕 카카오T
-              </a>
-            </div>
-            <p class="spot-desc">
+            <figure class="spot-photo spot-image-wrap">
+              <img class="spot-image" src="https://tong.visitkorea.or.kr/cms/resource/14/3520014_image2_1.jpg" alt="꼭대기에 붉은 등롱을 얹은 흰 등탑을 집게발 모양 조형물이 감싸고 있는 영덕 창포말등대" style="object-position: center 30%;" />
+            </figure>
+            <div class="spot-body">
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">위치:</span><span class="info-val">경상북도 영덕군 영덕읍 창포리 산 5-5</span></div><div class="info-row"><span class="info-label">운영 시간:</span><span class="info-val">상시 개방, 연중무휴 (TourAPI 영덕해맞이공원)</span></div><div class="info-row"><span class="info-label">입장료:</span><span class="info-val">무료 (TourAPI 영덕해맞이공원)</span></div><div class="info-row"><span class="info-label">주차:</span><span class="info-val">주차 가능 (TourAPI 영덕해맞이공원)</span></div></div>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EC%B0%BD%ED%8F%AC%EB%A7%90%EB%93%B1%EB%8C%80" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도 바로가기</a><a href="https://tmap.life/route?name=%EC%B0%BD%ED%8F%AC%EB%A7%90%EB%93%B1%EB%8C%80" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">T맵 길안내</a><a href="https://m.taxi.kakao.com/" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">카카오T</a></div>
+              <p class="spot-desc">
               창포말등대는 강구면과 축산면을 잇는 64km 해안도로 변에 조성한 해안형 자연공원, 영덕해맞이공원의 랜드마크예요. 사진처럼 흰 등탑을 집게발 모양 조형물이 감싸고 있고 꼭대기에 붉은 등롱이 있어요. 공원은 1997년 산불로 해안과 인근 산이 불탄 뒤 친환경 소재로 복구했고, 1,500여 개의 나무 계단이 파고라와 해안도로, 바다를 이어 산책로를 이뤄요.
             </p>
-            <div class="tip-box">
-              <span class="tip-icon">💡</span>
-              <div><strong>방문 팁</strong>: 산책로 중간에 전망데크가 두 곳 있어 동해를 한눈에 내려다보며 사진을 찍기 좋아요 (TourAPI).</div>
+              <div class="tip-box"><strong>방문 팁</strong>: 산책로 중간에 전망데크가 두 곳 있어 동해를 한눈에 내려다보며 사진을 찍기 좋아요 (TourAPI).</div>
             </div>
-          </div>
-        </div>
+          </section>
 
-        <div class="drive-bridge">
-          <span class="bridge-icon">🚗</span>
-          <div><strong>드라이브 이동</strong>: 점심을 먹은 뒤 창포말등대에서 해맞이공원 위쪽 언덕의 영덕풍력발전단지까지 약 3.2km (차량 약 7분, OSRM 경로 계산)</div>
-        </div>
+          <p class="drive-bridge"><strong>드라이브 이동</strong>: 점심을 먹은 뒤 창포말등대에서 해맞이공원 위쪽 언덕의 영덕풍력발전단지까지 약 3.2km (차량 약 7분, OSRM 경로 계산)</p>
 
-        <!-- 스팟 3: 영덕풍력발전단지 & 바람의언덕 -->
-        <div class="spot-card">
-          <div class="spot-image-wrap">
-            <img class="spot-image" src="https://tong.visitkorea.or.kr/cms/resource/48/4056748_image2_1.jpg" alt="흐린 하늘 아래 언덕에 선 풍력발전기 여러 기와 그 아래 축구장이 보이는 영덕풍력발전단지" />
-            <span class="spot-badge">스팟 03</span>
-          </div>
-          <div class="spot-content">
-            <div class="spot-title-wrap">
-              <h3 class="spot-title">영덕풍력발전단지</h3>
-              <span class="spot-category">해맞이공원 위 언덕의 풍력발전기 & 바람개비공원</span>
+          <section class="spot-section">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-badge">스팟 03</span><h3 class="spot-title">영덕풍력발전단지</h3></div>
+              <p class="spot-tagline">해맞이공원 위 언덕의 풍력발전기 & 바람개비공원</p>
             </div>
-            <ul class="spot-info-list">
-              <li>📍 <strong>위치</strong>: 경상북도 영덕군 영덕읍 창포리 산 70</li>
-              <li>⏰ <strong>운영 시간</strong>: 상시 개방, 연중무휴 (TourAPI)</li>
-              <li>🎫 <strong>입장료</strong>: 무료 (TourAPI)</li>
-              <li>🅿️ <strong>주차</strong>: 주차 가능 (TourAPI)</li>
-            </ul>
-            <div class="spot-actions">
-              <a href="https://map.naver.com/p/search/%EC%98%81%EB%8D%95%20%EC%8B%A0%EC%9E%AC%EC%83%9D%EC%97%90%EB%84%88%EC%A7%80%EA%B4%80" target="_blank" rel="noopener noreferrer" class="action-chip chip-naver">
-                🧭 네이버 지도 바로가기 ↗
-              </a>
-              <a href="https://tmap.life/route?name=%EC%98%81%EB%8D%95%ED%92%8D%EB%A0%A5%EB%B0%9C%EC%A0%84%EB%8B%A8%EC%A7%80" target="_blank" rel="noopener noreferrer" class="action-chip chip-tmap">
-                🚗 T맵 길안내
-              </a>
-              <a href="https://m.taxi.kakao.com/" target="_blank" rel="noopener noreferrer" class="action-chip chip-kakao">
-                🚕 카카오T
-              </a>
-            </div>
-            <p class="spot-desc">
+            <figure class="spot-photo spot-image-wrap">
+              <img class="spot-image" src="https://tong.visitkorea.or.kr/cms/resource/48/4056748_image2_1.jpg" alt="흐린 하늘 아래 언덕에 선 풍력발전기 여러 기와 그 아래 축구장이 보이는 영덕풍력발전단지" />
+            </figure>
+            <div class="spot-body">
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">위치:</span><span class="info-val">경상북도 영덕군 영덕읍 창포리 산 70</span></div><div class="info-row"><span class="info-label">운영 시간:</span><span class="info-val">상시 개방, 연중무휴 (TourAPI)</span></div><div class="info-row"><span class="info-label">입장료:</span><span class="info-val">무료 (TourAPI)</span></div><div class="info-row"><span class="info-label">주차:</span><span class="info-val">주차 가능 (TourAPI)</span></div></div>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EC%98%81%EB%8D%95%20%EC%8B%A0%EC%9E%AC%EC%83%9D%EC%97%90%EB%84%88%EC%A7%80%EA%B4%80" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도 바로가기</a><a href="https://tmap.life/route?name=%EC%98%81%EB%8D%95%ED%92%8D%EB%A0%A5%EB%B0%9C%EC%A0%84%EB%8B%A8%EC%A7%80" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">T맵 길안내</a><a href="https://m.taxi.kakao.com/" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">카카오T</a></div>
+              <p class="spot-desc">
               영덕풍력발전단지는 해안을 끼고 있어 사계절 바람이 많은 창포리, 영덕해맞이공원 위쪽 언덕에 조성한 풍력발전단지예요. 한쪽 날개 길이가 41m, 높이가 약 80m인 발전기들이 바다가 내려다보이는 언덕 위에 서 있어요. 단지 안에는 영덕 신재생에너지관과 바람개비공원, 어린이 놀이터, 항공기전시장, 오토캠핑장이 있어요.
             </p>
-            <div class="tip-box">
-              <span class="tip-icon">💡</span>
-              <div><strong>방문 팁</strong>: 단지가 영덕 블루로드 A코스와 이어져 있어 동해를 바라보며 걸을 수 있어요 (TourAPI).</div>
+              <div class="tip-box"><strong>방문 팁</strong>: 단지가 영덕 블루로드 A코스와 이어져 있어 동해를 바라보며 걸을 수 있어요 (TourAPI).</div>
             </div>
-          </div>
-        </div>
+          </section>
 
-        <div class="drive-bridge">
-          <span class="bridge-icon">🚗</span>
-          <div><strong>드라이브 이동</strong>: 풍력발전단지에서 북쪽 축산항 죽도산전망대까지 약 14.2km (차량 약 21분, OSRM 경로 계산)</div>
-        </div>
+          <p class="drive-bridge"><strong>드라이브 이동</strong>: 풍력발전단지에서 북쪽 축산항 죽도산전망대까지 약 14.2km (차량 약 21분, OSRM 경로 계산)</p>
 
-        <!-- 스팟 4: 축산항 & 죽도산전망대 -->
-        <div class="spot-card">
-          <div class="spot-image-wrap">
-            <img class="spot-image" src="https://tong.visitkorea.or.kr/cms/resource/52/3576952_image2_1.jpg" alt="경북 영덕 축산항 죽도산전망대와 해안 둘레길 전경" />
-            <span class="spot-badge">스팟 04</span>
-          </div>
-          <div class="spot-content">
-            <div class="spot-title-wrap">
-              <h3 class="spot-title">축산항 & 죽도산전망대</h3>
-              <span class="spot-category">옛 등대 자리 & 축산항을 둘러보는 360도 전망</span>
+          <section class="spot-section flip">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-badge">스팟 04</span><h3 class="spot-title">축산항 & 죽도산전망대</h3></div>
+              <p class="spot-tagline">옛 등대 자리 & 축산항을 둘러보는 360도 전망</p>
             </div>
-            <ul class="spot-info-list">
-              <li>📍 <strong>위치</strong>: 경상북도 영덕군 축산면 축산리 산 106-2</li>
-              <li>⏰ <strong>운영 시간</strong>: 10:00~17:00, 매주 월요일 휴무 (TourAPI)</li>
-              <li>🎫 <strong>입장료</strong>: 무료 (TourAPI)</li>
-              <li>🅿️ <strong>주차</strong>: 전망대 주차 불가 (TourAPI). 직선 약 440m 떨어진 전망대주차장, 축산리 산 107-6 (카카오맵)</li>
-            </ul>
-            <div class="spot-actions">
-              <a href="https://map.naver.com/p/search/%EC%A3%BD%EB%8F%84%EC%82%B0%EC%A0%84%EB%A7%9D%EB%8C%80" target="_blank" rel="noopener noreferrer" class="action-chip chip-naver">
-                🧭 네이버 지도 바로가기 ↗
-              </a>
-              <a href="https://tmap.life/route?name=%EC%A3%BD%EB%8F%84%EC%82%B0%EC%A0%84%EB%A7%9D%EB%8C%80" target="_blank" rel="noopener noreferrer" class="action-chip chip-tmap">
-                🚗 T맵 길안내
-              </a>
-              <a href="https://m.taxi.kakao.com/" target="_blank" rel="noopener noreferrer" class="action-chip chip-kakao">
-                🚕 카카오T
-              </a>
-            </div>
-            <p class="spot-desc">
+            <figure class="spot-photo spot-image-wrap">
+              <img class="spot-image" src="https://tong.visitkorea.or.kr/cms/resource/52/3576952_image2_1.jpg" alt="경북 영덕 축산항 죽도산전망대와 해안 둘레길 전경" />
+            </figure>
+            <div class="spot-body">
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">위치:</span><span class="info-val">경상북도 영덕군 축산면 축산리 산 106-2</span></div><div class="info-row"><span class="info-label">운영 시간:</span><span class="info-val">10:00~17:00, 매주 월요일 휴무 (TourAPI)</span></div><div class="info-row"><span class="info-label">입장료:</span><span class="info-val">무료 (TourAPI)</span></div><div class="info-row"><span class="info-label">주차:</span><span class="info-val">전망대 주차 불가 (TourAPI). 직선 약 440m 떨어진 전망대주차장, 축산리 산 107-6 (카카오맵)</span></div></div>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EC%A3%BD%EB%8F%84%EC%82%B0%EC%A0%84%EB%A7%9D%EB%8C%80" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도 바로가기</a><a href="https://tmap.life/route?name=%EC%A3%BD%EB%8F%84%EC%82%B0%EC%A0%84%EB%A7%9D%EB%8C%80" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">T맵 길안내</a><a href="https://m.taxi.kakao.com/" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">카카오T</a></div>
+              <p class="spot-desc">
               대나무가 많아 죽도라 불리는 이 산의 해발 80m 정상에는 1935년에 처음 등대가 세워졌어요. 축산항으로 들어오는 어선을 안내하던 자리가 2011년 5월 죽도산전망대로 새롭게 문을 열었어요. 전망대에서는 축산항을 중심으로 펼쳐지는 영덕의 모습을 360도로 둘러볼 수 있고, 한쪽에 망원경도 있어요.
             </p>
-            <div class="tip-box">
-              <span class="tip-icon">💡</span>
-              <div><strong>방문 팁</strong>: 전망대는 17:00에 문을 닫고 매주 월요일에 쉬어요 (TourAPI). 15:15쯤 도착하면 마감 전에 둘러보고 고래불해수욕장으로 넘어갈 수 있어요.</div>
+              <div class="tip-box"><strong>방문 팁</strong>: 전망대는 17:00에 문을 닫고 매주 월요일에 쉬어요 (TourAPI). 15:15쯤 도착하면 마감 전에 둘러보고 고래불해수욕장으로 넘어갈 수 있어요.</div>
             </div>
-          </div>
-        </div>
+          </section>
 
-        <div class="drive-bridge">
-          <span class="bridge-icon">🚗</span>
-          <div><strong>드라이브 이동</strong>: 16:20쯤 축산항에서 출발해 영해면을 지나 고래불해수욕장까지 약 13.4km (차량 약 24분, OSRM 경로 계산)</div>
-        </div>
+          <p class="drive-bridge"><strong>드라이브 이동</strong>: 16:20쯤 축산항에서 출발해 영해면을 지나 고래불해수욕장까지 약 13.4km (차량 약 24분, OSRM 경로 계산)</p>
 
-        <!-- 스팟 5: 고래불해수욕장 -->
-        <div class="spot-card">
-          <div class="spot-image-wrap">
-            <img class="spot-image" src="https://tong.visitkorea.or.kr/cms/resource/48/3515948_image2_1.jpg" alt="경북 영덕 고래불해수욕장 광활한 백사장과 푸른 동해 바다 항공 전경" />
-            <span class="spot-badge">스팟 05</span>
-          </div>
-          <div class="spot-content">
-            <div class="spot-title-wrap">
-              <h3 class="spot-title">고래불해수욕장</h3>
-              <span class="spot-category">8km 백사장과 송림 & 동해의 명사 20리</span>
+          <section class="spot-section">
+            <div class="spot-head">
+              <div class="spot-header"><span class="spot-badge">스팟 05</span><h3 class="spot-title">고래불해수욕장</h3></div>
+              <p class="spot-tagline">8km 백사장과 송림 & 동해의 명사 20리</p>
             </div>
-            <ul class="spot-info-list">
-              <li>📍 <strong>위치</strong>: 경상북도 영덕군 병곡면 병곡리 58-26</li>
-              <li>⏰ <strong>운영 시간</strong>: 연중무휴. 해수욕장 개장 기간 비수기 09:00~18:00, 성수기 09:00~19:30 (TourAPI)</li>
-              <li>🎫 <strong>입장료</strong>: 무료 (TourAPI)</li>
-              <li>🅿️ <strong>주차</strong>: 주차 가능 (TourAPI)</li>
-            </ul>
-            <div class="spot-actions">
-              <a href="https://map.naver.com/p/search/%EA%B3%A0%EB%9E%98%EB%B6%88%ED%95%B4%EC%88%98%EC%9A%95%EC%9E%A5" target="_blank" rel="noopener noreferrer" class="action-chip chip-naver">
-                🧭 네이버 지도 바로가기 ↗
-              </a>
-              <a href="https://tmap.life/route?name=%EA%B3%A0%EB%9E%98%EB%B6%88%ED%95%B4%EC%88%98%EC%9A%95%EC%9E%A5" target="_blank" rel="noopener noreferrer" class="action-chip chip-tmap">
-                🚗 T맵 길안내
-              </a>
-              <a href="https://m.taxi.kakao.com/" target="_blank" rel="noopener noreferrer" class="action-chip chip-kakao">
-                🚕 카카오T
-              </a>
-            </div>
-            <p class="spot-desc">
+            <figure class="spot-photo spot-image-wrap">
+              <img class="spot-image" src="https://tong.visitkorea.or.kr/cms/resource/48/3515948_image2_1.jpg" alt="경북 영덕 고래불해수욕장 광활한 백사장과 푸른 동해 바다 항공 전경" />
+            </figure>
+            <div class="spot-body">
+              <div class="spot-info-box info-wide"><div class="info-row"><span class="info-label">위치:</span><span class="info-val">경상북도 영덕군 병곡면 병곡리 58-26</span></div><div class="info-row"><span class="info-label">운영 시간:</span><span class="info-val">연중무휴. 해수욕장 개장 기간 비수기 09:00~18:00, 성수기 09:00~19:30 (TourAPI)</span></div><div class="info-row"><span class="info-label">입장료:</span><span class="info-val">무료 (TourAPI)</span></div><div class="info-row"><span class="info-label">주차:</span><span class="info-val">주차 가능 (TourAPI)</span></div></div>
+              <div class="map-btn-wrap spot-actions"><a href="https://map.naver.com/p/search/%EA%B3%A0%EB%9E%98%EB%B6%88%ED%95%B4%EC%88%98%EC%9A%95%EC%9E%A5" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">네이버 지도 바로가기</a><a href="https://tmap.life/route?name=%EA%B3%A0%EB%9E%98%EB%B6%88%ED%95%B4%EC%88%98%EC%9A%95%EC%9E%A5" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">T맵 길안내</a><a href="https://m.taxi.kakao.com/" target="_blank" rel="noopener noreferrer" class="btn-naver-map link-quiet">카카오T</a></div>
+              <p class="spot-desc">
               고려 말 목은 이색 선생이 상대산에 올랐다가 고래가 뛰노는 모습을 보고 '고래불'이라 이름 붙였다고 전하는 해수욕장이에요. 병곡면의 여섯 해안 마을을 배경으로 20리에 걸쳐 펼쳐지고, 해변 길이가 8km에 이르러 대진해수욕장과 함께 동해의 명사 20리로 불려요. 얕은 수심과 에메랄드빛 바닷물, 울창한 송림이 어우러지고 고래불국민야영장도 함께 있어요.
             </p>
-            <div class="tip-box">
-              <span class="tip-icon">💡</span>
-              <div><strong>방문 팁</strong>: 11월 2일 기준 해가 17:25에 지고 17:52쯤 어두워져요 (NOAA 계산식). 16:45쯤 도착하면 해가 지기 전에 백사장을 걸을 수 있어요.</div>
+              <div class="tip-box"><strong>방문 팁</strong>: 11월 2일 기준 해가 17:25에 지고 17:52쯤 어두워져요 (NOAA 계산식). 16:45쯤 도착하면 해가 지기 전에 백사장을 걸을 수 있어요.</div>
             </div>
+          </section>
           </div>
-        </div>
+        </section>
 
-      </section>
-
-      <section class="content-section">
-        <h2>2. 2인 예상 여행 경비</h2>
-        <p>출처에서 확인한 입장 요금만 더한 2인 기준 경비예요.</p>
-        <div class="table-wrap">
+        <section class="cost-table-card">
+          <div class="cost-head">
+            <h2 class="timeline-title long">2. 2인 예상 여행 경비</h2>
+            <p>출처에서 확인한 입장 요금만 더한 2인 기준 경비예요.</p>
+          </div>
+          <div class="table-wrap">
           <table class="cost-table">
             <thead>
               <tr>
@@ -788,38 +515,41 @@
             </tbody>
           </table>
         </div>
-      </section>
+        </section>
 
-      <section class="content-section">
-        <h2>3. 에필로그</h2>
+        <section class="prose-section">
+          <h2>3. 에필로그</h2>
         <p>
           경북 영덕은 언덕 위 공원과 해맞이공원 등대, 풍력발전기가 선 언덕, 축산항 전망대, 20리 백사장까지 하루 동안 동해 해안을 따라 이어 볼 수 있는 곳이에요.
         </p>
         <p>
           죽도산전망대가 쉬는 월요일을 피하고, 전망대 마감 17:00과 해 지는 시각에 맞춰 둘만의 영덕 해안 드라이브를 계획해 보세요.
         </p>
-      </section>
+        </section>
 
-      <div class="cta-card">
-        <h3>오늘 데이트와 함께 나만의 코스를 완성해보세요</h3>
-        <p>전국 2만여 개 엄선된 명소와 실시간 길찾기로 가장 완벽한 하루를 선물합니다.</p>
-        <a href="../../" class="cta-btn">오늘 데이트 코스 만들기 ↗</a>
+        <div class="cta-card">
+          <h3>오늘 데이트와 함께 나만의 코스를 완성해보세요</h3>
+          <p>전국 2만여 개 엄선된 명소와 실시간 길찾기로 가장 완벽한 하루를 선물합니다.</p>
+          <a href="../../" class="link-quiet">오늘 데이트 코스 만들기 ↗</a>
+        </div>
+
+        <div class="app-course-box">
+          <div>
+            <h2>이 코스 오늘 데이트에서 열기</h2>
+            <p>글에 나온 장소 5곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
+          </div>
+          <a class="btn app-action" href="../../#c=1294.4093.1290.1289.1293">앱에서 코스 열기</a>
+        </div>
       </div>
-
     </article>
-
-    <div class="app-course-box" style="margin: 40px 0 24px; padding: 20px 22px; background: var(--color-accent-light); border: 1px solid var(--color-border); border-radius: 14px;">
-      <strong style="display: block; font-size: 17px; color: var(--color-text-main); margin-bottom: 6px;">🗺️ 이 코스 오늘 데이트에서 열기</strong>
-      <p style="margin: 0 0 14px; font-size: 14.5px; line-height: 1.6; color: var(--color-text-main);">글에 나온 장소 5곳을 오늘 데이트 앱의 코스 카드로 열어요. 앱에서 길안내를 보고 코스를 저장할 수 있어요. 카드는 시간대 순서로 놓여 글의 동선과 다를 수 있어요.</p>
-      <a href="../../#c=1294.4093.1290.1289.1293" style="display: inline-block; padding: 10px 18px; border-radius: 10px; background: var(--color-text-main); color: #ffffff; font-weight: 700; font-size: 15px; text-decoration: none;">앱에서 코스 열기 →</a>
-    </div>
-
   </main>
 
   <footer class="site-footer">
-    <p>본 콘텐츠의 사진은 한국관광공사 TourAPI(공공누리 제1유형, 제3유형)가 제공한 이미지를 사용합니다.</p>
-    <p class="source-credit">출처: 한국관광공사 TourAPI 4.0 공공누리 제1유형, 제3유형</p>
-    <p style="margin-top: 12px; font-size: 0.8rem; color: #94a3b8;">Copyright © 2026 오늘 데이트 (Oneul Date). All rights reserved.</p>
+    <div class="footer-inner container">
+      <p class="footer-line">본 콘텐츠의 사진은 한국관광공사 TourAPI(공공누리 제1유형, 제3유형)가 제공한 이미지를 사용합니다.</p>
+      <p class="footer-line">출처: 한국관광공사 TourAPI 4.0 공공누리 제1유형, 제3유형</p>
+      <p class="footer-line">Copyright © 2026 오늘 데이트 (Oneul Date). All rights reserved.</p>
+    </div>
   </footer>
 
 </body>

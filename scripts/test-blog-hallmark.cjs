@@ -207,51 +207,53 @@ const original = `<!DOCTYPE html>
   assert.deepStrictEqual(compare(listOriginal, lout), [], '두 번째 계열이 보존 비교를 통과하지 못했다');
   assert.ok(lout.includes('<span class="tl-badge">1</span><span class="tl-time">10:30 - 11:45</span>') && lout.includes('class="tl-facts"') && lout.includes('class="cost-table cost-3"') && lout.includes('<section class="tips-card">'), '두 번째 계열의 새 틀이 아니다');
 
-  // 8. 장소 카드 계열(spot-card): 대표 사진, 요약 상자, 이동 연결, 앱 코스 상자가 article 밖, site-footer의 문단 셋
-  const card = original
-    .replace(/<div class="prose-intro">[\s\S]*?<\/div>/, `<div class="hero-image-wrap"><img class="hero-image" src="https://example.com/h.jpg" alt="대표 사진" /><div class="hero-caption">대표 사진 설명</div></div>
-      <div class="summary-box"><div class="summary-title"><span>🌾</span> 시험 요약</div><ul class="summary-list"><li><strong>테마</strong>: 시험 코스</li></ul></div>`)
-    .replace(/<section class="timeline-card">[\s\S]*?<\/section>/, `<section class="timeline-card">
-        <div class="timeline-title">시험 동선</div>
-        <div class="tl-act">오전: 첫째 곳</div>
-        <div class="tl-step"><span class="tl-time">10:30</span><div><span class="tl-place">첫째 곳</span><span class="tl-note">상시 개방</span></div></div>
-        <div class="tl-move">↓ 차로 약 5km (약 8분)</div>
-        <div class="tl-step"><span class="tl-time">13:00</span><div><span class="tl-place">둘째 곳</span><span class="tl-note">무료</span></div></div>
-        <div class="tl-move">차량 이동 합계 약 5km</div>
-      </section>
-      <section class="content-section"><h2>1. 프롤로그</h2><p>시험 프롤로그예요.</p></section>`)
-    .replace(/<section class="spot-section">[\s\S]*<\/section>\s*(?=<section class="cost-table-card">)/, `<section class="content-section">
-        <h2>2. 세부 코스 안내</h2>
-        <div class="spot-card">
-          <div class="spot-image-wrap"><img class="spot-image" src="https://example.com/a.jpg" alt="첫째 곳 전경" /><span class="spot-badge">스팟 01</span></div>
-          <div class="spot-content">
-            <div class="spot-title-wrap"><h3 class="spot-title">첫째 곳</h3><span class="spot-category">시험 한 줄</span></div>
-            <ul class="spot-info-list"><li>📍 <strong>위치</strong>: 시험시 시험로 1</li><li>⏰ 상시 개방</li></ul>
-            <div class="spot-actions"><a href="https://map.naver.com/p/search/a" target="_blank" rel="noopener noreferrer" class="action-chip chip-naver">🧭 네이버 지도 바로가기 ↗</a></div>
-            <p class="spot-desc">첫째 곳 설명이에요.</p>
-            <div class="tip-box"><span class="tip-icon">💡</span><div><strong>팁</strong>: 일찍 가요.</div></div>
-          </div>
-        </div>
-        <div class="drive-bridge"><span class="bridge-icon">🚗</span><div><strong>드라이브 이동</strong>: 약 5km</div></div>
-        <div class="spot-card">
-          <div class="spot-content">
-            <div class="spot-title-wrap"><h3 class="spot-title">둘째 곳</h3><span class="spot-category">사진 없는 곳</span></div>
-            <p class="spot-desc">둘째 곳 설명이에요.</p>
-          </div>
-        </div>
-      </section>
-      `)
-    .replace(/<section class="cost-table-card">\s*<h3 class="timeline-title">([\s\S]*?)<\/h3>/, '<section class="content-section"><h2>3. $1</h2>')
-    .replace(/(<div class="app-course-box"[\s\S]*?<\/div>)\s*(<footer style="margin-top: 40px;">[\s\S]*?<\/footer>)\s*<\/article>/, '<div class="cta-card"><h3>시험 CTA</h3><p>코스를 만들어 보세요.</p><a href="../../" class="cta-btn">코스 만들기 ↗</a></div>\n    </article>\n    $1')
-    .replace(/<footer class="site-footer">[\s\S]*?<\/footer>/, '<footer class="site-footer"><p>사진은 시험이 제공했어요.</p><p class="source-credit">출처: 시험</p></footer>');
-  const cout = convert(card);
-  assert.deepStrictEqual(compare(card, cout), [], '장소 카드 계열이 보존 비교를 통과하지 못했다');
-  assert.ok(cout.includes('<figure class="hero-figure">') && cout.includes('<div class="summary-card">') && cout.includes('<p class="timeline-title">시험 동선</p>'), '장소 카드 계열의 첫 구획이 새 틀이 아니다');
-  assert.ok(cout.includes('<div class="spots bridged">') && cout.includes('<p class="drive-bridge"><strong>드라이브 이동</strong>: 약 5km</p>') && cout.includes('<section class="spot-section no-photo">'), '장소 카드 계열의 세부 코스 틀이 아니다');
-  assert.ok(cout.includes('<div class="info-row"><span class="info-label">위치:</span>') && cout.includes('<div class="info-row plain">'), '장소 카드 계열 정보 줄이 새 틀이 아니다');
-  assert.ok(/<a class="btn" href="[^"]*#c=/.test(cout) && cout.includes('<footer class="site-footer">') && cout.includes('<p class="footer-line">출처: 시험</p>'), '장소 카드 계열의 앱 버튼이나 푸터가 새 틀이 아니다');
-  assert.throws(() => convert(card.replace('<p class="spot-desc">둘째 곳 설명이에요.</p>', '<blockquote>모름</blockquote>')), /모르는 요소/, '장소 카드 계열에서 모르는 요소가 있는데 변환이 실패하지 않았다');
-
+  // 8. 셋째 계열(real-photo-flat): 페이지 틀 전체가 다른 평면 글. 보존 비교는 <main> 안만 견주고 사진 설명은 순서대로 따로 견준다
+  const flat = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>[시험] 평면 글</title>
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <style> body { margin: 0; } </style>
+</head>
+<body>
+  <header class="travel-header-bar"><div class="header-inner"><div class="header-title"><a href="../">← 📖 오늘 데이트 매거진</a></div></div></header>
+  <main class="article-wrap">
+    <span class="post-badge">시험 · 평면</span>
+    <h1>[시험] 평면 글</h1>
+    <div class="post-sub-meta"><span>글: 시험 팀</span><span>•</span><span>발행: 2026년 10월 11일</span></div>
+    <div class="lead-box">평면 글의 도입이에요.<br><br>둘째 문단이에요.</div>
+    <div class="real-photo-card"><img src="https://example.com/lead.jpg" alt="대표"><div class="photo-caption">대표 사진 (출처: 시험)</div></div>
+    <h2>🗺️ 시험 동선</h2>
+    <div class="timeline-card">
+      <div class="tl-act">오전: 첫째</div>
+      <div class="tl-step"><span class="tl-time">10:00</span><span class="tl-place">첫째 곳</span><span class="tl-note">산책</span></div>
+      <div class="tl-move">차량 이동 약 5분</div>
+    </div>
+    <h2>1. 첫째 곳 이야기</h2>
+    <p>첫째 곳은 조용해요.</p>
+    <div class="guide-box"><h4>📍 첫째 곳 안내</h4><ul><li>주소: 시험시</li></ul></div>
+    <div class="real-photo-card"><img src="https://example.com/a.jpg" alt="첫째"><div class="photo-caption">첫째 사진 (출처: 시험)</div></div>
+    <p>사진 뒤 문단이에요.</p>
+    <div class="tip-box"><strong>💡 팁:</strong> 일찍 가요.</div>
+    <div class="map-btn-wrap"><a href="https://map.naver.com/p/search/a" class="map-btn" target="_blank" rel="noopener noreferrer">🧭 지도 보기</a></div>
+    <h2>💰 예상 경비</h2>
+    <div class="table-wrap"><table><thead><tr><th>구분</th><th>장소</th><th>금액</th><th>비고</th></tr></thead><tbody><tr><td>관람</td><td>첫째 곳</td><td>0원</td><td>무료</td></tr><tr style="font-weight: 700;"><td colspan="2">합계</td><td style="color: red;">0원</td><td></td></tr></tbody></table></div>
+    <h2>📍 지도 바로가기</h2>
+    <ul><li><a href="https://map.naver.com/p/search/a" target="_blank" rel="noopener noreferrer">첫째 곳</a></li></ul>
+    <div class="app-course-box" style="margin: 40px 0;"><strong style="display:block;">🗺️ 이 코스 열기</strong><p style="margin:0;">앱에서 열어요.</p><a href="${COURSE}" style="display:inline-block;">앱에서 코스 열기 →</a></div>
+    <footer class="article-footer"><p>© 2026 시험</p></footer>
+  </main>
+</body>
+</html>`;
+  const fout = convert(flat);
+  assert.deepStrictEqual(compare(flat, fout), [], '셋째 계열이 보존 비교를 통과하지 못했다');
+  assert.ok(fout.includes('<section class="spot-section flat">') && fout.includes('<figure class="spot-photo spot-image-wrap">') && fout.includes('<figure class="lead-photo">'), '셋째 계열 장소 구획과 사진 틀이 아니다');
+  assert.ok(fout.includes('<tr class="cost-total-row">') && fout.includes('class="cost-table cost-3"') === false && fout.includes('<table class="cost-table">'), '경비표 틀이 아니다');
+  assert.ok(fout.includes('<header class="site-header">') && fout.includes('<footer class="site-footer">') && !fout.includes('travel-header-bar'), '머리나 푸터가 새 틀이 아니다');
+  assert.ok(/<a class="btn" href="[^"]*#c=/.test(fout), '첫 화면 앱 버튼이 없다');
+  assert.throws(() => convert(flat.replace('<p>첫째 곳은 조용해요.</p>', '<p>첫째 곳은 조용해요.</p><blockquote>모름</blockquote>')), /모르는 요소/, '셋째 계열에서 모르는 요소가 있는데 변환이 실패하지 않았다');
+  assert.ok(compare(flat, fout.replace('대표 사진 (출처: 시험)', '다른 설명')).some((e) => /사진 설명/.test(e)), '사진 설명이 달라졌는데 compare가 잡지 못했다');
   assert.strictEqual(snapshot(out).links.length, snapshot(original).links.length + 1, '링크 수는 첫 화면 앱 버튼 하나만 늘어야 한다');
   console.log(`test-blog-hallmark: 변환 보존 비교, 새 틀 약속, 달라진 변환본 ${cases.length}건, 모르는 틀 실패 통과`);
 })().catch((e) => { console.error(e); process.exit(1); });
