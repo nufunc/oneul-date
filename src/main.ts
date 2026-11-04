@@ -7026,6 +7026,16 @@ function buildSharedSteps(ids: number[]): CourseStep[] {
 }
 
 /** URL에서 코스 hash 제거 (히스토리 오염 없이) */
+// 매거진 글에서 앱을 연 같은 탭이면 '← 글로 돌아가기'가 뒤로 가기를 부른다. 링크로 열면 글 맨 위로 가고 기록이 한 칸 더 쌓인다(P-296)
+function isBlogReferrerBack(referrer: string, linkPath: string, historyLength: number): boolean {
+  if (!referrer || historyLength <= 1) return false;
+  try {
+    return new URL(referrer).pathname.replace(/\/$/, '') === linkPath.replace(/\/$/, '');
+  } catch {
+    return false;
+  }
+}
+
 function clearCourseHash(): void {
   history.replaceState(null, '', location.pathname + location.search);
 }
@@ -7172,6 +7182,13 @@ function renderReceiverView(steps: CourseStep[]): void {
     renderShell();
   };
   document.getElementById('receiver-home-link')?.addEventListener('click', goHome);
+  const blogBack = document.getElementById('receiver-blog-back') as HTMLAnchorElement | null;
+  blogBack?.addEventListener('click', (e) => {
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    if (!isBlogReferrerBack(document.referrer, blogBack.pathname, history.length)) return;
+    e.preventDefault();
+    history.back();
+  });
   document.getElementById('btn-theme-toggle')?.addEventListener('click', cycleThemeMode);
   const sharedArea = (): { regions: string[]; subZones: string[] } =>
     sharedRegion ? { regions: [sharedRegion.key], subZones: sharedZone ? [sharedZone.key] : [] } : { regions: [], subZones: [] };
