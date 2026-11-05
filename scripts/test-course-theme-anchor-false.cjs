@@ -32,8 +32,8 @@ const code = [...new Set([...need].map((n) => decls.get(n)))]
   .sort((a, b) => a.pos - b.pos)
   .map((st) => st.getText().replace(/^export\s+/, ''))
   .join('\n');
-const { matchesCategoryTheme, SPOT_EXPLORE_CATEGORIES } = new Function(
-  `${ts.transpile(code, { target: 'es2022' })};return { matchesCategoryTheme, SPOT_EXPLORE_CATEGORIES };`,
+const { matchesCategoryTheme, SPOT_EXPLORE_CATEGORIES, THEME_FALSE_WORDS } = new Function(
+  `${ts.transpile(code, { target: 'es2022' })};return { matchesCategoryTheme, SPOT_EXPLORE_CATEGORIES, THEME_FALSE_WORDS };`,
 )();
 
 const spots = JSON.parse(fs.readFileSync(path.join(root, 'public', 'data', 'spots.json'), 'utf8'));
@@ -83,12 +83,18 @@ for (const [name, key] of [['석촌호수공원', 'OCEAN'], ['석촌호수 서�
   assert.ok(matchesCategoryTheme(mk(name), kwOf(key)), `정상 일치를 잃었다: ${name} (${key})`);
 for (const [name, key] of [['설빙 석촌호수동호점', 'OCEAN'], ['난산리식당 팜테라스그릴 성산', 'NIGHT'], ['천안역전시장', 'CULTURE'], ['리와인드 서울', 'WINE'], ['순천만 가든테라스 바베큐 순천', 'NIGHT']])
   assert.ok(!matchesCategoryTheme(mk(name), kwOf(key)), `오판이 맞았다: ${name} (${key})`);
+// 지점명 '...한강로점'은 한강 야경으로 보지 않는다. 같은 이름의 식당이 자동 동기화로 또 들어와도 걸린다(2026-11-06 뚜띠쿠치나 김포한강로점)
+for (const name of ['뚜띠쿠치나 김포한강로점', '갯마을 한강로점']) assert.ok(!matchesCategoryTheme(mk(name, '이탈리안'), kwOf('NIGHT')), `오판이 맞았다: ${name} (NIGHT)`);
+assert.ok(matchesCategoryTheme(mk('김포 한강 야경 카페'), kwOf('NIGHT')), '정상 일치를 잃었다: 김포 한강 야경 카페 (NIGHT)');
 
-// (c) 칩 9개 각각에서 더하기 전과 견줘 빠진 장소는 목록 34곳과 물고기골목뿐이다
+// (c) 칩 9개 각각에서 더하기 전과 견줘 빠진 장소는 목록 34곳과 물고기골목, 그리고 이름에 다른 말이 든 곳뿐이다
+// 빠진 곳이 이름의 다른 말 때문인지와 분류만으로는 그 칩에 맞지 않는지를 데이터에서 직접 본다. 자동 동기화로 새 지점이 들어와도 목록을 고치지 않는다
 const allowed = new Set([...Object.values(FALSE_IDS), ...Object.values(LOST_IDS)].flat());
+const hasFalseWord = (s) => new RegExp(THEME_FALSE_WORDS.source).test(s.name);
 for (const key of COURSE_CHIPS) {
   const dropped = spots.filter((s) => before(s, kwOf(key)) && !matchesCategoryTheme(s, kwOf(key)));
-  assert.deepStrictEqual(dropped.filter((s) => !allowed.has(s.id)).map((s) => s.name), [], `${key} 정상 일치를 잃었다`);
+  const unexplained = dropped.filter((s) => !allowed.has(s.id) && !(hasFalseWord(s) && !before({ name: '', category: s.category }, kwOf(key))));
+  assert.deepStrictEqual(unexplained.map((s) => s.name), [], `${key} 정상 일치를 잃었다`);
 }
 
 console.log(`ok: 지점명·상호 오판 ${present}곳 제외, 칩 ${COURSE_CHIPS.length}개 정상 일치 그대로`);
