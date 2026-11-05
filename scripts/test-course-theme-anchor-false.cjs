@@ -49,11 +49,11 @@ const before = (s, kws) => {
   return kws.some((k) => t.includes(k.toLowerCase()));
 };
 
-// (a) 다른 말 22개로 빠지는 32곳은 각 칩에 맞지 않는다(product-reviewer-137, 2026-11-03 spots.json)
+// (a) 다른 말 23개로 빠지는 34곳은 각 칩에 맞지 않는다(product-reviewer-137, 2026-11-03 spots.json)
 const FALSE_IDS = {
   DINING: [1788939168379, 1790243907145, 1790258777155, 1790292413990],
   WINE: [9601, 1788737485482, 1793533331634],
-  NIGHT: [2982, 4585, 4984, 6174, 1788894276541, 1788914106523, 1789996808330, 1790791408435, 1790831484968, 1792163368045],
+  NIGHT: [2982, 4585, 4984, 6174, 1788894276541, 1788914106523, 1789996808330, 1790791408435, 1790831484968, 1792163368045, 4977, 4979],
   OCEAN: [
     1788631648741, 1788631652537, 1789125210148, 1789635322654, 1789650172887, 1790070955487, 1790427947643, 1790465132712, 1790935406122,
     1792448062425,
@@ -79,12 +79,12 @@ for (const [id, key] of [[1719, 'OCEAN'], [1788633474915, 'OCEAN'], [315, 'NIGHT
   if (s) assert.ok(matchesCategoryTheme(s, kwOf(key)), `정상 일치를 잃었다: ${s.name} (${key})`);
 }
 const mk = (name, category = '') => ({ name, category, summary: '' });
-for (const [name, key] of [['석촌호수공원', 'OCEAN'], ['석촌호수 서호', 'OCEAN'], ['N서울타워', 'NIGHT'], ['한강공원 루프탑', 'NIGHT']])
+for (const [name, key] of [['석촌호수공원', 'OCEAN'], ['석촌호수 서호', 'OCEAN'], ['N서울타워', 'NIGHT'], ['한강공원 루프탑', 'NIGHT'], ['가든테라스 야경 루프탑', 'NIGHT']])
   assert.ok(matchesCategoryTheme(mk(name), kwOf(key)), `정상 일치를 잃었다: ${name} (${key})`);
-for (const [name, key] of [['설빙 석촌호수동호점', 'OCEAN'], ['난산리식당 팜테라스그릴 성산', 'NIGHT'], ['천안역전시장', 'CULTURE'], ['리와인드 서울', 'WINE']])
+for (const [name, key] of [['설빙 석촌호수동호점', 'OCEAN'], ['난산리식당 팜테라스그릴 성산', 'NIGHT'], ['천안역전시장', 'CULTURE'], ['리와인드 서울', 'WINE'], ['순천만 가든테라스 바베큐 순천', 'NIGHT']])
   assert.ok(!matchesCategoryTheme(mk(name), kwOf(key)), `오판이 맞았다: ${name} (${key})`);
 
-// (c) 칩 9개 각각에서 더하기 전과 견줘 빠진 장소는 목록 32곳과 물고기골목뿐이다
+// (c) 칩 9개 각각에서 더하기 전과 견줘 빠진 장소는 목록 34곳과 물고기골목뿐이다
 const allowed = new Set([...Object.values(FALSE_IDS), ...Object.values(LOST_IDS)].flat());
 for (const key of COURSE_CHIPS) {
   const dropped = spots.filter((s) => before(s, kwOf(key)) && !matchesCategoryTheme(s, kwOf(key)));
