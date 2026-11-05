@@ -19,11 +19,13 @@ class _Res(io.BytesIO):
         return False
 
 
-def _run(existing_kakao, searched, address="경북 영주시 순흥면 소백로 2740", provider_ids=None):
+def _run(existing_kakao, searched, address="경북 영주시 순흥면 소백로 2740", provider_ids=None, point=None):
     """스팟 한 곳으로 소셜 동기화를 돌리고 DB에 보낸 social_links.kakaomap을 돌려준다."""
     spot = {"id": 1791660755259, "name": "소수서원", "location": "영남 영주시", "row_address": address,
             "social_links": {"kakaomap": existing_kakao} if existing_kakao else {}, "metrics": {}, "summary": "s",
             "provider_ids": provider_ids}
+    if point:
+        spot["lat"], spot["lng"] = point
     patches = []
 
     def urlopen(req, timeout=0):
@@ -98,6 +100,37 @@ def test_other_place_kept_when_row_address_missing():
 def test_first_place_link_is_stored_without_addresses():
     new = {"url": "https://place.map.kakao.com/2", "addresses": ["인천 서해구 청라대로 204"]}
     assert _run(None, new, "") == {"url": new["url"]}
+
+
+def test_first_place_link_in_other_locality_is_rejected():
+    # 고삼호수: 행은 고삼면 봉산리(번호 없음), 이름이 포함된 고속도로 휴게소는 같은 면 삼은리이고 1.3km 밖이다(2026-11-05)
+    rest_area = {"url": "https://place.map.kakao.com/1786257507", "rating": 3.1,
+                 "addresses": ["경기 안성시 고삼면 이전봉산길 224-56", "경기 안성시 고삼면 삼은리 산 15-9"],
+                 "point": (37.07709125, 127.29452833)}
+    assert _run(None, rest_area, "경기도 안성시 고삼면 봉산리", point=(37.0794138, 127.2797868)) is None
+    assert _run(FALLBACK, rest_area, "경기도 안성시 고삼면 봉산리", point=(37.0794138, 127.2797868)) == FALLBACK
+
+
+def test_first_place_link_of_natural_spot_is_stored():
+    # 같은 리의 저수지: 번호 없는 주소지만 읍·면·동·리가 같다. 좌표가 없어도 받는다
+    lake = {"url": "https://place.map.kakao.com/8228404", "rating": 3.9,
+            "addresses": ["경기 안성시 고삼면 봉산리 495"], "point": (37.08241068, 127.28173904)}
+    assert _run(None, lake, "경기도 안성시 고삼면 봉산리")["url"] == lake["url"]
+    # 주소의 리가 달라도(산이 여러 리에 걸친다) 좌표가 1km 안이면 받는다
+    mountain = {"url": "https://place.map.kakao.com/1", "addresses": ["충북 영동군 황간면 마산리 산 44-15"],
+                "point": (36.2000, 127.9000)}
+    assert _run(None, mountain, "충청북도 영동군 황간면 원촌리", point=(36.2040, 127.9000))["url"] == mountain["url"]
+    assert _run(None, mountain, "충청북도 영동군 황간면 원촌리", point=(36.2200, 127.9000)) is None
+
+
+def test_first_place_link_with_provider_number_is_stored():
+    rest_area = {"url": "https://place.map.kakao.com/1786257507", "addresses": ["경기 안성시 고삼면 삼은리 산 15-9"]}
+    assert _run(None, rest_area, "경기도 안성시 고삼면 봉산리", {"kakao": "1786257507"}) == {"url": rest_area["url"]}
+
+
+def test_first_place_link_in_other_sigungu_is_rejected():
+    far = {"url": "https://place.map.kakao.com/2", "addresses": ["경기 수원시 장안구 연무동 1"]}
+    assert _run(None, far, "경기도 안성시 고삼면 봉산리") is None
 
 
 def test_fallback_kept_when_no_place_link():
