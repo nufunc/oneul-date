@@ -1678,6 +1678,7 @@ button {
 
 /* 전체 다시 뽑기 */
 .btn-regenerate {
+  position: relative;
   flex-shrink: 0;
   min-height: 38px;
   display: inline-flex;
@@ -1692,6 +1693,13 @@ button {
   padding: var(--space-1) var(--space-3);
   box-shadow: var(--shadow-card);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 모양은 38px로 두고 터치 영역만 세로 44px로 넓힌다. 1px은 padding box 기준이라 테두리만큼 더한다 */
+.btn-regenerate::after {
+  content: '';
+  position: absolute;
+  inset: -4px -1px;
 }
 
 .btn-regenerate:hover {
@@ -2262,7 +2270,7 @@ button {
      .step-card 접두가 없으면 .step-map-chip.icon-only가 이긴다. */
   .step-card .step-actions-bar,
   .step-card .step-actions-icons,
-  .step-card .step-actions-right { gap: 4px; }
+  .step-card .step-actions-right { gap: 4px; --icon-gap: 4px; }
   .step-card .step-actions-bar .btn-action-icon,
   .step-card .step-actions-right > a,
   .step-card .step-actions-right > button {
@@ -2277,7 +2285,7 @@ button {
    왼쪽 묶음이 접혔다(P-110). 그 막대만 모든 폭에서 28px, 340px 이하에서 24px로 줄인다. */
 .step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)),
 .step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .step-actions-icons,
-.step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .step-actions-right { gap: 4px; }
+.step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .step-actions-right { gap: 4px; --icon-gap: 4px; }
 .step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .btn-action-icon,
 .step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .step-actions-right > a,
 .step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .step-actions-right > button {
@@ -2317,17 +2325,17 @@ button {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
-/* 터치 타깃 44x44px 영역 확보 */
+/* 터치 타깃: 세로는 44px, 가로는 이웃 아이콘과의 간격 절반까지만 넓혀 이웃의 탭을 가로채지 않는다.
+   가운데로 44px 박스를 두면 28px 아이콘 사이에서 서로 겹쳐 첫 아이콘의 실제 영역이 32px로 줄었다.
+   --icon-gap은 아래 간격 규칙과 같은 값이다. 1px은 padding box 기준이라 테두리만큼 더한다 */
 .btn-action-icon::after {
   content: '';
   position: absolute;
   top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  min-width: 44px;
-  min-height: 44px;
-  width: 100%;
-  height: 100%;
+  left: calc(-1px - var(--icon-gap, 6px) / 2);
+  right: calc(-1px - var(--icon-gap, 6px) / 2);
+  height: 44px;
+  transform: translateY(-50%);
 }
 
 .btn-action-icon:hover {
@@ -2340,6 +2348,12 @@ button {
 }
 
 /* 장소 교체 아이콘 */
+/* 첫 아이콘이라 왼쪽에 이웃이 없다. 오른쪽은 간격 절반에서 멈추고 모자란 폭을 왼쪽으로 채워 44px로 맞춘다 */
+.btn-swap-icon::after {
+  left: auto;
+  width: 44px;
+}
+
 .btn-swap-icon {
   background: var(--color-surface-sub);
   border-color: var(--color-border);
