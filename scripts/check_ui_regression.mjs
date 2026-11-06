@@ -270,7 +270,7 @@ for (const [width, height] of [[320, 667], [390, 844]]) {
   receiver[`${width}x${height}`] = { ...first, vh: height, focusN, covered };
   await p.close();
 }
-// 11. 글에서 코스를 여는 막대(P-240): 매거진 안동 글 320×667 첫 화면에서 .od-course-bar 아래 끝과 높이, 가로 넘침,
+// 11. 글에서 코스를 여는 막대(P-240): 매거진 안동 글 320×667에서 막대가 나온 자리의 .od-course-bar 아래 끝과 높이, 가로 넘침,
 // 맨 끝으로 내렸을 때 막대와 겹치는 관련 글 링크 수, 막대를 누르면 받은 코스 화면과 '← 글로 돌아가기'가 나오는가
 const courseBar = await (async () => {
   const p = await ctx.newPage();
@@ -278,6 +278,12 @@ const courseBar = await (async () => {
   await p.route('**/ai-briefing', (r) => r.abort());
   await p.setViewportSize({ width: 320, height: 667 });
   await p.goto(`${URL}blog/andong/?v=${Date.now()}`, { waitUntil: 'load' });
+  // 글 안 코스 버튼이 보이는 동안 막대는 hidden이므로(f4cdfc4) 막대가 나올 때까지 내린 뒤 잰다
+  for (let i = 0; i < 40; i++) {
+    if (await p.evaluate(() => !document.querySelector('.od-course-bar')?.hidden)) break;
+    await p.evaluate(() => window.scrollBy(0, 300));
+    await p.waitForTimeout(100);
+  }
   const first = await p.evaluate(() => {
     const r = document.querySelector('.od-course-bar')?.getBoundingClientRect();
     return { barBottom: r ? Math.round(r.bottom) : -1, barH: r ? Math.round(r.height) : 0, scrollW: document.documentElement.scrollWidth };
