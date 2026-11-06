@@ -24,7 +24,7 @@ const CITY_REGION = {
   구례: '전남', 담양: '전남', 순천: '전남', 여수: '전남',
   상암: '서울', 서촌: '서울', 성수: '서울',
 };
-const PROVINCES = new Set(['서울', '경기', '인천', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '대구', '부산', '제주']);
+const PROVINCES = new Set(['서울', '경기', '인천', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '대구', '대전', '부산', '제주']);
 
 function fail(message) {
   console.error(`build_blog_related: ${message}`);
