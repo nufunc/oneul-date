@@ -3829,10 +3829,7 @@ function renderShell(): void {
   document.getElementById('btn-theme-toggle')?.addEventListener('click', () => {
     cycleThemeMode();
   });
-  document.getElementById('btn-open-saved')!.addEventListener('click', () => {
-    state.savedOpen = true;
-    renderOverlay();
-  });
+  document.getElementById('btn-open-saved')!.addEventListener('click', openSavedPanel);
   renderMainModeNav();
   if (state.mainMode === 'course') {
     renderConditions();
@@ -7134,6 +7131,7 @@ function renderReceiverView(steps: CourseStep[]): void {
     <header class="topbar">
       <h1 class="app-title"><a href="#" class="app-title-link" id="receiver-home-link" aria-label="오늘 데이트 홈으로 이동">오늘 데이트</a></h1>
       <div class="topbar-actions">
+        <button class="btn-saved" id="btn-open-saved">저장한 코스</button>
         <button class="btn-theme-toggle" id="btn-theme-toggle" aria-label="테마 변경, 현재 ${getThemeModeLabel(state.themeMode)}">${getThemeModeHtml(state.themeMode)}</button>
       </div>
     </header>
@@ -7162,7 +7160,7 @@ function renderReceiverView(steps: CourseStep[]): void {
 
       <div class="receiver-actions-bar">
         <button class="btn-secondary btn-receiver-action" id="btn-receiver-copy" type="button">📋 코스 복사</button>
-        <button class="btn-secondary btn-receiver-action" id="btn-receiver-save" type="button">💾 보관함 저장</button>
+        <button class="btn-secondary btn-receiver-action" id="btn-receiver-save" type="button">💾 저장</button>
         <button class="btn-secondary btn-receiver-action" id="btn-receiver-share" type="button">🔗 링크 복사</button>
       </div>
 
@@ -7190,6 +7188,7 @@ function renderReceiverView(steps: CourseStep[]): void {
     history.back();
   });
   document.getElementById('btn-theme-toggle')?.addEventListener('click', cycleThemeMode);
+  document.getElementById('btn-open-saved')?.addEventListener('click', openSavedPanel);
   const sharedArea = (): { regions: string[]; subZones: string[] } =>
     sharedRegion ? { regions: [sharedRegion.key], subZones: sharedZone ? [sharedZone.key] : [] } : { regions: [], subZones: [] };
   // '나도 이런 코스 만들기'는 받은 코스의 지역을 이어받는다
@@ -7235,7 +7234,7 @@ function renderReceiverView(steps: CourseStep[]): void {
       spotIds: sharedSpotIds,
       title: `${blogSlug ? '📖 매거진 코스 · ' : ''}${regionsLabel(area.regions, area.subZones)} · ${sharedTheme ? `${sharedTheme.emoji} ${sharedTheme.label}` : moodLabel('ALL')}`,
     };
-    showToast(addSavedCourse(item) ? '💾 내 보관함에 저장했어요' : '이미 저장한 코스라 맨 위로 올렸어요');
+    showToast(addSavedCourse(item) ? '💾 코스를 저장했어요' : '이미 저장한 코스라 맨 위로 올렸어요');
   });
 
   document.getElementById('btn-receiver-share')?.addEventListener('click', () => {
@@ -7280,6 +7279,12 @@ function savedCourseSpotsHtml(item: SavedCourse): string {
   `;
 }
 
+/** 홈과 받은 코스 화면의 머리 `저장한 코스` 버튼이 함께 쓰는 저장한 코스 시트 열기 */
+function openSavedPanel(): void {
+  state.savedOpen = true;
+  renderOverlay();
+}
+
 let isClosingOverlay = false;
 
 function closeOverlay(callback?: () => void): void {
@@ -7320,6 +7325,23 @@ function closeOverlay(callback?: () => void): void {
     }
     callback?.();
   }, 220);
+}
+
+/**
+ * 시트를 닫고 callback을 실행한다. 받은 코스 화면에서 연 시트면 callback 전에 홈 셸로 나간다
+ * (받은 화면에는 결과·조건 영역이 없어 불러오기가 아무것도 그리지 못한다).
+ * 시트가 쌓은 history 항목은 되돌리지 않는다: back()이 #c= 항목으로 돌아가 hashchange로 받은 코스 화면을 다시 그린다
+ */
+function closeOverlayThen(callback: () => void): void {
+  const fromShared = document.documentElement.hasAttribute('data-shared-course');
+  if (fromShared) overlayHistoryPushed = false;
+  closeOverlay(() => {
+    if (fromShared) {
+      clearCourseHash();
+      renderShell();
+    }
+    callback();
+  });
 }
 
 const isOverlayOpen = (): boolean =>
@@ -7491,7 +7513,7 @@ function renderOverlayContent(): void {
     root.querySelector('#overlay-close')!.addEventListener('click', () => closeOverlay());
     // 빈 패널에서 할 수 있는 일이 닫기뿐이었다(P-249). 코스 탭의 첫 지역 칩으로 보내 코스 만들기를 이어 가게 한다
     root.querySelector('#overlay-empty-make')?.addEventListener('click', () => {
-      closeOverlay(() => {
+      closeOverlayThen(() => {
         if (state.mainMode !== 'course') {
           state.mainMode = 'course';
           updateModeView();
@@ -7513,7 +7535,7 @@ function renderOverlayContent(): void {
           showToast('이 코스의 장소를 지금은 모두 찾을 수 없어요');
           return;
         }
-        closeOverlay(() => {
+        closeOverlayThen(() => {
           restoreCourse(item, steps);
           showToast(
             dropped > 0

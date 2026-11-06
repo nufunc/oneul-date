@@ -32,10 +32,10 @@ assert.match(link[1], new RegExp(`href="${headHref.replace(/[./]/g, '\\$&')}"`))
 // Tab 순서: 버튼이 링크보다 앞
 assert.ok(html.indexOf('<button') < html.indexOf('<a '), '버튼이 링크보다 앞에 와야 한다');
 
-// 클릭은 ✕와 같은 closeOverlay를 거친다(뒤로 가기 이력 처리 포함)
+// 클릭은 ✕와 같은 closeOverlay를 거친다(뒤로 가기 이력 처리 포함). 받은 코스 화면에서는 closeOverlayThen이 홈으로 나간 뒤 부른다
 const handler = src.match(/#overlay-empty-make'\)\?\.addEventListener\('click', \(\) => \{([\s\S]*?)\n    \}\);/);
 assert.ok(handler, '코스 만들러 가기 클릭 처리가 없다');
-assert.match(handler[1], /closeOverlay\(/);
+assert.match(handler[1], /closeOverlay(Then)?\(/);
 assert.match(handler[1], /cancelOverlayFocusReturn\(\)/);
 assert.match(handler[1], /\.quick-region-chip/);
 
