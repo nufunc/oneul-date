@@ -4384,6 +4384,17 @@ function applyDailyCourseIfEmpty(): void {
     if (steps.length > 0 && steps.length === last.ids.length) {
       state.course = steps;
       state.courseConditions = last.conditions;
+      // 칩과 🚀가 읽는 입력 상태도 코스 조건으로 맞춘다. 안 맞추면 🚀가 보던 지역이 아닌 전국 코스를 짠다(P-315)
+      const c = last.conditions;
+      state.regions = [...c.regions];
+      state.subZones = c.zoneFromQuery ? [] : [...c.subZones]; // 검색어에서 얻은 동네는 검색어가 다시 만든다
+      state.mood = c.mood;
+      state.searchQuery = c.searchQuery ?? '';
+      state.courseCategory = c.categoryKey ?? 'ALL';
+      state.indoorOnly = !!c.indoorOnly;
+      state.budgetFilter = c.budgetFilter ?? 'ALL';
+      state.slots = { day: false, evening: false, night: false, stay: false };
+      steps.forEach((st) => { state.slots[st.slot] = true; });
       renderConditions();
       renderResults();
       return;
