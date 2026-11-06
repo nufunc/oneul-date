@@ -4745,6 +4745,16 @@ function toCardThumbUrl(url: string): string {
 }
 
 /**
+ * 상세 시트 히어로용 주소: 카카오 mystore(수 MB짜리 JPEG 원본)만 가로 800px 리사이즈 주소로 바꾼다. R800x0은 비율을 지켜 현재 프레이밍을 유지한다.
+ * ?original(1000px 안팎 PNG)은 800px 변환본이 원본과 같거나 커서(표본 8곳 0.8~1.6배) 원본을 그대로 쓴다. 그 밖의 주소도 그대로 둔다
+ */
+function toHeroImgUrl(url: string): string {
+  return /^https?:\/\/t1\.kakaocdn\.net\/mystore\//.test(url)
+    ? `https://img1.daumcdn.net/thumb/R800x0/?fname=${encodeURIComponent(url)}`
+    : url;
+}
+
+/**
  * 장소의 고화질 이미지 결정 (카테고리·업종 정밀 매칭 및 중복 방지 usedImages 세트 지원)
  */
 function getSpotImageUrl(spot: Spot, slot: SlotKey, usedImages?: Set<string>): string {
@@ -7817,7 +7827,7 @@ function renderOverlayContent(): void {
           <div class="spot-detail-hero">
             ${badgesHtml ? `<div class="spot-detail-hero-badges">${badgesHtml}</div>` : ''}
             <div class="spot-detail-hero-fallback">${fallbackIcon}</div>
-            ${targetImgUrl ? `<img src="${escapeHtml(targetImgUrl)}" alt="${escapeHtml(spot.name)}" class="spot-detail-hero-img" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'; this.previousElementSibling.style.display='flex';" />` : ''}
+            ${targetImgUrl ? `<img src="${escapeHtml(toHeroImgUrl(targetImgUrl))}"${toHeroImgUrl(targetImgUrl) !== targetImgUrl ? ` data-orig="${escapeHtml(targetImgUrl)}"` : ''} alt="${escapeHtml(spot.name)}" class="spot-detail-hero-img" loading="lazy" referrerpolicy="no-referrer" onerror="var o=this.dataset.orig; if(o){this.dataset.orig=''; this.src=o; return;} this.style.display='none'; this.previousElementSibling.style.display='flex';" />` : ''}
           </div>
 
           <!-- 2. 기본 타이틀 및 카테고리/주소 -->
