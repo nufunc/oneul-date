@@ -3051,10 +3051,14 @@ function canonicalizeSavedSpotIds(): void {
   }
 }
 
-function saveSavedSpotIds(ids: Set<number>): void {
+/** 찜 목록을 저장하고 성공 여부를 돌려준다. 호출부가 결과로 토스트와 하트를 가린다 */
+function saveSavedSpotIds(ids: Set<number>): boolean {
   try {
     localStorage.setItem(SAVED_SPOTS_STORAGE_KEY, JSON.stringify(Array.from(ids)));
-  } catch {}
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /** 스팟 찜 여부 확인 */
@@ -3081,15 +3085,16 @@ function toggleSaveSpot(spotId: number): boolean {
     state.savedSpotIds = new Set();
   }
   const isSaved = state.savedSpotIds.has(spotId);
-  if (isSaved) {
-    state.savedSpotIds.delete(spotId);
-    saveSavedSpotIds(state.savedSpotIds);
-    showToast('보관함에서 제외했어요');
-  } else {
-    state.savedSpotIds.add(spotId);
-    saveSavedSpotIds(state.savedSpotIds);
-    showToast('❤️ 보관함에 담았어요!');
+  if (isSaved) state.savedSpotIds.delete(spotId);
+  else state.savedSpotIds.add(spotId);
+  if (!saveSavedSpotIds(state.savedSpotIds)) {
+    // 쓰기가 막히면 새로고침 때 사라지므로 메모리 상태를 되돌리고 이전 상태를 돌려줘 하트도 그대로 둔다
+    if (isSaved) state.savedSpotIds.add(spotId);
+    else state.savedSpotIds.delete(spotId);
+    showToast(`${isSaved ? '보관함에서 제외하지' : '보관함에 담지'} 못했어요. 이 브라우저에서 저장이 막혀 있어요`);
+    return isSaved;
   }
+  showToast(isSaved ? '보관함에서 제외했어요' : '❤️ 보관함에 담았어요!');
   return !isSaved;
 }
 
