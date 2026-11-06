@@ -2723,7 +2723,9 @@ button {
   overflow-wrap: anywhere;
 }
 
-/* spots.json을 받지 못했을 때의 다시 받기 버튼과 홈 위 고정 띠(P-255). 띠는 흐름 밖이라 들어와도 화면을 밀지 않는다 */
+/* spots.json을 받지 못했을 때의 다시 받기 버튼과 홈의 고정 띠(P-255). 띠는 흐름 밖이라 들어와도 화면을 밀지 않는다.
+   위에 두면 머리의 브랜드와 '저장한 코스'를 가려 기기에 있는 저장 코스를 열 수 없었다. 아래 막대(완성 버튼, 결과 막대:
+   화면 아래 8px, 높이 62px) 바로 위에 두고 머리와 탭은 비워 둔다(P-311) */
 .btn-data-retry {
   min-height: 44px;
   padding: 0 var(--space-4);
@@ -2744,7 +2746,7 @@ button {
 
 .data-failed-banner {
   position: fixed;
-  top: calc(var(--space-2) + env(safe-area-inset-top, 0px));
+  bottom: calc(76px + env(safe-area-inset-bottom, 0px));
   left: 50%;
   transform: translateX(-50%);
   width: calc(100% - 2 * var(--space-3));
@@ -2759,6 +2761,11 @@ button {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   color: var(--color-text);
+}
+
+/* 띠가 떠 있는 동안 맨 아래 내용이 띠 밑에 갇히지 않게 스크롤 끝에 띠 높이(최대 76px)와 간격만큼 더한다 */
+body:has(.data-failed-banner) #app {
+  padding-bottom: calc(160px + env(safe-area-inset-bottom, 0px));
 }
 
 .data-failed-text {

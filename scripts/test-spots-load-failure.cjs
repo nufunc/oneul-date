@@ -129,6 +129,11 @@ const cut = (src, from, to) => {
   const css = read('style.css');
   const rule = (sel) => cut(css, `\n${sel} {`, '\n}');
   assert.ok(rule('.data-failed-banner').includes('position: fixed;'), '띠가 고정 위치가 아니다(CLS)');
+  // 띠가 머리를 가리면 기기에 있는 저장 코스를 열 수 없었다(P-311). 위에 붙이지 않고 아래 막대(8px + 62px) 위에 둔다
+  const bannerRule = rule('.data-failed-banner');
+  assert.ok(!/^\s*top:/m.test(bannerRule), '띠가 위에 붙어 머리의 브랜드와 저장한 코스를 가린다');
+  const bannerBottom = bannerRule.match(/^\s*bottom: calc\((\d+)px \+ env\(safe-area-inset-bottom/m);
+  assert.ok(bannerBottom && Number(bannerBottom[1]) >= 70, '띠가 아래 막대(완성 버튼, 결과 막대)를 가린다');
   assert.ok(rule('.btn-data-retry').includes('min-height: 44px;'), '다시 받기 버튼이 44px보다 낮다');
   assert.ok(/min-width: 44px;\s*min-height: 44px;/.test(rule('.btn-data-dismiss')), '닫기 버튼이 44px보다 작다');
 
