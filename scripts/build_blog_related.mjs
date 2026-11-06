@@ -77,7 +77,7 @@ function navFor(post) {
     .sort((a, b) => Math.abs(posts.indexOf(a) - i) - Math.abs(posts.indexOf(b) - i))
     .slice(0, SAME_REGION_MAX);
   for (let k = 1; picked.length < COUNT; k++) {
-    for (const p of [posts[i + k], posts[i - k]]) {
+    for (const p of [posts[i - k], posts[i + k]]) {
       if (p && picked.length < COUNT && !picked.includes(p)) picked.push(p);
     }
   }
