@@ -35,9 +35,20 @@ assert.match(open, /state\.savedOpen = true;[\s\S]*renderOverlay\(\);/, 'openSav
 // 3. 저장 글: 버튼과 토스트가 보내는 쪽과 같다
 assert.match(receiver, /id="btn-receiver-save" type="button">💾 저장<\/button>/, '받은 코스 저장 버튼 글이 `💾 저장`이 아니다');
 assert.ok(!receiver.includes('보관함'), '받은 코스 화면에 `보관함` 글이 남았다');
-const toasts = src.match(/addSavedCourse\(item\) \? '([^']+)'/g) || [];
-assert.strictEqual(toasts.length, 2, '저장 토스트가 보내는 쪽과 받는 쪽 둘이어야 한다');
-for (const t of toasts) assert.ok(t.includes("'💾 코스를 저장했어요'"), `저장 토스트가 다르다: ${t}`);
+const callers = src.match(/^\s*saveCourseWithToast\(item\);/gm) || [];
+assert.strictEqual(callers.length, 2, '저장 토스트를 띄우는 곳이 보내는 쪽과 받는 쪽 둘이어야 한다');
+const helper = body(/^function saveCourseWithToast\(/m, /^\}/m);
+assert.ok(helper.includes("'💾 코스를 저장했어요'"), '저장 성공 토스트가 `💾 코스를 저장했어요`가 아니다');
+
+// 3-1. 쓰기가 실패하면 성공 문구를 띄우지 않는다(P-306)
+const add = body(/^function addSavedCourse\(/m, /^\}/m);
+assert.match(add, /if \(!persistSavedCourses\(list\)\) return 'failed';/, 'addSavedCourse가 쓰기 실패를 failed로 돌려주지 않는다');
+const persist = body(/^function persistSavedCourses\(/m, /^\}/m);
+assert.ok(!/showToast\(/.test(persist), 'persistSavedCourses가 직접 토스트를 띄우면 호출부의 성공 토스트가 덮는다');
+assert.match(helper, /result === 'failed'\s*\?\s*'코스를 저장하지 못했어요[^']*'\s*:\s*result === 'new'\s*\?\s*'💾 코스를 저장했어요'/, '실패 문구가 성공 문구보다 먼저 가려지지 않는다');
+assert.ok(!helper.includes('보관함'), '실패 문구에 `보관함`이 남았다');
+assert.ok(!/addSavedCourse\(item\) \?/.test(src), '호출부가 결과를 참거짓으로 읽어 실패를 성공 토스트로 덮는다');
+assert.match(src, /if \(!persistSavedCourses\(next\)\) \{\s*showToast\('삭제하지 못했어요[^']*'\);\s*return;/, '삭제 쓰기 실패가 삭제했어요 토스트에 덮인다');
 
 // 4. 저장한 코스를 불러오면 받은 코스 화면에서 나간다
 const then = body(/^function closeOverlayThen\(/m, /^\}/m);

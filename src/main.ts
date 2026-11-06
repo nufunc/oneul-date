@@ -3369,26 +3369,38 @@ function loadSavedCourses(): SavedCourse[] {
 
 /**
  * 같은 스팟 조합이 이미 있으면 새로 쌓지 않고 맨 위로 올린다. 저장을 여러 번 누르면 같은 코스가 계속 쌓였다.
- * 새로 추가했으면 true를 돌려준다.
+ * 쓰기가 막히면 'failed'를 돌려준다. 호출부가 성공 토스트로 덮지 않게 결과를 값으로 알린다(P-306).
  */
-function addSavedCourse(item: SavedCourse): boolean {
+function addSavedCourse(item: SavedCourse): 'new' | 'dup' | 'failed' {
   const keyOf = (ids: number[]) => [...ids].sort((a, b) => a - b).join(',');
   const list = loadSavedCourses();
   const dupIndex = list.findIndex((c) => keyOf(c.spotIds) === keyOf(item.spotIds));
   const isNew = dupIndex < 0;
   list.unshift(isNew ? item : list.splice(dupIndex, 1)[0]);
-  persistSavedCourses(list);
-  return isNew;
+  if (!persistSavedCourses(list)) return 'failed';
+  return isNew ? 'new' : 'dup';
 }
 
-function persistSavedCourses(list: SavedCourse[]): void {
+/** 쓰기에 성공하면 true. 저장 공간 초과나 접근 차단이면 false이고 알림은 호출부가 한 번만 띄운다 */
+function persistSavedCourses(list: SavedCourse[]): boolean {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    return true;
   } catch {
-    // 저장 공간 초과 등으로 실패하면 호출부의 showToast('저장했어요')가 그대로
-    // 실행돼 실제로는 저장 안 됐는데 성공한 것처럼 보인다. 실패를 알린다.
-    showToast('보관함 저장에 실패했어요. 저장 공간을 확인해주세요.');
+    return false;
   }
+}
+
+/** 저장 버튼의 결과 토스트. 실패 문구가 성공 문구에 덮이지 않게 하나만 띄운다 */
+function saveCourseWithToast(item: SavedCourse): void {
+  const result = addSavedCourse(item);
+  showToast(
+    result === 'failed'
+      ? '코스를 저장하지 못했어요. 이 브라우저에서 저장이 막혀 있어요. 🔗로 링크를 보내 두세요'
+      : result === 'new'
+        ? '💾 코스를 저장했어요'
+        : '이미 저장한 코스라 맨 위로 올렸어요',
+  );
 }
 
 /** 최근 노출 스폿 ID 이력 (오래된 순 → 최신 순, 최대 RECENT_MAX개 FIFO) */
@@ -5630,7 +5642,7 @@ function bindResultEvents(area: HTMLElement): void {
       spotIds: ids,
       title: courseTitle(state.courseConditions, state.course),
     };
-    showToast(addSavedCourse(item) ? '💾 코스를 저장했어요' : '이미 저장한 코스라 맨 위로 올렸어요');
+    saveCourseWithToast(item);
   });
 }
 
@@ -6975,7 +6987,7 @@ function renderReceiverView(steps: CourseStep[]): void {
       spotIds: sharedSpotIds,
       title: `${blogSlug ? '📖 매거진 코스 · ' : ''}${regionsLabel(area.regions, area.subZones)} · ${sharedTheme ? `${sharedTheme.emoji} ${sharedTheme.label}` : moodLabel('ALL')}`,
     };
-    showToast(addSavedCourse(item) ? '💾 코스를 저장했어요' : '이미 저장한 코스라 맨 위로 올렸어요');
+    saveCourseWithToast(item);
   });
 
   document.getElementById('btn-receiver-share')?.addEventListener('click', () => {
@@ -7353,7 +7365,10 @@ function renderOverlayContent(): void {
         const scrollTop = root.querySelector('.overlay-body')?.scrollTop ?? 0;
         const index = Array.from(root.querySelectorAll('.saved-item-delete')).indexOf(btn);
         const next = loadSavedCourses().filter((c) => c.id !== btn.dataset.deleteId);
-        persistSavedCourses(next);
+        if (!persistSavedCourses(next)) {
+          showToast('삭제하지 못했어요. 이 브라우저에서 저장이 막혀 있어요');
+          return;
+        }
         renderOverlay();
         const body = root.querySelector('.overlay-body');
         if (body) body.scrollTop = scrollTop;
