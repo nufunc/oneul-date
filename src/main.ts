@@ -4469,12 +4469,16 @@ function renderResults(): void {
   const refocusSelector = area && active && area.contains(active) ? focusSelectorFor(active) : null;
   renderResultsContent();
   if (area) restoreFocusIn(area, refocusSelector, '#btn-regenerate');
-  if (state.course && state.courseConditions) {
-    const ids = state.course.map((s) => s.spotId).filter((id): id is number => id !== null);
-    try {
-      sessionStorage.setItem(LAST_COURSE_STORAGE_KEY, JSON.stringify({ ids, conditions: state.courseConditions }));
-    } catch {}
-  }
+  saveLastCourse();
+}
+
+// 새로 고침·뒤로 오기에서 되살릴 마지막 코스를 쓴다. 최적 동선·다시 추천(renderResults)과 칸 교체(swapStep)가 함께 부른다
+function saveLastCourse(): void {
+  if (!state.course || !state.courseConditions) return;
+  const ids = state.course.map((s) => s.spotId).filter((id): id is number => id !== null);
+  try {
+    sessionStorage.setItem(LAST_COURSE_STORAGE_KEY, JSON.stringify({ ids, conditions: state.courseConditions }));
+  } catch {}
 }
 
 function renderResultsContent(): void {
@@ -5510,6 +5514,7 @@ function swapStep(index: number, refocus = false): void {
   }
   state.course[index] = { slot: step.slot, spotId: chosen.id };
   addRecentSpotIds([chosen.id]);
+  saveLastCourse();
 
   // 대상 카드만 부드럽게 swap-in 교체 (현재 코스의 다른 카드들이 쓰고 있는 이미지 Set 수집하여 중복 방지)
   const usedImages = new Set<string>();
