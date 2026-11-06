@@ -1408,6 +1408,31 @@ function searchStationCenter(query: string): { label: string; lat: number; lng: 
   return { label: `${station.name}역`, lat, lng };
 }
 
+/** 띄어 쓴 검색어의 한 낱말이 아래 사전 순회·빠른 태그 판정에 걸리는 말인지(걸리는 판정은 질의 전체에서 낱말을 찾는 쪽만 본다) */
+function isDictionaryQuery(q: string): boolean {
+  if (Object.keys(NATURAL_CONTEXT_MAP).some((kw) => (kw.length <= 1 ? q === kw : hasKeyword(q, kw)))) return true;
+  return POPULAR_QUICK_TAGS.some((t) => t.synonyms.length > 0 && q.includes(t.query.toLowerCase()));
+}
+function inPlaceText(spot: Spot, place: string): boolean {
+  return [spot.location, spot.area, spot.address, spot.name].join(' ').toLowerCase().includes(place);
+}
+/** '지역 사전어' 검색에서 지역 안에 나머지가 맞는 활성 스팟이 있는지. 스팟 목록이 바뀌면 다시 센다 */
+const spacedPlaceHitCache = new Map<string, boolean>();
+let spacedPlaceHitCacheSize = -1;
+function hasSpacedPlaceHit(place: string, rest: string): boolean {
+  if (spacedPlaceHitCacheSize !== spots.length) {
+    spacedPlaceHitCache.clear();
+    spacedPlaceHitCacheSize = spots.length;
+  }
+  const key = `${place}|${rest}`;
+  let hit = spacedPlaceHitCache.get(key);
+  if (hit === undefined) {
+    hit = spots.some((s) => !s.is_closed && inPlaceText(s, place) && matchesSearchQuery(s, rest));
+    spacedPlaceHitCache.set(key, hit);
+  }
+  return hit;
+}
+
 function matchesSearchQuery(spot: Spot, query: string): boolean {
   if (!query || !query.trim()) return true;
   // 이름을 그대로 친 검색은 늘 찾는다. '군산항'(지역어 + 한 글자)과 '결'(한 글자 이름)은 아래 규칙이 모두 닫았다
@@ -1524,6 +1549,15 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
       if (!spotModifierText(spot).includes(head)) return false;
       if (bizMatches(spot, bizMod[0])) return true;
     }
+  }
+
+  // '신안 바다', '진천 힐링'처럼 시군·동네 이름 뒤에 사전어를 띄어 쓴 검색어는 지역과 나머지를 AND로 묶는다.
+  // 아래 사전 순회가 '바다'·'힐링'만 보고 전국 장소를 통과시켜 앞말이 무시됐다(신안 바다 789곳 중 신안 80곳).
+  // 앞말이 사전어('바다 전망', '힐링 카페')거나 나머지가 사전어가 아니면('남산 돈까스') 기존 판정에 맡긴다
+  const spacedPlace = cleanQ.match(/^(\S+)\s+(\S.*)$/);
+  if (spacedPlace && isPlaceHead(spacedPlace[1]) && !isDictionaryQuery(spacedPlace[1]) && isDictionaryQuery(spacedPlace[2])) {
+    // 그 지역에 나머지가 맞는 장소가 하나도 없으면('단양 바다') 0건으로 만들지 않고 지역 전체를 낸다
+    return inPlaceText(spot, spacedPlace[1]) && (matchesSearchQuery(spot, spacedPlace[2]) || !hasSpacedPlaceHit(spacedPlace[1], spacedPlace[2]));
   }
 
   for (const [kw, syns] of Object.entries(NATURAL_CONTEXT_MAP)) {
