@@ -897,6 +897,15 @@ _PRICE_CHEONWON_RE = re.compile(r'(\d+)\s*천\s*원')
 _PRICE_PLAIN_NUM_RE = re.compile(r'\d{4,7}')
 
 
+def price_tier_from_avg(avg):
+    """평균 금액(원) → ₩ 15,000 미만, ₩₩ 30,000 미만, ₩₩₩ 50,000 미만, 그 위는 ₩₩₩₩. 카카오 패널 메뉴 가격(kakao_detail)도 이 경계를 쓴다"""
+    if avg < 15000:
+        return "₩"
+    if avg < 30000:
+        return "₩₩"
+    return "₩₩₩" if avg < 50000 else "₩₩₩₩"
+
+
 def derive_price_tier_from_text(price_text):
     """price 자유텍스트에서 avg_price_per_person과 price_tier를 규칙 기반으로
     추출한다. 못 읽으면 (None, None)을 반환한다(추정해서 지어내지 않는다).
@@ -940,14 +949,7 @@ def derive_price_tier_from_text(price_text):
     if avg is None:
         return (None, None)
 
-    if avg < 15000:
-        tier = "₩"
-    elif avg < 30000:
-        tier = "₩₩"
-    elif avg < 50000:
-        tier = "₩₩₩"
-    else:
-        tier = "₩₩₩₩"
+    tier = price_tier_from_avg(avg)
     # avg_price_per_person은 INTEGER 컬럼이라 float를 그대로 보내면
     # (예: 15500.5) DB가 400으로 거부한다. 반올림해 정수로 반환한다.
     return (tier, int(round(avg)))

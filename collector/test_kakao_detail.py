@@ -147,7 +147,7 @@ def test_daily_cap_and_cursor_go_into_query():
 def test_runs_once_a_day_and_backs_up_before_writing():
     d = tempfile.mkdtemp()
     _run({"1": P_ALL}, backup_dir=d)
-    [name] = os.listdir(d)
+    [name] = os.listdir(d)  # 카테고리가 없는 행은 가격 백업(p300) 대상이 아니다
     assert name.startswith("p226_") and not name.endswith("_dry.json")
     assert json.load(open(os.path.join(d, name))) == [{"id": 1, "name": "장소1", "business_hours": {}, "closed_days": [], "updated_at": "t"}]
     patches, gets, calls, _ = _run({"1": P_ALL}, backup_dir=d)
