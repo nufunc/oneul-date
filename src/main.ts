@@ -5504,8 +5504,6 @@ function renderStepCard(
   const targetImgUrl = getSpotImageUrl(spot, step.slot, opts.usedImages);
   const isHot = isSuperHotSpot(spot);
   const isClosedToday = isSpotClosedToday(spot);
-  const isSaved = isSpotSaved(spot.id);
-  const saveLabels = saveButtonLabels(spot.name, isSaved);
 
   // v4.0 큐레이션 뱃지
   const curationBadges: string[] = [];
@@ -5609,9 +5607,6 @@ function renderStepCard(
           })()}
         </div>
         <div class="step-actions-right">
-          <button class="step-save-chip icon-only ${isSaved ? 'is-saved' : ''}" data-spot-id="${spot.id}" aria-label="${escapeHtml(saveLabels.label)}" title="${saveLabels.title}">
-            <span>${isSaved ? '❤️' : '🤍'}</span>
-          </button>
           <a class="step-navi-chip icon-only" href="${escapeHtml(tmapUrl(spot))}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(spot.name)} T맵 길안내" title="T맵 길안내">
             <span>🧭</span>
           </a>
@@ -8292,18 +8287,6 @@ async function init(): Promise<void> {
     if (!spotId) return;
     state.spotDetailId = spotId;
     renderOverlay();
-  });
-  // 코스 카드 하트도 같은 이유로 문서에 건다. 버튼마다 걸면 🔄로 바꾼 카드와 공유받은 코스 화면의 하트가 빠졌다
-  document.addEventListener('click', (e) => {
-    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.step-save-chip');
-    if (!btn) return;
-    e.stopPropagation();
-    const spotId = Number(btn.dataset.spotId);
-    if (!spotId) return;
-    const isSaved = toggleSaveSpot(spotId);
-    btn.innerHTML = `<span>${isSaved ? '❤️' : '🤍'}</span>`;
-    btn.classList.toggle('is-saved', isSaved);
-    setSaveButtonLabels(btn, spotId, isSaved);
   });
   window.addEventListener('keydown', (e) => {
     const overlayOpen = state.savedOpen || state.regionSheetOpen || state.spotDetailId;

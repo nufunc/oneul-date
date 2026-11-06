@@ -5012,33 +5012,8 @@ html[data-theme-resolved="dark"] .quick-region-chip.chip-budget.is-luxury-active
 }
 
 /* ---------------------------------------------------------------------------
-   코스 카드 하트 찜 & 내비/택시 칩
+   코스 카드 내비/택시 칩
 --------------------------------------------------------------------------- */
-.step-save-chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  cursor: pointer;
-  font-size: 14px;
-  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
-}
-
-.step-save-chip:hover {
-  transform: translateY(-1px);
-  border-color: rgba(244, 63, 94, 0.4);
-  background: rgba(244, 63, 94, 0.08);
-}
-
-.step-save-chip.is-saved {
-  border-color: rgba(244, 63, 94, 0.5);
-  background: rgba(244, 63, 94, 0.12);
-}
-
 .step-navi-chip {
   display: inline-flex;
   align-items: center;
