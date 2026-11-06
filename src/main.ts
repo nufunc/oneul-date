@@ -6922,6 +6922,8 @@ function renderReceiverView(steps: CourseStep[]): void {
   const heroTitle = `${areaLabel ? `${areaLabel} ` : ''}데이트 코스 ${steps.length}곳`;
   const routeNames = sharedSpots.map((s) => s.name);
   const heroRoute = routeNames.slice(0, 3).join(' → ') + (routeNames.length > 3 ? ` 외 ${routeNames.length - 3}곳` : '');
+  // 매거진 글에서 연 코스는 글을 알아볼 말이 없어 저장 제목과 탭 제목이 같은 지역 글끼리 겹친다. 첫 장소 이름으로 가른다(P-312)
+  const blogFirst = routeNames.length > 0 ? `${routeNames[0]}${routeNames.length > 1 ? ` 외 ${routeNames.length - 1}곳` : ''}` : '';
 
   app.innerHTML = `
     <header class="topbar">
@@ -6969,6 +6971,7 @@ function renderReceiverView(steps: CourseStep[]): void {
     <div class="overlay-root" id="overlay-root"></div>
   `;
   if (!blogSlug) document.title = `${heroTitle} | 오늘 데이트`;
+  else if (blogFirst) document.title = `${blogFirst} 매거진 코스 | 오늘 데이트`;
 
   const goHome = (e: Event) => {
     e.preventDefault();
@@ -7028,7 +7031,9 @@ function renderReceiverView(steps: CourseStep[]): void {
         categoryKey: sharedCategoryKey,
       },
       spotIds: sharedSpotIds,
-      title: `${blogSlug ? '📖 매거진 코스 · ' : ''}${regionsLabel(area.regions, area.subZones)} · ${sharedTheme ? `${sharedTheme.emoji} ${sharedTheme.label}` : moodLabel('ALL')}`,
+      title: blogSlug && blogFirst
+        ? `📖 ${blogFirst} · 매거진 코스`
+        : `${blogSlug ? '📖 매거진 코스 · ' : ''}${regionsLabel(area.regions, area.subZones)} · ${sharedTheme ? `${sharedTheme.emoji} ${sharedTheme.label}` : moodLabel('ALL')}`,
     };
     saveCourseWithToast(item);
   });

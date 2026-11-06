@@ -68,4 +68,12 @@ assert.ok(!/\bcloseOverlay\(/.test(load), '불러오기가 홈으로 나가지 �
 const make = body(/#overlay-empty-make'\)\?\.addEventListener/, /root\.querySelectorAll<HTMLButtonElement>\('\.saved-item-main'\)/);
 assert.match(make, /closeOverlayThen\(/, '빈 시트의 코스 만들러 가기가 홈으로 나가지 않는다');
 
+// 5. 블로그 모드 저장 제목과 탭 제목은 첫 장소 이름으로 글을 가른다(P-312)
+assert.match(receiver, /const blogFirst = routeNames\.length > 0 \? `\$\{routeNames\[0\]\}\$\{routeNames\.length > 1 \? ` 외 \$\{routeNames\.length - 1\}곳` : ''\}` : '';/, '첫 장소 이름과 `외 N곳`을 만드는 blogFirst가 없다(장소 1곳이면 `외 N곳`을 뺀다)');
+assert.match(receiver, /title: blogSlug && blogFirst\s*\?\s*`📖 \$\{blogFirst\} · 매거진 코스`/, '블로그 모드 저장 제목이 `📖 <첫 장소> 외 N곳 · 매거진 코스`가 아니다');
+assert.match(receiver, /: `\$\{blogSlug \? '📖 매거진 코스 · ' : ''\}\$\{regionsLabel\(/, '첫 장소가 없을 때 옛 저장 제목으로 돌아가지 않는다');
+assert.match(receiver, /if \(!blogSlug\) document\.title = `\$\{heroTitle\} \| 오늘 데이트`;\s*else if \(blogFirst\) document\.title = `\$\{blogFirst\} 매거진 코스 \| 오늘 데이트`;/, '블로그 모드 탭 제목이 `<첫 장소> 외 N곳 매거진 코스 | 오늘 데이트`가 아니다');
+// 받은 코스 화면을 벗어나면 탭 제목이 원래대로 돌아온다
+assert.match(body(/^function setSharedCourseView\(/m, /^\}/m), /if \(!shared\) document\.title = homeDocTitle;/, '받은 코스 화면을 벗어날 때 탭 제목을 되돌리지 않는다');
+
 console.log('test-receiver-saved-button: 통과');
