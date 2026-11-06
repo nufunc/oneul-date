@@ -4388,7 +4388,7 @@ function applyDailyCourseIfEmpty(): void {
       const c = last.conditions;
       state.regions = [...c.regions];
       state.subZones = c.zoneFromQuery ? [] : [...c.subZones]; // 검색어에서 얻은 동네는 검색어가 다시 만든다
-      state.mood = c.mood;
+      // state.mood는 맞추지 않는다. 이 탭에 분위기 입력이 없어 복원하면 지울 수 없는 숨은 조건이 된다
       state.searchQuery = c.searchQuery ?? '';
       state.courseCategory = c.categoryKey ?? 'ALL';
       state.indoorOnly = !!c.indoorOnly;

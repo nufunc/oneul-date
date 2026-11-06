@@ -42,4 +42,7 @@ assert.deepStrictEqual(s.subZones, []);
 s = run({ regions: ['JEJU'], subZones: [], mood: 'ALL' }, [1], ['stay']);
 assert.deepStrictEqual([s.courseCategory, s.budgetFilter, s.indoorOnly, s.searchQuery], ['ALL', 'ALL', false, '']);
 assert.deepStrictEqual(s.slots, { day: false, evening: false, night: false, stay: true });
-console.log('ok 4');
+// 오늘의 코스의 숨은 분위기는 입력 상태로 옮기지 않는다: 이 탭에는 지울 입력이 없다
+s = run({ regions: [], subZones: [], mood: 'active' }, [1], ['day']);
+assert.strictEqual(s.mood, 'ALL');
+console.log('ok 5');
