@@ -1,4 +1,4 @@
-const CACHE_NAME = 'oneul-date-v0.9.32';
+const CACHE_NAME = 'oneul-date-v0.9.33';
 const ASSETS = [
   './',
   './index.html',
@@ -40,6 +40,9 @@ self.addEventListener('fetch', (event) => {
   if (url.hostname.includes('supabase.co') || url.pathname.includes('/api/')) {
     return;
   }
+
+  // spots.json은 앱이 IndexedDB에 따로 보관하므로 서비스 워커가 22.5MB 사본을 Cache Storage에 또 두지 않는다
+  if (url.pathname.endsWith('/data/spots.json')) return;
 
   // GET 요청에 대해 네트워크 우선 + 캐시 폴백 전략
   if (event.request.method === 'GET') {
