@@ -23,6 +23,7 @@ function setup({ mode = 'course', hash = '', hasButton = true } = {}) {
   const api = new Function(
     'state', 'location', 'document', 'renderConditions', 'calls',
     `${block}
+    function refreshSavedSpots() {}
     function triggerCourseGeneration() { if (waitForFullSpots()) return; calls.generated++; }
     return {
       trigger: triggerCourseGeneration,

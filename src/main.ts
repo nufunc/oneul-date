@@ -4182,6 +4182,8 @@ function waitForFullSpots(): boolean {
 /** 전체 데이터 로드가 끝나면(실패면 loadStaticSpots가 돌려준 샘플로) 기다리던 코스를 만든다. 다른 화면으로 갔으면 덮지 않는다 */
 function resolveWaitingCourse(): void {
   fullSpotsPending = false;
+  // 성공이든 실패(샘플 폴백)든 받는 중 표시를 거둔다. 실패 때 로딩으로 남지 않는다
+  refreshSavedSpots();
   if (!courseWaitingForSpots) return;
   courseWaitingForSpots = false;
   if (state.mainMode !== 'course' || location.hash.startsWith('#c=') || !document.getElementById('btn-generate')) return;
@@ -7053,6 +7055,8 @@ function savedCourseSpotsHtml(item: SavedCourse): string {
     .filter((entry): entry is { spot: Spot; slot: SlotKey | null } => entry !== null);
 
   if (steps.length === 0) {
+    // 전체 데이터가 오기 전에는 번들 샘플뿐이라 정상 항목도 비어 보인다. 실제로 사라진 장소와 구분해 받는 중이라고 알린다
+    if (fullSpotsPending) return `<span class="saved-spots-empty" data-spots-loading>${spotsWaitLabel()}</span>`;
     return `<span class="saved-spots-empty">(장소 정보 없음)</span>`;
   }
 
@@ -7071,6 +7075,17 @@ function savedCourseSpotsHtml(item: SavedCourse): string {
         .join('<span class="saved-step-sep" aria-hidden="true">›</span>')}
     </div>
   `;
+}
+
+/** 시트가 열린 채 전체 데이터가 도착하면 장소 칸만 다시 채운다. 시트를 통째로 다시 그리면 스크롤과 포커스가 처음으로 돌아간다 */
+function refreshSavedSpots(): void {
+  if (!state.savedOpen) return;
+  const list = loadSavedCourses();
+  document.querySelectorAll<HTMLElement>('#overlay-root .saved-item-main').forEach((btn) => {
+    const item = list.find((c) => c.id === btn.dataset.courseId);
+    const box = btn.querySelector<HTMLElement>('.saved-item-spots');
+    if (item && box) box.innerHTML = savedCourseSpotsHtml(item);
+  });
 }
 
 /** 홈과 받은 코스 화면의 머리 `저장한 코스` 버튼이 함께 쓰는 저장한 코스 시트 열기 */
