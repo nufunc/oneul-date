@@ -1610,8 +1610,10 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
   // 공백을 모두 뺀 검색어가 공백을 뺀 이름·지역·주소에 들어가면 통과시킨다
   const compactQ = cleanQ.replace(/\s+/g, '');
   if (compactQ.length < 2) return false;
+  // 띄어 쓰지 않은 동네·시군 이름('남해', '인제')은 위 비교가 이미 봤다. 여기서 더 보면 공백을 건너 이어 붙인
+  // '전남 해남군'의 '남해', '법인 제이엘'의 '인제'가 걸린다
   const compactTarget = [spot.name, spot.area, spot.address].join('|').replace(/\s+/g, '').toLowerCase();
-  if (hasKeyword(compactTarget, compactQ)) return true;
+  if (!(compactQ === cleanQ && isPlaceHead(compactQ)) && hasKeyword(compactTarget, compactQ)) return true;
 
   // 지역어 목록에 없는 동네를 업종과 붙여 친 검색어('망원동카페', '익선동맛집')는 끝의 업종어를 떼어
   // 동네(주소·이름에 있어야 함)와 업종의 AND로 본다. 동네 목록을 늘리지 않아도 새 동네에 통한다

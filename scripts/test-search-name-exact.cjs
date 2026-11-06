@@ -51,4 +51,12 @@ assert.strictEqual(m.isPollutedMediaChannelDummy(fake('성수 풍자')), true, '
 // 끝난 행사는 이름 검색에서도 여전히 빠진다(후보 관문은 그대로다)
 for (const q of ['군산시간여행축제', '천안흥타령춤축제']) assert.strictEqual(hits(q), 0, `${q}는 끝난 행사라 0건이다`);
 
+// 공백을 건너 이어 붙인 글자에는 걸리지 않는다: '인제'가 '농업회사법인 제이엘'과 '하리보 해피월드 인 제주'에 걸리던 것(P-308)
+const inje = open.filter((s) => m.matchesSearchQuery(s, '인제'));
+assert.ok(inje.length > 0, '인제는 인제군 장소를 찾아야 한다');
+for (const s of inje) {
+  const text = [s.name, s.area, s.address, s.location].join(' ').toLowerCase();
+  assert.ok(text.includes('인제'), `인제 검색에 ${s.name}(${s.address})가 걸렸다`);
+}
+
 console.log('test-search-name-exact: 모두 통과');
