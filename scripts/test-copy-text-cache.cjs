@@ -1,6 +1,6 @@
-// 복사 텍스트 총평 회귀 테스트: node scripts/test-copy-text-cache.cjs
+// 복사 텍스트 회귀 테스트: node scripts/test-copy-text-cache.cjs
 // formatCourseTextAsync를 src/main.ts에서 그대로 떼어 TypeScript로 변환해 실행한다(앱 번들과 같은 코드를 검사)
-// 총평 줄은 로컬 템플릿(generateCourseStory)으로 쓰고 네트워크 요청을 보내지 않아야 한다(P-274에서 AI 총평 요청 제거)
+// 머리 다음이 곧바로 1차 블록이고 `✨ "총평"` 줄이 없으며 네트워크 요청을 보내지 않아야 한다(P-274 AI 총평 요청 제거, P-301 총평 줄 제거)
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
@@ -20,7 +20,6 @@ const stubs = {
     fetchCalls++;
     throw new Error('복사 텍스트가 네트워크 요청을 보냈다');
   },
-  generateCourseStory: (_steps, _byId, mood) => `템플릿 총평 ${mood}`,
   regionsLabel: () => '성수',
   moodLabel: () => '감성',
   SPOT_EXPLORE_CATEGORIES: [],
@@ -44,16 +43,22 @@ const steps = [
   { slot: 'evening', spotId: null },
   { slot: 'evening', spotId: 2 },
 ];
-const firstLine = (text) => text.split('\n')[1];
+const secondLine = (text) => text.split('\n')[2];
 
 (async () => {
-  // 총평 줄은 무드에 맞춘 로컬 템플릿
-  assert.strictEqual(firstLine(await formatCourseTextAsync(steps, byId, [], 'ALL')), '✨ "템플릿 총평 ALL"');
-  assert.strictEqual(firstLine(await formatCourseTextAsync(steps, byId, [], 'ROMANTIC')), '✨ "템플릿 총평 ROMANTIC"');
+  // 머리줄 다음은 빈 줄 하나를 두고 곧바로 1차 블록이며 총평 줄(`✨ "`)이 없다
+  for (const mood of ['ALL', 'ROMANTIC']) {
+    const text = await formatCourseTextAsync(steps, byId, [], mood);
+    assert.ok(!/^✨ "/m.test(text), `${mood}: 복사 글에 ✨ " 줄이 있다`);
+    assert.ok(!text.includes('\n\n\n'), `${mood}: 빈 줄이 겹쳤다`);
+    assert.strictEqual(text.split('\n')[1], '', `${mood}: 머리줄 다음이 빈 줄이 아니다`);
+    assert.ok(secondLine(text).startsWith('1차 '), `${mood}: 머리 다음이 1차 블록이 아니다`);
+  }
+  assert.ok(!/generateCourseStory/.test(code), '복사 텍스트가 총평 생성기를 부른다');
   // 지운 AI 총평 캐시와 요청을 다시 부르지 않는다
   assert.ok(!/cachedAiBriefing|fetchAiBriefing|aiStoryCache/.test(code), '복사 텍스트가 AI 총평 캐시나 요청을 부른다');
   assert.strictEqual(fetchCalls, 0, '복사 텍스트가 총평 요청을 보냈다');
-  console.log('ok 복사 텍스트 총평 템플릿 3');
+  console.log('ok 복사 텍스트 총평 줄 없음 11');
 })().catch((e) => {
   console.error(`FAIL ${e.message}`);
   process.exit(1);

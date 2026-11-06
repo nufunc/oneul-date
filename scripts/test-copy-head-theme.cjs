@@ -16,7 +16,6 @@ const code = cut('function areaThemeLabel', '\n}\n') + cut('async function forma
 assert.ok(/return areaThemeLabel\(/.test(cut('function courseTitle', '\n}\n')), 'courseTitle이 areaThemeLabel을 부르지 않는다');
 
 const stubs = {
-  generateCourseStory: () => '총평',
   regionsLabel: (r) => (r.length ? r.join('·') : '전국 어디서나'),
   moodLabel: (m) => (m === 'ALL' ? '모든 분위기' : `분위기${m}`),
   SPOT_EXPLORE_CATEGORIES: [{ key: 'CAFE', emoji: '☕', label: '감성카페' }],
@@ -40,6 +39,7 @@ const link = (t) => t.split('\n').pop();
 (async () => {
   const chip = await formatCourseTextAsync(steps, byId, ['서울'], 'ALL', [], 'CAFE');
   assert.strictEqual(head(chip), '💖 [오늘 데이트 코스] 서울 · ☕ 감성카페');
+  assert.ok(!/^✨ "/m.test(chip), '복사 글에 ✨ " 총평 줄이 있다');
   assert.strictEqual(link(chip), 'https://share.example/?t=CAFE#c=1');
   for (const k of [undefined, 'ALL', 'NOPE']) {
     const none = await formatCourseTextAsync(steps, byId, ['서울'], 'ALL', [], k);
@@ -50,7 +50,7 @@ const link = (t) => t.split('\n').pop();
   assert.strictEqual(head(await formatCourseTextAsync(steps, byId, [], 'ALL', [], 'CAFE')), '💖 [오늘 데이트 코스] 전국 어디서나 · ☕ 감성카페');
   // 분위기를 고른 옛 호출은 그대로
   assert.strictEqual(head(await formatCourseTextAsync(steps, byId, ['서울'], 'R')), '💖 [오늘 데이트 코스] 서울 · 분위기R');
-  console.log('ok 복사 글 머리줄과 링크 칩 6');
+  console.log('ok 복사 글 머리줄과 링크 칩 7');
 })().catch((e) => {
   console.error(`FAIL ${e.message}`);
   process.exit(1);
