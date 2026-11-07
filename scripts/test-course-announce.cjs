@@ -84,6 +84,8 @@ assert.ok(/saveLastCourse\(\);\s*(\/\/[^\n]*\n\s*)?announce\(/.test(swap), '🔄
 const regen = fn('regenerateCourse');
 assert.strictEqual(regen.split("announceCourse('코스를 다시 추천했어요.')").length - 1, 2, '다시 추천: 앵커 분기와 끝');
 assert.ok(regen.indexOf('if (!state.course') < regen.indexOf('announceCourse'), '다시 추천: 코스 없음 반환 뒤');
+// 동네 재시도가 실패하면 그리지 않은 코스를 버리고 화면의 코스로 돌아간다
+assert.ok(/const shownCourse = state\.course;[\s\S]*if \(matchesIn\(place\)\)[\s\S]*return;\s*\}\s*(\/\/[^\n]*\n\s*)?state\.course = shownCourse;/.test(gen), '동네 재시도 실패 복원');
 // 복원·첫 로드·받은 코스 경로는 알리지 않는다
 for (const name of ['applyDailyCourseIfEmpty', 'renderResults', 'renderResultsContent']) {
   assert.ok(!/announce\w*\(/.test(fn(name)), `${name}은 알리지 않는다`);

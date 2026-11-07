@@ -4332,6 +4332,7 @@ function triggerCourseGeneration(): void {
     const place = hasMatchedSpot ? undefined : SEARCH_PLACE_PREFIXES.find((p) => cleanQ.startsWith(p) && cleanQ.length > p.length);
     if (place) {
       const rest = state.searchQuery.trim().slice(place.length).trim();
+      const shownCourse = state.course;
       state.course = generateCourse(
         spots,
         activeSlots(),
@@ -4356,6 +4357,8 @@ function triggerCourseGeneration(): void {
         showToast(`'${place}'에는 '${rest}'에 맞는 곳이 없어 ${place} 코스로 추천했어요`);
         return;
       }
+      // 동네 재시도가 실패하면 그리지 않은 코스가 남아 저장·교체·알림이 화면과 다른 코스를 읽었다
+      state.course = shownCourse;
     }
     if (hasMatchedSpot) {
       showToast(`'${state.searchQuery}' 중심 맞춤 코스를 추천했어요`);
