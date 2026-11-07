@@ -558,7 +558,8 @@ export async function loadSpots(regionMatches?: string[]): Promise<Spot[]> {
           }
         }
         const uniqueSpots = normalizeSpots(Array.from(uniqueIdMap.values()));
-        if (!regionMatches || regionMatches.length === 0) {
+        // 청크가 하나라도 실패한 부분 데이터는 저장하지 않는다. 저장하면 새로고침 건너뛰기로 6시간 고정된다(P-321)
+        if ((!regionMatches || regionMatches.length === 0) && uniqueIdMap.size >= total) {
           saveSpotsToCache(uniqueSpots);
         }
         return uniqueSpots;

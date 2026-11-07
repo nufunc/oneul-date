@@ -43,4 +43,6 @@ const saveM = src.match(/export async function saveSpotsToCache[\s\S]*?\n}\n/)[0
 assert(saveM.indexOf('tx.oncomplete') < saveM.indexOf('localStorage.setItem'), '저장 완료 전에 시각을 쓴다');
 // 새로고침은 캐시가 있는 분기에서만 건너뛴다
 assert(/if \(!isSpotsCacheFresh\([^)]*\)\) setTimeout\(\(\) => \{\s*loadSpots\(\)/.test(mainTs), '시작 새로고침 건너뛰기 연결이 바뀌었다');
+// 청크 일부가 실패한 전체 조회는 캐시에 저장하지 않는다
+assert.ok(src.includes('uniqueIdMap.size >= total'), '부분 데이터 저장 차단 없음');
 console.log('ok test-spots-cache-fresh');
