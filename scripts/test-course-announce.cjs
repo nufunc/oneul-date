@@ -90,4 +90,6 @@ for (const name of ['applyDailyCourseIfEmpty', 'renderResults', 'renderResultsCo
 }
 // 조건 칩은 선택 상태를 접근성 트리에 알린다(화면은 is-active 클래스뿐이었다)
 assert.strictEqual((src.match(/class="(quick-region-chip|spot-category-chip)[^\n]*aria-pressed="/g) ?? []).length, 9, '조건 칩 aria-pressed');
+// 지역 시트의 지역 줄은 tab 역할 자식이 없으므로 tablist가 아니다(axe aria-required-children)
+assert.ok(!src.includes('class="location-regions" role="tablist"') && /region-tab-item[^\n]*aria-pressed=/.test(src), '지역 줄 역할');
 console.log('ok');

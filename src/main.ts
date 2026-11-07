@@ -7516,7 +7516,7 @@ function renderOverlayContent(): void {
         </div>
         <div class="location-split">
           <!-- 좌측 8대 지역 탭 -->
-          <div class="location-regions" role="tablist">
+          <div class="location-regions" role="group" aria-label="지역">
             ${REGIONS.map((r) => {
               const isSelectedTab = (state.activeRegionTab || 'SEOUL') === r.key;
               const hasSelectedZones = state.subZones.some((zk) => {
@@ -7525,7 +7525,7 @@ function renderOverlayContent(): void {
               });
               const isRegSelected = r.key === 'ALL' ? state.regions.length === 0 : state.regions.includes(r.key);
               return `
-                <button class="region-tab-item ${isSelectedTab ? 'active' : ''}" data-region-tab="${r.key}">
+                <button class="region-tab-item ${isSelectedTab ? 'active' : ''}" data-region-tab="${r.key}" aria-pressed="${isSelectedTab}">
                   <span>${r.label}</span>
                   ${isRegSelected || hasSelectedZones ? `<span class="region-tab-badge">●</span>` : ''}
                 </button>
