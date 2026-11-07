@@ -121,6 +121,7 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 const DB_NAME = 'oneul_date_cache';
 const STORE_NAME = 'spots_store';
 const CACHE_KEY = 'all_spots_v1';
+const SPOTS_SAVED_AT_KEY = 'oneul_spots_saved_at';
 
 async function openCacheDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -259,8 +260,29 @@ export async function saveSpotsToCache(spots: Spot[]): Promise<void> {
     const tx = db.transaction(STORE_NAME, 'readwrite');
     const store = tx.objectStore(STORE_NAME);
     store.put(normalizeSpots(spots), CACHE_KEY);
+    // 저장이 끝난 뒤에만 저장 시각을 남긴다. 실패하면 시각이 없어 다음 방문이 새로고침한다(P-321)
+    await new Promise<void>((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = tx.onabort = () => reject(tx.error);
+    });
+    try {
+      localStorage.setItem(SPOTS_SAVED_AT_KEY, String(Date.now()));
+    } catch {
+      // localStorage를 못 쓰면 시각이 없어 항상 새로고침한다
+    }
   } catch {
     // 캐시 저장 실패 시 무시
+  }
+}
+
+/** IndexedDB 스팟 캐시를 저장한 지 maxAgeMs 안이면 참. 시각이 없거나 깨졌거나 미래이면 거짓 */
+export function isSpotsCacheFresh(maxAgeMs: number): boolean {
+  try {
+    const savedAt = Number(localStorage.getItem(SPOTS_SAVED_AT_KEY));
+    const age = Date.now() - savedAt;
+    return Number.isFinite(savedAt) && savedAt > 0 && age >= 0 && age < maxAgeMs;
+  } catch {
+    return false;
   }
 }
 

@@ -229,7 +229,7 @@ const ZONE_CENTERS: Record<string, { lat: number; lng: number }> = {
 const STORAGE_KEY = 'oneul_saved_courses';
 const RECENT_KEY = 'oneul_recent_spots';
 const LAST_COURSE_STORAGE_KEY = 'oneul_last_course';
-import { loadSpots, getCachedSpots, mergeSpots, loadSpotAliases, loadStations, findSpotsByRange, spotsFellBackToSample, spotsBytesReceived, onSpotsProgress } from './supabase';
+import { loadSpots, getCachedSpots, isSpotsCacheFresh, mergeSpots, loadSpotAliases, loadStations, findSpotsByRange, spotsFellBackToSample, spotsBytesReceived, onSpotsProgress } from './supabase';
 
 const RECENT_MAX = 100;
 
@@ -8261,8 +8261,8 @@ async function init(): Promise<void> {
       })
       .finally(resolveWaitingCourse);
   } else {
-    // 이미 캐시가 있는 경우: 백그라운드에서 최신 전체 데이터 동기화
-    setTimeout(() => {
+    // 이미 캐시가 있는 경우: 백그라운드에서 최신 전체 데이터 동기화. 6시간 안에 저장한 캐시면 건너뛴다(P-321)
+    if (!isSpotsCacheFresh(6 * 60 * 60 * 1000)) setTimeout(() => {
       loadSpots()
         .then((liveSpots) => {
           // 받지 못해 샘플이 왔으면 캐시의 전체 데이터를 샘플로 바꾸지 않는다(P-255)
