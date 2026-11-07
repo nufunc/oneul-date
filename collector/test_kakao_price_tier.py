@@ -1,4 +1,4 @@
-"""P-300 카카오 패널 메뉴 가격으로 양 끝 가격대를 채우는 13단계 회귀 테스트: python3 test_kakao_price_tier.py 또는 pytest
+"""P-300 카카오 패널 메뉴 가격으로 ₩를 채우는 13단계 회귀 테스트(P-322: 고가와 육류·횟집·주점은 쓰지 않는다): python3 test_kakao_price_tier.py 또는 pytest
 DB와 패널 호출은 test_kakao_detail의 가짜를 쓴다.
 """
 import json
@@ -22,14 +22,23 @@ def _tiers(panel, **row):
     return [b.get("price_tier") for _, b in patches] if patches else []
 
 
-def test_writes_only_extreme_tiers_by_mean_boundaries():
+def test_writes_only_won_below_15000_mean():
     assert _tiers(_panel([14999, 14999, 14999])) == ["₩"]
     assert _tiers(_panel([15000, 15000, 15000])) == []       # 가운데는 비운다
     assert _tiers(_panel([29999, 29999, 29999])) == []
-    assert _tiers(_panel([30000, 30000, 30000])) == ["₩₩₩"]
-    assert _tiers(_panel([49999, 49999, 49999])) == ["₩₩₩"]
-    assert _tiers(_panel([50000, 50000, 50000])) == ["₩₩₩₩"]
+    assert _tiers(_panel([30000, 30000, 30000])) == []       # 고가는 쓰지 않는다(P-322)
+    assert _tiers(_panel([49999, 49999, 49999])) == []
+    assert _tiers(_panel([50000, 50000, 50000])) == []
     assert _tiers(_panel([10000, 10000, 25000])) == []        # 평균 15,000
+
+
+def test_meat_raw_fish_and_pub_categories_get_no_tier_but_keep_hours():
+    for cat in ("육류,고기", "회", "술집", "호프,요리주점", "칵테일바", "실내포장마차", "일본식주점"):    # P-322 비움 대상 11행의 실제 범주
+        assert not k.price_empty(_row(1, category=cat)), cat
+        assert _tiers(_panel([8000] * 3), category=cat) == [], cat
+        patches, _, _, _ = _run({"1": _panel([8000] * 3, with_hours=True)}, rows=[_row(1, category=cat)])
+        assert set(patches[0][1]) == {"business_hours", "updated_at"}, cat    # 영업시간 백필은 그대로
+    assert k.price_empty(_row(1, category="한식")) and k.price_empty(_row(1, category="카페")) and k.price_empty(_row(1, category="일식"))
 
 
 def test_never_writes_avg_price_or_price_text():

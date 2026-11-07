@@ -7,10 +7,12 @@
 - closed_days: open_hours.headline_addition.current_off_day_desc가 '매주 ~ 휴무'일 때 parse_closed_days로 읽은 요일.
 - 쓰지 않는 행: 응답 실패(404 포함), summary.status가 Y가 아님, 영업시간 안내에 '임시 휴업', 패널과 DB 주소의 도로명이 다르거나
   어느 한쪽에 도로명이 없음. 읽을 때 빈 칸만 쓰고, 읽은 updated_at이 그대로인 행에만 쓴다.
-- price_tier(P-300): 식음료(category가 DINING)이고 price_tier·avg_price_per_person·price가 모두 빈 행만, 패널 메뉴 가격(0 이하와 '변동가격' -1 제외)이 3개 이상이고
-  패널 이름이 DB 이름과 같거나 포함 관계일 때 평균이 15,000원 미만이면 ₩, 30,000원 이상이면 ₩₩₩ 또는 ₩₩₩₩(경계는 price_tier_from_avg).
-  가운데(15,000~30,000원)는 비운다. 앱이 avg_price_per_person을 '1인 약 N원'으로 보이고 메뉴 평균은 1인 가격이 아니라서
-  avg_price_per_person과 price 문구는 쓰지 않는다. 백업은 p300_<시각>.json.
+- price_tier(P-300, P-322): 식음료(category가 DINING)이고 육류·횟집·주점(NO_PRICE_TIER)이 아니며 price_tier·avg_price_per_person·price가 모두 빈 행만,
+  패널 메뉴 가격(0 이하와 '변동가격' -1 제외)이 3개 이상이고 패널 이름이 DB 이름과 같거나 포함 관계일 때 평균이 15,000원 미만이면 ₩만 쓴다.
+  15,000원 이상은 비운다: 고가(₩₩₩ 이상)는 와인 병과 2인 이상 접시가 평균을 올려 표본 오탐이 33%라 쓰지 않고(P-322),
+  육류·횟집·주점은 술 잔수와 인분 표기 때문에 패널 가격으로 1인 가격을 정할 수 없어 비운다.
+  앱이 avg_price_per_person을 '1인 약 N원'으로 보이고 메뉴 평균은 1인 가격이 아니라서 avg_price_per_person과 price 문구는 쓰지 않는다.
+  가격 칸을 비우는 것은 영업시간과 정기 휴무 대상 선정에 영향을 주지 않는다. 백업은 p300_<시각>.json.
 - 패널 주소는 비공식이라 차단 기준을 모른다. 하루 한도는 KAKAO_DETAIL_DAILY_CAP(기본 500), 연속 실패 5회면 그날 멈춘다.
 
 사용: python3 kakao_detail.py [--apply] [--backup-dir DIR] [--limit N]
@@ -45,7 +47,9 @@ ROAD = re.compile(r'(?:^|\s)([가-힣A-Za-z0-9·.]+(?:로|길))\s*(?:지하\s*)?
 MENU_MIN_PRICES = 3
 # src/main.ts DINING_CATEGORY_RE와 같은 식음료 범위. P-300 표본이 식음료뿐이라 펜션·박물관·공원의 메뉴 가격은 읽지 않는다. 앱이 바꾸면 여기도 바꾼다
 DINING = re.compile(r"카페|커피|양식|한식|이탈리안|제과|베이커리|디저트|호프|요리주점|육류|고기|주점|일식|칵테일바|와인바|술집|해물|생선|분식|회$|국수|피자|한정식|포장마차|칼국수|중국요리|돈까스|우동|찻집|맥주")
-TIER_LOW_BELOW, TIER_HIGH_FROM = 15000, 30000  # 이 사이는 한 단계 안 오차가 잦아(표본 평균 일치 47%) 비운다
+TIER_LOW_BELOW = 15000  # 이상은 비운다. 가운데는 한 단계 안 오차가 잦고(표본 평균 일치 47%) 고가는 표본 오탐이 33%다(P-322)
+# 가격대를 쓰지 않는 육류·횟집·주점. 술 잔수와 인분 표기 때문에 패널 가격으로 1인 가격을 정할 수 없다(P-322 표본 11행 중 정탐 0)
+NO_PRICE_TIER = re.compile(r"육류|고기|회$|술집|칵테일바|호프|요리주점|포장마차|주점")
 
 
 class PanelFailed(Exception):
@@ -95,12 +99,13 @@ def _name_key(name):
 
 
 def price_empty(row):
-    """가격 칸이 모두 빈 식음료 행. 가격대를 채울 수 있는 행이다"""
-    return not (row.get("price_tier") or row.get("avg_price_per_person") or row.get("price")) and bool(DINING.search(row.get("category") or ""))
+    """가격 칸이 모두 빈 식음료 행 중 육류·횟집·주점이 아닌 행. 가격대를 채울 수 있는 행이다"""
+    category = row.get("category") or ""
+    return not (row.get("price_tier") or row.get("avg_price_per_person") or row.get("price")) and bool(DINING.search(category)) and not NO_PRICE_TIER.search(category)
 
 
 def menu_price_tier(panel, row):
-    """패널 메뉴 가격 평균의 양 끝 가격대. 이름이 다르거나 가격이 3개 미만이거나 평균이 가운데면 None."""
+    """패널 메뉴 가격 평균의 낮은 가격대(₩). 이름이 다르거나 가격이 3개 미만이거나 평균이 15,000원 이상이면 None."""
     a, b = _name_key((panel.get("summary") or {}).get("name")), _name_key(row.get("name"))
     if not a or not b or not (a in b or b in a):
         return None
@@ -109,7 +114,7 @@ def menu_price_tier(panel, row):
     if len(prices) < MENU_MIN_PRICES:
         return None
     mean = sum(prices) / len(prices)
-    return price_tier_from_avg(mean) if mean < TIER_LOW_BELOW or mean >= TIER_HIGH_FROM else None
+    return price_tier_from_avg(mean) if mean < TIER_LOW_BELOW else None
 
 
 def panel_fields(panel, row):
