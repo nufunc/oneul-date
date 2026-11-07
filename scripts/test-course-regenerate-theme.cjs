@@ -36,7 +36,7 @@ const courseTitle = new Function('spotById', `${titleJs}\nreturn courseTitle;`)(
 
 // regenerateCourse는 부르는 함수를 모두 가짜로 넣고 generateCourse에 넘긴 인자를 기록한다
 assert.ok(decls.has('regenerateCourse'), 'regenerateCourse가 없다');
-const STUBS = ['state', 'spotById', 'buildAnchorCourse', 'addRecentSpotIds', 'courseSpotIds', 'renderResults', 'generateCourse', 'spots', 'recentSpotIdSet', 'notifyRelaxedSlots', 'markResultsEngaged'];
+const STUBS = ['state', 'spotById', 'buildAnchorCourse', 'addRecentSpotIds', 'courseSpotIds', 'renderResults', 'generateCourse', 'spots', 'recentSpotIdSet', 'notifyRelaxedSlots', 'markResultsEngaged', 'announceCourse'];
 const makeRegenerate = new Function(...STUBS, `${toJs(decls.get('regenerateCourse'))}\nreturn regenerateCourse;`);
 
 const run = (conditions, screenCategory) => {
@@ -52,7 +52,7 @@ const run = (conditions, screenCategory) => {
     return state.course;
   };
   const noop = () => {};
-  makeRegenerate(state, new Map(), noop, noop, () => [], noop, generateCourse, [], () => new Set(), noop, noop)();
+  makeRegenerate(state, new Map(), noop, noop, () => [], noop, generateCourse, [], () => new Set(), noop, noop, noop)();
   assert.strictEqual(calls.length, 1, 'generateCourse를 한 번 부르지 않았다');
   return { opts: calls[0][4], title: courseTitle(state.courseConditions, state.course) };
 };

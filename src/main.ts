@@ -3510,6 +3510,37 @@ function showToast(msg: string): void {
   }, 2200);
 }
 
+let announceTimer: number | null = null;
+
+/** 눈에 보이지 않는 알림 영역(body 직속이라 결과 렌더로 지워지지 않는다)에 한 줄을 알린다. 같은 문구도 다시 읽히도록 비웠다가 채운다 */
+function announce(text: string): void {
+  let el = document.getElementById('sr-announce');
+  if (!el) {
+    el = document.createElement('p');
+    el.id = 'sr-announce';
+    el.className = 'sr-only';
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
+    el.setAttribute('aria-atomic', 'true');
+    document.body.appendChild(el);
+  }
+  el.textContent = '';
+  if (announceTimer !== null) window.clearTimeout(announceTimer);
+  announceTimer = window.setTimeout(() => {
+    if (el) el.textContent = text;
+    announceTimer = null;
+  }, 50);
+}
+
+/** 🚀·전체 다시 추천 뒤 스크린리더에 새 코스의 장소를 알린다. 이름을 찾을 장소가 없으면 알리지 않는다 */
+function announceCourse(lead: string): void {
+  const names = (state.course ?? []).flatMap((st) => {
+    const name = st.spotId !== null ? spotById.get(st.spotId)?.name : undefined;
+    return name ? [name] : [];
+  });
+  if (names.length > 0) announce(`${lead} 장소 ${names.length}곳: ${names.join(', ')}`);
+}
+
 // ---------------------------------------------------------------------------
 // 테마 관리 — 낮(기본) | 밤 | 시스템 3단 전환
 // ---------------------------------------------------------------------------
@@ -4321,6 +4352,7 @@ function triggerCourseGeneration(): void {
         if (state.courseConditions) state.courseConditions = { ...state.courseConditions, searchQuery: place, searchFallback: undefined };
         addRecentSpotIds(courseSpotIds());
         renderResults();
+        announceCourse('코스를 만들었어요.');
         showToast(`'${place}'에는 '${rest}'에 맞는 곳이 없어 ${place} 코스로 추천했어요`);
         return;
       }
@@ -4335,6 +4367,7 @@ function triggerCourseGeneration(): void {
   } else {
     notifyRelaxedSlots();
   }
+  announceCourse('코스를 만들었어요.');
 }
 
 /**
@@ -5536,6 +5569,8 @@ function swapStep(index: number, refocus = false): void {
   state.course[index] = { slot: step.slot, spotId: chosen.id };
   addRecentSpotIds([chosen.id]);
   saveLastCourse();
+  // 교체 뒤 카드 이름만 바뀌고 알림이 없었다. 렌더 경로가 갈리기 전에 한 번 알린다
+  announce(`${index + 1}번째 장소를 바꿨어요: ${current ? `${current.name} 대신 ` : ''}${chosen.name}`);
 
   // 대상 카드만 부드럽게 swap-in 교체 (현재 코스의 다른 카드들이 쓰고 있는 이미지 Set 수집하여 중복 방지)
   const usedImages = new Set<string>();
@@ -5615,6 +5650,7 @@ function regenerateCourse(): void {
     state.course = buildAnchorCourse(anchor);
     addRecentSpotIds(courseSpotIds());
     renderResults();
+    announceCourse('코스를 다시 추천했어요.');
     return;
   }
   // 다시 추천한 코스에는 찜이 들어가지 않으므로 찜 코스 제목을 끈다
@@ -5640,6 +5676,7 @@ function regenerateCourse(): void {
   addRecentSpotIds(courseSpotIds());
   renderResults();
   notifyRelaxedSlots();
+  announceCourse('코스를 다시 추천했어요.');
 }
 
 function bindResultEvents(area: HTMLElement): void {
