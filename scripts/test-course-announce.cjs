@@ -19,11 +19,10 @@ const fn = (name) => {
 
 // 가짜 DOM과 타이머
 const make = (course, spotsById) => {
-  const body = { children: [], appendChild(e) { this.children.push(e); } };
+  const body = { children: [{ id: 'sr-announce', textContent: '' }] };
   const document = {
     body,
     getElementById: (id) => body.children.find((e) => e.id === id) ?? null,
-    createElement: () => ({ attrs: {}, textContent: '', setAttribute(k, v) { this.attrs[k] = v; } }),
   };
   const timers = [];
   const window = { setTimeout: (f) => timers.push(f) - 1, clearTimeout: (i) => { timers[i] = null; } };
@@ -40,16 +39,16 @@ const make = (course, spotsById) => {
 const spots = [[1, { name: '백양산' }], [2, { name: '유진옥' }], [3, { name: '<b>브루잉</b>' }]];
 const course = [{ slot: 'a', spotId: 1 }, { slot: 'b', spotId: 2 }, { slot: 'c', spotId: 3 }];
 
-// 첫 로드에는 알림 영역도 글도 없다
-let t = make(course, spots);
-assert.strictEqual(t.el(), null, '첫 로드: 알림 영역 없음');
+// 영역은 첫 알림 전부터 index.html에 있어야 낭독되고, 결과 렌더가 지우지 못하게 #app 밖에 둔다
+const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+assert.ok(/<div id="app"><\/div>\s*<p id="sr-announce" class="sr-only" role="status" aria-live="polite" aria-atomic="true"><\/p>/.test(html), '정적 알림 영역');
 
-// 알림: 영역은 body 직속 하나, role=status, 비웠다가 채운다
+// 첫 로드에는 글이 없다
+let t = make(course, spots);
+assert.strictEqual(t.el().textContent, '', '첫 로드: 알림 글 없음');
+
+// 알림: 비웠다가 채운다
 t.announceCourse('코스를 만들었어요.');
-assert.strictEqual(t.body.children.length, 1);
-assert.strictEqual(t.el().attrs.role, 'status');
-assert.strictEqual(t.el().attrs['aria-live'], 'polite');
-assert.strictEqual(t.el().className, 'sr-only');
 assert.strictEqual(t.el().textContent, '', '채우기 전에 비어 있다');
 t.flush();
 assert.strictEqual(t.el().textContent, '코스를 만들었어요. 장소 3곳: 백양산, 유진옥, <b>브루잉</b>', '이름은 글자 그대로');
@@ -58,7 +57,6 @@ t.announceCourse('코스를 만들었어요.');
 assert.strictEqual(t.el().textContent, '', '같은 문구도 먼저 비운다');
 t.flush();
 assert.ok(t.el().textContent.includes('백양산'));
-assert.strictEqual(t.body.children.length, 1, '영역은 하나만 쓴다');
 // 연달아 부르면 마지막 문구만 남는다
 t.announce('가'); t.announce('나'); t.flush();
 assert.strictEqual(t.el().textContent, '나');
@@ -66,10 +64,10 @@ assert.strictEqual(t.el().textContent, '나');
 // 이름을 찾을 장소가 없으면 알리지 않는다
 t = make([{ slot: 'a', spotId: null }, { slot: 'b', spotId: 99 }], spots);
 t.announceCourse('코스를 만들었어요.'); t.flush();
-assert.strictEqual(t.el(), null, '장소가 없으면 거짓 알림을 내지 않는다');
+assert.strictEqual(t.el().textContent, '', '장소가 없으면 거짓 알림을 내지 않는다');
 t = make(null, spots);
 t.announceCourse('코스를 만들었어요.'); t.flush();
-assert.strictEqual(t.el(), null, '코스가 없으면 알리지 않는다');
+assert.strictEqual(t.el().textContent, '', '코스가 없으면 알리지 않는다');
 
 // 호출 자리: 🚀(place 분기와 끝), 🔄(후보 확정 뒤), 다시 추천(앵커 분기와 끝)
 const gen = fn('triggerCourseGeneration');
@@ -90,4 +88,6 @@ assert.ok(/const shownCourse = state\.course;[\s\S]*if \(matchesIn\(place\)\)[\s
 for (const name of ['applyDailyCourseIfEmpty', 'renderResults', 'renderResultsContent']) {
   assert.ok(!/announce\w*\(/.test(fn(name)), `${name}은 알리지 않는다`);
 }
+// 조건 칩은 선택 상태를 접근성 트리에 알린다(화면은 is-active 클래스뿐이었다)
+assert.strictEqual((src.match(/class="(quick-region-chip|spot-category-chip)[^\n]*aria-pressed="/g) ?? []).length, 9, '조건 칩 aria-pressed');
 console.log('ok');

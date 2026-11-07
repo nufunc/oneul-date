@@ -3512,22 +3512,14 @@ function showToast(msg: string): void {
 
 let announceTimer: number | null = null;
 
-/** 눈에 보이지 않는 알림 영역(body 직속이라 결과 렌더로 지워지지 않는다)에 한 줄을 알린다. 같은 문구도 다시 읽히도록 비웠다가 채운다 */
+/** index.html의 알림 영역(첫 알림 전부터 있어야 낭독된다)에 한 줄을 알린다. 같은 문구도 다시 읽히도록 비웠다가 채운다 */
 function announce(text: string): void {
-  let el = document.getElementById('sr-announce');
-  if (!el) {
-    el = document.createElement('p');
-    el.id = 'sr-announce';
-    el.className = 'sr-only';
-    el.setAttribute('role', 'status');
-    el.setAttribute('aria-live', 'polite');
-    el.setAttribute('aria-atomic', 'true');
-    document.body.appendChild(el);
-  }
+  const el = document.getElementById('sr-announce');
+  if (!el) return;
   el.textContent = '';
   if (announceTimer !== null) window.clearTimeout(announceTimer);
   announceTimer = window.setTimeout(() => {
-    if (el) el.textContent = text;
+    el.textContent = text;
     announceTimer = null;
   }, 50);
 }
@@ -3839,7 +3831,7 @@ function renderQuickRegionChips(showSavedChip = true, showSubZoneChip = true): s
   }
 
   const regionRow = `
-    <button class="quick-region-chip ${isAll ? 'is-active' : ''}" data-region-key="ALL" type="button" aria-label="전국 스팟 보기">
+    <button class="quick-region-chip ${isAll ? 'is-active' : ''}" data-region-key="ALL" type="button" aria-pressed="${isAll}" aria-label="전국 스팟 보기">
       <span class="region-chip-emoji">🗺️</span>
       <span class="region-chip-text">전국</span>
     </button>
@@ -3847,7 +3839,7 @@ function renderQuickRegionChips(showSavedChip = true, showSubZoneChip = true): s
       .map((r) => {
         const isActive = !hasSubZones && state.regions.length === 1 && state.regions[0] === r.key;
         return `
-          <button class="quick-region-chip ${isActive ? 'is-active' : ''}" data-region-key="${r.key}" type="button" aria-label="${escapeHtml(r.label)} 스팟 보기">
+          <button class="quick-region-chip ${isActive ? 'is-active' : ''}" data-region-key="${r.key}" type="button" aria-pressed="${isActive}" aria-label="${escapeHtml(r.label)} 스팟 보기">
             <span class="region-chip-text">${escapeHtml(r.label)}</span>
           </button>
         `;
@@ -3861,16 +3853,16 @@ function renderQuickRegionChips(showSavedChip = true, showSubZoneChip = true): s
           : `<span class="chip-arrow" aria-hidden="true">▾</span>`
       }
     </button>` : ''}
-    ${showSavedChip ? `<button class="quick-region-chip chip-saved ${state.savedOnly ? 'is-active is-saved-active' : ''}" data-action="toggle-saved" type="button" aria-label="보관함 스팟 보기" title="내가 찜한 스팟 모아보기">
+    ${showSavedChip ? `<button class="quick-region-chip chip-saved ${state.savedOnly ? 'is-active is-saved-active' : ''}" data-action="toggle-saved" type="button" aria-pressed="${state.savedOnly}" aria-label="보관함 스팟 보기" title="내가 찜한 스팟 모아보기">
       <span class="region-chip-text">${state.savedOnly ? '❤️ 보관함 ON' : (savedCount > 0 ? `❤️ ${savedCount}` : '🤍 찜')}</span>
     </button>` : ''}
-    <button class="quick-region-chip chip-indoor ${state.indoorOnly ? 'is-active is-indoor-active' : ''}" data-action="toggle-indoor" type="button" aria-label="실내 데이트 필터" title="비 오는 날/폭염 실내 데이트 모드">
+    <button class="quick-region-chip chip-indoor ${state.indoorOnly ? 'is-active is-indoor-active' : ''}" data-action="toggle-indoor" type="button" aria-pressed="${state.indoorOnly}" aria-label="실내 데이트 필터" title="비 오는 날/폭염 실내 데이트 모드">
       <span class="region-chip-text">${state.indoorOnly ? '☔ 실내 ON' : '☔ 실내'}</span>
     </button>
-    <button class="quick-region-chip chip-budget ${state.budgetFilter === 'BUDGET' ? 'is-active is-budget-active' : ''}" data-action="toggle-budget" data-budget="BUDGET" type="button" aria-label="가성비 데이트 필터" title="1인 2만원 이하 가성비/캐주얼 명소">
+    <button class="quick-region-chip chip-budget ${state.budgetFilter === 'BUDGET' ? 'is-active is-budget-active' : ''}" data-action="toggle-budget" data-budget="BUDGET" type="button" aria-pressed="${state.budgetFilter === 'BUDGET'}" aria-label="가성비 데이트 필터" title="1인 2만원 이하 가성비/캐주얼 명소">
       <span class="region-chip-text">${state.budgetFilter === 'BUDGET' ? '💸 가성비 ON' : '💸 가성비'}</span>
     </button>
-    <button class="quick-region-chip chip-budget ${state.budgetFilter === 'LUXURY' ? 'is-active is-luxury-active' : ''}" data-action="toggle-budget" data-budget="LUXURY" type="button" aria-label="스페셜 다이닝 필터" title="오마카세/파인다이닝/럭셔리 명소">
+    <button class="quick-region-chip chip-budget ${state.budgetFilter === 'LUXURY' ? 'is-active is-luxury-active' : ''}" data-action="toggle-budget" data-budget="LUXURY" type="button" aria-pressed="${state.budgetFilter === 'LUXURY'}" aria-label="스페셜 다이닝 필터" title="오마카세/파인다이닝/럭셔리 명소">
       <span class="region-chip-text">${state.budgetFilter === 'LUXURY' ? '🍷 스페셜 ON' : '🍷 스페셜'}</span>
     </button>
   `;
@@ -3878,7 +3870,7 @@ function renderQuickRegionChips(showSavedChip = true, showSubZoneChip = true): s
   const moodRow = MOOD_PRESETS.map((m) => {
     const isMoodActive = state.moodPreset === m.key;
     return `
-      <button class="quick-region-chip chip-mood ${isMoodActive ? 'is-active is-mood-active' : ''}" data-action="toggle-mood" data-mood-preset="${m.key}" type="button" aria-label="${m.label} 데이트 모드" title="${m.desc}">
+      <button class="quick-region-chip chip-mood ${isMoodActive ? 'is-active is-mood-active' : ''}" data-action="toggle-mood" data-mood-preset="${m.key}" type="button" aria-pressed="${isMoodActive}" aria-label="${m.label} 데이트 모드" title="${m.desc}">
         <span class="region-chip-text">${m.icon} ${m.label}</span>
       </button>
     `;
@@ -4051,7 +4043,7 @@ function renderConditions(): void {
       <!-- 3. 테마 칩 바 (SPOT_EXPLORE_CATEGORIES 순서 고정) -->
       <div class="spot-category-scroll" style="margin-bottom: var(--space-4);">
         ${themeChips.map((cat) => `
-          <button class="spot-category-chip ${state.courseCategory === cat.key ? 'is-active' : ''}" data-cat-key="${cat.key}">
+          <button class="spot-category-chip ${state.courseCategory === cat.key ? 'is-active' : ''}" data-cat-key="${cat.key}" aria-pressed="${state.courseCategory === cat.key}">
             <span class="chip-emoji">${cat.emoji}</span>
             <span class="chip-label">${cat.label}</span>
           </button>
@@ -6335,7 +6327,7 @@ function renderSpotDiscovery(): void {
     <!-- 3. 테마 칩 (SPOT_EXPLORE_CATEGORIES 순서 고정) -->
     <div class="spot-category-scroll" style="margin-bottom: var(--space-4);">
       ${getCuratedThemeChips().map((cat) => `
-        <button class="spot-category-chip ${state.spotCategory === cat.key ? 'is-active' : ''}" data-cat-key="${cat.key}">
+        <button class="spot-category-chip ${state.spotCategory === cat.key ? 'is-active' : ''}" data-cat-key="${cat.key}" aria-pressed="${state.spotCategory === cat.key}">
           <span class="chip-emoji">${cat.emoji}</span>
           <span class="chip-label">${cat.label}</span>
         </button>
