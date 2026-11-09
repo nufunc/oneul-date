@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from supabase_worker import derive_region_area, load_env
 
 _env = load_env()
-SUPABASE_URL = os.environ.get("SUPABASE_URL") or _env.get("SUPABASE_URL") or "http://152.70.89.210:18088"
+SUPABASE_URL = os.environ.get("SUPABASE_URL") or _env.get("SUPABASE_URL") or "https://152-70-89-210.sslip.io"
 SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY") or _env.get("SUPABASE_SERVICE_KEY") or ""
 
 # 2026년 인천 행정구역 개편으로 새로 생긴 area 명칭. address 문자열은 개편 전

@@ -16,7 +16,7 @@ from supabase_worker import normalize_spot_address, load_env
 from category_filter import CHAIN_BRAND_BLACKLIST
 
 _env = load_env()
-SUPABASE_URL = os.environ.get("SUPABASE_URL") or _env.get("SUPABASE_URL") or "http://152.70.89.210:18088"
+SUPABASE_URL = os.environ.get("SUPABASE_URL") or _env.get("SUPABASE_URL") or "https://152-70-89-210.sslip.io"
 SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY") or _env.get("SUPABASE_SERVICE_KEY") or ""
 
 DISALLOWED_CATEGORIES = [
