@@ -15,7 +15,7 @@ const pick = (decl) => {
 const code = [
   'const DISALLOWED_YOUTUBE_KEYWORDS', 'const VERIFIED_YOUTUBE_CREATORS', 'function isValidYoutubeHotclip',
   'const YT_GENERIC_NAME_WORDS', 'const normalizeYoutubeMatchText', 'function youtubeTitleNamesSpot',
-  'const TOURAPI_TEMPLATE_SUMMARY', 'const SUMMARY_TEMPLATE_MIN_REPEATS', 'let summaryTemplateCache',
+  'const TOURAPI_TEMPLATE_SUMMARY', 'const BLOG_TEMPLATE_SUMMARY', 'const SUMMARY_TEMPLATE_MIN_REPEATS', 'let summaryTemplateCache',
   'function summaryTemplateKey', 'function cardSpotSummary', 'function sheetRatingText', 'function cleanSpotSummary',
   'function buildFactSentence', 'function displaySpotSummary',
 ].map(pick).join('\n');
@@ -28,6 +28,7 @@ const fallbackSpot = (km) => ({
   summary: 'aT센터 — 한국관광공사 관광정보 문화시설 명소 (서초구)',
   curation_badges: { tour_api: true }, social_links: km ? { kakaomap: km } : {},
 });
+const blogSpot = (summary, km) => ({ ...fallbackSpot(km), summary });
 const CASES = [
   // (a) 폴백 요약 행: 기준(리뷰 10건 이상, 3.8점 이상)을 넘으면 사실 한 줄, 아니면 빈 값
   ['폴백 + 4.4점 리뷰 1499', fallbackSpot({ rating: 4.4, review_count: 1499 }),
@@ -38,6 +39,14 @@ const CASES = [
   // 정상 요약은 그대로 두고, 평점이 있으면 시트 평점 칸이 보인다
   ['정상 요약', { ...fallbackSpot({ rating: 4.6, review_count: 214 }), summary: '창가 자리에서 한강이 내려다보이는 작은 카페예요.' },
     { text: '창가 자리에서 한강이 내려다보이는 작은 카페예요.', isFact: false }, '★4.6 · 리뷰 214개'],
+  // 블로그 수집기 정형 요약(P-328): 사실 재료가 있으면 사실 한 줄, 없으면 빈 값. 비슷하지만 이 틀이 아닌 문장은 그대로 둔다
+  ['블로그 틀 + 4.4점 리뷰 1499', blogSpot('블로그 인기 추천 서울 강남구의 감성 순대', { rating: 4.4, review_count: 1499 }),
+    { text: '서초구에서 카카오맵 평점 4.4점(리뷰 1,499개)을 받은 곳이에요.', isFact: true }, ''],
+  ['블로그 틀 + 평점 없음', blogSpot('블로그 인기 추천 서울 강남구의 감성 순대', null), { text: '', isFact: false }, ''],
+  ['블로그에서 소개된 문장 유지', blogSpot('블로그에서 소개된 강남구의 순대국밥 맛집이에요.', null),
+    { text: '블로그에서 소개된 강남구의 순대국밥 맛집이에요.', isFact: false }, ''],
+  ['블로그 인기 추천이 문장 중간에 든 요약 유지', blogSpot('주말마다 줄 서는 곳이라 블로그 인기 추천 목록에도 오르는 순대국밥집이에요.', null),
+    { text: '주말마다 줄 서는 곳이라 블로그 인기 추천 목록에도 오르는 순대국밥집이에요.', isFact: false }, ''],
 ];
 
 let failed = 0;
