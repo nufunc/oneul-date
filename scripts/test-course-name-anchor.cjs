@@ -75,9 +75,9 @@ function matchesSearchQuery(spot, query) {
 
 const { stations } = JSON.parse(fs.readFileSync(path.join(root, 'public', 'data', 'stations.json'), 'utf8'));
 const rawSpots = JSON.parse(fs.readFileSync(path.join(root, 'public', 'data', 'spots.json'), 'utf8'));
-const { generateCourse, getCandidates, isCourseEligible, matchesSearchQuery, searchRelevanceTier, zoneKeysForQuery, zoneSelectionMatcher, swapPick, excludeRecent, dominantAnchorSpot, SPOT_EXPLORE_CATEGORIES, THEME_FALSE_WORDS, getLastAnchor, setStations } = new Function(
+const { generateCourse, getCandidates, isCourseEligible, isSpotClosedToday, matchesSearchQuery, searchRelevanceTier, zoneKeysForQuery, zoneSelectionMatcher, swapPick, excludeRecent, dominantAnchorSpot, SPOT_EXPLORE_CATEGORIES, THEME_FALSE_WORDS, getLastAnchor, setStations } = new Function(
   'rawSpotsData',
-  `${ts.transpile(code, { target: 'es2022' })};return { generateCourse, getCandidates, isCourseEligible, matchesSearchQuery, searchRelevanceTier, zoneKeysForQuery, zoneSelectionMatcher, swapPick, excludeRecent, dominantAnchorSpot, SPOT_EXPLORE_CATEGORIES, THEME_FALSE_WORDS, getLastAnchor: () => lastAnchor, setStations: (s) => { stationCoords = s; } };`,
+  `${ts.transpile(code, { target: 'es2022' })};return { generateCourse, getCandidates, isCourseEligible, isSpotClosedToday, matchesSearchQuery, searchRelevanceTier, zoneKeysForQuery, zoneSelectionMatcher, swapPick, excludeRecent, dominantAnchorSpot, SPOT_EXPLORE_CATEGORIES, THEME_FALSE_WORDS, getLastAnchor: () => lastAnchor, setStations: (s) => { stationCoords = s; } };`,
 )(rawSpots);
 setStations(stations);
 
@@ -155,7 +155,8 @@ const CORRECTED_STAY_IDS = [
   1791650312011, 1791706424061, 1791706424548, 1791767761541,
   1791981541378,
 ];
-const targets = [...CORRECTED_STAY_IDS, 8168].map((id) => spotById.get(id)).filter((s) => s && !s.is_closed && isCourseEligible(s));
+// 오늘 휴무인 스팟은 getCandidates가 앵커 후보에서 빼므로 시험 대상에서도 뺀다
+const targets = [...CORRECTED_STAY_IDS, 8168].map((id) => spotById.get(id)).filter((s) => s && !s.is_closed && isCourseEligible(s) && !isSpotClosedToday(s));
 assert.ok(targets.length >= 150, `이름 검색 대상이 150곳 미만이다: ${targets.length}`);
 const names = [...new Set(targets.map((s) => s.name))];
 const missed = [];
