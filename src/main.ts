@@ -3860,6 +3860,9 @@ function renderQuickRegionChips(showSavedChip = true, showSubZoneChip = true): s
     ${showSavedChip ? `<button class="quick-region-chip chip-saved ${state.savedOnly ? 'is-active is-saved-active' : ''}" data-action="toggle-saved" type="button" aria-pressed="${state.savedOnly}" aria-label="보관함 스팟 보기" title="내가 찜한 스팟 모아보기">
       <span class="region-chip-text">${state.savedOnly ? '❤️ 보관함 ON' : (savedCount > 0 ? `❤️ ${savedCount}` : '🤍 찜')}</span>
     </button>` : ''}
+  `;
+
+  const filterChips = `
     <button class="quick-region-chip chip-indoor ${state.indoorOnly ? 'is-active is-indoor-active' : ''}" data-action="toggle-indoor" type="button" aria-pressed="${state.indoorOnly}" aria-label="실내 데이트 필터" title="비 오는 날/폭염 실내 데이트 모드">
       <span class="region-chip-text">${state.indoorOnly ? '☔ 실내 ON' : '☔ 실내'}</span>
     </button>
@@ -3871,7 +3874,7 @@ function renderQuickRegionChips(showSavedChip = true, showSubZoneChip = true): s
     </button>
   `;
 
-  const moodRow = MOOD_PRESETS.map((m) => {
+  const moodRow = filterChips + MOOD_PRESETS.map((m) => {
     const isMoodActive = state.moodPreset === m.key;
     return `
       <button class="quick-region-chip chip-mood ${isMoodActive ? 'is-active is-mood-active' : ''}" data-action="toggle-mood" data-mood-preset="${m.key}" type="button" aria-pressed="${isMoodActive}" aria-label="${m.label} 데이트 모드" title="${m.desc}">
@@ -3882,7 +3885,8 @@ function renderQuickRegionChips(showSavedChip = true, showSubZoneChip = true): s
 
   // 무드 프리셋은 지역 선택과 성격이 다른 정밀 필터라 같은 가로 스크롤 줄에
   // 섞으면 8개 지역 칩 뒤로 밀려 기본 화면에서 100% 잘려 나간다(2026-09-23
-  // 디자인 감사 발견). 별도 줄로 분리해 항상 보이게 한다.
+  // 디자인 감사 발견). 별도 줄로 분리해 항상 보이게 한다. 실내·가성비·스페셜
+  // 칩도 지역 줄 끝(390px에서 x 527 이후)에서 잘려 같은 줄로 옮기고 줄바꿈한다(P-330).
   return `
     <div class="quick-region-scroll">${regionRow}</div>
     <div class="quick-region-scroll quick-mood-row">${moodRow}</div>

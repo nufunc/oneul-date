@@ -4772,6 +4772,8 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
 }
 
 .quick-mood-row {
+  flex-wrap: wrap;
+  overflow: visible;
   padding-top: 4px;
   border-top: 1px dashed var(--color-border);
 }
