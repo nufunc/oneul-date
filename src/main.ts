@@ -4536,6 +4536,11 @@ function getCatchtableUrl(spot: Spot): string | null {
 /** 카카오맵 매장 링크 생성 */
 function getKakaomapUrl(spot: Spot): string {
   const kakao = spot.social_links?.kakaomap?.url;
+  // 장소 id 링크만 그대로 둔다. 이름 검색어 링크는 결과 없음이나 다른 지역 가게가 열려 좌표 핀 링크로 바꾼다(P-339)
+  if (kakao && !kakao.includes('/link/search/')) return kakao;
+  if (typeof spot.lat === 'number' && typeof spot.lng === 'number') {
+    return `https://map.kakao.com/link/map/${encodeURIComponent(spot.name)},${spot.lat},${spot.lng}`;
+  }
   if (kakao) return kakao;
   return `https://map.kakao.com/link/search/${encodeURIComponent(mapQuery(spot))}`;
 }
