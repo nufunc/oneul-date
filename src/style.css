@@ -110,8 +110,8 @@ html[data-theme-resolved="dark"] {
   --color-accent-text: #38bdf8;
   --color-accent-soft: rgba(56, 189, 248, 0.15);
   --color-accent-medium: rgba(56, 189, 248, 0.25);
-  --color-accent-gradient: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-  --color-accent-gradient-hover: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+  --color-accent-gradient: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+  --color-accent-gradient-hover: linear-gradient(135deg, #075985 0%, #0c4a6e 100%);
   --color-on-accent: #0b0f17; /* 액센트 배경 위 선명한 가독성 (검정/어두운 텍스트) */
   --color-backdrop: rgba(0, 0, 0, 0.75);
   
@@ -144,7 +144,7 @@ html[data-theme="dark"] .btn-generate,
 html[data-theme-resolved="dark"] .btn-generate,
 html[data-theme="dark"] .btn-primary,
 html[data-theme-resolved="dark"] .btn-primary {
-  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  background: var(--color-accent-gradient);
   color: #ffffff !important;
   box-shadow: 0 4px 18px rgba(2, 132, 199, 0.35);
 }
@@ -153,7 +153,7 @@ html[data-theme="dark"] .btn-generate:hover,
 html[data-theme-resolved="dark"] .btn-generate:hover,
 html[data-theme="dark"] .btn-primary:hover,
 html[data-theme-resolved="dark"] .btn-primary:hover {
-  background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+  background: var(--color-accent-gradient-hover);
   box-shadow: 0 6px 24px rgba(2, 132, 199, 0.45);
 }
 
@@ -4889,9 +4889,6 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
 
 html[data-theme="dark"] .quick-region-chip.chip-indoor.is-indoor-active,
 html[data-theme-resolved="dark"] .quick-region-chip.chip-indoor.is-indoor-active {
-  background: #3b82f6;
-  border-color: #3b82f6;
-  color: #fff;
   box-shadow: 0 2px 10px rgba(59, 130, 246, 0.4);
 }
 
@@ -4978,8 +4975,8 @@ html[data-theme-resolved="dark"] .quick-region-chip.chip-mood.is-mood-active {
 
 html[data-theme="dark"] .quick-region-chip.chip-budget.is-budget-active,
 html[data-theme-resolved="dark"] .quick-region-chip.chip-budget.is-budget-active {
-  background: #059669;
-  border-color: #059669;
+  background: #047857;
+  border-color: #047857;
   color: #fff;
   box-shadow: 0 2px 10px rgba(16, 185, 129, 0.38);
 }
