@@ -825,7 +825,7 @@ export type SpotGenre = 'CAFE' | 'MEAL' | 'BAR' | 'ACTIVITY' | 'STAY';
 
 /** 스팟의 이름/카테고리/요약/태그를 종합 분석하여 데이트 코스용 핵심 장르(종목) 판정 */
 function getSpotGenre(spot: Spot): SpotGenre {
-  if (spot.slot === 'stay' || isRealStaySpot(spot)) return 'STAY';
+  if (spot.slot === 'stay') return 'STAY';
 
   const text = [
     spot.name || '',
