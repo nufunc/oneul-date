@@ -1773,6 +1773,21 @@ function parsePriceRangeWon(price: string): [number, number] | null {
   return valid.length > 0 ? [Math.min(...valid), Math.max(...valid)] : null;
 }
 
+/** 시트 가격 칸 문구 등급 풀이. 경계는 수집기 price_tier_from_avg(collector/supabase_worker.py)와 같다. 추정이라 "약"을 붙인다 */
+const PRICE_TIER_TEXT: Record<string, string> = {
+  FREE: '무료',
+  '₩': '₩ · 약 1.5만 원 미만',
+  '₩₩': '₩₩ · 약 1.5~3만 원',
+  '₩₩₩': '₩₩₩ · 약 3~5만 원',
+  '₩₩₩₩': '₩₩₩₩ · 약 5만 원 이상'
+};
+
+/** 시트 가격 칸 문구: 평균가, price, 가격 등급 순으로 쓰고 모두 비면 빈 문자열 */
+function sheetPriceText(spot: Spot): string {
+  if (spot.avg_price_per_person) return `1인 약 ${spot.avg_price_per_person.toLocaleString()}원`;
+  return spot.price || (spot.price_tier ? PRICE_TIER_TEXT[spot.price_tier] || '' : '');
+}
+
 function isBudgetSpot(spot: Spot): boolean {
   // 1. 명시적 가격 티어 (₩ 또는 FREE)
   if (spot.price_tier === 'FREE' || spot.price_tier === '₩') return true;
@@ -7835,7 +7850,7 @@ function renderOverlayContent(): void {
     const parkingText = spot.parking_detail || (spot.parking_info?.type === 'unknown' ? '' : spot.parking_info?.detail) || (spot.parking_type === 'free' ? '무료 주차 가능' : spot.parking_type === 'paid' ? '유료 주차' : spot.parking_type === 'valet' ? '발렛 가능' : '');
 
     // 가격
-    const priceText = spot.avg_price_per_person ? `1인 약 ${spot.avg_price_per_person.toLocaleString()}원` : spot.price || '';
+    const priceText = sheetPriceText(spot);
 
     // 카카오맵 평점
     const ratingText = sheetRatingText(spot, sumIsFact ? sum : '');
