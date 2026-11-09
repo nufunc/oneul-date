@@ -29,7 +29,8 @@ try:
 except ImportError:
     from collector.heal_and_verify_spots import heal_all_spots
 
-API_URL = os.environ.get("ONEUL_API_URL", "http://152.70.89.210:18088/rest/v1/spots")
+# 18088은 OCI 보안 목록에서 외부 접근을 닫았으므로(2026-11-10) 같은 API 앞의 HTTPS 프록시로 읽는다
+API_URL = os.environ.get("ONEUL_API_URL", "https://152-70-89-210.sslip.io/rest/v1/spots")
 TARGET_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "public", "data", "spots.json"))
 MIN_EXPECTED_SPOTS = 9000  # 비정상 데이터 누락 방지 안전 가드
 CLIENT_UNUSED_KEYS = {"metrics", "created_at", "updated_at", "provider_ids", "reservation_type", "fail_count"}
