@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """카카오 장소 패널로 TourAPI 밖 열린 행의 영업시간(business_hours)과 정기 휴무(closed_days)를 채운다(P-226, 수집기 13단계).
-같은 응답의 메뉴 가격으로 양 끝 가격대(price_tier)도 채운다(P-300). 기본은 드라이런, --apply일 때만 쓴다.
+같은 응답의 메뉴 가격으로 양 끝 가격대(price_tier)도 채우고(P-300), 같은 응답의 place_add_info로 주차(parking_info)도 채운다(P-332).
+기본은 드라이런, --apply일 때만 쓴다.
 
 - 대상: 열림, source.type이 tourapi가 아님, provider_ids.kakao 있음, business_hours가 빈 행. id 오름차순으로 커서 뒤부터 본다.
 - business_hours: {"영업시간": 문구}. 상세 시트가 키를 그대로 라벨로 보인다(src/main.ts:8101-8104).
@@ -13,6 +14,9 @@
   육류·횟집·주점은 술 잔수와 인분 표기 때문에 패널 가격으로 1인 가격을 정할 수 없어 비운다.
   앱이 avg_price_per_person을 '1인 약 N원'으로 보이고 메뉴 평균은 1인 가격이 아니라서 avg_price_per_person과 price 문구는 쓰지 않는다.
   가격 칸을 비우는 것은 영업시간과 정기 휴무 대상 선정에 영향을 주지 않는다. 백업은 p300_<시각>.json.
+- parking_info(P-332): 읽을 때 빈 칸(null, {}, type 없음 또는 unknown)인 행만 쓴다. parking_from_panel이 simple_parking_infos 텍스트와
+  store_facility_icons를 본다. 추가 패널 호출은 없다. is_parking 단독은 쓰지 않는다(DB가 확인한 available인 곳이 False로 올 수 있다).
+  백업은 p226_<시각>.json의 parking_info 열이고 쓴 값은 p332_written_<시각>.json(id, 새 값)에 남는다.
 - 패널 주소는 비공식이라 차단 기준을 모른다. 하루 한도는 KAKAO_DETAIL_DAILY_CAP(기본 500), 연속 실패 5회면 그날 멈춘다.
 
 사용: python3 kakao_detail.py [--apply] [--backup-dir DIR] [--limit N]
@@ -45,6 +49,11 @@ DAYS = "월화수목금토일"
 # '고양대로 1955', '도산대로57길 8', '연희로11가길 47 지하1층'에서 도로명만 뽑는다. 지번 주소에는 걸리지 않는다
 ROAD = re.compile(r'(?:^|\s)([가-힣A-Za-z0-9·.]+(?:로|길))\s*(?:지하\s*)?\d')
 MENU_MIN_PRICES = 3
+# 주차 신호(P-332). 텍스트는 simple_parking_infos.texts[0], 아이콘은 store_facility_icons[].text
+PARKING_TEXT_KIND = {"무료 주차": "free", "유료 주차": "paid", "주차 가능": "available", "주차장 없음": "impossible"}
+PARKING_ICON_KIND = {"무료주차": "free", "유료주차": "paid", "주차가능": "available"}
+# 요약에 조건이 붙은 무료는 카드의 '무료주차' 배지로 내보내지 않고 available로 낮춘다(표본 오탐 방지)
+PARKING_FREE_CONDITION = re.compile(r"\d+시간|\d+분|결제|정산|영수증|근처|주변|인근|공영|임시")
 # src/main.ts DINING_CATEGORY_RE와 같은 식음료 범위. P-300 표본이 식음료뿐이라 펜션·박물관·공원의 메뉴 가격은 읽지 않는다. 앱이 바꾸면 여기도 바꾼다
 DINING = re.compile(r"카페|커피|양식|한식|이탈리안|제과|베이커리|디저트|호프|요리주점|육류|고기|주점|일식|칵테일바|와인바|술집|해물|생선|분식|회$|국수|피자|한정식|포장마차|칼국수|중국요리|돈까스|우동|찻집|맥주")
 TIER_LOW_BELOW = 15000  # 이상은 비운다. 가운데는 한 단계 안 오차가 잦고(표본 평균 일치 47%) 고가는 표본 오탐이 33%다(P-322)
@@ -117,6 +126,34 @@ def menu_price_tier(panel, row):
     return price_tier_from_avg(mean) if mean < TIER_LOW_BELOW else None
 
 
+def parking_empty(row):
+    """읽을 때 parking_info가 빈 칸(null, {}, type 없음, unknown)인 행"""
+    info = row.get("parking_info")
+    return not info or (info.get("type") or "unknown") == "unknown"
+
+
+def parking_from_panel(panel):
+    """패널 place_add_info → parking_info({"type", "detail"}). 읽을 신호가 없으면 None.
+    free와 paid는 텍스트와 아이콘이 같은 종류일 때만 쓰고(free는 요약에 조건어가 없을 때만), 둘이 다르거나 한쪽만 있으면 available이다.
+    impossible은 텍스트가 '주차장 없음'이고 아이콘이 없고 is_parking이 True가 아닐 때만이다. is_parking만 있는 행은 None이다."""
+    info = panel.get("place_add_info") or {}
+    sp = info.get("simple_parking_infos") or {}
+    texts = sp.get("texts") or []
+    text = texts[0] if texts else None
+    text_kind = PARKING_TEXT_KIND.get(text)
+    icon_kinds = {PARKING_ICON_KIND[i.get("text")] for i in info.get("store_facility_icons") or [] if i.get("text") in PARKING_ICON_KIND}
+    if not text_kind and not icon_kinds:
+        return None
+    summary = (sp.get("summary") or "").strip()
+    if text_kind == "impossible" and not icon_kinds and (info.get("facilities") or {}).get("is_parking") is not True:
+        kind = "impossible"
+    elif text_kind in ("free", "paid") and icon_kinds == {text_kind}:
+        kind = "available" if text_kind == "free" and PARKING_FREE_CONDITION.search(summary) else text_kind
+    else:
+        kind = "available"
+    return {"type": kind, "detail": summary or text or next(iter(icon_kinds))}
+
+
 def panel_fields(panel, row):
     """패널 응답과 DB 행 → (쓸 칸, 건너뛴 까닭). 쓸 칸은 읽을 때 빈 칸만 담는다."""
     summary = panel.get("summary") or {}
@@ -139,11 +176,14 @@ def panel_fields(panel, row):
     tier = menu_price_tier(panel, row) if price_empty(row) else None
     if tier:
         fields["price_tier"] = tier
+    parking = parking_from_panel(panel) if parking_empty(row) else None
+    if parking:
+        fields["parking_info"] = parking
     return fields, None if fields else "empty"
 
 
 def run_kakao_detail_backfill(apply=False, log=print, backup_dir=None, limit=None):
-    """수집기 13단계. 하루 limit회(기본 DAILY_CAP)까지 패널을 1초 간격으로 읽어 빈 영업시간과 정기 휴무와 가격대를 채운다.
+    """수집기 13단계. 하루 limit회(기본 DAILY_CAP)까지 패널을 1초 간격으로 읽어 빈 영업시간과 정기 휴무와 가격대와 주차를 채운다.
     쓰기 전에 그 회차의 대상 행을 p226_<시각>.json으로(가격 칸이 모두 빈 행은 p300_<시각>.json으로도) 백업하고, 그 백업이 그날의 실행 표시라 재기동해도 하루 한 번만 돈다.
     드라이런은 DB에 쓰지 않고 계획만 p226_<시각>_dry.json으로 남긴다."""
     limit = limit or DAILY_CAP
@@ -165,7 +205,7 @@ def run_kakao_detail_backfill(apply=False, log=print, backup_dir=None, limit=Non
 
     cond = {"is_closed": "eq.false", "source->>type": "neq.tourapi"}
     last = load_json(STATE, {}).get("last_id", 0)
-    q = urllib.parse.urlencode({"select": "id,name,address,category,business_hours,closed_days,provider_ids,price,price_tier,avg_price_per_person,updated_at", **cond,
+    q = urllib.parse.urlencode({"select": "id,name,address,category,business_hours,closed_days,parking_info,provider_ids,price,price_tier,avg_price_per_person,updated_at", **cond,
                                 "provider_ids->>kakao": "not.is.null", "business_hours": "eq.{}", "id": f"gt.{last}",
                                 "order": "id.asc", "limit": limit})
     todo = _request(f"{base_url}/rest/v1/spots?{q}", headers) or []
@@ -173,7 +213,7 @@ def run_kakao_detail_backfill(apply=False, log=print, backup_dir=None, limit=Non
     if apply and todo:
         os.makedirs(backup_dir, exist_ok=True)
         with open_new(os.path.join(backup_dir, f"p226_{stamp}.json")) as fp:
-            json.dump([{k: r.get(k) for k in ("id", "name", "business_hours", "closed_days", "updated_at")} for r in todo],
+            json.dump([{k: r.get(k) for k in ("id", "name", "business_hours", "closed_days", "parking_info", "updated_at")} for r in todo],
                       fp, ensure_ascii=False, indent=2)
         log(f"백업: {fp.name}")
         priced = [r for r in todo if price_empty(r)]
@@ -210,7 +250,8 @@ def run_kakao_detail_backfill(apply=False, log=print, backup_dir=None, limit=Non
     hours_n = sum(1 for _, f in plans if f.get("business_hours"))
     closed_n = sum(1 for _, f in plans if f.get("closed_days"))
     tier_n = sum(1 for _, f in plans if f.get("price_tier"))
-    log(f"카카오 영업시간 백필: 대상 {len(todo)}행 · 패널 호출 {calls}회 · 쓸 행 {len(plans)}(영업시간 {hours_n}, 정기 휴무 {closed_n}, 가격대 {tier_n}) · "
+    parking_n = sum(1 for _, f in plans if f.get("parking_info"))
+    log(f"카카오 영업시간 백필: 대상 {len(todo)}행 · 패널 호출 {calls}회 · 쓸 행 {len(plans)}(영업시간 {hours_n}, 정기 휴무 {closed_n}, 가격대 {tier_n}, 주차 {parking_n}) · "
         f"건너뜀 {skipped}")
     if not apply:
         os.makedirs(backup_dir, exist_ok=True)
@@ -221,6 +262,12 @@ def run_kakao_detail_backfill(apply=False, log=print, backup_dir=None, limit=Non
             log(f"  {r['id']} {r['name']} | {f}")
         log(f"드라이런: DB에 쓰지 않았다. 계획: {fp.name}. 실제 반영은 --apply")
         return 0
+    written = [{"id": r["id"], "parking_info": f["parking_info"]} for r, f in plans if f.get("parking_info")]
+    if written:
+        # PATCH 전에 남겨 중간에 멈춰도 되돌릴 목록이 있다. 되돌림은 현재 값이 이 값과 같은 id만 백업의 옛 값으로 되돌린다
+        with open_new(os.path.join(backup_dir, f"p332_written_{stamp}.json")) as fp:
+            json.dump(written, fp, ensure_ascii=False, indent=2)
+        log(f"기록: {fp.name}")
     now = datetime.now(timezone.utc).isoformat()
     for r, fields in plans:
         q = urllib.parse.urlencode({"id": f"eq.{r['id']}", **cond, "updated_at": f"eq.{r['updated_at']}"})

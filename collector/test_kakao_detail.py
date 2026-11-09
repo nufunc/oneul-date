@@ -149,9 +149,23 @@ def test_runs_once_a_day_and_backs_up_before_writing():
     _run({"1": P_ALL}, backup_dir=d)
     [name] = os.listdir(d)  # 카테고리가 없는 행은 가격 백업(p300) 대상이 아니다
     assert name.startswith("p226_") and not name.endswith("_dry.json")
-    assert json.load(open(os.path.join(d, name))) == [{"id": 1, "name": "장소1", "business_hours": {}, "closed_days": [], "updated_at": "t"}]
+    assert json.load(open(os.path.join(d, name))) == [{"id": 1, "name": "장소1", "business_hours": {}, "closed_days": [], "parking_info": None, "updated_at": "t"}]
     patches, gets, calls, _ = _run({"1": P_ALL}, backup_dir=d)
     assert (patches, gets, calls) == ([], [], [])
+
+
+def test_parking_is_backed_up_recorded_and_written_only_to_empty_cells():
+    d = tempfile.mkdtemp()
+    p = {**P_ALL, "place_add_info": {"simple_parking_infos": {"texts": ["무료 주차"], "summary": ""}, "store_facility_icons": [{"text": "무료주차"}]}}
+    rows = [_row(1, parking_info={}), _row(2, parking_info={"type": "paid", "detail": "유료"})]
+    patches, _, _, _ = _run({"1": p, "2": p}, rows=rows, backup_dir=d)
+    free = {"type": "free", "detail": "무료 주차"}
+    assert [(u, b.get("parking_info")) for u, b in patches] == [(patches[0][0], free), (patches[1][0], None)]
+    names = sorted(os.listdir(d))
+    assert len(names) == 2
+    backup = json.load(open(os.path.join(d, next(n for n in names if n.startswith("p226_")))))
+    assert [r["parking_info"] for r in backup] == [{}, {"type": "paid", "detail": "유료"}]
+    assert json.load(open(os.path.join(d, next(n for n in names if n.startswith("p332_written_"))))) == [{"id": 1, "parking_info": free}]
 
 
 def test_dry_run_writes_nothing_to_db():
