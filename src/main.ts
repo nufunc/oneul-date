@@ -3047,8 +3047,35 @@ function getTodayDayOfWeek(date = new Date()): (typeof KOREAN_DAY_NAMES)[number]
 /** 요일 7개가 모두 든 closed_days는 휴업이 아니라 수집 오류다(충현박물관). 정기휴무로 보지 않는다 */
 function regularClosedDays(spot: Spot): string[] {
   const days = Array.isArray(spot.closed_days) ? spot.closed_days : [];
+  if (days.length === 0) return closedDaysFromHours(spot);
   const covered = KOREAN_DAY_NAMES.filter((d) => days.some((t) => typeof t === 'string' && t.startsWith(d)));
   return covered.length === KOREAN_DAY_NAMES.length ? [] : days;
+}
+
+/**
+ * closed_days가 빈 행은 영업시간이 `화 11:00 ~ 21:00 / 수 ...`처럼 요일마다 적혀 있고 요일이 빠졌으면 그 요일을 정기휴무로 본다(P-338).
+ * 모든 구간이 `요일 HH:MM`으로 시작하는 문자열만 대상이다. `평일/주말`, `월~금` 형식은 건드리지 않는다.
+ * 카카오 패널이 그 주에만 쉬는 요일도 빠뜨리므로 오탐이 약 2~10%다(제안 원장 P-338). 오탐이 문제가 되면 이 규칙을 걷어낸다.
+ * 문자열마다 한 번만 분석한다(getCandidates가 모든 열린 행에 부른다)
+ */
+const hoursClosedDaysCache = new Map<string, string[]>();
+function closedDaysFromHours(spot: Spot): string[] {
+  const bh = spot.business_hours;
+  const hours = bh && typeof bh === 'object' ? bh['영업시간'] || bh['이용시간'] : '';
+  if (typeof hours !== 'string' || !hours) return [];
+  let result = hoursClosedDaysCache.get(hours);
+  if (!result) {
+    const present = new Set<string>();
+    const dayStart = /^([월화수목금토일])\s*\d{1,2}:\d{2}/;
+    const allDayParts = hours.split('/').every((p) => {
+      const m = dayStart.exec(p.trim());
+      if (m) present.add(m[1]);
+      return !!m;
+    });
+    result = allDayParts ? KOREAN_DAY_NAMES.filter((d) => !present.has(d)).map((d) => `${d}요일`) : [];
+    hoursClosedDaysCache.set(hours, result);
+  }
+  return result;
 }
 
 /** 스팟이 오늘 정기휴무인지 판별 (현장 헛걸음 방지) */
