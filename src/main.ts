@@ -4539,7 +4539,8 @@ function getKakaomapUrl(spot: Spot): string {
   // 장소 id 링크만 그대로 둔다. 이름 검색어 링크는 결과 없음이나 다른 지역 가게가 열려 좌표 핀 링크로 바꾼다(P-339)
   if (kakao && !kakao.includes('/link/search/')) return kakao;
   if (typeof spot.lat === 'number' && typeof spot.lng === 'number') {
-    return `https://map.kakao.com/link/map/${encodeURIComponent(spot.name)},${spot.lat},${spot.lng}`;
+    // 쉼표(%2C)와 슬래시(%2F)는 인코딩해도 카카오가 구분자로 읽어 핀 없이 첫 화면이나 404로 보내므로 공백으로 바꾼다
+    return `https://map.kakao.com/link/map/${encodeURIComponent(spot.name.replace(/[,/]/g, ' '))},${spot.lat},${spot.lng}`;
   }
   if (kakao) return kakao;
   return `https://map.kakao.com/link/search/${encodeURIComponent(mapQuery(spot))}`;

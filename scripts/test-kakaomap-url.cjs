@@ -16,8 +16,9 @@ const CASES = [
   ['id 있음 + 좌표 있음: id 링크 유지', { name: '가게', lat: 37.5, lng: 127.1, social_links: { kakaomap: { url: ID } } }, ID],
   ['id 없음(검색어 저장) + 좌표 있음: 좌표 핀 링크', { name: '뜰아래석등', lat: 37.55, lng: 127.02, social_links: { kakaomap: { url: SEARCH('뜰아래석등') } } }, `https://map.kakao.com/link/map/${encodeURIComponent('뜰아래석등')},37.55,127.02`],
   ['저장값 없음 + 좌표 있음: 좌표 핀 링크', { name: '테라스룸 청담', lat: 37.52, lng: 127.05 }, `https://map.kakao.com/link/map/${encodeURIComponent('테라스룸 청담')},37.52,127.05`],
-  ['쉼표 든 이름: 쉼표는 %2C', { name: '카페, 하루', lat: 37.5, lng: 127 }, 'https://map.kakao.com/link/map/%EC%B9%B4%ED%8E%98%2C%20%ED%95%98%EB%A3%A8,37.5,127'],
-  ['슬래시 든 이름: 슬래시는 %2F', { name: 'A/B', lat: 37.5, lng: 127 }, 'https://map.kakao.com/link/map/A%2FB,37.5,127'],
+  ['쉼표 든 이름: 쉼표는 공백(%2C는 라이브에서 핀 없이 첫 화면으로 감)', { name: '한옥,만월 프리미엄스테이', lat: 35.8, lng: 128.5 }, `https://map.kakao.com/link/map/${encodeURIComponent('한옥 만월 프리미엄스테이')},35.8,128.5`],
+  ['쉼표와 공백 든 이름', { name: 'WELLNESS, the HANNAM', lat: 37.5, lng: 127 }, 'https://map.kakao.com/link/map/WELLNESS%20%20the%20HANNAM,37.5,127'],
+  ['슬래시 든 이름: 슬래시는 공백(%2F는 라이브에서 404)', { name: 'A/B', lat: 37.5, lng: 127 }, 'https://map.kakao.com/link/map/A%20B,37.5,127'],
   ['id 없음 + 좌표 없음 + 저장값 있음: 저장값 유지', { name: '가게', social_links: { kakaomap: { url: SEARCH('가게') } } }, SEARCH('가게')],
   ['둘 다 없음: 검색어 링크', { name: '가게' }, SEARCH('가게')],
 ];
