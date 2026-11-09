@@ -1179,6 +1179,18 @@ function pickNearRandom(
   return pickRandom(pool, rng);
 }
 
+/**
+ * 종목 중복 방지 거름. 앵커 5km(pickNearRandom의 가장 먼 근접 반경) 안에 다른 종목이 없고 같은 종목만 있으면 거르지 않는다.
+ * 거르면 5km 밖의 다른 종목이 뽑혀 이동 구간이 10km를 넘었다(P-335). 앵커 좌표가 없으면 종전대로 거른다
+ */
+function diversifyByGenre(candidates: Spot[], takenGenres: Set<SpotGenre>, anchor: Spot | null | undefined): Spot[] {
+  const diverse = candidates.filter((s) => !takenGenres.has(getSpotGenre(s)));
+  if (diverse.length === 0) return candidates;
+  if (!anchor || anchor.lat == null || anchor.lng == null) return diverse;
+  const within5km = (s: Spot) => s.lat != null && s.lng != null && getDistanceKm(anchor.lat!, anchor.lng!, s.lat!, s.lng!) <= 5.0;
+  return diverse.some(within5km) || !candidates.some(within5km) ? diverse : candidates;
+}
+
 /** 스텝 목록에서 excludeIndex를 제외한 스폿 중 가장 대표적인 앵커 스폿 반환 */
 function dominantAnchorSpot(
   steps: CourseStep[],
@@ -2110,8 +2122,7 @@ function generateCourse(
     const slotCandidates = nearStays.length > 0 ? nearStays : candidates;
 
     // 종목 중복 방지: 이미 선택된 차수와 동일한 장르(카페-카페, 식사-식사, 바-바) 배제
-    const diverseCandidates = slotCandidates.filter((s) => !pickedGenres.has(getSpotGenre(s)));
-    const finalCandidates = diverseCandidates.length > 0 ? diverseCandidates : slotCandidates;
+    const finalCandidates = diversifyByGenre(slotCandidates, pickedGenres, anchorSpot);
 
     // 숙박 외 칸도 앵커 STAY_ZONE_FALLBACK_RADIUS_KM 안을 먼저 쓴다. 근접 단계 마지막이 거리 상한 없이 골라 '담양힐링파크' 밤 칸이
     // 61.8km 떨어진 순천만 천문대가 됐다. 반경 안이 없으면 최근 노출 이력을 무시하고, 그래도 없으면 검색어에서 얻은 세부 동네를 풀어
@@ -2129,8 +2140,7 @@ function generateCourse(
       const near = nearAnchor(
         filterByBudget(filterByMoodPreset(getCandidates(all, slot, regionKeys, moodKey, picked, zones, geoAnchor, isIndoor), moodPreset), budgetFilter),
       );
-      const diverse = near.filter((s) => !pickedGenres.has(getSpotGenre(s)));
-      return diverse.length > 0 ? diverse : near;
+      return diversifyByGenre(near, pickedGenres, anchorSpot);
     };
     let nearPool: Spot[] = [];
     if (slot !== 'stay') {
@@ -5559,8 +5569,7 @@ function swapStep(index: number, refocus = false): void {
       if (otherSpot) otherGenres.add(getSpotGenre(otherSpot));
     }
   });
-  const diverseCandidates = candidates.filter((s) => !otherGenres.has(getSpotGenre(s)));
-  const finalCandidates = diverseCandidates.length > 0 ? diverseCandidates : candidates;
+  const finalCandidates = diversifyByGenre(candidates, otherGenres, anchor);
   const chosen = pickNearRandom(finalCandidates, anchor);
   if (!chosen) {
     showToast(

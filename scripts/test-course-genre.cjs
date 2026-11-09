@@ -17,7 +17,7 @@ for (const st of sf.statements) {
   else if (ts.isVariableStatement(st)) st.declarationList.declarations.forEach((d) => ts.isIdentifier(d.name) && decls.set(d.name.text, st));
 }
 const need = new Set();
-const queue = ['generateCourse', 'getSpotGenre'];
+const queue = ['generateCourse', 'getSpotGenre', 'diversifyByGenre'];
 while (queue.length) {
   const name = queue.pop();
   if (need.has(name)) continue;
@@ -35,9 +35,9 @@ const code = [...new Set([...need].map((n) => decls.get(n)))]
 
 const { stations } = JSON.parse(fs.readFileSync(path.join(root, 'public', 'data', 'stations.json'), 'utf8'));
 const rawSpots = JSON.parse(fs.readFileSync(path.join(root, 'public', 'data', 'spots.json'), 'utf8'));
-const { generateCourse, getSpotGenre, setStations } = new Function(
+const { generateCourse, getSpotGenre, diversifyByGenre, getDistanceKm, setStations } = new Function(
   'rawSpotsData',
-  `${ts.transpile(code, { target: 'es2022' })};return { generateCourse, getSpotGenre, setStations: (s) => { stationCoords = s; } };`,
+  `${ts.transpile(code, { target: 'es2022' })};return { generateCourse, getSpotGenre, diversifyByGenre, getDistanceKm, setStations: (s) => { stationCoords = s; } };`,
 )(rawSpots);
 setStations(stations);
 
@@ -67,9 +67,24 @@ for (const s of open) {
 }
 assert.ok(['CAFE', 'MEAL', 'BAR', 'ACTIVITY'].every((g) => genres[g] > 100), `종목 분포가 갈리지 않는다 ${JSON.stringify(genres)}`);
 
-// (c) 서울·경기·전국 낮저녁밤 코스 150개: 이웃한 두 칸이 같은 종목인 코스는 2% 이하다(수정 전 14%, 수정 뒤 모의 0.25%)
+// (b2) 종목 거름은 앵커 5km 안에 다른 종목이 있을 때만 건다: 없으면 먼 다른 종목 대신 가까운 같은 종목을 남긴다(P-335)
+const at = (name, category, km) => ({ ...base, id: Math.round(km * 10) + name.length, name, category, slot: 'day', lat: 37.5 + km / 111, lng: 127 });
+const anchor = at('앵커식당', '한식', 0);
+const nearMeal = [at('가나식당', '한식', 1), at('다라식당', '한식', 2)];
+const farCafe = at('마바카페', '카페', 15);
+const nearCafe = at('사아카페', '카페', 3);
+const taken = new Set(['MEAL']);
+assert.deepStrictEqual(diversifyByGenre([...nearMeal, farCafe], taken, anchor), [...nearMeal, farCafe], '5km 안에 다른 종목이 없는데 먼 다른 종목만 남겼다');
+assert.deepStrictEqual(diversifyByGenre([...nearMeal, nearCafe], taken, anchor), [nearCafe], '5km 안에 다른 종목이 있는데 거르지 않았다');
+assert.deepStrictEqual(diversifyByGenre([farCafe], taken, anchor), [farCafe], '5km 안에 후보가 없으면 종전대로 거른 결과여야 한다');
+assert.deepStrictEqual(diversifyByGenre([...nearMeal, farCafe], taken, null), [farCafe], '앵커가 없으면 종전대로 거른다');
+assert.deepStrictEqual(diversifyByGenre(nearMeal, taken, anchor), nearMeal, '같은 종목뿐이면 그대로 둔다');
+
+// (c) 서울·경기·전국 낮저녁밤 코스 150개: 이웃한 두 칸이 같은 종목인 코스는 4% 이하다(수정 전 14%, 400코스 모의 1.3%)
 let courses = 0;
 let adjacent = 0;
+let legs = 0;
+let far = 0;
 for (const regions of [['SEOUL'], ['GYEONGGI'], []]) {
   for (let seed = 1; seed <= 50; seed++) {
     const steps = generateCourse(open, [...SLOTS], regions, 'ALL', { rng: mulberry(seed) });
@@ -77,9 +92,18 @@ for (const regions of [['SEOUL'], ['GYEONGGI'], []]) {
     assert.ok(gs.every((g) => g !== 'STAY'), '코스에 STAY 장소가 들었다');
     courses++;
     if (gs.some((g, i) => i > 0 && g === gs[i - 1])) adjacent++;
+    const ps = steps.filter((st) => st.spotId != null).map((st) => byId.get(st.spotId));
+    ps.forEach((p, i) => {
+      if (i === 0 || p.lat == null || ps[i - 1].lat == null) return;
+      legs++;
+      if (getDistanceKm(ps[i - 1].lat, ps[i - 1].lng, p.lat, p.lng) > 10) far++;
+    });
   }
 }
 assert.strictEqual(courses, 150);
-assert.ok(adjacent / courses <= 0.02, `이웃 칸이 같은 종목인 코스 ${adjacent}/${courses}(${((adjacent / courses) * 100).toFixed(1)}%)가 2%를 넘었다`);
+assert.ok(adjacent / courses <= 0.04, `이웃 칸이 같은 종목인 코스 ${adjacent}/${courses}(${((adjacent / courses) * 100).toFixed(1)}%)가 4%를 넘었다`);
 
-console.log(`test-course-genre: ok (이웃 같은 종목 ${adjacent}/${courses})`);
+// (d) 같은 150코스에서 이동 구간이 10km를 넘는 비율은 5% 이하다(종목 거름이 먼 후보를 고르던 때 7%)
+assert.ok(legs > 200 && far / legs <= 0.05, `10km 초과 구간 ${far}/${legs}(${((far / legs) * 100).toFixed(1)}%)가 5%를 넘었다`);
+
+console.log(`test-course-genre: ok (이웃 같은 종목 ${adjacent}/${courses}, 10km 초과 구간 ${far}/${legs})`);
