@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """카카오 장소 패널로 TourAPI 밖 열린 행의 영업시간(business_hours)과 정기 휴무(closed_days)를 채운다(P-226, 수집기 13단계).
-같은 응답의 메뉴 가격으로 양 끝 가격대(price_tier)도 채우고(P-300), 같은 응답의 place_add_info로 주차(parking_info)도 채운다(P-332).
+같은 응답의 메뉴 가격과 가격 기호로 가격대(price_tier)도 채우고(P-300, P-333), 같은 응답의 place_add_info로 주차(parking_info)도 채운다(P-332).
 기본은 드라이런, --apply일 때만 쓴다.
 
 - 대상: 열림, source.type이 tourapi가 아님, provider_ids.kakao 있음, business_hours가 빈 행. id 오름차순으로 커서 뒤부터 본다.
@@ -8,12 +8,14 @@
 - closed_days: open_hours.headline_addition.current_off_day_desc가 '매주 ~ 휴무'일 때 parse_closed_days로 읽은 요일.
 - 쓰지 않는 행: 응답 실패(404 포함), summary.status가 Y가 아님, 영업시간 안내에 '임시 휴업', 패널과 DB 주소의 도로명이 다르거나
   어느 한쪽에 도로명이 없음. 읽을 때 빈 칸만 쓰고, 읽은 updated_at이 그대로인 행에만 쓴다.
-- price_tier(P-300, P-322): 식음료(category가 DINING)이고 육류·횟집·주점(NO_PRICE_TIER)이 아니며 price_tier·avg_price_per_person·price가 모두 빈 행만,
-  패널 메뉴 가격(0 이하와 '변동가격' -1 제외)이 3개 이상이고 패널 이름이 DB 이름과 같거나 포함 관계일 때 평균이 15,000원 미만이면 ₩만 쓴다.
-  15,000원 이상은 비운다: 고가(₩₩₩ 이상)는 와인 병과 2인 이상 접시가 평균을 올려 표본 오탐이 33%라 쓰지 않고(P-322),
+- price_tier(P-300, P-322, P-333): 식음료(category가 DINING)이고 육류·횟집·주점(NO_PRICE_TIER)이 아니며 price_tier·avg_price_per_person·price가 모두 빈 행만,
+  패널 이름이 DB 이름과 같거나 포함 관계일 때 쓴다. 같은 응답의 가격 기호 ai_mate.price_level.symbol이 있으면(P-333) ₩·₩₩→₩, ₩₩₩→₩₩, ₩₩₩₩₩→₩₩₩₩로 읽고
+  ₩₩₩₩는 비운다. 메뉴 가격(0 이하와 '변동가격' -1 제외)이 3개 이상이면 메뉴 평균 등급이 기호 등급과 같을 때만 쓰고 3개 미만이면 기호 등급을 쓴다.
+  기호가 없으면 메뉴 가격이 3개 이상이고 평균이 15,000원 미만일 때 ₩만 쓴다(P-300).
+  기호 없는 행의 15,000원 이상은 비운다: 고가(₩₩₩ 이상)는 와인 병과 2인 이상 접시가 평균을 올려 표본 오탐이 33%라 쓰지 않고(P-322),
   육류·횟집·주점은 술 잔수와 인분 표기 때문에 패널 가격으로 1인 가격을 정할 수 없어 비운다.
   앱이 avg_price_per_person을 '1인 약 N원'으로 보이고 메뉴 평균은 1인 가격이 아니라서 avg_price_per_person과 price 문구는 쓰지 않는다.
-  가격 칸을 비우는 것은 영업시간과 정기 휴무 대상 선정에 영향을 주지 않는다. 백업은 p300_<시각>.json.
+  가격 칸을 비우는 것은 영업시간과 정기 휴무 대상 선정에 영향을 주지 않는다. 백업은 p300_<시각>.json이고 쓴 값은 p333_written_<시각>.json(id, 새 값)에 남는다.
 - parking_info(P-332): 읽을 때 빈 칸(null, {}, type 없음 또는 unknown)인 행만 쓴다. parking_from_panel이 simple_parking_infos 텍스트와
   store_facility_icons를 본다. 추가 패널 호출은 없다. is_parking 단독은 쓰지 않는다(DB가 확인한 available인 곳이 False로 올 수 있다).
   백업은 p226_<시각>.json의 parking_info 열이고 쓴 값은 p332_written_<시각>.json(id, 새 값)에 남는다.
@@ -57,6 +59,9 @@ PARKING_FREE_CONDITION = re.compile(r"\d+시간|\d+분|결제|정산|영수증|�
 # src/main.ts DINING_CATEGORY_RE와 같은 식음료 범위. P-300 표본이 식음료뿐이라 펜션·박물관·공원의 메뉴 가격은 읽지 않는다. 앱이 바꾸면 여기도 바꾼다
 DINING = re.compile(r"카페|커피|양식|한식|이탈리안|제과|베이커리|디저트|호프|요리주점|육류|고기|주점|일식|칵테일바|와인바|술집|해물|생선|분식|회$|국수|피자|한정식|포장마차|칼국수|중국요리|돈까스|우동|찻집|맥주")
 TIER_LOW_BELOW = 15000  # 이상은 비운다. 가운데는 한 단계 안 오차가 잦고(표본 평균 일치 47%) 고가는 표본 오탐이 33%다(P-322)
+# 패널 가격 기호(P-333)는 DB 등급(15k, 30k, 50k 경계)보다 한 단계 높게 매겨져 한 단계 낮춰 쓴다. ₩₩₩₩는 표본 오탐 위험이 P-322와 같은 종류라 비운다
+PRICE_SYMBOL_TIER = {"₩": "₩", "₩₩": "₩", "₩₩₩": "₩₩", "₩₩₩₩₩": "₩₩₩₩"}
+PRICE_SYMBOL_SKIPPED = "₩₩₩₩"
 # 가격대를 쓰지 않는 육류·횟집·주점. 술 잔수와 인분 표기 때문에 패널 가격으로 1인 가격을 정할 수 없다(P-322 표본 11행 중 정탐 0)
 NO_PRICE_TIER = re.compile(r"육류|고기|회$|술집|칵테일바|호프|요리주점|포장마차|주점")
 
@@ -113,17 +118,23 @@ def price_empty(row):
     return not (row.get("price_tier") or row.get("avg_price_per_person") or row.get("price")) and bool(DINING.search(category)) and not NO_PRICE_TIER.search(category)
 
 
-def menu_price_tier(panel, row):
-    """패널 메뉴 가격 평균의 낮은 가격대(₩). 이름이 다르거나 가격이 3개 미만이거나 평균이 15,000원 이상이면 None."""
+def price_tier_from_panel(panel, row):
+    """패널 → price_tier(P-300, P-333). 패널 이름이 DB 이름과 다르면 None.
+    기호(ai_mate.price_level.symbol)가 ₩₩₩₩이면 None, 매핑되는 기호면 메뉴 가격이 3개 이상일 때 평균 등급이 기호 등급과 같을 때만 그 등급, 3개 미만이면 기호 등급이다.
+    기호가 없거나 모르는 값이면 메뉴 평균이 15,000원 미만일 때만 ₩다(메뉴 가격이 3개 미만이면 None)."""
     a, b = _name_key((panel.get("summary") or {}).get("name")), _name_key(row.get("name"))
     if not a or not b or not (a in b or b in a):
         return None
     items = ((panel.get("menu") or {}).get("menus") or {}).get("items") or []
     prices = [i["price"] for i in items if type(i.get("price")) is int and i["price"] > 0]
-    if len(prices) < MENU_MIN_PRICES:
+    mean = sum(prices) / len(prices) if len(prices) >= MENU_MIN_PRICES else None
+    symbol = (((panel.get("ai_mate") or {}).get("price_level") or {}).get("symbol") or "").strip()
+    if symbol == PRICE_SYMBOL_SKIPPED:
         return None
-    mean = sum(prices) / len(prices)
-    return price_tier_from_avg(mean) if mean < TIER_LOW_BELOW else None
+    tier = PRICE_SYMBOL_TIER.get(symbol)
+    if tier:
+        return tier if mean is None or price_tier_from_avg(mean) == tier else None
+    return price_tier_from_avg(mean) if mean is not None and mean < TIER_LOW_BELOW else None
 
 
 def parking_empty(row):
@@ -173,7 +184,7 @@ def panel_fields(panel, row):
     closed = parse_closed_days(off) if off.startswith("매주") and not row.get("closed_days") else []
     if closed:
         fields["closed_days"] = closed
-    tier = menu_price_tier(panel, row) if price_empty(row) else None
+    tier = price_tier_from_panel(panel, row) if price_empty(row) else None
     if tier:
         fields["price_tier"] = tier
     parking = parking_from_panel(panel) if parking_empty(row) else None
@@ -266,6 +277,11 @@ def run_kakao_detail_backfill(apply=False, log=print, backup_dir=None, limit=Non
     if written:
         # PATCH 전에 남겨 중간에 멈춰도 되돌릴 목록이 있다. 되돌림은 현재 값이 이 값과 같은 id만 백업의 옛 값으로 되돌린다
         with open_new(os.path.join(backup_dir, f"p332_written_{stamp}.json")) as fp:
+            json.dump(written, fp, ensure_ascii=False, indent=2)
+        log(f"기록: {fp.name}")
+    written = [{"id": r["id"], "price_tier": f["price_tier"]} for r, f in plans if f.get("price_tier")]
+    if written:
+        with open_new(os.path.join(backup_dir, f"p333_written_{stamp}.json")) as fp:
             json.dump(written, fp, ensure_ascii=False, indent=2)
         log(f"기록: {fp.name}")
     now = datetime.now(timezone.utc).isoformat()
