@@ -48,4 +48,13 @@ const ulju = spot('울주 식당', '울산 울주군 상북면 1', 35.5650, 129.
 const yangsan = spot('양산 식당', '경남 양산시 물금읍 1', 35.3100, 129.0100);
 assert.strictEqual(pickNearRandom([yangsan, ulju], ulsanBukgu, first, scope), ulju, '지역어 검색 폴백은 검색 지역 안을 고른다');
 assert.strictEqual(pickNearRandom([yangsan], ulsanBukgu, first, scope), yangsan, '검색 지역 안 후보가 없으면 종전 폴백을 쓴다');
+// 1순위 반경은 1.5km, 3km, 5km 순으로 보며 후보 10곳 이상인 첫 반경이다(10곳 미만이면 5km)
+const hub = spot('앵커', '서울 마포구 합정동 1', 37.5, 127.0, '수도권');
+const ring = (n, km, tag) => Array.from({ length: n }, (_, i) => spot(`${tag}${i}`, '서울 마포구 합정동 1', 37.5 + (km / 111) * (1 + i * 0.001), 127.0, '수도권'));
+const picks = (cands) => [0, 0.5, 0.999].map((r) => pickNearRandom(cands, hub, () => r));
+const dist = (s) => Math.abs(s.lat - 37.5) * 111;
+assert.ok(picks([...ring(12, 1, 'a'), ...ring(20, 2.5, 'b'), ...ring(30, 4.5, 'c')]).every((s) => dist(s) <= 1.5), '1.5km 안 후보가 10곳 이상이면 1.5km 안에서 고른다');
+assert.ok(picks([...ring(5, 1, 'a'), ...ring(8, 2.5, 'b'), ...ring(30, 4.5, 'c')]).every((s) => dist(s) <= 3), '1.5km 안 후보가 10곳 미만이고 3km 안이 10곳 이상이면 3km 안에서 고른다');
+assert.ok(picks([...ring(3, 1, 'a'), ...ring(3, 2.5, 'b'), ...ring(20, 4.5, 'c')]).some((s) => dist(s) > 3), '3km 안 후보가 10곳 미만이면 5km 안에서 고른다');
+assert.ok(picks([...ring(3, 1, 'a'), ...ring(5, 6, 'b')]).every((s) => dist(s) <= 1.5), '5km 안 후보가 10곳 미만이어도 5km 안이 비지 않으면 그 안에서 고른다');
 console.log('test-region-scope: 모두 통과');

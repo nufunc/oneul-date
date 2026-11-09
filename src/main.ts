@@ -1112,7 +1112,7 @@ function spotSido(spot: Spot): string {
 
 /**
  * 앵커 스폿 기준 스마트 근접 랜덤 선택 (물리적 거리 + 동일 자치구 클러스터링).
- * 1순위: 앵커와 물리적 거리 5km 이내 초근접 스폿 (실제 데이트 도보/대중교통 최적 동선)
+ * 1순위: 앵커와 물리적 거리 1.5km, 3km, 5km 순으로 후보 10곳 이상인 첫 반경 안 스폿 (걸어서 이어지는 동선), 10곳 미만이면 5km
  * 2순위: 앵커와 동일 자치구/행정구역 스폿 (예: 둘 다 영등포구, 마포구, 성동구 등)
  * 3순위: 앵커와 물리적 거리 10km 이내 인접 생활권 스폿
  * 4순위: 전체 조건 통과 후보 폴백 (지역어 검색이면 검색 지역 안을 먼저 본다)
@@ -1127,13 +1127,15 @@ function pickNearRandom(
     return pickRandom(candidates, rng);
   }
 
-  // 1순위: 위경도 반경 5km 이내 초근접
+  // 1순위: 위경도 반경 1.5km, 3km, 5km 순으로 보며 후보 10곳 이상인 첫 반경. 10곳 미만이면 5km 안에서 고른다
   if (anchor.lat != null && anchor.lng != null) {
-    const within5km = candidates.filter(
-      (s) => s.lat != null && s.lng != null && getDistanceKm(anchor.lat!, anchor.lng!, s.lat!, s.lng!) <= 5.0,
-    );
-    if (within5km.length > 0) {
-      return pickRandom(within5km, rng);
+    const dist = (s: Spot) =>
+      s.lat != null && s.lng != null ? getDistanceKm(anchor.lat!, anchor.lng!, s.lat!, s.lng!) : Infinity;
+    const within5km = candidates.filter((s) => dist(s) <= 5.0);
+    const near = [1.5, 3, 5].map((r) => within5km.filter((s) => dist(s) <= r)).find((c) => c.length >= 10);
+    const pool1 = near ?? within5km;
+    if (pool1.length > 0) {
+      return pickRandom(pool1, rng);
     }
   }
 
