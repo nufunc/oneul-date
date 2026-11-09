@@ -4764,8 +4764,11 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   gap: 6px;
   overflow-x: auto;
   scrollbar-width: none;
-  padding: 2px 2px 6px;
+  padding: 2px 20px 6px 2px;
   -webkit-overflow-scrolling: touch;
+  /* 오른쪽 20px를 흐려 줄이 더 있음을 보인다. 끝까지 스크롤하면 padding-right 20px 덕에 마지막 칩이 가림 밖에 놓인다 */
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 20px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 20px), transparent);
 }
 .quick-region-scroll::-webkit-scrollbar {
   display: none;
@@ -4774,7 +4777,9 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
 .quick-mood-row {
   flex-wrap: wrap;
   overflow: visible;
-  padding-top: 4px;
+  padding: 4px 2px 6px;
+  -webkit-mask-image: none;
+  mask-image: none;
   border-top: 1px dashed var(--color-border);
 }
 
