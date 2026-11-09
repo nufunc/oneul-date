@@ -10,7 +10,7 @@
     <script>
       (function() {
         try {
-          var mode = localStorage.getItem('oneul_theme_mode') || 'light';
+          var mode = localStorage.getItem('oneul_theme_mode') || 'auto';
           var isDark = mode === 'dark' || (mode === 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
           var resolved = isDark ? 'dark' : 'light';
           document.documentElement.setAttribute('data-theme', mode);
