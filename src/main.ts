@@ -2729,6 +2729,8 @@ const youtubeLinkLabel = (spot: Spot, yt?: { title?: string } | null): string =>
 const TOURAPI_TEMPLATE_SUMMARY = / — 한국관광공사 (인증|관광정보) .+ 명소 \(.+\)$/;
 // 블로그 수집기가 지역과 분류만 끼워 넣은 정형 요약('블로그 인기 추천 서울 강남구의 감성 순대'). 카드에 이미 보이는 정보의 되풀이이고 출처 주장은 근거가 없다(열린 1,771곳)
 const BLOG_TEMPLATE_SUMMARY = /^블로그 인기 추천 .+의 감성 .+$/;
+// 커뮤니티 수집기가 지역과 분류만 끼워 넣은 정형 요약('커뮤니티 추천 서울 마포구의 찐 로컬 카페'). 블로그 정형 요약과 같은 이유로 감춘다(열린 285곳, P-345)
+const COMMUNITY_TEMPLATE_SUMMARY = /^커뮤니티 추천 .+의 찐 로컬 .+$/;
 
 /**
  * 텍스트 복사 포맷 (시안 A: 모던 불릿 카드형 — Short URL & 표준 URL 인코딩 지원)
@@ -5179,7 +5181,8 @@ function cleanSpotSummary(spot: Spot): string {
   // TourAPI 수집기가 이름·분류·지역을 이어 붙인 폴백 문장('엠버리조트 — 한국관광공사 관광정보 숙박 명소 (제주시)')은 이미 화면에 있는
   // 정보만 되풀이한다(열린 2,425곳). 아래 인증 뱃지 문구로 바꾸면 갑천에도 '대표 데이트 명소'가 붙어 과장이라 빈 값을 돌려준다
   // 블로그 수집기 정형 요약('블로그 인기 추천 {지역}의 감성 {분류}')도 같은 이유로 빈 값을 돌려준다(P-328)
-  if (TOURAPI_TEMPLATE_SUMMARY.test(raw) || BLOG_TEMPLATE_SUMMARY.test(raw)) return '';
+  // 커뮤니티 수집기 정형 요약('커뮤니티 추천 {지역}의 찐 로컬 {분류}')도 같다(P-345)
+  if (TOURAPI_TEMPLATE_SUMMARY.test(raw) || BLOG_TEMPLATE_SUMMARY.test(raw) || COMMUNITY_TEMPLATE_SUMMARY.test(raw)) return '';
 
   // 비정상 케이스 판별 (영문 태그 나열, 스팟명과 동일, 너무 짧거나 무의미한 텍스트, 과거 단조로운 판박이 템플릿)
   const isBad =

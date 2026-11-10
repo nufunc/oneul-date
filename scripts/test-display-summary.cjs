@@ -15,7 +15,7 @@ const pick = (decl) => {
 const code = [
   'const DISALLOWED_YOUTUBE_KEYWORDS', 'const VERIFIED_YOUTUBE_CREATORS', 'function isValidYoutubeHotclip',
   'const YT_GENERIC_NAME_WORDS', 'const normalizeYoutubeMatchText', 'function youtubeTitleNamesSpot',
-  'const TOURAPI_TEMPLATE_SUMMARY', 'const BLOG_TEMPLATE_SUMMARY', 'const SUMMARY_TEMPLATE_MIN_REPEATS', 'let summaryTemplateCache',
+  'const TOURAPI_TEMPLATE_SUMMARY', 'const BLOG_TEMPLATE_SUMMARY', 'const COMMUNITY_TEMPLATE_SUMMARY', 'const SUMMARY_TEMPLATE_MIN_REPEATS', 'let summaryTemplateCache',
   'function summaryTemplateKey', 'function cardSpotSummary', 'function sheetRatingText', 'function cleanSpotSummary',
   'function buildFactSentence', 'function displaySpotSummary',
 ].map(pick).join('\n');
@@ -43,6 +43,10 @@ const CASES = [
   ['블로그 틀 + 4.4점 리뷰 1499', blogSpot('블로그 인기 추천 서울 강남구의 감성 순대', { rating: 4.4, review_count: 1499 }),
     { text: '서초구에서 카카오맵 평점 4.4점(리뷰 1,499개)을 받은 곳이에요.', isFact: true }, ''],
   ['블로그 틀 + 평점 없음', blogSpot('블로그 인기 추천 서울 강남구의 감성 순대', null), { text: '', isFact: false }, ''],
+  // 커뮤니티 수집기 정형 요약(P-345)
+  ['커뮤니티 틀 + 4.4점 리뷰 1499', blogSpot('커뮤니티 추천 서울 마포구의 찐 로컬 카페', { rating: 4.4, review_count: 1499 }),
+    { text: '서초구에서 카카오맵 평점 4.4점(리뷰 1,499개)을 받은 곳이에요.', isFact: true }, ''],
+  ['커뮤니티 틀 + 평점 없음', blogSpot('커뮤니티 추천 서울 마포구의 찐 로컬 카페', null), { text: '', isFact: false }, ''],
   ['블로그에서 소개된 문장 유지', blogSpot('블로그에서 소개된 강남구의 순대국밥 맛집이에요.', null),
     { text: '블로그에서 소개된 강남구의 순대국밥 맛집이에요.', isFact: false }, ''],
   ['블로그 인기 추천이 문장 중간에 든 요약 유지', blogSpot('주말마다 줄 서는 곳이라 블로그 인기 추천 목록에도 오르는 순대국밥집이에요.', null),
