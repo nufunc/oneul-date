@@ -51,22 +51,16 @@ if (posts.length <= COUNT) fail(`카드 ${posts.length}장만 읽었다(필요 $
 const unknown = posts.filter((p) => !p.region).map((p) => p.slug);
 if (unknown.length) console.warn(`build_blog_related: 권역을 정하지 못해 목록 앞뒤 글로만 채운 글 ${unknown.length}편 (${unknown.join(', ')})`);
 
+// P-347: 글의 Hallmark 토큰(종이색, 먹색, 본문 글꼴)을 따르고 글처럼 다크 전환을 하지 않는다. 토큰이 없는 글은 대체값을 쓴다
 const STYLE = `<style>
-.od-related{box-sizing:border-box;width:calc(100% - 32px);max-width:720px;margin:40px auto;padding:20px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;color:#1f2937;font:16px/1.5 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;text-align:left}
-.od-related h2{margin:0 0 8px;font-size:18px;line-height:1.4;font-weight:700;color:#111827}
+.od-related{box-sizing:border-box;width:calc(100% - 32px);max-width:var(--measure,720px);margin:40px auto;padding:20px;border:1px solid var(--color-rule,#e5e7eb);border-radius:var(--radius-card,12px);background:var(--color-paper-2,#fff);color:var(--color-ink,#1f2937);font:16px/1.5 var(--font-family,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif);text-align:left}
+.od-related h2{margin:0 0 8px;font-size:18px;line-height:1.4;font-weight:700;color:var(--color-ink,#111827);font-family:var(--font-display,inherit)}
 .od-related ul{list-style:none;margin:0;padding:0}
-.od-related li{margin:0;padding:0;border-top:1px solid #e5e7eb}
+.od-related li{margin:0;padding:0;border-top:1px solid var(--color-rule,#e5e7eb)}
 .od-related li:first-child{border-top:0}
-.od-related a{display:flex;align-items:center;min-height:44px;padding:10px 0;box-sizing:border-box;color:#1f2937;text-decoration:none;overflow-wrap:anywhere}
+.od-related a{display:flex;align-items:center;min-height:44px;padding:10px 0;box-sizing:border-box;color:var(--color-ink,#1f2937);text-decoration:none;overflow-wrap:anywhere}
 .od-related a:hover{text-decoration:underline}
-.od-related a.od-related-more{justify-content:flex-end;margin-top:4px;color:#be185d;font-weight:600}
-@media (prefers-color-scheme:dark){
-.od-related{background:#111827;border-color:#374151;color:#f3f4f6}
-.od-related h2{color:#f9fafb}
-.od-related li{border-top-color:#374151}
-.od-related a{color:#f3f4f6}
-.od-related a.od-related-more{color:#f9a8d4}
-}
+.od-related a.od-related-more{justify-content:flex-end;margin-top:4px;color:var(--color-accent-2,#be185d);font-weight:600}
 </style>`;
 
 // P-243: 남은 칸을 최신 글로 채우면 모든 글이 최신 글 한 편을 가리켜, 같은 권역도 남은 칸도 목록에서 자기와 가까운 글로 고른다.
