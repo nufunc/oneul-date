@@ -2068,7 +2068,11 @@ function generateCourse(
   }
 
   // 2. 검색어 매칭이 없거나 검색어가 비어있는 경우: 기존 앵커 로직(최소 후보 슬롯) 적용
+  // 숙박 외 칸의 후보 목록은 여기서 한 번만 만들어 아래 앵커 거름과 칸 채우기가 함께 쓴다(P-348)
+  const slotLists = new Map<SlotKey, Spot[]>();
+  let defaultAnchor = false;
   if (anchorSlot === null || anchorPool.length === 0) {
+    defaultAnchor = true;
     for (const slot of slotsOn) {
       const candidates = filterByBudget(
         filterByMoodPreset(
@@ -2077,6 +2081,7 @@ function generateCourse(
         ),
         budgetFilter,
       );
+      if (slot !== 'stay') slotLists.set(slot, candidates);
       if (candidates.length > 0 && (anchorSlot === null || candidates.length < anchorPool.length)) {
         anchorSlot = slot;
         anchorPool = candidates;
@@ -2086,8 +2091,23 @@ function generateCourse(
 
   // 키워드 검색 앵커는 앵커 칸 밖의 숙박 외 칸마다 STAY_ZONE_FALLBACK_RADIUS_KM 안 후보가 있는 곳만 쓴다. 그 칸 후보가 근처에 없는
   // 외진 숙소가 앵커가 되면 아래 반경 단계가 모두 비어 '글램핑' 밤 칸이 59.8km 떨어진 루프탑이 됐다. 남는 곳이 없으면 종전대로 뽑는다.
-  // 이름 일치 앵커와 지역·동네 검색은 거르지 않는다
-  if (keywordAnchor) {
+  // 이름 일치 앵커와 지역·동네 검색은 거르지 않는다.
+  // 기본 앵커(최소 후보 칸)도 같은 거름을 5km로 먼저 걸고, 남는 곳이 없으면 20km로 건다(P-348). 외진 밤 장소가 앵커가 되면
+  // 저녁 칸이 5km 안에 없어 15~20km 밖 장소로 채워져 이동 구간이 1시간을 넘었다
+  if (defaultAnchor) {
+    const nearLists = slotsOn
+      .filter((s) => s !== anchorSlot && slotLists.has(s))
+      .map((slot) => slotLists.get(slot)!.filter((s) => s.lat != null && s.lng != null));
+    for (const radius of [5.0, STAY_ZONE_FALLBACK_RADIUS_KM]) {
+      const feasible = anchorPool.filter(
+        (a) => a.lat != null && a.lng != null && nearLists.every((list) => list.some((s) => getDistanceKm(a.lat!, a.lng!, s.lat!, s.lng!) <= radius)),
+      );
+      if (feasible.length > 0) {
+        anchorPool = feasible;
+        break;
+      }
+    }
+  } else if (keywordAnchor) {
     const nearLists = slotsOn
       .filter((s) => s !== anchorSlot && s !== 'stay')
       .map((slot) =>
@@ -2126,16 +2146,18 @@ function generateCourse(
       anchorSpot && anchorSpot.lat != null && anchorSpot.lng != null
         ? anchorSpot
         : (pickedSpots.find((s) => s.lat != null && s.lng != null) ?? anchorSpot);
-    const candidates = filterByBudget(
-      filterByMoodPreset(
-        excludeRecent(
-          getCandidates(all, slot, regionKeys, moodKey, picked, zoneKeys, geoAnchor, isIndoor),
-          avoid,
+    const candidates =
+      slotLists.get(slot) ??
+      filterByBudget(
+        filterByMoodPreset(
+          excludeRecent(
+            getCandidates(all, slot, regionKeys, moodKey, picked, zoneKeys, geoAnchor, isIndoor),
+            avoid,
+          ),
+          moodPreset,
         ),
-        moodPreset,
-      ),
-      budgetFilter,
-    );
+        budgetFilter,
+      );
 
     // 앵커가 숙박 칸이 아닐 때 숙박 칸은 검색어에 맞는 숙소를 먼저 뽑는다. 검색어를 보지 않아 '캠핑' 검색의 숙박 칸이 호텔이 됐다.
     // 맞는 숙소가 하나도 없으면 종전대로 뽑고, 거리는 아래 pickNearRandom의 근접 순위(5km, 같은 구, 10km, 같은 권역 최단)를 따른다
