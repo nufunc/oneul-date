@@ -2730,30 +2730,6 @@ const TOURAPI_TEMPLATE_SUMMARY = / — 한국관광공사 (인증|관광정보) 
 // 블로그 수집기가 지역과 분류만 끼워 넣은 정형 요약('블로그 인기 추천 서울 강남구의 감성 순대'). 카드에 이미 보이는 정보의 되풀이이고 출처 주장은 근거가 없다(열린 1,771곳)
 const BLOG_TEMPLATE_SUMMARY = /^블로그 인기 추천 .+의 감성 .+$/;
 
-/** 복사 텍스트용 스팟 한 줄 소개 정제 (영문 날것 태그 방지 & 한국어 보강) */
-function getCleanSpotSummary(spot: Spot): string {
-  if (spot.summary && spot.summary.trim().length > 0) {
-    const raw = spot.summary.trim();
-    // 영문 키워드 나열(예: 'trendy, romantic', 'campnic') 형태인지, TourAPI 정형 요약인지 검사
-    if (!/^[a-zA-Z0-9,\s_-]+$/.test(raw) && !TOURAPI_TEMPLATE_SUMMARY.test(raw) && !BLOG_TEMPLATE_SUMMARY.test(raw)) {
-      return raw;
-    }
-  }
-  
-  // 한국어 카테고리 및 무드 태그로 자연스럽게 구성
-  const moods = moodTagLabels(spot);
-  if (spot.category && moods.length > 0) {
-    return `${moods.join(' · ')} 분위기의 감성 ${spot.category}`;
-  }
-  if (spot.category) {
-    return `분위기 좋은 감성 ${spot.category}`;
-  }
-  if (moods.length > 0) {
-    return `${moods.join(' · ')} 추천 데이트 스팟`;
-  }
-  return '에디터가 검증한 추천 데이트 명소';
-}
-
 /**
  * 텍스트 복사 포맷 (시안 A: 모던 불릿 카드형 — Short URL & 표준 URL 인코딩 지원)
  * 전각 공백을 제거하고 네이버 공식 naver.me 또는 초단축 Short URL로 깔끔하게 출력
@@ -2792,7 +2768,8 @@ async function formatCourseTextAsync(
 
     const lines: string[] = [];
     lines.push(`${i + 1}차 ${meta.emoji} ${spot.name}${catText}`);
-    const summary = getCleanSpotSummary(spot);
+    // 카드와 시트가 보이는 문장과 같게 한다(P-344)
+    const summary = displaySpotSummary(spot).text;
     if (summary) lines.push(`✨ ${summary}`);
     lines.push(`📍 ${spot.address || spot.location}`);
     lines.push(`🗺️ ${shortMapUrl}`);

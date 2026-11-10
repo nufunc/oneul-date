@@ -20,7 +20,7 @@ const stubs = {
   moodLabel: (m) => (m === 'ALL' ? '모든 분위기' : `분위기${m}`),
   SPOT_EXPLORE_CATEGORIES: [{ key: 'CAFE', emoji: '☕', label: '감성카페' }],
   naverMapUrl: (s) => `https://map.example/${s.id}`,
-  getCleanSpotSummary: () => '',
+  displaySpotSummary: () => ({ text: '', isFact: false }),
   getDistanceKm: () => 0.5,
   // 실제 buildShareUrl처럼 유효한 칩 키(CAFE)일 때만 ?t=를 싣는다
   buildShareUrl: (ids, key) => `https://share.example/${key === 'CAFE' ? '?t=CAFE' : ''}#c=${ids.join('.')}`,

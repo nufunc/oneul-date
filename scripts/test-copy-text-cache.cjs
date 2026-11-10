@@ -24,7 +24,7 @@ const stubs = {
   moodLabel: () => '감성',
   SPOT_EXPLORE_CATEGORIES: [],
   naverMapUrl: (s) => `https://map.example/${s.id}`,
-  getCleanSpotSummary: () => '',
+  displaySpotSummary: () => ({ text: '', isFact: false }),
   getDistanceKm: () => 0.5,
   buildShareUrl: (ids) => `https://share.example/${ids.join('-')}`,
   SLOT_META: { day: { emoji: '☀️' }, evening: { emoji: '🌆' } },
