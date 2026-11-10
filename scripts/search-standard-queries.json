@@ -1,0 +1,452 @@
+{
+ "_note": "앱 검색 표준 질의 셋(2026-11-10, product-reviewer-252). expectIds는 public/data/spots.json의 열린 행 id, expect는 그 파일의 주소·좌표로 판정하는 규칙. 역은 public/data/stations.json 1km.",
+ "queries": [
+  {
+   "type": "정확한 장소명",
+   "query": "매치스 성수",
+   "expectIds": [
+    1789876961103
+   ]
+  },
+  {
+   "type": "정확한 장소명",
+   "query": "드로우 에스프레소바",
+   "expectIds": [
+    1790481388613
+   ]
+  },
+  {
+   "type": "정확한 장소명",
+   "query": "내일은 니가쏴라",
+   "expectIds": [
+    1790486507595
+   ]
+  },
+  {
+   "type": "정확한 장소명",
+   "query": "스타필드 하남",
+   "expectIds": [
+    1790292415240
+   ]
+  },
+  {
+   "type": "정확한 장소명",
+   "query": "교보문고 광화문점",
+   "expectIds": [
+    1790489186006
+   ]
+  },
+  {
+   "type": "정확한 장소명",
+   "query": "담양힐링파크",
+   "expectIds": [
+    1790209625815
+   ]
+  },
+  {
+   "type": "정확한 장소명",
+   "query": "블루가든아카이브",
+   "expectIds": [
+    1791248274077
+   ]
+  },
+  {
+   "type": "띄어쓰기 변형",
+   "query": "버드나무브루어리",
+   "expectIds": [
+    1423
+   ]
+  },
+  {
+   "type": "띄어쓰기 변형",
+   "query": "성심당케익부띠끄",
+   "expectIds": [
+    1494
+   ]
+  },
+  {
+   "type": "띄어쓰기 변형",
+   "query": "여의도한강공원",
+   "expectIds": [
+    288
+   ]
+  },
+  {
+   "type": "띄어쓰기 변형",
+   "query": "임진각평화누리공원",
+   "expectIds": [
+    683
+   ]
+  },
+  {
+   "type": "띄어쓰기 변형",
+   "query": "곡교천은행나무길",
+   "expectIds": [
+    1790307188322
+   ]
+  },
+  {
+   "type": "띄어쓰기 변형",
+   "query": "블루가든 아카이브",
+   "expectIds": [
+    1791248274077
+   ]
+  },
+  {
+   "type": "띄어쓰기 변형",
+   "query": "담양 힐링파크",
+   "expectIds": [
+    1790209625815
+   ]
+  },
+  {
+   "type": "지역+업종",
+   "query": "성수 카페",
+   "expect": {
+    "rule": "place_biz",
+    "any": [
+     "성수",
+     "성동구"
+    ],
+    "biz": "카페"
+   }
+  },
+  {
+   "type": "지역+업종",
+   "query": "성수 술집",
+   "expect": {
+    "rule": "place_biz",
+    "any": [
+     "성수",
+     "성동구"
+    ],
+    "biz": "술집"
+   }
+  },
+  {
+   "type": "지역+업종",
+   "query": "홍대 술집",
+   "expect": {
+    "rule": "place_biz",
+    "any": [
+     "서교동",
+     "동교동",
+     "연남동",
+     "와우산로",
+     "어울마당로",
+     "양화로",
+     "홍익로",
+     "독막로",
+     "마포구"
+    ],
+    "biz": "술집"
+   }
+  },
+  {
+   "type": "지역+업종",
+   "query": "강릉 카페",
+   "expect": {
+    "rule": "place_biz",
+    "any": [
+     "강릉"
+    ],
+    "biz": "카페"
+   }
+  },
+  {
+   "type": "지역+업종",
+   "query": "강릉 맛집",
+   "expect": {
+    "rule": "place_biz",
+    "any": [
+     "강릉"
+    ],
+    "biz": "맛집"
+   }
+  },
+  {
+   "type": "지역+업종",
+   "query": "제주 호텔",
+   "expect": {
+    "rule": "place_biz",
+    "any": [
+     "제주"
+    ],
+    "biz": "호텔"
+   }
+  },
+  {
+   "type": "지역+업종",
+   "query": "부산 호텔",
+   "expect": {
+    "rule": "place_biz",
+    "any": [
+     "부산"
+    ],
+    "biz": "호텔"
+   }
+  },
+  {
+   "type": "지역+업종",
+   "query": "전주 맛집",
+   "expect": {
+    "rule": "place_biz",
+    "any": [
+     "전주"
+    ],
+    "biz": "맛집"
+   }
+  },
+  {
+   "type": "역 이름",
+   "query": "건대입구역",
+   "expect": {
+    "rule": "station",
+    "station": "건대입구",
+    "km": 1
+   }
+  },
+  {
+   "type": "역 이름",
+   "query": "신촌역",
+   "expect": {
+    "rule": "station",
+    "station": "신촌",
+    "km": 1
+   }
+  },
+  {
+   "type": "역 이름",
+   "query": "서면역",
+   "expect": {
+    "rule": "station",
+    "station": "서면",
+    "km": 1
+   }
+  },
+  {
+   "type": "역 이름",
+   "query": "성수역",
+   "expect": {
+    "rule": "station",
+    "station": "성수",
+    "km": 1
+   }
+  },
+  {
+   "type": "역 이름",
+   "query": "강남역",
+   "expect": {
+    "rule": "station",
+    "station": "강남",
+    "km": 1
+   }
+  },
+  {
+   "type": "역 이름",
+   "query": "홍대입구역",
+   "expect": {
+    "rule": "station",
+    "station": "홍대입구",
+    "km": 1
+   }
+  },
+  {
+   "type": "역 이름",
+   "query": "합정역",
+   "expect": {
+    "rule": "station",
+    "station": "합정",
+    "km": 1
+   }
+  },
+  {
+   "type": "동네 이름",
+   "query": "연남동",
+   "expect": {
+    "rule": "place",
+    "any": [
+     "연남"
+    ],
+    "withName": true
+   }
+  },
+  {
+   "type": "동네 이름",
+   "query": "망원동",
+   "expect": {
+    "rule": "place",
+    "any": [
+     "망원"
+    ],
+    "withName": true
+   }
+  },
+  {
+   "type": "동네 이름",
+   "query": "서촌",
+   "expect": {
+    "rule": "place",
+    "any": [
+     "서촌",
+     "통인동",
+     "체부동",
+     "누하동",
+     "옥인동",
+     "필운동",
+     "자하문로"
+    ],
+    "withName": true
+   }
+  },
+  {
+   "type": "동네 이름",
+   "query": "북촌",
+   "expect": {
+    "rule": "place",
+    "any": [
+     "북촌",
+     "가회동",
+     "삼청동",
+     "계동",
+     "재동",
+     "원서동"
+    ],
+    "withName": true
+   }
+  },
+  {
+   "type": "동네 이름",
+   "query": "해운대",
+   "expect": {
+    "rule": "place",
+    "any": [
+     "해운대"
+    ],
+    "withName": true
+   }
+  },
+  {
+   "type": "동네 이름",
+   "query": "경리단길",
+   "expect": {
+    "rule": "place",
+    "any": [
+     "경리단",
+     "회나무로",
+     "녹사평대로"
+    ],
+    "withName": true
+   }
+  },
+  {
+   "type": "동네 이름",
+   "query": "익선동",
+   "expect": {
+    "rule": "place",
+    "any": [
+     "익선"
+    ],
+    "withName": true
+   }
+  },
+  {
+   "type": "오타 한 글자",
+   "query": "스타필트 하남",
+   "expectIds": [
+    1790292415240
+   ]
+  },
+  {
+   "type": "오타 한 글자",
+   "query": "교보문고 광하문점",
+   "expectIds": [
+    1790489186006
+   ]
+  },
+  {
+   "type": "오타 한 글자",
+   "query": "임진각 평하누리공원",
+   "expectIds": [
+    683
+   ]
+  },
+  {
+   "type": "오타 한 글자",
+   "query": "여이도 한강공원",
+   "expectIds": [
+    288
+   ]
+  },
+  {
+   "type": "오타 한 글자",
+   "query": "담양힐링파트",
+   "expectIds": [
+    1790209625815
+   ]
+  },
+  {
+   "type": "오타 한 글자",
+   "query": "블루가든아카이부",
+   "expectIds": [
+    1791248274077
+   ]
+  },
+  {
+   "type": "오타 한 글자",
+   "query": "내일은 니가솨라",
+   "expectIds": [
+    1790486507595
+   ]
+  },
+  {
+   "type": "영문 상호",
+   "query": "lcdc seoul",
+   "expectIds": [
+    10144
+   ]
+  },
+  {
+   "type": "영문 상호",
+   "query": "3cats coffee lab",
+   "expectIds": [
+    1790462853854
+   ]
+  },
+  {
+   "type": "영문 상호",
+   "query": "piknic",
+   "expectIds": [
+    1934
+   ]
+  },
+  {
+   "type": "영문 상호",
+   "query": "irasun",
+   "expectIds": [
+    1793644238524
+   ]
+  },
+  {
+   "type": "영문 상호",
+   "query": "casa cielo",
+   "expectIds": [
+    1791457792500
+   ]
+  },
+  {
+   "type": "영문 상호",
+   "query": "stay vibe",
+   "expectIds": [
+    1791457791928
+   ]
+  },
+  {
+   "type": "영문 상호",
+   "query": "vsant",
+   "expectIds": [
+    6849
+   ]
+  }
+ ]
+}

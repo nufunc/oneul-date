@@ -1370,6 +1370,27 @@ function matchesDistrictQuery(spot: Spot, query: string): boolean {
 let stationCoords: Record<string, [number, number][]> = {};
 const STATION_RADIUS_KM = 1;
 
+/** 검색 0건일 때만 쓰는 근사 이름 판정(P-341). 공백을 뺀 검색어가 5글자 이상이고 공백을 뺀 이름과 길이가 같으며 한 글자만 다르고,
+ * 그 두 글자가 한글 음절이면서 초성이나 중성을 공유하면 참이다('스타필트 하남'과 '스타필드 하남'). 길이 비교를 먼저 둬 후보 전체를 훑어도 싸다 */
+function isNearNameMatch(spot: Spot, query: string): boolean {
+  const q = query.replace(/\s+/g, '').toLowerCase();
+  const raw = spot.name || '';
+  if (q.length < 5 || raw.length < q.length) return false;
+  const n = raw.replace(/\s+/g, '').toLowerCase();
+  if (n.length !== q.length) return false;
+  let diff = -1;
+  for (let i = 0; i < n.length; i++) {
+    if (n[i] === q[i]) continue;
+    if (diff >= 0) return false;
+    diff = i;
+  }
+  if (diff < 0) return false;
+  const a = n.charCodeAt(diff) - 0xac00;
+  const b = q.charCodeAt(diff) - 0xac00;
+  if (a < 0 || a >= 11172 || b < 0 || b >= 11172) return false;
+  return Math.floor(a / 588) === Math.floor(b / 588) || Math.floor((a % 588) / 28) === Math.floor((b % 588) / 28);
+}
+
 /**
  * 검색어가 역 이름이면 그 이름과 역사 좌표. '건대입구역'·'신촌역'은 주소에 나오지 않아 0건이었다.
  * '역'을 붙이지 않은 검색어는 이름이 주소 낱말('신촌', '시청')이면 기존 동네 검색에 맡기고, '건대입구'처럼 아닐 때만 역으로 본다
@@ -6212,7 +6233,7 @@ function searchRegionCenter(head: string): { lat: number; lng: number } | null {
 let discoveryQueryOrigin: string | null = null;
 
 /** 탐색 탭의 지역·검색어·카테고리·실내·찜·무드·가격 필터. 0건 화면의 대안 검색어 건수도 이 경로로 센다 */
-function filterDiscoverySpots<T extends Spot>(candidates: T[], q: string): { matchedSpots: T[]; expandedNationwide: boolean; unpricedHidden: number } {
+function filterDiscoverySpots<T extends Spot>(candidates: T[], q: string): { matchedSpots: T[]; expandedNationwide: boolean; unpricedHidden: number; nearName: boolean } {
   let matchedSpots = candidates;
 
   // 지역/세부존 필터 적용 (선택된 지역이 있는 경우 해당 지역 스팟만 선별)
@@ -6226,6 +6247,7 @@ function filterDiscoverySpots<T extends Spot>(candidates: T[], q: string): { mat
 
   // 스팟 전용 검색어 필터 적용 (스마트 전국 확장 지원)
   let expandedNationwide = false;
+  let nearName = false;
   if (q) {
     const inRegionMatched = matchedSpots.filter((s) => matchesSearchQuery(s, q));
     if (inRegionMatched.length > 0) {
@@ -6238,7 +6260,12 @@ function filterDiscoverySpots<T extends Spot>(candidates: T[], q: string): { mat
         // 화면은 계속 선택 지역으로 보여 60km 밖 스팟을 지역 안으로 믿게 했다. 넓혔다고 알린다
         expandedNationwide = state.regions.length > 0 || state.subZones.length > 0;
       } else {
-        matchedSpots = [];
+        // 글자가 그대로 든 장소가 어디에도 없을 때만 한 글자 틀린 이름을 찾는다. 선택 지역 안을 먼저 보고 없으면 전국으로 넓힌다(P-341)
+        const nearInRegion = matchedSpots.filter((s) => isNearNameMatch(s, q));
+        const nearMatched = nearInRegion.length > 0 ? nearInRegion : candidates.filter((s) => isNearNameMatch(s, q));
+        nearName = nearMatched.length > 0;
+        expandedNationwide = nearName && nearInRegion.length === 0 && (state.regions.length > 0 || state.subZones.length > 0);
+        matchedSpots = nearMatched;
       }
     }
   }
@@ -6293,7 +6320,7 @@ function filterDiscoverySpots<T extends Spot>(candidates: T[], q: string): { mat
     unpricedHidden = matchedSpots.filter((s) => !passes(s) && isUnpricedDining(s)).length;
     matchedSpots = matchedSpots.filter((s) => passes(s) || (includeUnpricedDining && isUnpricedDining(s)));
   }
-  return { matchedSpots, expandedNationwide, unpricedHidden };
+  return { matchedSpots, expandedNationwide, unpricedHidden, nearName };
 }
 
 /** 0건 검색어가 지역어로 시작하면('연남 파스타') 지역어만 친 검색과 나머지 말만 친 검색을 건수와 함께 돌려준다. 0건인 갈래는 뺀다.
@@ -6377,7 +6404,7 @@ function renderSpotDiscovery(): void {
   const allCandidateSpots = discoveryCandidateCache.list;
 
   const q = state.spotSearchQuery.trim();
-  const { matchedSpots, expandedNationwide, unpricedHidden } = filterDiscoverySpots(allCandidateSpots, q);
+  const { matchedSpots, expandedNationwide, unpricedHidden, nearName } = filterDiscoverySpots(allCandidateSpots, q);
 
   // 4. 정렬 적용 (거리순 / 핫플·인기순 / 평점순)
   if (state.spotSort === 'distance') {
@@ -6511,6 +6538,7 @@ function renderSpotDiscovery(): void {
           : `💬 가격 정보가 없는 식음료 ${unpricedHidden.toLocaleString('ko-KR')}곳은 빠졌어요`}
           <button type="button" class="scope-notice-btn" id="btn-toggle-unpriced">${includeUnpricedDining ? '빼고 보기' : '포함해서 보기'}</button></p>`
       : ''}
+    ${nearName ? `<p class="discovery-scope-notice" role="status">'${escapeHtml(q)}'와 비슷한 이름으로 찾았어요</p>` : ''}
     ${expandedNationwide ? `<p class="discovery-scope-notice" role="status">📍 ${escapeHtml(regLabel.title)}에는 '${escapeHtml(q)}' 스팟이 없어 전국 결과를 보여드려요</p>` : ''}
 
     <!-- 4. 그리드 피드 -->
