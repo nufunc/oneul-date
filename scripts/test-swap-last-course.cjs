@@ -11,7 +11,7 @@ assert.ok(start >= 0, 'saveLastCourse 없음');
 const code = ts.transpile(src.slice(start, src.indexOf('\n}\n', start) + 3), { target: 'es2022' });
 const make = (store, writeOk = true) => {
   const sessionStorage = { setItem(k, v) { if (!writeOk) throw new Error('QuotaExceededError'); store[k] = v; } };
-  return (state) => new Function('state', 'sessionStorage', 'LAST_COURSE_STORAGE_KEY', `${code};return saveLastCourse;`)(state, sessionStorage, 'k')();
+  return (state) => new Function('state', 'sessionStorage', 'LAST_COURSE_STORAGE_KEY', 'syncSaveButtons', `${code};return saveLastCourse;`)(state, sessionStorage, 'k', () => {})();
 };
 
 const conditions = { regions: ['SEOUL'] };

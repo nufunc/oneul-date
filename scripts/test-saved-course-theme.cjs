@@ -39,7 +39,7 @@ const STUBS = ['state', 'spotById', 'buildAnchorCourse', 'addRecentSpotIds', 'co
 const makeRegenerate = new Function(...STUBS, `${toJs(decls.get('regenerateCourse'))}\nreturn regenerateCourse;`);
 
 // 저장 버튼(#btn-save)이 만드는 SavedCourse 리터럴을 떼어 같은 state로 평가한다
-const saveBlock = src.slice(src.indexOf("querySelector('#btn-save')"));
+const saveBlock = src.slice(src.indexOf("'#btn-save')"));
 const lit = saveBlock.match(/const item: SavedCourse = (\{[\s\S]*?\n    \});/);
 assert.ok(lit, '저장 버튼의 SavedCourse 리터럴이 없다');
 const litJs = ts.transpileModule(`return (${lit[1]});`, { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;

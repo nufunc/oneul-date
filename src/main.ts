@@ -3537,12 +3537,16 @@ function loadSavedCourses(): SavedCourse[] {
   }
 }
 
+/** 같은 스팟 조합이면 순서가 달라도 같은 코스로 본다 */
+function keyOf(ids: number[]): string {
+  return [...ids].sort((a, b) => a - b).join(',');
+}
+
 /**
  * 같은 스팟 조합이 이미 있으면 새로 쌓지 않고 맨 위로 올린다. 저장을 여러 번 누르면 같은 코스가 계속 쌓였다.
  * 쓰기가 막히면 'failed'를 돌려준다. 호출부가 성공 토스트로 덮지 않게 결과를 값으로 알린다(P-306).
  */
 function addSavedCourse(item: SavedCourse): 'new' | 'dup' | 'failed' {
-  const keyOf = (ids: number[]) => [...ids].sort((a, b) => a - b).join(',');
   const list = loadSavedCourses();
   const dupIndex = list.findIndex((c) => keyOf(c.spotIds) === keyOf(item.spotIds));
   const isNew = dupIndex < 0;
@@ -3561,9 +3565,47 @@ function persistSavedCourses(list: SavedCourse[]): boolean {
   }
 }
 
+function isCourseSaved(ids: number[]): boolean {
+  if (ids.length === 0) return false;
+  return loadSavedCourses().some((c) => keyOf(c.spotIds) === keyOf(ids));
+}
+
+/**
+ * 저장 버튼(홈 결과 `#btn-save`, 받은 코스 `#btn-receiver-save`)을 장소 목록의 저장 여부에 맞춘다(P-342).
+ * 저장됨이면 `✅ 저장됨`이고 누르면 저장한 코스 목록을 연다. 아니면 `💾 저장`이다
+ */
+function paintSaveButton(btn: HTMLElement, ids: number[]): void {
+  btn.dataset.spotIds = ids.join(',');
+  if (isCourseSaved(ids)) {
+    btn.dataset.saved = 'true';
+    btn.textContent = '✅ 저장됨';
+    btn.setAttribute('aria-label', '저장한 코스 열기');
+  } else {
+    delete btn.dataset.saved;
+    btn.textContent = '💾 저장';
+    btn.removeAttribute('aria-label');
+  }
+}
+
+/** 코스가 바뀌었거나 저장 목록이 바뀐 뒤 두 저장 버튼을 현재 상태로 다시 맞춘다. 홈 버튼은 지금 코스를 따른다 */
+function syncSaveButtons(): void {
+  document.querySelectorAll<HTMLElement>('#btn-save, #btn-receiver-save').forEach((btn) => {
+    const ids = btn.id === 'btn-save' ? courseSpotIds() : (btn.dataset.spotIds || '').split(',').filter(Boolean).map(Number);
+    paintSaveButton(btn, ids);
+  });
+}
+
+/** 저장됨 상태의 버튼을 누르면 저장하지 않고 목록을 연다. 연 경우 true */
+function openSavedIfSaved(btn: HTMLElement | null): boolean {
+  if (btn?.dataset.saved !== 'true') return false;
+  openSavedPanel();
+  return true;
+}
+
 /** 저장 버튼의 결과 토스트. 실패 문구가 성공 문구에 덮이지 않게 하나만 띄운다 */
 function saveCourseWithToast(item: SavedCourse): void {
   const result = addSavedCourse(item);
+  if (result !== 'failed') syncSaveButtons();
   showToast(
     result === 'failed'
       ? '코스를 저장하지 못했어요. 이 브라우저에서 저장이 막혀 있어요. 🔗로 링크를 보내 두세요'
@@ -4650,9 +4692,11 @@ function renderResults(): void {
   saveLastCourse();
 }
 
-// 새로 고침·뒤로 오기에서 되살릴 마지막 코스를 쓴다. 최적 동선·다시 추천(renderResults)과 칸 교체(swapStep)가 함께 부른다
+// 새로 고침·뒤로 오기에서 되살릴 마지막 코스를 쓴다. 최적 동선·다시 추천(renderResults)과 칸 교체(swapStep)가 함께 부른다.
+// 코스 장소가 바뀌는 두 경로가 모두 지나므로 저장 버튼 상태도 여기서 맞춘다(P-342)
 function saveLastCourse(): void {
   if (!state.course || !state.courseConditions) return;
+  syncSaveButtons();
   const ids = state.course.map((s) => s.spotId).filter((id): id is number => id !== null);
   try {
     sessionStorage.setItem(LAST_COURSE_STORAGE_KEY, JSON.stringify({ ids, conditions: state.courseConditions }));
@@ -5862,7 +5906,8 @@ function bindResultEvents(area: HTMLElement): void {
     // 칩은 지역으로 만든 코스에서만 싣는다. 찜한 코스와 장소 중심 코스는 칩 조건이 코스와 다를 수 있다
     shareOrCopyLink(buildShareUrl(ids, byArea ? cond.categoryKey : undefined), 0, courseShareText(ids, byArea ? cond.regions : [], byArea ? cond.subZones : []));
   });
-  area.querySelector('#btn-save')?.addEventListener('click', () => {
+  area.querySelector<HTMLElement>('#btn-save')?.addEventListener('click', (e) => {
+    if (openSavedIfSaved(e.currentTarget as HTMLElement)) return;
     if (!state.course || !state.courseConditions) return;
     const ids = courseSpotIds();
     if (ids.length === 0) {
@@ -7217,7 +7262,10 @@ function renderReceiverView(steps: CourseStep[]): void {
     }
   });
 
-  document.getElementById('btn-receiver-save')?.addEventListener('click', () => {
+  const receiverSave = document.getElementById('btn-receiver-save');
+  if (receiverSave) paintSaveButton(receiverSave, sharedSpotIds);
+  receiverSave?.addEventListener('click', () => {
+    if (openSavedIfSaved(receiverSave)) return;
     if (sharedSpotIds.length === 0) {
       showToast('저장할 장소가 없어요');
       return;
@@ -7634,6 +7682,7 @@ function renderOverlayContent(): void {
           showToast('삭제하지 못했어요. 이 브라우저에서 저장이 막혀 있어요');
           return;
         }
+        syncSaveButtons();
         renderOverlay();
         const body = root.querySelector('.overlay-body');
         if (body) body.scrollTop = scrollTop;
