@@ -926,6 +926,7 @@ function getCandidatePool(
       matchesMood(s, moodKey) &&
       (!indoorOnly || isIndoorSpot(s)) &&
       !isSpotClosedToday(s) &&
+      isOpenAtSlotClock(s, slot) &&
       !excludeIds.includes(s.id),
   );
   // indoorOnly 및 휴무일 적용 시 후보가 0건이면 조건 완화(Graceful Fallback)
@@ -3076,6 +3077,57 @@ function closedDaysFromHours(spot: Spot): string[] {
     hoursClosedDaysCache.set(hours, result);
   }
   return result;
+}
+
+/**
+ * 칸의 대표 시각(분). 앱은 칸에 시각을 배정하지 않으므로 낮 13:00, 저녁 19:00, 밤 21:00을 제품 정의로 둔다(P-340).
+ * 이 시각에 이미 닫았거나 아직 열지 않은 장소는 코스 후보에서 거른다. 숙박은 시각이 없어 거르지 않는다.
+ */
+const SLOT_CLOCK_MIN: Partial<Record<SlotKey, number>> = { day: 13 * 60, evening: 19 * 60, night: 21 * 60 };
+
+/**
+ * 영업시간이 `요일 HH:MM ~ HH:MM` 목록, `매일 HH:MM ~ HH:MM`, `HH:MM~HH:MM`, `상시 개방`, is_24h일 때만 판정하고
+ * 나머지 형식(절기 표기, 설명문, 평일/주말 등)과 영업시간이 없는 장소는 열린 것으로 본다.
+ * 종료가 시작 이하이면 24시간을 더해 자정 넘김을 처리하고, 전날 구간이 넘어온 새벽도 함께 본다.
+ * (영업시간 문자열, 칸, 요일)마다 한 번만 분석한다(getCandidates가 모든 열린 행에 부른다)
+ */
+const slotClockOpenCache = new Map<string, boolean>();
+function isOpenAtSlotClock(spot: Spot, slot: SlotKey, date = new Date()): boolean {
+  const clock = SLOT_CLOCK_MIN[slot];
+  if (clock === undefined || spot.is_24h) return true;
+  const bh = spot.business_hours;
+  const hours = bh && typeof bh === 'object' ? bh['영업시간'] || bh['이용시간'] : '';
+  if (typeof hours !== 'string' || !hours) return true;
+  const today = KOREAN_DAY_NAMES[date.getDay()];
+  const key = `${slot}|${today}|${hours}`;
+  let result = slotClockOpenCache.get(key);
+  if (result === undefined) {
+    result = parseOpenAtClock(hours, clock, today, KOREAN_DAY_NAMES[(date.getDay() + 6) % 7]);
+    slotClockOpenCache.set(key, result);
+  }
+  return result;
+}
+
+function parseOpenAtClock(hours: string, clock: number, today: string, yesterday: string): boolean {
+  if (/^상시\s*개방$/.test(hours.trim())) return true;
+  const range = /^(?:([월화수목금토일]|매일)\s*)?(\d{1,2}):(\d{2})\s*~\s*(\d{1,2}):(\d{2})$/;
+  let sawToday = false;
+  for (const part of hours.split('/')) {
+    const m = range.exec(part.trim());
+    if (!m) return true;
+    const start = +m[2] * 60 + +m[3];
+    let end = +m[4] * 60 + +m[5];
+    if (end <= start) end += 1440;
+    const day = m[1];
+    if (!day || day === '매일' || day === today) {
+      sawToday = true;
+      if (start <= clock && clock < end) return true;
+    }
+    // 전날 구간이 자정을 넘어 오늘 새벽까지 이어지는 경우
+    if ((!day || day === '매일' || day === yesterday) && start <= clock + 1440 && clock + 1440 < end) return true;
+  }
+  // 오늘 요일이 목록에 없으면 정기휴무 판정(isSpotClosedToday) 몫이므로 여기서 거르지 않는다
+  return !sawToday;
 }
 
 /** 스팟이 오늘 정기휴무인지 판별 (현장 헛걸음 방지) */
