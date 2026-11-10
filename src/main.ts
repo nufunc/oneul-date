@@ -6538,7 +6538,7 @@ function renderSpotDiscovery(): void {
           : `💬 가격 정보가 없는 식음료 ${unpricedHidden.toLocaleString('ko-KR')}곳은 빠졌어요`}
           <button type="button" class="scope-notice-btn" id="btn-toggle-unpriced">${includeUnpricedDining ? '빼고 보기' : '포함해서 보기'}</button></p>`
       : ''}
-    ${nearName ? `<p class="discovery-scope-notice" role="status">'${escapeHtml(q)}'와 비슷한 이름으로 찾았어요</p>` : ''}
+    ${nearName ? `<p class="discovery-scope-notice" role="status">'${escapeHtml(q)}' 대신 비슷한 이름으로 찾았어요</p>` : ''}
     ${expandedNationwide ? `<p class="discovery-scope-notice" role="status">📍 ${escapeHtml(regLabel.title)}에는 '${escapeHtml(q)}' 스팟이 없어 전국 결과를 보여드려요</p>` : ''}
 
     <!-- 4. 그리드 피드 -->
