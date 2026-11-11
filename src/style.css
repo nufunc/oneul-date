@@ -926,6 +926,14 @@ button {
   -webkit-appearance: none;
 }
 
+/* iOS는 글자가 16px 미만인 입력칸에 초점을 주면 화면을 확대하고 그대로 둔다. 검색칸과 정렬 선택칸이 13.76px였다(P-366) */
+@media (pointer: coarse) {
+  .search-input,
+  .discovery-sort-select {
+    font-size: 16px;
+  }
+}
+
 .search-input::-webkit-search-cancel-button {
   -webkit-appearance: none;
   display: none;
