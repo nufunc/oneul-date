@@ -1113,6 +1113,21 @@ button {
   max-width: 140px;
 }
 
+/* 동네 둘을 고르면 둘째 동네 이름이 140px에서 잘려 보이지 않았다(조합 703쌍 중 544쌍). 조건 카드에서는 두 줄까지 보인다(P-370) */
+.course-compact-controls .btn-region-pill {
+  white-space: normal;
+  text-align: left;
+  min-height: 44px;
+}
+
+.course-compact-controls .btn-region-pill .pill-title {
+  max-width: none;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .btn-region-pill .pill-arrow {
   font-size: 0.75rem;
   opacity: 0.6;
