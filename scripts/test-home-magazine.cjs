@@ -46,7 +46,9 @@ assert.strictEqual(site.name, '오늘 데이트', 'WebSite name이 다르다');
 assert.strictEqual(site.description, root.match(/<meta name="description" content="([^"]*)"/)[1], 'WebSite description이 meta description과 다르다');
 assert.strictEqual(root.match(/<h1[\s>]/g)?.length, 1, '루트 정적 h1이 1개가 아니다');
 // 정적 h1은 #app 안에 있어야 앱이 innerHTML을 갈아 끼울 때 사라져 앱 h1과 겹치지 않는다
-assert.ok(root.includes('<div id="app"><h1 class="sr-only">오늘 데이트</h1></div>'), '정적 h1이 #app 안에 없다');
+assert.ok(root.includes('<div id="app"><h1 class="sr-only">오늘 데이트</h1>'), '정적 h1이 #app 안에 없다');
+// JS를 실행하지 않는 크롤러용 매거진 링크도 #app 안에 있어야 앱이 그릴 때 사라진다(P-371)
+assert.ok(root.includes('<a class="sr-only" href="./blog/">매거진</a></div>'), '정적 매거진 링크가 #app 안에 없다');
 const rootCanonical = `<link rel="canonical" href="${SITE_URL}"`;
 for (const f of landings) assert.ok(!fs.readFileSync(f, 'utf8').includes(rootCanonical), `지역 랜딩에 루트 canonical이 있다: ${f}`);
 for (const slug of fs.readdirSync(blogDir)) {
