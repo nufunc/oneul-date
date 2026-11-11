@@ -11,7 +11,11 @@
 - business_hours: {"이용시간": usetimeculture 원문}. 요일 키가 아니라서 앱의 오늘 휴무 판정에는 쓰이지 않는다.
 - 이미 price나 closed_days나 business_hours가 있는 칸은 건드리지 않는다. 쓰기 전에 바꿀 행을 백업한다.
 
+- 숙박 객실요금(P-357): 열린 TourAPI 숙박 행 중 가격 칸이 전부 빈 행에 detailInfo2(contentTypeId=32)의 객실 최저가를
+  price 한 칸에 `1박 N원~ (객실 최저가, 비수기 주중)` 형식으로 쓴다. price_tier·avg_price_per_person은 쓰지 않는다(1인 가격이 아니다).
+
 사용: python3 tour_fee.py [--apply] [--backup-dir DIR] [--parking --limit N]
+      python3 tour_fee.py --lodging-price [--limit N] [--max-calls N] [--count-only] [--apply [--plan FILE]] [--rollback WRITTEN_FILE]
 """
 import argparse
 import json
@@ -106,22 +110,32 @@ def parking_fields(intro, content_type_id):
     return None
 
 
-def fetch_intro(api_key, content_id, content_type_id="14"):
-    op = "detailIntro2" if "KorService2" in TOUR_API_BASE else "detailIntro1"
+def _fetch_items(op, api_key, content_id, content_type_id, label):
+    """detail 계열 오퍼레이션 → item 목록(없으면 빈 목록). 429는 그대로 올리고 그 밖의 오류는 3회 재시도한다."""
+    suffix = "2" if "KorService2" in TOUR_API_BASE else "1"
     q = urllib.parse.urlencode({"serviceKey": api_key, "MobileOS": "ETC", "MobileApp": "OneulDate", "_type": "json",
                                 "contentId": str(content_id), "contentTypeId": str(content_type_id)})
     for attempt in range(3):
         try:
-            data = tour_get_json(f"{TOUR_API_BASE}/{op}?{q}")
+            data = tour_get_json(f"{TOUR_API_BASE}/{op}{suffix}?{q}")
             items = ((data.get("response") or {}).get("body") or {}).get("items") or {}
-            item = (items.get("item") or [None])[0] if isinstance(items, dict) else None
-            return item or {}
+            item = items.get("item") if isinstance(items, dict) else None
+            return [item] if isinstance(item, dict) else list(item or [])
         except TourApiRateLimited:
             raise
         except Exception as e:
             err = e
             time.sleep(2 * (attempt + 1))
-    raise TourApiFetchFailed(f"intro {content_id}: {err}")
+    raise TourApiFetchFailed(f"{label} {content_id}: {err}")
+
+
+def fetch_intro(api_key, content_id, content_type_id="14"):
+    return (_fetch_items("detailIntro", api_key, content_id, content_type_id, "intro") or [{}])[0] or {}
+
+
+def fetch_rooms(api_key, content_id):
+    """숙박(32) detailInfo2 → 객실 item 목록. 객실 정보가 없으면 빈 목록(P-357)."""
+    return _fetch_items("detailInfo", api_key, content_id, "32", "rooms")
 
 
 def fetch_usefee(api_key, content_id):
@@ -306,13 +320,193 @@ def run_parking_backfill(apply=False, log=print, backup_dir=None, limit=PARKING_
     return 0
 
 
+# P-357 숙박 객실요금. 객실마다 비수기 주중·주말, 성수기 주중·주말 최저가를 주고 0이나 '전화 문의'는 미기재다
+ROOM_FEE_STEPS = ((("roomoffseasonminfee1",), "비수기 주중"), (("roomoffseasonminfee2",), "비수기 주말"),
+                  (("roompeakseasonminfee1", "roompeakseasonminfee2"), "성수기"))
+LODGING_CATEGORIES = ("숙박", "펜션", "호텔", "콘도,리조트", "민박", "한옥숙소")  # 캠핑장·글램핑은 객실이 없다(표본 0/10)
+MIN_ROOM_FEE = 1000  # 1,000원 미만은 단위 오기로 보고 쓰지 않는다
+LODGING_DAILY_CAP = 300  # P-208과 같은 하루 몫. 그날 사용량이 PARKING_SKIP_AT(700) 이상이면 쉰다
+LODGING_STATE = os.path.join(os.path.dirname(USAGE_FILE), ".lodging_price.json")  # 값이 없어도 읽은 id를 남겨 다음 날 다시 부르지 않는다
+LODGING_SELECT = "id,name,category,price,price_tier,avg_price_per_person,hot_score,source,updated_at"
+PRICE_EMPTY = "(price.is.null,price.eq.)"
+
+
+def _room_fee(raw):
+    digits = re.sub(r'[,\s원]', '', str(raw if raw is not None else ''))
+    return int(digits) if digits.isdigit() and int(digits) >= MIN_ROOM_FEE else None
+
+
+def lodging_price(rooms):
+    """detailInfo2 객실 목록 → price 문구. 비수기 주중 최저가, 없으면 비수기 주말, 없으면 성수기 순으로 첫 단계의 최솟값을 쓴다.
+    금액이 하나도 없으면(0, 전화 문의, 객실 없음) None. 1인 가격이 아니므로 1인·인당·시간 낱말을 넣지 않는다."""
+    for fields, label in ROOM_FEE_STEPS:
+        fees = [f for r in rooms or [] for k in fields if (f := _room_fee((r or {}).get(k)))]
+        if fees:
+            return f"1박 {min(fees):,}원~ (객실 최저가, {label})"
+    return None
+
+
+def _lodging_targets(base_url, headers):
+    """열린 TourAPI 숙박 칸 행 중 가격 칸이 전부 빈 행. 노출 순(hot_score 큰 순, 동률은 id)."""
+    rows, last = [], 0
+    while True:
+        q = urllib.parse.urlencode({"select": LODGING_SELECT, "source->>type": "eq.tourapi", "slot": "eq.stay", "is_closed": "eq.false",
+                                    "order": "id.asc", "id": f"gt.{last}", "limit": 1000})
+        page = _request(f"{base_url}/rest/v1/spots?{q}", headers)
+        if not page:
+            break
+        rows.extend(page)
+        last = page[-1]["id"]
+        if len(page) < 1000:
+            break
+    rows = [r for r in rows if r.get("category") in LODGING_CATEGORIES and not (r.get("price") or "").strip()
+            and not r.get("price_tier") and not r.get("avg_price_per_person")]
+    return sorted(rows, key=lambda r: (-(r.get("hot_score") or 0), r["id"]))
+
+
+def _snapshot(r):
+    return {k: r.get(k) for k in ("id", "name", "price", "price_tier", "avg_price_per_person", "updated_at")}
+
+
+def run_lodging_price(apply=False, log=print, backup_dir=None, limit=None, max_calls=LODGING_DAILY_CAP, count_only=False, plan_path=None):
+    """숙박 객실요금 백필(P-357). 기본은 드라이런이고 드라이런도 TourAPI를 부른다(max_calls회까지, count_only면 0회).
+    드라이런은 쓸 값을 p357_<시각>_dry.json에 남기고, --apply --plan <그 파일>은 호출 없이 그 값을 쓴다.
+    쓰기는 쓰기 전 이전 값 백업 p357_<시각>.json과 쓸 값 기록 p357_written_<시각>.json을 먼저 남기고,
+    id, is_closed=false, 읽은 updated_at, price 빈 칸 조건이 모두 맞는 행에만 price를 쓴다."""
+    backup_dir = backup_dir or os.path.expanduser("~/oneul-backups")
+    env = load_env()
+    base_url = (os.getenv("SUPABASE_URL") or env.get("SUPABASE_URL") or "").rstrip("/")
+    key = os.getenv("SUPABASE_SERVICE_KEY") or env.get("SUPABASE_SERVICE_KEY") or env.get("VITE_SUPABASE_ANON_KEY") or ""
+    if not base_url:
+        log("SUPABASE_URL이 없어 중단한다")
+        return 1
+    headers = {"Content-Type": "application/json"}
+    if key:
+        headers.update({"apikey": key, "Authorization": f"Bearer {key}"})
+    stamp = datetime.now(KST).strftime('%Y%m%d-%H%M%S')
+
+    if plan_path:
+        plan = json.load(open(plan_path, encoding="utf-8"))
+        rows, checked = plan["rows"], plan["checked"]
+        log(f"숙박 객실요금: 계획 파일 {plan_path}의 {len(rows)}행을 호출 없이 쓴다")
+    else:
+        targets = _lodging_targets(base_url, headers)
+        done = set(load_json(LODGING_STATE, {}).get("checked", []))
+        todo = [r for r in targets if r["id"] not in done]
+        by_cat = {c: sum(1 for r in targets if r["category"] == c) for c in LODGING_CATEGORIES}
+        log(f"숙박 객실요금: 대상 {len(targets)}행 {by_cat} · 이미 읽은 {len(targets) - len(todo)} · 남은 {len(todo)}")
+        if count_only:
+            for r in todo[:5]:
+                log(f"  {r['id']} {r['name']} | {r['category']} | hot {r.get('hot_score')}")
+            log("대상 수만 셌다: TourAPI 호출 0회, DB 쓰기 0회")
+            return 0
+        used = usage_today()
+        if used < 0 or used >= PARKING_SKIP_AT:
+            log(f"숙박 객실요금: 오늘 TourAPI 사용량 {used}회라 건너뛴다(기준 {PARKING_SKIP_AT}회)")
+            return 0
+        api_key = _tour_api_key()
+        if not api_key:
+            log("TourAPI 키가 없어 중단한다")
+            return 1
+        todo = todo[:limit] if limit else todo
+        start, rows, checked, failed, no_rooms = used, [], [], 0, 0
+        for r in todo:
+            # 재시도도 호출로 세므로 행 수가 아니라 사용량 증가분으로 상한을 본다
+            now_used = usage_today()
+            if now_used - start >= max_calls or now_used < 0 or now_used >= PARKING_SKIP_AT:
+                log(f"  호출 상한에서 멈춘다(이번 {now_used - start}회, 오늘 {now_used}회)")
+                break
+            cotid = (r["source"].get("url") or "").rsplit("cotid=", 1)[-1] if "cotid=" in (r["source"].get("url") or "") else ""
+            try:
+                rooms = fetch_rooms(api_key, cotid) if cotid else []
+            except TourApiRateLimited:
+                log(f"TourAPI 한도 초과로 조회를 멈춘다(오늘 호출 {usage_today()}회)")
+                break
+            except TourApiFetchFailed as e:
+                failed += 1
+                log(f"  조회 실패로 건너뜀: {r['id']} {r['name']} ({e})")
+                continue
+            time.sleep(0.3)
+            checked.append(r["id"])
+            no_rooms += not rooms
+            if text := lodging_price(rooms):
+                rows.append({**_snapshot(r), "new_price": text})
+        calls = usage_today() - start
+        kinds = {label: sum(1 for x in rows if x["new_price"].endswith(f"{label})")) for _, label in ROOM_FEE_STEPS}
+        log(f"숙박 객실요금: 읽은 행 {len(checked)} · 호출 {calls}회 · 조회 실패 {failed} · 객실 없음 {no_rooms} · "
+            f"쓸 행 {len(rows)}(채움률 {len(rows) / len(checked) if checked else 0:.0%}) {kinds}")
+        for x in rows[:10]:
+            log(f"  {x['id']} {x['name']} | {x['new_price']}")
+        if not apply:
+            os.makedirs(backup_dir, exist_ok=True)
+            with open_new(os.path.join(backup_dir, f"p357_{stamp}_dry.json")) as fp:
+                json.dump({"rows": rows, "checked": checked}, fp, ensure_ascii=False, indent=2)
+            log(f"드라이런: DB에 쓰지 않았다. 계획: {fp.name}. 실제 반영은 --apply(--plan 으로 그 계획을 호출 없이 쓴다)")
+            return 0
+    if not rows:
+        log("쓸 행이 없다")
+        return 0
+    os.makedirs(backup_dir, exist_ok=True)
+    with open_new(os.path.join(backup_dir, f"p357_{stamp}.json")) as fp:
+        json.dump([{k: v for k, v in x.items() if k != "new_price"} for x in rows], fp, ensure_ascii=False, indent=2)
+    log(f"백업: {fp.name}")
+    # PATCH 전에 남겨 중간에 멈춰도 되돌릴 목록이 있다
+    with open_new(os.path.join(backup_dir, f"p357_written_{stamp}.json")) as fp:
+        json.dump([{"id": x["id"], "price": x["new_price"]} for x in rows], fp, ensure_ascii=False, indent=2)
+    log(f"기록: {fp.name}")
+    now = datetime.now(timezone.utc).isoformat()
+    wrote = 0
+    for x in rows:
+        q = urllib.parse.urlencode({"id": f"eq.{x['id']}", "is_closed": "eq.false", "updated_at": f"eq.{x['updated_at']}",
+                                    "or": PRICE_EMPTY, "select": "id"})
+        got = _request(f"{base_url}/rest/v1/spots?{q}", {**headers, "Prefer": "return=representation"}, "PATCH",
+                       {"price": x["new_price"], "updated_at": now})
+        wrote += len(got or [])
+    atomic_dump(LODGING_STATE, {"checked": sorted(set(load_json(LODGING_STATE, {}).get("checked", [])) | set(checked))})
+    log(f"반영 완료: 쓸 {len(rows)}행 중 조건이 맞아 쓴 {wrote}행")
+    return 0
+
+
+def run_lodging_rollback(written_path, log=print):
+    """p357_written_<시각>.json의 id마다 현재 price가 기록한 값과 같을 때만 같은 시각 백업 p357_<시각>.json의 이전 값으로 되돌린다.
+    그 뒤 손으로 고친 값은 덮지 않는다."""
+    env = load_env()
+    base_url = (os.getenv("SUPABASE_URL") or env.get("SUPABASE_URL") or "").rstrip("/")
+    key = os.getenv("SUPABASE_SERVICE_KEY") or env.get("SUPABASE_SERVICE_KEY") or env.get("VITE_SUPABASE_ANON_KEY") or ""
+    if not base_url:
+        log("SUPABASE_URL이 없어 중단한다")
+        return 1
+    headers = {"Content-Type": "application/json", "Prefer": "return=representation"}
+    if key:
+        headers.update({"apikey": key, "Authorization": f"Bearer {key}"})
+    written = json.load(open(written_path, encoding="utf-8"))
+    backup = {b["id"]: b for b in json.load(open(written_path.replace("p357_written_", "p357_"), encoding="utf-8"))}
+    now, back = datetime.now(timezone.utc).isoformat(), 0
+    for w in written:
+        q = urllib.parse.urlencode({"id": f"eq.{w['id']}", "price": f"eq.{w['price']}", "select": "id"})
+        got = _request(f"{base_url}/rest/v1/spots?{q}", headers, "PATCH", {"price": backup[w["id"]]["price"], "updated_at": now})
+        back += len(got or [])
+    log(f"되돌림 완료: 기록 {len(written)}행 중 현재 값이 같아 되돌린 {back}행")
+    return 0
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--apply", action="store_true", help="실제로 DB에 쓴다(기본은 드라이런)")
     ap.add_argument("--backup-dir", default=os.path.expanduser("~/oneul-backups"))
     ap.add_argument("--limit", type=int, help="이번에 조회할 최대 행 수(TourAPI 하루 한도를 나눠 쓸 때)")
     ap.add_argument("--parking", action="store_true", help="요금 대신 관광지 주차 백필(P-208)을 돌린다")
+    ap.add_argument("--lodging-price", action="store_true", help="요금 대신 숙박 객실요금 백필(P-357)을 돌린다")
+    ap.add_argument("--max-calls", type=int, default=LODGING_DAILY_CAP, help=f"--lodging-price의 TourAPI 호출 상한(기본 {LODGING_DAILY_CAP})")
+    ap.add_argument("--count-only", action="store_true", help="--lodging-price: 대상 수만 세고 TourAPI를 부르지 않는다")
+    ap.add_argument("--plan", help="--lodging-price --apply: 드라이런이 남긴 p357_<시각>_dry.json을 호출 없이 쓴다")
+    ap.add_argument("--rollback", help="--lodging-price: p357_written_<시각>.json의 값을 백업의 이전 값으로 되돌린다")
     args = ap.parse_args()
+    if args.lodging_price and args.rollback:
+        sys.exit(run_lodging_rollback(args.rollback))
+    if args.lodging_price:
+        sys.exit(run_lodging_price(apply=args.apply, backup_dir=args.backup_dir, limit=args.limit, max_calls=args.max_calls,
+                                   count_only=args.count_only, plan_path=args.plan))
     if args.parking:
         sys.exit(run_parking_backfill(apply=args.apply, backup_dir=args.backup_dir, limit=args.limit or PARKING_DAILY_CAP))
     sys.exit(run_fee_backfill(apply=args.apply, backup_dir=args.backup_dir, limit=args.limit))
