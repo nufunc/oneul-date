@@ -34,6 +34,7 @@ const headTags = `    <link rel="canonical" href="${SITE_URL}" />
     <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
   </head>`;
 
-const appWithH1 = '<div id="app"><h1 class="sr-only">오늘 데이트</h1></div>';
+// JS를 실행하지 않는 크롤러도 루트에서 매거진에 닿도록 상단 메뉴와 같은 링크를 둔다. renderShell이 #app을 통째로 바꿔 화면에는 남지 않는다(P-371)
+const appWithH1 = '<div id="app"><h1 class="sr-only">오늘 데이트</h1><a class="sr-only" href="./blog/">매거진</a></div>';
 fs.writeFileSync(indexPath, html.replace('</head>', headTags).replace(APP_TAG, appWithH1));
 console.log('build_home_magazine: dist/index.html에 canonical, WebSite JSON-LD, 정적 h1을 넣었다');
