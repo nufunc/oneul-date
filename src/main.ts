@@ -823,8 +823,20 @@ function isIndoorSpot(spot: Spot): boolean {
 
 export type SpotGenre = 'CAFE' | 'MEAL' | 'BAR' | 'ACTIVITY' | 'STAY';
 
-/** 스팟의 이름/카테고리/요약/태그를 종합 분석하여 데이트 코스용 핵심 장르(종목) 판정 */
+/** 장소별 종목 판정 캐시. 같은 장소를 코스 한 번 안에서 여러 번 판정하므로 정규식을 한 번만 돌린다 */
+const spotGenreCache = new WeakMap<Spot, SpotGenre>();
+
 function getSpotGenre(spot: Spot): SpotGenre {
+  let genre = spotGenreCache.get(spot);
+  if (genre === undefined) {
+    genre = classifySpotGenre(spot);
+    spotGenreCache.set(spot, genre);
+  }
+  return genre;
+}
+
+/** 스팟의 이름/카테고리/요약/태그를 종합 분석하여 데이트 코스용 핵심 장르(종목) 판정 */
+function classifySpotGenre(spot: Spot): SpotGenre {
   if (spot.slot === 'stay') return 'STAY';
 
   const text = [
@@ -2198,7 +2210,22 @@ function generateCourse(
     const slotCandidates = nearStays.length > 0 ? nearStays : candidates;
 
     // 종목 중복 방지: 이미 선택된 차수와 동일한 장르(카페-카페, 식사-식사, 바-바) 배제
-    const finalCandidates = diversifyByGenre(slotCandidates, pickedGenres, anchorSpot);
+    let finalCandidates = diversifyByGenre(slotCandidates, pickedGenres, anchorSpot);
+    // 최근 노출 제외가 앵커 5km 안의 다른 종목 후보를 모두 빼면 종목 중복이 생겼다(P-358). 그때는 이력을 빼지 않은 후보로
+    // 다시 거르고, 거기에 앵커 5km 안의 다른 종목이 있으면 종목 다양화를 최근 노출 회피보다 앞세운다
+    if (slot !== 'stay' && avoid.size > 0 && anchorSpot && anchorSpot.lat != null && anchorSpot.lng != null) {
+      const hasFreshGenreNear = (list: Spot[]) =>
+        list.some(
+          (s) => s.lat != null && s.lng != null && !pickedGenres.has(getSpotGenre(s)) && getDistanceKm(anchorSpot!.lat!, anchorSpot!.lng!, s.lat, s.lng) <= 5.0,
+        );
+      if (!hasFreshGenreNear(finalCandidates)) {
+        const withRecent = filterByBudget(
+          filterByMoodPreset(getCandidates(all, slot, regionKeys, moodKey, picked, zoneKeys, geoAnchor, isIndoor), moodPreset),
+          budgetFilter,
+        );
+        if (hasFreshGenreNear(withRecent)) finalCandidates = diversifyByGenre(withRecent, pickedGenres, anchorSpot);
+      }
+    }
 
     // 숙박 외 칸도 앵커 STAY_ZONE_FALLBACK_RADIUS_KM 안을 먼저 쓴다. 근접 단계 마지막이 거리 상한 없이 골라 '담양힐링파크' 밤 칸이
     // 61.8km 떨어진 순천만 천문대가 됐다. 반경 안이 없으면 최근 노출 이력을 무시하고, 그래도 없으면 검색어에서 얻은 세부 동네를 풀어
