@@ -35,5 +35,19 @@ for (const [input, expected] of CASES) {
     console.error(`FAIL ${JSON.stringify(input)}: ${JSON.stringify(actual)} != ${JSON.stringify(expected)}`);
   }
 }
+// P-357: 가성비·스페셜 칩은 '1박 N원' 객실가를 1인 금액으로 읽지 않는다
+const pStart = src.indexOf('function perPersonPriceRange');
+const perPerson = new Function('parsePriceRangeWon', `${ts.transpile(src.slice(pStart, src.indexOf('\n}\n', pStart) + 3), { target: 'es2022' })};return perPersonPriceRange;`)(parse);
+for (const [price, expected] of [
+  ['1박 80,000원~ (객실 최저가, 비수기 주중)', null],
+  ['2박 300,000원', null],
+  ['1인 45,000원', [45000, 45000]],
+]) {
+  const actual = perPerson({ price });
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+    failed++;
+    console.error(`FAIL perPersonPriceRange ${JSON.stringify(price)}: ${JSON.stringify(actual)} != ${JSON.stringify(expected)}`);
+  }
+}
 if (failed) process.exit(1);
 console.log(`ok ${CASES.length}`);

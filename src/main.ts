@@ -1821,6 +1821,12 @@ function sheetPriceText(spot: Spot): string {
   return spot.price || (spot.price_tier ? PRICE_TIER_TEXT[spot.price_tier] || '' : '');
 }
 
+/** 가성비·스페셜 칩이 쓰는 1인 금액. '1박 N원' 객실가는 1인 가격이 아니라 읽지 않는다(P-357) */
+function perPersonPriceRange(spot: Spot): [number, number] | null {
+  const p = spot.price || '';
+  return /[0-9]\s*박/.test(p) ? null : parsePriceRangeWon(p);
+}
+
 function isBudgetSpot(spot: Spot): boolean {
   // 1. 명시적 가격 티어 (₩ 또는 FREE)
   if (spot.price_tier === 'FREE' || spot.price_tier === '₩') return true;
@@ -1836,7 +1842,7 @@ function isBudgetSpot(spot: Spot): boolean {
   // 고가 코스가 가성비로 분류됐다(가성비 판정 7,463곳 중 6,604곳이 이 부분 일치로 통과)
   const pStr = spot.price || '';
   if (pStr.includes('무료')) return true;
-  const range = parsePriceRangeWon(pStr);
+  const range = perPersonPriceRange(spot);
   if (range) return range[1] <= 22000;
 
   // 4. 카테고리/태그/소개 텍스트 검사
@@ -1860,7 +1866,7 @@ function isSpecialDiningSpot(spot: Spot): boolean {
   // price에서 금액을 읽으면 금액만으로 판정한다(최고 4.5만원 이상). 티어·평균가·분위기·키워드는 금액이 없을 때만 쓴다.
   // 요약문 템플릿의 '위스키'·'기념일' 때문에 2만원대 레일바이크·파스타집이 스페셜로 통과했고, 티어를 먼저 보면
   // 털게탕 한 접시나 2인 가격에서 나온 ₩₩₩ 때문에 곰치국·포장마차 약 100곳이 통과했다(2026-09-27)
-  const range = parsePriceRangeWon(spot.price || '');
+  const range = perPersonPriceRange(spot);
   if (range) return range[1] >= 45000;
 
   // 1. 명시적 가격 티어 (₩₩₩ 또는 ₩₩₩₩)
