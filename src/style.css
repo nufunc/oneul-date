@@ -2707,6 +2707,8 @@ button {
   color: var(--color-text);
   line-height: 1.35;
   letter-spacing: -0.01em;
+  /* 320px에서 긴 지역 이름 뒤 '3곳'만 둘째 줄에 남지 않게 줄 길이를 고른다(P-359) */
+  text-wrap: balance;
 }
 
 .receiver-hero-desc {
