@@ -2983,6 +2983,8 @@ function courseShareText(spotIds: number[], regionKeys: string[] = [], zoneKeys:
  * dropped: 뺀 장소 수. 제외 안내와 완료 안내를 따로 띄우면 뒤의 것이 앞의 것을 덮어 한 번만 알린다
  * text: 공유 시트에만 싣는 코스 문구. 클립보드는 주소창에 붙여도 열리도록 주소 한 줄만 복사한다
  */
+// 공유 시트를 여는 기기에서는 단추가 복사하지 않으므로 글자를 '공유'로 둔다(P-355)
+const CAN_SHARE = typeof navigator.share === 'function';
 async function shareOrCopyLink(url: string, dropped = 0, text?: string): Promise<void> {
   if (navigator.share) {
     if (dropped > 0) showToast(`${dropped}곳을 빼고 공유해요`);
@@ -7261,7 +7263,7 @@ function renderReceiverView(steps: CourseStep[]): void {
       <div class="receiver-actions-bar">
         <button class="btn-secondary btn-receiver-action" id="btn-receiver-copy" type="button">📋 코스 복사</button>
         <button class="btn-secondary btn-receiver-action" id="btn-receiver-save" type="button">💾 저장</button>
-        <button class="btn-secondary btn-receiver-action" id="btn-receiver-share" type="button">🔗 링크 복사</button>
+        <button class="btn-secondary btn-receiver-action" id="btn-receiver-share" type="button">🔗 ${CAN_SHARE ? '링크 공유' : '링크 복사'}</button>
       </div>
 
       <button class="btn-primary btn-make-own" id="btn-make-own">🚀 나만의 코스 만들기 →</button>
@@ -7617,7 +7619,7 @@ function renderOverlayContent(): void {
                   </button>
                   <div class="saved-item-actions">
                     <button class="saved-action-btn saved-item-copy" data-copy-id="${escapeHtml(item.id)}" aria-label="카톡 복사" title="카톡 포맷 복사">📋</button>
-                    <button class="saved-action-btn saved-item-share" data-share-id="${escapeHtml(item.id)}" aria-label="링크 복사" title="공유 링크 복사">🔗</button>
+                    <button class="saved-action-btn saved-item-share" data-share-id="${escapeHtml(item.id)}" aria-label="${CAN_SHARE ? '링크 공유' : '링크 복사'}" title="${CAN_SHARE ? '코스 링크 공유' : '공유 링크 복사'}">🔗</button>
                     <button class="saved-action-btn saved-item-delete" data-delete-id="${escapeHtml(item.id)}" aria-label="삭제" title="삭제">🗑</button>
                   </div>
                 </div>`;
