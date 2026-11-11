@@ -800,6 +800,8 @@ function deduplicateSpotList(spots: Spot[]): Spot[] {
  * 청주(최근접 33km)·광주(최근접 76km)는 후보 없음으로 떨어져 엉뚱한 숙소 대신 안내 카드가 뜬다.
  */
 const STAY_ZONE_FALLBACK_RADIUS_KM = 20;
+/** 동네 이름 검색의 앵커 후보를 동네 중심에서 이 거리 안으로 좁힌다(P-362) */
+const ZONE_ANCHOR_RADIUS_KM = 5.0;
 
 const OUTDOOR_PATTERNS = /(?:공원|산책|둘레길|올레길|트레킹|피크닉|수목원|식물원\s*야외|유원지|해변|해수욕장|루프탑|카약|요트|패들|서핑|야외\s*전망대|야경산책|출렁다리|산성|성곽|숲|목장|농장|골프|해안|계곡|폭포|캠핑|글램핑|야시장|스카이워크|케이블카|드라이브|등산|휴양림|정원|전망대|유적|릉|묘|사찰|템플|선착장|항만|포구|분수|구름다리|광장|휴게소|보트|짚라인|짚트랙|등대|전망데크|보행교|대교|봉수대|야경길|루지|레일바이크|짚와이어|수변)/i;
 const INDOOR_PATTERNS = /(?:실내|아쿠아리움|수족관|박물관|미술관|전시|갤러리|쇼핑몰|백화점|아케이드|공방|스파|온천|찜질|도서관|영화관|카페|커피|베이커리|제과|디저트|레스토랑|식당|다이닝|양식|한식|일식|중식|주점|이자카야|펍|와인|칵테일|위스키|노래방|볼링|보드게임|방탈출|호텔|체험관|문화원|뮤지엄|기념관|전시관)/i;
@@ -1990,6 +1992,7 @@ function generateCourse(
   let anchorSlot: SlotKey | null = null;
   let anchorPool: Spot[] = [];
   let keywordAnchor = false;
+  let zoneAnchor = false;
   // 검색어·카테고리 앵커에도 가성비·스페셜·무드 프리셋을 건다. 빠져 있어 스페셜 칩을 켠 채 '떡볶이'를 치면
   // 4,000원 떡볶이집이 앵커가 됐다. 필터와 검색어가 함께 맞는 곳이 없으면 아래 일반 앵커로 넘어간다
   // filterByMoodPreset은 0건이면 원래 목록을 돌려줘 앵커에서는 프리셋이 무시됐으므로 엄격 판정을 쓴다
@@ -2004,10 +2007,20 @@ function generateCourse(
   };
   // 슬롯별 앵커 후보: 검색어에 맞는 스팟에 칩 필터와 범위를 걸고 최근 노출을 뺀다.
   // 최근 노출 제외는 검색어 판정 뒤에 건다. 앞에서 빼면 맞는 스팟이 모두 이력에 든 검색어가 앵커를 잃고 전국 무작위 코스가 됐다
-  const anchorPoolsBySlot = (slots: SlotKey[]): Spot[][] => {
-    const matched = slots.map((slot) =>
-      applyChipFilters(getCandidates(all, slot, regionKeys, 'ALL', [], zoneKeys, null, isIndoor).filter((s) => matchesSearchQuery(s, query!))),
+  // 동네 이름 검색('애월 맛집')의 앵커 후보는 동네 중심에서 ZONE_ANCHOR_RADIUS_KM 안의 일치만 쓴다. 칸마다 일치 수가 가장 적은 칸을 앵커로 삼으면
+  // 외진 일치 한두 곳이 그 칸의 전부라 다시 추천 6번이 모두 그 한 곳을 앵커로 썼다(8.4km, 15.5km). 안에 일치가 한 곳도 없거나 역명 검색이면 거르지 않는다
+  const zoneCenter = opts.zoneFromQuery && !station ? ZONE_CENTERS[zoneKeys[0]] : undefined;
+  const withinZoneCore = (lists: Spot[][]): Spot[][] => {
+    if (!zoneCenter) return lists;
+    const core = lists.map((list) =>
+      list.filter((s) => s.lat != null && s.lng != null && getDistanceKm(zoneCenter.lat, zoneCenter.lng, s.lat, s.lng) <= ZONE_ANCHOR_RADIUS_KM),
     );
+    return core.some((list) => list.length > 0) ? core : lists;
+  };
+  const anchorPoolsBySlot = (slots: SlotKey[]): Spot[][] => {
+    const matched = withinZoneCore(slots.map((slot) =>
+      applyChipFilters(getCandidates(all, slot, regionKeys, 'ALL', [], zoneKeys, null, isIndoor).filter((s) => matchesSearchQuery(s, query!))),
+    ));
     const radius = station ? stationAnchorRadiusKm(matched.flat(), station.points) : null;
     return matched.map((list) =>
       excludeRecent(radius === null ? inScopeFirst(list) : list.filter((s) => stationDistanceKm(s, station!.points) <= radius), avoid),
@@ -2051,7 +2064,9 @@ function generateCourse(
       for (const [i, slot] of slotsOn.entries()) {
         // 검색어가 있을 때는 mood 제약 없이 해당 지역/존의 스팟 풀에서 폭넓게 검색
         const matched = pools[i];
-        if (matched.length > 0 && (anchorSlot === null || matched.length < anchorPool.length)) {
+        // 동네 검색은 이력 밖 후보가 남은 칸만 본다. 한 칸의 후보가 이력에 다 들면 excludeRecent가 그 칸을 통째로 되돌려 같은 앵커가 반복됐다
+        const zoneFresh = opts.zoneFromQuery && pools.some((p) => p.some((s) => !avoid.has(s.id)));
+        if (matched.length > 0 && (!zoneFresh || matched.some((s) => !avoid.has(s.id))) && (anchorSlot === null || matched.length < anchorPool.length)) {
           anchorSlot = slot;
           anchorPool = matched;
         }
@@ -2073,6 +2088,7 @@ function generateCourse(
       }
     }
     keywordAnchor = !exactAnchor && anchorPool.length > 0 && !scope && zoneKeysForQuery(query).length === 0;
+    zoneAnchor = !exactAnchor && anchorPool.length > 0 && !!opts.zoneFromQuery;
   } else if (categoryDef && categoryDef.keywords) {
     // 1-3. 카테고리 칩이 선택된 경우: 테마 낱말에 맞는 후보가 가장 많은 칸을 앵커로 쓴다. 가장 적은 칸을 쓰면
     // 그 종류가 드문 칸의 오판(🍷 낮 칸 라운지 카페)이 앵커가 됐다. 🌙 칩은 저녁·밤 칸을 먼저 보고
@@ -2136,11 +2152,13 @@ function generateCourse(
         break;
       }
     }
-  } else if (keywordAnchor) {
+  } else if (keywordAnchor || zoneAnchor) {
+    // 동네 검색(P-362)도 같은 거름을 건다. 이력 밖 후보가 남은 칸으로 앵커 칸이 바뀌면 다른 칸 장소가 앵커에서 20km 안에 없어
+    // '담양'의 밤 칸이 65km 밖 장소가 됐다. 칸 채우기가 마지막에 동네를 풀어 찾으므로 여기서도 동네 제한 없이 본다. 남는 곳이 없으면 종전대로 뽑는다
     const nearLists = slotsOn
       .filter((s) => s !== anchorSlot && s !== 'stay')
       .map((slot) =>
-        filterByBudget(filterByMoodPreset(getCandidates(all, slot, regionKeys, moodKey, [], zoneKeys, null, isIndoor), moodPreset), budgetFilter).filter(
+        filterByBudget(filterByMoodPreset(getCandidates(all, slot, regionKeys, moodKey, [], zoneAnchor ? [] : zoneKeys, null, isIndoor), moodPreset), budgetFilter).filter(
           (s) => s.lat != null && s.lng != null,
         ),
       );
