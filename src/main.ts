@@ -3011,8 +3011,8 @@ function shareThemeKey(key: string | null | undefined): string | undefined {
  * categoryKey: 켠 테마 칩이면 `?t=<칩 키>`로 싣는다(P-292). 받은 링크에서 이어받은 옛 `t`는 늘 지우고 다시 정한다
  */
 function buildShareUrl(spotIds: number[], categoryKey?: string): string {
-  const params = new URLSearchParams(location.search);
-  params.delete('t');
+  // P-374: 앱이 읽는 쿼리는 t뿐이라 보낸 사람의 fbclid·utm_* 같은 유입 쿼리는 싣지 않는다
+  const params = new URLSearchParams();
   const theme = shareThemeKey(categoryKey);
   if (theme) params.set('t', theme);
   const query = params.toString();

@@ -39,7 +39,9 @@ for (const c of SPOT_EXPLORE_CATEGORIES.filter((c) => c.key !== 'ALL')) {
 assert.strictEqual(share('', [1], 'XYZ'), 'https://nufunc.github.io/oneul-date/#c=1', '잘못된 키가 실렸다');
 assert.strictEqual(share('?t=OCEAN', [1], undefined), 'https://nufunc.github.io/oneul-date/#c=1', '옛 t가 남았다');
 assert.strictEqual(share('?t=OCEAN', [1], 'CAFE'), 'https://nufunc.github.io/oneul-date/?t=CAFE#c=1', '옛 t가 새 칩으로 바뀌지 않았다');
-assert.strictEqual(share('?x=1', [1], 'CAFE'), 'https://nufunc.github.io/oneul-date/?x=1&t=CAFE#c=1', '다른 검색어를 잃었다');
+// P-374: 유입 쿼리(fbclid·utm_*)는 받는 사람에게 넘기지 않는다
+assert.strictEqual(share('?fbclid=a&utm_source=b', [1], 'CAFE'), 'https://nufunc.github.io/oneul-date/?t=CAFE#c=1', '유입 쿼리가 실렸다');
+assert.strictEqual(share('?fbclid=a', [1], undefined), 'https://nufunc.github.io/oneul-date/#c=1', '유입 쿼리가 실렸다');
 const { shareThemeKey } = makeShare(loc(''));
 for (const bad of ['XYZ', 'cafe', 'ALL', '', null, undefined, '__proto__', 'CAFE&x=1']) assert.strictEqual(shareThemeKey(bad), undefined, `잘못된 키를 받았다: ${bad}`);
 assert.strictEqual(shareThemeKey('CAFE'), 'CAFE');
