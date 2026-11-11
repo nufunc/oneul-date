@@ -3221,9 +3221,12 @@ function isOpenAtSlotClock(spot: Spot, slot: SlotKey, date = new Date()): boolea
   return result;
 }
 
+/** 영업시간 한 구간 `[요일|매일] HH:MM ~ HH:MM`. parseOpenAtClock과 todayHoursLabel(P-372)이 함께 쓴다 */
+const HOURS_RANGE_RE = /^(?:([월화수목금토일]|매일)\s*)?(\d{1,2}):(\d{2})\s*~\s*(\d{1,2}):(\d{2})$/;
+
 function parseOpenAtClock(hours: string, clock: number, today: string, yesterday: string): boolean {
   if (/^상시\s*개방$/.test(hours.trim())) return true;
-  const range = /^(?:([월화수목금토일]|매일)\s*)?(\d{1,2}):(\d{2})\s*~\s*(\d{1,2}):(\d{2})$/;
+  const range = HOURS_RANGE_RE;
   let sawToday = false;
   for (const part of hours.split('/')) {
     const m = range.exec(part.trim());
@@ -3241,6 +3244,28 @@ function parseOpenAtClock(hours: string, clock: number, today: string, yesterday
   }
   // 오늘 요일이 목록에 없으면 정기휴무 판정(isSpotClosedToday) 몫이므로 여기서 거르지 않는다
   return !sawToday;
+}
+
+/**
+ * 코스 카드 배지용 오늘 영업시간(P-372). 카드에서 시간을 알려면 시트를 열어야 해 헛걸음을 막지 못했다.
+ * 형식을 확실히 해석할 때만 `오늘 11:00~22:00`, 상시 개방과 is_24h는 `24시간`을 돌려주고
+ * 해석하지 못하는 형식, 오늘 요일이 없는 목록, 오늘 구간이 둘 이상인 경우는 빈 문자열이라 배지를 그리지 않는다.
+ * 영업 중 판정은 하지 않는다(방문 시각을 모른다)
+ */
+function todayHoursLabel(spot: Spot, date = new Date()): string {
+  if (spot.is_24h) return '24시간';
+  const bh = spot.business_hours;
+  const hours = bh && typeof bh === 'object' ? bh['영업시간'] || bh['이용시간'] : '';
+  if (typeof hours !== 'string' || !hours) return '';
+  if (/^상시\s*개방$/.test(hours.trim())) return '24시간';
+  const today = KOREAN_DAY_NAMES[date.getDay()];
+  const found: string[] = [];
+  for (const part of hours.split('/')) {
+    const m = HOURS_RANGE_RE.exec(part.trim());
+    if (!m) return '';
+    if (!m[1] || m[1] === '매일' || m[1] === today) found.push(`${m[2]}:${m[3]}~${m[4]}:${m[5]}`);
+  }
+  return found.length === 1 ? `오늘 ${found[0]}` : '';
 }
 
 /** 스팟이 오늘 정기휴무인지 판별 (현장 헛걸음 방지) */
@@ -5716,6 +5741,12 @@ function renderStepCard(
 
   if (spot.price_tier && spot.price_tier !== 'FREE') {
     metaBadges.push(`<span class="badge-meta badge-price">${spot.price_tier}</span>`);
+  }
+
+  // P-372: 오늘 영업시간 한 줄. 오늘 휴무 카드는 ⚠️ 배지와 모순되므로 그리지 않는다
+  const hoursLabel = isClosedToday ? '' : todayHoursLabel(spot);
+  if (hoursLabel) {
+    metaBadges.push(`<span class="badge-meta badge-hours"><span aria-hidden="true">🕒</span> ${hoursLabel}</span>`);
   }
 
   // v4.0 실시간 예약 링크

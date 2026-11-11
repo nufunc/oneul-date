@@ -2633,6 +2633,11 @@ button {
   border-color: #BAE6FD;
 }
 
+/* P-372: 오늘 영업시간. inline-flex가 이모지 뒤 공백을 지우므로 간격을 gap으로 둔다 */
+.badge-hours {
+  gap: 3px;
+}
+
 .badge-price {
   color: #B45309;
   background: #FFFBEB;
