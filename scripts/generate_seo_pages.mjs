@@ -64,7 +64,22 @@ function replaceMeta(html, property, content) {
   return html.replace(re, `<meta ${attr}="${property}" content="${escapeHtml(content)}" />`);
 }
 
-function buildPage(region, slot, pageSpots) {
+// 랜딩 32쪽을 크롤러가 따라갈 수 있게 같은 지역의 다른 시간대, 다른 지역의 같은 시간대, /blog/를 잇는다(P-369).
+// generated에 든 조합만 링크하므로 MIN_SPOTS_PER_PAGE 미달로 건너뛴 쪽은 링크가 생기지 않는다.
+function buildNav(region, slot, generated) {
+  const link = (r, sl, text) => `<a href="${SITE_URL}/${r.slug}/${sl.key}/">${escapeHtml(text)}</a>`;
+  const sameRegion = SLOTS.filter((sl) => sl.key !== slot.key && generated.has(`${region.slug}/${sl.key}`))
+    .map((sl) => link(region, sl, `${region.key} ${sl.label}`));
+  const sameSlot = REGIONS.filter((r) => r.slug !== region.slug && generated.has(`${r.slug}/${slot.key}`))
+    .map((r) => link(r, slot, `${r.key} ${slot.label}`));
+  const lines = [];
+  if (sameRegion.length) lines.push(`<p>${escapeHtml(region.key)} 다른 시간대: ${sameRegion.join(' · ')}</p>`);
+  if (sameSlot.length) lines.push(`<p>다른 지역 ${escapeHtml(slot.label)} 코스: ${sameSlot.join(' · ')}</p>`);
+  lines.push(`<p><a href="${SITE_URL}/blog/">데이트 코스 매거진 보기</a></p>`);
+  return `<nav aria-label="다른 데이트 코스 추천">\n        ${lines.join('\n        ')}\n      </nav>`;
+}
+
+function buildPage(region, slot, pageSpots, generated) {
   const url = `${SITE_URL}/${region.slug}/${slot.key}/`;
   const title = `${region.key} ${slot.label} 데이트 코스 추천 | 오늘 데이트`;
   const description = `${region.key} 지역 ${slot.label} 시간대에 어울리는 데이트 장소 ${pageSpots.length}곳을 모았다. 조건만 고르면 코스가 완성된다.`;
@@ -112,6 +127,7 @@ function buildPage(region, slot, pageSpots) {
       <p>${escapeHtml(description)}</p>
       <ul>${listItems}
       </ul>
+      ${buildNav(region, slot, generated)}
       <p><a href="${SITE_URL}/">오늘 데이트에서 직접 코스 만들기 →</a></p>
     </section>`;
 
@@ -122,6 +138,8 @@ function buildPage(region, slot, pageSpots) {
 const sitemapUrls = [`${SITE_URL}/`];
 let pageCount = 0;
 
+// 1단계: 만들 조합을 모두 정한다. 랜딩끼리 잇는 링크가 실제로 만든 쪽만 가리키려면 쓰기 전에 전체를 알아야 한다.
+const plannedPages = [];
 for (const region of REGIONS) {
   for (const slot of SLOTS) {
     const seenKeys = new Set();
@@ -140,13 +158,18 @@ for (const region of REGIONS) {
       continue;
     }
 
-    const pageSpots = candidates.slice(0, TOP_N);
-    const outDir = path.join(distDir, region.slug, slot.key);
-    fs.mkdirSync(outDir, { recursive: true });
-    fs.writeFileSync(path.join(outDir, 'index.html'), buildPage(region, slot, pageSpots));
-    sitemapUrls.push(`${SITE_URL}/${region.slug}/${slot.key}/`);
-    pageCount += 1;
+    plannedPages.push({ region, slot, pageSpots: candidates.slice(0, TOP_N) });
   }
+}
+const generated = new Set(plannedPages.map(({ region, slot }) => `${region.slug}/${slot.key}`));
+
+// 2단계: 페이지를 쓴다.
+for (const { region, slot, pageSpots } of plannedPages) {
+  const outDir = path.join(distDir, region.slug, slot.key);
+  fs.mkdirSync(outDir, { recursive: true });
+  fs.writeFileSync(path.join(outDir, 'index.html'), buildPage(region, slot, pageSpots, generated));
+  sitemapUrls.push(`${SITE_URL}/${region.slug}/${slot.key}/`);
+  pageCount += 1;
 }
 
 // 블로그 매거진 페이지를 sitemap에 등록
