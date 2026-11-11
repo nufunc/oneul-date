@@ -1019,12 +1019,20 @@ function getDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): 
   return R * c;
 }
 
-/** 두 지점 사이 거리(km)로 표기 문구와 아이콘을 만든다. 1km 미만은 도보, 그 이상은 차량이다.
- * 차량은 30km 미만이 25km/h에 3분, 30km부터는 그 30km 값(75분)에 60km/h를 이어 붙인다.
+/** 도보로 표기하고 도보 길찾기를 여는 거리 상한(km). P-329 pickNearRandom의 첫 근접 반경 1.5km와 같은 값이다(P-376) */
+const WALK_MAX_KM = 1.5;
+
+/** 두 지점 사이 거리(km)로 표기 문구와 아이콘과 길찾기 모드를 만든다. WALK_MAX_KM 미만은 도보, 그 이상은 차량이다.
+ * 도보 거리는 1km 미만이 m, 1km부터 소수 한 자리 km다. 차량은 30km 미만이 25km/h에 3분, 30km부터는 그 30km 값(75분)에 60km/h를 이어 붙인다.
  * 종전에는 30km 이상이 dist/60시간이라 29.9km는 75분, 37km는 0.6시간(37분)으로 더 먼 구간이 짧게 나왔다 */
-function describeTransit(dist: number): { distanceText: string; timeText: string; icon: string } {
-  if (dist < 1.0) {
-    return { distanceText: `${Math.round(dist * 1000)}m`, timeText: `도보 약 ${Math.max(1, Math.round(dist * 15))}분`, icon: '🚶‍♂️' };
+function describeTransit(dist: number): { distanceText: string; timeText: string; icon: string; mode: 'walk' | 'transit' } {
+  if (dist < WALK_MAX_KM) {
+    return {
+      distanceText: dist < 1.0 ? `${Math.round(dist * 1000)}m` : `${dist.toFixed(1)}km`,
+      timeText: `도보 약 ${Math.max(1, Math.round(dist * 15))}분`,
+      icon: '🚶‍♂️',
+      mode: 'walk',
+    };
   }
   const carMin = dist < 30.0
     ? Math.max(3, Math.round((dist / 25) * 60 + 3))
@@ -1036,6 +1044,7 @@ function describeTransit(dist: number): { distanceText: string; timeText: string
     distanceText: dist < 30.0 ? `${dist.toFixed(1)}km` : `${dist.toFixed(0)}km`,
     timeText: `차량·이동 약 ${time}`,
     icon: '🚗',
+    mode: 'transit',
   };
 }
 
@@ -2890,13 +2899,9 @@ async function formatCourseTextAsync(
       const nextSpot = byId.get(filled[i + 1].spotId);
       if (spot.lat && spot.lng && nextSpot?.lat && nextSpot?.lng) {
         const dist = getDistanceKm(spot.lat, spot.lng, nextSpot.lat, nextSpot.lng);
-        if (dist < 1.0) {
-          const walkMin = Math.max(1, Math.round(dist * 15));
-          lines.push(`\n   ↓ 🚶‍♂️ 도보 약 ${walkMin}분 (${Math.round(dist * 1000)}m)`);
-        } else {
-          const carMin = Math.max(3, Math.round((dist / 25) * 60 + 3));
-          lines.push(`\n   ↓ 🚗 이동 약 ${carMin}분 (${dist.toFixed(1)}km)`);
-        }
+        // 화면 이동 띠와 같은 문구(P-376)
+        const { icon, timeText, distanceText } = describeTransit(dist);
+        lines.push(`\n   ↓ ${icon} ${timeText} (${distanceText})`);
       } else {
         lines.push(`\n   ↓ 📍 다음 코스로 이동`);
       }
@@ -2962,10 +2967,11 @@ function renderUserOriginTransitDivider(firstStep: CourseStep): string {
     let distanceText = '';
     let timeText = '';
     let icon = '🚶‍♂️';
+    let mode = '';
 
-    ({ distanceText, timeText, icon } = describeTransit(dist));
+    ({ distanceText, timeText, icon, mode } = describeTransit(dist));
 
-    const naviUrl = `https://map.naver.com/p/directions/${userCoords.lng},${userCoords.lat},${encodeURIComponent('내위치')}/${s.lng},${s.lat},${encodeURIComponent(s.name)}/-/${dist < 1.0 ? 'walk' : 'transit'}`;
+    const naviUrl = `https://map.naver.com/p/directions/${userCoords.lng},${userCoords.lat},${encodeURIComponent('내위치')}/${s.lng},${s.lat},${encodeURIComponent(s.name)}/-/${mode}`;
 
     return `
       <div class="step-transit-divider origin-start">
@@ -5293,7 +5299,7 @@ function renderStepTransitDivider(prevStep: CourseStep, nextStep: CourseStep): s
 
   let naviUrl = '';
   if (s1.lat && s1.lng && s2.lat && s2.lng) {
-    const mode = (getDistanceKm(s1.lat, s1.lng, s2.lat, s2.lng) < 1.0) ? 'walk' : 'transit';
+    const { mode } = describeTransit(getDistanceKm(s1.lat, s1.lng, s2.lat, s2.lng));
     naviUrl = `https://map.naver.com/p/directions/${s1.lng},${s1.lat},${encodeURIComponent(s1.name)}/${s2.lng},${s2.lat},${encodeURIComponent(s2.name)}/-/${mode}`;
   } else {
     naviUrl = naverMapUrl(s2);

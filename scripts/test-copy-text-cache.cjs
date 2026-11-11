@@ -12,7 +12,12 @@ const cut = (from, to) => {
   assert(start >= 0, `src/main.ts에 ${from}이 없다`);
   return src.slice(start, src.indexOf(to, start) + to.length);
 };
-const code = cut('function areaThemeLabel', '\n}\n') + cut('async function formatCourseTextAsync', '\n}\n');
+const code = [
+  cut('const WALK_MAX_KM', ';\n'),
+  cut('function describeTransit', '\n}\n'),
+  cut('function areaThemeLabel', '\n}\n'),
+  cut('async function formatCourseTextAsync', '\n}\n'),
+].join('\n');
 
 let fetchCalls = 0;
 const stubs = {
