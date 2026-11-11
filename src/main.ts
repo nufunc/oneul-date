@@ -2010,11 +2010,11 @@ function generateCourse(
   // 동네 이름 검색('애월 맛집')의 앵커 후보는 동네 중심에서 ZONE_ANCHOR_RADIUS_KM 안의 일치만 쓴다. 칸마다 일치 수가 가장 적은 칸을 앵커로 삼으면
   // 외진 일치 한두 곳이 그 칸의 전부라 다시 추천 6번이 모두 그 한 곳을 앵커로 썼다(8.4km, 15.5km). 안에 일치가 한 곳도 없거나 역명 검색이면 거르지 않는다
   const zoneCenter = opts.zoneFromQuery && !station ? ZONE_CENTERS[zoneKeys[0]] : undefined;
+  const inZoneCore = (s: Spot) =>
+    !zoneCenter || (s.lat != null && s.lng != null && getDistanceKm(zoneCenter.lat, zoneCenter.lng, s.lat, s.lng) <= ZONE_ANCHOR_RADIUS_KM);
   const withinZoneCore = (lists: Spot[][]): Spot[][] => {
     if (!zoneCenter) return lists;
-    const core = lists.map((list) =>
-      list.filter((s) => s.lat != null && s.lng != null && getDistanceKm(zoneCenter.lat, zoneCenter.lng, s.lat, s.lng) <= ZONE_ANCHOR_RADIUS_KM),
-    );
+    const core = lists.map((list) => list.filter(inZoneCore));
     return core.some((list) => list.length > 0) ? core : lists;
   };
   const anchorPoolsBySlot = (slots: SlotKey[]): Spot[][] => {
@@ -2032,9 +2032,12 @@ function generateCourse(
     // 1-0. 이름을 그대로 친 검색은 이름이 같은 스팟을 앵커로 먼저 쓴다. 칸별 풀의 크기로만 정하면 이름이 같은 스팟이 큰 풀에 묻혀
     // 다른 칸의 작은 풀 스팟이 앵커가 됐다(담양힐링파크, 라비돌 호텔&리조트). 이름이 역 이름과 같은 파라다이스시티도 이 규칙이 먼저다
     const lowerQuery = query.toLowerCase();
+    // 동네 이름 자체를 친 검색('영일대')이면 동네 중심 5km 밖의 같은 이름(대잠동 '영일대' 호텔, 6.7km)은 앵커로 쓰지 않는다(P-364)
+    const zoneName = (POPULAR_ZONES.find((z) => z.key === zoneKeys[0])?.label ?? '').split('·')[0].toLowerCase();
+    const zoneNameQuery = !!zoneCenter && (lowerQuery === zoneName || lowerQuery === zoneName.split(' ')[1]);
     for (const slot of SLOT_ORDER) {
       const exact = applyChipFilters(
-        getCandidates(all, slot, regionKeys, 'ALL', [], zoneKeys, null, isIndoor).filter((s) => (s.name || '').trim().toLowerCase() === lowerQuery),
+        getCandidates(all, slot, regionKeys, 'ALL', [], zoneKeys, null, isIndoor).filter((s) => (s.name || '').trim().toLowerCase() === lowerQuery && (!zoneNameQuery || inZoneCore(s))),
       );
       if (exact.length > 0 && (anchorSlot === null || exact.length < anchorPool.length)) {
         anchorSlot = slot;

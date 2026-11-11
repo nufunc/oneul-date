@@ -379,4 +379,15 @@ for (const categoryKey of ['PUB', 'CULTURE', 'OCEAN', 'HEALING']) {
   assert.strictEqual(lost.length, 0, `${categoryKey} 🔄 ${checked}번 중 ${lost.length}번이 20km 안 테마 일치 후보를 두고 다른 곳으로 바뀌었다: ${lost.slice(0, 5).join(', ')}`);
 }
 
+// (f) 동네 이름 자체를 친 검색은 동네 중심 5km 밖의 같은 이름 장소를 앵커로 쓰지 않는다(P-364).
+// '영일대'는 6.7km 떨어진 대잠동 '영일대' 호텔이 매번 앵커였다
+{
+  const zoneKeys = zoneKeysForQuery('영일대');
+  assert.ok(zoneKeys.length > 0, '영일대에 세부 동네가 없다');
+  const anchors = run('영일대', ['day', 'evening', 'night'], 6, 364, zoneKeys, true).map((c) => c.find((st) => st.anchor)?.spot).filter(Boolean);
+  assert.ok(anchors.length > 0, '영일대 코스에 앵커가 없다');
+  const hotel = anchors.filter((s) => s.id === 1790686128758);
+  assert.strictEqual(hotel.length, 0, `영일대 앵커 ${anchors.length}번 중 ${hotel.length}번이 대잠동 영일대 호텔이다`);
+}
+
 console.log('test-course-name-anchor: 모두 통과');
