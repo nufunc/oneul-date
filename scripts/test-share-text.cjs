@@ -27,7 +27,7 @@ const sheets = [];
 const nav = { share: undefined, clipboard: { writeText: async (t) => nav.copied.push(t) }, shared: [], copied: [] };
 const stubs = {
   spotById,
-  regionsLabel: (regions, zones) => (zones.length > 0 ? '성수' : regions.join('·')),
+  courseAreaLabel: (spots, regions, zones) => (zones.length > 0 ? '성수' : regions.join('·')),
   showToast: (msg) => toasts.push(msg),
   navigator: nav,
   document: { activeElement: null },

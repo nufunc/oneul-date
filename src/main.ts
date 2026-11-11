@@ -1111,6 +1111,15 @@ function spotSido(spot: Spot): string {
   return m ? m[1][0] + m[2] : w.slice(0, 2);
 }
 
+/** 주소로 정한 시·군·구 이름. 시는 '시'를 떼고(충주), 군은 그대로(영덕군), 광역시의 구·군은 시 이름을 앞에 붙인다(울산 남구). 정하지 못하면 null */
+function spotSigunguLabel(spot: Spot): string | null {
+  const place = (spot.address || '').split(/\s+/)[1] ?? '';
+  const sido = spotSido(spot);
+  if (['서울', '부산', '대구', '인천', '광주', '대전', '울산'].includes(sido)) return /[구군]$/.test(place) ? `${sido} ${place}` : null;
+  if (/시$/.test(place)) return place.slice(0, -1);
+  return /군$/.test(place) ? place : null;
+}
+
 /**
  * 앵커 스폿 기준 스마트 근접 랜덤 선택 (물리적 거리 + 동일 자치구 클러스터링).
  * 1순위: 앵커와 물리적 거리 1.5km, 3km, 5km 순으로 후보 10곳 이상인 첫 반경 안 스폿 (걸어서 이어지는 동선), 10곳 미만이면 5km
@@ -2270,6 +2279,26 @@ function regionsLabel(regionKeys: string[], zoneKeys: string[] = []): string {
     .join('·');
 }
 
+/**
+ * 코스 장소로 정한 지역 이름. 복사 글 머리줄과 공유 시트 문구와 받은 코스 제목이 함께 쓴다(P-350).
+ * 1) 모든 장소가 든 존 2) 모든 장소가 한 시·군·구 3) 시·군 둘이면 'A·B' 4) 그 밖에는 선택한 지역 라벨, 선택도 없으면 ''
+ */
+function courseAreaLabel(spots: Spot[], regionKeys: string[] = [], zoneKeys: string[] = []): string {
+  if (spots.length > 0) {
+    // 고른 존이 모든 장소를 덮으면 고른 존 이름을 그대로 쓴다
+    if (zoneKeys.length > 0 && spots.every((s) => matchesZone(s, zoneKeys))) return regionsLabel(regionKeys, zoneKeys);
+    const zone = POPULAR_ZONES.find((z) => spots.every((s) => matchesZone(s, [z.key])));
+    if (zone) return zone.label;
+    const places = spots.map((s) => ({ key: `${spotSido(s)} ${spotSigunguLabel(s)}`, label: spotSigunguLabel(s) }));
+    if (places.every((p) => p.label)) {
+      const labels = [...new Map(places.map((p) => [p.key, p.label as string])).values()];
+      if (labels.length === 1) return labels[0];
+      if (labels.length === 2 && labels.every((l) => !l.includes(' '))) return labels.join('·');
+    }
+  }
+  return regionKeys.length > 0 || zoneKeys.length > 0 ? regionsLabel(regionKeys, zoneKeys) : '';
+}
+
 /** 저장 포맷 하위호환 — 과거 문자열 region('ALL' 포함)을 배열로 정규화 */
 function normalizeRegionCond(value: string[] | string | undefined): string[] {
   if (Array.isArray(value)) return value.filter((k) => k !== 'ALL');
@@ -2767,7 +2796,8 @@ async function formatCourseTextAsync(
   categoryKey?: string,
 ): Promise<string> {
   const blocks: string[] = [];
-  const headText = areaThemeLabel(regionsLabel(regionKeys, zoneKeys), moodKey, categoryKey);
+  const headSpots = steps.map((st) => (st.spotId !== null ? byId.get(st.spotId) : undefined)).filter((s): s is Spot => Boolean(s));
+  const headText = areaThemeLabel(courseAreaLabel(headSpots, regionKeys, zoneKeys) || '전국 어디서나', moodKey, categoryKey);
 
   blocks.push(`💖 [오늘 데이트 코스] ${headText}`);
 
@@ -2937,9 +2967,11 @@ function buildShareUrl(spotIds: number[], categoryKey?: string): string {
  * 받는 사람이 열기 전에 코스를 알 수 있게 한다. 찾지 못한 id는 건너뛰고, 하나도 못 찾으면 undefined
  */
 function courseShareText(spotIds: number[], regionKeys: string[] = [], zoneKeys: string[] = []): string | undefined {
-  const names = spotIds.map((id) => spotById.get(id)?.name).filter((n): n is string => Boolean(n));
+  const spots = spotIds.map((id) => spotById.get(id)).filter((s): s is Spot => Boolean(s));
+  const names = spots.map((s) => s.name).filter((n): n is string => Boolean(n));
   if (names.length === 0) return undefined;
-  const region = regionKeys.length > 0 || zoneKeys.length > 0 ? `${regionsLabel(regionKeys, zoneKeys)} ` : '';
+  const area = courseAreaLabel(spots, regionKeys, zoneKeys);
+  const region = area ? `${area} ` : '';
   const more = names.length > 4 ? ` 외 ${names.length - 4}곳` : '';
   return `${region}데이트 코스 ${names.length}곳: ${names.slice(0, 4).join(' → ')}${more}`;
 }
@@ -7169,7 +7201,7 @@ function renderReceiverView(steps: CourseStep[]): void {
     ? REGIONS.find((r) => r.key === sharedZone.regionKey)
     : REGIONS.find((r) => r.key !== 'ALL' && sharedSpots[0]?.region && r.match.includes(sharedSpots[0].region));
   // 제목에는 모든 장소가 든 지역만 쓴다. 지역이 섞인 코스에 첫 장소의 지역을 붙이면 코스 전체가 그 지역인 것처럼 읽힌다(P-273)
-  const areaLabel = sharedZone?.label ?? (sharedRegion && sharedSpots.every((s) => sharedRegion.match.includes(s.region)) ? sharedRegion.label : '');
+  const areaLabel = courseAreaLabel(sharedSpots, sharedRegion && sharedSpots.every((s) => sharedRegion.match.includes(s.region)) ? [sharedRegion.key] : []);
   const heroTitle = `${areaLabel ? `${areaLabel} ` : ''}데이트 코스 ${steps.length}곳`;
   const routeNames = sharedSpots.map((s) => s.name);
   const heroRoute = routeNames.slice(0, 3).join(' → ') + (routeNames.length > 3 ? ` 외 ${routeNames.length - 3}곳` : '');

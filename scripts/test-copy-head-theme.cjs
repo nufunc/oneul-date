@@ -16,7 +16,7 @@ const code = cut('function areaThemeLabel', '\n}\n') + cut('async function forma
 assert.ok(/return areaThemeLabel\(/.test(cut('function courseTitle', '\n}\n')), 'courseTitle이 areaThemeLabel을 부르지 않는다');
 
 const stubs = {
-  regionsLabel: (r) => (r.length ? r.join('·') : '전국 어디서나'),
+  courseAreaLabel: (spots, r) => r.join('·'),
   moodLabel: (m) => (m === 'ALL' ? '모든 분위기' : `분위기${m}`),
   SPOT_EXPLORE_CATEGORIES: [{ key: 'CAFE', emoji: '☕', label: '감성카페' }],
   naverMapUrl: (s) => `https://map.example/${s.id}`,

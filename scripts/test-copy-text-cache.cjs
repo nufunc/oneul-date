@@ -20,7 +20,7 @@ const stubs = {
     fetchCalls++;
     throw new Error('복사 텍스트가 네트워크 요청을 보냈다');
   },
-  regionsLabel: () => '성수',
+  courseAreaLabel: () => '성수',
   moodLabel: () => '감성',
   SPOT_EXPLORE_CATEGORIES: [],
   naverMapUrl: (s) => `https://map.example/${s.id}`,

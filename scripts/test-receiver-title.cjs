@@ -26,7 +26,7 @@ assert.match(view, /document\.title = `\$\{heroTitle\} \| 오늘 데이트`;/, '
 assert.ok(view.includes('매거진 글에 나온 장소로 만든 코스예요'), '매거진 경로 제목이 바뀌었다');
 
 // 2. 지역이 섞이면 첫 장소의 지역을 제목에 붙이지 않는다
-assert.match(view, /const areaLabel = sharedZone\?\.label \?\? \(sharedRegion && sharedSpots\.every\(/, '제목 지역이 모든 장소가 든 지역인지 보지 않는다');
+assert.match(view, /const areaLabel = courseAreaLabel\(sharedSpots, sharedRegion && sharedSpots\.every\(/, '제목 지역이 courseAreaLabel로 정해지지 않거나 모든 장소가 든 지역인지 보지 않는다');
 
 // 3. 설명 줄은 장소 이름 앞 셋의 경로이고 나머지는 `외 N곳`
 assert.match(view, /\.slice\(0, 3\)\.join\(' → '\)/, '설명 줄이 장소 이름 앞 셋의 경로가 아니다');
