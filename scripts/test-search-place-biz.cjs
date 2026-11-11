@@ -21,6 +21,8 @@ const sample = [
   row(4, '성수 디저트 카페', '카페', '서울 성동구 성수로 51'),
   row(5, '성수 갤러리', '문화시설', '서울 성동구 성수로 52'),
   row(6, '청담 와인바', '와인바', '서울 강남구 청담로 1'),
+  row(7, '탑동 커피', '카페', '제주특별자치도 제주시 탑동로 2'),
+  row(8, '애월 카페', '카페', '제주특별자치도 제주시 애월읍 1'),
 ];
 const { stations } = JSON.parse(fs.readFileSync(path.join(root, 'public', 'data', 'stations.json'), 'utf8'));
 const env = { rawSpotsData: sample, cleanSpotSummary: (s) => s.summary || '', __st: stations };
@@ -33,5 +35,9 @@ for (const q of ['성수술집', '성수동술집']) assert.deepStrictEqual(ids(
 // 카페와 동네 전체는 그대로다
 assert.deepStrictEqual(ids('성수 카페'), [4], '성수 카페는 성수의 카페만');
 assert.deepStrictEqual(ids('성수'), [1, 2, 3, 4, 5], '성수는 동네 전체');
+
+// '제주 시내 카페'의 '시내'는 동네 라벨의 일반어라 '제주 카페'와 같은 집합이다(P-367)
+assert.deepStrictEqual(ids('제주 시내 카페'), ids('제주 카페'), '제주 시내 카페는 제주 카페와 같은 집합');
+assert.ok(ids('제주 시내 카페').length === 2, `제주 시내 카페가 ${ids('제주 시내 카페')}이다`);
 
 console.log('test-search-place-biz: 모두 통과');

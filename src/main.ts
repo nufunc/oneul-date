@@ -1518,7 +1518,8 @@ function matchesSearchQuery(spot: Spot, query: string): boolean {
   if (Object.hasOwn(BROAD_REGION_ALIASES, cleanQ)) return inBroadRegion(spot, cleanQ);
   const place = SEARCH_PLACE_PREFIXES.find((p) => cleanQ.startsWith(p) && cleanQ.length > p.length);
   if (place) {
-    const rest = cleanQ.slice(place.length).trim();
+    // '제주 시내 카페'의 '시내'는 동네 라벨('제주 시내·탑동')의 일반어라 업종과 AND로 묶지 않는다. 묶으면 요약에 '시내'가 든 애월 카페 1곳만 맞았다(P-367)
+    const rest = cleanQ.slice(place.length).trim().replace(/^시내\s+(?=\S)/, '');
     // 인기 동네에서 가져온 이름('문래', '연남')은 권역 전체(영등포·여의도, 마포구)로 넓히지 않고 주소·이름에 있을 때만 본다
     const inPlace = FAMOUS_AREAS.includes(place)
       ? spotMatchesPlace(spot, place)
