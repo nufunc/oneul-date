@@ -7649,16 +7649,19 @@ function renderOverlayContent(): void {
                   .map((item) => {
                     const date = new Date(item.createdAt);
                     const dateStr = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+                    const name = item.title ?? `${regionsLabel(normalizeRegionCond(item.conditions.region), item.conditions.subZones)} · ${moodLabel(item.conditions.mood)}`;
+                    // 코스마다 버튼 이름이 같아 화면 낭독기로는 어느 코스의 버튼인지 가릴 수 없었다. 코스 이름을 붙인다(P-361)
+                    const of = escapeHtml(`${dateStr} ${name}`);
                     return `
                 <div class="saved-item">
                   <button class="saved-item-main" data-course-id="${escapeHtml(item.id)}">
-                    <span class="saved-item-meta">${dateStr} · ${escapeHtml(item.title ?? `${regionsLabel(normalizeRegionCond(item.conditions.region), item.conditions.subZones)} · ${moodLabel(item.conditions.mood)}`)}</span>
+                    <span class="saved-item-meta">${dateStr} · ${escapeHtml(name)}</span>
                     <div class="saved-item-spots">${savedCourseSpotsHtml(item)}</div>
                   </button>
                   <div class="saved-item-actions">
-                    <button class="saved-action-btn saved-item-copy" data-copy-id="${escapeHtml(item.id)}" aria-label="카톡 복사" title="카톡 포맷 복사">📋</button>
-                    <button class="saved-action-btn saved-item-share" data-share-id="${escapeHtml(item.id)}" aria-label="${CAN_SHARE ? '링크 공유' : '링크 복사'}" title="${CAN_SHARE ? '코스 링크 공유' : '공유 링크 복사'}">🔗</button>
-                    <button class="saved-action-btn saved-item-delete" data-delete-id="${escapeHtml(item.id)}" aria-label="삭제" title="삭제">🗑</button>
+                    <button class="saved-action-btn saved-item-copy" data-copy-id="${escapeHtml(item.id)}" aria-label="${of} 카톡 복사" title="카톡 포맷 복사">📋</button>
+                    <button class="saved-action-btn saved-item-share" data-share-id="${escapeHtml(item.id)}" aria-label="${of} ${CAN_SHARE ? '링크 공유' : '링크 복사'}" title="${CAN_SHARE ? '코스 링크 공유' : '공유 링크 복사'}">🔗</button>
+                    <button class="saved-action-btn saved-item-delete" data-delete-id="${escapeHtml(item.id)}" aria-label="${of} 삭제" title="삭제">🗑</button>
                   </div>
                 </div>`;
                   })
@@ -7753,16 +7756,17 @@ function renderOverlayContent(): void {
         e.stopPropagation();
         // 바로 위 🔗와 붙어 있어 잘못 누르면 되돌릴 수 없이 지워졌다. 첫 탭은 확인 상태로만 바꾸고 3초 안에 다시 눌러야 지운다
         if (btn.dataset.confirm !== '1') {
+          const label = btn.getAttribute('aria-label') ?? '삭제';
           btn.dataset.confirm = '1';
           btn.classList.add('is-confirm');
           btn.textContent = '삭제?';
-          btn.setAttribute('aria-label', '한 번 더 누르면 삭제');
+          btn.setAttribute('aria-label', `${label.replace(/ 삭제$/, '')} 한 번 더 누르면 삭제`);
           window.setTimeout(() => {
             if (!btn.isConnected) return;
             delete btn.dataset.confirm;
             btn.classList.remove('is-confirm');
             btn.textContent = '🗑';
-            btn.setAttribute('aria-label', '삭제');
+            btn.setAttribute('aria-label', label);
           }, 3000);
           return;
         }
