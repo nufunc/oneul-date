@@ -52,6 +52,9 @@ PUBLIC_FACILITY_NAME = re.compile(r"(문화원|평생학습관|교육원|시민�
 # 레포츠/체험 유형의 캠프·펜션도 숙소다(2026-10-04 P-057: 하늘그린캠프, 학마을캠프펜션이 day로 들어옴).
 # 다른 유형에는 캠프그리브스(관광지), 소금강행복펜션마트(쇼핑)가 있어 이 유형에서만 본다
 LEISURE_LODGING_NAME = re.compile(r"캠프|펜션")
+# 쇼핑 유형의 생활 소매: 의료기·안경점·다이소·동네 마트(P-377 강릉 9곳). 마트는 이름 끝, 공백 앞, 점으로 끝나는 낱말 안일 때만 본다.
+# 상회·식품·건어물·전자는 제주 소품 가게 같은 오탐이 섞여 넣지 않는다
+DAILY_RETAIL_NAME = re.compile(r"의료기|약국|보청기|안경|다이소|생활용품|마트(?:\s|$|\S*점$)")
 # 데이트 코스로 추천하지 않는 레포츠/체험 유형: 골프장, 낚시터(P-057 열린 행 96곳, 77곳). 보광미니골프장은 남긴다
 GOLF_NAME = re.compile(r"(?<!미니)골프|컨트리\s*클럽|(CC|GC|C\.C)(?![A-Za-z])", re.IGNORECASE)
 FISHING_NAME = re.compile(r"낚시|피싱|좌대")
@@ -490,6 +493,8 @@ def run_tourapi_mining(supabase_url: str, service_key: str, tour_api_key: str = 
                 if ctype_id == "32" and is_skipped_lodging(item):
                     continue
                 if ctype_id == "14" and PUBLIC_FACILITY_NAME.search(title.strip()):
+                    continue
+                if ctype_id == "38" and DAILY_RETAIL_NAME.search(title.strip()):
                     continue
                 if is_non_date_leisure_or_monument(ctype_id, title):
                     continue
