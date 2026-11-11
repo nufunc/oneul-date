@@ -3893,10 +3893,13 @@ function applyTheme(mode: ThemeMode, notify = false): void {
   }
 
   // 모바일 브라우저 상단 상태바 테마 컬러 동기화
-  const metaTheme = document.querySelector('meta[name="theme-color"]:not([media])');
-  if (metaTheme) {
-    metaTheme.setAttribute('content', resolved === 'dark' ? '#0b0f17' : '#f5f6f8');
-  }
+  // media가 붙은 meta가 먼저 적용되므로, 수동 테마에서는 둘 다 고른 색으로 바꾸고 시스템 테마에서는 각자의 색으로 되돌린다(OS 설정과 다른 수동 테마에서 상태바 색이 어긋났다)
+  const THEME_COLOR = { light: '#f5f6f8', dark: '#0b0f17' };
+  document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => {
+    const media = meta.getAttribute('media') ?? '';
+    const own = media.includes('dark') ? THEME_COLOR.dark : media.includes('light') ? THEME_COLOR.light : null;
+    meta.setAttribute('content', mode === 'auto' && own ? own : THEME_COLOR[resolved]);
+  });
 
   if (notify) {
     const msg =
