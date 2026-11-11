@@ -1115,6 +1115,8 @@ function spotSido(spot: Spot): string {
 function spotSigunguLabel(spot: Spot): string | null {
   const place = (spot.address || '').split(/\s+/)[1] ?? '';
   const sido = spotSido(spot);
+  // 세종은 시·군·구가 없어 둘째 낱말이 도로명이다
+  if (sido === '세종') return '세종';
   if (['서울', '부산', '대구', '인천', '광주', '대전', '울산'].includes(sido)) return /[구군]$/.test(place) ? `${sido} ${place}` : null;
   if (/시$/.test(place)) return place.slice(0, -1);
   return /군$/.test(place) ? place : null;

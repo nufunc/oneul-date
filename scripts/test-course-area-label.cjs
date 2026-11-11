@@ -42,6 +42,7 @@ assert.strictEqual(label(['서울 성동구 아차산로 1'], ['SEOUL'], ['seong
 assert.strictEqual(label(['충북 충주시 목벌동 1', '충청북도 충주시 목벌안길 26', '충북 충주시 소태면 3'], ['CHUNGCHEONG']), '충주');
 assert.strictEqual(label(['경북 영덕군 영덕읍 3', '경상북도 영덕군 강구면 411'], ['YEONGNAM']), '영덕군');
 assert.strictEqual(label(['울산 남구 대공원로 138-1', '울산광역시 남구 달삼로23번길 8'], ['YEONGNAM']), '울산 남구');
+assert.strictEqual(label(['세종 수목원로 136', '세종특별자치시 나성북로 30'], ['CHUNGCHEONG']), '세종');
 assert.strictEqual(label(['강원특별자치도 속초시 중앙로 1', '강원 속초시 영랑해안길 2']), '속초');
 assert.strictEqual(label(['경기 수원시 권선구 호매실로 70', '경기 수원시 팔달구 창룡대로 15']), '수원');
 // 같은 이름의 구는 시가 다르면 다른 곳이다
@@ -51,7 +52,8 @@ assert.strictEqual(label(['경기 포천시 신북면 1', '경기 남양주시 �
 assert.strictEqual(courseAreaLabel(at('울산 남구 대공원로 1', '울산 중구 태화동 2'), ['YEONGNAM'], []), '영남');
 // 시·군이 셋이거나 정하지 못한 장소가 섞이면 선택한 지역 라벨, 선택도 없으면 빈 이름
 assert.strictEqual(label(['충북 충주시 1', '충북 제천시 2', '충북 단양군 3'], ['CHUNGCHEONG']), '충청');
-assert.strictEqual(label(['충북 충주시 1', '세종 도움3로 105-6'], ['CHUNGCHEONG']), '충청');
+assert.strictEqual(label(['충북 충주시 1', '세종 도움3로 105-6'], ['CHUNGCHEONG']), '충주·세종');
+assert.strictEqual(label(['충북 충주시 1', '충북 중앙탑로 105'], ['CHUNGCHEONG']), '충청');
 assert.strictEqual(label(['충북 충주시 1', '충북 제천시 2', '충북 단양군 3']), '');
 assert.strictEqual(courseAreaLabel([], ['YEONGNAM'], []), '영남');
 assert.strictEqual(courseAreaLabel([], [], []), '');
