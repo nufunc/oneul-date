@@ -23,7 +23,7 @@ function run(conditions, ids, slotsOf) {
     renderConditions() {}, renderResults() {}, buildDailyRecommendedCourse: () => null,
   };
   const names = Object.keys(env);
-  new Function(...names, `${code};applyDailyCourseIfEmpty();`)(...names.map((n) => env[n]));
+  new Function(...names, `let prevCourse = null;${code};applyDailyCourseIfEmpty();`)(...names.map((n) => env[n]));
   return state;
 }
 

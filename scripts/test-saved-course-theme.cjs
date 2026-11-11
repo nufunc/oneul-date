@@ -36,7 +36,7 @@ const courseTitle = new Function('spotById', `${titleJs}\nreturn courseTitle;`)(
 
 assert.ok(decls.has('regenerateCourse'), 'regenerateCourse가 없다');
 const STUBS = ['state', 'spotById', 'buildAnchorCourse', 'addRecentSpotIds', 'courseSpotIds', 'renderResults', 'generateCourse', 'spots', 'recentSpotIdSet', 'notifyRelaxedSlots', 'markResultsEngaged', 'announceCourse'];
-const makeRegenerate = new Function(...STUBS, `${toJs(decls.get('regenerateCourse'))}\nreturn regenerateCourse;`);
+const makeRegenerate = new Function(...STUBS, `${['prevCourse', 'snapshotPrevCourse', 'regenerateCourse'].map((n) => toJs(decls.get(n))).join('\n')}\nreturn regenerateCourse;`);
 
 // 저장 버튼(#btn-save)이 만드는 SavedCourse 리터럴을 떼어 같은 state로 평가한다
 const saveBlock = src.slice(src.indexOf("'#btn-save')"));
@@ -45,7 +45,7 @@ assert.ok(lit, '저장 버튼의 SavedCourse 리터럴이 없다');
 const litJs = ts.transpileModule(`return (${lit[1]});`, { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
 const makeItem = new Function('state', 'ids', 'courseTitle', litJs);
 
-const restoreJs = ['SLOT_ORDER', 'normalizeRegionCond', 'restoreCourse'].map((n) => toJs(decls.get(n))).join('\n');
+const restoreJs = ['SLOT_ORDER', 'normalizeRegionCond', 'prevCourse', 'restoreCourse'].map((n) => toJs(decls.get(n))).join('\n');
 const RSTUBS = ['state', 'updateModeView', 'renderConditions', 'renderResults', 'document', 'cancelOverlayFocusReturn', 'markResultsEngaged'];
 const makeRestore = new Function(...RSTUBS, `${restoreJs}\nreturn restoreCourse;`);
 

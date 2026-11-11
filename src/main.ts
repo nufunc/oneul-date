@@ -3600,6 +3600,32 @@ const state: AppState = {
 
 let spotById = buildSpotIndex(spots);
 
+// 🔄·다시 추천·⚡ 직전의 코스 한 단계(P-363). 되돌릴 길이 없어 바꾼 결과가 나빠도 원래 코스를 다시 얻을 수 없었다.
+// 코스 조건도 함께 보관한다: 다시 추천이 fromSaved를 끄므로 코스만 되돌리면 제목과 조건이 어긋난다
+let prevCourse: { course: CourseStep[]; conditions: AppState['courseConditions'] } | null = null;
+
+/** 코스를 바꾸기 직전에 부른다. 한 단계만 보관하므로 연달아 바꾸면 가장 최근 직전 코스가 남는다 */
+function snapshotPrevCourse(): void {
+  if (!state.course || !state.courseConditions) return;
+  prevCourse = { course: state.course.map((s) => ({ ...s })), conditions: state.courseConditions };
+}
+
+const UNDO_COURSE_BTN_HTML = `<button class="btn-regenerate" id="btn-undo-course" type="button" aria-label="바꾸기 전 코스로 되돌리기">↩ 이전</button>`;
+
+function undoCourse(): void {
+  if (!prevCourse) return;
+  state.course = prevCourse.course;
+  state.courseConditions = prevCourse.conditions;
+  prevCourse = null;
+  // 누른 버튼이 사라지므로 renderResults의 포커스 복원이 #btn-regenerate로 보낸다. 저장 상태와 새로 고침 복원도 여기서 맞는다
+  renderResults();
+  announce('이전 코스로 되돌렸어요.');
+}
+
+function bindUndoButton(root: ParentNode): void {
+  root.querySelector('#btn-undo-course')?.addEventListener('click', undoCourse);
+}
+
 function activeSlots(): SlotKey[] {
   return SLOT_ORDER.filter((k) => state.slots[k]);
 }
@@ -4556,6 +4582,7 @@ function triggerCourseGeneration(): void {
   // 매칭된 한 칸만 성수이고 나머지는 종로·강남으로 넓게 채워졌다. 지역 시트에서 고른 세부 동네가 있으면 그것을 따른다
   const zoneKeys = state.subZones.length > 0 ? state.subZones : zoneKeysForQuery(state.searchQuery);
   const zoneFromQuery = state.subZones.length === 0 && zoneKeys.length > 0;
+  prevCourse = null; // P-363: 코스를 통째로 바꾸는 자리라 ↩ 이전 보관분을 비운다
   state.course = generateCourse(
     spots,
     slotsOn,
@@ -4695,6 +4722,7 @@ function applyDailyCourseIfEmpty(): void {
     if (!loadedRegionKeys.has('ALL')) return;
     const steps = buildSharedSteps(last.ids);
     if (steps.length > 0 && steps.length === last.ids.length) {
+      prevCourse = null;
       state.course = steps;
       state.courseConditions = last.conditions;
       // 칩과 🚀가 읽는 입력 상태도 코스 조건으로 맞춘다. 안 맞추면 🚀가 보던 지역이 아닌 전국 코스를 짠다(P-315)
@@ -4717,6 +4745,7 @@ function applyDailyCourseIfEmpty(): void {
   if (state.searchQuery || state.subZones.length > 0) return;
   const daily = buildDailyRecommendedCourse(spots);
   if (daily) {
+    prevCourse = null;
     state.course = daily.steps;
     state.courseConditions = {
       regions: [daily.regionKey],
@@ -4858,6 +4887,7 @@ function renderResultsContent(): void {
     <div class="course-head">
       <span class="course-title">${escapeHtml(courseTitle(cond, state.course))}</span>
       <div class="course-head-actions">
+        ${prevCourse ? UNDO_COURSE_BTN_HTML : ''}
         ${state.course.length >= 3 ? `
           <button class="btn-optimize-route" id="btn-optimize-route" type="button" title="이동 거리가 가장 짧은 최적 동선으로 순서 자동 정렬" aria-label="최적 동선 정렬">
             ⚡ 최적 동선
@@ -5855,6 +5885,7 @@ function swapStep(index: number, refocus = false): void {
     );
     return;
   }
+  snapshotPrevCourse();
   state.course[index] = { slot: step.slot, spotId: chosen.id };
   addRecentSpotIds([chosen.id]);
   saveLastCourse();
@@ -5905,6 +5936,13 @@ function swapStep(index: number, refocus = false): void {
   refreshTransitDividers();
   const bottomShift = newCard.offsetTop + newCard.offsetHeight - oldBottom;
 
+  // 칸 교체는 결과 영역을 다시 그리지 않으므로 머리 줄에 ↩ 이전만 따로 끼운다(P-363)
+  const headActions = document.querySelector<HTMLElement>('.course-head-actions');
+  if (headActions && !headActions.querySelector('#btn-undo-course')) {
+    headActions.insertAdjacentHTML('afterbegin', UNDO_COURSE_BTN_HTML);
+    bindUndoButton(headActions);
+  }
+
   const newSwapBtn = newCard.querySelector<HTMLButtonElement>('.btn-swap, .btn-swap-icon');
   if (newSwapBtn) {
     bindSwapButton(newSwapBtn);
@@ -5933,6 +5971,7 @@ function refreshTransitDividers(): void {
 function regenerateCourse(): void {
   if (!state.course || !state.courseConditions) return;
   markResultsEngaged();
+  snapshotPrevCourse();
   // 앵커 코스는 같은 앵커 주변에서 다시 뽑는다(가까운 후보 가운데 무작위라 매번 달라진다)
   const anchor = state.courseConditions.anchorId ? spotById.get(state.courseConditions.anchorId) : undefined;
   if (anchor) {
@@ -5979,6 +6018,7 @@ function bindResultEvents(area: HTMLElement): void {
   area.querySelectorAll<HTMLButtonElement>('.btn-swap, .btn-swap-icon').forEach((btn) => {
     bindSwapButton(btn);
   });
+  bindUndoButton(area);
   area.querySelector('#btn-optimize-route')?.addEventListener('click', () => {
     optimizeCourseRoute();
   });
@@ -6129,6 +6169,7 @@ function optimizeCourseRoute(): boolean {
   // 자리(순서)가 아니라 스팟을 따라 슬롯 라벨도 함께 옮긴다. 자리 기준
   // 라벨을 그대로 두면 밤 시간대용으로 고른 심야 술집이 순열상 2차리로
   // 옮겨졌을 때 "저녁" 라벨이 그대로 붙어버렸다(2026-09-23 발견).
+  snapshotPrevCourse();
   state.course = [
     { slot: initialSteps[bestPerm[0]].slot, spotId: currentSpots[bestPerm[0]].id },
     { slot: initialSteps[bestPerm[1]].slot, spotId: currentSpots[bestPerm[1]].id },
@@ -6243,6 +6284,7 @@ function buildCourseFromSavedSpots(): boolean {
   const first = steps[0]?.spotId ? spotById.get(steps[0].spotId) : undefined;
   const farCount = first ? savedList.filter((s) => !usedSpotIds.has(s.id) && distKm(first, s) > SAVED_COURSE_MAX_KM).length : 0;
 
+  prevCourse = null;
   state.course = steps;
   state.courseConditions = {
     regions: [...state.regions],
@@ -6944,6 +6986,7 @@ function bindDiscoveryCardEvents(root: ParentNode, area: HTMLElement): void {
       if (!anchorSpot) return;
 
       const steps = buildAnchorCourse(anchorSpot);
+      prevCourse = null;
       state.course = steps;
       state.courseConditions = {
         regions: [...state.regions],
@@ -8328,6 +8371,7 @@ function renderOverlayContent(): void {
           renderShell();
         }
         const steps = buildAnchorCourse(spot);
+        prevCourse = null;
         state.course = steps;
         // 앵커는 이름 검색이 아니라 id로 남긴다. 숙소 앵커는 이름 검색에 잡히지 않아 다시 추천에서 빠졌다
         state.courseConditions = {
@@ -8376,6 +8420,7 @@ function restoreCourse(item: SavedCourse, steps: CourseStep[]): void {
   for (const k of SLOT_ORDER) {
     state.slots[k] = item.conditions.slots.includes(k);
   }
+  prevCourse = null;
   state.course = steps;
   state.courseConditions = {
     regions: [...regions],

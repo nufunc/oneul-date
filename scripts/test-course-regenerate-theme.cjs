@@ -37,7 +37,7 @@ const courseTitle = new Function('spotById', `${titleJs}\nreturn courseTitle;`)(
 // regenerateCourse는 부르는 함수를 모두 가짜로 넣고 generateCourse에 넘긴 인자를 기록한다
 assert.ok(decls.has('regenerateCourse'), 'regenerateCourse가 없다');
 const STUBS = ['state', 'spotById', 'buildAnchorCourse', 'addRecentSpotIds', 'courseSpotIds', 'renderResults', 'generateCourse', 'spots', 'recentSpotIdSet', 'notifyRelaxedSlots', 'markResultsEngaged', 'announceCourse'];
-const makeRegenerate = new Function(...STUBS, `${toJs(decls.get('regenerateCourse'))}\nreturn regenerateCourse;`);
+const makeRegenerate = new Function(...STUBS, `${['prevCourse', 'snapshotPrevCourse', 'regenerateCourse'].map((n) => toJs(decls.get(n))).join('\n')}\nreturn regenerateCourse;`);
 
 const run = (conditions, screenCategory) => {
   const calls = [];
