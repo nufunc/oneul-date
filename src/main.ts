@@ -4801,19 +4801,10 @@ const ICON_NAVER_MAP_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill
 
 /** 캐치테이블 매장 다이렉트 예약 링크 (DB에 실제 매장 URL이 수집된 경우에만 노출) */
 function getCatchtableUrl(spot: Spot): string | null {
-  const b = spot.booking_info?.url;
-  if (b && (b.includes('catchtable.co.kr/ct/shop/') || b.includes('catchtable.net/'))) {
-    return b;
-  }
-  const soc = spot.social_links?.catchtable?.url;
-  if (soc && (soc.includes('catchtable.co.kr/ct/shop/') || soc.includes('catchtable.net/'))) {
-    return soc;
-  }
-  const src = spot.source?.url;
-  if (src && (src.includes('catchtable.co.kr/ct/shop/') || src.includes('catchtable.net/'))) {
-    return src;
-  }
-  return null;
+  // ct/shop/search?keyword= 는 수집기가 만든 검색 주소라 캐치테이블이 'search'를 매장 별칭으로 읽어 없는 매장으로 연다(575곳, 2026-11-11)
+  const isShopUrl = (u?: string | null): u is string =>
+    !!u && !u.includes('/ct/shop/search') && (u.includes('catchtable.co.kr/ct/shop/') || u.includes('catchtable.net/'));
+  return [spot.booking_info?.url, spot.social_links?.catchtable?.url, spot.source?.url].find(isShopUrl) ?? null;
 }
 
 /** 카카오맵 매장 링크 생성 */
