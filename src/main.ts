@@ -4096,9 +4096,26 @@ function renderQuickRegionChips(showSavedChip = true, showSubZoneChip = true): s
 }
 
 /**
+ * 칩을 누를 때마다 조건 영역이 다시 그려져 지역 줄의 scrollLeft가 0으로 돌아가므로
+ * 켜진 지역 칩이 줄 밖이면 가운데로 맞춘다(P-353). scrollIntoView는 페이지 세로 스크롤까지 움직여 쓰지 않는다.
+ */
+function revealActiveRegionChip(container: HTMLElement): void {
+  const row = container.querySelector<HTMLElement>('.quick-region-scroll:not(.quick-mood-row)');
+  const chip = row?.querySelector<HTMLElement>('.is-active[data-region-key]');
+  if (!row || !chip) return;
+  const r = row.getBoundingClientRect();
+  const c = chip.getBoundingClientRect();
+  // 줄 오른쪽 padding(20px)은 흐림 가림이 덮는 폭이라 그 안쪽도 안 보이는 것으로 본다
+  if (c.left >= r.left && c.right <= r.right - parseFloat(getComputedStyle(row).paddingRight)) return;
+  row.scrollLeft += c.left - r.left - (row.clientWidth - chip.offsetWidth) / 2;
+}
+
+/**
  * 1-Tap 퀵 지역 칩 바 이벤트 바인딩
  */
 function bindQuickRegionEvents(container: HTMLElement, onRegionChange: () => void): void {
+  revealActiveRegionChip(container);
+
   // 1. 권역 칩 클릭 (ALL 또는 특정 권역 1-Tap 전환)
   container.querySelectorAll<HTMLButtonElement>('.quick-region-chip[data-region-key]').forEach((btn) => {
     btn.addEventListener('click', (e) => {
