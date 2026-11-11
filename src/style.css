@@ -2466,7 +2466,9 @@ button {
   transform: scale(0.95);
 }
 
+/* 흰 아이콘은 초록 바탕에서 대비 2.25:1이라 짙은 초록으로 3:1 이상을 맞춘다(P-356) */
 .step-map-chip.icon-only {
+  color: #052E16;
   width: 32px;
   min-width: 32px;
   padding: 0;
