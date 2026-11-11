@@ -8,7 +8,8 @@
 // 네이버 플레이스 업체 사진(ldb-phinf.pstatic.net)은 네이버 검색 축소 주소(w750 JPEG)로 바꾼다(P-253). 원본이 장당 약 2MB다.
 // 원본 PNG가 장당 중앙값 1.2MB라 휴대폰 첫 화면에 1MB 넘게 받는 글이 51편이었다. 원본은 data-orig에 두고 onerror에서 한 번만 되돌린다.
 // width·height는 원본 크기 그대로 둔다(축소는 비율을 지킨다). 이미 onerror가 있는 img는 되돌리기를 덮지 않도록 그대로 둔다.
-// og:image, JSON-LD image처럼 img 태그 밖의 주소는 바꾸지 않는다. 대상은 글 dist/blog/<slug>/index.html과 목록 dist/blog/index.html이다.
+// JSON-LD image처럼 img 태그 밖의 주소는 바꾸지 않는다. 단 og:image와 twitter:image는 카카오 자르기 주소(C1200x630 JPEG)로 바꾸고 og:image:width·height 1200x630을 더한다(원본 7MB 방지, 크기 명시).
+// 대상은 글 dist/blog/<slug>/index.html과 목록 dist/blog/index.html이다.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -19,6 +20,9 @@ const offline = process.env.BLOG_IMAGE_SIZES_OFFLINE === '1';
 const IMG_RE = /<img\b[^>]*>/g;
 const THUMB_HOST_RE = /^https?:\/\/(t1\.daumcdn\.net|t1\.kakaocdn\.net|tong\.visitkorea\.or\.kr|ldb-phinf\.pstatic\.net)\//;
 const THUMB_PREFIX = 'https://img1.daumcdn.net/thumb/R800x0.fwebp/?fname=';
+const OG_HOST_RE = /^https?:\/\/(t1\.daumcdn\.net|t1\.kakaocdn\.net|tong\.visitkorea\.or\.kr)\//;
+const OG_PREFIX = 'https://img1.daumcdn.net/thumb/C1200x630.fjpg/?fname=';
+const OG_RE = /<meta (property="og:image"|name="twitter:image") content="([^"]+)">/g;
 const NAVER_THUMB_PREFIX = 'https://search.pstatic.net/common/?type=w750&src=';
 const thumbPrefix = (src) => (src.includes('//ldb-phinf.pstatic.net/') ? NAVER_THUMB_PREFIX : THUMB_PREFIX);
 const ONERROR = "var o=this.dataset.orig; if(o){this.dataset.orig=''; this.src=o;}";
@@ -144,11 +148,19 @@ const toThumb = (tag) => {
   const thumb = thumbPrefix(src) + encodeURIComponent(src.replace(/&amp;/g, '&'));
   return tag.replace(` src="${src}"`, () => ` src="${thumb}" data-orig="${src}" onerror="${ONERROR}"`);
 };
+let ogThumbed = 0;
+const toOgThumb = (html) => html.replace(OG_RE, (tag, key, src) => {
+  if (!OG_HOST_RE.test(src)) return tag;
+  ogThumbed++;
+  const meta = `<meta ${key} content="${OG_PREFIX}${encodeURIComponent(src.replace(/&amp;/g, '&'))}">`;
+  return key.startsWith('property') ? `${meta}\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="630">` : meta;
+});
 for (const { file, html } of pages) {
-  const out = html.replace(IMG_RE, (tag) => toThumb(addSize(tag)));
+  const out = toOgThumb(html.replace(IMG_RE, (tag) => toThumb(addSize(tag))));
   if (out !== html) fs.writeFileSync(file, out);
 }
 
 console.log(`build_blog_image_sizes: img ${sized}개에 크기를 넣었다 (캐시에 더한 주소 ${added}개, 크기 없이 둔 img ${left}개${offline ? ', 망 끔' : ''})`);
 console.log(`build_blog_image_sizes: img ${thumbed}개를 축소 주소로 바꿨다 (onerror가 있어 둔 img ${keptOnerror}개)`);
+console.log(`build_blog_image_sizes: og:image와 twitter:image ${ogThumbed}개를 1200x630 JPEG 주소로 바꿨다`);
 if (failed.length) console.warn(`build_blog_image_sizes: 크기를 읽지 못한 주소 ${failed.length}개\n  ${failed.join('\n  ')}`);

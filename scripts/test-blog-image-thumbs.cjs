@@ -1,7 +1,7 @@
 // 매거진 사진 축소 주소 빌드 결과 시험(P-247): npm run build 뒤 node scripts/test-blog-image-thumbs.cjs
 // dist/blog의 글과 목록에서 t1.daumcdn.net, t1.kakaocdn.net, tong.visitkorea.or.kr, ldb-phinf.pstatic.net(P-253) img가 남지 않고, 바뀐 img는 호스트에 맞는 축소 주소로 시작하며
-// fname을 풀면 data-orig와 같고, 원본 주소가 크기 캐시에 있으면 width·height가 남아 있는지 본다. og:image는 원본 public/blog와 같은지 본다
-// 픽스처를 임시 폴더에서 망을 끄고 돌려 크기 없는 img, &amp; 주소, 이미 onerror가 있는 img, 대상 밖 호스트, 다시 돌린 결과를 본다
+// fname을 풀면 data-orig와 같고, 원본 주소가 크기 캐시에 있으면 width·height가 남아 있는지 본다. og:image와 twitter:image는 대상 호스트면 C1200x630 JPEG 주소로 바뀌고(풀면 원본과 같고) og:image:width·height 1200·630이 바로 뒤에 있는지 본다
+// 픽스처를 임시 폴더에서 망을 끄고 돌려 크기 없는 img, &amp; 주소, 이미 onerror가 있는 img, 대상 밖 호스트(img와 og:image와 twitter:image), 다시 돌린 결과를 본다
 const assert = require('assert');
 const fs = require('fs');
 const os = require('os');
@@ -10,6 +10,8 @@ const { execFileSync } = require('child_process');
 
 const HOST_RE = /^https?:\/\/(t1\.daumcdn\.net|t1\.kakaocdn\.net|tong\.visitkorea\.or\.kr|ldb-phinf\.pstatic\.net)\//;
 const PREFIX = 'https://img1.daumcdn.net/thumb/R800x0.fwebp/?fname=';
+const OG_HOST_RE = /^https?:\/\/(t1\.daumcdn\.net|t1\.kakaocdn\.net|tong\.visitkorea\.or\.kr)\//;
+const OG_PREFIX = 'https://img1.daumcdn.net/thumb/C1200x630.fjpg/?fname=';
 const NAVER_PREFIX = 'https://search.pstatic.net/common/?type=w750&src=';
 const prefixOf = (orig) => (orig.includes('//ldb-phinf.pstatic.net/') ? NAVER_PREFIX : PREFIX);
 const script = path.join(__dirname, 'build_blog_image_sizes.mjs');
@@ -49,8 +51,20 @@ for (const file of files) {
   }
   const source = path.join(root, 'public', 'blog', rel);
   if (fs.existsSync(source)) {
-    const og = (h) => [...h.matchAll(/<meta\s+property="og:image"\s+content="([^"]*)"/g)].map((m) => m[1]);
-    assert.deepStrictEqual(og(html), og(fs.readFileSync(source, 'utf8')), `${rel}: og:image가 원본과 다르다`);
+    const src = fs.readFileSync(source, 'utf8');
+    for (const key of ['property="og:image"', 'name="twitter:image"']) {
+      const re = new RegExp(`<meta ${key} content="([^"]*)">(\\s*<meta property="og:image:width" content="1200">\\s*<meta property="og:image:height" content="630">)?`, 'g');
+      const got = [...html.matchAll(re)];
+      const orig = [...src.matchAll(re)].map((m) => m[1]);
+      assert.strictEqual(got.length, orig.length, `${rel}: ${key} 개수가 원본과 다르다`);
+      got.forEach(([, url, size], i) => {
+        if (!OG_HOST_RE.test(orig[i])) return assert.strictEqual(url, orig[i], `${rel}: 대상 밖 ${key}가 바뀌었다`);
+        assert.ok(url.startsWith(OG_PREFIX), `${rel}: ${key}가 C1200x630 주소가 아니다: ${url}`);
+        assert.strictEqual(decodeURIComponent(url.slice(OG_PREFIX.length)), unamp(orig[i]), `${rel}: ${key}의 fname이 원본과 다르다`);
+        assert.strictEqual(!!size, key.startsWith('property'), `${rel}: og:image 바로 뒤의 width 1200·height 630 여부가 기대와 다르다`);
+      });
+    }
+    assert.strictEqual((html.match(/property="og:image:(width|height)"/g) || []).length, 2 * (html.match(/property="og:image" content="https:\/\/img1\.daumcdn\.net\/thumb\/C1200x630/g) || []).length, `${rel}: og:image:width·height 개수가 이상하다`);
   }
 }
 assert.ok(posts > 0 && list > 0, `축소 주소로 바꾼 img가 없다 (글 ${posts}, 목록 ${list})`);
@@ -63,8 +77,9 @@ const page = path.join(tmp, 'dist', 'blog', 'x', 'index.html');
 const listPage = path.join(tmp, 'dist', 'blog', 'index.html');
 fs.mkdirSync(path.dirname(page), { recursive: true });
 const uncached = 'http://tong.visitkorea.or.kr/none-test.jpg?a=1&amp;b=2';
+const offHost = 'https://example.com/off-host.jpg';
 const input = [
-  `<meta property="og:image" content="${cached}">`,
+  `<meta property="og:image" content="${offHost}">`,
   `<img src="${cached}" alt="a" />`,
   `<img src="${uncached}" alt="b" />`,
   `<img src="https://t1.daumcdn.net/x.png" onerror="this.remove()" alt="c" />`,
@@ -72,6 +87,9 @@ const input = [
   `<img src="${PREFIX}abc" alt="e" />`,
   `<img src="${NAVER_PREFIX}abc" alt="f" />`,
   `<img src="${naverOrig}" alt="g" referrerpolicy="no-referrer" />`,
+  `<meta property="og:image" content="${cached}">`,
+  `<meta name="twitter:image" content="${cached}">`,
+  `<meta name="twitter:image" content="${offHost}">`,
 ].join('\n');
 fs.writeFileSync(page, input);
 fs.writeFileSync(listPage, `<img src="${cached}" class="card-thumb" />`);
@@ -80,7 +98,7 @@ const log = run();
 assert.ok(log.includes('img 4개를 축소 주소로 바꿨다 (onerror가 있어 둔 img 1개)'), `로그가 기대와 다르다: ${log}`);
 const out = fs.readFileSync(page, 'utf8').split('\n');
 const [w, h] = cache[cached];
-assert.strictEqual(out[0], input.split('\n')[0], 'img 밖의 og:image가 바뀌었다');
+assert.strictEqual(out[0], input.split('\n')[0], '대상 밖 호스트의 og:image가 바뀌었다');
 assert.ok(out[1].startsWith(`<img width="${w}" height="${h}" src="${PREFIX}`), `크기와 축소 주소가 같이 들어가지 않았다: ${out[1]}`);
 checkThumb(out[1], 'fixture a');
 checkThumb(out[2], 'fixture b');
@@ -90,6 +108,15 @@ assert.deepStrictEqual(out.slice(3, 7), input.split('\n').slice(3, 7), 'onerror�
 checkThumb(out[7], 'fixture g');
 assert.strictEqual(attr(out[7], 'src'), `${NAVER_PREFIX}https%3A%2F%2Fldb-phinf.pstatic.net%2F20211216_185%2Fx_JPEG%2F%25C5%25A9%2528O%2529.jpg`, '네이버 축소 주소가 기대와 다르다');
 assert.ok(/\sreferrerpolicy="no-referrer"/.test(out[7]), `referrerpolicy가 빠졌다: ${out[7]}`);
+const og = `${OG_PREFIX}${encodeURIComponent(cached)}`;
+assert.deepStrictEqual(out.slice(8), [
+  `<meta property="og:image" content="${og}">`,
+  '  <meta property="og:image:width" content="1200">',
+  '  <meta property="og:image:height" content="630">',
+  `<meta name="twitter:image" content="${og}">`,
+  `<meta name="twitter:image" content="${offHost}">`,
+], 'og:image와 twitter:image가 C1200x630 주소로 바뀌고 크기 줄 둘이 더해지지 않았다');
+assert.ok(log.includes('og:image와 twitter:image 2개를'), `og 치환 개수 로그가 기대와 다르다: ${log}`);
 checkThumb(fs.readFileSync(listPage, 'utf8'), 'fixture list');
 const once = fs.readFileSync(page, 'utf8') + fs.readFileSync(listPage, 'utf8');
 run();
