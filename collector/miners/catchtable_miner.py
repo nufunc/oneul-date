@@ -256,9 +256,10 @@ def run_catchtable_mining(supabase_url: str, service_key: str, max_discoveries: 
             region = derived_region or default_region
             area = derived_area or default_area
 
-            # 캐치테이블 검색 바로가기 링크 생성
-            encoded_real = urllib.parse.quote(real_name)
-            catchtable_url = f"https://app.catchtable.co.kr/ct/shop/search?keyword={encoded_real}"
+            # 매장 링크는 저장하지 않는다. 예전에 넣던 ct/shop/search?keyword= 주소는 캐치테이블이
+            # 'search'를 매장 별칭으로 읽어 없는 매장으로 열었다(575곳, 2026-11-11). 매장 API는 Cloudflare가
+            # 스크립트 요청을 403으로 막아 수집 때 존재를 확인할 수 없으므로, 확인된 별칭만 overrides로 넣는다
+            catchtable_url = None
             is_blueribbon = "블루리본" in query_text
 
             spot_id = new_spot_id()
