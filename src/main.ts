@@ -4445,7 +4445,12 @@ function bindConditionEvents(area: HTMLElement): void {
 function zoneKeysForQuery(query: string): string[] {
   const q = (query || '').trim().toLowerCase();
   if (!q) return [];
-  const zone = POPULAR_ZONES.find((z) => z.label.split('·').some((part) => part.length >= 2 && q.startsWith(part.toLowerCase())));
+  // '부산 서면'처럼 도시가 앞에 붙은 라벨은 동네 이름('서면')만 친 검색도 받는다. '시내'는 일반어라 뺀다(P-360)
+  const parts = (label: string) => label.split('·').flatMap((p) => {
+    const tail = p.split(' ')[1];
+    return tail && tail !== '시내' ? [p, tail] : [p];
+  });
+  const zone = POPULAR_ZONES.find((z) => parts(z.label).some((part) => part.length >= 2 && q.startsWith(part.toLowerCase())));
   return zone ? [zone.key] : [];
 }
 
