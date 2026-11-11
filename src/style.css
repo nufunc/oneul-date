@@ -4,6 +4,8 @@
    ========================================================================== */
 
 :root {
+  color-scheme: light;
+
   /* 메인 컬러 팔레트 (Slate Navy Minimal) */
   --color-bg: #f5f6f8; /* 소프트 쿨 슬레이트 그레이 */
   --color-surface: #ffffff; /* 순백의 카드 서피스 */
@@ -92,6 +94,7 @@
 
 html[data-theme="dark"],
 html[data-theme-resolved="dark"] {
+  color-scheme: dark;
   --color-bg: #0b0f17;
   --color-surface: #151c28;
   --color-surface-hover: #1e2638;
@@ -705,6 +708,18 @@ button {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* 더블탭 확대 대기를 없앤다. 핀치 확대는 그대로 둔다 */
+a,
+button,
+input,
+select,
+summary,
+label,
+[role="button"],
+[role="tab"] {
+  touch-action: manipulation;
+}
+
 /* 모바일 퍼스트 레이아웃 */
 #app {
   max-width: var(--layout-max);
@@ -780,7 +795,7 @@ button {
   border-radius: var(--radius-full);
   padding: var(--space-2) var(--space-3);
   box-shadow: var(--shadow-card);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -810,7 +825,7 @@ button {
   border-radius: var(--radius-full);
   padding: var(--space-2) var(--space-4);
   box-shadow: var(--shadow-card);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -922,7 +937,7 @@ button {
   border-radius: var(--radius-full);
   box-shadow: var(--shadow-card);
   outline: none;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   -webkit-appearance: none;
 }
 
@@ -973,7 +988,7 @@ button {
   cursor: pointer;
   opacity: 0;
   pointer-events: none;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease, transform 0.15s ease;
 }
 
 .search-clear.is-visible,
@@ -1031,7 +1046,7 @@ button {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-full);
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s ease;
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s ease;
   white-space: nowrap;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
@@ -1067,7 +1082,7 @@ button {
   padding: var(--space-4);
   box-shadow: var(--shadow-card);
   margin-bottom: var(--space-5);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .course-compact-controls {
@@ -1091,7 +1106,7 @@ button {
   font-size: var(--font-sm);
   font-weight: 700;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast);
   max-width: 100%;
   white-space: nowrap;
 }
@@ -1174,7 +1189,7 @@ button {
   font-size: var(--font-xs);
   font-weight: 700;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: background-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), filter var(--transition-fast);
 }
 
 .slot-toggle-inline:hover {
@@ -1208,7 +1223,7 @@ button {
   padding: var(--space-2);
   margin-bottom: var(--space-3);
   box-shadow: var(--shadow-card);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .selector-btn {
@@ -1222,7 +1237,7 @@ button {
   border-radius: var(--radius-md);
   color: var(--color-text);
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s ease;
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s ease;
   text-align: left;
   gap: 8px;
 }
@@ -1336,7 +1351,7 @@ button {
   border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-text-faint);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   overflow: hidden;
 }
@@ -1355,7 +1370,7 @@ button {
   line-height: 1.2;
   filter: grayscale(0.8);
   opacity: 0.65;
-  transition: all 0.2s ease;
+  transition: opacity 0.2s ease, filter 0.2s ease, transform 0.2s ease;
 }
 
 .slot-toggle .slot-label {
@@ -1427,7 +1442,7 @@ button {
   border-radius: var(--radius-full);
   padding: var(--space-2) var(--space-4);
   white-space: nowrap;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .pill:hover {
@@ -1491,7 +1506,7 @@ button {
   padding: var(--space-3) var(--space-5);
   min-height: 50px;
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1520,7 +1535,7 @@ button {
   padding: var(--space-3) var(--space-5);
   min-height: 50px;
   box-shadow: var(--shadow-card);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1715,7 +1730,7 @@ button {
   border-radius: var(--radius-full);
   padding: var(--space-1) var(--space-3);
   box-shadow: var(--shadow-card);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* 모양은 38px로 두고 터치 영역만 세로 44px로 넓힌다. 1px은 padding box 기준이라 테두리만큼 더한다 */
@@ -2218,7 +2233,7 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-swap:active {
@@ -2238,7 +2253,7 @@ button {
   font-weight: 600;
   color: var(--color-text-sub);
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-swap-chip .icon-swap {
@@ -2344,7 +2359,7 @@ button {
   cursor: pointer;
   padding: 0;
   position: relative;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
@@ -2473,7 +2488,7 @@ button {
   font-weight: 700;
   color: #FFFFFF;
   text-decoration: none;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 1px 3px rgba(3, 199, 90, 0.25);
   white-space: nowrap;
 }
@@ -2534,7 +2549,7 @@ button {
   font-weight: 700;
   color: #FFFFFF;
   text-decoration: none;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 1px 3px rgba(255, 59, 48, 0.25);
   white-space: nowrap;
 }
@@ -2933,7 +2948,7 @@ body:has(.data-failed-banner) #app {
   color: var(--color-text-faint);
   margin: calc(-1 * var(--space-2)) calc(-1 * var(--space-2)) calc(-1 * var(--space-2)) 0;
   border-radius: var(--radius-full);
-  transition: all 0.15s ease, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.15s ease, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .overlay-close:active {
@@ -3116,7 +3131,7 @@ body:has(.data-failed-banner) #app {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--space-3) var(--space-4);
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .saved-item-main:active {
@@ -3212,7 +3227,7 @@ body:has(.data-failed-banner) #app {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   background: var(--color-surface);
-  transition: all 0.15s ease, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   padding: 0;
 }
 
@@ -3342,7 +3357,7 @@ body:has(.data-failed-banner) #app {
   border: none;
   border-left: 3px solid transparent;
   cursor: pointer;
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s ease;
+  transition: background-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s cubic-bezier(0.16, 1, 0.3, 1), border-left-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s ease;
   text-align: left;
 }
 
@@ -3474,7 +3489,7 @@ body:has(.data-failed-banner) #app {
   border-radius: var(--radius-md);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
 .all-feature-item:hover {
@@ -3523,7 +3538,7 @@ body:has(.data-failed-banner) #app {
   border-radius: var(--radius-lg);
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.15);
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s ease;
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s ease;
 }
 
 .btn-select-all-korea:hover {
@@ -3572,7 +3587,7 @@ body:has(.data-failed-banner) #app {
   font-weight: 500;
   cursor: pointer;
   user-select: none;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s ease;
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s ease;
 }
 
 .zone-check-item:hover {
@@ -3610,7 +3625,7 @@ body:has(.data-failed-banner) #app {
   cursor: pointer;
   position: relative;
   flex-shrink: 0;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 }
 
 .zone-checkbox:checked,
@@ -3923,7 +3938,7 @@ body:has(#results-area[data-engaged] .result-actions-3) .toast-msg {
   color: var(--color-text);
   text-decoration: none;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
   position: relative;
 }
@@ -4046,7 +4061,7 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   font-size: var(--font-sm);
   font-weight: 600;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: background-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
   position: relative;
   white-space: nowrap;
 }
@@ -4162,7 +4177,7 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .btn-discovery-filter-reset:hover {
@@ -4190,7 +4205,7 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   background: var(--color-surface);
   color: var(--color-text);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
   box-shadow: var(--shadow-sm);
   padding: 0;
 }
@@ -4237,7 +4252,7 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   cursor: pointer;
   outline: none;
   box-shadow: var(--shadow-sm);
-  transition: all var(--transition-fast);
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .discovery-sort-select:hover {
@@ -4254,7 +4269,7 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
 .spot-discovery-grid {
   display: grid;
   gap: var(--space-3);
-  transition: all 0.2s ease;
+  transition: gap 0.2s ease, grid-template-columns 0.2s ease;
 }
 
 /* 2개행 모드 (2열) */
@@ -4756,7 +4771,7 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
   box-shadow: var(--shadow-sm);
   scroll-snap-align: start;
   user-select: none;
@@ -4829,7 +4844,7 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast), transform var(--transition-fast);
   box-shadow: var(--shadow-sm);
   user-select: none;
   flex-shrink: 0;
@@ -5149,7 +5164,7 @@ html[data-theme-resolved="dark"] .btn-optimize-route {
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
 .btn-saved-recommend:hover {
@@ -5179,7 +5194,7 @@ html[data-theme-resolved="dark"] .btn-saved-recommend {
   font-size: var(--font-sm);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .btn-detail-save:hover {
@@ -5273,7 +5288,7 @@ html[data-theme-resolved="dark"] .spot-closed-badge {
   font-weight: 600;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
 }
 
 .btn-build-anchor-course:hover,
@@ -5300,7 +5315,7 @@ html[data-theme-resolved="dark"] .spot-closed-badge {
   font-weight: 700;
   color: var(--color-text);
   text-decoration: none;
-  transition: all var(--transition-fast);
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
 }
 
 .btn-discovery-map:hover,
@@ -5328,7 +5343,7 @@ html[data-theme-resolved="dark"] .spot-closed-badge {
   font-weight: 700;
   cursor: pointer;
   box-shadow: var(--shadow-sm);
-  transition: all var(--transition-fast);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .btn-discovery-more:hover {
@@ -5402,7 +5417,7 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   text-decoration: none;
   white-space: nowrap;
   flex-shrink: 0;
-  transition: all var(--transition-fast);
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
 }
 
 .btn-discovery-chip-action:hover {
@@ -5750,7 +5765,7 @@ html[data-theme-resolved="dark"] .btn-discovery-chip-action.btn-discovery-yt {
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-text);
-  transition: all var(--transition-fast);
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .spot-link-btn.book {
