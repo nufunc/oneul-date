@@ -83,10 +83,21 @@ function buildNav(region, slot, generated) {
   return `<nav aria-label="다른 데이트 코스 추천">\n        ${lines.join('\n        ')}\n      </nav>`;
 }
 
+// 검색 결과 설명(P-385): 지역·시간대와 그 쪽 목록 상위 장소 이름(점수순, 이름 중복 제외 최대 3곳)을 넣어 쪽마다 다르게 한다.
+// 155자를 넘으면 이름을 뒤에서부터 하나씩 뺀다. 같은 spots.json이면 같은 문장이 나온다.
+const DESC_MAX = 155;
+function buildDescription(region, slot, pageSpots) {
+  const names = [...new Set(pageSpots.map((s) => String(s.name || '').replace(/\s+/g, ' ').trim()).filter(Boolean))].slice(0, 3);
+  const make = (n) => `${region.key} ${slot.label} 데이트 코스 추천: ${names.slice(0, n).join(', ')} 등 ${region.key} 지역 ${slot.label} 시간대에 어울리는 장소 ${pageSpots.length}곳을 모았다. 조건만 고르면 코스가 완성된다.`;
+  let n = names.length;
+  while (n > 1 && make(n).length > DESC_MAX) n -= 1;
+  return make(n);
+}
+
 function buildPage(region, slot, pageSpots, generated) {
   const url = `${SITE_URL}/${region.slug}/${slot.key}/`;
   const title = `${region.key} ${slot.label} 데이트 코스 추천 | 오늘 데이트`;
-  const description = `${region.key} 지역 ${slot.label} 시간대에 어울리는 데이트 장소 ${pageSpots.length}곳을 모았다. 조건만 고르면 코스가 완성된다.`;
+  const description = buildDescription(region, slot, pageSpots);
 
   let html = template;
   html = html.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(title)}</title>`);
