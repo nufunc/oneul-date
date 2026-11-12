@@ -7722,6 +7722,9 @@ function renderOverlay(): void {
   overlayWasOpen = locked;
 }
 
+// 지역 탭의 선택 표시: ●는 읽지 않고 뜻만 스크린리더에 전한다(P-389)
+const REGION_TAB_BADGE_HTML = '<span class="region-tab-badge" aria-hidden="true">●</span><span class="sr-only">, 선택 있음</span>';
+
 function renderOverlayContent(): void {
   const root = document.getElementById('overlay-root');
   if (!root) return;
@@ -7930,7 +7933,7 @@ function renderOverlayContent(): void {
               return `
                 <button class="region-tab-item ${isSelectedTab ? 'active' : ''}" data-region-tab="${r.key}" aria-pressed="${isSelectedTab}">
                   <span>${r.label}</span>
-                  ${isRegSelected || hasSelectedZones ? `<span class="region-tab-badge">●</span>` : ''}
+                  ${isRegSelected || hasSelectedZones ? REGION_TAB_BADGE_HTML : ''}
                 </button>
               `;
             }).join('')}
@@ -8137,12 +8140,10 @@ function renderOverlayContent(): void {
           let badge = activeTabEl.querySelector('.region-tab-badge');
           if (isRegSelected || hasAnyInReg) {
             if (!badge) {
-              const span = document.createElement('span');
-              span.className = 'region-tab-badge';
-              span.textContent = '●';
-              activeTabEl.appendChild(span);
+              activeTabEl.insertAdjacentHTML('beforeend', REGION_TAB_BADGE_HTML);
             }
           } else if (badge) {
+            badge.nextElementSibling?.remove();
             badge.remove();
           }
         }
