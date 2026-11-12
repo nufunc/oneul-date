@@ -36,6 +36,10 @@ const SLOTS = [
 
 const MIN_SPOTS_PER_PAGE = 3;
 const TOP_N = 12;
+// 공유 미리보기 사진(P-383): 그 쪽 목록에서 점수가 가장 높은 스팟 가운데 카카오 자르기 주소가 받는 호스트의 사진을 쓴다.
+// 매거진 글과 같은 C1200x630 JPEG 주소다(P-373, build_blog_image_sizes.mjs). 없으면 템플릿의 og.png를 둔다.
+const OG_HOST_RE = /^https?:\/\/(t1\.daumcdn\.net|t1\.kakaocdn\.net|tong\.visitkorea\.or\.kr)\//;
+const OG_PREFIX = 'https://img1.daumcdn.net/thumb/C1200x630.fjpg/?fname=';
 
 function spotScore(spot) {
   const badgeCount = spot.curation_badges ? Object.values(spot.curation_badges).filter(Boolean).length : 0;
@@ -59,7 +63,7 @@ function escapeHtml(s) {
 }
 
 function replaceMeta(html, property, content) {
-  const attr = property.startsWith('og:') || property.startsWith('twitter:') ? 'property' : 'name';
+  const attr = property.startsWith('og:') ? 'property' : 'name';
   const re = new RegExp(`<meta ${attr}="${property}" content="[^"]*" />`);
   return html.replace(re, `<meta ${attr}="${property}" content="${escapeHtml(content)}" />`);
 }
@@ -93,6 +97,12 @@ function buildPage(region, slot, pageSpots, generated) {
   html = replaceMeta(html, 'twitter:url', url);
   html = replaceMeta(html, 'twitter:title', title);
   html = replaceMeta(html, 'twitter:description', description);
+  const photo = pageSpots.find((spot) => OG_HOST_RE.test(spot.image_url || ''));
+  if (photo) {
+    const ogImage = OG_PREFIX + encodeURIComponent(photo.image_url);
+    html = replaceMeta(html, 'og:image', ogImage);
+    html = replaceMeta(html, 'twitter:image', ogImage);
+  }
   html = html.replace('</head>', `    <link rel="canonical" href="${url}" />\n  </head>`);
 
   const jsonLd = {
