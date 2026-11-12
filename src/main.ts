@@ -3810,13 +3810,12 @@ function showToast(msg: string): void {
   if (!toast) {
     toast = document.createElement('div');
     toast.className = 'toast-msg';
-    // 저장·복사·필터 결과를 스크린리더에도 알린다
-    toast.setAttribute('role', 'status');
-    toast.setAttribute('aria-live', 'polite');
-    toast.setAttribute('aria-atomic', 'true');
+    // 글자와 함께 처음 붙는 라이브 영역은 첫 알림이 읽히지 않아(WCAG 4.1.3, ux-reviewer-287) 토스트는 화면에만 두고 낭독은 #sr-announce가 맡는다
+    toast.setAttribute('aria-hidden', 'true');
     document.body.appendChild(toast);
   }
   toast.textContent = msg;
+  announce(msg);
   // 저장한 코스 패널이 열린 동안 토스트가 맨 아래 항목과 📋 🔗를 가렸다(P-272). 패널 위쪽 끝 8px 위로 올린다
   const panel = document.querySelector<HTMLElement>('#overlay-root .overlay-panel');
   toast.style.bottom = panel ? `${panel.offsetHeight + 8}px` : '';
@@ -3832,15 +3831,19 @@ function showToast(msg: string): void {
 }
 
 let announceTimer: number | null = null;
+let announcePending = '';
 
 /** index.html의 알림 영역(첫 알림 전부터 있어야 낭독된다)에 한 줄을 알린다. 같은 문구도 다시 읽히도록 비웠다가 채운다 */
 function announce(text: string): void {
   const el = document.getElementById('sr-announce');
   if (!el) return;
   el.textContent = '';
+  // 한 동작에서 이어 부른 알림(코스 장소와 토스트)이 앞 알림을 지우지 않게 50ms 안의 문구는 이어 읽는다
+  announcePending = announcePending ? `${announcePending} ${text}` : text;
   if (announceTimer !== null) window.clearTimeout(announceTimer);
   announceTimer = window.setTimeout(() => {
-    el.textContent = text;
+    el.textContent = announcePending;
+    announcePending = '';
     announceTimer = null;
   }, 50);
 }

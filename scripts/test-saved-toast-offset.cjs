@@ -13,6 +13,8 @@ const cut = (from, to) => {
   return src.slice(start, src.indexOf(to, start) + to.length);
 };
 const code = [
+  // showToast가 부르는 낭독은 이 시험의 대상이 아니다
+  'function announce() {}',
   cut('let toastTimer', '\n'),
   cut('function showToast', '\n}\n'),
   cut('let isClosingOverlay', '\n'),

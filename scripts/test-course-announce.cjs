@@ -57,9 +57,12 @@ t.announceCourse('코스를 만들었어요.');
 assert.strictEqual(t.el().textContent, '', '같은 문구도 먼저 비운다');
 t.flush();
 assert.ok(t.el().textContent.includes('백양산'));
-// 연달아 부르면 마지막 문구만 남는다
+// 한 동작에서 연달아 부르면 앞 문구를 지우지 않고 이어 읽는다(코스 장소와 토스트, ux-reviewer-287)
 t.announce('가'); t.announce('나'); t.flush();
-assert.strictEqual(t.el().textContent, '나');
+assert.strictEqual(t.el().textContent, '가 나');
+// 읽은 뒤 다음 알림은 새로 시작한다
+t.announce('다'); t.flush();
+assert.strictEqual(t.el().textContent, '다');
 
 // 이름을 찾을 장소가 없으면 알리지 않는다
 t = make([{ slot: 'a', spotId: null }, { slot: 'b', spotId: 99 }], spots);
@@ -92,4 +95,9 @@ for (const name of ['applyDailyCourseIfEmpty', 'renderResults', 'renderResultsCo
 assert.strictEqual((src.match(/class="(quick-region-chip|spot-category-chip)[^\n]*aria-pressed="/g) ?? []).length, 9, '조건 칩 aria-pressed');
 // 지역 시트의 지역 줄은 tab 역할 자식이 없으므로 tablist가 아니다(axe aria-required-children)
 assert.ok(!src.includes('class="location-regions" role="tablist"') && /region-tab-item[^\n]*aria-pressed=/.test(src), '지역 줄 역할');
+// 토스트는 화면에만 두고 낭독은 처음부터 있는 #sr-announce가 맡는다(첫 토스트가 글자와 함께 생겨 읽히지 않았다)
+const toastFn = fn('showToast');
+assert.match(toastFn, /announce\(msg\);/, 'showToast가 #sr-announce로 알리지 않는다');
+assert.ok(!/aria-live|role', 'status/.test(toastFn), '토스트에 라이브 영역 속성이 남아 두 번 읽힌다');
+
 console.log('ok');
