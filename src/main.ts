@@ -4012,11 +4012,11 @@ function renderMainModeNav(): void {
   nav.innerHTML = `
     <div class="main-tab-bar" role="tablist">
       <button class="main-tab-btn ${state.mainMode === 'course' ? 'is-active' : ''}" id="tab-mode-course" role="tab" aria-selected="${state.mainMode === 'course'}">
-        <span class="main-tab-emoji">✨</span>
+        <span class="main-tab-emoji" aria-hidden="true">✨</span>
         <span class="main-tab-label">맞춤 코스</span>
       </button>
       <button class="main-tab-btn ${state.mainMode === 'spots' ? 'is-active' : ''}" id="tab-mode-spots" role="tab" aria-selected="${state.mainMode === 'spots'}">
-        <span class="main-tab-emoji">📍</span>
+        <span class="main-tab-emoji" aria-hidden="true">📍</span>
         <span class="main-tab-label">스팟 탐색</span>
         <span class="main-tab-badge">NEW</span>
       </button>
@@ -4401,7 +4401,7 @@ function renderConditions(): void {
       <div class="spot-category-scroll" style="margin-bottom: var(--space-4);" role="group" aria-label="테마 선택">
         ${themeChips.map((cat) => `
           <button class="spot-category-chip ${state.courseCategory === cat.key ? 'is-active' : ''}" data-cat-key="${cat.key}" aria-pressed="${state.courseCategory === cat.key}">
-            <span class="chip-emoji">${cat.emoji}</span>
+            <span class="chip-emoji" aria-hidden="true">${cat.emoji}</span>
             <span class="chip-label">${cat.label}</span>
           </button>
         `).join('')}
@@ -4410,7 +4410,7 @@ function renderConditions(): void {
       <!-- 4. 컴팩트 1줄 컨트롤: [📍 지역 선택 캡슐] + [시간대 4종 토글] -->
       <div class="course-compact-controls" style="margin-bottom: var(--space-4);">
         <button class="btn-region-pill ${regLabel.isSelected ? 'is-selected' : ''}" id="btn-trigger-region" aria-haspopup="dialog">
-          <span class="pill-icon">📍</span>
+          <span class="pill-icon" aria-hidden="true">📍</span>
           <span class="pill-title">${escapeHtml(regLabel.title)}</span>
           <span class="pill-arrow" aria-hidden="true">▾</span>
         </button>
@@ -4420,7 +4420,7 @@ function renderConditions(): void {
             const meta = SLOT_META[k];
             return `
               <button class="slot-toggle-inline ${state.slots[k] ? 'on' : ''}" data-slot="${k}" aria-pressed="${state.slots[k]}" title="${meta.label}">
-                <span class="slot-emoji">${meta.emoji}</span>
+                <span class="slot-emoji" aria-hidden="true">${meta.emoji}</span>
                 <span class="slot-text">${meta.label}</span>
               </button>`;
           }).join('')}
@@ -6719,7 +6719,7 @@ function renderSpotDiscovery(): void {
     <div class="spot-category-scroll" style="margin-bottom: var(--space-4);" role="group" aria-label="테마 선택">
       ${getCuratedThemeChips().map((cat) => `
         <button class="spot-category-chip ${state.spotCategory === cat.key ? 'is-active' : ''}" data-cat-key="${cat.key}" aria-pressed="${state.spotCategory === cat.key}">
-          <span class="chip-emoji">${cat.emoji}</span>
+          <span class="chip-emoji" aria-hidden="true">${cat.emoji}</span>
           <span class="chip-label">${cat.label}</span>
         </button>
       `).join('')}
@@ -6729,7 +6729,7 @@ function renderSpotDiscovery(): void {
     <div class="discovery-status-bar">
       <div class="status-left">
         <button class="btn-region-pill ${regLabel.isSelected ? 'is-selected' : ''}" id="btn-discovery-region-trigger" aria-haspopup="dialog" title="탐색 지역 변경">
-          <span class="pill-icon">📍</span>
+          <span class="pill-icon" aria-hidden="true">📍</span>
           <span class="pill-title">${escapeHtml(regLabel.title)}</span>
           <span class="pill-arrow" aria-hidden="true">▾</span>
         </button>
