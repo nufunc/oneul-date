@@ -7878,6 +7878,8 @@ function renderOverlayContent(): void {
           btn.classList.add('is-confirm');
           btn.textContent = '삭제?';
           btn.setAttribute('aria-label', `${label.replace(/ 삭제$/, '')} 한 번 더 누르면 삭제`);
+          // 포커스된 단추의 이름만 바뀌어 낭독기 사용자는 첫 누름 뒤 아무 일도 없던 것으로 받아들였다(P-395)
+          announce('한 번 더 누르면 삭제돼요');
           window.setTimeout(() => {
             if (!btn.isConnected) return;
             delete btn.dataset.confirm;

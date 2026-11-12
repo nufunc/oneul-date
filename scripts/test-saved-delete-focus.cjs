@@ -36,4 +36,8 @@ assert.ok(saveTop < render && saveIdx < render, '스크롤과 순번을 다시 �
 assert.ok(render < restore && render < pick && render < empty && render < focus, '스크롤과 초점을 renderOverlay() 앞에서 준다(✕ 초점이 덮어쓴다)');
 assert.ok(focus < toast, '토스트 뒤에 초점을 준다');
 
+// 첫 누름(확인 상태)도 낭독기에 알린다(P-395): 확인 분기의 return 앞에서 announce
+const confirmBranch = handler.slice(handler.indexOf("btn.dataset.confirm !== '1'"), handler.indexOf('return;'));
+assert.ok(confirmBranch.includes("announce('한 번 더 누르면 삭제돼요');"), '첫 누름의 확인 상태를 알리지 않는다');
+
 console.log('test-saved-delete-focus: 통과');
