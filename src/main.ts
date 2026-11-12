@@ -7764,11 +7764,13 @@ function renderOverlayContent(): void {
                     const dateStr = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
                     const name = item.title ?? `${regionsLabel(normalizeRegionCond(item.conditions.region), item.conditions.subZones)} · ${moodLabel(item.conditions.mood)}`;
                     // 코스마다 버튼 이름이 같아 화면 낭독기로는 어느 코스의 버튼인지 가릴 수 없었다. 코스 이름을 붙인다(P-361)
-                    const of = escapeHtml(`${dateStr} ${name}`);
+                    // 제목의 📍🔍❤️ 같은 그림 문자가 단추 넷의 이름마다 읽혔다. 이름에서는 빼고 화면 글자는 낭독에서 숨긴다(P-394)
+                    const of = escapeHtml(`${dateStr} ${name.replace(/\p{Extended_Pictographic}️?\s*/gu, '')}`);
+                    const nameHtml = escapeHtml(name).replace(/\p{Extended_Pictographic}️?/gu, '<span aria-hidden="true">$&</span>');
                     return `
                 <div class="saved-item">
                   <button class="saved-item-main" data-course-id="${escapeHtml(item.id)}">
-                    <span class="saved-item-meta">${dateStr} · ${escapeHtml(name)}</span>
+                    <span class="saved-item-meta">${dateStr} · ${nameHtml}</span>
                     <div class="saved-item-spots">${savedCourseSpotsHtml(item)}</div>
                   </button>
                   <div class="saved-item-actions">
