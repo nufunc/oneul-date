@@ -3691,6 +3691,30 @@ body:has(.data-failed-banner) #app {
 }
 
 /* 화면에는 보이지 않고 스크린리더만 읽는 텍스트 */
+/* 본문 건너뛰기: 키보드 포커스를 받을 때만 왼쪽 위에 보인다 */
+.skip-link {
+  position: absolute;
+  left: var(--space-3);
+  top: -100px;
+  z-index: 1000;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 2px solid var(--color-text);
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: calc(var(--space-2) + env(safe-area-inset-top, 0px));
+}
+
+/* 건너뛴 뒤 포커스를 받은 본문 전체에 윤곽을 그리지 않는다 */
+#main-content:focus {
+  outline: none;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;

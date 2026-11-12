@@ -3945,7 +3945,9 @@ function renderShell(): void {
   const appTopBefore = app.getBoundingClientRect().top;
   setSharedCourseView(false);
 
+  // 머리 단추를 건너뛰어 코스 조건으로 가는 링크와 main 랜드마크(WCAG 2.4.1, ux-reviewer-287)
   app.innerHTML = `
+    <a class="skip-link" id="skip-to-main" href="#main-content">본문으로 건너뛰기</a>
     <header class="topbar">
       <h1 class="app-title"><a href="#" class="app-title-link" id="brand-home-link" aria-label="오늘 데이트 홈으로 이동">오늘 데이트</a></h1>
       <div class="topbar-actions">
@@ -3954,10 +3956,12 @@ function renderShell(): void {
         <button class="btn-saved" id="btn-open-saved">저장한 코스</button>
       </div>
     </header>
+    <main id="main-content" tabindex="-1">
     <nav class="main-mode-nav" id="main-mode-nav"></nav>
     <section class="conditions" id="conditions-area"></section>
     <section class="results" id="results-area"></section>
     <section class="spot-discovery-area" id="spot-discovery-area" style="display: none;"></section>
+    </main>
     <footer class="app-footer">
       <p class="footer-copy">오늘 데이트 <span class="footer-version">${APP_VERSION}</span></p>
       <p class="footer-sub">엄선한 스팟만 골라 담은 오늘의 데이트 코스</p>
@@ -3965,6 +3969,11 @@ function renderShell(): void {
     </footer>
     <div class="overlay-root" id="overlay-root"></div>
   `;
+  // 주소의 해시를 바꾸면 hashchange가 받은 코스 판정을 다시 하므로 주소는 두고 포커스만 옮긴다
+  document.getElementById('skip-to-main')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('main-content')?.focus();
+  });
   document.getElementById('brand-home-link')?.addEventListener('click', (e) => {
     e.preventDefault();
     clearCourseHash();
