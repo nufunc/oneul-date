@@ -2976,7 +2976,7 @@ function renderUserOriginTransitDivider(firstStep: CourseStep): string {
     return `
       <div class="step-transit-divider origin-start">
         <div class="step-transit-line"></div>
-        <a class="step-transit-badge" href="${escapeHtml(naviUrl)}" target="_blank" rel="noopener noreferrer" aria-label="내 위치에서 ${escapeHtml(s.name)} 길찾기">
+        <a class="step-transit-badge" href="${escapeHtml(naviUrl)}" target="_blank" rel="noopener noreferrer" aria-label="내 위치 출발 · ${escapeHtml(timeText)} (${escapeHtml(distanceText)}), ${escapeHtml(s.name)}까지 길찾기">
           <span class="step-transit-icon">🚩 ${icon}</span>
           <span class="step-transit-time">내 위치 출발 · ${escapeHtml(timeText)}</span>
           <span class="step-transit-dist">(${escapeHtml(distanceText)})</span>
@@ -2995,7 +2995,7 @@ function renderUserOriginTransitDivider(firstStep: CourseStep): string {
   return `
     <div class="step-transit-divider origin-start">
       <div class="step-transit-line"></div>
-      <a class="step-transit-badge" href="${escapeHtml(naviUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(s.name)} 길찾기 및 지도 보기">
+      <a class="step-transit-badge" href="${escapeHtml(naviUrl)}" target="_blank" rel="noopener noreferrer" aria-label="1차 데이트 시작 · ${escapeHtml(s.name)}, 지도 보기">
         <span class="step-transit-icon">🚩 📍</span>
         <span class="step-transit-time">1차 데이트 시작 · ${escapeHtml(s.name)}</span>
         <span class="step-transit-arrow" aria-hidden="true">↗</span>
@@ -5309,7 +5309,7 @@ function renderStepTransitDivider(prevStep: CourseStep, nextStep: CourseStep): s
   return `
     <div class="step-transit-divider">
       <div class="step-transit-line"></div>
-      <a class="step-transit-badge" href="${escapeHtml(naviUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(s2.name)} 길찾기">
+      <a class="step-transit-badge" href="${escapeHtml(naviUrl)}" target="_blank" rel="noopener noreferrer" aria-label="${escapeHtml(timeText)}${distanceText ? ` (${escapeHtml(distanceText)})` : ''}, ${escapeHtml(s2.name)}까지 길찾기">
         <span class="step-transit-icon">${icon}</span>
         <span class="step-transit-time">${escapeHtml(timeText)}</span>
         ${distanceText ? `<span class="step-transit-dist">(${escapeHtml(distanceText)})</span>` : ''}

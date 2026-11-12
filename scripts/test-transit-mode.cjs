@@ -49,4 +49,11 @@ assert.deepStrictEqual(copyLine(37), ['\n   ↓ 🚗 차량·이동 약 1시간 
 assert.deepStrictEqual(copyLine(1.4), ['\n   ↓ 🚶‍♂️ 도보 약 21분 (1.4km)']);
 assert.deepStrictEqual(copyLine(1.5), ['\n   ↓ 🚗 차량·이동 약 7분 (1.5km)']);
 
+// 이동 배지의 접근 가능한 이름은 보이는 글자로 시작한다(WCAG 2.5.3, ux-reviewer-283)
+const badgeLabels = [...src.matchAll(/class="step-transit-badge"[^>]*aria-label="([^"]*)"/g)].map((m) => m[1]);
+assert.strictEqual(badgeLabels.length, 3, `이동 배지 aria-label 수: ${badgeLabels.length}`);
+assert.ok(badgeLabels[0].startsWith('내 위치 출발 · ${escapeHtml(timeText)}'), badgeLabels[0]);
+assert.ok(badgeLabels[1].startsWith('1차 데이트 시작 · ${escapeHtml(s.name)}'), badgeLabels[1]);
+assert.ok(badgeLabels[2].startsWith('${escapeHtml(timeText)}'), badgeLabels[2]);
+
 console.log('test-transit-mode: 통과');
