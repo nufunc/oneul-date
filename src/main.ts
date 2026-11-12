@@ -7304,7 +7304,7 @@ function receiverLoadingHtml(failed = false): string {
         <button class="btn-theme-toggle" id="btn-theme-toggle" aria-label="테마 변경, 현재 ${getThemeModeLabel(state.themeMode)}">${getThemeModeHtml(state.themeMode)}</button>
       </div>
     </header>
-    <section class="receiver-view" id="receiver-loading">
+    <main class="receiver-view" id="receiver-loading">
       <div class="receiver-hero-card">
         <span class="receiver-hero-badge">✨ 공유받은 데이트 코스</span>
         <h2 class="receiver-hero-title">친구가 보낸 특별한 데이트 코스예요</h2>
@@ -7318,7 +7318,7 @@ function receiverLoadingHtml(failed = false): string {
         </p>`
         }
       </div>
-    </section>
+    </main>
   `;
 }
 
@@ -7384,7 +7384,7 @@ function renderReceiverView(steps: CourseStep[]): void {
         <button class="btn-theme-toggle" id="btn-theme-toggle" aria-label="테마 변경, 현재 ${getThemeModeLabel(state.themeMode)}">${getThemeModeHtml(state.themeMode)}</button>
       </div>
     </header>
-    <section class="receiver-view">
+    <main class="receiver-view">
       <div class="receiver-hero-card">
         ${blogSlug
           ? `<span class="receiver-hero-badge">📖 매거진 코스</span>
@@ -7414,7 +7414,7 @@ function renderReceiverView(steps: CourseStep[]): void {
       </div>
 
       <button class="btn-primary btn-make-own" id="btn-make-own">🚀 나만의 코스 만들기 →</button>
-    </section>
+    </main>
     <footer class="app-footer">
       <p class="footer-copy">오늘 데이트 <span class="footer-version">${APP_VERSION}</span></p>
       <p class="footer-sub">엄선한 스팟만 골라 담은 오늘의 데이트 코스</p>

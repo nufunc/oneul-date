@@ -12,7 +12,10 @@ const home = src.slice(src.indexOf('<a class="skip-link"'), src.indexOf('<footer
 assert.ok(home.length > 0, '건너뛰기 링크가 없다');
 assert.ok(home.indexOf('skip-link') < home.indexOf('<header class="topbar">'), '건너뛰기 링크가 머리 앞에 없다');
 assert.match(home, /<main id="main-content" tabindex="-1">[\s\S]*id="conditions-area"[\s\S]*id="results-area"[\s\S]*<\/main>/, 'main이 조건과 결과를 감싸지 않는다');
-assert.strictEqual((src.match(/<main\b/g) || []).length, 1, 'main 랜드마크가 둘 이상이다');
+// 화면마다 main은 하나: 홈, 받은 코스 불러오는 중, 받은 코스(P-392)
+assert.strictEqual((src.match(/<main\b/g) || []).length, 3, 'main 랜드마크 수가 화면 수와 다르다');
+assert.ok(!/<section class="receiver-view"/.test(src), '받은 코스 화면에 main 랜드마크가 없다');
+assert.strictEqual((src.match(/<main class="receiver-view"/g) || []).length, 2, '받은 코스 두 화면이 main이 아니다');
 
 assert.match(src, /'skip-to-main'\)\?\.addEventListener\('click', \(e\) => \{\s*e\.preventDefault\(\);\s*document\.getElementById\('main-content'\)\?\.focus\(\);/, '건너뛰기가 해시를 바꾸거나 포커스를 옮기지 않는다');
 
