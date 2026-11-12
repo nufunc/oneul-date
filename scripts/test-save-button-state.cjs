@@ -48,7 +48,7 @@ const item = (ids) => ({ id: 'x', createdAt: '', conditions: {}, spotIds: ids, t
   assert.strictEqual(home.attrs['aria-label'], undefined);
   api.saveCourseWithToast(item([2, 1]));
   assert.strictEqual(home.textContent, '✅ 저장됨', '저장 뒤 버튼 글이 바뀌지 않는다');
-  assert.strictEqual(home.attrs['aria-label'], '저장한 코스 열기');
+  assert.strictEqual(home.attrs['aria-label'], '저장됨, 저장한 코스 열기');
   assert.strictEqual(ctx.toasts[0], '💾 코스를 저장했어요', '기존 토스트가 바뀌었다');
 }
 

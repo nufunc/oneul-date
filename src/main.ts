@@ -3728,7 +3728,8 @@ function paintSaveButton(btn: HTMLElement, ids: number[]): void {
   if (isCourseSaved(ids)) {
     btn.dataset.saved = 'true';
     btn.textContent = '✅ 저장됨';
-    btn.setAttribute('aria-label', '저장한 코스 열기');
+    // 음성 제어가 화면 글자 '저장됨'으로 부를 수 있게 이름 앞에 둔다(WCAG 2.5.3)
+    btn.setAttribute('aria-label', '저장됨, 저장한 코스 열기');
   } else {
     delete btn.dataset.saved;
     btn.textContent = '💾 저장';
