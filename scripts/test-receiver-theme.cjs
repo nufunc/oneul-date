@@ -49,6 +49,10 @@ assert.strictEqual(shareThemeKey('CAFE'), 'CAFE');
 // 3. 보내는 쪽은 코스 스냅숏의 categoryKey를 읽고(화면 칩이 아니다) 지역 코스에서만 싣는다
 assert.match(src, /buildShareUrl\(ids, byArea \? cond\.categoryKey : undefined\)/, '🔗 공유가 코스 스냅숏의 categoryKey를 싣지 않는다');
 assert.ok(!/buildShareUrl\([^)]*state\.courseCategory/.test(src), '공유 링크가 화면 칩을 읽는다');
+// 저장한 코스 목록의 🔗도 저장 항목의 칩과 지역을 싣는다(ux-reviewer-281)
+const savedShare = src.slice(src.indexOf("'.saved-item-share'"), src.indexOf("'.saved-item-delete'"));
+assert.match(savedShare, /buildShareUrl\(ids, item\.conditions\.categoryKey\)/, '저장 목록 🔗가 칩을 싣지 않는다');
+assert.match(savedShare, /courseShareText\(ids, regions, item\.conditions\.subZones \|\| \[\]\)/, '저장 목록 🔗가 지역을 싣지 않는다');
 
 // 4. 받는 쪽: 링크의 t를 검증해 읽고, 저장 항목에 categoryKey를 넣어 제목이 칩을 따른다. 다시 공유도 같은 칩을 잇는다
 const view = src.slice(src.indexOf('function renderReceiverView('));

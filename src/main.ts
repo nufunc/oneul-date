@@ -7843,7 +7843,9 @@ function renderOverlayContent(): void {
           return;
         }
         const ids = steps.map((st) => st.spotId as number);
-        shareOrCopyLink(buildShareUrl(ids), dropped, courseShareText(ids));
+        // 같은 항목의 📋와 같은 조건을 싣는다. 빠지면 받은 쪽이 저장할 때 칩이 사라졌다(ux-reviewer-281)
+        const regions = normalizeRegionCond(item.conditions.region);
+        shareOrCopyLink(buildShareUrl(ids, item.conditions.categoryKey), dropped, courseShareText(ids, regions, item.conditions.subZones || []));
       });
     });
 
