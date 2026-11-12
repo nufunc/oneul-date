@@ -1990,7 +1990,8 @@ label,
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  background: linear-gradient(135deg, #FF385C 0%, #E11D48 100%);
+  /* 흰 10px 글자가 #FF385C 쪽에서 3.52:1이라 단색으로 4.70:1을 맞춘다. 탐색 카드 핫플 배지와 같은 색(ux-reviewer-286) */
+  background: #e11d48;
   color: #FFFFFF;
   font-size: 10px;
   font-weight: 800;
