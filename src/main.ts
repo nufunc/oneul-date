@@ -3733,7 +3733,8 @@ function paintSaveButton(btn: HTMLElement, ids: number[]): void {
   } else {
     delete btn.dataset.saved;
     btn.textContent = '💾 저장';
-    btn.removeAttribute('aria-label');
+    // 이모지를 그림 이름으로 읽지 않게 화면 글자와 같은 이름을 둔다(P-393)
+    btn.setAttribute('aria-label', '저장');
   }
 }
 
@@ -4956,9 +4957,9 @@ function renderResultsContent(): void {
       }).join('')}
     </div>
     <div class="result-actions result-actions-3">
-      <button class="btn-secondary" id="btn-copy">📋 복사</button>
-      <button class="btn-secondary" id="btn-share-link">🔗 링크</button>
-      <button class="btn-primary" id="btn-save">💾 저장</button>
+      <button class="btn-secondary" id="btn-copy"><span aria-hidden="true">📋</span> 복사</button>
+      <button class="btn-secondary" id="btn-share-link"><span aria-hidden="true">🔗</span> 링크</button>
+      <button class="btn-primary" id="btn-save" aria-label="저장">💾 저장</button>
     </div>
   `;
   bindResultEvents(area);
@@ -7306,7 +7307,7 @@ function receiverLoadingHtml(failed = false): string {
     </header>
     <main class="receiver-view" id="receiver-loading">
       <div class="receiver-hero-card">
-        <span class="receiver-hero-badge">✨ 공유받은 데이트 코스</span>
+        <span class="receiver-hero-badge"><span aria-hidden="true">✨</span> 공유받은 데이트 코스</span>
         <h2 class="receiver-hero-title">친구가 보낸 특별한 데이트 코스예요</h2>
         ${
           // spots.json을 받지 못하면 샘플로 판정하지 않는다. 판정하면 '찾을 수 없어요'와 함께 해시를 지워 받은 링크를 잃는다(P-255)
@@ -7387,13 +7388,13 @@ function renderReceiverView(steps: CourseStep[]): void {
     <main class="receiver-view">
       <div class="receiver-hero-card">
         ${blogSlug
-          ? `<span class="receiver-hero-badge">📖 매거진 코스</span>
+          ? `<span class="receiver-hero-badge"><span aria-hidden="true">📖</span> 매거진 코스</span>
         <h2 class="receiver-hero-title">매거진 글에 나온 장소로 만든 코스예요</h2>
         <p class="receiver-hero-desc"><a href="./blog/${blogSlug}/" id="receiver-blog-back" style="color:inherit">← 글로 돌아가기</a></p>`
-          : `<span class="receiver-hero-badge">✨ 공유받은 데이트 코스</span>
+          : `<span class="receiver-hero-badge"><span aria-hidden="true">✨</span> 공유받은 데이트 코스</span>
         <h2 class="receiver-hero-title">${escapeHtml(heroTitle)}</h2>
         <p class="receiver-hero-desc receiver-hero-route">${escapeHtml(heroRoute)}</p>`}
-        <button class="btn-primary btn-make-own-hero" id="btn-make-own-hero" type="button">🚀 나도 이런 코스 만들기 →</button>
+        <button class="btn-primary btn-make-own-hero" id="btn-make-own-hero" type="button"><span aria-hidden="true">🚀</span> 나도 이런 코스 만들기 <span aria-hidden="true">→</span></button>
       </div>
 
       <div class="step-list">
@@ -7408,12 +7409,12 @@ function renderReceiverView(steps: CourseStep[]): void {
       </div>
 
       <div class="receiver-actions-bar">
-        <button class="btn-secondary btn-receiver-action" id="btn-receiver-copy" type="button">📋 코스 복사</button>
-        <button class="btn-secondary btn-receiver-action" id="btn-receiver-save" type="button">💾 저장</button>
-        <button class="btn-secondary btn-receiver-action" id="btn-receiver-share" type="button">🔗 ${CAN_SHARE ? '링크 공유' : '링크 복사'}</button>
+        <button class="btn-secondary btn-receiver-action" id="btn-receiver-copy" type="button"><span aria-hidden="true">📋</span> 코스 복사</button>
+        <button class="btn-secondary btn-receiver-action" id="btn-receiver-save" type="button" aria-label="저장">💾 저장</button>
+        <button class="btn-secondary btn-receiver-action" id="btn-receiver-share" type="button"><span aria-hidden="true">🔗</span> ${CAN_SHARE ? '링크 공유' : '링크 복사'}</button>
       </div>
 
-      <button class="btn-primary btn-make-own" id="btn-make-own">🚀 나만의 코스 만들기 →</button>
+      <button class="btn-primary btn-make-own" id="btn-make-own"><span aria-hidden="true">🚀</span> 나만의 코스 만들기 <span aria-hidden="true">→</span></button>
     </main>
     <footer class="app-footer">
       <p class="footer-copy">오늘 데이트 <span class="footer-version">${APP_VERSION}</span></p>

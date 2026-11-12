@@ -45,7 +45,7 @@ const item = (ids) => ({ id: 'x', createdAt: '', conditions: {}, spotIds: ids, t
   const { home, api, ctx } = setup();
   api.paintSaveButton(home, [1, 2]);
   assert.strictEqual(home.textContent, '💾 저장');
-  assert.strictEqual(home.attrs['aria-label'], undefined);
+  assert.strictEqual(home.attrs['aria-label'], '저장', '저장 전 이름이 화면 글자와 다르다');
   api.saveCourseWithToast(item([2, 1]));
   assert.strictEqual(home.textContent, '✅ 저장됨', '저장 뒤 버튼 글이 바뀌지 않는다');
   assert.strictEqual(home.attrs['aria-label'], '저장됨, 저장한 코스 열기');
@@ -60,7 +60,7 @@ const item = (ids) => ({ id: 'x', createdAt: '', conditions: {}, spotIds: ids, t
   ctx.state.course = [{ spotId: 1 }, { spotId: 3 }];
   api.syncSaveButtons();
   assert.strictEqual(home.textContent, '💾 저장');
-  assert.strictEqual(home.attrs['aria-label'], undefined);
+  assert.strictEqual(home.attrs['aria-label'], '저장', '저장 전 이름이 화면 글자와 다르다');
   assert.strictEqual(home.dataset.saved, undefined);
   ctx.state.course = [{ spotId: 2 }, { spotId: 1 }];
   api.syncSaveButtons();

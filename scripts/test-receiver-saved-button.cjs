@@ -33,7 +33,7 @@ const open = body(/^function openSavedPanel\(\)/m, /^\}/m);
 assert.match(open, /state\.savedOpen = true;[\s\S]*renderOverlay\(\);/, 'openSavedPanel이 시트를 열지 않는다');
 
 // 3. 저장 글: 버튼과 토스트가 보내는 쪽과 같다
-assert.match(receiver, /id="btn-receiver-save" type="button">💾 저장<\/button>/, '받은 코스 저장 버튼 글이 `💾 저장`이 아니다');
+assert.match(receiver, /id="btn-receiver-save" type="button" aria-label="저장">💾 저장<\/button>/, '받은 코스 저장 버튼 글이 `💾 저장`이 아니다');
 assert.ok(!receiver.includes('보관함'), '받은 코스 화면에 `보관함` 글이 남았다');
 const callers = src.match(/^\s*saveCourseWithToast\(item\);/gm) || [];
 assert.strictEqual(callers.length, 2, '저장 토스트를 띄우는 곳이 보내는 쪽과 받는 쪽 둘이어야 한다');
