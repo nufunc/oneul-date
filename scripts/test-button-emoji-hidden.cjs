@@ -6,7 +6,8 @@ const fs = require('fs');
 const path = require('path');
 
 const src = fs.readFileSync(path.join(__dirname, '..', 'src', 'main.ts'), 'utf8');
-for (const cls of ['main-tab-emoji', 'chip-emoji', 'pill-icon', 'slot-emoji']) {
+// P-391: 제목 글자가 옆에 있는 정보 줄과 안내의 장식 아이콘도 숨긴다. 시간대를 뜻하는 saved-step-emoji는 읽게 둔다
+for (const cls of ['main-tab-emoji', 'chip-emoji', 'pill-icon', 'slot-emoji', 'meta-item-icon', 'feature-icon', 'empty-icon', 'overlay-tip-icon', 'search-input-icon', 'badge-search-match-icon']) {
   const spans = src.match(new RegExp(`<span class="${cls}"[^>]*>`, 'g')) || [];
   assert.ok(spans.length > 0, `${cls} 자리가 없다`);
   for (const s of spans) assert.ok(s.includes('aria-hidden="true"'), `${cls} 이모지가 읽힌다: ${s}`);

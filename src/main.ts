@@ -4377,7 +4377,7 @@ function renderConditions(): void {
       <!-- 1. 통합 검색창 (스팟 탐색과 100% 동일) -->
       <div class="search-container" style="margin-bottom: var(--space-2);">
         <div class="search-box">
-          <span class="search-input-icon">🔍</span>
+          <span class="search-input-icon" aria-hidden="true">🔍</span>
           <input 
             type="search" 
             class="search-input" 
@@ -5782,7 +5782,7 @@ function renderStepCard(
             const currentQ = state.courseConditions?.searchQuery || state.searchQuery;
             if (currentQ && matchesSearchQuery(spot, currentQ)) {
               const badge = getSearchMatchBadge(currentQ);
-              return `<span class="badge-search-match"><span class="badge-search-match-icon">${badge.icon}</span> ${escapeHtml(badge.label)}</span>`;
+              return `<span class="badge-search-match"><span class="badge-search-match-icon" aria-hidden="true">${badge.icon}</span> ${escapeHtml(badge.label)}</span>`;
             }
             return '';
           })()}
@@ -6695,7 +6695,7 @@ function renderSpotDiscovery(): void {
     <!-- 1. 통합 검색창 -->
     <div class="search-container" style="margin-bottom: var(--space-2);">
       <div class="search-box">
-        <span class="search-input-icon">🔍</span>
+        <span class="search-input-icon" aria-hidden="true">🔍</span>
         <input 
           type="search" 
           class="search-input" 
@@ -6795,7 +6795,7 @@ function renderSpotDiscovery(): void {
         if (state.savedOnly && savedCount > 0) {
           return `
         <div class="spot-empty-state">
-          <span class="empty-icon">❤️</span>
+          <span class="empty-icon" aria-hidden="true">❤️</span>
           <p class="empty-title">보관함 ${savedCount.toLocaleString('ko-KR')}곳 중 이 조건에 맞는 곳이 없어요</p>
           <p class="empty-desc">지역이나 검색어를 바꾸면 찜한 곳이 보여요</p>
           <button class="btn-empty-reset" id="btn-empty-reset-saved-filters">조건 풀고 보관함 보기</button>
@@ -6803,7 +6803,7 @@ function renderSpotDiscovery(): void {
         }
         return `
         <div class="spot-empty-state">
-          <span class="empty-icon">${state.savedOnly ? '❤️' : '🧭'}</span>
+          <span class="empty-icon" aria-hidden="true">${state.savedOnly ? '❤️' : '🧭'}</span>
           <p class="empty-title">${state.savedOnly ? '아직 보관함에 담은 스팟이 없어요' : '검색 조건에 맞는 스팟을 찾지 못했어요'}</p>
           <p class="empty-desc">${state.savedOnly ? '마음에 드는 스팟 카드의 하트(🤍)를 눌러 나만의 데이트 리스트를 모아보세요!' : '지역명이나 키워드를 변경해보세요!'}</p>
           ${!state.savedOnly && q ? emptySearchAlternatives(allCandidateSpots, q).map((alt) => `
@@ -7747,7 +7747,7 @@ function renderOverlayContent(): void {
         <div class="overlay-body">
           ${list.length > 0 ? `
           <div class="overlay-tip-banner">
-            <span class="overlay-tip-icon">💡</span>
+            <span class="overlay-tip-icon" aria-hidden="true">💡</span>
             <span class="overlay-tip-text">카톡이나 메모장에 코스를 복사해두면 기기를 변경해도 안전하게 보관돼요.</span>
           </div>` : ''}
           ${
@@ -7960,21 +7960,21 @@ function renderOverlayContent(): void {
                 </p>
                 <div class="all-regions-features">
                   <div class="all-feature-item">
-                    <span class="feature-icon">✨</span>
+                    <span class="feature-icon" aria-hidden="true">✨</span>
                     <div class="feature-body">
                       <span class="feature-title">전국 핫플레이스 엄선</span>
                       <span class="feature-desc">인기 명소부터 로컬 감성 스팟까지</span>
                     </div>
                   </div>
                   <div class="all-feature-item">
-                    <span class="feature-icon">🚗</span>
+                    <span class="feature-icon" aria-hidden="true">🚗</span>
                     <div class="feature-body">
                       <span class="feature-title">여행 & 드라이브 추천</span>
                       <span class="feature-desc">주말 근교 및 색다른 데이트 코스</span>
                     </div>
                   </div>
                   <div class="all-feature-item">
-                    <span class="feature-icon">🧭</span>
+                    <span class="feature-icon" aria-hidden="true">🧭</span>
                     <div class="feature-body">
                       <span class="feature-title">자유로운 코스 연결</span>
                       <span class="feature-desc">지역 제한 없는 폭넓은 큐레이션</span>
@@ -8291,7 +8291,7 @@ function renderOverlayContent(): void {
           <div class="spot-detail-meta-grid">
             ${hoursText || closedText ? `
               <div class="${shortItemClass('hours')}">
-                <span class="meta-item-icon">🕒</span>
+                <span class="meta-item-icon" aria-hidden="true">🕒</span>
                 <div class="meta-item-body">
                   <strong class="meta-item-title">
                     영업시간
@@ -8304,7 +8304,7 @@ function renderOverlayContent(): void {
 
             ${parkingText ? `
               <div class="${shortItemClass('parking')}">
-                <span class="meta-item-icon">🚗</span>
+                <span class="meta-item-icon" aria-hidden="true">🚗</span>
                 <div class="meta-item-body">
                   <strong class="meta-item-title">주차 안내</strong>
                   <p class="meta-item-desc">${escapeHtml(parkingText)}</p>
@@ -8314,7 +8314,7 @@ function renderOverlayContent(): void {
 
             ${priceText ? `
               <div class="${shortItemClass('price')}">
-                <span class="meta-item-icon">💳</span>
+                <span class="meta-item-icon" aria-hidden="true">💳</span>
                 <div class="meta-item-body">
                   <strong class="meta-item-title">가격대 / 예산</strong>
                   <p class="meta-item-desc">${escapeHtml(priceText)}</p>
@@ -8324,7 +8324,7 @@ function renderOverlayContent(): void {
 
             ${ratingText ? `
               <div class="${shortItemClass('rating')}">
-                <span class="meta-item-icon">⭐</span>
+                <span class="meta-item-icon" aria-hidden="true">⭐</span>
                 <div class="meta-item-body">
                   <strong class="meta-item-title">카카오맵 평점</strong>
                   <p class="meta-item-desc">${escapeHtml(ratingText)}</p>
@@ -8334,7 +8334,7 @@ function renderOverlayContent(): void {
 
             ${signatureItems.length > 0 ? `
               <div class="meta-grid-item full-width">
-                <span class="meta-item-icon">🍽️</span>
+                <span class="meta-item-icon" aria-hidden="true">🍽️</span>
                 <div class="meta-item-body">
                   <strong class="meta-item-title">대표 메뉴</strong>
                   <div class="meta-tag-chips">
@@ -8346,7 +8346,7 @@ function renderOverlayContent(): void {
 
             ${moodTags.length > 0 ? `
               <div class="meta-grid-item full-width">
-                <span class="meta-item-icon">✨</span>
+                <span class="meta-item-icon" aria-hidden="true">✨</span>
                 <div class="meta-item-body">
                   <strong class="meta-item-title">분위기 & 키워드</strong>
                   <div class="meta-tag-chips">
