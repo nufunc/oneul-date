@@ -1,5 +1,5 @@
 // 코스 결과 🔄와 다시 추천 눌리는 영역 시험(P-303): node scripts/test-course-touch-target.cjs
-// src/style.css에서 .btn-action-icon(공통), .btn-swap-icon(🔄), .btn-regenerate(다시 추천)의 ::after가
+// src/style.css에서 .btn-action-icon(공통), .btn-swap-icon(🔄), .btn-regenerate(다시 추천), .btn-optimize-route(최적 동선)의 ::after가
 // 보이는 크기를 바꾸지 않고 눌리는 영역을 44px 이상으로 넓히는지, 이웃 아이콘과 겹치지 않는지 본다
 const assert = require('assert');
 const fs = require('fs');
@@ -50,5 +50,14 @@ assert.ok(inset, '.btn-regenerate::after inset 값이 없다');
 // padding box는 테두리 1px씩 안쪽이라 높이 = 38 - 2 + 2 * 확장
 assert.ok(h - 2 + 2 * -Number(inset[1]) >= 44, `다시 추천 눌리는 높이가 ${h - 2 + 2 * -Number(inset[1])}px로 44px 미만이다`);
 assert.ok(-Number(inset[2]) <= 1, '다시 추천 눌리는 영역을 옆 버튼 쪽으로 넓혔다');
+
+// 최적 동선: 모양 높이는 라이브 375px 실측 34px(ux-reviewer-284). ::after로 세로만 44px, 가로는 테두리만큼만
+const opt = rule('.btn-optimize-route');
+assert.match(opt, /position:\s*relative;/, '.btn-optimize-route에 position: relative가 없다');
+assert.match(opt, /padding:\s*6px 12px;/, '최적 동선 여백이 바뀌어 실측 34px 전제가 깨졌다');
+const optInset = rule('.btn-optimize-route::after').match(/inset:\s*(-?\d+)px\s+(-?\d+)px;/);
+assert.ok(optInset, '.btn-optimize-route::after inset 값이 없다');
+assert.ok(34 - 2 + 2 * -Number(optInset[1]) >= 44, '최적 동선 눌리는 높이가 44px 미만이다');
+assert.ok(-Number(optInset[2]) <= 1, '최적 동선 눌리는 영역을 옆 버튼 쪽으로 넓혔다');
 
 console.log('test-course-touch-target: 통과');

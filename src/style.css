@@ -5117,6 +5117,7 @@ html[data-theme-resolved="dark"] .quick-region-chip.chip-budget.is-luxury-active
 }
 
 .btn-optimize-route {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -5129,6 +5130,13 @@ html[data-theme-resolved="dark"] .quick-region-chip.chip-budget.is-luxury-active
   font-weight: 700;
   cursor: pointer;
   transition: transform 0.15s ease, background 0.15s ease;
+}
+
+/* 모양은 34px로 두고 터치 영역만 세로 44px로 넓힌다. inset은 padding box 기준이라 테두리 1px만큼 더한다 */
+.btn-optimize-route::after {
+  content: '';
+  position: absolute;
+  inset: -6px -1px;
 }
 
 .btn-optimize-route:hover {
