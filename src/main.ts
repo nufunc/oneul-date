@@ -4398,7 +4398,7 @@ function renderConditions(): void {
       </div>
 
       <!-- 3. 테마 칩 바 (SPOT_EXPLORE_CATEGORIES 순서 고정) -->
-      <div class="spot-category-scroll" style="margin-bottom: var(--space-4);">
+      <div class="spot-category-scroll" style="margin-bottom: var(--space-4);" role="group" aria-label="테마 선택">
         ${themeChips.map((cat) => `
           <button class="spot-category-chip ${state.courseCategory === cat.key ? 'is-active' : ''}" data-cat-key="${cat.key}" aria-pressed="${state.courseCategory === cat.key}">
             <span class="chip-emoji">${cat.emoji}</span>
@@ -6716,7 +6716,7 @@ function renderSpotDiscovery(): void {
     </div>
 
     <!-- 3. 테마 칩 (SPOT_EXPLORE_CATEGORIES 순서 고정) -->
-    <div class="spot-category-scroll" style="margin-bottom: var(--space-4);">
+    <div class="spot-category-scroll" style="margin-bottom: var(--space-4);" role="group" aria-label="테마 선택">
       ${getCuratedThemeChips().map((cat) => `
         <button class="spot-category-chip ${state.spotCategory === cat.key ? 'is-active' : ''}" data-cat-key="${cat.key}" aria-pressed="${state.spotCategory === cat.key}">
           <span class="chip-emoji">${cat.emoji}</span>
