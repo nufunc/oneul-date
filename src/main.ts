@@ -7401,7 +7401,9 @@ function showSpotsFailedBanner(count: number): void {
   const bar = document.createElement('div');
   bar.id = 'spots-failed-banner';
   bar.className = 'data-failed-banner';
-  bar.setAttribute('role', 'status');
+  // 글자를 담은 채 삽입한 status는 낭독되지 않아 이름 있는 영역으로 두고 안내 문장만 #sr-announce로 알린다(P-423)
+  bar.setAttribute('role', 'region');
+  bar.setAttribute('aria-label', '장소 정보 안내');
   bar.innerHTML = `
     <p class="data-failed-text">장소 정보를 다 받지 못했어요. 지금은 일부 ${count.toLocaleString()}곳만 보여요.</p>
     <button type="button" class="btn-data-retry">다시 받기</button>
@@ -7410,6 +7412,7 @@ function showSpotsFailedBanner(count: number): void {
   bar.querySelector('.btn-data-retry')!.addEventListener('click', () => location.reload());
   bar.querySelector('.btn-data-dismiss')!.addEventListener('click', () => bar.remove());
   document.body.appendChild(bar);
+  announce(bar.querySelector('.data-failed-text')!.textContent!);
 }
 
 /** 조건 영역·오늘의코스·교체 없이 코스 카드만 + [나만의 코스 만들기] CTA + 실전 공유/저장/길찾기 액션 */

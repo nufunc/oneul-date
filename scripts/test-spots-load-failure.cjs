@@ -90,7 +90,7 @@ const cut = (src, from, to) => {
   const cachedSync = cut(main, '      loadSpots()\n        .then((liveSpots) => {', '\n          }\n');
   assert.ok(cachedSync.includes('!spotsFellBackToSample'), '캐시 동기화가 실패한 샘플로 덮는다');
 
-  // 4. 홈 띠: 고정 위치, role=status, 실제 개수, 다시 받기와 닫기
+  // 4. 홈 띠: 고정 위치, 이름 있는 영역, 안내 문장은 #sr-announce로(P-423), 실제 개수, 다시 받기와 닫기
   const bannerCode = cut(main, 'function showSpotsFailedBanner(', '\n}\n');
   const makeEl = (tag) => {
     const el = {
@@ -101,7 +101,11 @@ const cut = (src, from, to) => {
       querySelector(sel) {
         const cls = sel.replace('.', '');
         if (!this.innerHTML.includes(`class="${cls}"`)) return null;
-        return (this.found[sel] = this.found[sel] || makeEl('button'));
+        if (!this.found[sel]) {
+          this.found[sel] = makeEl('button');
+          this.found[sel].textContent = (this.innerHTML.match(new RegExp(`class="${cls}"[^>]*>([^<]*)<`)) || [])[1];
+        }
+        return this.found[sel];
       },
       found: {},
     };
@@ -113,12 +117,15 @@ const cut = (src, from, to) => {
     getElementById: (id) => doc.body.children.find((c) => c.id === id) || null,
   };
   const loc = { reloads: 0, reload() { this.reloads++; } };
-  const show = new Function('document', 'location', `${ts.transpile(bannerCode, { target: 'es2022' })};return showSpotsFailedBanner;`)(doc, loc);
+  const announced = [];
+  const show = new Function('document', 'location', 'announce', `${ts.transpile(bannerCode, { target: 'es2022' })};return showSpotsFailedBanner;`)(doc, loc, (t) => announced.push(t));
   show(251);
   show(251);
   assert.strictEqual(doc.body.children.length, 1, '띠가 두 번 붙었다');
   const bar = doc.body.children[0];
-  assert.strictEqual(bar.attrs.role, 'status', '띠에 role=status가 없다');
+  assert.strictEqual(bar.attrs.role, 'region', '띠가 글자째 삽입되는 status로 남았다');
+  assert.strictEqual(bar.attrs['aria-label'], '장소 정보 안내', '띠 영역에 이름이 없다');
+  assert.deepStrictEqual(announced, ['장소 정보를 다 받지 못했어요. 지금은 일부 251곳만 보여요.'], '안내 문장을 한 번만 알리지 않는다');
   assert.ok(bar.innerHTML.includes('장소 정보를 다 받지 못했어요. 지금은 일부 251곳만 보여요.'), '띠 문구나 개수가 다르다');
   assert.ok(bar.innerHTML.includes('>다시 받기</button>'), '다시 받기 버튼이 없다');
   assert.ok(/class="btn-data-dismiss" aria-label="안내 닫기"/.test(bar.innerHTML), '닫기 버튼에 aria-label이 없다');
