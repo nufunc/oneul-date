@@ -13,8 +13,8 @@ assert.strictEqual(strip('🔍 서촌 카페 코스'), '서촌 카페 코스');
 assert.strictEqual(strip('❤️ 찜한 코스'), '찜한 코스');
 assert.strictEqual(strip('📍 청계광장 중심 코스'), '청계광장 중심 코스');
 
-assert.ok(src.includes('<span class="saved-item-meta">${dateStr} · ${nameHtml}</span>'), '화면 제목이 그림 문자를 숨긴 값을 쓰지 않는다');
-assert.ok(src.includes(String.raw`const nameHtml = escapeHtml(name).replace(/\p{Extended_Pictographic}️?/gu, '<span aria-hidden="true">$&</span>');`), '화면 제목의 그림 문자가 낭독에서 숨겨지지 않는다');
+assert.ok(src.includes('<span class="saved-item-meta"><span>${dateStr} · ${nameHtml}</span></span>'), '화면 제목이 그림 문자를 숨긴 값을 쓰지 않거나 flex 줄에서 띄어쓰기를 잃는다');
+assert.ok(src.includes(String.raw`const nameHtml = escapeHtml(name).replace(/\p{Extended_Pictographic}\uFE0F?/gu, '<span aria-hidden="true">$&</span>');`), '화면 제목의 그림 문자가 낭독에서 숨겨지지 않는다');
 assert.ok(src.includes('<span class="saved-step-emoji">${emoji}</span>'), '시간대 이모지가 숨겨졌다');
 
 console.log('test-saved-title-emoji: 통과');

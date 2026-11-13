@@ -7765,12 +7765,13 @@ function renderOverlayContent(): void {
                     const name = item.title ?? `${regionsLabel(normalizeRegionCond(item.conditions.region), item.conditions.subZones)} · ${moodLabel(item.conditions.mood)}`;
                     // 코스마다 버튼 이름이 같아 화면 낭독기로는 어느 코스의 버튼인지 가릴 수 없었다. 코스 이름을 붙인다(P-361)
                     // 제목의 📍🔍❤️ 같은 그림 문자가 단추 넷의 이름마다 읽혔다. 이름에서는 빼고 화면 글자는 낭독에서 숨긴다(P-394)
-                    const of = escapeHtml(`${dateStr} ${name.replace(/\p{Extended_Pictographic}️?\s*/gu, '')}`);
-                    const nameHtml = escapeHtml(name).replace(/\p{Extended_Pictographic}️?/gu, '<span aria-hidden="true">$&</span>');
+                    const of = escapeHtml(`${dateStr} ${name.replace(/\p{Extended_Pictographic}\uFE0F?\s*/gu, '')}`);
+                    // 제목 줄이 flex라 그림 문자 span 앞뒤 띄어쓰기가 사라졌다. 글자 전체를 span 하나에 넣는다
+                    const nameHtml = escapeHtml(name).replace(/\p{Extended_Pictographic}\uFE0F?/gu, '<span aria-hidden="true">$&</span>');
                     return `
                 <li class="saved-item">
                   <button class="saved-item-main" data-course-id="${escapeHtml(item.id)}">
-                    <span class="saved-item-meta">${dateStr} · ${nameHtml}</span>
+                    <span class="saved-item-meta"><span>${dateStr} · ${nameHtml}</span></span>
                     <span class="saved-item-spots">${savedCourseSpotsHtml(item)}</span>
                   </button>
                   <div class="saved-item-actions">
