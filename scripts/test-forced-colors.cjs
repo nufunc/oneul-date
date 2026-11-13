@@ -16,4 +16,7 @@ assert.match(blocks, /HighlightText !important;\s*\/\*[^*]*\*\/\s*forced-color-a
 const search = css.match(/\n\.search-input \{([^}]*)\}/);
 assert.ok(search && /outline: 2px solid transparent;/.test(search[1]) && !/outline: none;/.test(search[1]), '검색칸 초점 외곽선을 지운다');
 
+// 주요 단추 경계(P-405)
+assert.match(blocks, /\.btn-primary \{[^}]*border: 2px solid ButtonText;/, '주요 단추 경계가 없다');
+
 console.log('test-forced-colors: 통과');

@@ -6017,4 +6017,8 @@ html[data-theme-resolved="dark"] .spot-link-btn.kakao {
     /* 글자 뒤 Canvas 받침이 흰 글자를 덮어 받침을 끈다. 시스템 색만 쓰므로 고대비 테마를 따른다 */
     forced-color-adjust: none;
   }
+  /* 테두리 없이 배경색으로만 그린 주요 단추가 글자만 남았다(WCAG 1.4.11, P-405) */
+  .btn-primary {
+    border: 2px solid ButtonText;
+  }
 }
