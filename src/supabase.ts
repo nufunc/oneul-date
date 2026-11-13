@@ -372,7 +372,7 @@ const RANGE_PROBE_BYTES = 2048; // 행 최대 1,838B(2026-10-20)보다 커야 �
 const RANGE_PROBES = 7;
 const RANGE_FINAL_BYTES = 16384;
 const RANGE_MAX_REQUESTS = 300; // 공유 3곳에 88건(라운드 4번)이다
-const RANGE_TIMEOUT_MS = 15000; // Slow 3G(왕복 약 2초)에서 순차 5번과 요청 88건이 6초를 넘겼다(P-410)
+const RANGE_TIMEOUT_MS = 25000; // Slow 3G(응답 약 2.5초)에서 순차 라운드 6번이 약 17초 걸려 15초도 모자랐다(P-410)
 
 /** 조각에서 from 이후 첫 행 머리의 바이트 위치와 id. 문자열로 디코드해 세면 다중 바이트 문자에서 위치가 어긋나 바이트로 센다 */
 export function findRowHead(buf: Uint8Array, from = 0): { pos: number; id: number } | null {

@@ -17,7 +17,7 @@ const cut = (src, from, to) => {
 
 // 1. Range 시간 제한은 15초이고 findSpotsByRange의 중단 타이머가 그 값을 쓴다
 const supa = read('supabase.ts');
-assert.ok(/^const RANGE_TIMEOUT_MS = 15000;/m.test(supa), 'RANGE_TIMEOUT_MS가 15000이 아니다');
+assert.ok(/^const RANGE_TIMEOUT_MS = 25000;/m.test(supa), 'RANGE_TIMEOUT_MS가 25000이 아니다');
 assert.ok(supa.includes('setTimeout(() => ctrl.abort(), RANGE_TIMEOUT_MS)'), 'Range 중단 타이머가 RANGE_TIMEOUT_MS를 쓰지 않는다');
 
 // 2. init의 첫 방문 로딩 블록을 떼어 실행한다: 받은 링크만 Range가 끝난 뒤 전체 파일을 받는다
