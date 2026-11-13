@@ -2803,6 +2803,21 @@ label,
   margin-top: var(--space-2);
 }
 
+/* 실패 카드의 다시 불러오기와 홈으로를 한 줄에 둔다. 글자 200%에서 넘치면 다음 줄로 내린다(P-413) */
+.receiver-failed-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.receiver-failed-actions .btn-secondary {
+  min-height: 44px;
+  margin-top: var(--space-2);
+  padding: 0 var(--space-4);
+  font-size: var(--font-sm);
+}
+
 .data-failed-banner {
   position: fixed;
   bottom: calc(76px + env(safe-area-inset-bottom, 0px));

@@ -7320,9 +7320,10 @@ function setSharedCourseView(shared: boolean): void {
  * 그사이 홈 셸을 그리면 코스를 만들어 받은 코스를 잃었으므로 수신자 머리 카드와 자리표시만 그리고 홈 진입을 두지 않는다
  */
 function receiverLoadingHtml(failed = false): string {
+  // 실패 카드에서는 다시 불러오기가 계속 실패해도 앱 안에서 나갈 길이 있게 홈 링크를 둔다. 대기 카드에 두면 홈으로 간 뒤 도착한 데이터가 받은 코스를 그리지 않는다(P-413)
   return `
     <header class="topbar">
-      <h1 class="app-title">오늘 데이트</h1>
+      <h1 class="app-title">${failed ? '<a href="#" class="app-title-link" id="receiver-home-link" aria-label="오늘 데이트 홈으로 이동">오늘 데이트</a>' : '오늘 데이트'}</h1>
       <div class="topbar-actions">
         <button class="btn-theme-toggle" id="btn-theme-toggle" aria-label="테마 변경, 현재 ${getThemeModeLabel(state.themeMode)}">${getThemeModeHtml(state.themeMode)}</button>
       </div>
@@ -7335,7 +7336,10 @@ function receiverLoadingHtml(failed = false): string {
           // spots.json을 받지 못하면 샘플로 판정하지 않는다. 판정하면 '찾을 수 없어요'와 함께 해시를 지워 받은 링크를 잃는다(P-255)
           failed
             ? `<p class="receiver-hero-desc" role="alert">연결이 끊겨 코스를 불러오지 못했어요. 링크는 그대로예요.</p>
-        <button type="button" class="btn-data-retry" id="btn-receiver-retry">다시 불러오기</button>`
+        <div class="receiver-failed-actions">
+          <button type="button" class="btn-data-retry" id="btn-receiver-retry">다시 불러오기</button>
+          <button type="button" class="btn-secondary" id="btn-receiver-home">홈으로</button>
+        </div>`
             : `<p class="receiver-hero-desc" role="status" aria-live="polite">
           <span aria-hidden="true" style="display:inline-block;width:14px;height:14px;margin-right:8px;vertical-align:-2px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite"></span>공유받은 코스를 불러오는 중이에요
         </p>`
@@ -7351,6 +7355,15 @@ function renderReceiverLoading(failed = false): void {
   app.innerHTML = receiverLoadingHtml(failed);
   document.getElementById('btn-theme-toggle')?.addEventListener('click', cycleThemeMode);
   document.getElementById('btn-receiver-retry')?.addEventListener('click', () => location.reload());
+  // 홈은 샘플로 그려지므로 실패 띠로 이유를 함께 알린다(P-413)
+  const goHome = (e: Event) => {
+    e.preventDefault();
+    clearCourseHash();
+    renderShell();
+    if (spotsFellBackToSample) showSpotsFailedBanner(spots.filter((s) => !s.is_closed && isCourseEligible(s)).length);
+  };
+  document.getElementById('receiver-home-link')?.addEventListener('click', goHome);
+  document.getElementById('btn-receiver-home')?.addEventListener('click', goHome);
 }
 
 /** 홈에서 spots.json을 받지 못해 샘플로 보이는 동안 위에 고정한 띠. 흐름 밖(position:fixed)이라 들어와도 화면이 밀리지 않는다(P-255) */
