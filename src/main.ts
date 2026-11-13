@@ -3213,15 +3213,15 @@ const SLOT_CLOSE_MARGIN_MIN = 60;
  * (영업시간 문자열, 칸, 요일)마다 한 번만 분석한다(getCandidates가 모든 열린 행에 부른다)
  */
 const slotClockOpenCache = new Map<string, boolean>();
-function isOpenAtSlotClock(spot: Spot, slot: SlotKey, date = new Date()): boolean {
+function isOpenAtSlotClock(spot: Spot, slot: SlotKey, date = new Date(), withMargin = true): boolean {
   const clock = SLOT_CLOCK_MIN[slot];
   if (clock === undefined || spot.is_24h) return true;
   const bh = spot.business_hours;
   const hours = bh && typeof bh === 'object' ? bh['영업시간'] || bh['이용시간'] : '';
   if (typeof hours !== 'string' || !hours) return true;
   const today = KOREAN_DAY_NAMES[date.getDay()];
-  const margin = slot === 'evening' || slot === 'night' ? SLOT_CLOSE_MARGIN_MIN : 0;
-  const key = `${slot}|${today}|${hours}`;
+  const margin = withMargin && (slot === 'evening' || slot === 'night') ? SLOT_CLOSE_MARGIN_MIN : 0;
+  const key = `${slot}|${today}|${margin}|${hours}`;
   let result = slotClockOpenCache.get(key);
   if (result === undefined) {
     result = parseOpenAtClock(hours, clock, today, KOREAN_DAY_NAMES[(date.getDay() + 6) % 7], margin);
@@ -5770,6 +5770,8 @@ function renderStepCard(
   const targetImgUrl = getSpotImageUrl(spot, step.slot, opts.usedImages);
   const isHot = isSuperHotSpot(spot);
   const isClosedToday = isSpotClosedToday(spot);
+  // P-426: 받은 코스와 찜 코스는 칸 시각 거르기를 거치지 않아 닫은 장소가 경고 없이 보였다. 과경고를 피하려고 여유 없이 칸 시각 한 점만 본다
+  const isClosedAtSlot = !isClosedToday && !isOpenAtSlotClock(spot, step.slot, new Date(), false);
 
   // v4.0 큐레이션 뱃지
   const curationBadges: string[] = [];
@@ -5814,6 +5816,7 @@ function renderStepCard(
     <div class="step-thumb-col">
       ${isHot ? `<span class="badge-hot-floating">🔥 핫플</span>` : ''}
       ${isClosedToday ? `<span class="badge-closed-floating">⚠️ 오늘 휴무</span>` : ''}
+      ${isClosedAtSlot ? `<span class="badge-closed-floating">⚠️ 이 시간엔 영업 전후일 수 있어요</span>` : ''}
       <div class="step-fallback-box">${fallbackIcon}</div>
       ${targetImgUrl ? `<img class="step-thumb-img" src="${escapeHtml(toCardThumbUrl(targetImgUrl))}"${toCardThumbUrl(targetImgUrl) !== targetImgUrl ? ` data-orig="${escapeHtml(targetImgUrl)}"` : ''} alt="${escapeHtml(spot.name)}" loading="lazy" fetchpriority="low" decoding="async" referrerpolicy="no-referrer" onload="this.classList.add('is-loaded');" onerror="var o=this.dataset.orig; if(o){this.dataset.orig=''; this.src=o; return;} this.classList.add('is-hidden'); this.previousElementSibling?.classList.add('is-active');" />` : ''}
     </div>`;

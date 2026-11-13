@@ -65,6 +65,16 @@ assert.strictEqual(open('매일 09:00 ~ 13:30', 'day'), true);
 assert.strictEqual(open('월 23:00 ~ 22:00 / 화 10:00 ~ 12:00', 'night'), false);
 assert.strictEqual(open('월 23:00 ~ 22:30 / 화 10:00 ~ 12:00', 'night'), true);
 
+// 카드 경고 배지(P-426)는 여유 없이 칸 시각 한 점만 본다
+assert.strictEqual(isOpenAtSlotClock(sp('매일 11:00 ~ 20:00'), 'evening', TUE, false), true);
+assert.strictEqual(isOpenAtSlotClock(sp('매일 11:00 ~ 19:00'), 'evening', TUE, false), false);
+assert.strictEqual(isOpenAtSlotClock(sp('14:00 ~ 22:00'), 'day', TUE, false), false);
+// 같은 문자열을 여유 있음과 없음으로 번갈아 불러도 캐시가 섞이지 않는다
+assert.strictEqual(isOpenAtSlotClock(sp('매일 11:00 ~ 20:00'), 'evening', TUE), false);
+const card = src.slice(src.indexOf('function renderStepCard('), src.indexOf('function renderStepCard(') + 6000);
+assert.ok(/isClosedAtSlot = !isClosedToday && !isOpenAtSlotClock\(spot, step\.slot, new Date\(\), false\)/.test(card), '카드가 칸 시각 닫힘을 여유 없이 보지 않는다');
+assert.ok(/isClosedAtSlot \? `<span class="badge-closed-floating">/.test(card), '칸 시각 닫힘 배지가 badge-closed-floating이 아니다');
+
 // 7요일 목록은 그날 요일 구간만 본다
 const week = '월 11:00 ~ 21:00 / 화 11:00 ~ 18:00 / 수 11:00 ~ 23:00 / 목 11:00 ~ 21:00 / 금 11:00 ~ 21:00 / 토 11:00 ~ 21:00 / 일 11:00 ~ 21:00';
 assert.strictEqual(open(week, 'evening', TUE), false);
