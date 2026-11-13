@@ -3645,7 +3645,8 @@ function snapshotPrevCourse(): void {
   prevCourse = { course: state.course.map((s) => ({ ...s })), conditions: state.courseConditions };
 }
 
-const UNDO_COURSE_BTN_HTML = `<button class="btn-regenerate" id="btn-undo-course" type="button" aria-label="바꾸기 전 코스로 되돌리기">↩ 이전</button>`;
+// 이름이 보이는 글자 「이전」으로 시작해야 음성 명령으로 누를 수 있다(WCAG 2.5.3, P-397)
+const UNDO_COURSE_BTN_HTML = `<button class="btn-regenerate" id="btn-undo-course" type="button" aria-label="이전 코스로 되돌리기"><span aria-hidden="true">↩</span> 이전</button>`;
 
 function undoCourse(): void {
   if (!prevCourse) return;

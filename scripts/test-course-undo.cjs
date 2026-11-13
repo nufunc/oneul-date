@@ -136,4 +136,7 @@ for (const [name, marker] of [['swapStep', 'state.course[index] ='], ['regenerat
 assert.ok(/\$\{prevCourse \? UNDO_COURSE_BTN_HTML : ''\}/.test(src), '머리 줄 버튼이 보관분 조건부가 아님');
 assert.ok(/id="btn-undo-course"/.test(src) && /↩ 이전/.test(src));
 
+// 이름이 보이는 글자로 시작하고 화살표는 낭독에서 숨긴다(P-397, WCAG 2.5.3)
+assert.ok(src.includes('aria-label="이전 코스로 되돌리기"><span aria-hidden="true">↩</span> 이전</button>'), '되돌리기 단추 이름이 보이는 글자 「이전」으로 시작하지 않음');
+
 console.log('test-course-undo: 통과');
