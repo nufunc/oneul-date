@@ -6330,7 +6330,10 @@ function buildCourseFromSavedSpots(): boolean {
     const unused = savedList.filter((s) => !usedSpotIds.has(s.id));
     const slotMatches = unused.filter((s) => fitsSlot(s, slot));
     // stay 스팟은 day/evening/night의 "아무거나" 폴백 대상에서 제외한다
-    const pool = slotMatches.length > 0 ? slotMatches : unused.filter((s) => s.slot !== 'stay');
+    const anyPool = slotMatches.length > 0 ? slotMatches : unused.filter((s) => s.slot !== 'stay');
+    // P-424: 오늘 휴무이거나 칸 시각에 닫은 찜을 그대로 넣었다. 열린 찜을 먼저 쓰고, 모두 닫혔으면 기존대로 닫힌 찜을 넣는다
+    const openPool = anyPool.filter((s) => !isSpotClosedToday(s) && isOpenAtSlotClock(s, slot));
+    const pool = openPool.length > 0 ? openPool : anyPool;
     let matched: Spot | undefined;
     if (!prev) {
       // 첫 단계: 다른 찜이 가장 많이 모인 곳에서 시작한다. 이웃 수가 같으면 이웃까지 거리 합이 작은 곳, 그래도 같으면 저장 순서
