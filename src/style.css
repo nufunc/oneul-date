@@ -526,7 +526,7 @@ html[data-theme-resolved="dark"] .selector-btn.is-selected {
 html[data-theme="dark"] .search-input,
 html[data-theme-resolved="dark"] .search-input {
   background: var(--color-surface);
-  border-color: var(--color-border);
+  border-color: var(--color-text-faint);
   color: var(--color-text);
 }
 
@@ -943,7 +943,8 @@ label,
   font-weight: 500;
   color: var(--color-text);
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  /* 같은 색 카드 안이라 경계만 입력칸 범위를 보인다. --color-border는 1.38:1이었다(WCAG 1.4.11, P-420) */
+  border: 1px solid var(--color-text-faint);
   border-radius: var(--radius-full);
   box-shadow: var(--shadow-card);
   /* 초점 표시가 그림자뿐이라 강제 색상 모드에서 사라졌다. 투명 외곽선은 그 모드에서만 보인다(WCAG 2.4.7, P-404) */

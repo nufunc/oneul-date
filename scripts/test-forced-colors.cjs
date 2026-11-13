@@ -16,6 +16,12 @@ assert.match(blocks, /HighlightText !important;\s*\/\*[^*]*\*\/\s*forced-color-a
 const search = css.match(/\n\.search-input \{([^}]*)\}/);
 assert.ok(search && /outline: 2px solid transparent;/.test(search[1]) && !/outline: none;/.test(search[1]), '검색칸 초점 외곽선을 지운다');
 
+// 검색칸 경계(P-420): 카드 면과 3:1 이상인 --color-text-faint를 쓰고, 초점 경계색은 그대로다
+assert.match(search[1], /border: 1px solid var\(--color-text-faint\);/, '검색칸 경계가 --color-text-faint가 아니다');
+const darkSearch = css.match(/html\[data-theme-resolved="dark"\] \.search-input \{([^}]*)\}/)[1];
+assert.match(darkSearch, /border-color: var\(--color-text-faint\);/, '다크 검색칸 경계가 --color-text-faint가 아니다');
+assert.match(css, /\.search-input:focus \{\s*border-color: var\(--color-accent-text\);/, '검색칸 초점 경계색이 바뀌었다');
+
 // 주요 단추 경계(P-405)
 assert.match(blocks, /\.btn-primary \{[^}]*border: 2px solid ButtonText;/, '주요 단추 경계가 없다');
 
