@@ -1,5 +1,5 @@
 // 빌드 끝에 루트 dist/index.html에만 canonical, WebSite JSON-LD, 정적 h1을 넣는다(P-229).
-// 정적 h1은 #app 안의 sr-only라 앱이 그리면 앱 h1로 바뀌고 자리를 차지하지 않는다.
+// 정적 h1은 #app 안의 보이는 머리 골격이라 앱이 #app을 통째로 그리면 앱 h1로 바뀌어 h1이 둘이 되지 않는다.
 // 실행 시점: generate_seo_pages.mjs 뒤. 그 뒤에 돌려야 지역 랜딩(dist/<region>/<slot>/)이 루트 canonical을 복제하지 않는다.
 // 첫 화면의 최신 매거진 글 블록과 지역별 코스 링크 목록은 2026-11-03 사용자 지시로 넣지 않는다. 지역 랜딩 노출은 sitemap.xml이 맡는다.
 import fs from 'node:fs';
@@ -35,6 +35,7 @@ const headTags = `    <link rel="canonical" href="${SITE_URL}" />
   </head>`;
 
 // JS를 실행하지 않는 크롤러도 루트에서 매거진에 닿도록 상단 메뉴와 같은 링크를 둔다. renderShell이 #app을 통째로 바꿔 화면에는 남지 않는다(P-371)
-const appWithH1 = '<div id="app"><h1 class="sr-only">오늘 데이트</h1><a class="sr-only" href="./blog/">매거진</a></div>';
+// Slow 3G에서 CSS가 끝난 뒤 앱 JS가 실행될 때까지 4.6초 동안 빈 배경만 보였다. 홈과 받은 코스 어느 쪽에도 맞는 머리와 문구를 먼저 보인다(P-412)
+const appWithH1 = '<div id="app"><header class="topbar"><h1 class="app-title">오늘 데이트</h1></header><p class="app-boot" role="status">불러오는 중이에요</p><a class="sr-only" href="./blog/">매거진</a></div>';
 fs.writeFileSync(indexPath, html.replace('</head>', headTags).replace(APP_TAG, appWithH1));
 console.log('build_home_magazine: dist/index.html에 canonical, WebSite JSON-LD, 정적 h1을 넣었다');
