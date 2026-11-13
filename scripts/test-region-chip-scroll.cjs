@@ -5,10 +5,15 @@ const fs = require('fs');
 const path = require('path');
 
 const src = fs.readFileSync(path.join(__dirname, '..', 'src', 'main.ts'), 'utf8');
-const start = src.indexOf('function revealActiveRegionChip(');
-assert.ok(start >= 0, 'revealActiveRegionChip이 없다');
-const body = src.slice(start, src.indexOf('\n}\n', start) + 2)
+// 계산은 P-417에서 revealChipInRow로 뗐으므로 둘을 함께 떼어 온다
+const cut = (marker) => {
+  const start = src.indexOf(marker);
+  assert.ok(start >= 0, `${marker}가 없다`);
+  return src.slice(start, src.indexOf('\n}\n', start) + 2);
+};
+const body = `${cut('function revealActiveRegionChip(')}\n${cut('function revealChipInRow(')}`
   .replace(/\(container: HTMLElement\): void/, '(container)')
+  .replace(/\(row: HTMLElement, chip: HTMLElement\): void/, '(row, chip)')
   .replace(/<HTMLElement>/g, '');
 const reveal = new Function(`${body}; return revealActiveRegionChip;`)();
 

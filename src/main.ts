@@ -3992,6 +3992,13 @@ function renderShell(): void {
     </footer>
     <div class="overlay-root" id="overlay-root"></div>
   `;
+  // Chromium은 반쯤 보이는 칩에 Tab해도 줄을 넘기지 않아 칩 이름이 잘린 채 남았다. 키보드 초점일 때만 넘겨
+  // 마우스와 터치로 누를 때의 움직임은 그대로 둔다(P-417)
+  document.getElementById('conditions-area')?.addEventListener('focusin', (e) => {
+    const chip = e.target as HTMLElement;
+    const row = chip.closest<HTMLElement>('.quick-region-scroll:not(.quick-mood-row), .spot-category-scroll');
+    if (row && chip.matches(':focus-visible')) revealChipInRow(row, chip);
+  });
   // 주소의 해시를 바꾸면 hashchange가 받은 코스 판정을 다시 하므로 주소는 두고 포커스만 옮긴다
   document.getElementById('skip-to-main')?.addEventListener('click', (e) => {
     e.preventDefault();
@@ -4256,6 +4263,11 @@ function revealActiveRegionChip(container: HTMLElement): void {
   const row = container.querySelector<HTMLElement>('.quick-region-scroll:not(.quick-mood-row)');
   const chip = row?.querySelector<HTMLElement>('.is-active[data-region-key]');
   if (!row || !chip) return;
+  revealChipInRow(row, chip);
+}
+
+/** 가로 칩 줄에서 칩이 줄 밖이거나 오른쪽 흐림 가림에 걸치면 가운데로 맞춘다. 줄의 scrollLeft만 바꾼다 */
+function revealChipInRow(row: HTMLElement, chip: HTMLElement): void {
   const r = row.getBoundingClientRect();
   const c = chip.getBoundingClientRect();
   // 줄 오른쪽 padding(20px)은 흐림 가림이 덮는 폭이라 그 안쪽도 안 보이는 것으로 본다
