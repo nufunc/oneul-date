@@ -457,7 +457,8 @@ export async function findSpotsByRange(ids: number[]): Promise<Spot[]> {
 /** 병합으로 닫힌 스팟의 옛 id → 남은 id (동기화가 public/data/spot_aliases.json으로 내보낸다). 실패하면 빈 객체 */
 export async function loadSpotAliases(): Promise<Record<string, number>> {
   try {
-    const res = await fetch('./data/spot_aliases.json');
+    // 응답이 멈추면 받은 링크가 대기 카드에 머문다. 8초가 지나면 아래 catch로 빈 객체를 돌려준다(P-409)
+    const res = await fetch('./data/spot_aliases.json', { signal: AbortSignal.timeout(8000) });
     if (res.ok) return (await res.json()) as Record<string, number>;
   } catch {
     // 별칭이 없어도 앱은 동작한다. 병합된 옛 id만 찾지 못한다

@@ -8655,7 +8655,11 @@ async function init(): Promise<void> {
     // 역 이름 검색은 좌표가 있어야 걸리므로, 검색어가 먼저 입력됐으면 좌표가 도착한 뒤 다시 그린다
     if (state.mainMode === 'spots' && state.spotSearchQuery.trim()) renderSpotDiscovery();
   });
-  if (isSharedLink) await aliasesReady;
+  // 별칭을 기다리는 동안 빈 화면이 되지 않도록 대기 카드를 먼저 그린다(P-409)
+  if (isSharedLink) {
+    renderReceiverLoading();
+    await aliasesReady;
+  }
 
   // 1. 일반 홈 진입 시 0ms 즉시 셸 렌더링 (블로킹 제거)
   if (!isSharedLink) {
@@ -8757,7 +8761,8 @@ async function init(): Promise<void> {
   if (isSharedLink && (!state.course || state.course.length === 0)) {
     if (hasCachedData) {
       handleRoute();
-    } else {
+    } else if (!document.getElementById('receiver-loading')) {
+      // 위에서 그린 대기 카드가 있으면 다시 그리지 않는다: 회전 표시가 처음부터 다시 돈다
       renderReceiverLoading();
     }
   }
