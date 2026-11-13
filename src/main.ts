@@ -4464,10 +4464,9 @@ function renderConditions(): void {
 
       <!-- 5. 코스 완성하기 버튼군: 맞춤 생성 + 찜한 코스 -->
       <div class="course-generate-btn-group">
-        <button class="btn-primary btn-generate" id="btn-generate"${courseWaitingForSpots ? ' disabled aria-busy="true"' : ''}>
+        <button class="btn-primary btn-generate" id="btn-generate"${courseWaitingForSpots ? ' aria-disabled="true" aria-busy="true"' : ''}>
           ${courseWaitingForSpots ? spotsWaitLabel() : '🚀 맞춤 데이트 코스 완성하기'}
         </button>
-        ${courseWaitingForSpots ? '<span class="sr-only" role="status">스팟 불러오는 중…</span>' : ''}
         ${savedCount > 0 ? `
           <button class="btn-saved-recommend" id="btn-saved-recommend" type="button" title="보관함에 담아둔 스팟으로 코스 완성하기"${savedPending ? ' disabled aria-busy="true"' : ''}>
             ❤️ 찜한 코스 (${savedCount})
@@ -4589,12 +4588,20 @@ function zoneKeysForQuery(query: string): string[] {
 let fullSpotsPending = false;
 let courseWaitingForSpots = false;
 
-/** 전체 데이터를 기다려야 하면 버튼을 대기 상태로 그리고 true */
+/** 조건 영역을 다시 그려도 🚀 버튼에 있던 초점을 새 버튼으로 옮긴다. 갈아 끼운 버튼 때문에 초점이 BODY로 떨어졌다(P-421) */
+function renderConditionsKeepGenerateFocus(): void {
+  const hadFocus = document.activeElement?.id === 'btn-generate';
+  renderConditions();
+  if (hadFocus) document.getElementById('btn-generate')?.focus({ preventScroll: true });
+}
+
+/** 전체 데이터를 기다려야 하면 버튼을 대기 상태로 그리고 true. 버튼 글자는 알림 영역이 아니라 대기를 #sr-announce로 알린다(P-421) */
 function waitForFullSpots(): boolean {
   if (!fullSpotsPending) return false;
   if (!courseWaitingForSpots) {
     courseWaitingForSpots = true;
-    renderConditions();
+    renderConditionsKeepGenerateFocus();
+    announce('스팟을 불러오는 중이에요. 다 받으면 코스를 만들어요');
   }
   return true;
 }
@@ -4607,7 +4614,7 @@ function resolveWaitingCourse(): void {
   if (!courseWaitingForSpots) return;
   courseWaitingForSpots = false;
   if (state.mainMode !== 'course' || location.hash.startsWith('#c=') || !document.getElementById('btn-generate')) return;
-  renderConditions();
+  renderConditionsKeepGenerateFocus();
   triggerCourseGeneration();
 }
 

@@ -13,15 +13,30 @@ assert.ok(start > 0 && fnStart > start, '대기 블록을 찾지 못했다');
 const block = ts.transpile(src.slice(start, end), { target: 'es2022' });
 
 function setup({ mode = 'course', hash = '', hasButton = true } = {}) {
-  const calls = { render: 0, generated: 0 };
+  const calls = { render: 0, generated: 0, announced: [] };
+  // renderConditions는 버튼을 새 노드로 갈아 끼우고 초점을 BODY로 떨어뜨린다(브라우저와 같게)
+  const body = { id: '' };
+  const newButton = () => {
+    const b = { id: 'btn-generate', focus: (opts) => { b.focusOpts = opts; env.document.activeElement = b; } };
+    return b;
+  };
   const env = {
     state: { mainMode: mode },
     location: { hash },
-    document: { getElementById: (id) => (id === 'btn-generate' && hasButton ? {} : null) },
-    renderConditions: () => calls.render++,
+    document: {
+      button: hasButton ? newButton() : null,
+      activeElement: body,
+      getElementById: (id) => (id === 'btn-generate' ? env.document.button : null),
+    },
+    renderConditions: () => {
+      calls.render++;
+      if (env.document.button) env.document.button = newButton();
+      env.document.activeElement = body;
+    },
+    announce: (t) => calls.announced.push(t),
   };
   const api = new Function(
-    'state', 'location', 'document', 'renderConditions', 'calls',
+    'state', 'location', 'document', 'renderConditions', 'calls', 'announce',
     `${block}
     function refreshSavedSpots() {}
     function triggerCourseGeneration() { if (waitForFullSpots()) return; calls.generated++; }
@@ -31,7 +46,7 @@ function setup({ mode = 'course', hash = '', hasButton = true } = {}) {
       setPending: (v) => { fullSpotsPending = v; },
       waiting: () => courseWaitingForSpots,
     };`,
-  )(env.state, env.location, env.document, env.renderConditions, calls);
+  )(env.state, env.location, env.document, env.renderConditions, calls, env.announce);
   return { api, calls, env };
 }
 
@@ -83,9 +98,31 @@ for (const opts of [{ mode: 'spots' }, { hash: '#c=1,2,3' }, { hasButton: false 
   assert.strictEqual(api.waiting(), false, `${JSON.stringify(opts)}에서 대기가 남았다`);
 }
 
-// 버튼은 대기 동안 비활성이고 문구와 role="status"가 있다. 로드가 끝나면 성공·실패 모두 대기를 푼다
-assert.ok(/id="btn-generate"\$\{courseWaitingForSpots \? ' disabled/.test(src), '대기 중 버튼 비활성이 없다');
-assert.ok(src.includes(`'<span class="sr-only" role="status">스팟 불러오는 중…</span>'`), 'role=status 문구가 없다');
+// P-421: 버튼에 초점을 둔 채 누르면 대기를 #sr-announce로 한 번 알리고, 대기와 완료 두 번의 다시 그리기 뒤에도 초점이 새 버튼에 있다
+{
+  const { api, calls, env } = setup();
+  api.setPending(true);
+  env.document.activeElement = env.document.button;
+  api.trigger();
+  api.trigger();
+  assert.deepStrictEqual(calls.announced, ['스팟을 불러오는 중이에요. 다 받으면 코스를 만들어요'], '대기 알림이 한 번이 아니다');
+  assert.strictEqual(env.document.activeElement, env.document.button, '대기로 그린 뒤 초점이 버튼에 없다');
+  assert.deepStrictEqual(env.document.button.focusOpts, { preventScroll: true });
+  api.resolve();
+  assert.strictEqual(calls.generated, 1);
+  assert.strictEqual(env.document.activeElement, env.document.button, '완료로 그린 뒤 초점이 버튼에 없다');
+}
+// 초점이 버튼에 없었으면 옮기지 않는다
+{
+  const { api, env } = setup();
+  api.setPending(true);
+  api.trigger();
+  assert.strictEqual(env.document.activeElement.id, '', '초점이 없던 버튼으로 초점을 끌어왔다');
+}
+
+// 버튼은 대기 동안 aria-disabled라 초점을 받고, 문구는 알림 영역이 아니다(대기 span은 두 번 읽혀 지웠다). 로드가 끝나면 성공·실패 모두 대기를 푼다
+assert.ok(/id="btn-generate"\$\{courseWaitingForSpots \? ' aria-disabled="true" aria-busy="true"'/.test(src), '대기 중 버튼 aria-disabled가 없다');
+assert.ok(!src.includes('role="status">스팟 불러오는 중…</span>'), '대기 role=status span이 남았다');
 assert.ok(/fullSpotsPending = true;\s*\n\s*const loadFullSpots = \(\) =>\s*loadSpots\(\)/.test(src), '캐시 없는 로드에서만 대기를 켜야 한다');
 assert.ok(src.includes('.finally(resolveWaitingCourse)'), '로드가 끝나도 대기를 풀지 않는다');
 assert.ok(src.includes('if (!courseWaitingForSpots) applyDailyCourseIfEmpty();'), '기다리던 코스를 오늘의 코스가 먼저 덮는다');

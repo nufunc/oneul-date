@@ -116,7 +116,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const paint = cut(main, 'function paintSpotsProgress', '\n}\n');
   assert.ok(!/renderConditions|innerHTML|role/.test(paint), '진행 알림이 화면을 다시 그리거나 알림 영역을 건드린다');
   assert.ok(paint.includes("style.setProperty('--load-pct'"), '채움 비율 CSS 변수를 바꾸지 않는다');
-  assert.ok(main.includes(`'<span class="sr-only" role="status">스팟 불러오는 중…</span>'`), 'role=status 문구가 바뀌었다');
+  assert.ok(main.includes(`announce('스팟을 불러오는 중이에요. 다 받으면 코스를 만들어요');`), '대기 알림 문구에 비율이 들어가거나 문구가 바뀌었다');
 
   // 6. 탐색 탭 상태 줄(P-258): 알림 영역 문구는 고정하고 비율은 aria-hidden 칸에만 넣는다. 받기가 끝났거나 분모가 0이면 비율을 붙이지 않는다
   assert.ok(
