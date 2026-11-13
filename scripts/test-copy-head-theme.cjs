@@ -25,6 +25,9 @@ const stubs = {
   // 실제 buildShareUrl처럼 유효한 칩 키(CAFE)일 때만 ?t=를 싣는다
   buildShareUrl: (ids, key) => `https://share.example/${key === 'CAFE' ? '?t=CAFE' : ''}#c=${ids.join('.')}`,
   SLOT_META: { day: { emoji: '☀️' } },
+  isSpotClosedToday: () => false,
+  isOpenAtSlotClock: () => true,
+  todayHoursLabel: () => '',
 };
 const { formatCourseTextAsync } = new Function(
   ...Object.keys(stubs),

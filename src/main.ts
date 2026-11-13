@@ -2891,6 +2891,12 @@ async function formatCourseTextAsync(
     // 카드와 시트가 보이는 문장과 같게 한다(P-344)
     const summary = displaySpotSummary(spot).text;
     if (summary) lines.push(`✨ ${summary}`);
+    // P-427: 카드 배지와 같은 판정과 문구. 받는 사람은 앱을 열지 않으면 경고를 볼 수 없었다
+    const closedToday = isSpotClosedToday(spot);
+    if (closedToday) lines.push('⚠️ 오늘 휴무');
+    else if (!isOpenAtSlotClock(spot, step.slot, new Date(), false)) lines.push('⚠️ 영업시간 확인');
+    const hoursLabel = closedToday ? '' : todayHoursLabel(spot);
+    if (hoursLabel) lines.push(`🕒 ${hoursLabel}`);
     lines.push(`📍 ${spot.address || spot.location}`);
     lines.push(`🗺️ ${shortMapUrl}`);
 

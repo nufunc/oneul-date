@@ -16,6 +16,15 @@ const code = [
   cut('const WALK_MAX_KM', ';\n'),
   cut('function describeTransit', '\n}\n'),
   cut('function areaThemeLabel', '\n}\n'),
+  // P-427: 카드 배지와 같은 영업시간 판정을 실제 코드로 돌린다
+  cut('const KOREAN_DAY_NAMES', ';\n'),
+  cut('const SLOT_CLOCK_MIN', ';\n'),
+  cut('const SLOT_CLOSE_MARGIN_MIN', ';\n'),
+  cut('const slotClockOpenCache', ';\n'),
+  cut('function isOpenAtSlotClock', '\n}\n'),
+  cut('const HOURS_RANGE_RE', ';\n'),
+  cut('function parseOpenAtClock', '\n}\n'),
+  cut('function todayHoursLabel', '\n}\n'),
   cut('async function formatCourseTextAsync', '\n}\n'),
 ].join('\n');
 
@@ -32,7 +41,8 @@ const stubs = {
   displaySpotSummary: () => ({ text: '', isFact: false }),
   getDistanceKm: () => 0.5,
   buildShareUrl: (ids) => `https://share.example/${ids.join('-')}`,
-  SLOT_META: { day: { emoji: '☀️' }, evening: { emoji: '🌆' } },
+  isSpotClosedToday: (s) => Boolean(s.closedToday),
+  SLOT_META: { day: { emoji: '☀️' }, evening: { emoji: '🌆' }, night: { emoji: '🌙' } },
 };
 const { formatCourseTextAsync } = new Function(
   ...Object.keys(stubs),
@@ -63,7 +73,22 @@ const secondLine = (text) => text.split('\n')[2];
   // 지운 AI 총평 캐시와 요청을 다시 부르지 않는다
   assert.ok(!/cachedAiBriefing|fetchAiBriefing|aiStoryCache/.test(code), '복사 텍스트가 AI 총평 캐시나 요청을 부른다');
   assert.strictEqual(fetchCalls, 0, '복사 텍스트가 총평 요청을 보냈다');
-  console.log('ok 복사 텍스트 총평 줄 없음 11');
+  // P-427: 칸 시각에 닫은 장소는 카드와 같은 경고와 오늘 영업시간 줄, 영업시간을 모르면 줄 없음
+  const hoursById = new Map([
+    [1, { id: 1, name: '낙원장', category: '주점', address: '종로 1', business_hours: { 영업시간: '매일 17:00 ~ 01:00' } }],
+    [2, { id: 2, name: '휴무집', category: '한식', address: '종로 2', closedToday: true, business_hours: { 영업시간: '매일 11:00 ~ 22:00' } }],
+    [3, { id: 3, name: '모름집', category: '카페', address: '종로 3' }],
+  ]);
+  const hoursText = await formatCourseTextAsync(
+    [{ slot: 'day', spotId: 1 }, { slot: 'evening', spotId: 2 }, { slot: 'night', spotId: 3 }], hoursById, [], 'ALL',
+  );
+  const [b1, b2, b3] = hoursText.split(/\n(?=\d차 )/).slice(1);
+  assert.ok(b1.includes('\n⚠️ 영업시간 확인\n🕒 오늘 17:00~01:00\n📍 종로 1'), `낮 칸 17시 개점 블록: ${b1}`);
+  assert.ok(b2.includes('\n⚠️ 오늘 휴무\n📍 종로 2'), `휴무 블록: ${b2}`);
+  assert.ok(!/🕒|영업시간 확인/.test(b2), '휴무 블록에 영업시간 줄이 있다');
+  assert.ok(!/⚠️|🕒/.test(b3), `영업시간 모르는 블록에 경고나 시간 줄: ${b3}`);
+  assert.ok(!/⚠️|🕒/.test(await formatCourseTextAsync(steps, byId, [], 'ALL')), '영업시간 없는 코스에 경고나 시간 줄');
+  console.log('ok 복사 텍스트 총평 줄 없음, 영업시간 줄 16');
 })().catch((e) => {
   console.error(`FAIL ${e.message}`);
   process.exit(1);
