@@ -3909,6 +3909,18 @@ body:has(#results-area[data-engaged] .result-actions-3) .toast-msg {
   .btn-regenerate:hover .icon-refresh {
     transform: rotate(60deg);
   }
+
+  /* 터치로 끈 칩에 :hover가 남아 hover 글자색이 다크 면 위 2.92:1이 됐다(P-419) */
+  .quick-region-chip.chip-indoor:hover {
+    border-color: #3b82f6;
+    color: #2563eb;
+  }
+
+  .quick-region-chip.chip-mood:hover {
+    border-color: #a855f7;
+    color: #9333ea;
+    background: rgba(168, 85, 247, 0.08);
+  }
 }
 
 /* ==========================================================================
@@ -4996,11 +5008,6 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   color: var(--color-text-sub);
 }
 
-.quick-region-chip.chip-indoor:hover {
-  border-color: #3b82f6;
-  color: #2563eb;
-}
-
 .quick-region-chip.chip-indoor.is-indoor-active {
   background: #2563eb;
   border-color: #2563eb;
@@ -5059,12 +5066,6 @@ html[data-theme-resolved="dark"] .quick-region-chip.chip-saved.is-saved-active {
 .quick-region-chip.chip-mood {
   border-color: rgba(168, 85, 247, 0.35);
   color: var(--color-text-sub);
-}
-
-.quick-region-chip.chip-mood:hover {
-  border-color: #a855f7;
-  color: #9333ea;
-  background: rgba(168, 85, 247, 0.08);
 }
 
 .quick-region-chip.chip-mood.is-mood-active {
