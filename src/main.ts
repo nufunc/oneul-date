@@ -3796,6 +3796,11 @@ function recentSpotIdSet(): ReadonlySet<number> {
 // 유틸
 // ---------------------------------------------------------------------------
 
+/** 움직임 줄이기를 켠 사용자에게는 부드러운 스크롤 대신 바로 이동한다(WCAG 2.3.3, P-406) */
+function scrollMotion(): ScrollBehavior {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+}
+
 function escapeHtml(text: string): string {
   return text
     .replace(/&/g, '&amp;')
@@ -3984,7 +3989,7 @@ function renderShell(): void {
       state.mainMode = 'course';
       updateModeView();
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: scrollMotion() });
   });
   document.getElementById('btn-theme-toggle')?.addEventListener('click', () => {
     cycleThemeMode();
@@ -4679,7 +4684,7 @@ function triggerCourseGeneration(): void {
   // 모바일에서는 결과가 버튼 바로 아래 화면 밖에서 시작해 눌러도 변화가 보이지 않았다. 결과가 화면 아래쪽이면 그리로 내린다
   const resultsEl = document.getElementById('results-area');
   if (resultsEl && resultsEl.getBoundingClientRect().top > window.innerHeight * 0.6) {
-    resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    resultsEl.scrollIntoView({ behavior: scrollMotion(), block: 'start' });
   }
 
   // 검색어가 포함된 경우 토스트 피드백
@@ -6347,7 +6352,7 @@ function buildCourseFromSavedSpots(): boolean {
   state.mainMode = 'course';
   updateModeView();
   // #app 위에 루트 매거진 블록이 있어 0으로 올리면 결과 대신 블록이 보인다
-  app.scrollIntoView({ behavior: 'smooth' });
+  app.scrollIntoView({ behavior: scrollMotion() });
   showToast(
     farCount > 0
       ? `❤️ 찜한 스팟으로 코스를 만들었어요. 찜 ${farCount}곳은 멀어서 이번 코스에서 뺐어요`
@@ -7056,7 +7061,7 @@ function bindDiscoveryCardEvents(root: ParentNode, area: HTMLElement): void {
       markResultsEngaged();
       const resultsEl = document.getElementById('results-area');
       if (resultsEl) {
-        resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        resultsEl.scrollIntoView({ behavior: scrollMotion(), block: 'start' });
       }
     });
   });
@@ -8442,7 +8447,7 @@ function renderOverlayContent(): void {
         };
         state.mainMode = 'course';
         updateModeView();
-        app.scrollIntoView({ behavior: 'smooth' });
+        app.scrollIntoView({ behavior: scrollMotion() });
         showToast(`✨ '${spot.name}' 중심 맞춤 코스를 완성했어요!`);
       });
     });
@@ -8497,7 +8502,7 @@ function restoreCourse(item: SavedCourse, steps: CourseStep[]): void {
   renderConditions();
   markResultsEngaged();
   renderResults();
-  document.getElementById('results-area')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('results-area')?.scrollIntoView({ behavior: scrollMotion(), block: 'start' });
   // 화면이 결과로 옮겨 가므로 시트를 연 맨 위 버튼 대신 불러온 코스의 첫 상호명으로 포커스를 준다
   cancelOverlayFocusReturn();
   document.querySelector<HTMLElement>('#results-area .step-name-link')?.focus({ preventScroll: true });
