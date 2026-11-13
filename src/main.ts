@@ -5816,7 +5816,7 @@ function renderStepCard(
     <div class="step-thumb-col">
       ${isHot ? `<span class="badge-hot-floating">🔥 핫플</span>` : ''}
       ${isClosedToday ? `<span class="badge-closed-floating">⚠️ 오늘 휴무</span>` : ''}
-      ${isClosedAtSlot ? `<span class="badge-closed-floating">⚠️ 이 시간엔 영업 전후일 수 있어요</span>` : ''}
+      ${isClosedAtSlot ? `<span class="badge-closed-floating">⚠️ 영업시간 확인</span>` : ''}
       <div class="step-fallback-box">${fallbackIcon}</div>
       ${targetImgUrl ? `<img class="step-thumb-img" src="${escapeHtml(toCardThumbUrl(targetImgUrl))}"${toCardThumbUrl(targetImgUrl) !== targetImgUrl ? ` data-orig="${escapeHtml(targetImgUrl)}"` : ''} alt="${escapeHtml(spot.name)}" loading="lazy" fetchpriority="low" decoding="async" referrerpolicy="no-referrer" onload="this.classList.add('is-loaded');" onerror="var o=this.dataset.orig; if(o){this.dataset.orig=''; this.src=o; return;} this.classList.add('is-hidden'); this.previousElementSibling?.classList.add('is-active');" />` : ''}
     </div>`;
