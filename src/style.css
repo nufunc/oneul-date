@@ -2680,7 +2680,8 @@ label,
 }
 
 .result-actions.result-actions-3 {
-  grid-template-columns: repeat(3, 1fr);
+  /* 1fr의 최소 폭이 글자 폭이라 글자 200%에서 저장 칸이 화면 밖으로 밀렸다(WCAG 1.4.10, P-400) */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .result-actions.result-actions-1 {
@@ -2691,7 +2692,6 @@ label,
 .result-actions .btn-primary {
   padding-left: var(--space-2);
   padding-right: var(--space-2);
-  white-space: nowrap;
 }
 
 /* 🚀 직후 📋 🔗 💾 막대가 첫 화면 밖 124~679px 아래라 저장하려면 더 내려야 했다. 사용자가 코스를 만든 뒤
@@ -2861,7 +2861,8 @@ body:has(.data-failed-banner) #app {
    문서 끝에서는 카드 목록 아래 제자리로 돌아간다(P-238) */
 .receiver-actions-bar {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  /* 글자 폭대로 한 줄에 두고, 모자랄 때만 칸을 줄여 꺾는다. 1fr 고정 폭은 글자 200%에서 링크 공유가 화면 밖으로 밀렸다(P-400) */
+  grid-template-columns: repeat(3, auto);
   gap: var(--space-2);
   margin-top: var(--space-3);
   position: sticky;
@@ -2887,7 +2888,6 @@ body:has(.data-failed-banner) #app {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  white-space: nowrap;
 }
 
 .btn-make-own {
