@@ -3203,6 +3203,8 @@ function closedDaysFromHours(spot: Spot): string[] {
  * 이 시각에 이미 닫았거나 아직 열지 않은 장소는 코스 후보에서 거른다. 숙박은 시각이 없어 거르지 않는다.
  */
 const SLOT_CLOCK_MIN: Partial<Record<SlotKey, number>> = { day: 13 * 60, evening: 19 * 60, night: 21 * 60 };
+/** 저녁과 밤 칸은 칸 시각 뒤 이만큼(분) 더 열려 있어야 후보로 둔다. 20:00 마감 식당이 19시 저녁 칸에 들어가 주문을 못 할 수 있었다(P-425) */
+const SLOT_CLOSE_MARGIN_MIN = 60;
 
 /**
  * 영업시간이 `요일 HH:MM ~ HH:MM` 목록, `매일 HH:MM ~ HH:MM`, `HH:MM~HH:MM`, `상시 개방`, is_24h일 때만 판정하고
@@ -3218,10 +3220,11 @@ function isOpenAtSlotClock(spot: Spot, slot: SlotKey, date = new Date()): boolea
   const hours = bh && typeof bh === 'object' ? bh['영업시간'] || bh['이용시간'] : '';
   if (typeof hours !== 'string' || !hours) return true;
   const today = KOREAN_DAY_NAMES[date.getDay()];
+  const margin = slot === 'evening' || slot === 'night' ? SLOT_CLOSE_MARGIN_MIN : 0;
   const key = `${slot}|${today}|${hours}`;
   let result = slotClockOpenCache.get(key);
   if (result === undefined) {
-    result = parseOpenAtClock(hours, clock, today, KOREAN_DAY_NAMES[(date.getDay() + 6) % 7]);
+    result = parseOpenAtClock(hours, clock, today, KOREAN_DAY_NAMES[(date.getDay() + 6) % 7], margin);
     slotClockOpenCache.set(key, result);
   }
   return result;
@@ -3230,7 +3233,7 @@ function isOpenAtSlotClock(spot: Spot, slot: SlotKey, date = new Date()): boolea
 /** 영업시간 한 구간 `[요일|매일] HH:MM ~ HH:MM`. parseOpenAtClock과 todayHoursLabel(P-372)이 함께 쓴다 */
 const HOURS_RANGE_RE = /^(?:([월화수목금토일]|매일)\s*)?(\d{1,2}):(\d{2})\s*~\s*(\d{1,2}):(\d{2})$/;
 
-function parseOpenAtClock(hours: string, clock: number, today: string, yesterday: string): boolean {
+function parseOpenAtClock(hours: string, clock: number, today: string, yesterday: string, margin = 0): boolean {
   if (/^상시\s*개방$/.test(hours.trim())) return true;
   const range = HOURS_RANGE_RE;
   let sawToday = false;
@@ -3243,10 +3246,10 @@ function parseOpenAtClock(hours: string, clock: number, today: string, yesterday
     const day = m[1];
     if (!day || day === '매일' || day === today) {
       sawToday = true;
-      if (start <= clock && clock < end) return true;
+      if (start <= clock && clock + margin < end) return true;
     }
     // 전날 구간이 자정을 넘어 오늘 새벽까지 이어지는 경우
-    if ((!day || day === '매일' || day === yesterday) && start <= clock + 1440 && clock + 1440 < end) return true;
+    if ((!day || day === '매일' || day === yesterday) && start <= clock + 1440 && clock + 1440 + margin < end) return true;
   }
   // 오늘 요일이 목록에 없으면 정기휴무 판정(isSpotClosedToday) 몫이므로 여기서 거르지 않는다
   return !sawToday;

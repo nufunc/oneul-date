@@ -54,6 +54,17 @@ assert.strictEqual(open('00:00 ~ 00:00', 'night'), true);
 assert.strictEqual(open('월 14:00 ~ 14:00 / 화 15:00 ~ 16:00', 'day'), true);
 assert.strictEqual(open('월 14:00 ~ 14:00 / 수 15:00 ~ 16:00', 'day', WED), false);
 
+// 저녁과 밤 칸은 칸 시각 뒤 60분 더 열려 있어야 한다(P-425). 낮 칸은 칸 시각 한 점만 본다
+assert.strictEqual(open('매일 11:00 ~ 20:00', 'evening'), false);
+assert.strictEqual(open('매일 11:00 ~ 20:01', 'evening'), true);
+assert.strictEqual(open('매일 10:00 ~ 19:30', 'evening'), false);
+assert.strictEqual(open('18:00 ~ 22:00', 'night'), false);
+assert.strictEqual(open('18:00 ~ 22:30', 'night'), true);
+assert.strictEqual(open('매일 09:00 ~ 13:30', 'day'), true);
+// 전날 구간이 넘어온 새벽에도 같은 여유를 본다(월 23:00 ~ 화 22:00은 화 21시 밤 칸에 60분이 모자란다)
+assert.strictEqual(open('월 23:00 ~ 22:00 / 화 10:00 ~ 12:00', 'night'), false);
+assert.strictEqual(open('월 23:00 ~ 22:30 / 화 10:00 ~ 12:00', 'night'), true);
+
 // 7요일 목록은 그날 요일 구간만 본다
 const week = '월 11:00 ~ 21:00 / 화 11:00 ~ 18:00 / 수 11:00 ~ 23:00 / 목 11:00 ~ 21:00 / 금 11:00 ~ 21:00 / 토 11:00 ~ 21:00 / 일 11:00 ~ 21:00';
 assert.strictEqual(open(week, 'evening', TUE), false);
