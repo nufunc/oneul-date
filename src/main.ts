@@ -3678,11 +3678,24 @@ function courseSpotIds(): number[] {
 // localStorage — 저장한 코스 · 최근 노출 이력
 // ---------------------------------------------------------------------------
 
+/**
+ * 형태가 틀린 항목 하나가 목록 전체를 그리지 못하게 해서 걸러 낸다. 파싱에 실패하면 다음 저장이 원문을 덮기 전에
+ * 원문을 따로 한 번 보관한다(P-408)
+ */
 function loadSavedCourses(): SavedCourse[] {
+  let raw: string | null = null;
   try {
-    const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    return Array.isArray(parsed) ? (parsed as SavedCourse[]) : [];
+    raw = localStorage.getItem(STORAGE_KEY);
+    const parsed = JSON.parse(raw || '[]');
+    return Array.isArray(parsed)
+      ? (parsed as SavedCourse[]).filter((c) => c && Array.isArray(c.spotIds) && c.conditions)
+      : [];
   } catch {
+    try {
+      if (raw && localStorage.getItem(`${STORAGE_KEY}_broken`) === null) localStorage.setItem(`${STORAGE_KEY}_broken`, raw);
+    } catch {
+      // 보관도 막힌 브라우저면 빈 목록으로 계속한다
+    }
     return [];
   }
 }
