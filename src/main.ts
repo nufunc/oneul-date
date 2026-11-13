@@ -7369,6 +7369,8 @@ function renderReceiverLoading(failed = false): void {
     clearCourseHash();
     renderShell();
     if (spotsFellBackToSample) showSpotsFailedBanner(spots.filter((s) => !s.is_closed && isCourseEligible(s)).length);
+    // 누른 링크와 단추가 화면과 함께 사라져 초점이 BODY로 떨어진다. 건너뛰기 링크와 같은 본문으로 옮긴다(P-415)
+    document.getElementById('main-content')?.focus({ preventScroll: true });
   };
   document.getElementById('receiver-home-link')?.addEventListener('click', goHome);
   document.getElementById('btn-receiver-home')?.addEventListener('click', goHome);
@@ -7472,6 +7474,8 @@ function renderReceiverView(steps: CourseStep[]): void {
     e.preventDefault();
     clearCourseHash();
     renderShell();
+    // 누른 단추가 받은 코스 화면과 함께 사라져 초점이 BODY로 떨어진다. 건너뛰기 링크와 같은 본문으로 옮긴다(P-415)
+    document.getElementById('main-content')?.focus({ preventScroll: true });
   };
   document.getElementById('receiver-home-link')?.addEventListener('click', goHome);
   const blogBack = document.getElementById('receiver-blog-back') as HTMLAnchorElement | null;
