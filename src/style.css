@@ -4108,6 +4108,9 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   transition: background-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
   position: relative;
   white-space: nowrap;
+  /* 글자 200%에서 스팟 탐색 탭이 화면 밖으로 밀렸다. 칸을 등분하고 그림·글자·배지를 필요할 때만 꺾는다(WCAG 1.4.10, P-402) */
+  min-width: 0;
+  flex-wrap: wrap;
 }
 
 /* 320~360px대 저가 안드로이드 폭: 타이틀+탭 라벨이 줄바꿈되며 헤더가
