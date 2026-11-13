@@ -8409,6 +8409,8 @@ function renderOverlayContent(): void {
       if (saveBtn) {
         saveBtn.textContent = nowSaved ? '❤️ 찜완료' : '🤍 찜하기';
         saveBtn.classList.toggle('is-saved', nowSaved);
+        // 처음 그릴 때만 상태별 title을 넣어, 찜한 뒤에도 설명이 「보관함에 담기」로 남았다(P-398)
+        saveBtn.title = nowSaved ? '보관함에서 제외' : '보관함에 담기';
       }
       if (state.mainMode === 'spots') {
         renderSpotDiscovery();

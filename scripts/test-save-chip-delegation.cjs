@@ -22,4 +22,7 @@ assert.ok(!css.includes('step-save-chip'), 'style.css에 .step-save-chip 규칙�
 assert.ok(main.includes('btn-discovery-save'), '스팟 탐색 카드의 찜이 없다');
 assert.ok(main.includes('btn-detail-toggle-save'), '장소 상세의 찜이 없다');
 
+// 상세 시트 찜 단추도 누를 때 title을 상태에 맞춘다(P-398)
+assert.ok(main.includes("saveBtn.title = nowSaved ? '보관함에서 제외' : '보관함에 담기';"), '상세 시트 찜 단추 title이 상태를 따라가지 않음');
+
 console.log('ok 5');
