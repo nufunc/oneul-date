@@ -8689,49 +8689,56 @@ async function init(): Promise<void> {
 
   // 3. 백그라운드 비동기 최적화 로딩
   if (!hasCachedData) {
-    // 받은 링크는 공유 id 행만 Range 요청으로 먼저 찾아 그린다. 전체 파일은 아래에서 함께 받는다
-    if (isSharedLink) {
-      const sharedIds = [...new Set((parseCourseHash(location.hash) || []).map((id) => spotAliasIds.get(id) ?? id))];
-      findSpotsByRange(sharedIds).then((found) => {
-        // 일부만 찾았으면 그리지 않는다: 못 찾은 곳을 뺐다는 알림이 잘못 뜬다. 전체 데이터가 오면 아래 콜백이 그린다
-        if (found.length === 0 || found.length !== sharedIds.length || !document.getElementById('receiver-loading')) return;
-        spotById = buildSpotIndex([...spots, ...found]);
-        handleRoute();
-      });
-    }
     // 캐시가 없는 첫 방문 시: 전국 전체 스팟 로드
     onSpotsProgress(paintSpotsProgress);
     fullSpotsPending = true;
-    loadSpots()
-      .then((firstSpots) => {
-        if (firstSpots && firstSpots.length > 0) {
-          // 위와 같은 이유로 번들 샘플을 전체 데이터로 바꾼다
-          spots = deduplicateSpotList(firstSpots);
-          spotById = buildSpotIndex(spots);
-          canonicalizeSavedSpotIds();
-          loadedRegionKeys.add('ALL');
-          // 자리표시가 아직 떠 있을 때만 받은 코스를 그린다. 사용자가 해시를 바꿔 다른 화면으로 갔으면 덮지 않는다
-          // 샘플로 떨어졌으면 받은 링크는 판정하지 않고 실패 카드에 머물고, 그 밖의 화면은 띠로 알린다(P-255)
-          if (isSharedLink && document.getElementById('receiver-loading')) {
-            if (spotsFellBackToSample) renderReceiverLoading(true);
-            else handleRoute();
-          } else {
-            if (spotsFellBackToSample) showSpotsFailedBanner(spots.filter((s) => !s.is_closed && isCourseEligible(s)).length);
-            if (state.mainMode === 'spots') {
-              renderSpotDiscovery();
-            } else if (state.mainMode === 'course') {
-              if (!courseWaitingForSpots) applyDailyCourseIfEmpty();
+    const loadFullSpots = () =>
+      loadSpots()
+        .then((firstSpots) => {
+          if (firstSpots && firstSpots.length > 0) {
+            // 위와 같은 이유로 번들 샘플을 전체 데이터로 바꾼다
+            spots = deduplicateSpotList(firstSpots);
+            spotById = buildSpotIndex(spots);
+            canonicalizeSavedSpotIds();
+            loadedRegionKeys.add('ALL');
+            // 자리표시가 아직 떠 있을 때만 받은 코스를 그린다. 사용자가 해시를 바꿔 다른 화면으로 갔으면 덮지 않는다
+            // 샘플로 떨어졌으면 받은 링크는 판정하지 않고 실패 카드에 머물고, 그 밖의 화면은 띠로 알린다(P-255)
+            if (isSharedLink && document.getElementById('receiver-loading')) {
+              if (spotsFellBackToSample) renderReceiverLoading(true);
+              else handleRoute();
+            } else {
+              if (spotsFellBackToSample) showSpotsFailedBanner(spots.filter((s) => !s.is_closed && isCourseEligible(s)).length);
+              if (state.mainMode === 'spots') {
+                renderSpotDiscovery();
+              } else if (state.mainMode === 'course') {
+                if (!courseWaitingForSpots) applyDailyCourseIfEmpty();
+              }
             }
+          } else if (document.getElementById('receiver-loading')) {
+            renderShell();
           }
-        } else if (document.getElementById('receiver-loading')) {
-          renderShell();
-        }
-      })
-      .catch(() => {
-        // 받지 못하면 자리표시에 머물지 않고 홈 셸로 떨어진다
-        if (document.getElementById('receiver-loading')) renderShell();
-      })
-      .finally(resolveWaitingCourse);
+        })
+        .catch(() => {
+          // 받지 못하면 자리표시에 머물지 않고 홈 셸로 떨어진다
+          if (document.getElementById('receiver-loading')) renderShell();
+        })
+        .finally(resolveWaitingCourse);
+    // 받은 링크는 공유 id 행만 Range 요청으로 먼저 찾아 그린다. Range 조각이 전체 파일과 대역폭을 나누지 않도록
+    // 전체 파일은 Range가 끝난 뒤(성공이든 실패든) 받는다(P-410)
+    if (isSharedLink) {
+      const sharedIds = [...new Set((parseCourseHash(location.hash) || []).map((id) => spotAliasIds.get(id) ?? id))];
+      findSpotsByRange(sharedIds)
+        .then((found) => {
+          // 일부만 찾았으면 그리지 않는다: 못 찾은 곳을 뺐다는 알림이 잘못 뜬다. 전체 데이터가 오면 위 loadFullSpots가 그린다
+          if (found.length === 0 || found.length !== sharedIds.length || !document.getElementById('receiver-loading')) return;
+          spotById = buildSpotIndex([...spots, ...found]);
+          handleRoute();
+        })
+        .catch(() => {})
+        .then(loadFullSpots);
+    } else {
+      loadFullSpots();
+    }
   } else {
     // 이미 캐시가 있는 경우: 백그라운드에서 최신 전체 데이터 동기화. 6시간 안에 저장한 캐시면 건너뛴다(P-321)
     if (!isSpotsCacheFresh(6 * 60 * 60 * 1000)) setTimeout(() => {

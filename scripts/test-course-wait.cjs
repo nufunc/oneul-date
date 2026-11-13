@@ -86,7 +86,7 @@ for (const opts of [{ mode: 'spots' }, { hash: '#c=1,2,3' }, { hasButton: false 
 // 버튼은 대기 동안 비활성이고 문구와 role="status"가 있다. 로드가 끝나면 성공·실패 모두 대기를 푼다
 assert.ok(/id="btn-generate"\$\{courseWaitingForSpots \? ' disabled/.test(src), '대기 중 버튼 비활성이 없다');
 assert.ok(src.includes(`'<span class="sr-only" role="status">스팟 불러오는 중…</span>'`), 'role=status 문구가 없다');
-assert.ok(/fullSpotsPending = true;\s*\n\s*loadSpots\(\)/.test(src), '캐시 없는 로드에서만 대기를 켜야 한다');
+assert.ok(/fullSpotsPending = true;\s*\n\s*const loadFullSpots = \(\) =>\s*loadSpots\(\)/.test(src), '캐시 없는 로드에서만 대기를 켜야 한다');
 assert.ok(src.includes('.finally(resolveWaitingCourse)'), '로드가 끝나도 대기를 풀지 않는다');
 assert.ok(src.includes('if (!courseWaitingForSpots) applyDailyCourseIfEmpty();'), '기다리던 코스를 오늘의 코스가 먼저 덮는다');
 console.log('ok course-wait');

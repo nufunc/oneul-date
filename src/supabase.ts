@@ -372,7 +372,7 @@ const RANGE_PROBE_BYTES = 2048; // 행 최대 1,838B(2026-10-20)보다 커야 �
 const RANGE_PROBES = 7;
 const RANGE_FINAL_BYTES = 16384;
 const RANGE_MAX_REQUESTS = 300; // 공유 3곳에 88건(라운드 4번)이다
-const RANGE_TIMEOUT_MS = 6000;
+const RANGE_TIMEOUT_MS = 15000; // Slow 3G(왕복 약 2초)에서 순차 5번과 요청 88건이 6초를 넘겼다(P-410)
 
 /** 조각에서 from 이후 첫 행 머리의 바이트 위치와 id. 문자열로 디코드해 세면 다중 바이트 문자에서 위치가 어긋나 바이트로 센다 */
 export function findRowHead(buf: Uint8Array, from = 0): { pos: number; id: number } | null {
@@ -406,7 +406,7 @@ export function extractRow(buf: Uint8Array, id: number): Spot | null {
 
 /**
  * spots.json에서 ids 행을 Range 요청 k분 탐색으로 찾는다. 하나라도 못 찾았거나 아래 조건에 걸리면 빈 배열이고 호출부는 전체 파일을 기다린다.
- * 206이 아님, content-encoding 있음(압축본 기준 조각), 응답마다 전체 크기가 다름(탐색 중 동기화), 요청 수 상한, 6초 초과
+ * 206이 아님, content-encoding 있음(압축본 기준 조각), 응답마다 전체 크기가 다름(탐색 중 동기화), 요청 수 상한, 15초 초과
  */
 export async function findSpotsByRange(ids: number[]): Promise<Spot[]> {
   if (ids.length === 0) return [];
