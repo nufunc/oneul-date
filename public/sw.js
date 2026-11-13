@@ -9,8 +9,17 @@ const ASSETS = [
 // 설치 시 정적 자산 사전 캐싱
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS).catch(() => {});
+    caches.open(CACHE_NAME).then(async (cache) => {
+      await cache.addAll(ASSETS).catch(() => {});
+      // 첫 방문의 앱 번들은 등록 전에 받아져 fetch 처리기를 지나지 않는다. index.html이 가리키는 해시 이름 번들을 함께 넣는다(P-411)
+      // index.html이나 번들을 받지 못하면 번들 추가만 건너뛴다
+      try {
+        const html = await (await fetch('./index.html', { cache: 'no-cache' })).text();
+        const built = [...new Set([...html.matchAll(/"(\/oneul-date\/assets\/[^"]+)"/g)].map((m) => m[1]))];
+        if (built.length > 0) await cache.addAll(built);
+      } catch {
+        // 번들 없이도 install은 마친다
+      }
     })
   );
   self.skipWaiting();
