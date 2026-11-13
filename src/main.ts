@@ -8488,7 +8488,11 @@ function renderOverlayContent(): void {
         };
         state.mainMode = 'course';
         updateModeView();
-        app.scrollIntoView({ behavior: scrollMotion() });
+        // 맨 위로 올리면 닫힘 초점 복귀가 새 코스 아래쪽 같은 장소로 가 초점이 화면 밖에 남았다.
+        // 저장 코스 불러오기와 같이 결과로 내리고 첫 상호명에 초점을 준다(P-416)
+        document.getElementById('results-area')?.scrollIntoView({ behavior: scrollMotion(), block: 'start' });
+        cancelOverlayFocusReturn();
+        document.querySelector<HTMLElement>('#results-area .step-name-link')?.focus({ preventScroll: true });
         showToast(`✨ '${spot.name}' 중심 맞춤 코스를 완성했어요!`);
       });
     });
