@@ -8581,7 +8581,10 @@ function handleRoute(): void {
   if (sharedIds !== null) {
     const steps = buildSharedSteps(sharedIds);
     if (steps.length > 0) {
+      // 대기 카드에서 바뀐 화면은 낭독기에 알린다. 캐시로 바로 그린 첫 화면은 페이지 낭독과 겹쳐 알리지 않는다(P-422)
+      const fromLoading = !!document.getElementById('receiver-loading');
       renderReceiverView(steps);
+      if (fromLoading) announce(`받은 코스를 불러왔어요. 장소 ${steps.length}곳`);
       // 병합·폐업으로 사라진 곳을 조용히 빼면 수신자가 그대로 저장·재공유해 원래 코스가 줄어든 채 퍼진다
       const dropped = new Set(sharedIds).size - steps.length;
       if (dropped > 0) showToast(`공유된 ${steps.length + dropped}곳 중 ${dropped}곳은 지금 코스에 넣을 수 없어 뺐어요`);
