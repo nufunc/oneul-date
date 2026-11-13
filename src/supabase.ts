@@ -1,5 +1,3 @@
-import rawSpotsData from './data/spots.sample.json';
-
 export interface SocialPlatformLink {
   url: string;
   title?: string;
@@ -361,7 +359,13 @@ export async function loadStaticSpots(): Promise<Spot[]> {
   // 샘플은 IndexedDB에 저장하지 않는다. 저장하면 다시 받기(새로 고침)가 캐시의 샘플을 먼저 읽어 전체 파일을 다시 요청하지 않는다
   spotsFellBackToSample = true;
   // 샘플 JSON의 business_hours가 빈 객체와 {영업시간}, {이용시간}으로 섞이면 TS가 빈 객체를 {영업시간?: undefined}로 추론해 Spot[] 단언이 TS2352로 실패한다. 값은 normalizeSpots가 정리한다
-  return normalizeSpots(rawSpotsData as unknown as Spot[]);
+  // 샘플은 실패할 때만 따로 받는다. 정적 import하면 앱 JS gzip의 절반(약 69KB)이 첫 화면을 늦췄다(P-414)
+  try {
+    return normalizeSpots((await import('./data/spots.sample.json')).default as unknown as Spot[]);
+  } catch {
+    // 오프라인 첫 방문처럼 샘플 조각도 받지 못하면 빈 목록이다
+    return [];
+  }
 }
 
 // 받은 링크 첫 방문은 전체 spots.json(gzip 3.7MB, Slow 4G 21초)이 와야 수신자 화면을 그렸다. 공유 id 행만 Range 요청으로 찾는다.

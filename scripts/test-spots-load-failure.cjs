@@ -18,7 +18,9 @@ const cut = (src, from, to) => {
 (async () => {
   // 1. loadStaticSpots: 실패면 샘플을 돌려주고 표시를 세우며 IndexedDB에 저장하지 않는다
   const supa = read('supabase.ts');
-  const loadCode = cut(supa, 'export let spotsFellBackToSample', '\n}\n').replace(/^export /gm, '');
+  // 샘플 동적 import(P-414)는 new Function 안에서 받을 수 없어 주입한 rawSpotsData로 바꾼다
+  const loadCode = cut(supa, 'export let spotsFellBackToSample', '\n}\n').replace(/^export /gm, '')
+    .replace("(await import('./data/spots.sample.json')).default", 'rawSpotsData');
   const sample = [{ id: 1 }, { id: 2 }];
   const env = { response: null, saved: [] };
   const mod = new Function(

@@ -17,7 +17,7 @@ const all = JSON.parse(fs.readFileSync(path.join(root, 'public', 'data', 'spots.
 const { stations } = JSON.parse(fs.readFileSync(path.join(root, 'public', 'data', 'stations.json'), 'utf8'));
 const env = { rawSpotsData: all, cleanSpotSummary: (s) => s.summary || '', __st: stations };
 const names = 'isCourseEligible,deduplicateSpotList,matchesSearchQuery,isListicleEntry,isPollutedMediaChannelDummy';
-const m = new Function(...Object.keys(env), `${js};stationCoords=__st;return {${names}};`)(...Object.values(env));
+const m = new Function(...Object.keys(env), `${js};spots=rawSpotsData;stationCoords=__st;return {${names}};`)(...Object.values(env));
 
 const open = all.filter((s) => !s.is_closed);
 const candidates = m.deduplicateSpotList(open.filter((s) => m.isCourseEligible(s)));

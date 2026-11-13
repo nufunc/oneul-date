@@ -1,5 +1,4 @@
 import './style.css';
-import rawSpotsData from './data/spots.sample.json';
 import { renderNativeInfeedAdCard, initAdSense } from './ads';
 
 // ---------------------------------------------------------------------------
@@ -289,7 +288,8 @@ export const DISTANCE_RADIUS_OPTIONS = [
   { value: 10.0, label: '10km' },
 ];
 
-let spots: Spot[] = rawSpotsData as unknown as Spot[];
+// spots.json이 오기 전에는 비어 있다. 실패 폴백 샘플은 loadSpots가 따로 받는다(P-414)
+let spots: Spot[] = [];
 
 // ---------------------------------------------------------------------------
 // 순수 함수 — 필터 · 후보 계산 · 랜덤 픽 · 코스 생성 · 텍스트 포맷 (상태/DOM 없음)
@@ -6814,6 +6814,14 @@ function renderSpotDiscovery(): void {
     <div class="spot-discovery-grid cols-${state.spotGridCols}">
       ${displaySpots.length > 0 ? displaySpots.map((spot) => renderDiscoverySpotCard(spot, state.spotGridCols)).join('') : (() => {
         // 찜이 있는데 지역·검색 같은 다른 조건 때문에 0건이면 '담은 스팟이 없다'는 문구가 사실과 어긋난다
+        // 첫 방문은 spots.json이 오기 전까지 목록이 비어 있다. 찾지 못했다고 하지 않고 받는 중임을 알린다(P-414)
+        if (spots.length === 0 && fullSpotsPending) {
+          return `
+        <div class="spot-empty-state">
+          <span class="empty-icon" aria-hidden="true">🧭</span>
+          <p class="empty-title">스팟을 불러오고 있어요</p>
+        </div>`;
+        }
         const savedCount = state.savedSpotIds?.size ?? 0;
         if (state.savedOnly && savedCount > 0) {
           return `

@@ -20,7 +20,9 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 (async () => {
   const supa = read('supabase.ts');
-  const loadCode = cut(supa, 'export let spotsFellBackToSample', '\n}\n').replace(/^export /gm, '');
+  // 샘플 동적 import(P-414)는 new Function 안에서 받을 수 없어 주입한 rawSpotsData로 바꾼다
+  const loadCode = cut(supa, 'export let spotsFellBackToSample', '\n}\n').replace(/^export /gm, '')
+    .replace("(await import('./data/spots.sample.json')).default", 'rawSpotsData');
   assert.ok(/const SPOTS_IDLE_MS = 15000;/.test(loadCode), '무응답 제한이 15초가 아니다');
   assert.ok(!/setTimeout\(\s*\(\)\s*=>\s*ctrl\.abort\(\),\s*\d/.test(loadCode), '전체 시간 고정 제한이 생겼다');
   const sample = [{ id: 1 }];
