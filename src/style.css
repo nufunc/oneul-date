@@ -5075,13 +5075,6 @@ html[data-theme-resolved="dark"] .quick-region-chip.chip-saved.is-saved-active {
   box-shadow: 0 2px 8px rgba(147, 51, 234, 0.35);
 }
 
-html[data-theme="dark"] .quick-region-chip.chip-mood.is-mood-active,
-html[data-theme-resolved="dark"] .quick-region-chip.chip-mood.is-mood-active {
-  background: #a855f7;
-  border-color: #a855f7;
-  color: #fff;
-}
-
 /* 1-Tap 스마트 예산 필터 칩 (.chip-budget) */
 .quick-region-chip.chip-budget {
   color: var(--color-text-sub);
