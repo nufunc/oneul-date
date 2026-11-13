@@ -45,7 +45,7 @@ const add = body(/^function addSavedCourse\(/m, /^\}/m);
 assert.match(add, /if \(!persistSavedCourses\(list\)\) return 'failed';/, 'addSavedCourse가 쓰기 실패를 failed로 돌려주지 않는다');
 const persist = body(/^function persistSavedCourses\(/m, /^\}/m);
 assert.ok(!/showToast\(/.test(persist), 'persistSavedCourses가 직접 토스트를 띄우면 호출부의 성공 토스트가 덮는다');
-assert.match(helper, /result === 'failed'\s*\?\s*'코스를 저장하지 못했어요[^']*'\s*:\s*result === 'new'\s*\?\s*'💾 코스를 저장했어요'/, '실패 문구가 성공 문구보다 먼저 가려지지 않는다');
+assert.match(helper, /result === 'failed'\s*\?\s*'코스를 저장하지 못했어요[^']*'\s*:\s*result === 'new'\s*\?[^:]*?\?[^:]*?:\s*'💾 코스를 저장했어요'/, '실패 문구가 성공 문구보다 먼저 가려지지 않는다');
 assert.ok(!helper.includes('보관함'), '실패 문구에 `보관함`이 남았다');
 assert.ok(!/addSavedCourse\(item\) \?/.test(src), '호출부가 결과를 참거짓으로 읽어 실패를 성공 토스트로 덮는다');
 assert.match(src, /if \(!persistSavedCourses\(next\)\) \{\s*showToast\('삭제하지 못했어요[^']*'\);\s*return;/, '삭제 쓰기 실패가 삭제했어요 토스트에 덮인다');

@@ -3775,7 +3775,10 @@ function saveCourseWithToast(item: SavedCourse): void {
     result === 'failed'
       ? '코스를 저장하지 못했어요. 이 브라우저에서 저장이 막혀 있어요. 🔗로 링크를 보내 두세요'
       : result === 'new'
-        ? '💾 코스를 저장했어요'
+        ? // 카카오톡 안 브라우저의 저장소는 다른 브라우저와 따로라 다른 곳에서 열면 목록이 비어 유실로 읽힌다(P-407)
+          /KAKAOTALK/i.test(navigator.userAgent)
+          ? '💾 저장했어요. 카카오톡 안에서 저장한 코스는 카카오톡에서 열 때만 보여요'
+          : '💾 코스를 저장했어요'
         : '이미 저장한 코스라 맨 위로 올렸어요',
   );
 }
