@@ -7521,7 +7521,7 @@ function savedCourseSpotsHtml(item: SavedCourse): string {
   }
 
   return `
-    <div class="saved-step-flow">
+    <span class="saved-step-flow">
       ${steps
         .map((entry) => {
           const emoji = entry.slot && SLOT_META[entry.slot] ? SLOT_META[entry.slot].emoji : '📍';
@@ -7533,7 +7533,7 @@ function savedCourseSpotsHtml(item: SavedCourse): string {
           `;
         })
         .join('<span class="saved-step-sep" aria-hidden="true">›</span>')}
-    </div>
+    </span>
   `;
 }
 
@@ -7758,7 +7758,7 @@ function renderOverlayContent(): void {
             <button type="button" class="btn-primary" id="overlay-empty-make">코스 만들러 가기</button>
             <a class="btn-secondary" href="./blog/">매거진에서 코스 고르기</a>
           </div>`
-              : list
+              : `<ul class="saved-list" role="list">${list
                   .map((item) => {
                     const date = new Date(item.createdAt);
                     const dateStr = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
@@ -7768,19 +7768,19 @@ function renderOverlayContent(): void {
                     const of = escapeHtml(`${dateStr} ${name.replace(/\p{Extended_Pictographic}️?\s*/gu, '')}`);
                     const nameHtml = escapeHtml(name).replace(/\p{Extended_Pictographic}️?/gu, '<span aria-hidden="true">$&</span>');
                     return `
-                <div class="saved-item">
+                <li class="saved-item">
                   <button class="saved-item-main" data-course-id="${escapeHtml(item.id)}">
                     <span class="saved-item-meta">${dateStr} · ${nameHtml}</span>
-                    <div class="saved-item-spots">${savedCourseSpotsHtml(item)}</div>
+                    <span class="saved-item-spots">${savedCourseSpotsHtml(item)}</span>
                   </button>
                   <div class="saved-item-actions">
                     <button class="saved-action-btn saved-item-copy" data-copy-id="${escapeHtml(item.id)}" aria-label="${of} 카톡 복사" title="카톡 포맷 복사">📋</button>
                     <button class="saved-action-btn saved-item-share" data-share-id="${escapeHtml(item.id)}" aria-label="${of} ${CAN_SHARE ? '링크 공유' : '링크 복사'}" title="${CAN_SHARE ? '코스 링크 공유' : '공유 링크 복사'}">🔗</button>
                     <button class="saved-action-btn saved-item-delete" data-delete-id="${escapeHtml(item.id)}" aria-label="${of} 삭제" title="삭제">🗑</button>
                   </div>
-                </div>`;
+                </li>`;
                   })
-                  .join('')
+                  .join('')}</ul>`
           }
         </div>
       </div>

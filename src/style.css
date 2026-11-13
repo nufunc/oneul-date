@@ -3154,7 +3154,16 @@ body:has(.data-failed-banner) #app {
   letter-spacing: var(--label-tracking);
 }
 
+/* 저장 목록은 ul(P-396). 목록 기호와 기본 여백을 없앤다 */
+.saved-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* 단추 안이라 span으로 둔다(button은 구문 콘텐츠만 허용) */
 .saved-item-spots {
+  display: block;
   width: 100%;
   margin-top: 4px;
 }
