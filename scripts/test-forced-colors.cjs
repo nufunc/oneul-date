@@ -12,4 +12,8 @@ assert.match(blocks, /\[aria-pressed="true"\],\s*\[role="tab"\]\[aria-selected="
 
 assert.match(blocks, /HighlightText !important;\s*\/\*[^*]*\*\/\s*forced-color-adjust: none;/, '선택한 칩 글자가 받침에 덮인다');
 
+// 검색칸 초점 외곽선(P-404): 투명 외곽선이 강제 색상에서 보인다
+const search = css.match(/\n\.search-input \{([^}]*)\}/);
+assert.ok(search && /outline: 2px solid transparent;/.test(search[1]) && !/outline: none;/.test(search[1]), '검색칸 초점 외곽선을 지운다');
+
 console.log('test-forced-colors: 통과');

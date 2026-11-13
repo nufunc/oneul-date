@@ -946,7 +946,8 @@ label,
   border: 1px solid var(--color-border);
   border-radius: var(--radius-full);
   box-shadow: var(--shadow-card);
-  outline: none;
+  /* 초점 표시가 그림자뿐이라 강제 색상 모드에서 사라졌다. 투명 외곽선은 그 모드에서만 보인다(WCAG 2.4.7, P-404) */
+  outline: 2px solid transparent;
   transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   -webkit-appearance: none;
 }
