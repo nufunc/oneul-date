@@ -42,7 +42,7 @@ const stubs = {
   getDistanceKm: () => 0.5,
   buildShareUrl: (ids) => `https://share.example/${ids.join('-')}`,
   isSpotClosedToday: (s) => Boolean(s.closedToday),
-  SLOT_META: { day: { emoji: '☀️' }, evening: { emoji: '🌆' }, night: { emoji: '🌙' } },
+  SLOT_META: { day: { emoji: '☀️', label: '낮' }, evening: { emoji: '🌆', label: '저녁' }, night: { emoji: '🌙', label: '밤' } },
 };
 const { formatCourseTextAsync } = new Function(
   ...Object.keys(stubs),
@@ -83,12 +83,16 @@ const secondLine = (text) => text.split('\n')[2];
     [{ slot: 'day', spotId: 1 }, { slot: 'evening', spotId: 2 }, { slot: 'night', spotId: 3 }], hoursById, [], 'ALL',
   );
   const [b1, b2, b3] = hoursText.split(/\n(?=\d차 )/).slice(1);
+  // P-428: 장소 줄에 카드 칸 표시와 같은 칸 이름
+  assert.ok(b1.startsWith('1차 ☀️ 낮 낙원장 (주점)\n'), `낮 칸 장소 줄: ${b1}`);
+  assert.ok(b2.startsWith('2차 🌆 저녁 휴무집 (한식)\n'), `저녁 칸 장소 줄: ${b2}`);
+  assert.ok(b3.startsWith('3차 🌙 밤 모름집 (카페)\n'), `밤 칸 장소 줄: ${b3}`);
   assert.ok(b1.includes('\n⚠️ 영업시간 확인\n🕒 오늘 17:00~01:00\n📍 종로 1'), `낮 칸 17시 개점 블록: ${b1}`);
   assert.ok(b2.includes('\n⚠️ 오늘 휴무\n📍 종로 2'), `휴무 블록: ${b2}`);
   assert.ok(!/🕒|영업시간 확인/.test(b2), '휴무 블록에 영업시간 줄이 있다');
   assert.ok(!/⚠️|🕒/.test(b3), `영업시간 모르는 블록에 경고나 시간 줄: ${b3}`);
   assert.ok(!/⚠️|🕒/.test(await formatCourseTextAsync(steps, byId, [], 'ALL')), '영업시간 없는 코스에 경고나 시간 줄');
-  console.log('ok 복사 텍스트 총평 줄 없음, 영업시간 줄 16');
+  console.log('ok 복사 텍스트 총평 줄 없음, 영업시간 줄, 칸 이름 19');
 })().catch((e) => {
   console.error(`FAIL ${e.message}`);
   process.exit(1);

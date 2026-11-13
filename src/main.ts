@@ -2887,7 +2887,8 @@ async function formatCourseTextAsync(
     const catText = spot.category ? ` (${spot.category})` : '';
 
     const lines: string[] = [];
-    lines.push(`${i + 1}차 ${meta.emoji} ${spot.name}${catText}`);
+    // P-428: 카드 칸 표시와 같은 글자. 이모지만으로는 🌆이 저녁인지 읽기 어려웠다
+    lines.push(`${i + 1}차 ${meta.emoji} ${meta.label} ${spot.name}${catText}`);
     // 카드와 시트가 보이는 문장과 같게 한다(P-344)
     const summary = displaySpotSummary(spot).text;
     if (summary) lines.push(`✨ ${summary}`);
