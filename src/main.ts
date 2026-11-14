@@ -2345,6 +2345,18 @@ function generateCourse(
       if (nearPool.length === 0) nearPool = nearDiverse(zoneKeys);
       if (nearPool.length === 0 && opts.zoneFromQuery && zoneKeys.length > 0) nearPool = nearDiverse([]);
     }
+    // 반경 단계가 모두 비면(숙박은 분위기 안 숙소가 앵커 반경 밖이면) 분위기를 풀어 앵커 반경 안에서 고른다(P-444).
+    // 오늘 추천 영남·active 코스가 앵커 반경 안에 분위기 안 저녁 후보가 없어 68~75km 밖 장소를 이었다. 'ALL' 코스는 그대로 둔다
+    if (moodKey !== 'ALL' && (slot !== 'stay' ? nearPool.length === 0 : nearAnchor(slotCandidates).length === 0)) {
+      const relaxed = diversifyByGenre(
+        nearAnchor(
+          filterByBudget(filterByMoodPreset(getCandidates(all, slot, regionKeys, 'ALL', picked, zoneKeys, geoAnchor, isIndoor), moodPreset), budgetFilter),
+        ),
+        pickedGenres,
+        anchorSpot,
+      );
+      if (relaxed.length > 0) nearPool = relaxed;
+    }
     const chosen = pickNearRandom(nearPool.length > 0 ? nearPool : finalCandidates, anchorSpot, rng, scope);
     if (chosen) {
       picked.push(chosen.id);
