@@ -28,6 +28,8 @@ const stubs = {
   isSpotClosedToday: () => false,
   isOpenAtSlotClock: () => true,
   todayHoursLabel: () => '',
+  hasNoHoursInfo: () => false,
+  HOURS_UNKNOWN_TEXT: '영업시간 정보 없음',
 };
 const { formatCourseTextAsync } = new Function(
   ...Object.keys(stubs),

@@ -2957,6 +2957,7 @@ async function formatCourseTextAsync(
     else if (!isOpenAtSlotClock(spot, step.slot, new Date(), false)) lines.push('⚠️ 영업시간 확인');
     const hoursLabel = closedToday ? '' : todayHoursLabel(spot);
     if (hoursLabel) lines.push(`🕒 ${hoursLabel}`);
+    else if (!closedToday && hasNoHoursInfo(spot)) lines.push(`🕒 ${HOURS_UNKNOWN_TEXT}`);
     lines.push(`📍 ${spot.address || spot.location}`);
     lines.push(`🗺️ ${shortMapUrl}`);
 
@@ -3341,6 +3342,14 @@ function todayHoursLabel(spot: Spot, date = new Date()): string {
     if (!m[1] || m[1] === '매일' || m[1] === today) found.push(`${m[2]}:${m[3]}~${m[4]}:${m[5]}`);
   }
   return found.length === 1 ? `오늘 ${found[0]}` : '';
+}
+
+/** P-437: 영업시간을 모르는 장소는 카드, 시트, 복사 글이 줄을 통째로 빼서 '해당 없음'과 구분되지 않았다. 세 화면이 같은 문구를 쓴다 */
+const HOURS_UNKNOWN_TEXT = '영업시간 정보 없음';
+
+/** 영업시간 원문이 하나도 없는 장소(시트 영업시간 칸이 비는 경우). 원문은 있으나 형식을 못 읽는 곳은 시트가 원문을 보이므로 넣지 않는다 */
+function hasNoHoursInfo(spot: Spot): boolean {
+  return !spot.is_24h && !(spot.business_hours && Object.keys(spot.business_hours).length > 0);
 }
 
 /** 스팟이 오늘 정기휴무인지 판별 (현장 헛걸음 방지) */
@@ -5919,6 +5928,8 @@ function renderStepCard(
   const hoursLabel = isClosedToday ? '' : todayHoursLabel(spot);
   if (hoursLabel) {
     metaBadges.push(`<span class="badge-meta badge-hours"><span aria-hidden="true">🕒</span> ${hoursLabel}</span>`);
+  } else if (!isClosedToday && hasNoHoursInfo(spot)) {
+    metaBadges.push(`<span class="badge-meta badge-hours"><span aria-hidden="true">🕒</span> ${HOURS_UNKNOWN_TEXT}</span>`);
   }
 
   // v4.0 실시간 예약 링크
@@ -8479,7 +8490,7 @@ function renderOverlayContent(): void {
     const signatureItems = spot.signature_items || [];
 
     // 짧은 항목은 휴대폰에서도 2열이라, 수가 홀수면 마지막 짧은 항목이 한 줄 전체를 쓴다. :has()는 iOS 15.3 이하 Safari가 몰라 템플릿에서 정한다
-    const shortItems = [hoursText || closedText ? 'hours' : '', parkingText ? 'parking' : '', priceText ? 'price' : '', ratingText ? 'rating' : ''].filter(Boolean);
+    const shortItems = ['hours', parkingText ? 'parking' : '', priceText ? 'price' : '', ratingText ? 'rating' : ''].filter(Boolean);
     const loneShort = shortItems.length % 2 === 1 ? shortItems[shortItems.length - 1] : '';
     const shortItemClass = (key: string) => `meta-grid-item${loneShort === key ? ' full-width' : ''}`;
 
@@ -8538,18 +8549,16 @@ function renderOverlayContent(): void {
 
           <!-- 4. 실용 정보 그리드 (영업시간, 주차, 가격, 메뉴 등) -->
           <div class="spot-detail-meta-grid">
-            ${hoursText || closedText ? `
-              <div class="${shortItemClass('hours')}">
-                <span class="meta-item-icon" aria-hidden="true">🕒</span>
-                <div class="meta-item-body">
-                  <strong class="meta-item-title">
-                    영업시간
-                    ${isClosedToday ? '<span class="spot-closed-badge">⚠️ 오늘 정기휴무</span>' : ''}
-                  </strong>
-                  <p class="meta-item-desc">${escapeHtml(hoursText || '정보 없음')}${closedText ? ` (휴무: ${escapeHtml(closedText)})` : ''}</p>
-                </div>
+            <div class="${shortItemClass('hours')}">
+              <span class="meta-item-icon" aria-hidden="true">🕒</span>
+              <div class="meta-item-body">
+                <strong class="meta-item-title">
+                  영업시간
+                  ${isClosedToday ? '<span class="spot-closed-badge">⚠️ 오늘 정기휴무</span>' : ''}
+                </strong>
+                <p class="meta-item-desc">${escapeHtml(hoursText || HOURS_UNKNOWN_TEXT)}${closedText ? ` (휴무: ${escapeHtml(closedText)})` : ''}</p>
               </div>
-            ` : ''}
+            </div>
 
             ${parkingText ? `
               <div class="${shortItemClass('parking')}">

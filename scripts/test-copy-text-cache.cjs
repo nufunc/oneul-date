@@ -25,6 +25,8 @@ const code = [
   cut('const HOURS_RANGE_RE', ';\n'),
   cut('function parseOpenAtClock', '\n}\n'),
   cut('function todayHoursLabel', '\n}\n'),
+  cut('const HOURS_UNKNOWN_TEXT', ';\n'),
+  cut('function hasNoHoursInfo', '\n}\n'),
   cut('async function formatCourseTextAsync', '\n}\n'),
 ].join('\n');
 
@@ -90,9 +92,14 @@ const secondLine = (text) => text.split('\n')[2];
   assert.ok(b1.includes('\n⚠️ 영업시간 확인\n🕒 오늘 17:00~01:00\n📍 종로 1'), `낮 칸 17시 개점 블록: ${b1}`);
   assert.ok(b2.includes('\n⚠️ 오늘 휴무\n📍 종로 2'), `휴무 블록: ${b2}`);
   assert.ok(!/🕒|영업시간 확인/.test(b2), '휴무 블록에 영업시간 줄이 있다');
-  assert.ok(!/⚠️|🕒/.test(b3), `영업시간 모르는 블록에 경고나 시간 줄: ${b3}`);
-  assert.ok(!/⚠️|🕒/.test(await formatCourseTextAsync(steps, byId, [], 'ALL')), '영업시간 없는 코스에 경고나 시간 줄');
-  console.log('ok 복사 텍스트 총평 줄 없음, 영업시간 줄, 칸 이름 19');
+  // P-437: 영업시간을 모르면 경고 없이 카드와 같은 '영업시간 정보 없음' 줄
+  assert.ok(b3.includes('\n🕒 영업시간 정보 없음\n📍 종로 3'), `영업시간 모르는 블록: ${b3}`);
+  assert.ok(!/⚠️/.test(b3), `영업시간 모르는 블록에 경고: ${b3}`);
+  assert.ok(!/영업시간 정보 없음/.test(b1 + b2), '영업시간을 아는 블록이나 휴무 블록에 정보 없음 줄');
+  const noHours = await formatCourseTextAsync(steps, byId, [], 'ALL');
+  assert.ok(!/⚠️/.test(noHours), '영업시간 없는 코스에 경고');
+  assert.strictEqual(noHours.match(/🕒 영업시간 정보 없음/g).length, 2, '영업시간 없는 칸마다 정보 없음 줄');
+  console.log('ok 복사 텍스트 총평 줄 없음, 영업시간 줄, 칸 이름 22');
 })().catch((e) => {
   console.error(`FAIL ${e.message}`);
   process.exit(1);
