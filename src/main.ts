@@ -5120,7 +5120,7 @@ function renderResultsContent(): void {
       <span class="course-title">${escapeHtml(courseTitle(cond, state.course))}</span>
       <div class="course-head-actions">
         ${prevCourse ? UNDO_COURSE_BTN_HTML : ''}
-        ${state.course.length >= 3 ? `
+        ${routeOptimizableSteps(state.course) ? `
           <button class="btn-optimize-route" id="btn-optimize-route" type="button" title="이동 거리가 가장 짧은 최적 동선으로 순서 자동 정렬" aria-label="최적 동선 정렬">
             ⚡ 최적 동선
           </button>
@@ -6377,24 +6377,29 @@ function calculateCourseTotalDistance(steps: CourseStep[]): number {
   return total;
 }
 
-/** 코스 최적 동선 자동 정렬: 3개 스팟의 최단 이동 거리 순열 탐색 */
+/**
+ * 최적 동선 순열 대상: 숙박이 아닌 칸이 정확히 3개이고 모두 장소가 있을 때만 그 칸을 돌려준다(P-448).
+ * ⚡ 단추 조건과 optimizeCourseRoute가 같은 판정을 쓴다. 빈 칸이 섞이면 번호가 어긋나므로 막는다
+ */
+function routeOptimizableSteps(course: CourseStep[] | null): CourseStep[] | null {
+  if (!course) return null;
+  const steps = course.filter((step) => step.slot !== 'stay');
+  if (steps.length !== 3 || steps.some((step) => !step.spotId || !spotById.get(step.spotId))) return null;
+  return steps;
+}
+
+/** 코스 최적 동선 자동 정렬: 숙박 아닌 3개 스팟의 최단 이동 거리 순열 탐색 */
 function optimizeCourseRoute(): boolean {
-  if (!state.course || state.course.length < 3) {
+  const initialSteps = routeOptimizableSteps(state.course);
+  if (!state.course || !initialSteps) {
     showToast('3개 차수 코스가 모두 완성되어야 동선을 최적화할 수 있어요');
     return false;
   }
 
-  const currentSpots = state.course
-    .map((step) => (step.spotId ? spotById.get(step.spotId) || null : null))
-    .filter((s): s is Spot => Boolean(s));
-
-  if (currentSpots.length < 3) {
-    showToast('유효한 스팟이 3개 이상이어야 해요');
-    return false;
-  }
-
-  const initialSteps = [...state.course];
-  const initialDistance = calculateCourseTotalDistance(initialSteps);
+  const currentSpots = initialSteps.map((step) => spotById.get(step.spotId as number) as Spot);
+  // 숙박 칸은 순열에서 빼고 끝에 그대로 붙인다(P-448)
+  const stayTail = state.course.filter((step) => step.slot === 'stay');
+  const initialDistance = calculateCourseTotalDistance([...initialSteps, ...stayTail]);
 
   // 6가지 순열 중 장르 호환 가능한 것만 추출
   const permutations = [
@@ -6417,11 +6422,14 @@ function optimizeCourseRoute(): boolean {
     const g2 = getSpotGenre(pSpots[2]);
     if (g0 === 'BAR') continue;
     if (g2 === 'CAFE' && g0 === 'MEAL') continue;
+    // 옮긴 장소가 새 칸 시각에 열려 있어야 한다(P-447)
+    if (!pSpots.every((spot, k) => isOpenAtSlotClock(spot, initialSteps[k].slot))) continue;
 
     const testSteps: CourseStep[] = [
       { slot: initialSteps[0].slot, spotId: pSpots[0].id },
       { slot: initialSteps[1].slot, spotId: pSpots[1].id },
       { slot: initialSteps[2].slot, spotId: pSpots[2].id },
+      ...stayTail,
     ];
 
     const dist = calculateCourseTotalDistance(testSteps);
@@ -6436,14 +6444,15 @@ function optimizeCourseRoute(): boolean {
     return false;
   }
 
-  // 자리(순서)가 아니라 스팟을 따라 슬롯 라벨도 함께 옮긴다. 자리 기준
-  // 라벨을 그대로 두면 밤 시간대용으로 고른 심야 술집이 순열상 2차리로
-  // 옮겨졌을 때 "저녁" 라벨이 그대로 붙어버렸다(2026-09-23 발견).
+  // 칸 이름은 자리에 고정하고 장소만 옮긴다. 이름을 장소를 따라 옮기면 원래 순서가
+  // 낮·저녁·밤이므로 순서가 바뀔 때마다 `저녁 → 낮`처럼 시각 순서가 깨졌다(P-447).
+  // 밤 술집이 저녁 칸에 붙는 문제(2026-09-23)는 위의 새 칸 시각 영업 검사로 막는다.
   snapshotPrevCourse();
   state.course = [
-    { slot: initialSteps[bestPerm[0]].slot, spotId: currentSpots[bestPerm[0]].id },
-    { slot: initialSteps[bestPerm[1]].slot, spotId: currentSpots[bestPerm[1]].id },
-    { slot: initialSteps[bestPerm[2]].slot, spotId: currentSpots[bestPerm[2]].id },
+    { slot: initialSteps[0].slot, spotId: currentSpots[bestPerm[0]].id },
+    { slot: initialSteps[1].slot, spotId: currentSpots[bestPerm[1]].id },
+    { slot: initialSteps[2].slot, spotId: currentSpots[bestPerm[2]].id },
+    ...stayTail,
   ];
 
   const savedKm = (initialDistance - minDistance).toFixed(1);
