@@ -2346,15 +2346,18 @@ function generateCourse(
       if (nearPool.length === 0 && opts.zoneFromQuery && zoneKeys.length > 0) nearPool = nearDiverse([]);
     }
     // 반경 단계가 모두 비면(숙박은 분위기 안 숙소가 앵커 반경 밖이면) 분위기를 풀어 앵커 반경 안에서 고른다(P-444).
-    // 오늘 추천 영남·active 코스가 앵커 반경 안에 분위기 안 저녁 후보가 없어 68~75km 밖 장소를 이었다. 'ALL' 코스는 그대로 둔다
-    if (moodKey !== 'ALL' && (slot !== 'stay' ? nearPool.length === 0 : nearAnchor(slotCandidates).length === 0)) {
-      const relaxed = diversifyByGenre(
-        nearAnchor(
-          filterByBudget(filterByMoodPreset(getCandidates(all, slot, regionKeys, 'ALL', picked, zoneKeys, geoAnchor, isIndoor), moodPreset), budgetFilter),
-        ),
-        pickedGenres,
-        anchorSpot,
+    // 오늘 추천 영남·active 코스가 앵커 반경 안에 분위기 안 저녁 후보가 없어 68~75km 밖 장소를 이었다. 'ALL' 코스는 그대로 둔다.
+    // 숙박 외 칸은 반경 후보가 모두 이미 고른 종목이어도 분위기를 풀고 반경 안 다른 종목만 쓴다(P-445). 분위기 안 다른 종목이
+    // 20km 안에 없어 '알텐데[MEAL] > 코이누르[MEAL]'처럼 같은 종목을 이었다. 풀어도 다른 종목이 없으면 원래 후보를 둔다
+    const allTaken = slot !== 'stay' && nearPool.length > 0 && nearPool.every((s) => pickedGenres.has(getSpotGenre(s)));
+    if (moodKey !== 'ALL' && (slot !== 'stay' ? nearPool.length === 0 || allTaken : nearAnchor(slotCandidates).length === 0)) {
+      const relaxedNear = nearAnchor(
+        filterByBudget(filterByMoodPreset(getCandidates(all, slot, regionKeys, 'ALL', picked, zoneKeys, geoAnchor, isIndoor), moodPreset), budgetFilter),
       );
+      const relaxed =
+        nearPool.length === 0
+          ? diversifyByGenre(relaxedNear, pickedGenres, anchorSpot)
+          : relaxedNear.filter((s) => !pickedGenres.has(getSpotGenre(s)));
       if (relaxed.length > 0) nearPool = relaxed;
     }
     const chosen = pickNearRandom(nearPool.length > 0 ? nearPool : finalCandidates, anchorSpot, rng, scope);
