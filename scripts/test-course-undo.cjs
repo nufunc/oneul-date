@@ -21,7 +21,7 @@ for (const name of ['prevCourse', 'snapshotPrevCourse', 'undoCourse', 'bindUndoB
 }
 
 // 보관·복원·다시 추천을 한 범위에 넣고 나머지 의존은 가짜로 둔다. 코스 대입이 일어나는 generateCourse 가짜는 새 id를 돌려준다
-const STUBS = ['state', 'announce', 'renderResults', 'announceCourse', 'markResultsEngaged', 'spotById', 'buildAnchorCourse', 'addRecentSpotIds', 'courseSpotIds', 'generateCourse', 'spots', 'recentSpotIdSet', 'notifyRelaxedSlots'];
+const STUBS = ['state', 'announce', 'renderResults', 'announceCourse', 'markResultsEngaged', 'spotById', 'buildAnchorCourse', 'addRecentSpotIds', 'courseSpotIds', 'generateCourse', 'spots', 'recentSpotIdSet', 'notifyRelaxedSlots', 'zoneRelaxedSlots', 'announceZoneRelaxed'];
 const body = ['prevCourse', 'snapshotPrevCourse', 'undoCourse', 'bindUndoButton', 'UNDO_COURSE_BTN_HTML', 'regenerateCourse'].map((n) => toJs(decls.get(n))).join('\n');
 const make = new Function(...STUBS, `${body}\nreturn { snapshotPrevCourse, undoCourse, regenerateCourse, bindUndoButton, get prev() { return prevCourse; }, clear() { prevCourse = null; } };`);
 
@@ -45,6 +45,8 @@ const setup = () => {
     () => [{ slot: 'lunch', spotId: 11 }, { slot: 'cafe', spotId: 12 }, { slot: 'dinner', spotId: 13 }],
     [],
     () => new Set(),
+    () => {},
+    () => [],
     () => {},
   );
   return { api, state, log };

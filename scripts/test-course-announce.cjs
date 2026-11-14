@@ -75,8 +75,8 @@ assert.strictEqual(t.el().textContent, '', '코스가 없으면 알리지 않는
 // 호출 자리: 🚀(place 분기와 끝), 🔄(후보 확정 뒤), 다시 추천(앵커 분기와 끝)
 const gen = fn('triggerCourseGeneration');
 assert.strictEqual(gen.split("announceCourse('코스를 만들었어요.')").length - 1, 2, '🚀: place 분기와 끝 두 곳');
-assert.ok(/announceCourse\('코스를 만들었어요\.'\);\s*showToast\(`'\$\{place\}'/.test(gen), '🚀 place 분기: 토스트 앞');
-assert.ok(/announceCourse\('코스를 만들었어요\.'\);\s*\}\s*$/.test(gen), '🚀 끝');
+assert.ok(/announceCourse\('코스를 만들었어요\.'\);\s*announceZoneRelaxed\(\);\s*showToast\(`'\$\{place\}'/.test(gen), '🚀 place 분기: 토스트 앞');
+assert.ok(/announceCourse\('코스를 만들었어요\.'\);\s*announceZoneRelaxed\(\);\s*\}\s*$/.test(gen), '🚀 끝');
 const swap = fn('swapStep');
 const iChosen = swap.indexOf('if (!chosen)');
 const iAnn = swap.indexOf('announce(');

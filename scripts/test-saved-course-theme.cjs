@@ -35,7 +35,7 @@ const titleJs = [...new Set([...need].map((n) => decls.get(n)))].sort((a, b) => 
 const courseTitle = new Function('spotById', `${titleJs}\nreturn courseTitle;`)(new Map());
 
 assert.ok(decls.has('regenerateCourse'), 'regenerateCourse가 없다');
-const STUBS = ['state', 'spotById', 'buildAnchorCourse', 'addRecentSpotIds', 'courseSpotIds', 'renderResults', 'generateCourse', 'spots', 'recentSpotIdSet', 'notifyRelaxedSlots', 'markResultsEngaged', 'announceCourse'];
+const STUBS = ['state', 'spotById', 'buildAnchorCourse', 'addRecentSpotIds', 'courseSpotIds', 'renderResults', 'generateCourse', 'spots', 'recentSpotIdSet', 'notifyRelaxedSlots', 'markResultsEngaged', 'announceCourse', 'zoneRelaxedSlots', 'announceZoneRelaxed'];
 const makeRegenerate = new Function(...STUBS, `${['prevCourse', 'snapshotPrevCourse', 'regenerateCourse'].map((n) => toJs(decls.get(n))).join('\n')}\nreturn regenerateCourse;`);
 
 // 저장 버튼(#btn-save)이 만드는 SavedCourse 리터럴을 떼어 같은 state로 평가한다
@@ -63,7 +63,7 @@ const restoreThenRegenerate = (item, screenCategory) => {
     calls.push(args);
     return state.course;
   };
-  makeRegenerate(state, new Map(), noop, noop, () => [], noop, generateCourse, [], () => new Set(), noop, noop, noop)();
+  makeRegenerate(state, new Map(), noop, noop, () => [], noop, generateCourse, [], () => new Set(), noop, noop, noop, () => [], noop)();
   assert.strictEqual(calls.length, 1, 'generateCourse를 한 번 부르지 않았다');
   assert.strictEqual(state.courseCategory, screenCategory, '불러오기가 화면 칩을 바꿨다');
   return { title, categoryKey: calls[0][4].categoryKey };

@@ -988,6 +988,35 @@ function applyStayZonePolicy(pool: CandidatePool, slot: SlotKey, anchor: Spot | 
   );
 }
 
+/**
+ * 세부존 안에 후보가 없어(getCandidatePool의 relaxed) 존 밖 장소가 들어간 낮·저녁·밤 칸(P-431).
+ * 숙박은 applyStayZonePolicy가 앵커 반경으로 존 밖을 고르는 것이 정책이라 뺀다
+ */
+function zoneRelaxedSlots(
+  all: Spot[],
+  steps: CourseStep[],
+  regionKeys: string[],
+  moodKey: string,
+  zoneKeys: string[],
+  indoorOnly: boolean = false,
+): SlotKey[] {
+  const inZone = zoneSelectionMatcher(zoneKeys);
+  if (!inZone) return [];
+  return steps.flatMap((st) => {
+    if (st.slot === 'stay' || st.spotId === null) return [];
+    const spot = all.find((s) => s.id === st.spotId);
+    if (!spot || inZone(spot)) return [];
+    return getCandidatePool(all, st.slot, regionKeys, moodKey, [], zoneKeys, indoorOnly).relaxed ? [st.slot] : [];
+  });
+}
+
+/** 존 완화 칸 안내 한 줄. 완화한 칸이 없으면 빈 문자열 */
+function zoneRelaxedNotice(slots: SlotKey[], regionKeys: string[], zoneKeys: string[]): string {
+  if (slots.length === 0 || zoneKeys.length === 0) return '';
+  const scope = regionKeys.length > 0 ? `${regionsLabel(regionKeys)} 전체` : '전국';
+  return `'${regionsLabel([], zoneKeys)}'에 맞는 ${slots.map((s) => SLOT_META[s].label).join('·')} 장소가 없어 ${scope}에서 골랐어요`;
+}
+
 /** 슬롯 + 지역 + 세부존 + 분위기 조건에 맞는 후보 목록 (숙박 광역 폴백 정책 적용) */
 function getCandidates(
   all: Spot[],
@@ -3516,6 +3545,8 @@ interface AppState {
     zoneFromQuery?: boolean;
     /** 검색어에 맞는 곳이 없어 인기 코스(byFilter면 필터 기준)로 대신 짰다. 결과 머리에 안내 줄을 둔다(P-264) */
     searchFallback?: { query: string; byFilter: boolean };
+    /** 세부존 안에 후보가 없어 권역 전체에서 고른 낮·저녁·밤 칸. 결과 머리 안내 줄이 읽는다(P-431) */
+    zoneRelaxed?: SlotKey[];
   } | null;
   savedOpen: boolean;
   regionSheetOpen: boolean;
@@ -4748,6 +4779,7 @@ function triggerCourseGeneration(): void {
     zoneFromQuery,
     // 대체 사실이 2.2초 토스트뿐이라 토스트가 사라지면 검색 결과로 오인했다(P-264)
     searchFallback: state.searchQuery && !hasMatchedSpot ? { query: state.searchQuery, byFilter } : undefined,
+    zoneRelaxed: zoneRelaxedSlots(spots, state.course, state.regions, state.mood, zoneKeys, state.indoorOnly),
   };
   addRecentSpotIds(courseSpotIds());
   markResultsEngaged();
@@ -4783,10 +4815,18 @@ function triggerCourseGeneration(): void {
         zoneKeys,
       );
       if (matchesIn(place)) {
-        if (state.courseConditions) state.courseConditions = { ...state.courseConditions, searchQuery: place, searchFallback: undefined };
+        if (state.courseConditions) {
+          state.courseConditions = {
+            ...state.courseConditions,
+            searchQuery: place,
+            searchFallback: undefined,
+            zoneRelaxed: zoneRelaxedSlots(spots, state.course, state.regions, state.mood, zoneKeys, state.indoorOnly),
+          };
+        }
         addRecentSpotIds(courseSpotIds());
         renderResults();
         announceCourse('코스를 만들었어요.');
+        announceZoneRelaxed();
         showToast(`'${place}'에는 '${rest}'에 맞는 곳이 없어 ${place} 코스로 추천했어요`);
         return;
       }
@@ -4804,6 +4844,19 @@ function triggerCourseGeneration(): void {
     notifyRelaxedSlots();
   }
   announceCourse('코스를 만들었어요.');
+  announceZoneRelaxed();
+}
+
+/** 결과 머리 존 완화 안내 줄의 문구. 코스를 만든 경로(🚀·다시 추천)만 zoneRelaxed를 채우므로 받은 코스와 저장 코스에서는 빈 문자열 */
+function currentZoneRelaxedNotice(): string {
+  const cond = state.courseConditions;
+  return cond?.zoneRelaxed ? zoneRelaxedNotice(cond.zoneRelaxed, cond.regions, cond.subZones) : '';
+}
+
+/** 안내 줄은 화면에만 그려 낭독되지 않으므로 코스 알림 뒤에 #sr-announce로 한 번 알린다 */
+function announceZoneRelaxed(): void {
+  const notice = currentZoneRelaxedNotice();
+  if (notice) announce(notice);
 }
 
 /**
@@ -4997,7 +5050,9 @@ function renderResultsContent(): void {
   const cond = state.courseConditions;
   const usedImages = new Set<string>();
   const fallback = cond.searchFallback;
+  const zoneNotice = currentZoneRelaxedNotice();
   area.innerHTML = `
+    ${zoneNotice ? `<div class="search-miss zone-relaxed"><p>${escapeHtml(zoneNotice)}</p></div>` : ''}
     ${fallback ? `
       <div class="search-miss">
         <p>'${escapeHtml(fallback.query)}'${fallback.byFilter ? ' 중 켜 둔 필터에 맞는 곳을 찾지 못해 필터 기준 코스를' : '에 맞는 곳을 찾지 못해 인기 코스를'} 보여 드려요</p>
@@ -6134,10 +6189,15 @@ function regenerateCourse(): void {
     },
     cond.subZones,
   );
+  state.courseConditions = {
+    ...cond,
+    zoneRelaxed: zoneRelaxedSlots(spots, state.course, cond.regions, cond.mood, cond.subZones, cond.indoorOnly ?? false),
+  };
   addRecentSpotIds(courseSpotIds());
   renderResults();
   notifyRelaxedSlots();
   announceCourse('코스를 다시 추천했어요.');
+  announceZoneRelaxed();
 }
 
 function bindResultEvents(area: HTMLElement): void {

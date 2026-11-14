@@ -29,7 +29,7 @@ assert.ok(blur > gen, 'Enter 처리가 코스 생성 뒤 터치 기기에서만 
 const trig = fnBody('triggerCourseGeneration');
 assert.match(trig, /searchFallback: state\.searchQuery && !hasMatchedSpot \? \{ query: state\.searchQuery, byFilter \} : undefined/,
   '검색어가 맞지 않은 코스에만 searchFallback을 담지 않는다');
-assert.match(trig, /searchQuery: place, searchFallback: undefined/, '동네만 남긴 코스에 대체 안내가 남는다');
+assert.match(trig, /searchQuery: place,\s*searchFallback: undefined/, '동네만 남긴 코스에 대체 안내가 남는다');
 assert.match(trig, /\} else if \(byFilter\) \{/, '토스트와 안내 줄의 필터 판정이 갈라졌다');
 
 // 3. 안내 줄: 결과 머리 위, 검색어 escapeHtml, 일반 문단(role=status 없음)
