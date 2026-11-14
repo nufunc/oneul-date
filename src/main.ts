@@ -3537,6 +3537,8 @@ interface AppState {
     categoryKey?: string;
     indoorOnly?: boolean;
     budgetFilter?: 'ALL' | 'BUDGET' | 'LUXURY';
+    /** 코스를 짤 때 건 상황 칩. 다시 추천은 화면 칩으로 다시 채운다(P-433) */
+    moodPreset?: MoodPresetKey | null;
     /** 찜으로 만든 코스. 지역·분위기 선택과 무관하므로 제목을 따로 붙인다 */
     fromSaved?: boolean;
     /** '이 스팟 중심' 맞춤 코스의 앵커. 다시 추천도 이 스팟 주변에서 뽑는다 */
@@ -4776,6 +4778,7 @@ function triggerCourseGeneration(): void {
     categoryKey: state.courseCategory,
     indoorOnly: state.indoorOnly,
     budgetFilter: state.budgetFilter,
+    moodPreset: state.moodPreset,
     zoneFromQuery,
     // 대체 사실이 2.2초 토스트뿐이라 토스트가 사라지면 검색 결과로 오인했다(P-264)
     searchFallback: state.searchQuery && !hasMatchedSpot ? { query: state.searchQuery, byFilter } : undefined,
@@ -4841,7 +4844,7 @@ function triggerCourseGeneration(): void {
       showToast(`'${state.searchQuery}' 매칭 스팟이 없어 인기 코스로 추천했어요`);
     }
   } else {
-    notifyRelaxedSlots();
+    notifyRelaxedSlots(state.budgetFilter, state.moodPreset);
   }
   announceCourse('코스를 만들었어요.');
   announceZoneRelaxed();
@@ -4861,15 +4864,16 @@ function announceZoneRelaxed(): void {
 
 /**
  * 스페셜·가성비·분위기 프리셋은 칸에 맞는 후보가 0건이면 필터 전 목록에서 뽑는다(filterByBudget·filterByMoodPreset).
- * 그 칸이 필터 밖이라는 것을 알리지 않아, 강원 '실내+스페셜' 낮 칸에 동네 마트가 조용히 들어왔다(2026-09-27)
+ * 그 칸이 필터 밖이라는 것을 알리지 않아, 강원 '실내+스페셜' 낮 칸에 동네 마트가 조용히 들어왔다(2026-09-27).
+ * 칩 값은 코스를 짤 때 넘긴 값을 받는다. 화면 칩을 읽으면 끈 칩으로 다시 추천한 코스에 켠 칩 기준 토스트가 떴다(P-433)
  */
-function notifyRelaxedSlots(): void {
+function notifyRelaxedSlots(budgetFilter: 'ALL' | 'BUDGET' | 'LUXURY' | undefined, moodPreset: MoodPresetKey | null | undefined): void {
   if (!state.course) return;
   const filters: { label: string; ok: (s: Spot) => boolean }[] = [];
-  if (state.budgetFilter === 'LUXURY') filters.push({ label: '스페셜', ok: isSpecialDiningSpot });
-  if (state.budgetFilter === 'BUDGET') filters.push({ label: '가성비', ok: isBudgetSpot });
-  if (state.moodPreset) {
-    const preset = state.moodPreset;
+  if (budgetFilter === 'LUXURY') filters.push({ label: '스페셜', ok: isSpecialDiningSpot });
+  if (budgetFilter === 'BUDGET') filters.push({ label: '가성비', ok: isBudgetSpot });
+  if (moodPreset) {
+    const preset = moodPreset;
     filters.push({
       label: MOOD_PRESETS.find((m) => m.key === preset)?.label ?? '분위기',
       ok: (s) => strictMoodPresetFilter([s], preset).length > 0,
@@ -4916,6 +4920,7 @@ function applyDailyCourseIfEmpty(): void {
       state.courseCategory = c.categoryKey ?? 'ALL';
       state.indoorOnly = !!c.indoorOnly;
       state.budgetFilter = c.budgetFilter ?? 'ALL';
+      state.moodPreset = c.moodPreset ?? null;
       state.slots = { day: false, evening: false, night: false, stay: false };
       steps.forEach((st) => { state.slots[st.slot] = true; });
       renderConditions();
@@ -6173,6 +6178,10 @@ function regenerateCourse(): void {
   if (state.courseConditions.fromSaved) state.courseConditions = { ...state.courseConditions, fromSaved: false };
   const cond = state.courseConditions;
   const slotsOn = state.course.map((st) => st.slot);
+  // 예산 칩과 상황 칩은 화면 칩을 따른다. 예산은 코스 조건, 상황은 화면 칩에서 읽어 칩을 켠 뒤 다시 추천하면
+  // 끈 예산으로 짠 코스에 켠 칩 기준 토스트가 떴고, 칩을 끈 뒤에도 스페셜이 계속 걸렸다(P-433)
+  const budgetFilter = state.budgetFilter;
+  const moodPreset = state.moodPreset;
   state.course = generateCourse(
     spots,
     slotsOn,
@@ -6183,19 +6192,21 @@ function regenerateCourse(): void {
       searchQuery: cond.searchQuery,
       categoryKey: cond.categoryKey,
       indoorOnly: cond.indoorOnly,
-      moodPreset: state.moodPreset,
-      budgetFilter: cond.budgetFilter,
+      moodPreset,
+      budgetFilter,
       zoneFromQuery: cond.zoneFromQuery,
     },
     cond.subZones,
   );
   state.courseConditions = {
     ...cond,
+    budgetFilter,
+    moodPreset,
     zoneRelaxed: zoneRelaxedSlots(spots, state.course, cond.regions, cond.mood, cond.subZones, cond.indoorOnly ?? false),
   };
   addRecentSpotIds(courseSpotIds());
   renderResults();
-  notifyRelaxedSlots();
+  notifyRelaxedSlots(budgetFilter, moodPreset);
   announceCourse('코스를 다시 추천했어요.');
   announceZoneRelaxed();
 }

@@ -39,22 +39,25 @@ assert.ok(decls.has('regenerateCourse'), 'regenerateCourse가 없다');
 const STUBS = ['state', 'spotById', 'buildAnchorCourse', 'addRecentSpotIds', 'courseSpotIds', 'renderResults', 'generateCourse', 'spots', 'recentSpotIdSet', 'notifyRelaxedSlots', 'markResultsEngaged', 'announceCourse', 'zoneRelaxedSlots', 'announceZoneRelaxed'];
 const makeRegenerate = new Function(...STUBS, `${['prevCourse', 'snapshotPrevCourse', 'regenerateCourse'].map((n) => toJs(decls.get(n))).join('\n')}\nreturn regenerateCourse;`);
 
-const run = (conditions, screenCategory) => {
+const run = (conditions, screenCategory, chips = {}) => {
   const calls = [];
+  const notified = [];
   const state = {
     course: [{ slot: 'lunch', spotId: 1 }, { slot: 'cafe', spotId: 2 }],
     courseConditions: conditions,
     courseCategory: screenCategory,
-    moodPreset: null,
+    moodPreset: chips.moodPreset ?? null,
+    budgetFilter: chips.budgetFilter ?? 'ALL',
   };
   const generateCourse = (...args) => {
     calls.push(args);
     return state.course;
   };
   const noop = () => {};
-  makeRegenerate(state, new Map(), noop, noop, () => [], noop, generateCourse, [], () => new Set(), noop, noop, noop, () => [], noop)();
+  const notify = (...args) => notified.push(args);
+  makeRegenerate(state, new Map(), noop, noop, () => [], noop, generateCourse, [], () => new Set(), notify, noop, noop, () => [], noop)();
   assert.strictEqual(calls.length, 1, 'generateCourse를 한 번 부르지 않았다');
-  return { opts: calls[0][4], title: courseTitle(state.courseConditions, state.course) };
+  return { opts: calls[0][4], title: courseTitle(state.courseConditions, state.course), notified, cond: state.courseConditions };
 };
 
 const base = { regions: ['SEOUL'], subZones: [], mood: 'ALL', searchQuery: '' };
@@ -74,8 +77,18 @@ const daily = run({ ...base, mood: 'romantic' }, 'CAFE');
 assert.strictEqual(daily.opts.categoryKey, undefined, '테마 없는 스냅숏이 화면 칩으로 짠다');
 assert.ok(!daily.title.includes('카페'), '테마 없는 스냅숏 제목에 화면 칩이 붙는다');
 
-// 상황 칩은 이번 범위에서 화면 값을 그대로 쓴다(P-289 승인 (나))
-const src2 = decls.get('regenerateCourse').getText();
-assert.match(src2, /moodPreset:\s*state\.moodPreset/, '상황 칩을 화면 값에서 읽지 않는다');
+// 예산 칩과 상황 칩은 화면 칩으로 짜고, 같은 값을 알림과 코스 조건에 넘긴다(P-433)
+// 칩을 끈 코스에서 스페셜을 켜고 다시 추천: 스페셜로 짜고 스페셜 기준으로 알린다
+const on = run({ ...base, budgetFilter: 'ALL', moodPreset: null }, 'ALL', { budgetFilter: 'LUXURY', moodPreset: 'NIGHT_LIFE' });
+assert.strictEqual(on.opts.budgetFilter, 'LUXURY', '켠 예산 칩으로 짜지 않는다');
+assert.strictEqual(on.opts.moodPreset, 'NIGHT_LIFE', '켠 상황 칩으로 짜지 않는다');
+assert.deepStrictEqual(on.notified, [['LUXURY', 'NIGHT_LIFE']], '알림 칩이 생성 칩과 다르다');
+assert.strictEqual(on.cond.budgetFilter, 'LUXURY', '코스 조건의 예산이 생성 값과 다르다');
+assert.strictEqual(on.cond.moodPreset, 'NIGHT_LIFE', '코스 조건의 상황 칩이 생성 값과 다르다');
+// 스페셜로 짠 코스에서 칩을 끄고 다시 추천: 스페셜이 더 걸리지 않는다
+const off = run({ ...base, budgetFilter: 'LUXURY', moodPreset: 'BLIND_DATE' }, 'ALL', {});
+assert.strictEqual(off.opts.budgetFilter, 'ALL', '끈 예산 칩이 계속 걸린다');
+assert.strictEqual(off.opts.moodPreset, null, '끈 상황 칩이 계속 걸린다');
+assert.deepStrictEqual(off.notified, [['ALL', null]], '끈 칩 기준으로 알리지 않는다');
 
 console.log('test-course-regenerate-theme: 통과');
