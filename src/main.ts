@@ -363,8 +363,11 @@ function textContainsZoneKeyword(targetText: string, keyword: string): boolean {
   if (keyword === '광주' && /광주호/.test(sanitizedText) && !/광주(?:광역시|\s|[시구동길로]|$)/.test(sanitizedText)) {
     return false;
   }
-  if (keyword === '대구' && /대구탕|대구뽈/.test(sanitizedText) && !/대구(?:광역시|\s|[시구동길로]|$)/.test(sanitizedText)) {
-    return false;
+  if (keyword === '대구') {
+    // '부산 해운대구'의 '대구'는 지명이 아님(P-442). 대구탕 판정도 이 글자를 지명으로 보지 않게 먼저 뺀다
+    const daeguText = sanitizedText.replace(/해운대구/g, '');
+    if (!daeguText.includes('대구')) return false;
+    if (/대구탕|대구뽈/.test(daeguText) && !/대구(?:광역시|\s|[시구동길로]|$)/.test(daeguText)) return false;
   }
 
   return true;
