@@ -1890,6 +1890,25 @@ function sheetPriceText(spot: Spot): string {
   return spot.price || (spot.price_tier ? PRICE_TIER_TEXT[spot.price_tier] || '' : '');
 }
 
+/** 시트 주차 칸 상태 풀이(P-439). 수집 원문이 영문 상태값('free')이나 한 낱말('가능')이면 칸 제목 아래 뜻이 비어 type 문구로 바꾼다 */
+const PARKING_TYPE_TEXT: Record<string, string> = {
+  free: '무료 주차',
+  paid: '유료 주차',
+  valet: '발렛 가능',
+  available: '주차 가능',
+  impossible: '주차 불가'
+};
+
+/** 시트 주차 칸 문구: parking_detail, parking_info.detail, parking_type 순으로 쓰고 모두 비면 빈 문자열 */
+function sheetParkingText(spot: Spot): string {
+  const type = spot.parking_info?.type || '';
+  // type 'unknown'의 '인근 공영주차장 이용'은 TourAPI 수집기가 근거 없이 넣은 기본값이라 보이지 않는다(열린 약 5,800곳)
+  const detail = type === 'unknown' ? '' : (spot.parking_info?.detail || '').trim();
+  const bare = /^[a-z_]+$/.test(detail) || detail === '가능' || detail === '불가능';
+  const infoText = bare ? PARKING_TYPE_TEXT[type] || PARKING_TYPE_TEXT[detail] || (detail === '불가능' ? '주차 불가' : detail === '가능' ? '주차 가능' : '') : detail;
+  return spot.parking_detail || infoText || (spot.parking_type === 'free' ? '무료 주차 가능' : spot.parking_type === 'paid' ? '유료 주차' : spot.parking_type === 'valet' ? '발렛 가능' : '');
+}
+
 /** 가성비·스페셜 칩이 쓰는 1인 금액. '1박 N원' 객실가는 1인 가격이 아니라 읽지 않는다(P-357) */
 function perPersonPriceRange(spot: Spot): [number, number] | null {
   const p = spot.price || '';
@@ -8445,8 +8464,7 @@ function renderOverlayContent(): void {
     const closedText = regularClosedDays(spot).join(', ');
 
     // 주차
-    // type 'unknown'의 '인근 공영주차장 이용'은 TourAPI 수집기가 근거 없이 넣은 기본값이라 보이지 않는다(열린 약 5,800곳)
-    const parkingText = spot.parking_detail || (spot.parking_info?.type === 'unknown' ? '' : spot.parking_info?.detail) || (spot.parking_type === 'free' ? '무료 주차 가능' : spot.parking_type === 'paid' ? '유료 주차' : spot.parking_type === 'valet' ? '발렛 가능' : '');
+    const parkingText = sheetParkingText(spot);
 
     // 가격
     const priceText = sheetPriceText(spot);
