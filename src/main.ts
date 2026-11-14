@@ -418,6 +418,11 @@ function matchesZone(spot: Spot, zoneKeys: string[]): boolean {
     const targetText = isJejuSubZone
       ? `${spot.name} ${spot.location} ${spot.address ?? ''}`
       : `${spot.name} ${spot.location}`;
+    // 텍스트 대체 반경(P-443): 상호 앞머리 지명과 동명 지명 오탐은 글자로 못 가려 존 중심 거리로 거른다(서울 8km, 부산 15km, 그 밖 30km)
+    const textRadiusKm = zone.regionKey === 'SEOUL' ? 8 : zone.key.startsWith('busan_') ? 15 : 30;
+    const center = ZONE_CENTERS[zone.key];
+    if (center && spot.lat != null && spot.lng != null
+      && getDistanceKm(center.lat, center.lng, spot.lat, spot.lng) > textRadiusKm) return false;
     return zone.keywords.some((kw) => textContainsZoneKeyword(targetText, kw));
   });
 }
