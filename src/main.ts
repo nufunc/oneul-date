@@ -6343,54 +6343,83 @@ function buildCourseFromSavedSpots(): boolean {
     return { count: ds.length, sum: ds.reduce((x, y) => x + y, 0) };
   };
 
-  for (const slot of slotsOn) {
-    const prev = steps.length > 0 && steps[steps.length - 1].spotId ? spotById.get(steps[steps.length - 1].spotId as number) || null : null;
-    const unused = savedList.filter((s) => !usedSpotIds.has(s.id));
-    const slotMatches = unused.filter((s) => fitsSlot(s, slot));
-    // stay 스팟은 day/evening/night의 "아무거나" 폴백 대상에서 제외한다
-    const anyPool = slotMatches.length > 0 ? slotMatches : unused.filter((s) => s.slot !== 'stay');
-    // P-424: 오늘 휴무이거나 칸 시각에 닫은 찜을 그대로 넣었다. 열린 찜을 먼저 쓰고, 모두 닫혔으면 기존대로 닫힌 찜을 넣는다
-    const openPool = anyPool.filter((s) => !isSpotClosedToday(s) && isOpenAtSlotClock(s, slot));
-    const pool = openPool.length > 0 ? openPool : anyPool;
-    let matched: Spot | undefined;
+  // P-429: 칸 순서대로 남은 찜 전체를 폴백으로 받아 저녁·밤 찜이 낮 칸에서 소진됐다. 1단계는 칸에 맞는 찜만,
+  // 2단계는 남은 칸에 다른 찜을 그 칸 시각에 열려 있을 때만 넣고, 그래도 빈 칸은 근처 후보로 채운다
+  const picks = new Map<SlotKey, Spot>();
+  // 앞 칸에 놓인 장소가 기준점이다. 앞 칸이 비었으면 뒤 칸 장소(숙박 찜만 있을 때의 숙소 등)를 기준점으로 삼는다
+  const anchorFor = (slot: SlotKey): Spot | null => {
+    const i = slotsOn.indexOf(slot);
+    for (let j = i - 1; j >= 0; j -= 1) {
+      const p = picks.get(slotsOn[j]);
+      if (p) return p;
+    }
+    for (let j = i + 1; j < slotsOn.length; j += 1) {
+      const p = picks.get(slotsOn[j]);
+      if (p) return p;
+    }
+    return null;
+  };
+  const choose = (slot: SlotKey, pool: Spot[]): Spot | undefined => {
+    const prev = anchorFor(slot);
     if (!prev) {
-      // 첫 단계: 다른 찜이 가장 많이 모인 곳에서 시작한다. 이웃 수가 같으면 이웃까지 거리 합이 작은 곳, 그래도 같으면 저장 순서
-      matched = pool.reduce<Spot | undefined>((best, s) => {
+      // 기준점이 없으면 다른 찜이 가장 많이 모인 곳에서 시작한다. 이웃 수가 같으면 이웃까지 거리 합이 작은 곳, 그래도 같으면 저장 순서
+      return pool.reduce<Spot | undefined>((best, s) => {
         if (!best) return s;
         const a = neighborStats(s), b = neighborStats(best);
         return a.count > b.count || (a.count === b.count && a.sum < b.sum) ? s : best;
       }, undefined);
-    } else {
-      const nearest = pool
-        .map((s) => ({ s, d: distKm(prev, s) }))
-        .sort((a, b) => a.d - b.d)[0];
-      if (nearest && nearest.d <= SAVED_COURSE_MAX_KM) matched = nearest.s;
     }
+    const nearest = pool
+      .map((s) => ({ s, d: distKm(prev, s) }))
+      .sort((x, y) => x.d - y.d)[0];
+    return nearest && nearest.d <= SAVED_COURSE_MAX_KM ? nearest.s : undefined;
+  };
+  const isOpenFor = (s: Spot, slot: SlotKey) => !isSpotClosedToday(s) && isOpenAtSlotClock(s, slot);
+  const place = (slot: SlotKey, s: Spot | undefined) => {
+    if (!s) return;
+    picks.set(slot, s);
+    usedSpotIds.add(s.id);
+  };
 
-    if (matched) {
-      steps.push({ slot, spotId: matched.id });
-      usedSpotIds.add(matched.id);
-    } else {
-      // getCandidates의 기준점은 숙박 배치에만 쓰여 가까운 순을 보장하지 않는다. 앞 단계와 가까운 후보를 직접 고르고,
-      // 50km 안에 없으면 먼 곳으로 채우지 않고 빈 단계로 둔다
-      let candidates = getCandidates(spots, slot, [], 'ALL', Array.from(usedSpotIds), [], prev).filter(isCourseEligible);
-      if (prev) {
-        const pc = getSpotCoordinates(prev);
-        candidates = candidates
-          .map((c) => ({ c, d: getDistanceKm(pc.lat, pc.lng, getSpotCoordinates(c).lat, getSpotCoordinates(c).lng) }))
-          .filter((x) => x.d <= 50)
-          .sort((x, y) => x.d - y.d)
-          .map((x) => x.c);
-      }
-      if (candidates.length > 0) {
-        const picked = candidates[0];
-        steps.push({ slot, spotId: picked.id });
-        usedSpotIds.add(picked.id);
-      } else {
-        steps.push({ slot, spotId: null });
-      }
+  // 1단계는 찜의 slot이 칸과 같은 찜을 먼저 놓고, 그다음 장르로 맞는 찜(낮 칸의 카페 등)을 놓는다.
+  // 장르 매칭을 함께 돌리면 밤 칸 카페형 바가 낮 칸에 먼저 들어간다
+  const placeFitting = (fits: (s: Spot, slot: SlotKey) => boolean) => {
+    for (const slot of slotsOn) {
+      if (picks.has(slot)) continue;
+      const slotMatches = savedList.filter((s) => !usedSpotIds.has(s.id) && fits(s, slot));
+      // P-424: 열린 찜을 먼저 쓰고, 칸에 맞는 찜이 모두 닫혔으면 닫힌 찜을 넣어 칸을 비우지 않는다
+      const openPool = slotMatches.filter((s) => isOpenFor(s, slot));
+      place(slot, choose(slot, openPool.length > 0 ? openPool : slotMatches));
     }
+  };
+  placeFitting((s, slot) => s.slot === slot);
+  placeFitting(fitsSlot);
+  for (const slot of slotsOn) {
+    if (picks.has(slot)) continue;
+    // stay 스팟은 day/evening/night 칸에 넣지 않는다
+    place(slot, choose(slot, savedList.filter((s) => !usedSpotIds.has(s.id) && s.slot !== 'stay' && slot !== 'stay' && isOpenFor(s, slot))));
   }
+
+  for (const slot of slotsOn) {
+    if (picks.has(slot)) continue;
+    const prev = anchorFor(slot);
+    // getCandidates의 기준점은 숙박 배치에만 쓰여 가까운 순을 보장하지 않는다. 기준점과 가까운 후보를 직접 고르고,
+    // 50km 안에 없으면 먼 곳으로 채우지 않고 빈 단계로 둔다
+    let candidates = getCandidates(spots, slot, [], 'ALL', Array.from(usedSpotIds), [], prev).filter(isCourseEligible);
+    if (prev) {
+      const pc = getSpotCoordinates(prev);
+      candidates = candidates
+        .map((c) => ({ c, d: getDistanceKm(pc.lat, pc.lng, getSpotCoordinates(c).lat, getSpotCoordinates(c).lng) }))
+        .filter((x) => x.d <= 50)
+        .sort((x, y) => x.d - y.d)
+        .map((x) => x.c);
+    }
+    place(slot, candidates[0]);
+  }
+  for (const slot of slotsOn) steps.push({ slot, spotId: picks.get(slot)?.id ?? null });
+  const savedPicks = [...picks.values()].filter((s) => savedList.includes(s));
+  const savedUsed = savedPicks.length;
+  const closedSavedCount = savedPicks.filter((s) => isSpotClosedToday(s)).length;
 
   const first = steps[0]?.spotId ? spotById.get(steps[0].spotId) : undefined;
   const farCount = first ? savedList.filter((s) => !usedSpotIds.has(s.id) && distKm(first, s) > SAVED_COURSE_MAX_KM).length : 0;
@@ -6409,11 +6438,15 @@ function buildCourseFromSavedSpots(): boolean {
   updateModeView();
   // #app 위에 루트 매거진 블록이 있어 0으로 올리면 결과 대신 블록이 보인다
   app.scrollIntoView({ behavior: scrollMotion() });
-  showToast(
-    farCount > 0
-      ? `❤️ 찜한 스팟으로 코스를 만들었어요. 찜 ${farCount}곳은 멀어서 이번 코스에서 뺐어요`
-      : `❤️ 찜한 스팟으로 나만의 데이트 코스를 완성했어요!`,
-  );
+  // 찜이 코스에 몇 곳 들어갔는지와 오늘 휴무 찜이 섞였는지를 밝힌다(P-429)
+  const notes = [
+    savedUsed === savedList.length
+      ? `❤️ 찜 ${savedList.length}곳으로 코스를 만들었어요`
+      : `❤️ 찜 ${savedList.length}곳 중 ${savedUsed}곳으로 코스를 만들었어요`,
+  ];
+  if (farCount > 0) notes.push(`찜 ${farCount}곳은 멀어서 이번 코스에서 뺐어요`);
+  if (closedSavedCount > 0) notes.push(`오늘 휴무인 찜 ${closedSavedCount}곳이 들어 있어요`);
+  showToast(notes.join('. '));
   renderResults();
   return true;
 }
