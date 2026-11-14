@@ -18,7 +18,8 @@ assert.strictEqual(text('available'), '🅿️ 주차가능');
 // 기존 문구는 그대로
 assert.strictEqual(text('valet'), '🅿️ 발렛가능');
 assert.strictEqual(text('free'), '🅿️ 무료주차');
-assert.strictEqual(text('paid'), '🅿️ 주차가능');
+// 유료는 시트의 '유료 주차'와 맞춘다
+assert.strictEqual(text('paid'), '🅿️ 유료주차');
 // 모르는 값은 배지 없음
 assert.strictEqual(text('unknown'), '');
 assert.strictEqual(badge({}), '');

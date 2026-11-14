@@ -5915,7 +5915,10 @@ function renderStepCard(
     metaBadges.push(`<span class="badge-meta badge-parking">🅿️ 발렛가능</span>`);
   } else if (pType === 'free') {
     metaBadges.push(`<span class="badge-meta badge-parking">🅿️ 무료주차</span>`);
-  } else if (pType === 'paid' || pType === 'available') {
+  } else if (pType === 'paid') {
+    // 시트가 '유료 주차'로 보이므로 카드도 유료를 밝힌다
+    metaBadges.push(`<span class="badge-meta badge-parking">🅿️ 유료주차</span>`);
+  } else if (pType === 'available') {
     // P-438: available과 impossible은 시트에 보이는데 카드가 비어 '주차 정보 없음'과 구분되지 않았다
     metaBadges.push(`<span class="badge-meta badge-parking">🅿️ 주차가능</span>`);
   } else if (pType === 'impossible') {
