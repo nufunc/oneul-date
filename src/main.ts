@@ -992,32 +992,25 @@ function applyStayZonePolicy(pool: CandidatePool, slot: SlotKey, anchor: Spot | 
 }
 
 /**
- * 세부존 안에 후보가 없어(getCandidatePool의 relaxed) 존 밖 장소가 들어간 낮·저녁·밤 칸(P-431).
+ * 존 밖 장소가 들어간 낮·저녁·밤 칸(P-431). 존 안 후보가 없어 넓힌 칸(getCandidatePool의 relaxed)과
+ * 검색어 존에서 존 안 후보가 앵커에서 멀어 근처에서 고른 칸(generateCourse의 nearDiverse([]))을 함께 본다(P-441).
  * 숙박은 applyStayZonePolicy가 앵커 반경으로 존 밖을 고르는 것이 정책이라 뺀다
  */
-function zoneRelaxedSlots(
-  all: Spot[],
-  steps: CourseStep[],
-  regionKeys: string[],
-  moodKey: string,
-  zoneKeys: string[],
-  indoorOnly: boolean = false,
-): SlotKey[] {
+function zoneRelaxedSlots(all: Spot[], steps: CourseStep[], zoneKeys: string[]): SlotKey[] {
   const inZone = zoneSelectionMatcher(zoneKeys);
   if (!inZone) return [];
   return steps.flatMap((st) => {
     if (st.slot === 'stay' || st.spotId === null) return [];
     const spot = all.find((s) => s.id === st.spotId);
-    if (!spot || inZone(spot)) return [];
-    return getCandidatePool(all, st.slot, regionKeys, moodKey, [], zoneKeys, indoorOnly).relaxed ? [st.slot] : [];
+    return !spot || inZone(spot) ? [] : [st.slot];
   });
 }
 
-/** 존 완화 칸 안내 한 줄. 완화한 칸이 없으면 빈 문자열 */
+/** 존 완화 칸 안내 한 줄. 존 안 후보가 없는 칸과 멀기만 한 칸 모두에 맞는 문구. 완화한 칸이 없으면 빈 문자열 */
 function zoneRelaxedNotice(slots: SlotKey[], regionKeys: string[], zoneKeys: string[]): string {
   if (slots.length === 0 || zoneKeys.length === 0) return '';
   const scope = regionKeys.length > 0 ? `${regionsLabel(regionKeys)} 전체` : '전국';
-  return `'${regionsLabel([], zoneKeys)}'에 맞는 ${slots.map((s) => SLOT_META[s].label).join('·')} 장소가 없어 ${scope}에서 골랐어요`;
+  return `'${regionsLabel([], zoneKeys)}' 안에서 가까운 ${slots.map((s) => SLOT_META[s].label).join('·')} 장소를 못 찾아 ${scope}에서 골랐어요`;
 }
 
 /** 슬롯 + 지역 + 세부존 + 분위기 조건에 맞는 후보 목록 (숙박 광역 폴백 정책 적용) */
@@ -4815,7 +4808,7 @@ function triggerCourseGeneration(): void {
     zoneFromQuery,
     // 대체 사실이 2.2초 토스트뿐이라 토스트가 사라지면 검색 결과로 오인했다(P-264)
     searchFallback: state.searchQuery && !hasMatchedSpot ? { query: state.searchQuery, byFilter } : undefined,
-    zoneRelaxed: zoneRelaxedSlots(spots, state.course, state.regions, state.mood, zoneKeys, state.indoorOnly),
+    zoneRelaxed: zoneRelaxedSlots(spots, state.course, zoneKeys),
   };
   addRecentSpotIds(courseSpotIds());
   markResultsEngaged();
@@ -4856,7 +4849,7 @@ function triggerCourseGeneration(): void {
             ...state.courseConditions,
             searchQuery: place,
             searchFallback: undefined,
-            zoneRelaxed: zoneRelaxedSlots(spots, state.course, state.regions, state.mood, zoneKeys, state.indoorOnly),
+            zoneRelaxed: zoneRelaxedSlots(spots, state.course, zoneKeys),
           };
         }
         addRecentSpotIds(courseSpotIds());
@@ -6251,7 +6244,7 @@ function regenerateCourse(): void {
     ...cond,
     budgetFilter,
     moodPreset,
-    zoneRelaxed: zoneRelaxedSlots(spots, state.course, cond.regions, cond.mood, cond.subZones, cond.indoorOnly ?? false),
+    zoneRelaxed: zoneRelaxedSlots(spots, state.course, cond.subZones),
   };
   addRecentSpotIds(courseSpotIds());
   renderResults();

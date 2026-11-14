@@ -1,5 +1,6 @@
-// 존 완화 안내 줄 회귀 테스트(P-431): node scripts/test-zone-relaxed-notice.cjs
-// 세부존 안에 후보가 없어 권역 전체에서 고른 낮·저녁·밤 칸만 안내하고, 숙박과 존 안 칸과 존 미선택에는 안내하지 않는지 본다.
+// 존 완화 안내 줄 회귀 테스트(P-431, P-441): node scripts/test-zone-relaxed-notice.cjs
+// 존 밖 장소가 든 낮·저녁·밤 칸을 안내하고, 숙박과 존 안 칸과 존 미선택에는 안내하지 않는지 본다.
+// 존 안 후보가 없어 넓힌 칸과 검색어 존에서 존 안 후보가 멀어 근처에서 고른 칸을 함께 안내한다.
 // src/main.ts의 zoneRelaxedSlots·zoneRelaxedNotice와 그것이 부르는 선언을 그대로 떼어 TypeScript로 변환해 실행한다
 const assert = require('assert');
 const fs = require('fs');
@@ -46,21 +47,24 @@ const steps = [
   { slot: 'night', spotId: 3 },
   { slot: 'stay', spotId: 4 },
 ];
-const slots = zoneRelaxedSlots(all, steps, ['CHUNGCHEONG'], 'ALL', ['taean']);
+const slots = zoneRelaxedSlots(all, steps, ['taean']);
 assert.deepStrictEqual(slots, ['evening', 'night'], '존 완화 칸은 저녁·밤만, 숙박과 존 안 낮은 빠짐');
 assert.strictEqual(
   zoneRelaxedNotice(slots, ['CHUNGCHEONG'], ['taean']),
-  "'태안·안면도·서산'에 맞는 저녁·밤 장소가 없어 충청 전체에서 골랐어요",
+  "'태안·안면도·서산' 안에서 가까운 저녁·밤 장소를 못 찾아 충청 전체에서 골랐어요",
 );
-assert.strictEqual(zoneRelaxedNotice(['night'], [], ['taean']), "'태안·안면도·서산'에 맞는 밤 장소가 없어 전국에서 골랐어요", '권역 미선택은 전국');
-assert.deepStrictEqual(zoneRelaxedSlots(all, steps, ['CHUNGCHEONG'], 'ALL', []), [], '존 미선택: 안내 없음');
+assert.strictEqual(zoneRelaxedNotice(['night'], [], ['taean']), "'태안·안면도·서산' 안에서 가까운 밤 장소를 못 찾아 전국에서 골랐어요", '권역 미선택은 전국');
+assert.deepStrictEqual(zoneRelaxedSlots(all, steps, []), [], '존 미선택: 안내 없음');
 assert.strictEqual(zoneRelaxedNotice([], ['CHUNGCHEONG'], ['taean']), '', '완화 칸 없음: 빈 문자열');
-// 존 안 저녁 후보가 있는데 존 밖 장소가 든 코스(찜·앵커 코스 등)는 완화로 보지 않는다
+// 존 안 저녁 후보가 있어도 앵커에서 멀어 존 밖에서 고른 칸(검색어 존의 nearDiverse([]))은 안내한다(P-441)
 const withZoneEvening = [...all, spot(5, 'evening', '만리포 횟집', '충남 태안군 소원면', '태안군')];
-assert.deepStrictEqual(zoneRelaxedSlots(withZoneEvening, steps, ['CHUNGCHEONG'], 'ALL', ['taean']), ['night'], '존 안 후보가 있으면 완화 아님');
+assert.deepStrictEqual(zoneRelaxedSlots(withZoneEvening, steps, ['taean']), ['evening', 'night'], '존 안 후보가 있어도 존 밖 칸은 안내');
+// 존 안 장소로 채운 칸과 빈 칸은 안내하지 않는다
+const inZoneSteps = [{ slot: 'day', spotId: 1 }, { slot: 'evening', spotId: 5 }, { slot: 'night', spotId: null }];
+assert.deepStrictEqual(zoneRelaxedSlots(withZoneEvening, inZoneSteps, ['taean']), [], '존 안 칸과 빈 칸: 안내 없음');
 
 // 배선: 🚀·다시 추천만 zoneRelaxed를 채우고, 결과 머리 search-miss 띠와 #sr-announce가 같은 문구를 쓴다
 assert.strictEqual((src.match(/zoneRelaxed: zoneRelaxedSlots\(/g) || []).length, 3, '🚀, 동네 재시도, 다시 추천 세 곳');
 assert.ok(/<div class="search-miss zone-relaxed"><p>\$\{escapeHtml\(zoneNotice\)\}<\/p><\/div>/.test(src), '결과 머리 띠');
 assert.strictEqual((src.match(/announceZoneRelaxed\(\);/g) || []).length, 3, '코스 알림 뒤 낭독 세 곳');
-console.log('test-zone-relaxed-notice: ok 9');
+console.log('test-zone-relaxed-notice: ok 10');
