@@ -6017,12 +6017,18 @@ function swapStep(index: number, refocus = false): void {
   if (!step) return;
   const cond = state.courseConditions;
   const anchor = dominantAnchorSpot(state.course, spotById, index);
+  // 예산 칩과 상황 칩은 다시 추천처럼 화면 칩을 따른다. 예산을 코스 조건에서 읽어 칩을 켠 뒤 교체해도
+  // 칩 밖 장소가 나왔고, 칩을 끈 뒤에도 스페셜이 계속 걸렸다(P-436)
+  const budgetFilter = state.budgetFilter;
+  const moodPreset = state.moodPreset;
   // 코스를 만들 때 걸었던 실내·무드 프리셋을 교체에도 똑같이 건다. 빠져 있어 실내 칩을 켠 채 교체하면
   // 루프탑·정원이, 심야 프리셋에서는 카페·골프장이 들어왔다
   const pool = getCandidates(spots, step.slot, cond.regions, cond.mood, courseSpotIds(), cond.subZones, anchor, cond.indoorOnly ?? false);
+  // 칩은 최근 노출을 빼기 전에 건다. 뒤에 걸면 칩 맞는 곳이 모두 이력에 든 칸이 알림 없이 칩 밖 장소로 바뀌었다(P-436)
+  const chipPool = filterByBudget(filterByMoodPreset(pool, moodPreset), budgetFilter);
   const recent = recentSpotIdSet();
   // 이력이 칸 후보를 모두 덮으면 excludeRecent가 이력을 무시해 같은 장소를 알림 없이 되풀이했다(P-431)
-  const wrapped = isRecentExhausted(pool, recent);
+  const wrapped = isRecentExhausted(chipPool, recent);
   const rawCandidates = excludeRecent(pool, recent);
   // 검색어에 맞는 카드는 같은 칸 일치 후보 가운데 기준 스팟 STAY_ZONE_FALLBACK_RADIUS_KM 안에서 먼저 바꾼다. 검색어를 보지 않아
   // '파스타' 저녁 칸이 스테이크·공원으로 바뀌고, 3번 누르면 검색어 코스 58%가 일치 카드를 모두 잃었다. 남는 곳이 없으면 종전대로 고른다
@@ -6042,9 +6048,9 @@ function swapStep(index: number, refocus = false): void {
                 getDistanceKm(anchor.lat!, anchor.lng!, s.lat!, s.lng!) <= STAY_ZONE_FALLBACK_RADIUS_KM &&
                 matches(s),
             ),
-            state.moodPreset,
+            moodPreset,
           ),
-          cond.budgetFilter,
+          budgetFilter,
         )
       : [];
   const queryMatches = query ? nearMatchesBy((s) => matchesSearchQuery(s, query)) : [];
@@ -6053,7 +6059,7 @@ function swapStep(index: number, refocus = false): void {
   const candidates =
     matchCandidates.length > 0
       ? matchCandidates
-      : filterByBudget(filterByMoodPreset(rawCandidates, state.moodPreset), cond.budgetFilter);
+      : excludeRecent(chipPool, recent);
   // 다른 차수와 동일한 종목(장르) 중복 방지
   const otherGenres = new Set<SpotGenre>();
   state.course.forEach((st, idx) => {

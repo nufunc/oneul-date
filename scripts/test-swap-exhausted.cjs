@@ -57,10 +57,10 @@ for (let n = 1; n <= 6; n++) {
 }
 assert.deepStrictEqual(toastAt, [3, 6], '후보 3곳 칸: 3번째와 6번째 교체에만 알림');
 
-// swapStep 배선: 판정은 이력 제외 전 후보로, 알림 문구는 상수로, 후보 0곳 문구는 그대로
+// swapStep 배선: 판정은 이력 제외 전 칩 건 후보로(P-436), 알림 문구는 상수로, 후보 0곳 문구는 그대로
 const swap = src.slice(src.search(/^function swapStep\(/m));
 const body = swap.slice(0, swap.search(/\n}\n/));
-assert.ok(/const wrapped = isRecentExhausted\(pool, recent\);\s*const rawCandidates = excludeRecent\(pool, recent\);/.test(body), '소진 판정 배선');
+assert.ok(/const wrapped = isRecentExhausted\(chipPool, recent\);\s*const rawCandidates = excludeRecent\(pool, recent\);/.test(body), '소진 판정 배선');
 assert.ok(/if \(wrapped\) forgetRecentSpotIds\(/.test(body), '소진 뒤 이력 비움');
 assert.ok(/if \(wrapped\) showToast\(SWAP_EXHAUSTED_MSG\);/.test(body), '소진 알림');
 assert.ok(body.includes("'이 조건에 다른 추천 장소가 없어요'"), '후보 0곳 문구 유지');
