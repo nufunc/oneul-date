@@ -12,10 +12,10 @@ const end = src.indexOf('\n}\n', fnStart) + 3;
 const sheetParkingText = new Function(`${ts.transpile(src.slice(start, end), { target: 'es2022' })};return sheetParkingText;`)();
 const info = (type, detail) => ({ parking_info: { type, detail } });
 
-// 영문 상태값은 type 문구로 바꾼다
-assert.strictEqual(sheetParkingText(info('available', 'free')), '주차 가능');
+// 영문 상태값은 type 문구로 바꾸되, detail의 무료·유료·발렛은 그 구분을 살린다
+assert.strictEqual(sheetParkingText(info('available', 'free')), '무료 주차');
 assert.strictEqual(sheetParkingText(info('available', 'available')), '주차 가능');
-assert.strictEqual(sheetParkingText(info('available', 'paid')), '주차 가능');
+assert.strictEqual(sheetParkingText(info('available', 'paid')), '유료 주차');
 assert.strictEqual(sheetParkingText(info('free', 'free')), '무료 주차');
 assert.strictEqual(sheetParkingText(info('impossible', 'impossible')), '주차 불가');
 // type이 없으면 상태값 자체를 풀이한다

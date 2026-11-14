@@ -1905,7 +1905,9 @@ function sheetParkingText(spot: Spot): string {
   // type 'unknown'의 '인근 공영주차장 이용'은 TourAPI 수집기가 근거 없이 넣은 기본값이라 보이지 않는다(열린 약 5,800곳)
   const detail = type === 'unknown' ? '' : (spot.parking_info?.detail || '').trim();
   const bare = /^[a-z_]+$/.test(detail) || detail === '가능' || detail === '불가능';
-  const infoText = bare ? PARKING_TYPE_TEXT[type] || PARKING_TYPE_TEXT[detail] || (detail === '불가능' ? '주차 불가' : detail === '가능' ? '주차 가능' : '') : detail;
+  // detail의 무료·유료·발렛은 type 'available'보다 자세하므로 먼저 쓴다
+  const specific = detail === 'free' || detail === 'paid' || detail === 'valet' ? PARKING_TYPE_TEXT[detail] : '';
+  const infoText = bare ? specific || PARKING_TYPE_TEXT[type] || PARKING_TYPE_TEXT[detail] || (detail === '불가능' ? '주차 불가' : detail === '가능' ? '주차 가능' : '') : detail;
   return spot.parking_detail || infoText || (spot.parking_type === 'free' ? '무료 주차 가능' : spot.parking_type === 'paid' ? '유료 주차' : spot.parking_type === 'valet' ? '발렛 가능' : '');
 }
 
