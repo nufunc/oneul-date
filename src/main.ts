@@ -7641,6 +7641,14 @@ function showSpotsFailedBanner(count: number): void {
 }
 
 /** 조건 영역·오늘의코스·교체 없이 코스 카드만 + [나만의 코스 만들기] CTA + 실전 공유/저장/길찾기 액션 */
+// 받은 코스 카드에 휴무나 영업시간 확인 배지가 하나라도 붙는가. renderStepCard의 배지 조건과 같다(P-449)
+function courseHasHoursWarning(steps: CourseStep[], date = new Date()): boolean {
+  return steps.some((st) => {
+    const spot = st.spotId !== null ? spotById.get(st.spotId) : undefined;
+    return !!spot && (isSpotClosedToday(spot, date) || !isOpenAtSlotClock(spot, st.slot, date, false));
+  });
+}
+
 function renderReceiverView(steps: CourseStep[]): void {
   setSharedCourseView(true);
   const usedImages = new Set<string>();
@@ -7700,6 +7708,8 @@ function renderReceiverView(steps: CourseStep[]): void {
         }).join('')}
       </div>
 
+      ${courseHasHoursWarning(steps) ? `<button class="btn-secondary btn-receiver-edit" id="btn-receiver-edit" type="button"><span aria-hidden="true">🔄</span> 바꿔서 쓰기</button>` : ''}
+
       <div class="receiver-actions-bar">
         <button class="btn-secondary btn-receiver-action" id="btn-receiver-copy" type="button"><span aria-hidden="true">📋</span> 코스 복사</button>
         <button class="btn-secondary btn-receiver-action" id="btn-receiver-save" type="button" aria-label="저장">💾 저장</button>
@@ -7747,6 +7757,15 @@ function renderReceiverView(steps: CourseStep[]): void {
   };
   document.getElementById('btn-make-own')?.addEventListener('click', makeOwn);
   document.getElementById('btn-make-own-hero')?.addEventListener('click', makeOwn);
+  // 경고 칸을 바꾸려면 저장 목록을 거쳐야 했다. 저장하지 않고 결과 화면에 열어 🔄를 쓰게 한다(P-449)
+  document.getElementById('btn-receiver-edit')?.addEventListener('click', () => {
+    clearCourseHash();
+    renderShell();
+    const area = sharedArea();
+    const conditions = { region: area.regions, subZones: area.subZones, mood: 'ALL', slots: steps.map((st) => st.slot), categoryKey: sharedCategoryKey };
+    restoreCourse({ conditions }, steps);
+    showToast('🔄로 장소를 바꿀 수 있어요');
+  });
 
   // 수신자 뷰 액션 이벤트 바인딩
   document.getElementById('btn-receiver-copy')?.addEventListener('click', async () => {
@@ -8764,7 +8783,7 @@ function resolveSavedSteps(spotIds: number[]): { steps: CourseStep[]; dropped: n
   return { steps, dropped: spotIds.length - steps.length };
 }
 
-function restoreCourse(item: SavedCourse, steps: CourseStep[]): void {
+function restoreCourse(item: Pick<SavedCourse, 'conditions'>, steps: CourseStep[]): void {
 
   // 하위호환: 과거 저장분은 region이 문자열 — 배열로 정규화해 복원
   const regions = normalizeRegionCond(item.conditions.region);
