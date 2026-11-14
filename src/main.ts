@@ -1015,6 +1015,13 @@ function excludeRecent(candidates: Spot[], recentIds: ReadonlySet<number>): Spot
   return filtered.length > 0 ? filtered : candidates;
 }
 
+/** 후보가 있고 모두 최근 노출 이력에 들어 excludeRecent가 이력을 무시하게 되는지(P-431). 칸 교체의 소진 알림이 쓴다 */
+function isRecentExhausted(candidates: Spot[], recentIds: ReadonlySet<number>): boolean {
+  return recentIds.size > 0 && candidates.length > 0 && candidates.every((s) => recentIds.has(s.id));
+}
+
+const SWAP_EXHAUSTED_MSG = '이 조건의 장소를 모두 보여 드렸어요. 처음부터 다시 보여 드려요';
+
 /** 두 위경도 좌표 간의 거리 계산 (km) */
 function getDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;
@@ -3827,6 +3834,16 @@ function recentSpotIdSet(): ReadonlySet<number> {
   return new Set(loadRecentSpotIds());
 }
 
+/** 이력에서 주어진 스폿을 뺀다. 교체가 칸 후보를 한 바퀴 다 보인 뒤 다음 바퀴를 처음부터 돌리는 데 쓴다(P-431) */
+function forgetRecentSpotIds(ids: number[]): void {
+  const drop = new Set(ids);
+  try {
+    localStorage.setItem(RECENT_KEY, JSON.stringify(loadRecentSpotIds().filter((id) => !drop.has(id))));
+  } catch {
+    // 저장 실패는 addRecentSpotIds와 같이 무시
+  }
+}
+
 // ---------------------------------------------------------------------------
 // 유틸
 // ---------------------------------------------------------------------------
@@ -5945,10 +5962,11 @@ function swapStep(index: number, refocus = false): void {
   const anchor = dominantAnchorSpot(state.course, spotById, index);
   // 코스를 만들 때 걸었던 실내·무드 프리셋을 교체에도 똑같이 건다. 빠져 있어 실내 칩을 켠 채 교체하면
   // 루프탑·정원이, 심야 프리셋에서는 카페·골프장이 들어왔다
-  const rawCandidates = excludeRecent(
-    getCandidates(spots, step.slot, cond.regions, cond.mood, courseSpotIds(), cond.subZones, anchor, cond.indoorOnly ?? false),
-    recentSpotIdSet(),
-  );
+  const pool = getCandidates(spots, step.slot, cond.regions, cond.mood, courseSpotIds(), cond.subZones, anchor, cond.indoorOnly ?? false);
+  const recent = recentSpotIdSet();
+  // 이력이 칸 후보를 모두 덮으면 excludeRecent가 이력을 무시해 같은 장소를 알림 없이 되풀이했다(P-431)
+  const wrapped = isRecentExhausted(pool, recent);
+  const rawCandidates = excludeRecent(pool, recent);
   // 검색어에 맞는 카드는 같은 칸 일치 후보 가운데 기준 스팟 STAY_ZONE_FALLBACK_RADIUS_KM 안에서 먼저 바꾼다. 검색어를 보지 않아
   // '파스타' 저녁 칸이 스테이크·공원으로 바뀌고, 3번 누르면 검색어 코스 58%가 일치 카드를 모두 잃었다. 남는 곳이 없으면 종전대로 고른다
   // 테마 칩 코스의 테마 일치 카드도 같은 규칙으로 바꾼다. 검색어 거르기가 남긴 곳이 없을 때만 쓴다
@@ -5998,11 +6016,14 @@ function swapStep(index: number, refocus = false): void {
     return;
   }
   snapshotPrevCourse();
+  // 한 바퀴를 다 보였으면 이 칸 후보의 이력을 비워 다음 바퀴를 처음부터 돌리고, 알림은 바퀴가 넘어갈 때만 낸다
+  if (wrapped) forgetRecentSpotIds([...pool.map((s) => s.id), ...(current ? [current.id] : [])]);
   state.course[index] = { slot: step.slot, spotId: chosen.id };
   addRecentSpotIds([chosen.id]);
   saveLastCourse();
   // 교체 뒤 카드 이름만 바뀌고 알림이 없었다. 렌더 경로가 갈리기 전에 한 번 알린다
   announce(`${index + 1}번째 장소를 바꿨어요: ${current ? `${current.name} 대신 ` : ''}${chosen.name}`);
+  if (wrapped) showToast(SWAP_EXHAUSTED_MSG);
 
   // 대상 카드만 부드럽게 swap-in 교체 (현재 코스의 다른 카드들이 쓰고 있는 이미지 Set 수집하여 중복 방지)
   const usedImages = new Set<string>();
