@@ -386,6 +386,7 @@ function matchesZone(spot: Spot, zoneKeys: string[]): boolean {
     if (!zoneCoversRegion(spot, zone)) return false;
 
     const area = spotArea(spot);
+    let isJejuSubZone = false;
     if (area) {
       if (zone.keywords.some((kw) => areaMatchesZoneKeyword(area, kw))) return true;
 
@@ -401,7 +402,7 @@ function matchesZone(spot: Spot, zoneKeys: string[]): boolean {
         );
         // 제주는 시가 제주시·서귀포시 둘뿐이라 area가 시 단위로만 잡힌다.
         // 시 이름을 키워드로 갖지 않는 제주 세부존(애월·한림, 구좌·성산)은 텍스트 폴백을 허용한다.
-        const isJejuSubZone = zone.regionKey === 'JEJU'
+        isJejuSubZone = zone.regionKey === 'JEJU'
           && (area === '제주시' || area === '서귀포시')
           && !zone.keywords.some((kw) => kw === '제주시' || kw === '서귀포');
         if (!zoneHasArea && !isJejuSubZone) {
@@ -410,7 +411,10 @@ function matchesZone(spot: Spot, zoneKeys: string[]): boolean {
       }
     }
 
-    const targetText = `${spot.name} ${spot.location}`;
+    // 제주 세부존은 읍·면이 location에 빠진 행이 많아 address('제주시 애월읍 …')도 본다
+    const targetText = isJejuSubZone
+      ? `${spot.name} ${spot.location} ${spot.address ?? ''}`
+      : `${spot.name} ${spot.location}`;
     return zone.keywords.some((kw) => textContainsZoneKeyword(targetText, kw));
   });
 }

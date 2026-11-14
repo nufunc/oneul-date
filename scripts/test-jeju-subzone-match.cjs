@@ -40,6 +40,11 @@ const CASES = [
   ['제주시 중문 언급 행은 중문·서귀포 존에 흡수되지 않음', jeju('중문식당 제주점', '제주 제주시 연동', '제주시'), 'jeju_jungmun', false],
   ['서귀포시 연동 언급 행은 시내 존에 흡수되지 않음', jeju('연동 국수', '제주 서귀포시 대정읍', '서귀포시'), 'jeju_city', false],
   ['다른 권역 시 단위 차단은 그대로', { id: 2, name: '공주 한옥', location: '충남 공주시', area: '공주시', region: '충청', slot: 'day' }, 'taean', false],
+  // P-432: location에 읍·면이 없고 address에만 있는 제주 행
+  ['address 애월읍 행은 애월·한림 존', { ...jeju('바다 카페', '제주 제주시', '제주시'), address: '제주특별자치도 제주시 애월읍 애월해안로 1' }, 'jeju_aewol', true],
+  ['address 성산읍 행은 구좌·성산 존', { ...jeju('해녀 식당', '제주 서귀포시', '서귀포시'), address: '제주특별자치도 서귀포시 성산읍 일출로 1' }, 'jeju_gujwa', true],
+  ['address 애월읍 행은 구좌·성산 존이 아님', { ...jeju('바다 카페', '제주 제주시', '제주시'), address: '제주특별자치도 제주시 애월읍 애월해안로 1' }, 'jeju_gujwa', false],
+  ['제주 밖 존은 address를 보지 않음', { id: 3, name: '바다 카페', location: '전남', region: '호남', slot: 'day', address: '전라남도 여수시 돌산읍 1' }, 'yeosu', false],
 ];
 for (const [label, spot, zk, want] of CASES) assert.strictEqual(matchesZone(spot, [zk]), want, label);
 console.log(`test-jeju-subzone-match: ok ${CASES.length}`);
