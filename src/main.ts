@@ -2177,12 +2177,10 @@ function generateCourse(
   if (anchorSlot === null || anchorPool.length === 0) {
     defaultAnchor = true;
     for (const slot of slotsOn) {
-      const candidates = filterByBudget(
-        filterByMoodPreset(
-          excludeRecent(getCandidates(all, slot, regionKeys, moodKey, [], zoneKeys, null, isIndoor), avoid),
-          moodPreset,
-        ),
-        budgetFilter,
+      // 칩을 건 뒤 최근 노출을 뺀다. 먼저 빼면 칩 맞는 후보가 모두 이력에 든 칸이 칩을 버리고 이력 밖 칩 아닌 곳을 골랐다(P-434)
+      const candidates = excludeRecent(
+        filterByBudget(filterByMoodPreset(getCandidates(all, slot, regionKeys, moodKey, [], zoneKeys, null, isIndoor), moodPreset), budgetFilter),
+        avoid,
       );
       if (slot !== 'stay') slotLists.set(slot, candidates);
       if (candidates.length > 0 && (anchorSlot === null || candidates.length < anchorPool.length)) {
@@ -2253,15 +2251,12 @@ function generateCourse(
         : (pickedSpots.find((s) => s.lat != null && s.lng != null) ?? anchorSpot);
     const candidates =
       slotLists.get(slot) ??
-      filterByBudget(
-        filterByMoodPreset(
-          excludeRecent(
-            getCandidates(all, slot, regionKeys, moodKey, picked, zoneKeys, geoAnchor, isIndoor),
-            avoid,
-          ),
-          moodPreset,
+      excludeRecent(
+        filterByBudget(
+          filterByMoodPreset(getCandidates(all, slot, regionKeys, moodKey, picked, zoneKeys, geoAnchor, isIndoor), moodPreset),
+          budgetFilter,
         ),
-        budgetFilter,
+        avoid,
       );
 
     // 앵커가 숙박 칸이 아닐 때 숙박 칸은 검색어에 맞는 숙소를 먼저 뽑는다. 검색어를 보지 않아 '캠핑' 검색의 숙박 칸이 호텔이 됐다.
