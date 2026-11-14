@@ -4825,18 +4825,19 @@ function triggerCourseGeneration(): void {
         renderResults();
         announceCourse('코스를 만들었어요.');
         announceZoneRelaxed();
-        showToast(`'${place}'에는 '${rest}'에 맞는 곳이 없어 ${place} 코스로 추천했어요`);
+        notifyRelaxedSlots(state.budgetFilter, state.moodPreset, `'${place}'에는 '${rest}'에 맞는 곳이 없어 ${place} 코스로 추천했어요`);
         return;
       }
       // 동네 재시도가 실패하면 그리지 않은 코스가 남아 저장·교체·알림이 화면과 다른 코스를 읽었다
       state.course = shownCourse;
     }
+    // 검색 토스트에도 칩 완화 문구를 한 토스트로 붙인다. 붙이지 않아 검색+칩 코스 36/140이 칩 밖 칸을 말없이 넣었다(P-435)
     if (hasMatchedSpot) {
-      showToast(`'${state.searchQuery}' 중심 맞춤 코스를 추천했어요`);
+      notifyRelaxedSlots(state.budgetFilter, state.moodPreset, `'${state.searchQuery}' 중심 맞춤 코스를 추천했어요`);
     } else if (byFilter) {
-      showToast(`'${state.searchQuery}' 중 켜 둔 필터에 맞는 스팟이 없어 필터 기준으로 추천했어요`);
+      notifyRelaxedSlots(state.budgetFilter, state.moodPreset, `'${state.searchQuery}' 중 켜 둔 필터에 맞는 스팟이 없어 필터 기준으로 추천했어요`);
     } else {
-      showToast(`'${state.searchQuery}' 매칭 스팟이 없어 인기 코스로 추천했어요`);
+      notifyRelaxedSlots(state.budgetFilter, state.moodPreset, `'${state.searchQuery}' 매칭 스팟이 없어 인기 코스로 추천했어요`);
     }
   } else {
     notifyRelaxedSlots(state.budgetFilter, state.moodPreset);
@@ -4860,10 +4861,14 @@ function announceZoneRelaxed(): void {
 /**
  * 스페셜·가성비·분위기 프리셋은 칸에 맞는 후보가 0건이면 필터 전 목록에서 뽑는다(filterByBudget·filterByMoodPreset).
  * 그 칸이 필터 밖이라는 것을 알리지 않아, 강원 '실내+스페셜' 낮 칸에 동네 마트가 조용히 들어왔다(2026-09-27).
- * 칩 값은 코스를 짤 때 넘긴 값을 받는다. 화면 칩을 읽으면 끈 칩으로 다시 추천한 코스에 켠 칩 기준 토스트가 떴다(P-433)
+ * 칩 값은 코스를 짤 때 넘긴 값을 받는다. 화면 칩을 읽으면 끈 칩으로 다시 추천한 코스에 켠 칩 기준 토스트가 떴다(P-433).
+ * lead가 있으면(검색 토스트) 칩 문구를 그 뒤에 붙여 한 토스트로 낸다(P-435)
  */
-function notifyRelaxedSlots(budgetFilter: 'ALL' | 'BUDGET' | 'LUXURY' | undefined, moodPreset: MoodPresetKey | null | undefined): void {
-  if (!state.course) return;
+function notifyRelaxedSlots(
+  budgetFilter: 'ALL' | 'BUDGET' | 'LUXURY' | undefined,
+  moodPreset: MoodPresetKey | null | undefined,
+  lead = '',
+): void {
   const filters: { label: string; ok: (s: Spot) => boolean }[] = [];
   if (budgetFilter === 'LUXURY') filters.push({ label: '스페셜', ok: isSpecialDiningSpot });
   if (budgetFilter === 'BUDGET') filters.push({ label: '가성비', ok: isBudgetSpot });
@@ -4874,21 +4879,18 @@ function notifyRelaxedSlots(budgetFilter: 'ALL' | 'BUDGET' | 'LUXURY' | undefine
       ok: (s) => strictMoodPresetFilter([s], preset).length > 0,
     });
   }
-  if (filters.length === 0) return;
+  // 존 완화 띠(P-431)가 말하는 칸은 토스트에 다시 적지 않는다
+  const zoneRelaxed = state.courseConditions?.zoneRelaxed ?? [];
   const relaxedSlots: string[] = [];
-  const failedFilters = new Set<string>();
-  for (const st of state.course) {
+  for (const st of state.course ?? []) {
     const spot = st.spotId ? spotById.get(st.spotId) : undefined;
-    if (!spot) continue;
-    const failed = filters.filter((f) => !f.ok(spot));
-    if (failed.length > 0) {
-      relaxedSlots.push(SLOT_META[st.slot].label);
-      failed.forEach((f) => failedFilters.add(f.label));
-    }
+    if (spot && !zoneRelaxed.includes(st.slot) && filters.some((f) => !f.ok(spot))) relaxedSlots.push(SLOT_META[st.slot].label);
   }
-  if (relaxedSlots.length > 0) {
-    showToast(`${relaxedSlots.join('·')} 칸은 ${[...failedFilters].join('·')}에 맞는 곳이 없어 조건을 풀어 골랐어요`);
-  }
+  // 칩 둘을 켰으면 한 칩만 풀었어도 켠 칩을 모두 적는다. 예산만 적으면 그 칸에 스페셜 후보가 있는데도 '스페셜에 맞는 곳이 없어'라고 했다
+  const chips = `${filters.map((f) => f.label).join('·')}에${filters.length > 1 ? ' 함께' : ''}`;
+  const notice = relaxedSlots.length > 0 ? `${relaxedSlots.join('·')} 칸은 ${chips} 맞는 곳이 없어 조건을 풀어 골랐어요` : '';
+  const msg = [lead, notice].filter(Boolean).join('. ');
+  if (msg) showToast(msg);
 }
 
 /** 첫 화면 진입 시 오늘 날짜 추천 코스를 기본 제공 (공유 링크 및 검색 중이 아닐 때) */
