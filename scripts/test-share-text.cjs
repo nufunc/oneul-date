@@ -32,6 +32,7 @@ const stubs = {
   navigator: nav,
   document: { activeElement: null },
   openCopySheet: (text) => sheets.push(text),
+  isSpotClosedToday: (s) => s.closed === true,
 };
 const { courseShareText, shareOrCopyLink } = new Function(
   ...Object.keys(stubs),
@@ -51,6 +52,13 @@ assert.strictEqual(courseShareText([1, 2], [], []), '데이트 코스 2곳: 가 
 assert.strictEqual(courseShareText([99, 1, 98, 2]), '데이트 코스 2곳: 가 카페 → 나 식당');
 assert.strictEqual(courseShareText([99, 98]), undefined);
 assert.strictEqual(courseShareText([]), undefined);
+// 오늘 휴무인 장소는 끝에 이름을 붙여 알린다. 넷 밖의 장소도 빠뜨리지 않는다
+spotById.get(2).closed = true;
+spotById.get(6).closed = true;
+assert.strictEqual(courseShareText([1, 2]), '데이트 코스 2곳: 가 카페 → 나 식당 · ⚠️ 오늘 휴무: 나 식당');
+assert.strictEqual(courseShareText([1, 2, 3, 4, 5, 6]), '데이트 코스 6곳: 가 카페 → 나 식당 → 다 공원 → 라 바 외 2곳 · ⚠️ 오늘 휴무: 나 식당, 바 전시');
+delete spotById.get(2).closed;
+delete spotById.get(6).closed;
 
 (async () => {
   const url = 'https://example.test/#c=1.2.3';

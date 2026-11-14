@@ -3121,7 +3121,11 @@ function courseShareText(spotIds: number[], regionKeys: string[] = [], zoneKeys:
   const area = courseAreaLabel(spots, regionKeys, zoneKeys);
   const region = area ? `${area} ` : '';
   const more = names.length > 4 ? ` 외 ${names.length - 4}곳` : '';
-  return `${region}데이트 코스 ${names.length}곳: ${names.slice(0, 4).join(' → ')}${more}`;
+  // 복사 글(P-427)에는 휴무 경고가 있으나 공유 시트 글에는 없어 받는 사람이 열기 전에 알 수 없었다.
+  // 칸 시각은 경로마다 넘어오지 않아 날짜만으로 정해지는 오늘 휴무만 싣는다
+  const closed = spots.filter((s) => s.name && isSpotClosedToday(s)).map((s) => s.name);
+  const warn = closed.length > 0 ? ` · ⚠️ 오늘 휴무: ${closed.join(', ')}` : '';
+  return `${region}데이트 코스 ${names.length}곳: ${names.slice(0, 4).join(' → ')}${more}${warn}`;
 }
 
 /**
