@@ -3944,7 +3944,12 @@ function showToast(msg: string): void {
   toastTimer = window.setTimeout(() => {
     toast?.classList.remove('show');
     toastTimer = null;
-  }, 2200);
+  }, toastDuration(msg));
+}
+
+// 2.2초 고정이면 27자 이상 문구의 뒷부분(조건 완화, 대처 안내)이 읽히지 않았다(ux-323). 초당 약 10자로 늘리고 7초에서 멈춘다
+function toastDuration(msg: string): number {
+  return Math.min(7000, Math.max(2200, 1000 + [...msg.replace(/\s/g, '')].length * 100));
 }
 
 let announceTimer: number | null = null;

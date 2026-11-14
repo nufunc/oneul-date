@@ -17,6 +17,7 @@ const code = [
   'function announce() {}',
   cut('let toastTimer', '\n'),
   cut('function showToast', '\n}\n'),
+  cut('function toastDuration', '\n}\n'),
   cut('let isClosingOverlay', '\n'),
   cut('function closeOverlay', '\n}\n'),
 ].join('\n');
