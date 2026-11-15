@@ -1428,6 +1428,8 @@ const NATURAL_CONTEXT_MAP: Record<string, string[]> = {
   // '장가계'는 포항 내연산 계곡의 별명(블로그·언론)이라 공식 이름·주소에 없다. 같은 계곡의 앵커로 잇는다. '소금강'만 쓰면 강릉 소금강 7곳이 걸려 '소금강 전망대'로 쓴다(P-147)
   '장가계': ['내연산', '소금강 전망대', '12폭포'],
   '내연산': ['내연산', '소금강 전망대', '12폭포', '보경사'],
+  // 경리단길은 별명이라 대부분의 가게 주소에 없고 실제 도로명 '회나무로'만 있다. 회나무로 주소 18곳은 모두 용산구 이태원동·용산동2가 일대 좌표다(P-455)
+  '경리단길': ['경리단', '회나무로'],
 };
 
 /** 스팟이 도 약칭·광역 권역명에 드는지. 주소가 '경남 창원시'와 '경상남도 통영시'로 섞여 있어 별칭을 모두 본다 */
@@ -1469,6 +1471,14 @@ function isNearNameMatch(spot: Spot, query: string): boolean {
   const b = q.charCodeAt(diff) - 0xac00;
   if (a < 0 || a >= 11172 || b < 0 || b >= 11172) return false;
   return Math.floor(a / 588) === Math.floor(b / 588) || Math.floor((a % 588) / 28) === Math.floor((b % 588) / 28);
+}
+
+/** 관련도 등급으로 정렬한 결과에 이름에 검색어 전체가 든 곳(등급 1 이하)이 없으면 근사 이름(isNearNameMatch) 장소를 맨 앞으로 옮긴다(P-455).
+ * 근사 이름을 0건일 때만 보던 탓에 '담양힐링파트'는 동의어로 걸린 10곳 가운데 8위에 담양힐링파크가 있었다 */
+function promoteNearNameMatches(list: Spot[], q: string): void {
+  if (!list.length || searchRelevanceTier(list[0], q) <= 1) return;
+  const near = new Set(list.filter((s) => isNearNameMatch(s, q)));
+  if (near.size) list.sort((a, b) => Number(near.has(b)) - Number(near.has(a)));
 }
 
 /**
@@ -6945,7 +6955,10 @@ function renderSpotDiscovery(): void {
 
   // 검색어가 있으면 관련도 등급으로 먼저 나눈다. 정렬은 안정적이라 등급 안에서는 위에서 고른 순서가 유지된다.
   // 이름을 정확히 쳐도 거리·인기순에 밀려 수십~백여 번째에 나왔다(예: '수원 남문통닭' 223건 중 107위)
-  if (q) matchedSpots.sort((a, b) => searchRelevanceTier(a, q) - searchRelevanceTier(b, q));
+  if (q) {
+    matchedSpots.sort((a, b) => searchRelevanceTier(a, q) - searchRelevanceTier(b, q));
+    promoteNearNameMatches(matchedSpots, q);
+  }
 
   const totalCount = matchedSpots.length;
   const pageSize = state.spotGridCols === 5 ? 25 : state.spotGridCols === 3 ? 18 : 12;

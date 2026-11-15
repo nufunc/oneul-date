@@ -19,7 +19,7 @@ const fn = (name) => {
 const ytStart = src.indexOf('const DISALLOWED_YOUTUBE_KEYWORDS');
 const ytEnd = src.indexOf('\n}\n', src.indexOf('function youtubeTitleNamesSpot(')) + 3;
 assert.ok(ytStart >= 0 && ytEnd > ytStart, '유튜브 판정 구간을 찾지 못했다');
-const extra = [src.slice(ytStart, ytEnd), ...['getDistanceKm', 'trustedRating', 'getSpotPopularityScore', 'searchRegionHead', 'searchRegionCenter', 'isNearNameMatch'].map(fn)].join('\n');
+const extra = [src.slice(ytStart, ytEnd), ...['getDistanceKm', 'trustedRating', 'getSpotPopularityScore', 'searchRegionHead', 'searchRegionCenter', 'isNearNameMatch', 'promoteNearNameMatches'].map(fn)].join('\n');
 const regionCache = 'const searchRegionCenterCache = new Map(); let searchRegionCenterSource = null;';
 const body = src.slice(start, end).replace(/^export /gm, '');
 const js = ts
@@ -29,8 +29,9 @@ const js = ts
 const all = JSON.parse(fs.readFileSync(path.join(root, 'public', 'data', 'spots.json'), 'utf8'));
 const { stations } = JSON.parse(fs.readFileSync(path.join(root, 'public', 'data', 'stations.json'), 'utf8'));
 const env = { rawSpotsData: all, cleanSpotSummary: (s) => s.summary || '', __st: stations };
-const names = 'isCourseEligible,deduplicateSpotList,matchesSearchQuery,searchRelevanceTier,searchStationCenter,searchRegionHead,searchRegionCenter,getDistanceKm,getSpotPopularityScore,roundDistanceForDisplay,getSpotCoordinates,isNearNameMatch';
-const m = new Function(...Object.keys(env), `${js};stationCoords=__st;return {${names}};`)(...Object.values(env));
+const names = 'isCourseEligible,deduplicateSpotList,matchesSearchQuery,searchRelevanceTier,searchStationCenter,searchRegionHead,searchRegionCenter,getDistanceKm,getSpotPopularityScore,roundDistanceForDisplay,getSpotCoordinates,isNearNameMatch,promoteNearNameMatches';
+// 앱처럼 전역 spots를 채운다. 비워 두면 지역 중심(searchRegionCenter)이 늘 null이라 지역 질의가 성수 기준 거리순이 됐다(P-455)
+const m = new Function(...Object.keys(env), `${js};stationCoords=__st;spots=deduplicateSpotList(rawSpotsData);return {${names}};`)(...Object.values(env));
 
 const open = all.filter((s) => !s.is_closed);
 const base = m.deduplicateSpotList(open.filter((s) => m.isCourseEligible(s)));
@@ -90,6 +91,7 @@ function search(q) {
   const cq = q.replace(/\s+/g, '').toLowerCase();
   const fz = simMode && cq.length >= FUZZY_MIN ? candidatesFor(c.lat, c.lng).filter((s) => fuzzyName(s, cq)) : [];
   list.sort((a, b) => m.searchRelevanceTier(a, q) - m.searchRelevanceTier(b, q));
+  m.promoteNearNameMatches(list, q);
   // 앱과 같이 0건일 때만 근사 이름 판정(isNearNameMatch)을 쓴다. 정상 검색 결과가 있으면 타지 않는다
   if (list.length === 0 && m.isNearNameMatch) return candidatesFor(c.lat, c.lng).filter((s) => m.isNearNameMatch(s, q));
   if (simMode === 'zero' && list.length === 0) return fz;
