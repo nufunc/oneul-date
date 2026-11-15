@@ -3697,9 +3697,9 @@ body:has(.data-failed-banner) #app {
 
 .zone-label {
   flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
   letter-spacing: -0.01em;
 }
 
