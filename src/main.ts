@@ -8463,12 +8463,14 @@ function renderOverlayContent(): void {
         item.classList.toggle('is-checked', willCheck);
         if (cb) cb.checked = willCheck;
 
-        // 해당 지역 내 체크된 항목이 1개라도 있으면 지역 포함, 0개면 지역 기본 포함 유지
+        // 해당 지역 내 체크된 항목이 1개라도 있으면 지역 포함, 0개면 지역도 뺀다(P-460: 보이는 체크가 곧 선택)
         const hasAnyInReg = subZonesInTab.some((z) => state.subZones.includes(z.key));
         if (hasAnyInReg) {
           if (!state.regions.includes(activeReg)) {
             state.regions.push(activeReg);
           }
+        } else {
+          state.regions = state.regions.filter((r) => r !== activeReg);
         }
 
         // 해당 권역 전체 칩 체크 상태 실시간 동기화
@@ -8481,22 +8483,22 @@ function renderOverlayContent(): void {
           if (allCb) allCb.checked = allNowChecked;
         }
 
-        // 좌측 탭 인디케이터 뱃지 동기화
-        const activeTabEl = root.querySelector<HTMLButtonElement>(
-          `.region-tab-item[data-region-tab="${activeReg}"]`,
-        );
-        if (activeTabEl) {
-          const isRegSelected = state.regions.includes(activeReg);
-          let badge = activeTabEl.querySelector('.region-tab-badge');
-          if (isRegSelected || hasAnyInReg) {
+        // 좌측 탭 인디케이터 뱃지 동기화. '전국' 탭 표시는 지역이 하나도 없을 때라 함께 맞춘다
+        const syncTabBadge = (tabKey: string, on: boolean) => {
+          const tabEl = root.querySelector<HTMLButtonElement>(`.region-tab-item[data-region-tab="${tabKey}"]`);
+          if (!tabEl) return;
+          const badge = tabEl.querySelector('.region-tab-badge');
+          if (on) {
             if (!badge) {
-              activeTabEl.insertAdjacentHTML('beforeend', REGION_TAB_BADGE_HTML);
+              tabEl.insertAdjacentHTML('beforeend', REGION_TAB_BADGE_HTML);
             }
           } else if (badge) {
             badge.nextElementSibling?.remove();
             badge.remove();
           }
-        }
+        };
+        syncTabBadge(activeReg, state.regions.includes(activeReg) || hasAnyInReg);
+        syncTabBadge('ALL', state.regions.length === 0);
       });
     });
 
@@ -8509,13 +8511,8 @@ function renderOverlayContent(): void {
       renderOverlay();
     });
 
-    // 선택 완료 버튼 (선택 보정 및 적용)
+    // 선택 완료 버튼: 시트에 보이는 체크 그대로 확정한다. 보고 있던 탭으로 보정하지 않는다(P-460)
     root.querySelector('#btn-location-submit')?.addEventListener('click', () => {
-      // '전체' 탭은 둘러보기일 뿐이라 이미 체크한 동네를 지우지 않는다. 마지막으로 연 탭이 '전체'라는 이유로
-      // 선택이 모두 사라졌다. 전국으로 되돌리는 일은 '전국' 칩과 [초기화]가 맡는다
-      if (state.activeRegionTab !== 'ALL' && state.regions.length === 0 && state.subZones.length === 0) {
-        state.regions = [state.activeRegionTab || 'SEOUL'];
-      }
       regionSheetSnapshot = null;
       closeOverlay();
     });
