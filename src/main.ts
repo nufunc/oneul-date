@@ -8269,6 +8269,21 @@ function renderOverlayContent(): void {
   // 2. 에어비앤비 스타일 2단 지역 선택 바텀시트
   if (state.regionSheetOpen) {
     regionSheetSnapshot ??= { regions: [...state.regions], subZones: [...state.subZones] };
+    // 시트 안 조작(탭, 전체 체크, 초기화)으로 다시 그리면 누른 요소에 초점을 둔다. 처음 열 때만 닫기로(P-466)
+    const prevFocus = document.activeElement;
+    let refocusSelector: string | null = null;
+    if (prevFocus instanceof HTMLElement && root.contains(prevFocus)) {
+      const checkAll = prevFocus.closest<HTMLElement>('.zone-check-all');
+      const regionTab = prevFocus.closest<HTMLElement>('[data-region-tab]')?.dataset.regionTab;
+      if (checkAll) {
+        const key = focusSelectorFor(checkAll) ?? (checkAll.dataset.zoneAll ? '.zone-check-all[data-zone-all]' : null);
+        refocusSelector = key ? `${key} input` : null;
+      } else if (regionTab) {
+        refocusSelector = `[data-region-tab="${CSS.escape(regionTab)}"]`;
+      } else {
+        refocusSelector = focusSelectorFor(prevFocus);
+      }
+    }
     const activeReg = state.activeRegionTab || 'SEOUL';
     const subZonesInTab = POPULAR_ZONES.filter((z) => z.regionKey === activeReg);
     const isAllTab = activeReg === 'ALL';
@@ -8527,7 +8542,8 @@ function renderOverlayContent(): void {
       closeOverlay();
     });
 
-    focusOverlayEntry();
+    if (refocusSelector) restoreFocusIn(root, refocusSelector, '#overlay-close');
+    else focusOverlayEntry();
     return;
   }
 
