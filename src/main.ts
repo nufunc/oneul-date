@@ -7528,20 +7528,30 @@ function bindDiscoveryEvents(area: HTMLElement): void {
 // --- 수신자 뷰 (S5 — 링크로 열었을 때) ---------------------------------------------
 
 /**
- * 공유 ID 배열 → 스텝 목록 (슬롯 순 정렬).
+ * 공유·저장 ID 배열 → 스텝 목록. 장소는 담긴 순서를 지키고, 칸 이름은 장소들의 slot을
+ * SLOT_ORDER로 정렬한 목록에서 자리 순서대로 붙인다. ⚡는 칸 이름을 자리에 고정하고 장소만
+ * 옮기므로(P-447) slot으로 다시 정렬하면 받는 화면과 복원이 정렬 전 순서로 돌아갔다(P-454).
+ * ⚡을 거치지 않은 배열은 이미 칸 순서라 결과가 정렬할 때와 같다.
  * 존재하지 않는 스폿·slot 없는 스폿뿐 아니라 숙박 검증(isRealStaySpot)에 실패한 스폿도 제외한다.
- * 링크에 담긴 ID를 그대로 믿으면 생성 경로의 방어막을 통째로 우회하기 때문.
+ * 담긴 ID를 그대로 믿으면 생성 경로의 방어막을 통째로 우회하기 때문.
  */
-function buildSharedSteps(ids: number[]): CourseStep[] {
-  const steps: CourseStep[] = [];
+function stepsInGivenOrder(ids: number[]): CourseStep[] {
+  const kept: number[] = [];
+  const slots: SlotKey[] = [];
   for (const id of ids) {
     const spot = spotById.get(id);
     if (spot && isCourseEligible(spot)) {
-      steps.push({ slot: spot.slot as SlotKey, spotId: id });
+      kept.push(id);
+      slots.push(spot.slot as SlotKey);
     }
   }
-  steps.sort((a, b) => SLOT_ORDER.indexOf(a.slot) - SLOT_ORDER.indexOf(b.slot));
-  return steps;
+  slots.sort((a, b) => SLOT_ORDER.indexOf(a) - SLOT_ORDER.indexOf(b));
+  return kept.map((spotId, i) => ({ slot: slots[i], spotId }));
+}
+
+/** 공유 ID 배열 → 스텝 목록 (순서 규칙은 stepsInGivenOrder) */
+function buildSharedSteps(ids: number[]): CourseStep[] {
+  return stepsInGivenOrder(ids);
 }
 
 /** URL에서 코스 hash 제거 (히스토리 오염 없이) */
@@ -8774,12 +8784,7 @@ function renderOverlayContent(): void {
  * 사라진 id를 세지 않으면 불러오기·복사에서 안내 없이 빠졌다
  */
 function resolveSavedSteps(spotIds: number[]): { steps: CourseStep[]; dropped: number } {
-  const steps: CourseStep[] = [];
-  for (const id of spotIds) {
-    const spot = spotById.get(id);
-    if (spot && isCourseEligible(spot)) steps.push({ slot: spot.slot as SlotKey, spotId: id });
-  }
-  steps.sort((a, b) => SLOT_ORDER.indexOf(a.slot) - SLOT_ORDER.indexOf(b.slot));
+  const steps = stepsInGivenOrder(spotIds);
   return { steps, dropped: spotIds.length - steps.length };
 }
 
