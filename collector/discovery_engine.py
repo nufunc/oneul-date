@@ -216,7 +216,8 @@ def query_area_mismatch(query_text: str, area: str, road_addr: str) -> bool:
 def infer_slot(category: str, name: str) -> str:
     cat = (category or "").lower()
     nm = name.lower()
-    if any(k in cat or k in nm for k in ["바(bar)", "와인", "칵테일", "펍", "주점", "포차", "야시장", "이자카야", "호프", "위스키", "심야"]):
+    # 술집·포장마차는 카카오 업종 '술집', '실내포장마차'다. 빠져 있어 블로그 발굴 술집이 낮 칸으로 들어갔다(2026-11-15 P-465)
+    if any(k in cat or k in nm for k in ["바(bar)", "와인", "칵테일", "펍", "주점", "술집", "포차", "포장마차", "야시장", "이자카야", "호프", "위스키", "심야"]):
         return "night"
     if any(k in cat or k in nm for k in [
         "다이닝", "오마카세", "레스토랑", "스테이크", "파스타", "코스", "한정식", "비스트로",

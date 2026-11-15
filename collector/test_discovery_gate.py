@@ -38,6 +38,16 @@ def test_auto_insert_is_off_by_default():
     assert discovery_engine.CANDIDATE_FILE.endswith("discovery_candidates.jsonl")
 
 
+def test_infer_slot_bar_categories_are_night():
+    """P-465: 카카오 업종 '술집'·'실내포장마차'가 낮 칸으로 들어가던 문제"""
+    from discovery_engine import infer_slot
+    assert infer_slot("술집", "술술술인생술집") == "night"
+    assert infer_slot("술집", "아니스") == "night"
+    assert infer_slot("실내포장마차", "철이네포차") == "night"
+    assert infer_slot("카페", "쾨르커피") == "day"
+    assert infer_slot("한식", "섬진강애재첩") == "evening"
+
+
 if __name__ == "__main__":
     for fn in [v for k, v in list(globals().items()) if k.startswith("test_")]:
         fn()
