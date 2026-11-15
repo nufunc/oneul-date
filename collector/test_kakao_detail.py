@@ -111,6 +111,18 @@ def test_skips_row_whose_road_name_differs_or_is_missing():
     assert state == {"last_id": 3}
 
 
+def test_jibun_match_passes_only_when_both_addresses_lack_road_name():
+    """P-451: 패널에 도로명이 없으면 DB 지번 주소의 동·리 + 번지가 패널 jibun과 같을 때만 통과한다(2026-11-15 표본)."""
+    # 뺑드깜빠뉴형: 지번이 같다
+    p_same = {**P_ALL, "summary": {"status": "Y", "address": {"jibun": "울산 중구 태화동 134 2동 2-3층"}}}
+    # 금강보행교형: 번지가 다르다
+    p_diff = {**P_ALL, "summary": {"status": "Y", "address": {"jibun": "세종특별자치시 세종동 29-111"}}}
+    assert k.panel_fields(p_same, _row(1, address="울산 중구 태화동 134"))[0] == {"business_hours": {"영업시간": "매일 10:00 ~ 18:00"}}
+    assert k.panel_fields(p_diff, _row(2, address="세종특별자치시 세종동 27-2")) == ({}, "road")
+    assert k.panel_fields(p_same, _row(3, address="울산 중구 태화로 134")) == ({}, "road")
+    assert k.panel_fields(p_same, _row(4, address="울산 중구 태화동")) == ({}, "road")
+
+
 def test_skips_status_not_y():
     patches, _, _, _ = _run({"1": {**P_ALL, "summary": {"status": "N", "address": ADDR}}})
     assert patches == []

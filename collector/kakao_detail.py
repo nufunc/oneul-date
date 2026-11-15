@@ -50,6 +50,8 @@ STATE = os.path.join(os.path.dirname(USAGE_FILE), ".kakao_detail_backfill.json")
 DAYS = "월화수목금토일"
 # '고양대로 1955', '도산대로57길 8', '연희로11가길 47 지하1층'에서 도로명만 뽑는다. 지번 주소에는 걸리지 않는다
 ROAD = re.compile(r'(?:^|\s)([가-힣A-Za-z0-9·.]+(?:로|길))\s*(?:지하\s*)?\d')
+# '운천동 1710', '금성동 산 5-19', '진동리 1361'에서 동·리와 번지를 뽑는다(P-451)
+JIBUN = re.compile(r'(?:^|\s)([가-힣0-9]+(?:동|리|가))\s+(산\s*)?(\d+(?:-\d+)?)(?![\d-])')
 MENU_MIN_PRICES = 3
 # 주차 신호(P-332). 텍스트는 simple_parking_infos.texts[0], 아이콘은 store_facility_icons[].text
 PARKING_TEXT_KIND = {"무료 주차": "free", "유료 주차": "paid", "주차 가능": "available", "주차장 없음": "impossible"}
@@ -83,6 +85,11 @@ def fetch_panel(kakao_id):
 def road_name(address):
     m = ROAD.search(address or "")
     return m.group(1) if m else None
+
+
+def jibun_key(address):
+    m = JIBUN.search(address or "")
+    return (m.group(1), bool(m.group(2)), m.group(3)) if m else None
 
 
 def hours_text(open_hours):
@@ -173,8 +180,14 @@ def panel_fields(panel, row):
     oh = panel.get("open_hours") or {}
     if re.search(r"임시\s*휴업", json.dumps(oh, ensure_ascii=False)):
         return {}, "temp_closed"
-    road = road_name((summary.get("address") or {}).get("road"))
-    if not road or road != road_name(row.get("address")):
+    addr = summary.get("address") or {}
+    road = road_name(addr.get("road"))
+    if road:
+        same = road == road_name(row.get("address"))
+    else:  # 패널에 도로명이 없으면 DB 주소도 지번일 때만 동·리 + 번지로 대조한다(P-451)
+        jibun = jibun_key(row.get("address"))
+        same = bool(jibun) and not road_name(row.get("address")) and jibun == jibun_key(addr.get("jibun"))
+    if not same:
         return {}, "road"
     fields = {}
     text = hours_text(oh) if not row.get("business_hours") else None
