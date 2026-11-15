@@ -7891,9 +7891,16 @@ function openSavedPanel(): void {
 }
 
 let isClosingOverlay = false;
+// 지역 시트를 연 시점의 선택. '선택 완료'만 시트 안 변경을 확정하고 다른 닫기는 이 값으로 되돌린다(P-459)
+let regionSheetSnapshot: { regions: string[]; subZones: string[] } | null = null;
 
 function closeOverlay(callback?: () => void): void {
   if (isClosingOverlay || (!state.savedOpen && !state.regionSheetOpen && !state.spotDetailId)) return;
+  if (state.regionSheetOpen && regionSheetSnapshot) {
+    state.regions = regionSheetSnapshot.regions;
+    state.subZones = regionSheetSnapshot.subZones;
+  }
+  regionSheetSnapshot = null;
   const root = document.getElementById('overlay-root');
   if (!root) return;
   const backdrop = root.querySelector('.overlay-backdrop');
@@ -8251,6 +8258,7 @@ function renderOverlayContent(): void {
 
   // 2. 에어비앤비 스타일 2단 지역 선택 바텀시트
   if (state.regionSheetOpen) {
+    regionSheetSnapshot ??= { regions: [...state.regions], subZones: [...state.subZones] };
     const activeReg = state.activeRegionTab || 'SEOUL';
     const subZonesInTab = POPULAR_ZONES.filter((z) => z.regionKey === activeReg);
     const isAllTab = activeReg === 'ALL';
@@ -8508,6 +8516,7 @@ function renderOverlayContent(): void {
       if (state.activeRegionTab !== 'ALL' && state.regions.length === 0 && state.subZones.length === 0) {
         state.regions = [state.activeRegionTab || 'SEOUL'];
       }
+      regionSheetSnapshot = null;
       closeOverlay();
     });
 

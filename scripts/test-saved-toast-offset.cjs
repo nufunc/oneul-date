@@ -19,6 +19,7 @@ const code = [
   cut('function showToast', '\n}\n'),
   cut('function toastDuration', '\n}\n'),
   cut('let isClosingOverlay', '\n'),
+  cut('let regionSheetSnapshot', '\n'),
   cut('function closeOverlay', '\n}\n'),
 ].join('\n');
 
