@@ -19,16 +19,23 @@ const cut = (src, from, to) => {
   // 1. loadStaticSpots: 실패면 샘플을 돌려주고 표시를 세우며 IndexedDB에 저장하지 않는다
   const supa = read('supabase.ts');
   // 샘플 동적 import(P-414)는 new Function 안에서 받을 수 없어 주입한 rawSpotsData로 바꾼다
+  const colsCode = cut(supa, 'export function rowsFromColumns', '\n}\n').replace(/^export /gm, '');
   const loadCode = cut(supa, 'export let spotsFellBackToSample', '\n}\n').replace(/^export /gm, '')
     .replace("(await import('./data/spots.sample.json')).default", 'rawSpotsData');
   const sample = [{ id: 1 }, { id: 2 }];
-  const env = { response: null, saved: [] };
+  const env = { response: null, saved: [], urls: [] };
   const mod = new Function(
     'env',
     'normalizeSpots',
     'rawSpotsData',
     'saveSpotsToCache',
-    `const fetch = async () => { if (env.response instanceof Error) throw env.response; return env.response; };
+    `const fetch = async (url) => {
+      env.urls.push(url);
+      const r = typeof env.response === 'function' ? env.response(url) : env.response;
+      if (r instanceof Error) throw r;
+      return r;
+    };
+    ${ts.transpile(colsCode, { target: 'es2022' })}
     ${ts.transpile(loadCode, { target: 'es2022' })}
     return { loadStaticSpots, flag: () => spotsFellBackToSample };`,
   )(env, (rows) => rows, sample, (rows) => env.saved.push(rows.length));
@@ -53,6 +60,32 @@ const cut = (src, from, to) => {
   assert.strictEqual((await mod.loadStaticSpots()).length, 5);
   assert.strictEqual(mod.flag(), false, '성공한 뒤에도 실패 표시가 남았다');
   assert.deepStrictEqual(env.saved, [5], '성공한 데이터를 캐시에 저장하지 않았다');
+
+  // P-453: 열 형식 본문은 행으로 바꿔 저장하고, 404면 행 파일을 한 번 더 받으며, 둘 다 없으면 샘플이다
+  const cols = { id: full.map((r) => r.id) };
+  env.response = { ok: true, status: 200, json: async () => cols };
+  env.saved = [];
+  env.urls = [];
+  assert.deepStrictEqual(await mod.loadStaticSpots(), full, '열 형식 본문을 행으로 바꾸지 못했다');
+  assert.deepStrictEqual(env.urls, ['./data/spots.cols.json']);
+  assert.deepStrictEqual(env.saved, [5]);
+  const notFound = { ok: false, status: 404, json: async () => ({}) };
+  env.response = (url) => (url.endsWith('/spots.cols.json') ? notFound : { ok: true, status: 200, json: async () => full });
+  env.urls = [];
+  assert.strictEqual((await mod.loadStaticSpots()).length, 5, '404 뒤 행 파일을 받지 못했다');
+  assert.deepStrictEqual(env.urls, ['./data/spots.cols.json', './data/spots.json']);
+  assert.strictEqual(mod.flag(), false);
+  env.response = notFound;
+  env.urls = [];
+  env.saved = [];
+  assert.strictEqual(await mod.loadStaticSpots(), sample, '두 파일 모두 404인데 샘플이 아니다');
+  assert.strictEqual(mod.flag(), true);
+  assert.deepStrictEqual(env.saved, []);
+  // 500은 되돌림 대상이 아니다: 행 파일을 다시 받지 않고 샘플로 떨어진다
+  env.response = { ok: false, status: 500, json: async () => ({}) };
+  env.urls = [];
+  assert.strictEqual(await mod.loadStaticSpots(), sample);
+  assert.deepStrictEqual(env.urls, ['./data/spots.cols.json']);
 
   // 2. 받은 링크 실패 카드: 해시를 지우지 않고 문구와 다시 불러오기 버튼을 보인다
   const main = read('main.ts');

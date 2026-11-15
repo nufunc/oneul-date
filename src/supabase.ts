@@ -303,6 +303,21 @@ export function mergeSpots(base: Spot[], incoming: Spot[]): Spot[] {
 }
 
 /**
+ * spots.cols.json({칸 이름: 행 수만큼의 값 배열})을 행 배열로 바꾼다. id 칸이 배열이 아니면 빈 배열이다.
+ * 같은 칸 값을 붙여 두어 gzip이 행 배열보다 28% 작다. 받은 링크 Range는 계속 행 파일 spots.json을 읽는다(P-453)
+ */
+export function rowsFromColumns(cols: unknown): Spot[] {
+  const c = cols as Record<string, unknown[]> | null;
+  if (!c || typeof c !== 'object' || !Array.isArray(c.id)) return [];
+  const keys = Object.keys(c);
+  return c.id.map((_, i) => {
+    const row: Record<string, unknown> = {};
+    for (const k of keys) row[k] = c[k][i];
+    return row as unknown as Spot;
+  });
+}
+
+/**
  * 정적 CDN (public/data/spots.json)에서 10,000여 개 스팟 데이터를 비동기 로드합니다.
  * Supabase 일시 장애 또는 대역폭 초과 시에도 100% 무중단 서비스를 보장합니다.
  */
@@ -323,7 +338,12 @@ export async function loadStaticSpots(): Promise<Spot[]> {
   spotsBytesReceived = 0;
   try {
     arm();
-    const res = await fetch('./data/spots.json', { signal: ctrl.signal });
+    let res = await fetch('./data/spots.cols.json', { signal: ctrl.signal });
+    // 수집기가 열 형식 파일을 아직 내지 않았거나 되돌렸으면 행 파일을 받는다(P-453)
+    if (res.status === 404) {
+      arm();
+      res = await fetch('./data/spots.json', { signal: ctrl.signal });
+    }
     if (res.ok) {
       let data: unknown;
       if (res.body) {
@@ -344,8 +364,9 @@ export async function loadStaticSpots(): Promise<Spot[]> {
         clearTimeout(timer);
         data = await res.json();
       }
-      if (Array.isArray(data) && data.length > 0) {
-        const normalized = normalizeSpots(data as Spot[]);
+      const rows = Array.isArray(data) ? (data as Spot[]) : rowsFromColumns(data);
+      if (rows.length > 0) {
+        const normalized = normalizeSpots(rows);
         saveSpotsToCache(normalized);
         spotsFellBackToSample = false;
         return normalized;

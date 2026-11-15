@@ -13,6 +13,9 @@ const skip = sw.indexOf("if (url.pathname.endsWith('/data/spots.json')) return;"
 const respond = sw.indexOf('event.respondWith');
 assert.ok(skip >= 0, 'sw.js에 spots.json 예외가 없다');
 assert.ok(respond > skip, 'spots.json 예외가 respondWith보다 앞에 있어야 한다');
+// P-453: 앱 전체 받기는 열 형식 spots.cols.json을 먼저 받으므로 같은 예외를 둔다
+const skipCols = sw.indexOf("if (url.pathname.endsWith('/data/spots.cols.json')) return;");
+assert.ok(skipCols >= 0 && respond > skipCols, 'spots.cols.json 예외가 없거나 respondWith보다 뒤에 있다');
 
 // 2. CACHE_NAME은 배포된 v0.9.32와 달라야 옛 캐시를 activate가 지우고, 패키지 버전과 맞아야 한다
 const name = /const CACHE_NAME = '([^']+)'/.exec(sw)[1];

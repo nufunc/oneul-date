@@ -21,6 +21,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 (async () => {
   const supa = read('supabase.ts');
   // 샘플 동적 import(P-414)는 new Function 안에서 받을 수 없어 주입한 rawSpotsData로 바꾼다
+  const colsCode = cut(supa, 'export function rowsFromColumns', '\n}\n').replace(/^export /gm, '');
   const loadCode = cut(supa, 'export let spotsFellBackToSample', '\n}\n').replace(/^export /gm, '')
     .replace("(await import('./data/spots.sample.json')).default", 'rawSpotsData');
   assert.ok(/const SPOTS_IDLE_MS = 15000;/.test(loadCode), '무응답 제한이 15초가 아니다');
@@ -35,14 +36,16 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     `const fetch = (...a) => env.fetch(...a);
     const setTimeout = (fn, ms) => { const h = globalThis.setTimeout(() => { env.timers.delete(h); fn(); }, ms); env.timers.add(h); return h; };
     const clearTimeout = (h) => { env.timers.delete(h); globalThis.clearTimeout(h); };
+    ${ts.transpile(colsCode, { target: 'es2022' })}
     ${ts.transpile(loadCode.replace('SPOTS_IDLE_MS = 15000', `SPOTS_IDLE_MS = ${IDLE}`), { target: 'es2022' })}
     return { loadStaticSpots, onSpotsProgress, flag: () => spotsFellBackToSample, bytes: () => spotsBytesReceived };`,
   )(env, (rows) => rows, sample, () => {});
 
   const full = Array.from({ length: 50 }, (_, i) => ({ id: 100 + i, name: `한글 스팟 ${i}` }));
   const file = Buffer.from(JSON.stringify(full), 'utf8');
+  const rowFile = file;
   // 조각을 gap 간격으로 count개만 내고 멈춘다(count가 전체면 닫는다). 요청이 끊기면 스트림도 오류로 끝난다
-  const serve = ({ headerDelay = 0, gap = 0, count = Infinity, parts = 10 }) => (url, init) =>
+  const serve = ({ headerDelay = 0, gap = 0, count = Infinity, parts = 10, file = rowFile }) => (url, init) =>
     new Promise((resolve, reject) => {
       assert.ok(init && init.signal, 'fetch에 signal을 넘기지 않았다');
       const size = Math.ceil(file.length / parts);
@@ -98,6 +101,30 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   assert.ok(seen[0] < file.length / 5, '새 받기가 앞 받기의 바이트에 이어 셌다');
   assert.ok(took >= IDLE && took < IDLE * 4, `본문 무응답 제한 시각이 어긋난다: ${took}ms`);
   assert.strictEqual(env.timers.size, 0, '끊은 뒤 타이머가 남았다');
+
+  // 3b. P-453: 열 형식 spots.cols.json을 먼저 받아 행으로 바꾸고, 404면 spots.json을 받아 바이트를 0부터 센다
+  const colsObj = {};
+  for (const k of Object.keys(full[0])) colsObj[k] = full.map((r) => r[k]);
+  const colsFile = Buffer.from(JSON.stringify(colsObj), 'utf8');
+  const urls = [];
+  env.fetch = (url, init) => { urls.push(url); return serve({ file: colsFile })(url, init); };
+  got = await mod.loadStaticSpots();
+  assert.deepStrictEqual(got, full, '열 형식 본문을 행으로 바꾸지 못했다');
+  assert.deepStrictEqual(urls, ['./data/spots.cols.json'], '열 형식 파일을 먼저 받지 않았다');
+  assert.strictEqual(mod.bytes(), colsFile.length, '열 형식 받기의 바이트를 세지 않았다');
+  assert.strictEqual(mod.flag(), false);
+  urls.length = 0;
+  seen.length = 0;
+  env.fetch = (url, init) => {
+    urls.push(url);
+    return url.endsWith('/spots.cols.json') ? Promise.resolve({ ok: false, status: 404 }) : serve({})(url, init);
+  };
+  got = await mod.loadStaticSpots();
+  assert.deepStrictEqual(got, full, '404 뒤 행 파일을 받지 못했다');
+  assert.deepStrictEqual(urls, ['./data/spots.cols.json', './data/spots.json'], '404 뒤 행 파일을 한 번 받지 않았다');
+  assert.strictEqual(seen[seen.length - 1], file.length, '404 뒤 진행이 행 파일 크기로 끝나지 않았다');
+  assert.strictEqual(mod.flag(), false);
+  assert.strictEqual(env.timers.size, 0, '404 되돌림 뒤 타이머가 남았다');
   mod.onSpotsProgress(null);
 
   // 4. 버튼 문구: 분모가 없으면 기존 문구, 다 받아도 99%에서 멈춘다
