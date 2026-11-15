@@ -4474,6 +4474,21 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   font-size: 0.85rem;
   border-radius: var(--radius-sm);
 }
+/* 3열 카드 버튼은 모양을 28px로 두고 눌리는 영역만 세로 44px로 넓힌다(.step-name-link::after와 같은 방식) */
+.discovery-card.cols-3 .btn-discovery-save,
+.discovery-card.cols-3 .btn-discovery-action-build {
+  position: relative;
+}
+.discovery-card.cols-3 .btn-discovery-save::after,
+.discovery-card.cols-3 .btn-discovery-action-build::after {
+  content: '';
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  top: 50%;
+  height: 44px;
+  transform: translateY(-50%);
+}
 .discovery-card.cols-3 .btn-discovery-chip-action {
   width: 28px;
   height: 28px;
