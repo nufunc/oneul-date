@@ -4100,6 +4100,7 @@ function renderShell(): void {
   // 머리 단추를 건너뛰어 코스 조건으로 가는 링크와 main 랜드마크(WCAG 2.4.1, ux-reviewer-287)
   app.innerHTML = `
     <a class="skip-link" id="skip-to-main" href="#main-content">본문으로 건너뛰기</a>
+    <a class="skip-link" id="skip-to-conditions" href="#conditions-area">코스 조건으로 건너뛰기</a>
     <header class="topbar">
       <h1 class="app-title"><a href="#" class="app-title-link" id="brand-home-link" aria-label="오늘 데이트 홈으로 이동">오늘 데이트</a></h1>
       <div class="topbar-actions">
@@ -4132,6 +4133,11 @@ function renderShell(): void {
   document.getElementById('skip-to-main')?.addEventListener('click', (e) => {
     e.preventDefault();
     document.getElementById('main-content')?.focus();
+  });
+  // 첫 화면 칩 묶음을 건너뛰어 지역 선택 단추로 간다. 스팟 탐색 탭처럼 단추가 없으면 본문으로(P-467)
+  document.getElementById('skip-to-conditions')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    (document.getElementById('btn-trigger-region') ?? document.getElementById('main-content'))?.focus();
   });
   document.getElementById('brand-home-link')?.addEventListener('click', (e) => {
     e.preventDefault();

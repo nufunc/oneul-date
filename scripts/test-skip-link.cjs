@@ -19,6 +19,9 @@ assert.strictEqual((src.match(/<main class="receiver-view"/g) || []).length, 2, 
 
 assert.match(src, /'skip-to-main'\)\?\.addEventListener\('click', \(e\) => \{\s*e\.preventDefault\(\);\s*document\.getElementById\('main-content'\)\?\.focus\(\);/, '건너뛰기가 해시를 바꾸거나 포커스를 옮기지 않는다');
 
+assert.ok(home.indexOf('id="skip-to-conditions"') > home.indexOf('id="skip-to-main"') && home.indexOf('id="skip-to-conditions"') < home.indexOf('<header class="topbar">'), '조건 건너뛰기 링크가 본문 건너뛰기 뒤, 머리 앞에 없다(P-467)');
+assert.match(src, /'skip-to-conditions'\)\?\.addEventListener\('click', \(e\) => \{\s*e\.preventDefault\(\);\s*\(document\.getElementById\('btn-trigger-region'\) \?\? document\.getElementById\('main-content'\)\)\?\.focus\(\);/, '조건 건너뛰기가 지역 선택 단추로 초점을 옮기지 않는다');
+
 assert.match(css, /\.skip-link \{[^}]*top: -100px;/, '건너뛰기 링크가 평소에 보인다');
 assert.match(css, /\.skip-link:focus \{[^}]*top:/, '건너뛰기 링크가 포커스 때 보이지 않는다');
 
