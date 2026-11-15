@@ -6,7 +6,8 @@ const fs = require('fs');
 const path = require('path');
 
 const src = fs.readFileSync(path.join(__dirname, '..', 'src', 'main.ts'), 'utf8');
-const ofLine = src.match(/const of = escapeHtml\(`\$\{dateStr\} \$\{name\.replace\((\/.*?\/gu), ''\)\}`\);/);
+// 뒤에 첫 장소 이름이 붙는다(P-464). 그림 문자를 빼는 부분만 본다
+const ofLine = src.match(/const of = escapeHtml\(`\$\{dateStr\} \$\{name\.replace\((\/.*?\/gu), ''\)\}/);
 assert.ok(ofLine, '단추 이름이 제목의 그림 문자를 빼지 않는다');
 const strip = (s) => s.replace(new RegExp(ofLine[1].slice(1, -3), 'gu'), '');
 assert.strictEqual(strip('🔍 서촌 카페 코스'), '서촌 카페 코스');
