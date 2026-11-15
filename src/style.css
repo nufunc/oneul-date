@@ -2645,7 +2645,7 @@ label,
 .badge-meta {
   display: inline-flex;
   align-items: center;
-  font-size: 11px;
+  font-size: 0.6875rem; /* 브라우저 글자 크기 설정을 따르게 rem(P-456). 기본 11px */
   font-weight: 600;
   padding: 2px 7px;
   border-radius: 4px;
@@ -5312,7 +5312,12 @@ html[data-theme-resolved="dark"] .btn-saved-recommend {
   border-radius: 9999px;
   background: #b91c1c; /* 불투명 붉은색에 흰 글씨 6.47:1. 반투명이면 밝은 사진 위에서 AA(4.5:1)에 못 미쳤다 */
   color: #fff;
-  font-size: 10px;
+  /* 글자 크기 설정을 따르게 rem, 커지면 썸네일 안에서 줄바꿈한다(P-456). 기본 10px */
+  font-size: 0.625rem;
+  width: max-content;
+  max-width: calc(100% - 16px);
+  white-space: normal;
+  line-height: 1.2;
   font-weight: 700;
   backdrop-filter: blur(4px);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
@@ -5343,7 +5348,7 @@ html[data-theme-resolved="dark"] .btn-saved-recommend {
   border-radius: 4px;
   background: rgba(239, 68, 68, 0.15);
   color: #b91c1c; /* 라이트 5.57:1. #ef4444는 3.24:1이었다 */
-  font-size: 11px;
+  font-size: 0.6875rem; /* 글자 크기 설정을 따르게 rem(P-456). 기본 11px */
   font-weight: 700;
   vertical-align: middle;
 }
