@@ -2320,16 +2320,16 @@ label,
   /* 320px에서 아이콘 7개(260px)가 막대(222px)를 넘어 왼쪽 묶음이 접혔다(P-106). 28px로 줄인다.
      .step-card 접두가 없으면 .step-map-chip.icon-only가 이긴다. */
   .step-card .step-actions-bar,
-  .step-card .step-actions-icons,
-  .step-card .step-actions-right { gap: 4px; --icon-gap: 4px; }
+  .step-card .step-actions-icons { gap: 4px; --icon-gap: 4px; }
+  .step-card .step-actions-right { gap: 16px; --icon-gap: 16px; }
   .step-card .step-actions-bar .btn-action-icon,
   .step-card .step-actions-right > a,
   .step-card .step-actions-right > button {
     width: 28px; height: 28px; min-width: 28px; min-height: 28px; padding: 0;
   }
-  /* 칩이 28px로 줄어도 터치 영역을 세로 44px로 두고 가로는 간격 4px의 절반까지만 넓힌다 */
+  /* 칩이 28px로 줄어도 터치 영역을 44px로 두고 가로는 간격 16px의 절반까지 넓힌다(P-450) */
   .step-card .step-actions-right > a::after,
-  .step-card .step-actions-right > button::after { inset: -9px -3px; }
+  .step-card .step-actions-right > button::after { inset: -9px -9px; }
 }
 
 /* 왼쪽 아이콘이 4개면(다시 추천 포함) 4+4가 390px에서 300px, 320px에서 252px로 막대를 넘어
@@ -2530,7 +2530,7 @@ label,
 .step-actions-right {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 12px; /* 지도 링크 셋의 눌리는 폭을 44px로 두는 간격(P-450) */
   margin-left: auto;
 }
 
@@ -2544,7 +2544,7 @@ label,
 .step-actions-right > button::after {
   content: '';
   position: absolute;
-  inset: -7px -4px; /* 1px 테두리 안쪽(padding box) 기준이라 1px씩 더한다 */
+  inset: -7px -7px; /* 1px 테두리 안쪽(padding box) 기준이라 1px씩 더한다 */
 }
 
 /* 실시간 예약 바로가기 칩 (캐치테이블/네이버) */
