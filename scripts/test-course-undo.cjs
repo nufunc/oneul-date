@@ -22,7 +22,7 @@ for (const name of ['prevCourse', 'snapshotPrevCourse', 'undoCourse', 'bindUndoB
 
 // 보관·복원·다시 추천을 한 범위에 넣고 나머지 의존은 가짜로 둔다. 코스 대입이 일어나는 generateCourse 가짜는 새 id를 돌려준다
 const STUBS = ['state', 'announce', 'renderResults', 'announceCourse', 'markResultsEngaged', 'spotById', 'buildAnchorCourse', 'addRecentSpotIds', 'courseSpotIds', 'generateCourse', 'spots', 'recentSpotIdSet', 'notifyRelaxedSlots', 'zoneRelaxedSlots', 'announceZoneRelaxed'];
-const body = ['prevCourse', 'snapshotPrevCourse', 'undoCourse', 'bindUndoButton', 'UNDO_COURSE_BTN_HTML', 'regenerateCourse'].map((n) => toJs(decls.get(n))).join('\n');
+const body = ['courseCandidates', 'candidateIndex', 'inCandidateMode', 'replaceCourseKeepingCandidate', 'prevCourse', 'snapshotPrevCourse', 'undoCourse', 'bindUndoButton', 'UNDO_COURSE_BTN_HTML', 'regenerateCourse'].map((n) => toJs(decls.get(n))).join('\n');
 const make = new Function(...STUBS, `${body}\nreturn { snapshotPrevCourse, undoCourse, regenerateCourse, bindUndoButton, get prev() { return prevCourse; }, clear() { prevCourse = null; } };`);
 
 const setup = () => {
@@ -97,7 +97,7 @@ const ids = (course) => course.map((s) => s.spotId);
 }
 
 // 4) 소스 훑기: state.course를 통째로 대입하는 자리는 보관 세 동작이 아니면 같은 함수 앞쪽에서 prevCourse를 비워야 한다
-const SNAPSHOTTING = new Set(['regenerateCourse', 'optimizeCourseRoute', 'undoCourse']);
+const SNAPSHOTTING = new Set(['regenerateCourse', 'optimizeCourseRoute', 'undoCourse', 'replaceCourseKeepingCandidate']); // 마지막은 위 셋이 부르는 후보 유지 대입(P-469)
 const fnOf = (node) => {
   for (let n = node.parent; n; n = n.parent) if (ts.isFunctionLike(n)) return n;
   return null;
@@ -127,7 +127,7 @@ for (const a of assigns) {
 assert.ok(guarded >= 7, `비우는 자리 ${guarded}곳: 저장 열기, 받은 코스, 앵커, 🚀가 모두 들어 있어야 한다`);
 
 // 5) 보관은 세 동작에서 코스를 바꾸기 전에 일어난다
-for (const [name, marker] of [['swapStep', 'state.course[index] ='], ['regenerateCourse', 'state.course = '], ['optimizeCourseRoute', 'state.course = [']]) {
+for (const [name, marker] of [['swapStep', 'state.course[index] ='], ['regenerateCourse', 'state.course = '], ['optimizeCourseRoute', 'replaceCourseKeepingCandidate([']]) {
   const text = decls.get(name).getText();
   const snap = text.indexOf('snapshotPrevCourse()');
   const change = text.indexOf(marker);

@@ -36,7 +36,7 @@ const courseTitle = new Function('spotById', `${titleJs}\nreturn courseTitle;`)(
 
 assert.ok(decls.has('regenerateCourse'), 'regenerateCourse가 없다');
 const STUBS = ['state', 'spotById', 'buildAnchorCourse', 'addRecentSpotIds', 'courseSpotIds', 'renderResults', 'generateCourse', 'spots', 'recentSpotIdSet', 'notifyRelaxedSlots', 'markResultsEngaged', 'announceCourse', 'zoneRelaxedSlots', 'announceZoneRelaxed'];
-const makeRegenerate = new Function(...STUBS, `${['prevCourse', 'snapshotPrevCourse', 'regenerateCourse'].map((n) => toJs(decls.get(n))).join('\n')}\nreturn regenerateCourse;`);
+const makeRegenerate = new Function(...STUBS, `${['courseCandidates', 'candidateIndex', 'inCandidateMode', 'replaceCourseKeepingCandidate', 'prevCourse', 'snapshotPrevCourse', 'regenerateCourse'].map((n) => toJs(decls.get(n))).join('\n')}\nreturn regenerateCourse;`);
 
 // 저장 버튼(#btn-save)이 만드는 SavedCourse 리터럴을 떼어 같은 state로 평가한다
 const saveBlock = src.slice(src.indexOf("'#btn-save')"));

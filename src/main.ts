@@ -3754,6 +3754,62 @@ let spotById = buildSpotIndex(spots);
 let prevCourse: { course: CourseStep[]; conditions: AppState['courseConditions'] } | null = null;
 
 /** 코스를 바꾸기 직전에 부른다. 한 단계만 보관하므로 연달아 바꾸면 가장 최근 직전 코스가 남는다 */
+// 맞춤 코스 후보(P-469). 🚀 한 번에 같은 조건으로 최대 3개를 짜고 고른 후보를 state.course로 둔다.
+// 받은 코스·저장 코스·앵커 코스처럼 state.course를 이 배열 밖의 코스로 바꾸는 경로에서는 후보 단추가 숨는다
+let courseCandidates: CourseStep[][] = [];
+let candidateIndex = 0;
+
+/** 앞 후보에 쓴 장소를 피할 목록에 더해 후보를 차례로 짠다. 피하면 후보가 없는 칸은 generateCourse가 겹침을 허용하고, 장소 구성이 앞 후보와 같으면 버린다 */
+function buildCourseCandidates(make: (avoidIds: Set<number>) => CourseStep[], baseAvoid: ReadonlySet<number>, count = 3): CourseStep[][] {
+  const out: CourseStep[][] = [];
+  const used = new Set<number>(baseAvoid);
+  const seen = new Set<string>();
+  for (let i = 0; i < count; i++) {
+    const course = make(new Set(used));
+    const ids = course.flatMap((st) => (st.spotId !== null ? [st.spotId] : []));
+    const key = [...ids].sort((a, b) => a - b).join(',');
+    if (i > 0 && (ids.length === 0 || seen.has(key))) continue;
+    seen.add(key);
+    ids.forEach((id) => used.add(id));
+    out.push(course);
+  }
+  return out;
+}
+
+function inCandidateMode(): boolean {
+  return courseCandidates.length > 1 && state.course === courseCandidates[candidateIndex];
+}
+
+/** 후보를 보는 중이면 바꾼 코스를 그 후보 자리에 넣는다. 다시 추천·최적 동선·되돌리기가 현재 후보만 바꾸고 후보 단추를 유지한다 */
+function replaceCourseKeepingCandidate(next: CourseStep[]): void {
+  if (inCandidateMode()) courseCandidates[candidateIndex] = next;
+  state.course = next;
+}
+
+function selectCandidate(index: number): void {
+  if (!inCandidateMode() || index === candidateIndex || !courseCandidates[index]) return;
+  prevCourse = null; // ↩ 이전은 후보 안의 변경만 되돌린다. 다른 후보의 직전 코스를 이 후보 자리에 넣지 않는다
+  candidateIndex = index;
+  state.course = courseCandidates[index];
+  if (state.courseConditions) {
+    state.courseConditions = { ...state.courseConditions, zoneRelaxed: zoneRelaxedSlots(spots, state.course, state.courseConditions.subZones) };
+  }
+  addRecentSpotIds(courseSpotIds());
+  renderResults();
+  document.querySelector<HTMLElement>(`#results-area [data-candidate="${index}"]`)?.focus({ preventScroll: true });
+  announceCourse(`후보 ${index + 1} 코스를 골랐어요.`);
+}
+
+function renderCandidateTabs(): string {
+  if (!inCandidateMode()) return '';
+  return `<div class="course-candidates" role="group" aria-label="코스 후보">${courseCandidates.map((course, i) => {
+    const first = course.find((st) => st.spotId !== null);
+    const name = first ? spotById.get(first.spotId as number)?.name : undefined;
+    const active = i === candidateIndex;
+    return `<button type="button" class="quick-region-chip${active ? ' is-active' : ''}" data-candidate="${i}" aria-pressed="${active}" aria-label="후보 ${i + 1}${name ? `: ${escapeHtml(name)}` : ''}">후보 ${i + 1}</button>`;
+  }).join('')}</div>`;
+}
+
 function snapshotPrevCourse(): void {
   if (!state.course || !state.courseConditions) return;
   prevCourse = { course: state.course.map((s) => ({ ...s })), conditions: state.courseConditions };
@@ -3764,7 +3820,7 @@ const UNDO_COURSE_BTN_HTML = `<button class="btn-regenerate" id="btn-undo-course
 
 function undoCourse(): void {
   if (!prevCourse) return;
-  state.course = prevCourse.course;
+  replaceCourseKeepingCandidate(prevCourse.course);
   state.courseConditions = prevCourse.conditions;
   prevCourse = null;
   // 누른 버튼이 사라지므로 renderResults의 포커스 복원이 #btn-regenerate로 보낸다. 저장 상태와 새로 고침 복원도 여기서 맞는다
@@ -4811,22 +4867,28 @@ function triggerCourseGeneration(): void {
   const zoneKeys = state.subZones.length > 0 ? state.subZones : zoneKeysForQuery(state.searchQuery);
   const zoneFromQuery = state.subZones.length === 0 && zoneKeys.length > 0;
   prevCourse = null; // P-363: 코스를 통째로 바꾸는 자리라 ↩ 이전 보관분을 비운다
-  state.course = generateCourse(
-    spots,
-    slotsOn,
-    state.regions,
-    state.mood,
-    {
-      avoidIds: recentSpotIdSet(),
-      searchQuery: state.searchQuery,
-      categoryKey: state.courseCategory,
-      indoorOnly: state.indoorOnly,
-      moodPreset: state.moodPreset,
-      budgetFilter: state.budgetFilter,
-      zoneFromQuery,
-    },
-    zoneKeys,
+  const makeCandidates = (searchQuery: string) => buildCourseCandidates(
+    (avoidIds) => generateCourse(
+      spots,
+      slotsOn,
+      state.regions,
+      state.mood,
+      {
+        avoidIds,
+        searchQuery,
+        categoryKey: state.courseCategory,
+        indoorOnly: state.indoorOnly,
+        moodPreset: state.moodPreset,
+        budgetFilter: state.budgetFilter,
+        zoneFromQuery,
+      },
+      zoneKeys,
+    ),
+    recentSpotIdSet(),
   );
+  courseCandidates = makeCandidates(state.searchQuery);
+  candidateIndex = 0;
+  state.course = courseCandidates[0];
   const matchesIn = (q: string) =>
     state.course?.some((st) => {
       if (!st.spotId) return false;
@@ -4867,22 +4929,9 @@ function triggerCourseGeneration(): void {
     if (place) {
       const rest = state.searchQuery.trim().slice(place.length).trim();
       const shownCourse = state.course;
-      state.course = generateCourse(
-        spots,
-        activeSlots(),
-        state.regions,
-        state.mood,
-        {
-          avoidIds: recentSpotIdSet(),
-          searchQuery: place,
-          categoryKey: state.courseCategory,
-          indoorOnly: state.indoorOnly,
-          moodPreset: state.moodPreset,
-          budgetFilter: state.budgetFilter,
-          zoneFromQuery,
-        },
-        zoneKeys,
-      );
+      const shownCandidates = courseCandidates;
+      courseCandidates = makeCandidates(place);
+      state.course = courseCandidates[0];
       if (matchesIn(place)) {
         if (state.courseConditions) {
           state.courseConditions = {
@@ -4901,6 +4950,7 @@ function triggerCourseGeneration(): void {
       }
       // 동네 재시도가 실패하면 그리지 않은 코스가 남아 저장·교체·알림이 화면과 다른 코스를 읽었다
       state.course = shownCourse;
+      courseCandidates = shownCandidates;
     }
     // 검색 토스트에도 칩 완화 문구를 한 토스트로 붙인다. 붙이지 않아 검색+칩 코스 36/140이 칩 밖 칸을 말없이 넣었다(P-435)
     if (hasMatchedSpot) {
@@ -5132,6 +5182,7 @@ function renderResultsContent(): void {
         <button type="button" class="search-miss-btn" id="btn-search-edit">검색어 바꾸기</button>
       </div>
     ` : ''}
+    ${renderCandidateTabs()}
     <div class="course-head">
       <span class="course-title">${escapeHtml(courseTitle(cond, state.course))}</span>
       <div class="course-head-actions">
@@ -6264,7 +6315,7 @@ function regenerateCourse(): void {
   // 끈 예산으로 짠 코스에 켠 칩 기준 토스트가 떴고, 칩을 끈 뒤에도 스페셜이 계속 걸렸다(P-433)
   const budgetFilter = state.budgetFilter;
   const moodPreset = state.moodPreset;
-  state.course = generateCourse(
+  replaceCourseKeepingCandidate(generateCourse(
     spots,
     slotsOn,
     cond.regions,
@@ -6279,7 +6330,7 @@ function regenerateCourse(): void {
       zoneFromQuery: cond.zoneFromQuery,
     },
     cond.subZones,
-  );
+  ));
   state.courseConditions = {
     ...cond,
     budgetFilter,
@@ -6294,6 +6345,9 @@ function regenerateCourse(): void {
 }
 
 function bindResultEvents(area: HTMLElement): void {
+  area.querySelectorAll<HTMLElement>('[data-candidate]').forEach((btn) => {
+    btn.addEventListener('click', () => selectCandidate(Number(btn.dataset.candidate)));
+  });
   area.querySelector('#btn-search-edit')?.addEventListener('click', () => {
     const input = document.querySelector<HTMLInputElement>('#search-input');
     if (!input) return;
@@ -6464,12 +6518,12 @@ function optimizeCourseRoute(): boolean {
   // 낮·저녁·밤이므로 순서가 바뀔 때마다 `저녁 → 낮`처럼 시각 순서가 깨졌다(P-447).
   // 밤 술집이 저녁 칸에 붙는 문제(2026-09-23)는 위의 새 칸 시각 영업 검사로 막는다.
   snapshotPrevCourse();
-  state.course = [
+  replaceCourseKeepingCandidate([
     { slot: initialSteps[0].slot, spotId: currentSpots[bestPerm[0]].id },
     { slot: initialSteps[1].slot, spotId: currentSpots[bestPerm[1]].id },
     { slot: initialSteps[2].slot, spotId: currentSpots[bestPerm[2]].id },
     ...stayTail,
-  ];
+  ]);
 
   const savedKm = (initialDistance - minDistance).toFixed(1);
   showToast(`⚡ 최적 동선으로 정렬 완료! 이동 거리가 ${savedKm}km 단축되었어요.`);

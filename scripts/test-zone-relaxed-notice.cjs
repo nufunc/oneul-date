@@ -64,7 +64,7 @@ const inZoneSteps = [{ slot: 'day', spotId: 1 }, { slot: 'evening', spotId: 5 },
 assert.deepStrictEqual(zoneRelaxedSlots(withZoneEvening, inZoneSteps, ['taean']), [], '존 안 칸과 빈 칸: 안내 없음');
 
 // 배선: 🚀·다시 추천만 zoneRelaxed를 채우고, 결과 머리 search-miss 띠와 #sr-announce가 같은 문구를 쓴다
-assert.strictEqual((src.match(/zoneRelaxed: zoneRelaxedSlots\(/g) || []).length, 3, '🚀, 동네 재시도, 다시 추천 세 곳');
+assert.strictEqual((src.match(/zoneRelaxed: zoneRelaxedSlots\(/g) || []).length, 4, '🚀, 동네 재시도, 다시 추천, 후보 전환(P-469) 네 곳');
 assert.ok(/<div class="search-miss zone-relaxed"><p>\$\{escapeHtml\(zoneNotice\)\}<\/p><\/div>/.test(src), '결과 머리 띠');
 assert.strictEqual((src.match(/announceZoneRelaxed\(\);/g) || []).length, 3, '코스 알림 뒤 낭독 세 곳');
 console.log('test-zone-relaxed-notice: ok 10');
