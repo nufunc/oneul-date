@@ -196,7 +196,7 @@ const ZONE_CENTERS: Record<string, { lat: number; lng: number }> = {
   bundang: { lat: 37.3947, lng: 127.1112 },
   suwon: { lat: 37.2831, lng: 127.0142 },
   songdo: { lat: 37.3934, lng: 126.6508 },
-  gapyeong: { lat: 37.8315, lng: 127.5097 },
+  gapyeong: { lat: 37.7357, lng: 127.4227 }, // 청평(P-468)
   ilsan: { lat: 37.6584, lng: 126.7701 },
   hanam: { lat: 37.5393, lng: 127.2148 },
   anyang: { lat: 37.3943, lng: 126.9568 },
@@ -207,7 +207,7 @@ const ZONE_CENTERS: Record<string, { lat: number; lng: number }> = {
   daejeon: { lat: 36.3504, lng: 127.3845 },
   cheongju: { lat: 36.6358, lng: 127.4914 },
   cheonan: { lat: 36.8151, lng: 127.1139 },
-  taean: { lat: 36.7457, lng: 126.2974 },
+  taean: { lat: 36.5104, lng: 126.3383 }, // 안면읍(P-468)
   gongju: { lat: 36.4465, lng: 127.1190 },
   jeonju: { lat: 35.8150, lng: 127.1534 },
   yeosu: { lat: 34.7441, lng: 127.7378 },
