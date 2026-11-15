@@ -3218,6 +3218,8 @@ body:has(.data-failed-banner) #app {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  max-width: 100%;
+  min-width: 0;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-full);
@@ -3236,7 +3238,7 @@ body:has(.data-failed-banner) #app {
 .saved-step-name {
   letter-spacing: -0.01em;
   word-break: keep-all;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .saved-step-sep {
