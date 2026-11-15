@@ -3188,11 +3188,15 @@ body:has(.data-failed-banner) #app {
   letter-spacing: var(--label-tracking);
 }
 
-/* 저장 목록은 ul(P-396). 목록 기호와 기본 여백을 없앤다 */
+/* 저장 목록은 ul(P-396). 목록 기호와 기본 여백을 없앤다.
+   항목이 .overlay-body의 직계 자식이 아니게 되어 그 간격 8px을 여기서 다시 준다(P-452) */
 .saved-list {
   list-style: none;
   margin: 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
 /* 단추 안이라 span으로 둔다(button은 구문 콘텐츠만 허용) */

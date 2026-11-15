@@ -18,6 +18,7 @@ const flow = src.slice(src.indexOf('function savedCourseSpotsHtml('), src.indexO
 assert.ok(flow.length > 0 && !/<div\b/.test(flow), '장소 흐름이 div를 그린다(열기 단추 안에 들어간다)');
 
 assert.match(css, /\.saved-list \{[^}]*list-style: none;/, '목록 기호가 보인다');
+assert.match(css, /\.saved-list \{[^}]*gap: var\(--space-2\);/, '저장 항목 사이 간격이 0이다(P-452)');
 assert.match(css, /\.saved-item-spots \{[^}]*display: block;/, '장소 칸이 span이 되며 줄바꿈을 잃었다');
 
 console.log('test-saved-list-structure: 통과');
