@@ -36,6 +36,8 @@ MIN_EXPECTED_SPOTS = 9000  # 비정상 데이터 누락 방지 안전 가드
 CLIENT_UNUSED_KEYS = {"metrics", "created_at", "updated_at", "provider_ids", "reservation_type", "fail_count"}
 ALIAS_FILE = os.path.join(os.path.dirname(TARGET_FILE), "spot_aliases.json")
 # 첫 방문자가 spots.json을 받는 동안 보이는 번들 샘플. 실제 id로 다시 써야 그동안 찜한 스팟이 도착 뒤에도 남는다
+# 앱 첫 방문 전체 받기용 열 형식 사본. 받은 링크 Range는 계속 행 파일 TARGET_FILE을 읽는다(P-453)
+COLS_FILE = os.path.join(os.path.dirname(TARGET_FILE), "spots.cols.json")
 SAMPLE_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src", "data", "spots.sample.json"))
 SAMPLE_MAX_COUNT = 480
 SAMPLE_MAX_BYTES = 305_000  # 2026-09-13 샘플 크기(305,327B). 번들이 이보다 커지지 않게 한다
@@ -179,6 +181,17 @@ def pick_sample(out_spots, max_count=SAMPLE_MAX_COUNT, max_bytes=SAMPLE_MAX_BYTE
     return picked
 
 
+def columns_text(out_spots):
+    """행 배열을 {칸: 행 수만큼의 값 배열} JSON 문자열로 바꾼다. 앱 rowsFromColumns(src/supabase.ts)가 되돌린다(P-453)"""
+    keys = list(out_spots[0])
+    assert all(list(sp) == keys for sp in out_spots), "spots.json 행마다 칸 목록이나 순서가 다르다"
+    text = json.dumps({k: [sp[k] for sp in out_spots] for k in keys}, ensure_ascii=False, separators=(",", ":"))
+    cols = json.loads(text)
+    back = [{k: cols[k][i] for k in keys} for i in range(len(cols["id"]))]
+    assert back == json.loads(json.dumps(out_spots, ensure_ascii=False)), "열 형식을 행으로 되돌린 결과가 spots.json과 다르다"
+    return text
+
+
 def main():
     spots = fetch_all_active_spots()
     total = len(spots)
@@ -217,6 +230,11 @@ def main():
     if os.path.exists(TARGET_FILE):
         os.remove(TARGET_FILE)
     os.rename(tmp_file, TARGET_FILE)
+
+    with open(f"{COLS_FILE}.tmp", "w", encoding="utf-8") as f:
+        f.write(columns_text(out_spots))
+    os.replace(f"{COLS_FILE}.tmp", COLS_FILE)
+    logger.info(f"열 형식 사본 기록: {COLS_FILE} ({os.path.getsize(COLS_FILE):,}B)")
 
     active_ids = {sp["id"] for sp in healed_spots if not sp.get("is_closed")}
     aliases = fetch_merge_aliases(active_ids)
