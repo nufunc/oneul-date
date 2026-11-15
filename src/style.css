@@ -4429,12 +4429,15 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   font-size: 0.80rem;
   margin: 0 0 3px;
 }
-/* 3열 칸은 320에서 71px이라 상호명을 두 줄까지 접는다. 2열과 5열은 한 줄 말줄임 그대로 둔다 */
-.discovery-card.cols-3 .discovery-name {
+/* 3열 칸은 320에서 71px이라 상호명을 두 줄까지 접는다. 2열도 글자를 키우면 한 글자만 남아 두 줄로 접는다.
+   5열은 한 줄 말줄임 그대로 둔다 */
+.discovery-card.cols-3 .discovery-name,
+.discovery-card.cols-2 .discovery-name {
   display: block;
   -webkit-line-clamp: unset;
 }
-.discovery-card.cols-3 .discovery-name-link {
+.discovery-card.cols-3 .discovery-name-link,
+.discovery-card.cols-2 .discovery-name-link {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -4514,6 +4517,13 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   border-radius: var(--radius-sm);
 }
 
+/* 2열 머리는 이름과 업종을 세로로 쌓아 업종이 이름 폭을 먼저 가져가지 않게 한다 */
+.discovery-card.cols-2 .discovery-card-header {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
 /* 2열 모드 텍스트 포함 버튼 스타일 */
 .discovery-card.cols-2 .btn-discovery-action-build.with-label,
 .discovery-card.cols-2 .btn-discovery-action-map.with-label {
@@ -4540,7 +4550,8 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   min-width: 0;
   padding: 0;
 }
-@container (max-width: 139px) {
+/* 기준을 rem으로 두어 브라우저 글자 크기를 키우면 라벨이 함께 숨는다(16px 기준 139px) */
+@container (max-width: 8.6875rem) {
   .discovery-card.cols-2 .action-label {
     display: none;
   }
