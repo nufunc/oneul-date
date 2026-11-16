@@ -3789,6 +3789,9 @@ function replaceCourseKeepingCandidate(next: CourseStep[]): void {
   state.course = next;
 }
 
+// 후보 전환 렌더에서만 true. lazy 이미지는 캐시돼 있어도 보이기 전까지 complete가 되지 않아 is-loaded를 같은 동기 구간에서 붙일 수 없다(P-471)
+let thumbEager = false;
+
 function selectCandidate(index: number): void {
   if (!inCandidateMode() || index === candidateIndex || !courseCandidates[index]) return;
   candidatePrev[candidateIndex] = prevCourse; // 후보별로 보관해 그 후보의 직전 코스만 그 후보 자리에 되돌린다
@@ -3799,7 +3802,8 @@ function selectCandidate(index: number): void {
     state.courseConditions = { ...state.courseConditions, zoneRelaxed: zoneRelaxedSlots(spots, state.course, state.courseConditions.subZones) };
   }
   addRecentSpotIds(courseSpotIds());
-  renderResults();
+  thumbEager = true;
+  try { renderResults(); } finally { thumbEager = false; }
   document.querySelector<HTMLElement>(`#results-area [data-candidate="${index}"]`)?.focus({ preventScroll: true });
   announceCourse(`후보 ${index + 1} 코스를 골랐어요.`);
 }
@@ -5134,8 +5138,17 @@ function renderResults(): void {
   const active = document.activeElement;
   const refocusSelector = area && active && area.contains(active) ? focusSelectorFor(active) : null;
   renderResultsContent();
+  markLoadedThumbs(area);
   if (area) restoreFocusIn(area, refocusSelector, '#btn-regenerate');
   saveLastCourse();
+}
+
+// innerHTML로 새로 만든 이미지는 onload가 다음 작업에서 불려 이미 받은 사진도 투명도 0에서 0.3초 전환으로 다시 나타났다.
+// 같은 동기 구간에서 클래스를 붙이면 계산된 투명도가 0이었던 적이 없어 전환이 시작되지 않는다(P-471)
+function markLoadedThumbs(area: HTMLElement | null): void {
+  area?.querySelectorAll<HTMLImageElement>('img.step-thumb-img').forEach((img) => {
+    if (img.complete && img.naturalWidth > 0) img.classList.add('is-loaded');
+  });
 }
 
 // 새로 고침·뒤로 오기에서 되살릴 마지막 코스를 쓴다. 최적 동선·다시 추천(renderResults)과 칸 교체(swapStep)가 함께 부른다.
@@ -6049,7 +6062,7 @@ function renderStepCard(
       ${isClosedToday ? `<span class="badge-closed-floating">⚠️ 오늘 휴무</span>` : ''}
       ${isClosedAtSlot ? `<span class="badge-closed-floating">⚠️ 영업시간 확인</span>` : ''}
       <div class="step-fallback-box">${fallbackIcon}</div>
-      ${targetImgUrl ? `<img class="step-thumb-img" src="${escapeHtml(toCardThumbUrl(targetImgUrl))}"${toCardThumbUrl(targetImgUrl) !== targetImgUrl ? ` data-orig="${escapeHtml(targetImgUrl)}"` : ''} alt="${escapeHtml(spot.name)}" loading="lazy" fetchpriority="low" decoding="async" referrerpolicy="no-referrer" onload="this.classList.add('is-loaded');" onerror="var o=this.dataset.orig; if(o){this.dataset.orig=''; this.src=o; return;} this.classList.add('is-hidden'); this.previousElementSibling?.classList.add('is-active');" />` : ''}
+      ${targetImgUrl ? `<img class="step-thumb-img" src="${escapeHtml(toCardThumbUrl(targetImgUrl))}"${toCardThumbUrl(targetImgUrl) !== targetImgUrl ? ` data-orig="${escapeHtml(targetImgUrl)}"` : ''} alt="${escapeHtml(spot.name)}" loading="${thumbEager ? 'eager' : 'lazy'}" fetchpriority="low" decoding="async" referrerpolicy="no-referrer" onload="this.classList.add('is-loaded');" onerror="var o=this.dataset.orig; if(o){this.dataset.orig=''; this.src=o; return;} this.classList.add('is-hidden'); this.previousElementSibling?.classList.add('is-active');" />` : ''}
     </div>`;
 
   return `
@@ -6304,6 +6317,8 @@ function refreshTransitDividers(): void {
   });
 }
 
+const SAVED_REGENERATE_NOTICE = '찜을 빼고 새로 추천했어요. ↩ 이전으로 찜 코스를 되돌릴 수 있어요.';
+
 /** 동일 조건 스냅샷으로 모든 스텝 재생성 (체감 랜덤 보정 적용) */
 function regenerateCourse(): void {
   if (!state.course || !state.courseConditions) return;
@@ -6318,8 +6333,9 @@ function regenerateCourse(): void {
     announceCourse(`${candidateLabel()}코스를 다시 추천했어요.`);
     return;
   }
-  // 다시 추천한 코스에는 찜이 들어가지 않으므로 찜 코스 제목을 끈다
-  if (state.courseConditions.fromSaved) state.courseConditions = { ...state.courseConditions, fromSaved: false };
+  // 다시 추천한 코스에는 찜이 들어가지 않으므로 찜 코스 제목을 끈다. 사용자는 찜 위에서 다시 뽑는다고 읽기 쉬워 사실을 알린다(P-471)
+  const wasFromSaved = !!state.courseConditions.fromSaved;
+  if (wasFromSaved) state.courseConditions = { ...state.courseConditions, fromSaved: false };
   const cond = state.courseConditions;
   const slotsOn = state.course.map((st) => st.slot);
   // 예산 칩과 상황 칩은 화면 칩을 따른다. 예산은 코스 조건, 상황은 화면 칩에서 읽어 칩을 켠 뒤 다시 추천하면
@@ -6353,6 +6369,7 @@ function regenerateCourse(): void {
   notifyRelaxedSlots(budgetFilter, moodPreset);
   announceCourse(`${candidateLabel()}코스를 다시 추천했어요.`);
   announceZoneRelaxed();
+  if (wasFromSaved) showToast(SAVED_REGENERATE_NOTICE);
 }
 
 function bindResultEvents(area: HTMLElement): void {
