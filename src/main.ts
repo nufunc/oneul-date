@@ -7836,6 +7836,8 @@ function renderReceiverView(steps: CourseStep[]): void {
   const sharedSpotIds = steps.map((s) => s.spotId).filter((id): id is number => id !== null);
   // 보낸 사람이 켠 테마 칩(`?t=`). 저장과 다시 공유가 이어받는다(P-292)
   const sharedCategoryKey = shareThemeKey(new URLSearchParams(location.search).get('t'));
+  // 받는 사람도 보낸 사람이 켠 테마를 저장 제목과 같은 `이모지 이름` 표기로 본다(P-482)
+  const sharedTheme = SPOT_EXPLORE_CATEGORIES.find((c) => c.key === sharedCategoryKey);
   // 매거진 글의 '앱에서 코스 열기'로 들어오면 referrer가 같은 출처의 /blog/<slug>/다. slug는 외부 입력이라 영숫자와 하이픈만 받는다
   let blogSlug: string | null = null;
   try {
@@ -7872,7 +7874,7 @@ function renderReceiverView(steps: CourseStep[]): void {
           ? `<span class="receiver-hero-badge"><span aria-hidden="true">📖</span> 매거진 코스</span>
         <h2 class="receiver-hero-title">매거진 글에 나온 장소로 만든 코스예요</h2>
         <p class="receiver-hero-desc"><a href="./blog/${blogSlug}/" id="receiver-blog-back" style="color:inherit">← 글로 돌아가기</a></p>`
-          : `<span class="receiver-hero-badge"><span aria-hidden="true">✨</span> 공유받은 데이트 코스</span>
+          : `<span class="receiver-hero-badge"><span aria-hidden="true">✨</span> 공유받은 데이트 코스${sharedTheme ? ` · <span aria-hidden="true">${sharedTheme.emoji}</span> ${escapeHtml(sharedTheme.label)}` : ''}</span>
         <h2 class="receiver-hero-title">${escapeHtml(heroTitle)}</h2>
         <p class="receiver-hero-desc receiver-hero-route">${escapeHtml(heroRoute)}</p>`}
         <button class="btn-primary btn-make-own-hero" id="btn-make-own-hero" type="button"><span aria-hidden="true">🚀</span> 나도 이런 코스 만들기 <span aria-hidden="true">→</span></button>
@@ -7968,7 +7970,6 @@ function renderReceiverView(steps: CourseStep[]): void {
       return;
     }
     const area = sharedArea();
-    const sharedTheme = SPOT_EXPLORE_CATEGORIES.find((c) => c.key === sharedCategoryKey);
     const item: SavedCourse = {
       id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
       createdAt: new Date().toISOString(),
@@ -7982,7 +7983,8 @@ function renderReceiverView(steps: CourseStep[]): void {
       spotIds: sharedSpotIds,
       title: blogSlug && blogFirst
         ? `📖 ${blogFirst} · 매거진 코스`
-        : `${blogSlug ? '📖 매거진 코스 · ' : ''}${regionsLabel(area.regions, area.subZones)} · ${sharedTheme ? `${sharedTheme.emoji} ${sharedTheme.label}` : moodLabel('ALL')}`,
+        // 맞춤 코스 결과 저장 제목과 같은 규칙: 테마가 없으면 고르지 않은 '모든 분위기'를 적지 않고 지역만(P-280, P-482)
+        : `${blogSlug ? '📖 매거진 코스 · ' : ''}${areaThemeLabel(regionsLabel(area.regions, area.subZones), 'ALL', sharedCategoryKey)}`,
     };
     saveCourseWithToast(item);
   });

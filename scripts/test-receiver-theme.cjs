@@ -1,4 +1,4 @@
-// 공유 링크 테마 칩 시험(P-292): node scripts/test-receiver-theme.cjs
+// 공유 링크 테마 칩 시험(P-292, P-482): node scripts/test-receiver-theme.cjs
 // src/main.ts에서 shareThemeKey, buildShareUrl, SPOT_EXPLORE_CATEGORIES, 받은 화면의 칩 읽기와 저장 리터럴을 떼어 실행한다.
 // 켠 칩은 `?t=<칩 키>`로 실리고 끈 칩은 안 붙는지, 링크의 잘못된 키는 버리는지,
 // 받은 코스 저장 항목에 categoryKey가 들어가고 `t`가 없는 옛 링크는 지금과 같은지 본다
@@ -66,19 +66,33 @@ assert.strictEqual(readKey(''), undefined);
 const saveStart = view.indexOf("'btn-receiver-save'");
 const lit = view.slice(saveStart).match(/const item: SavedCourse = (\{[\s\S]*?\n    \});/);
 assert.ok(lit, '받은 코스 저장 리터럴이 없다');
-const sharedThemeLine = view.slice(saveStart).match(/const sharedTheme = [^\n]+;/);
-assert.ok(sharedThemeLine, 'sharedTheme 계산이 없다');
+// 저장 제목은 맞춤 코스 결과와 같은 areaThemeLabel 규칙을 쓴다(P-482): 테마가 없으면 지역만
+const MOODS = [];
 const makeItem = new Function(
-  'SPOT_EXPLORE_CATEGORIES', 'sharedCategoryKey', 'steps', 'sharedSpotIds', 'blogSlug', 'area', 'regionsLabel', 'moodLabel',
-  toJs(`${sharedThemeLine[0]}\nreturn (${lit[1]});`),
+  'SPOT_EXPLORE_CATEGORIES', 'MOODS', 'sharedCategoryKey', 'steps', 'sharedSpotIds', 'blogSlug', 'area', 'regionsLabel', 'blogFirst',
+  toJs(`${declJs('moodLabel')}\n${declJs('areaThemeLabel')}\nreturn (${lit[1]});`),
 );
-const save = (key) => makeItem(SPOT_EXPLORE_CATEGORIES, key, [{ slot: 'day' }, { slot: 'evening' }], [1, 2], null, { regions: ['SEOUL'], subZones: [] }, () => '서울', () => '모든 분위기');
+const save = (key, blog = null, first = '') => makeItem(SPOT_EXPLORE_CATEGORIES, MOODS, key, [{ slot: 'day' }, { slot: 'evening' }], [1, 2], blog, { regions: ['SEOUL'], subZones: [] }, () => '서울', first);
 const cafe = save('CAFE');
 assert.strictEqual(cafe.conditions.categoryKey, 'CAFE', '받은 코스 저장 항목에 categoryKey가 없다');
 assert.strictEqual(cafe.title, '서울 · ☕ 감성카페', `받은 코스 저장 제목: ${cafe.title}`);
 const plain = save(undefined);
 assert.strictEqual(plain.conditions.categoryKey, undefined, '칩 없는 링크가 categoryKey를 넣었다');
-assert.strictEqual(plain.title, '서울 · 모든 분위기', `옛 링크 저장 제목이 달라졌다: ${plain.title}`);
+assert.strictEqual(plain.title, '서울', `테마 없는 링크 저장 제목에 분위기가 붙었다: ${plain.title}`);
+assert.strictEqual(save(undefined, 'x').title, '📖 매거진 코스 · 서울', '매거진 코스 저장 제목');
+assert.strictEqual(save('CAFE', 'x', 'A 외 1곳').title, '📖 A 외 1곳 · 매거진 코스', '매거진 첫 장소 저장 제목');
+assert.ok(!view.slice(saveStart, saveStart + 2000).includes("moodLabel('ALL')"), '받은 코스 저장이 모든 분위기를 붙인다');
+
+// 5. 받은 화면 머리 배지에 테마를 같은 `이모지 이름` 표기로 보이고, 테마가 없으면 아무것도 더하지 않는다(P-482)
+const themeLine = view.match(/const sharedTheme = [^\n]+;/);
+assert.ok(themeLine, 'sharedTheme 계산이 없다');
+const badge = view.match(/<span class="receiver-hero-badge"><span aria-hidden="true">✨<\/span> 공유받은 데이트 코스(\$\{[^\n]*?\})<\/span>\n/);
+assert.ok(badge, '받은 화면 배지에 테마 자리가 없다');
+const badgeHtml = (key) =>
+  new Function('SPOT_EXPLORE_CATEGORIES', 'sharedCategoryKey', 'escapeHtml', toJs(`${themeLine[0]}\nreturn \`${badge[1]}\`;`))(SPOT_EXPLORE_CATEGORIES, key, (x) => x);
+assert.strictEqual(badgeHtml('CAFE'), ' · <span aria-hidden="true">☕</span> 감성카페');
+assert.strictEqual(badgeHtml(undefined), '', '테마 없는 링크 배지에 무언가 붙었다');
+
 assert.match(view, /buildShareUrl\(sharedSpotIds, sharedCategoryKey\)/, '받은 링크 다시 공유가 칩을 잇지 않는다');
 
 console.log('test-receiver-theme: 통과');
