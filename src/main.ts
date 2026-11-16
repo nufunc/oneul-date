@@ -3762,7 +3762,9 @@ let spotById = buildSpotIndex(spots);
 
 // 🔄·다시 추천·⚡ 직전의 코스 한 단계(P-363). 되돌릴 길이 없어 바꾼 결과가 나빠도 원래 코스를 다시 얻을 수 없었다.
 // 코스 조건도 함께 보관한다: 다시 추천이 fromSaved를 끄므로 코스만 되돌리면 제목과 조건이 어긋난다
-type PrevCourse = { course: CourseStep[]; conditions: AppState['courseConditions'] };
+// chips는 저장 코스 불러오기(restoreCourse)가 조건 칩까지 덮을 때만 둔다. 되돌린 코스와 칩이 어긋나지 않게 함께 되돌린다(P-475)
+type PrevChips = { regions: string[]; subZones: string[]; slots: AppState['slots'] };
+type PrevCourse = { course: CourseStep[]; conditions: AppState['courseConditions']; chips?: PrevChips };
 let prevCourse: PrevCourse | null = null;
 
 /** 코스를 바꾸기 직전에 부른다. 한 단계만 보관하므로 연달아 바꾸면 가장 최근 직전 코스가 남는다 */
@@ -3835,9 +3837,9 @@ function renderCandidateTabs(): string {
   }).join('')}</div>`;
 }
 
-function snapshotPrevCourse(): void {
+function snapshotPrevCourse(chips?: PrevChips): void {
   if (!state.course || !state.courseConditions) return;
-  prevCourse = { course: state.course.map((s) => ({ ...s })), conditions: state.courseConditions };
+  prevCourse = { course: state.course.map((s) => ({ ...s })), conditions: state.courseConditions, chips };
 }
 
 // 이름이 보이는 글자 「이전」으로 시작해야 음성 명령으로 누를 수 있다(WCAG 2.5.3, P-397)
@@ -3847,7 +3849,14 @@ function undoCourse(): void {
   if (!prevCourse) return;
   replaceCourseKeepingCandidate(prevCourse.course);
   state.courseConditions = prevCourse.conditions;
+  const chips = prevCourse.chips;
   prevCourse = null;
+  if (chips) {
+    state.regions = chips.regions;
+    state.subZones = chips.subZones;
+    state.slots = chips.slots;
+    renderConditions();
+  }
   // 누른 버튼이 사라지므로 renderResults의 포커스 복원이 #btn-regenerate로 보낸다. 저장 상태와 새로 고침 복원도 여기서 맞는다
   renderResults();
   announce('이전 코스로 되돌렸어요.');
@@ -8939,6 +8948,11 @@ function resolveSavedSteps(spotIds: number[]): { steps: CourseStep[]; dropped: n
 }
 
 function restoreCourse(item: Pick<SavedCourse, 'conditions'>, steps: CourseStep[]): void {
+  // 저장하지 않은 현재 코스는 ↩ 이전으로 되찾게 보관한다(조건 칩 포함). 이미 저장한 코스는 잃는 것이 없어 비운다(P-475)
+  prevCourse = null;
+  if (state.course && !isCourseSaved(courseSpotIds())) {
+    snapshotPrevCourse({ regions: [...state.regions], subZones: [...state.subZones], slots: { ...state.slots } });
+  }
 
   // 하위호환: 과거 저장분은 region이 문자열 — 배열로 정규화해 복원
   const regions = normalizeRegionCond(item.conditions.region);
@@ -8949,7 +8963,6 @@ function restoreCourse(item: Pick<SavedCourse, 'conditions'>, steps: CourseStep[
   for (const k of SLOT_ORDER) {
     state.slots[k] = item.conditions.slots.includes(k);
   }
-  prevCourse = null;
   state.course = steps;
   state.courseConditions = {
     regions: [...regions],
