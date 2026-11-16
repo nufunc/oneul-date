@@ -37,7 +37,7 @@ const SLOTS = [
 const MIN_SPOTS_PER_PAGE = 3;
 const TOP_N = 12;
 // 공유 미리보기 사진(P-383): 그 쪽 목록에서 점수가 가장 높은 스팟 가운데 카카오 자르기 주소가 받는 호스트의 사진을 쓴다.
-// 매거진 글과 같은 C1200x630 JPEG 주소다(P-373, build_blog_image_sizes.mjs). 없으면 템플릿의 og.png를 둔다.
+// 매거진 글과 같은 C1200x630 JPEG 주소다(P-373, build_blog_image_sizes.mjs). 없으면 템플릿의 og-v2.png를 둔다.
 const OG_HOST_RE = /^https?:\/\/(t1\.daumcdn\.net|t1\.kakaocdn\.net|tong\.visitkorea\.or\.kr)\//;
 const OG_PREFIX = 'https://img1.daumcdn.net/thumb/C1200x630.fjpg/?fname=';
 
