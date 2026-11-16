@@ -73,7 +73,17 @@ interface SavedCourse {
   createdAt: string; // ISO
   /** region: 현재 포맷은 배열(다중 선택), 과거 저장분은 문자열 — normalizeRegionCond로 복원 */
   /** categoryKey: 저장할 때의 테마 칩. 예전 저장분에는 없어 칩 없음으로 불러온다 */
-  conditions: { region: string[] | string; subZones?: string[]; mood: string; slots: SlotKey[]; categoryKey?: string };
+  /** anchorId·searchQuery·fromSaved: 앵커·검색어·찜 코스의 제목과 다시 추천 기준(P-472). 예전 저장분에는 없어 지역 코스로 불러온다 */
+  conditions: {
+    region: string[] | string;
+    subZones?: string[];
+    mood: string;
+    slots: SlotKey[];
+    categoryKey?: string;
+    anchorId?: number;
+    searchQuery?: string;
+    fromSaved?: boolean;
+  };
   spotIds: number[];
   /** 저장할 때의 코스 제목('🔍 성수 카페 코스' 등). 예전 저장분에는 없다 */
   title?: string;
@@ -6442,6 +6452,9 @@ function bindResultEvents(area: HTMLElement): void {
         mood: state.courseConditions.mood,
         slots: state.course.map((st) => st.slot),
         categoryKey: state.courseConditions.categoryKey,
+        anchorId: state.courseConditions.anchorId,
+        searchQuery: state.courseConditions.searchQuery || undefined,
+        fromSaved: state.courseConditions.fromSaved || undefined,
       },
       spotIds: ids,
       title: courseTitle(state.courseConditions, state.course),
@@ -8938,6 +8951,9 @@ function restoreCourse(item: Pick<SavedCourse, 'conditions'>, steps: CourseStep[
     subZones: [...subZones],
     mood: item.conditions.mood,
     categoryKey: item.conditions.categoryKey,
+    anchorId: item.conditions.anchorId,
+    searchQuery: item.conditions.searchQuery,
+    fromSaved: item.conditions.fromSaved,
   };
 
   // 스팟 탐색 탭에서 불러오면 결과가 숨겨진 코스 탭에 그려져 화면에 아무 변화가 없었다. 코스 탭으로 옮기고 결과로 내린다
