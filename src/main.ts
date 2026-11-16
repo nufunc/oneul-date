@@ -5956,14 +5956,16 @@ function getDisplayLocation(spot: Spot): string {
     if (parts.length >= 2) {
       const city = parts[0];
       const dist = parts[1];
+      // '경상남도 거제시'를 앞 두 글자로 자르면 '경상 거제시'가 되어 경남·경북을 가를 수 없다
+      const sido = spotSido(spot);
       // 광역시/도 및 구/시 조합
       if (['서울', '인천', '부산', '대구', '광주', '대전', '울산', '세종'].some(c => city.includes(c))) {
-        return `${city.slice(0, 2)} ${dist}`;
+        return `${sido} ${dist}`;
       }
       if (parts.length >= 3 && (dist.endsWith('시') || dist.endsWith('군'))) {
-        return `${city.slice(0, 2)} ${dist} ${parts[2].endsWith('구') ? parts[2] : ''}`.trim();
+        return `${sido} ${dist} ${parts[2].endsWith('구') ? parts[2] : ''}`.trim();
       }
-      return `${city.slice(0, 2)} ${dist}`;
+      return `${sido} ${dist}`;
     }
   }
 
