@@ -3751,13 +3751,16 @@ let spotById = buildSpotIndex(spots);
 
 // 🔄·다시 추천·⚡ 직전의 코스 한 단계(P-363). 되돌릴 길이 없어 바꾼 결과가 나빠도 원래 코스를 다시 얻을 수 없었다.
 // 코스 조건도 함께 보관한다: 다시 추천이 fromSaved를 끄므로 코스만 되돌리면 제목과 조건이 어긋난다
-let prevCourse: { course: CourseStep[]; conditions: AppState['courseConditions'] } | null = null;
+type PrevCourse = { course: CourseStep[]; conditions: AppState['courseConditions'] };
+let prevCourse: PrevCourse | null = null;
 
 /** 코스를 바꾸기 직전에 부른다. 한 단계만 보관하므로 연달아 바꾸면 가장 최근 직전 코스가 남는다 */
 // 맞춤 코스 후보(P-469). 🚀 한 번에 같은 조건으로 최대 3개를 짜고 고른 후보를 state.course로 둔다.
 // 받은 코스·저장 코스·앵커 코스처럼 state.course를 이 배열 밖의 코스로 바꾸는 경로에서는 후보 단추가 숨는다
 let courseCandidates: CourseStep[][] = [];
 let candidateIndex = 0;
+// ↩ 이전(P-470)은 후보별로 둔다. prevCourse는 보는 후보의 것이고, 다른 후보의 것은 전환할 때 여기 맡겼다 되찾는다
+let candidatePrev: (PrevCourse | null)[] = [];
 
 /** 앞 후보에 쓴 장소를 피할 목록에 더해 후보를 차례로 짠다. 피하면 후보가 없는 칸은 generateCourse가 겹침을 허용하고, 장소 구성이 앞 후보와 같으면 버린다 */
 function buildCourseCandidates(make: (avoidIds: Set<number>) => CourseStep[], baseAvoid: ReadonlySet<number>, count = 3): CourseStep[][] {
@@ -3788,8 +3791,9 @@ function replaceCourseKeepingCandidate(next: CourseStep[]): void {
 
 function selectCandidate(index: number): void {
   if (!inCandidateMode() || index === candidateIndex || !courseCandidates[index]) return;
-  prevCourse = null; // ↩ 이전은 후보 안의 변경만 되돌린다. 다른 후보의 직전 코스를 이 후보 자리에 넣지 않는다
+  candidatePrev[candidateIndex] = prevCourse; // 후보별로 보관해 그 후보의 직전 코스만 그 후보 자리에 되돌린다
   candidateIndex = index;
+  prevCourse = candidatePrev[index] ?? null;
   state.course = courseCandidates[index];
   if (state.courseConditions) {
     state.courseConditions = { ...state.courseConditions, zoneRelaxed: zoneRelaxedSlots(spots, state.course, state.courseConditions.subZones) };
@@ -3800,13 +3804,19 @@ function selectCandidate(index: number): void {
   announceCourse(`후보 ${index + 1} 코스를 골랐어요.`);
 }
 
+/** 후보를 보는 중이면 "후보 N ", 아니면 빈 문자열. 다시 추천이 어느 후보를 바꾸는지 이름과 알림에 밝힌다 */
+function candidateLabel(): string {
+  return inCandidateMode() ? `후보 ${candidateIndex + 1} ` : '';
+}
+
 function renderCandidateTabs(): string {
   if (!inCandidateMode()) return '';
   return `<div class="course-candidates" role="group" aria-label="코스 후보">${courseCandidates.map((course, i) => {
     const first = course.find((st) => st.spotId !== null);
     const name = first ? spotById.get(first.spotId as number)?.name : undefined;
     const active = i === candidateIndex;
-    return `<button type="button" class="quick-region-chip${active ? ' is-active' : ''}" data-candidate="${i}" aria-pressed="${active}" aria-label="후보 ${i + 1}${name ? `: ${escapeHtml(name)}` : ''}">후보 ${i + 1}</button>`;
+    // 보이는 글자(후보 N + 첫 장소)와 aria-label을 같게 둔다(WCAG 2.5.3). 이름은 둘째 줄에서 말줄임한다
+    return `<button type="button" class="quick-region-chip${active ? ' is-active' : ''}" data-candidate="${i}" aria-pressed="${active}" aria-label="후보 ${i + 1}${name ? ` ${escapeHtml(name)}` : ''}"><span class="cand-num">후보 ${i + 1}</span>${name ? `<span class="cand-name">${escapeHtml(name)}</span>` : ''}</button>`;
   }).join('')}</div>`;
 }
 
@@ -4888,6 +4898,7 @@ function triggerCourseGeneration(): void {
   );
   courseCandidates = makeCandidates(state.searchQuery);
   candidateIndex = 0;
+  candidatePrev = [];
   state.course = courseCandidates[0];
   const matchesIn = (q: string) =>
     state.course?.some((st) => {
@@ -5192,7 +5203,7 @@ function renderResultsContent(): void {
             ⚡ 최적 동선
           </button>
         ` : ''}
-        <button class="btn-regenerate" id="btn-regenerate" aria-label="전체 다시 추천받기">
+        <button class="btn-regenerate" id="btn-regenerate" aria-label="${candidateLabel() || '전체 '}다시 추천받기">
           ${ICON_REFRESH_SVG}
           <span class="btn-regenerate-text">다시 추천</span>
         </button>
@@ -6304,7 +6315,7 @@ function regenerateCourse(): void {
     state.course = buildAnchorCourse(anchor);
     addRecentSpotIds(courseSpotIds());
     renderResults();
-    announceCourse('코스를 다시 추천했어요.');
+    announceCourse(`${candidateLabel()}코스를 다시 추천했어요.`);
     return;
   }
   // 다시 추천한 코스에는 찜이 들어가지 않으므로 찜 코스 제목을 끈다
@@ -6340,7 +6351,7 @@ function regenerateCourse(): void {
   addRecentSpotIds(courseSpotIds());
   renderResults();
   notifyRelaxedSlots(budgetFilter, moodPreset);
-  announceCourse('코스를 다시 추천했어요.');
+  announceCourse(`${candidateLabel()}코스를 다시 추천했어요.`);
   announceZoneRelaxed();
 }
 

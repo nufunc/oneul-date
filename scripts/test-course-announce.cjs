@@ -83,7 +83,7 @@ const iAnn = swap.indexOf('announce(');
 assert.ok(iChosen >= 0 && iAnn > swap.indexOf('return;', iChosen), '🔄: 후보 없음 반환 뒤에만 알린다');
 assert.ok(/saveLastCourse\(\);\s*(\/\/[^\n]*\n\s*)?announce\(/.test(swap), '🔄: 교체 확정 직후');
 const regen = fn('regenerateCourse');
-assert.strictEqual(regen.split("announceCourse('코스를 다시 추천했어요.')").length - 1, 2, '다시 추천: 앵커 분기와 끝');
+assert.strictEqual(regen.split("announceCourse(`${candidateLabel()}코스를 다시 추천했어요.`)").length - 1, 2, '다시 추천: 앵커 분기와 끝');
 assert.ok(regen.indexOf('if (!state.course') < regen.indexOf('announceCourse'), '다시 추천: 코스 없음 반환 뒤');
 // 동네 재시도가 실패하면 그리지 않은 코스를 버리고 화면의 코스로 돌아간다
 assert.ok(/const shownCourse = state\.course;[\s\S]*if \(matchesIn\(place\)\)[\s\S]*return;\s*\}\s*(\/\/[^\n]*\n\s*)?state\.course = shownCourse;/.test(gen), '동네 재시도 실패 복원');

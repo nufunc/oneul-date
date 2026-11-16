@@ -22,7 +22,7 @@ for (const name of ['prevCourse', 'snapshotPrevCourse', 'undoCourse', 'bindUndoB
 
 // 보관·복원·다시 추천을 한 범위에 넣고 나머지 의존은 가짜로 둔다. 코스 대입이 일어나는 generateCourse 가짜는 새 id를 돌려준다
 const STUBS = ['state', 'announce', 'renderResults', 'announceCourse', 'markResultsEngaged', 'spotById', 'buildAnchorCourse', 'addRecentSpotIds', 'courseSpotIds', 'generateCourse', 'spots', 'recentSpotIdSet', 'notifyRelaxedSlots', 'zoneRelaxedSlots', 'announceZoneRelaxed'];
-const body = ['courseCandidates', 'candidateIndex', 'inCandidateMode', 'replaceCourseKeepingCandidate', 'prevCourse', 'snapshotPrevCourse', 'undoCourse', 'bindUndoButton', 'UNDO_COURSE_BTN_HTML', 'regenerateCourse'].map((n) => toJs(decls.get(n))).join('\n');
+const body = ['courseCandidates', 'candidateIndex', 'inCandidateMode', 'candidateLabel', 'replaceCourseKeepingCandidate', 'prevCourse', 'snapshotPrevCourse', 'undoCourse', 'bindUndoButton', 'UNDO_COURSE_BTN_HTML', 'regenerateCourse'].map((n) => toJs(decls.get(n))).join('\n');
 const make = new Function(...STUBS, `${body}\nreturn { snapshotPrevCourse, undoCourse, regenerateCourse, bindUndoButton, get prev() { return prevCourse; }, clear() { prevCourse = null; } };`);
 
 const setup = () => {
@@ -97,7 +97,7 @@ const ids = (course) => course.map((s) => s.spotId);
 }
 
 // 4) 소스 훑기: state.course를 통째로 대입하는 자리는 보관 세 동작이 아니면 같은 함수 앞쪽에서 prevCourse를 비워야 한다
-const SNAPSHOTTING = new Set(['regenerateCourse', 'optimizeCourseRoute', 'undoCourse', 'replaceCourseKeepingCandidate']); // 마지막은 위 셋이 부르는 후보 유지 대입(P-469)
+const SNAPSHOTTING = new Set(['regenerateCourse', 'optimizeCourseRoute', 'undoCourse', 'replaceCourseKeepingCandidate', 'selectCandidate']); // 뒤 둘은 후보 유지 대입(P-469)과 후보별 prevCourse 맞바꿈(P-470)
 const fnOf = (node) => {
   for (let n = node.parent; n; n = n.parent) if (ts.isFunctionLike(n)) return n;
   return null;

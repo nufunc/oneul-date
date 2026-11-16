@@ -1698,9 +1698,33 @@ label,
 /* 맞춤 코스 후보 전환(P-469). 단추는 .quick-region-chip(높이 44px)을 쓴다 */
 .course-candidates {
   display: flex;
-  flex-wrap: wrap;
   gap: var(--space-2);
   margin-bottom: var(--space-3);
+}
+
+/* P-470: 단추 3등분. 윗줄 후보 번호, 아랫줄 첫 장소 이름(한 줄 말줄임). 높이는 44px 이상 */
+.course-candidates .quick-region-chip {
+  flex: 1 1 0;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0;
+  padding: 4px 8px;
+  border-radius: var(--radius-lg);
+  line-height: 1.25;
+}
+
+.course-candidates .cand-num,
+.course-candidates .cand-name {
+  display: block;
+  max-width: 100%;
+}
+
+.course-candidates .cand-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
 }
 
 .course-head {
