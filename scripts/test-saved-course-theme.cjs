@@ -65,8 +65,7 @@ const restoreThenRegenerate = (item, screenCategory) => {
   };
   makeRegenerate(state, new Map(), noop, noop, () => [], noop, generateCourse, [], () => new Set(), noop, noop, noop, () => [], noop)();
   assert.strictEqual(calls.length, 1, 'generateCourse를 한 번 부르지 않았다');
-  assert.strictEqual(state.courseCategory, screenCategory, '불러오기가 화면 칩을 바꿨다');
-  return { title, categoryKey: calls[0][4].categoryKey };
+  return { title, categoryKey: calls[0][4].categoryKey, chip: state.courseCategory };
 };
 
 // 서울 카페 칩으로 만든 코스를 저장 → 화면 칩을 와인으로 바꿈 → 불러오기
@@ -79,11 +78,13 @@ assert.strictEqual(saved.conditions.categoryKey, 'CAFE', '저장 항목에 테�
 const cafe = restoreThenRegenerate(saved, 'WINE');
 assert.match(cafe.title, /카페/, `불러온 코스 제목이 저장 때 칩을 따르지 않는다: ${cafe.title}`);
 assert.strictEqual(cafe.categoryKey, 'CAFE', '불러온 코스의 다시 추천이 저장 때 칩으로 짜지 않는다');
+assert.strictEqual(cafe.chip, 'CAFE', '불러온 뒤 화면 테마 칩이 저장 코스의 테마가 아니다(P-476)');
 
 // 칸이 없는 옛 저장 항목: 오류 없이 칩 없음으로 불러온다
 const old = { id: 'old', createdAt: '2026-10-01T00:00:00.000Z', conditions: { region: 'SEOUL', mood: 'ALL', slots: ['day', 'evening'] }, spotIds: [1, 2] };
 const legacy = restoreThenRegenerate(old, 'WINE');
 assert.strictEqual(legacy.title, '서울', `옛 저장 코스 제목: ${legacy.title}`);
 assert.strictEqual(legacy.categoryKey, undefined, '옛 저장 코스의 다시 추천이 화면 칩으로 짠다');
+assert.strictEqual(legacy.chip, 'ALL', '옛 저장 코스를 불러오면 테마 칩이 칩 없음이어야 한다(P-476)');
 
 console.log('test-saved-course-theme: 통과');

@@ -80,6 +80,10 @@ interface SavedCourse {
     mood: string;
     slots: SlotKey[];
     categoryKey?: string;
+    /** 저장할 때의 실내·예산·상황 칩. 불러오면 칩이 이 코스의 조건이 된다(P-476). 예전 저장분에는 없어 꺼진 칩으로 불러온다 */
+    indoorOnly?: boolean;
+    budgetFilter?: 'ALL' | 'BUDGET' | 'LUXURY';
+    moodPreset?: MoodPresetKey | null;
     anchorId?: number;
     searchQuery?: string;
     fromSaved?: boolean;
@@ -3763,7 +3767,17 @@ let spotById = buildSpotIndex(spots);
 // 🔄·다시 추천·⚡ 직전의 코스 한 단계(P-363). 되돌릴 길이 없어 바꾼 결과가 나빠도 원래 코스를 다시 얻을 수 없었다.
 // 코스 조건도 함께 보관한다: 다시 추천이 fromSaved를 끄므로 코스만 되돌리면 제목과 조건이 어긋난다
 // chips는 저장 코스 불러오기(restoreCourse)가 조건 칩까지 덮을 때만 둔다. 되돌린 코스와 칩이 어긋나지 않게 함께 되돌린다(P-475)
-type PrevChips = { regions: string[]; subZones: string[]; slots: AppState['slots'] };
+// 테마·실내·예산·분위기 프리셋·검색어도 함께 둔다. 불러오기가 이 칩을 저장 코스의 조건으로 바꾸므로 되돌릴 때 같이 돌아와야 한다(P-476)
+type PrevChips = {
+  regions: string[];
+  subZones: string[];
+  slots: AppState['slots'];
+  courseCategory: string;
+  indoorOnly: boolean;
+  budgetFilter: AppState['budgetFilter'];
+  moodPreset: AppState['moodPreset'];
+  searchQuery: string;
+};
 type PrevCourse = { course: CourseStep[]; conditions: AppState['courseConditions']; chips?: PrevChips };
 let prevCourse: PrevCourse | null = null;
 
@@ -3855,6 +3869,11 @@ function undoCourse(): void {
     state.regions = chips.regions;
     state.subZones = chips.subZones;
     state.slots = chips.slots;
+    state.courseCategory = chips.courseCategory;
+    state.indoorOnly = chips.indoorOnly;
+    state.budgetFilter = chips.budgetFilter;
+    state.moodPreset = chips.moodPreset;
+    state.searchQuery = chips.searchQuery;
     renderConditions();
   }
   // 누른 버튼이 사라지므로 renderResults의 포커스 복원이 #btn-regenerate로 보낸다. 저장 상태와 새로 고침 복원도 여기서 맞는다
@@ -6464,6 +6483,9 @@ function bindResultEvents(area: HTMLElement): void {
         mood: state.courseConditions.mood,
         slots: state.course.map((st) => st.slot),
         categoryKey: state.courseConditions.categoryKey,
+        indoorOnly: state.courseConditions.indoorOnly || undefined,
+        budgetFilter: state.courseConditions.budgetFilter === 'ALL' ? undefined : state.courseConditions.budgetFilter,
+        moodPreset: state.courseConditions.moodPreset ?? undefined,
         anchorId: state.courseConditions.anchorId,
         searchQuery: state.courseConditions.searchQuery || undefined,
         fromSaved: state.courseConditions.fromSaved || undefined,
@@ -8951,7 +8973,16 @@ function restoreCourse(item: Pick<SavedCourse, 'conditions'>, steps: CourseStep[
   // 저장하지 않은 현재 코스는 ↩ 이전으로 되찾게 보관한다(조건 칩 포함). 이미 저장한 코스는 잃는 것이 없어 비운다(P-475)
   prevCourse = null;
   if (state.course && !isCourseSaved(courseSpotIds())) {
-    snapshotPrevCourse({ regions: [...state.regions], subZones: [...state.subZones], slots: { ...state.slots } });
+    snapshotPrevCourse({
+      regions: [...state.regions],
+      subZones: [...state.subZones],
+      slots: { ...state.slots },
+      courseCategory: state.courseCategory,
+      indoorOnly: state.indoorOnly,
+      budgetFilter: state.budgetFilter,
+      moodPreset: state.moodPreset,
+      searchQuery: state.searchQuery,
+    });
   }
 
   // 하위호환: 과거 저장분은 region이 문자열 — 배열로 정규화해 복원
@@ -8963,12 +8994,21 @@ function restoreCourse(item: Pick<SavedCourse, 'conditions'>, steps: CourseStep[
   for (const k of SLOT_ORDER) {
     state.slots[k] = item.conditions.slots.includes(k);
   }
+  // 🚀가 읽는 입력 칩도 코스 조건으로 맞춘다. 안 맞추면 직전 칩 값으로 다른 테마의 코스를 짠다(새로 고침 복원과 같은 규칙, state.mood는 맞추지 않는다)
+  state.courseCategory = item.conditions.categoryKey ?? 'ALL';
+  state.indoorOnly = !!item.conditions.indoorOnly;
+  state.budgetFilter = item.conditions.budgetFilter ?? 'ALL';
+  state.moodPreset = item.conditions.moodPreset ?? null;
+  state.searchQuery = item.conditions.searchQuery ?? '';
   state.course = steps;
   state.courseConditions = {
     regions: [...regions],
     subZones: [...subZones],
     mood: item.conditions.mood,
     categoryKey: item.conditions.categoryKey,
+    indoorOnly: item.conditions.indoorOnly,
+    budgetFilter: item.conditions.budgetFilter,
+    moodPreset: item.conditions.moodPreset,
     anchorId: item.conditions.anchorId,
     searchQuery: item.conditions.searchQuery,
     fromSaved: item.conditions.fromSaved,

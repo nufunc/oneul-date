@@ -103,17 +103,18 @@ const ids = (course) => course.map((s) => s.spotId);
   const restoreJs = ['SLOT_ORDER', 'normalizeRegionCond', 'courseSpotIds', 'prevCourse', 'snapshotPrevCourse', 'undoCourse', 'courseCandidates', 'candidateIndex', 'inCandidateMode', 'replaceCourseKeepingCandidate', 'restoreCourse'].map((n) => toJs(decls.get(n))).join('\n');
   const RS = ['state', 'isCourseSaved', 'updateModeView', 'renderConditions', 'renderResults', 'document', 'cancelOverlayFocusReturn', 'markResultsEngaged', 'announce', 'scrollMotion'];
   const makeRestore = new Function(...RS, `${restoreJs}\nreturn { restoreCourse, undoCourse, get prev() { return prevCourse; } };`);
-  const run = (saved) => {
+  const run = (saved, extraState = {}, extraCond = {}) => {
     const log = { conditions: 0, render: 0 };
     const cur = [{ slot: 'day', spotId: 1 }, { slot: 'evening', spotId: 2 }];
     const state = {
       mainMode: 'course', regions: ['SEOUL'], subZones: ['seongsu'], slots: { day: true, evening: true, night: false, stay: false },
       course: cur, courseConditions: { regions: ['SEOUL'], subZones: ['seongsu'], mood: 'ALL' },
+      courseCategory: 'ALL', indoorOnly: false, budgetFilter: 'ALL', moodPreset: null, searchQuery: '', mood: 'ALL', ...extraState,
     };
     const doc = { getElementById: () => null, querySelector: () => null };
     const noop = () => {};
     const api = makeRestore(state, () => saved, noop, () => { log.conditions += 1; }, () => { log.render += 1; }, doc, noop, noop, noop, () => 'auto');
-    const item = { conditions: { region: ['GYEONGGI'], subZones: [], mood: 'ALL', slots: ['night'] } };
+    const item = { conditions: { region: ['GYEONGGI'], subZones: [], mood: 'ALL', slots: ['night'], ...extraCond } };
     api.restoreCourse(item, [{ slot: 'night', spotId: 9 }]);
     return { api, state, log, cur };
   };
@@ -130,6 +131,32 @@ const ids = (course) => course.map((s) => s.spotId);
     assert.deepStrictEqual(state.subZones, ['seongsu']);
     assert.deepStrictEqual(state.slots, { day: true, evening: true, night: false, stay: false });
     assert.strictEqual(api.prev, null);
+  }
+  // 테마·실내·예산·분위기·검색어 칩(P-476): 불러오면 저장 코스의 조건이 되고, ↩ 이전하면 직전 값이 돌아온다. 과거 저장분은 기본값이다
+  {
+    const { api, state } = run(false, { courseCategory: 'DINING', indoorOnly: true, budgetFilter: 'LUXURY', moodPreset: 'rainy', searchQuery: '성수', mood: 'ROMANTIC' }, { categoryKey: 'CAFE', indoorOnly: false, budgetFilter: 'BUDGET', moodPreset: 'quiet', searchQuery: '한남' });
+    assert.strictEqual(state.courseCategory, 'CAFE', '불러온 뒤 테마 칩이 저장 코스의 테마가 아니다');
+    assert.strictEqual(state.indoorOnly, false);
+    assert.strictEqual(state.budgetFilter, 'BUDGET');
+    assert.strictEqual(state.moodPreset, 'quiet');
+    assert.strictEqual(state.searchQuery, '한남');
+    assert.strictEqual(state.mood, 'ROMANTIC', 'state.mood는 맞추지 않는다');
+    assert.strictEqual(state.courseConditions.categoryKey, 'CAFE');
+    api.undoCourse();
+    assert.strictEqual(state.courseCategory, 'DINING', '↩ 이전 뒤 테마 칩이 직전 값으로 돌아오지 않는다');
+    assert.strictEqual(state.indoorOnly, true);
+    assert.strictEqual(state.budgetFilter, 'LUXURY');
+    assert.strictEqual(state.moodPreset, 'rainy');
+    assert.strictEqual(state.searchQuery, '성수');
+    assert.strictEqual(state.mood, 'ROMANTIC');
+  }
+  {
+    const { state } = run(false, { courseCategory: 'DINING', indoorOnly: true, budgetFilter: 'LUXURY', moodPreset: 'rainy', searchQuery: '성수' }, {});
+    assert.strictEqual(state.courseCategory, 'ALL', '테마가 없는 과거 저장분은 칩 없음이어야 한다');
+    assert.strictEqual(state.indoorOnly, false);
+    assert.strictEqual(state.budgetFilter, 'ALL');
+    assert.strictEqual(state.moodPreset, null);
+    assert.strictEqual(state.searchQuery, '');
   }
   // 저장된 코스: 잃는 것이 없으므로 ↩ 이전이 없다
   {
