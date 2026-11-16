@@ -69,7 +69,7 @@ const restoreThenRegenerate = (item) => {
     return state.course;
   };
   makeRegenerate(state, spotMap, buildAnchorCourse, noop, () => [], noop, generateCourse, [], () => new Set(), noop, noop, noop, () => [], noop, noop, '')();
-  return { title, calls };
+  return { title, calls, state };
 };
 
 const saveWith = (courseConditions) => makeItem({ course: steps, courseConditions }, [1, 2], courseTitle);
@@ -91,6 +91,13 @@ const q = restoreThenRegenerate(searched);
 assert.strictEqual(q.title, searched.title, `불러온 검색어 코스 제목: ${q.title}`);
 assert.strictEqual(q.calls.generate[0][4].searchQuery, '성수 카페', '다시 추천이 검색어를 잃었다');
 
+// 검색어에서 동네를 얻은 코스: 다시 추천이 검색어 동네 완화(zoneFromQuery)를 잃지 않고, 조건 칸 세부 동네로 되살리지 않는다
+const zq = saveWith({ ...base, subZones: ['seongsu'], searchQuery: '성수 카페', zoneFromQuery: true });
+assert.strictEqual(zq.conditions.zoneFromQuery, true, '저장 항목에 zoneFromQuery가 없다');
+const zr = restoreThenRegenerate(zq);
+assert.strictEqual(zr.calls.generate[0][4].zoneFromQuery, true, '다시 추천이 검색어 동네 완화를 잃었다');
+assert.deepStrictEqual(zr.state.subZones, [], '검색어 동네가 조건 칸 세부 동네로 되살아났다');
+
 // 찜 코스: 열기 제목 `❤️ 찜한 코스 · 지역`
 const fav = saveWith({ ...base, searchQuery: '', fromSaved: true });
 assert.strictEqual(fav.title, '❤️ 찜한 코스 · 서울 성동구');
@@ -98,7 +105,7 @@ assert.strictEqual(restoreThenRegenerate(fav).title, fav.title, '불러온 찜 �
 
 // 일반 지역 코스는 저장에 새 필드가 실리지 않는다(빈 검색어와 꺼진 찜은 JSON에서 빠진다)
 const plain = JSON.parse(JSON.stringify(saveWith({ ...base, searchQuery: '' })));
-assert.ok(!('anchorId' in plain.conditions) && !('searchQuery' in plain.conditions) && !('fromSaved' in plain.conditions), '지역 코스 저장에 새 필드가 실렸다');
+assert.ok(!('anchorId' in plain.conditions) && !('searchQuery' in plain.conditions) && !('fromSaved' in plain.conditions) && !('zoneFromQuery' in plain.conditions), '지역 코스 저장에 새 필드가 실렸다');
 
 // 필드가 없는 옛 저장 항목: 오류 없이 지역 코스로 열고 다시 추천도 지역 기준
 const old = { id: 'old', createdAt: '2026-10-01T00:00:00.000Z', conditions: { region: 'SEOUL', mood: 'ALL', slots: ['day', 'evening'] }, spotIds: [1, 2] };

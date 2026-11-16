@@ -83,6 +83,7 @@ interface SavedCourse {
     anchorId?: number;
     searchQuery?: string;
     fromSaved?: boolean;
+    zoneFromQuery?: boolean;
   };
   spotIds: number[];
   /** 저장할 때의 코스 제목('🔍 성수 카페 코스' 등). 예전 저장분에는 없다 */
@@ -6455,6 +6456,7 @@ function bindResultEvents(area: HTMLElement): void {
         anchorId: state.courseConditions.anchorId,
         searchQuery: state.courseConditions.searchQuery || undefined,
         fromSaved: state.courseConditions.fromSaved || undefined,
+        zoneFromQuery: state.courseConditions.zoneFromQuery || undefined,
       },
       spotIds: ids,
       title: courseTitle(state.courseConditions, state.course),
@@ -8940,7 +8942,8 @@ function restoreCourse(item: Pick<SavedCourse, 'conditions'>, steps: CourseStep[
   const regions = normalizeRegionCond(item.conditions.region);
   const subZones = Array.isArray(item.conditions.subZones) ? item.conditions.subZones : [];
   state.regions = regions;
-  state.subZones = subZones;
+  // 검색어에서 얻은 동네는 조건 칸의 세부 동네로 되살리지 않는다(조건 되살리기 경로와 같은 규칙)
+  state.subZones = item.conditions.zoneFromQuery ? [] : subZones;
   for (const k of SLOT_ORDER) {
     state.slots[k] = item.conditions.slots.includes(k);
   }
@@ -8954,6 +8957,7 @@ function restoreCourse(item: Pick<SavedCourse, 'conditions'>, steps: CourseStep[
     anchorId: item.conditions.anchorId,
     searchQuery: item.conditions.searchQuery,
     fromSaved: item.conditions.fromSaved,
+    zoneFromQuery: item.conditions.zoneFromQuery,
   };
 
   // 스팟 탐색 탭에서 불러오면 결과가 숨겨진 코스 탭에 그려져 화면에 아무 변화가 없었다. 코스 탭으로 옮기고 결과로 내린다
