@@ -3778,7 +3778,9 @@ type PrevChips = {
   moodPreset: AppState['moodPreset'];
   searchQuery: string;
 };
-type PrevCourse = { course: CourseStep[]; conditions: AppState['courseConditions']; chips?: PrevChips };
+// candidates는 후보를 보던 중 저장 코스를 불러올 때만 둔다. 후보 묶음과 보던 번호와 후보별 ↩ 이전을 함께 되돌려 후보 단추와 전환을 살린다(P-477)
+type PrevCandidates = { list: CourseStep[][]; index: number; prev: (PrevCourse | null)[] };
+type PrevCourse = { course: CourseStep[]; conditions: AppState['courseConditions']; chips?: PrevChips; candidates?: PrevCandidates };
 let prevCourse: PrevCourse | null = null;
 
 /** 코스를 바꾸기 직전에 부른다. 한 단계만 보관하므로 연달아 바꾸면 가장 최근 직전 코스가 남는다 */
@@ -3851,9 +3853,9 @@ function renderCandidateTabs(): string {
   }).join('')}</div>`;
 }
 
-function snapshotPrevCourse(chips?: PrevChips): void {
+function snapshotPrevCourse(chips?: PrevChips, candidates?: PrevCandidates): void {
   if (!state.course || !state.courseConditions) return;
-  prevCourse = { course: state.course.map((s) => ({ ...s })), conditions: state.courseConditions, chips };
+  prevCourse = { course: state.course.map((s) => ({ ...s })), conditions: state.courseConditions, chips, candidates };
 }
 
 // 이름이 보이는 글자 「이전」으로 시작해야 음성 명령으로 누를 수 있다(WCAG 2.5.3, P-397)
@@ -3861,10 +3863,20 @@ const UNDO_COURSE_BTN_HTML = `<button class="btn-regenerate" id="btn-undo-course
 
 function undoCourse(): void {
   if (!prevCourse) return;
-  replaceCourseKeepingCandidate(prevCourse.course);
+  const cand = prevCourse.candidates;
+  if (cand) {
+    // 후보 묶음을 되돌리고 보던 후보 자리에 보관한 코스를 넣어 state.course와 같은 객체로 맞춘다
+    cand.list[cand.index] = prevCourse.course;
+    courseCandidates = cand.list;
+    candidateIndex = cand.index;
+    candidatePrev = cand.prev;
+    state.course = cand.list[cand.index];
+  } else {
+    replaceCourseKeepingCandidate(prevCourse.course);
+  }
   state.courseConditions = prevCourse.conditions;
   const chips = prevCourse.chips;
-  prevCourse = null;
+  prevCourse = cand ? (cand.prev[cand.index] ?? null) : null;
   if (chips) {
     state.regions = chips.regions;
     state.subZones = chips.subZones;
@@ -8971,6 +8983,8 @@ function resolveSavedSteps(spotIds: number[]): { steps: CourseStep[]; dropped: n
 
 function restoreCourse(item: Pick<SavedCourse, 'conditions'>, steps: CourseStep[]): void {
   // 저장하지 않은 현재 코스는 ↩ 이전으로 되찾게 보관한다(조건 칩 포함). 이미 저장한 코스는 잃는 것이 없어 비운다(P-475)
+  const candidates: PrevCandidates | undefined = inCandidateMode() ? { list: courseCandidates, index: candidateIndex, prev: [...candidatePrev] } : undefined;
+  if (candidates) candidates.prev[candidates.index] = prevCourse; // 보던 후보의 ↩ 이전도 불러오기가 비우기 전에 함께 둔다
   prevCourse = null;
   if (state.course && !isCourseSaved(courseSpotIds())) {
     snapshotPrevCourse({
@@ -8982,7 +8996,7 @@ function restoreCourse(item: Pick<SavedCourse, 'conditions'>, steps: CourseStep[
       budgetFilter: state.budgetFilter,
       moodPreset: state.moodPreset,
       searchQuery: state.searchQuery,
-    });
+    }, candidates);
   }
 
   // 하위호환: 과거 저장분은 region이 문자열 — 배열로 정규화해 복원
