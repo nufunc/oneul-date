@@ -3271,6 +3271,14 @@ const MOOD_PRESETS: { key: MoodPresetKey; label: string; icon: string; desc: str
   { key: 'NIGHT_LIFE', label: '심야·야장', icon: '🌙', desc: '늦은 밤 감성 테라스·바·이자카야' },
 ];
 
+// 저장소(저장 코스·새로 고침 복원)에서 읽은 값은 아는 키만 받는다. 모르는 분위기 키는 끌 칩이 없는 숨은 조건이 돼 거짓 완화 토스트를 냈다(P-481)
+function knownMoodPreset(v: unknown): MoodPresetKey | null {
+  return MOOD_PRESETS.some((m) => m.key === v) ? (v as MoodPresetKey) : null;
+}
+function knownBudgetFilter(v: unknown): 'BUDGET' | 'LUXURY' | null {
+  return v === 'BUDGET' || v === 'LUXURY' ? v : null;
+}
+
 /** 오늘 요일 인덱스 (일, 월, 화, 수, 목, 금, 토) */
 const KOREAN_DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토'] as const;
 
@@ -5096,9 +5104,9 @@ function applyDailyCourseIfEmpty(): void {
     if (steps.length > 0 && steps.length === last.ids.length) {
       prevCourse = null;
       state.course = steps;
-      state.courseConditions = last.conditions;
+      const c = { ...last.conditions, budgetFilter: knownBudgetFilter(last.conditions.budgetFilter) ?? undefined, moodPreset: knownMoodPreset(last.conditions.moodPreset) ?? undefined };
+      state.courseConditions = c;
       // 칩과 🚀가 읽는 입력 상태도 코스 조건으로 맞춘다. 안 맞추면 🚀가 보던 지역이 아닌 전국 코스를 짠다(P-315)
-      const c = last.conditions;
       state.regions = [...c.regions];
       state.subZones = c.zoneFromQuery ? [] : [...c.subZones]; // 검색어에서 얻은 동네는 검색어가 다시 만든다
       // state.mood는 맞추지 않는다. 이 탭에 분위기 입력이 없어 복원하면 지울 수 없는 숨은 조건이 된다
@@ -9017,8 +9025,10 @@ function restoreCourse(item: Pick<SavedCourse, 'conditions'>, steps: CourseStep[
   // 🚀가 읽는 입력 칩도 코스 조건으로 맞춘다. 안 맞추면 직전 칩 값으로 다른 테마의 코스를 짠다(새로 고침 복원과 같은 규칙, state.mood는 맞추지 않는다)
   state.courseCategory = item.conditions.categoryKey ?? 'ALL';
   state.indoorOnly = !!item.conditions.indoorOnly;
-  state.budgetFilter = item.conditions.budgetFilter ?? 'ALL';
-  state.moodPreset = item.conditions.moodPreset ?? null;
+  const budgetFilter = knownBudgetFilter(item.conditions.budgetFilter);
+  const moodPreset = knownMoodPreset(item.conditions.moodPreset);
+  state.budgetFilter = budgetFilter ?? 'ALL';
+  state.moodPreset = moodPreset;
   state.searchQuery = item.conditions.searchQuery ?? '';
   state.course = steps;
   loadedCourse = steps;
@@ -9028,8 +9038,8 @@ function restoreCourse(item: Pick<SavedCourse, 'conditions'>, steps: CourseStep[
     mood: item.conditions.mood,
     categoryKey: item.conditions.categoryKey,
     indoorOnly: item.conditions.indoorOnly,
-    budgetFilter: item.conditions.budgetFilter,
-    moodPreset: item.conditions.moodPreset,
+    budgetFilter: budgetFilter ?? undefined,
+    moodPreset: moodPreset ?? undefined,
     anchorId: item.conditions.anchorId,
     searchQuery: item.conditions.searchQuery,
     fromSaved: item.conditions.fromSaved,

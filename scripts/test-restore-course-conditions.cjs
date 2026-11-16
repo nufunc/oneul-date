@@ -8,7 +8,10 @@ const ts = require('typescript');
 const src = fs.readFileSync(path.join(__dirname, '..', 'src', 'main.ts'), 'utf8');
 const start = src.search(/^function applyDailyCourseIfEmpty\(/m);
 assert.ok(start >= 0, 'applyDailyCourseIfEmpty 없음');
-const code = ts.transpile(src.slice(start, src.indexOf('\n}\n', start) + 3), { target: 'es2022' });
+const fnText = (re) => { const i = src.search(re); assert.ok(i >= 0, `${re} 없음`); return src.slice(i, src.indexOf('\n}\n', i) + 3); };
+const presetsAt = src.indexOf('const MOOD_PRESETS');
+const helpers = [src.slice(presetsAt, src.indexOf('\n];\n', presetsAt) + 4), fnText(/^function knownMoodPreset\(/m), fnText(/^function knownBudgetFilter\(/m)].join('\n');
+const code = ts.transpile(`${helpers}\n${src.slice(start, src.indexOf('\n}\n', start) + 3)}`, { target: 'es2022' });
 
 function run(conditions, ids, slotsOf) {
   const state = {

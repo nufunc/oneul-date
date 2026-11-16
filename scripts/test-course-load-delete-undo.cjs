@@ -14,7 +14,7 @@ for (const st of sf.statements) {
 }
 const toJs = (st) => ts.transpileModule(st.getText().replace(/^export\s+/, ''), { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
 
-const names = ['SLOT_ORDER', 'normalizeRegionCond', 'courseSpotIds', 'prevCourse', 'snapshotPrevCourse', 'undoCourse', 'courseCandidates', 'candidateIndex', 'candidatePrev', 'inCandidateMode', 'replaceCourseKeepingCandidate', 'loadedCourse', 'restoreCourse'];
+const names = ['SLOT_ORDER', 'normalizeRegionCond', 'courseSpotIds', 'prevCourse', 'snapshotPrevCourse', 'undoCourse', 'courseCandidates', 'candidateIndex', 'candidatePrev', 'inCandidateMode', 'replaceCourseKeepingCandidate', 'MOOD_PRESETS', 'knownMoodPreset', 'knownBudgetFilter', 'loadedCourse', 'restoreCourse'];
 const body = names.map((n) => { assert.ok(decls.has(n), `${n}이 없다`); return toJs(decls.get(n)); }).join('\n');
 const RS = ['state', 'isCourseSaved', 'updateModeView', 'renderConditions', 'renderResults', 'document', 'cancelOverlayFocusReturn', 'markResultsEngaged', 'announce', 'scrollMotion'];
 const make = new Function(...RS, `${body}\nreturn { restoreCourse, undoCourse, snapshotPrevCourse, get prev() { return prevCourse; }, get cands() { return courseCandidates; }, get idx() { return candidateIndex; }, setCands(list, i) { courseCandidates = list; candidateIndex = i; candidatePrev = []; prevCourse = null; } };`);

@@ -100,7 +100,7 @@ const ids = (course) => course.map((s) => s.spotId);
 
 // 3-2) 저장 코스 불러오기(P-475): 미저장 현재 코스는 ↩ 이전으로 되찾고 조건 칩도 함께 돌아온다. 저장된 코스면 보관분이 없다
 {
-  const restoreJs = ['SLOT_ORDER', 'normalizeRegionCond', 'courseSpotIds', 'prevCourse', 'snapshotPrevCourse', 'undoCourse', 'courseCandidates', 'candidateIndex', 'candidatePrev', 'inCandidateMode', 'replaceCourseKeepingCandidate', 'loadedCourse', 'restoreCourse'].map((n) => toJs(decls.get(n))).join('\n');
+  const restoreJs = ['SLOT_ORDER', 'normalizeRegionCond', 'courseSpotIds', 'prevCourse', 'snapshotPrevCourse', 'undoCourse', 'courseCandidates', 'candidateIndex', 'candidatePrev', 'inCandidateMode', 'replaceCourseKeepingCandidate', 'MOOD_PRESETS', 'knownMoodPreset', 'knownBudgetFilter', 'loadedCourse', 'restoreCourse'].map((n) => toJs(decls.get(n))).join('\n');
   const RS = ['state', 'isCourseSaved', 'updateModeView', 'renderConditions', 'renderResults', 'document', 'cancelOverlayFocusReturn', 'markResultsEngaged', 'announce', 'scrollMotion'];
   const makeRestore = new Function(...RS, `${restoreJs}\nreturn { restoreCourse, undoCourse, get prev() { return prevCourse; }, get cands() { return courseCandidates; }, get idx() { return candidateIndex; }, setCands(list, i, prev) { courseCandidates = list; candidateIndex = i; candidatePrev = []; prevCourse = prev; } };`);
   const run = (saved, extraState = {}, extraCond = {}) => {
@@ -134,11 +134,11 @@ const ids = (course) => course.map((s) => s.spotId);
   }
   // 테마·실내·예산·분위기·검색어 칩(P-476): 불러오면 저장 코스의 조건이 되고, ↩ 이전하면 직전 값이 돌아온다. 과거 저장분은 기본값이다
   {
-    const { api, state } = run(false, { courseCategory: 'DINING', indoorOnly: true, budgetFilter: 'LUXURY', moodPreset: 'rainy', searchQuery: '성수', mood: 'ROMANTIC' }, { categoryKey: 'CAFE', indoorOnly: false, budgetFilter: 'BUDGET', moodPreset: 'quiet', searchQuery: '한남' });
+    const { api, state } = run(false, { courseCategory: 'DINING', indoorOnly: true, budgetFilter: 'LUXURY', moodPreset: 'NIGHT_LIFE', searchQuery: '성수', mood: 'ROMANTIC' }, { categoryKey: 'CAFE', indoorOnly: false, budgetFilter: 'BUDGET', moodPreset: 'BLIND_DATE', searchQuery: '한남' });
     assert.strictEqual(state.courseCategory, 'CAFE', '불러온 뒤 테마 칩이 저장 코스의 테마가 아니다');
     assert.strictEqual(state.indoorOnly, false);
     assert.strictEqual(state.budgetFilter, 'BUDGET');
-    assert.strictEqual(state.moodPreset, 'quiet');
+    assert.strictEqual(state.moodPreset, 'BLIND_DATE');
     assert.strictEqual(state.searchQuery, '한남');
     assert.strictEqual(state.mood, 'ROMANTIC', 'state.mood는 맞추지 않는다');
     assert.strictEqual(state.courseConditions.categoryKey, 'CAFE');
@@ -146,12 +146,12 @@ const ids = (course) => course.map((s) => s.spotId);
     assert.strictEqual(state.courseCategory, 'DINING', '↩ 이전 뒤 테마 칩이 직전 값으로 돌아오지 않는다');
     assert.strictEqual(state.indoorOnly, true);
     assert.strictEqual(state.budgetFilter, 'LUXURY');
-    assert.strictEqual(state.moodPreset, 'rainy');
+    assert.strictEqual(state.moodPreset, 'NIGHT_LIFE');
     assert.strictEqual(state.searchQuery, '성수');
     assert.strictEqual(state.mood, 'ROMANTIC');
   }
   {
-    const { state } = run(false, { courseCategory: 'DINING', indoorOnly: true, budgetFilter: 'LUXURY', moodPreset: 'rainy', searchQuery: '성수' }, {});
+    const { state } = run(false, { courseCategory: 'DINING', indoorOnly: true, budgetFilter: 'LUXURY', moodPreset: 'NIGHT_LIFE', searchQuery: '성수' }, {});
     assert.strictEqual(state.courseCategory, 'ALL', '테마가 없는 과거 저장분은 칩 없음이어야 한다');
     assert.strictEqual(state.indoorOnly, false);
     assert.strictEqual(state.budgetFilter, 'ALL');
