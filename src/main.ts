@@ -3782,6 +3782,8 @@ type PrevChips = {
 type PrevCandidates = { list: CourseStep[][]; index: number; prev: (PrevCourse | null)[] };
 type PrevCourse = { course: CourseStep[]; conditions: AppState['courseConditions']; chips?: PrevChips; candidates?: PrevCandidates };
 let prevCourse: PrevCourse | null = null;
+// 저장 코스 불러오기가 그린 코스. 지금 코스가 이 객체면 불러온 뒤 다른 코스로 바꾸지 않은 것이다(🔄·다시 추천·⚡는 칩 없는 보관분으로 바꿔 보관분 유지 조건을 끊는다, P-480)
+let loadedCourse: CourseStep[] | null = null;
 
 /** 코스를 바꾸기 직전에 부른다. 한 단계만 보관하므로 연달아 바꾸면 가장 최근 직전 코스가 남는다 */
 // 맞춤 코스 후보(P-469). 🚀 한 번에 같은 조건으로 최대 3개를 짜고 고른 후보를 state.course로 둔다.
@@ -8987,8 +8989,10 @@ function restoreCourse(item: Pick<SavedCourse, 'conditions'>, steps: CourseStep[
   if (candidates) candidates.prev[candidates.index] = prevCourse; // 보던 후보의 ↩ 이전도 불러오기가 비우기 전에 함께 둔다
   const currentSaved = !!state.course && isCourseSaved(courseSpotIds());
   // 칩이 있는 보관분은 코스·조건·후보를 모두 담은 불러오기의 보관분이라, 저장 코스 X에서 Y를 이어 열어도 처음 미저장 코스를 되찾게 둔다(P-479)
-  if (!(currentSaved && prevCourse?.chips)) prevCourse = null;
-  if (state.course && !currentSaved) {
+  // 불러온 X를 지워 미저장이 돼도 X를 그대로 보는 중이면 같은 규칙으로 둔다(P-480)
+  const keepPrev = (currentSaved || (!!state.course && state.course === loadedCourse)) && !!prevCourse?.chips;
+  if (!keepPrev) prevCourse = null;
+  if (state.course && !currentSaved && !keepPrev) {
     snapshotPrevCourse({
       regions: [...state.regions],
       subZones: [...state.subZones],
@@ -9017,6 +9021,7 @@ function restoreCourse(item: Pick<SavedCourse, 'conditions'>, steps: CourseStep[
   state.moodPreset = item.conditions.moodPreset ?? null;
   state.searchQuery = item.conditions.searchQuery ?? '';
   state.course = steps;
+  loadedCourse = steps;
   state.courseConditions = {
     regions: [...regions],
     subZones: [...subZones],

@@ -100,7 +100,7 @@ const ids = (course) => course.map((s) => s.spotId);
 
 // 3-2) 저장 코스 불러오기(P-475): 미저장 현재 코스는 ↩ 이전으로 되찾고 조건 칩도 함께 돌아온다. 저장된 코스면 보관분이 없다
 {
-  const restoreJs = ['SLOT_ORDER', 'normalizeRegionCond', 'courseSpotIds', 'prevCourse', 'snapshotPrevCourse', 'undoCourse', 'courseCandidates', 'candidateIndex', 'candidatePrev', 'inCandidateMode', 'replaceCourseKeepingCandidate', 'restoreCourse'].map((n) => toJs(decls.get(n))).join('\n');
+  const restoreJs = ['SLOT_ORDER', 'normalizeRegionCond', 'courseSpotIds', 'prevCourse', 'snapshotPrevCourse', 'undoCourse', 'courseCandidates', 'candidateIndex', 'candidatePrev', 'inCandidateMode', 'replaceCourseKeepingCandidate', 'loadedCourse', 'restoreCourse'].map((n) => toJs(decls.get(n))).join('\n');
   const RS = ['state', 'isCourseSaved', 'updateModeView', 'renderConditions', 'renderResults', 'document', 'cancelOverlayFocusReturn', 'markResultsEngaged', 'announce', 'scrollMotion'];
   const makeRestore = new Function(...RS, `${restoreJs}\nreturn { restoreCourse, undoCourse, get prev() { return prevCourse; }, get cands() { return courseCandidates; }, get idx() { return candidateIndex; }, setCands(list, i, prev) { courseCandidates = list; candidateIndex = i; candidatePrev = []; prevCourse = prev; } };`);
   const run = (saved, extraState = {}, extraCond = {}) => {
