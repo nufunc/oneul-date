@@ -8985,8 +8985,10 @@ function restoreCourse(item: Pick<SavedCourse, 'conditions'>, steps: CourseStep[
   // 저장하지 않은 현재 코스는 ↩ 이전으로 되찾게 보관한다(조건 칩 포함). 이미 저장한 코스는 잃는 것이 없어 비운다(P-475)
   const candidates: PrevCandidates | undefined = inCandidateMode() ? { list: courseCandidates, index: candidateIndex, prev: [...candidatePrev] } : undefined;
   if (candidates) candidates.prev[candidates.index] = prevCourse; // 보던 후보의 ↩ 이전도 불러오기가 비우기 전에 함께 둔다
-  prevCourse = null;
-  if (state.course && !isCourseSaved(courseSpotIds())) {
+  const currentSaved = !!state.course && isCourseSaved(courseSpotIds());
+  // 칩이 있는 보관분은 코스·조건·후보를 모두 담은 불러오기의 보관분이라, 저장 코스 X에서 Y를 이어 열어도 처음 미저장 코스를 되찾게 둔다(P-479)
+  if (!(currentSaved && prevCourse?.chips)) prevCourse = null;
+  if (state.course && !currentSaved) {
     snapshotPrevCourse({
       regions: [...state.regions],
       subZones: [...state.subZones],

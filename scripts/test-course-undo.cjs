@@ -184,6 +184,49 @@ const ids = (course) => course.map((s) => s.spotId);
     assert.deepStrictEqual(ids(api.cands[2]), [5, 6]);
     assert.strictEqual(api.prev, viewedPrev, '보던 후보의 ↩ 이전이 함께 돌아오지 않는다');
   }
+  // 저장 코스를 연달아 불러오기(P-479): 미저장 B(후보 3개) → 저장 X → 저장 Y 뒤에도 ↩ 이전이 B와 후보 묶음과 칩을 되살린다
+  {
+    const mk = (a, b) => [{ slot: 'day', spotId: a }, { slot: 'evening', spotId: b }];
+    const list = [mk(1, 2), mk(3, 4), mk(5, 6)];
+    const state = {
+      mainMode: 'course', regions: ['SEOUL'], subZones: ['seongsu'], slots: { day: true, evening: true, night: false, stay: false },
+      course: list[1], courseConditions: { regions: ['SEOUL'], subZones: ['seongsu'], mood: 'ALL' },
+      courseCategory: 'DINING', indoorOnly: true, budgetFilter: 'ALL', moodPreset: null, searchQuery: '성수', mood: 'ALL',
+    };
+    const noop = () => {};
+    const savedKeys = ['9,10']; // X만 저장돼 있다(B는 미저장)
+    const isSaved = (idsArr) => savedKeys.includes([...idsArr].sort((a, b) => a - b).join(','));
+    const api = makeRestore(state, isSaved, noop, noop, noop, { getElementById: () => null, querySelector: () => null }, noop, noop, noop, () => 'auto');
+    api.setCands(list, 1, null);
+    const cond = (region) => ({ conditions: { region: [region], subZones: [], mood: 'ALL', slots: ['day', 'evening'], categoryKey: 'CAFE' } });
+    api.restoreCourse(cond('GYEONGGI'), mk(9, 10)); // X
+    assert.ok(api.prev && api.prev.candidates, '첫 불러오기 뒤 B가 ↩ 이전에 없다');
+    api.restoreCourse(cond('BUSAN'), mk(20, 21)); // Y: 저장된 X 위에서 B 보관분을 비우지 않는다
+    assert.ok(api.prev, 'X에서 Y로 불러온 뒤 B의 ↩ 이전이 사라졌다');
+    assert.deepStrictEqual(ids(state.course), [20, 21]);
+    api.undoCourse();
+    assert.deepStrictEqual(ids(state.course), [3, 4], '↩ 이전이 B로 돌아가지 않는다');
+    assert.strictEqual(api.cands.length, 3, '↩ 이전 뒤 후보 묶음이 돌아오지 않는다');
+    assert.strictEqual(api.idx, 1, '↩ 이전 뒤 보던 후보 번호가 유지되지 않는다');
+    assert.strictEqual(state.course, api.cands[api.idx]);
+    assert.strictEqual(state.courseCategory, 'DINING', '↩ 이전 뒤 칩이 B의 값이 아니다');
+    assert.strictEqual(state.searchQuery, '성수');
+    assert.deepStrictEqual(state.subZones, ['seongsu']);
+    assert.strictEqual(api.prev, null);
+  }
+  // 칩 없는 보관분(🔄·다시 추천·⚡)은 저장 코스를 불러오면 지금처럼 비운다
+  {
+    const state = {
+      mainMode: 'course', regions: ['SEOUL'], subZones: [], slots: { day: true, evening: true, night: false, stay: false },
+      course: [{ slot: 'day', spotId: 9 }, { slot: 'evening', spotId: 10 }], courseConditions: { regions: ['SEOUL'], subZones: [], mood: 'ALL' },
+      courseCategory: 'ALL', indoorOnly: false, budgetFilter: 'ALL', moodPreset: null, searchQuery: '', mood: 'ALL',
+    };
+    const noop = () => {};
+    const api = makeRestore(state, () => true, noop, noop, noop, { getElementById: () => null, querySelector: () => null }, noop, noop, noop, () => 'auto');
+    api.setCands([], 0, { course: [{ slot: 'day', spotId: 1 }, { slot: 'evening', spotId: 2 }], conditions: state.courseConditions }); // 칩 없는 보관분
+    api.restoreCourse({ conditions: { region: ['BUSAN'], subZones: [], mood: 'ALL', slots: ['day', 'evening'] } }, [{ slot: 'day', spotId: 20 }, { slot: 'evening', spotId: 21 }]);
+    assert.strictEqual(api.prev, null, '칩 없는 보관분이 저장 코스 불러오기에서 비워지지 않았다');
+  }
   // 저장된 코스: 잃는 것이 없으므로 ↩ 이전이 없다
   {
     const { api } = run(true);
