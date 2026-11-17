@@ -6030,15 +6030,17 @@ function getDisplayLocation(spot: Spot): string {
 function renderStepCard(
   step: CourseStep,
   index: number,
-  opts: { swappable?: boolean; usedImages?: Set<string> } = {},
+  opts: { swappable?: boolean; usedImages?: Set<string>; hideSlot?: boolean } = {},
 ): string {
   const swappable = opts.swappable !== false;
   const meta = SLOT_META[step.slot];
+  // 매거진 코스는 시간대를 글이 정하는데 링크에는 장소 ID만 실려 DB slot이 글과 어긋난다. 그 화면에서는 시간대 표시를 뺀다(P-484)
+  const slotTag = opts.hideSlot ? '' : `<div class="step-slot">${meta.emoji} ${meta.label}</div>`;
   if (step.spotId === null) {
     return `
       <article class="step-card empty">
         <div class="step-card-head">
-          <div class="step-slot">${meta.emoji} ${meta.label}</div>
+          ${slotTag}
         </div>
         <p class="step-empty-msg">${
           step.slot === 'stay'
@@ -6053,7 +6055,7 @@ function renderStepCard(
     return `
       <article class="step-card empty">
         <div class="step-card-head">
-          <div class="step-slot">${meta.emoji} ${meta.label}</div>
+          ${slotTag}
         </div>
         <p class="step-empty-msg">장소 정보를 불러올 수 없어요</p>
       </article>
@@ -6132,7 +6134,7 @@ function renderStepCard(
     <article class="step-card has-image">
       <div class="step-card-head">
         <div class="step-slot-wrap">
-          <div class="step-slot">${meta.emoji} ${meta.label}</div>
+          ${slotTag}
           ${(() => {
             const currentQ = state.courseConditions?.searchQuery || state.searchQuery;
             if (currentQ && matchesSearchQuery(spot, currentQ)) {
@@ -7883,7 +7885,7 @@ function renderReceiverView(steps: CourseStep[]): void {
       <div class="step-list">
         ${steps.length > 0 ? renderUserOriginTransitDivider(steps[0]) : ''}
         ${steps.map((step, i) => {
-          let html = renderStepCard(step, i, { swappable: false, usedImages });
+          let html = renderStepCard(step, i, { swappable: false, usedImages, hideSlot: Boolean(blogSlug) });
           if (i < steps.length - 1) {
             html += renderStepTransitDivider(step, steps[i + 1]);
           }
