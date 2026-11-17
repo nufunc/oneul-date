@@ -3915,7 +3915,7 @@ body:has(#results-area[data-engaged] .result-actions-3) .toast-msg {
 
 .footer-sub {
   font-size: var(--font-xs);
-  color: var(--color-text-faint);
+  color: var(--color-text-sub); /* 라이트 대비 4.5:1 이상(P-483) */
   letter-spacing: var(--label-tracking);
 }
 
