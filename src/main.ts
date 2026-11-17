@@ -3710,7 +3710,7 @@ function requestUserGeolocation(showFeedback = false): void {
 
       const detected = detectRegionFromCoords(pos.coords.latitude, pos.coords.longitude);
       // 사용자가 아직 수동으로 다른 지역을 선택하지 않았을 때만 자동 갱신
-      if (state.regions.length === 1 && state.regions[0] === 'SEOUL' && detected !== 'SEOUL') {
+      if (state.regions.length === 1 && state.regions[0] === 'SEOUL' && detected !== 'SEOUL' && !entryArea.region) {
         state.regions = [detected];
         ensureSpotsForRegions([detected]);
       }
@@ -3742,10 +3742,25 @@ function requestUserGeolocation(showFeedback = false): void {
   );
 }
 
+/**
+ * 지역 랜딩이 넘기는 첫 지역·시간대(P-488). 랜딩 쪽은 #seo-landing의 data-region·data-slot, 랜딩 하단 링크는 ?r=·?s=로 싣는다.
+ * 외부 입력이라 REGIONS·SLOT_ORDER에 있는 키만 받고 나머지는 버린다. 둘 다 없으면 루트 첫 화면 그대로다
+ */
+const entryArea = (() => {
+  const landing = document.getElementById('seo-landing')?.dataset;
+  const query = new URLSearchParams(location.search);
+  const region = landing?.region ?? query.get('r');
+  const slot = landing?.slot ?? query.get('s');
+  return {
+    region: REGIONS.some((r) => r.key !== 'ALL' && r.key === region) ? region : null,
+    slot: SLOT_ORDER.find((k) => k === slot) ?? null,
+  };
+})();
+
 const state: AppState = {
   mainMode: 'course',
-  slots: getDefaultSlots(),
-  regions: [],
+  slots: entryArea.slot ? { day: false, evening: false, night: false, stay: false, [entryArea.slot]: true } : getDefaultSlots(),
+  regions: entryArea.region ? [entryArea.region] : [],
   subZones: [],
   mood: 'ALL',
   searchQuery: '',
@@ -5123,7 +5138,8 @@ function applyDailyCourseIfEmpty(): void {
     }
     try { sessionStorage.removeItem(LAST_COURSE_STORAGE_KEY); } catch {} // 닫힌 스팟이 섞였으면 버리고 오늘 추천으로
   }
-  if (state.searchQuery || state.subZones.length > 0) return;
+  // 랜딩에서 온 첫 지역·시간대는 오늘 추천의 다른 지역 코스로 덮지 않는다(P-488)
+  if (state.searchQuery || state.subZones.length > 0 || entryArea.region || entryArea.slot) return;
   const daily = buildDailyRecommendedCourse(spots);
   if (daily) {
     prevCourse = null;

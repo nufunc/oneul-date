@@ -16,15 +16,16 @@ if (!fs.existsSync(templatePath) || !fs.existsSync(spotsPath)) {
 const template = fs.readFileSync(templatePath, 'utf-8');
 const spots = JSON.parse(fs.readFileSync(spotsPath, 'utf-8'));
 
+// app: 앱 지역 칩 키(src/main.ts REGIONS). 앱은 인천을 경기·인천 칩 하나로 묶는다(P-488)
 const REGIONS = [
-  { key: '서울', slug: 'seoul' },
-  { key: '경기', slug: 'gyeonggi' },
-  { key: '인천', slug: 'incheon' },
-  { key: '강원', slug: 'gangwon' },
-  { key: '충청', slug: 'chungcheong' },
-  { key: '영남', slug: 'yeongnam' },
-  { key: '호남', slug: 'honam' },
-  { key: '제주', slug: 'jeju' },
+  { key: '서울', slug: 'seoul', app: 'SEOUL' },
+  { key: '경기', slug: 'gyeonggi', app: 'GYEONGGI' },
+  { key: '인천', slug: 'incheon', app: 'GYEONGGI' },
+  { key: '강원', slug: 'gangwon', app: 'GANGWON' },
+  { key: '충청', slug: 'chungcheong', app: 'CHUNGCHEONG' },
+  { key: '영남', slug: 'yeongnam', app: 'YEONGNAM' },
+  { key: '호남', slug: 'honam', app: 'HONAM' },
+  { key: '제주', slug: 'jeju', app: 'JEJU' },
 ];
 
 const SLOTS = [
@@ -143,13 +144,13 @@ function buildPage(region, slot, pageSpots, generated) {
         </li>`).join('');
 
   const seoSection = `
-    <section id="seo-landing" aria-label="${escapeHtml(region.key)} ${escapeHtml(slot.label)} 데이트 코스 추천">
+    <section id="seo-landing" data-region="${region.app}" data-slot="${slot.key}" aria-label="${escapeHtml(region.key)} ${escapeHtml(slot.label)} 데이트 코스 추천">
       <h1>${escapeHtml(title)}</h1>
       <p>${escapeHtml(description)}</p>
       <ul>${listItems}
       </ul>
       ${buildNav(region, slot, generated)}
-      <p><a href="${SITE_URL}/">오늘 데이트에서 직접 코스 만들기 →</a></p>
+      <p><a href="${SITE_URL}/?r=${region.app}&amp;s=${slot.key}">오늘 데이트에서 직접 코스 만들기 →</a></p>
     </section>`;
 
   html = html.replace('<div id="app"></div>', `${seoSection}<div id="app"></div>`);
