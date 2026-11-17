@@ -21,7 +21,8 @@ const cut = (src, from, to) => {
   // 샘플 동적 import(P-414)는 new Function 안에서 받을 수 없어 주입한 rawSpotsData로 바꾼다
   const colsCode = cut(supa, 'export function rowsFromColumns', '\n}\n').replace(/^export /gm, '');
   const loadCode = cut(supa, 'export let spotsFellBackToSample', '\n}\n').replace(/^export /gm, '')
-    .replace("(await import('./data/spots.sample.json')).default", 'rawSpotsData');
+    .replace("(await import('./data/spots.sample.json')).default", 'rawSpotsData')
+    .replace(/import\.meta\.env\.BASE_URL/g, "'/oneul-date/'");
   const sample = [{ id: 1 }, { id: 2 }];
   const env = { response: null, saved: [], urls: [] };
   const mod = new Function(
@@ -67,13 +68,13 @@ const cut = (src, from, to) => {
   env.saved = [];
   env.urls = [];
   assert.deepStrictEqual(await mod.loadStaticSpots(), full, '열 형식 본문을 행으로 바꾸지 못했다');
-  assert.deepStrictEqual(env.urls, ['./data/spots.cols.json']);
+  assert.deepStrictEqual(env.urls, ['/oneul-date/data/spots.cols.json']);
   assert.deepStrictEqual(env.saved, [5]);
   const notFound = { ok: false, status: 404, json: async () => ({}) };
   env.response = (url) => (url.endsWith('/spots.cols.json') ? notFound : { ok: true, status: 200, json: async () => full });
   env.urls = [];
   assert.strictEqual((await mod.loadStaticSpots()).length, 5, '404 뒤 행 파일을 받지 못했다');
-  assert.deepStrictEqual(env.urls, ['./data/spots.cols.json', './data/spots.json']);
+  assert.deepStrictEqual(env.urls, ['/oneul-date/data/spots.cols.json', '/oneul-date/data/spots.json']);
   assert.strictEqual(mod.flag(), false);
   env.response = notFound;
   env.urls = [];
@@ -85,7 +86,7 @@ const cut = (src, from, to) => {
   env.response = { ok: false, status: 500, json: async () => ({}) };
   env.urls = [];
   assert.strictEqual(await mod.loadStaticSpots(), sample);
-  assert.deepStrictEqual(env.urls, ['./data/spots.cols.json']);
+  assert.deepStrictEqual(env.urls, ['/oneul-date/data/spots.cols.json']);
 
   // 2. 받은 링크 실패 카드: 해시를 지우지 않고 문구와 다시 불러오기 버튼을 보인다
   const main = read('main.ts');

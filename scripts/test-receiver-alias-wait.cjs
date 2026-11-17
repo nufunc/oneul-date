@@ -30,7 +30,8 @@ const cut = (src, from, to) => {
   );
 
   // 3. loadSpotAliases: 8초 시간 제한을 걸고, 시간이 지나 끊기면 빈 객체를 돌려준다
-  const code = cut(read('supabase.ts'), 'export async function loadSpotAliases', '\n}\n').replace(/^export /gm, '');
+  const code = cut(read('supabase.ts'), 'export async function loadSpotAliases', '\n}\n').replace(/^export /gm, '')
+    .replace(/import\.meta\.env\.BASE_URL/g, "'/oneul-date/'");
   const env = { ms: [], mode: 'hang' };
   const loadSpotAliases = new Function(
     'env',

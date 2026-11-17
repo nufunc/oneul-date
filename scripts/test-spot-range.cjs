@@ -8,7 +8,7 @@ const ts = require('typescript');
 const src = fs.readFileSync(path.join(__dirname, '..', 'src', 'supabase.ts'), 'utf8');
 const start = src.indexOf('const RANGE_URL');
 const end = src.indexOf('\n}\n', src.indexOf('async function findSpotsByRange')) + 3;
-const code = ts.transpile(src.slice(start, end).replace(/^export /gm, ''), { target: 'es2022' });
+const code = ts.transpile(src.slice(start, end).replace(/^export /gm, '').replace(/import\.meta\.env\.BASE_URL/g, "'/oneul-date/'"), { target: 'es2022' });
 const { findRowHead, extractRow, findSpotsByRange } = new Function(
   'normalizeSpots',
   `${code};return { findRowHead, extractRow, findSpotsByRange };`,

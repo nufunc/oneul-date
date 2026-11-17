@@ -23,7 +23,8 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   // 샘플 동적 import(P-414)는 new Function 안에서 받을 수 없어 주입한 rawSpotsData로 바꾼다
   const colsCode = cut(supa, 'export function rowsFromColumns', '\n}\n').replace(/^export /gm, '');
   const loadCode = cut(supa, 'export let spotsFellBackToSample', '\n}\n').replace(/^export /gm, '')
-    .replace("(await import('./data/spots.sample.json')).default", 'rawSpotsData');
+    .replace("(await import('./data/spots.sample.json')).default", 'rawSpotsData')
+    .replace(/import\.meta\.env\.BASE_URL/g, "'/oneul-date/'");
   assert.ok(/const SPOTS_IDLE_MS = 15000;/.test(loadCode), '무응답 제한이 15초가 아니다');
   assert.ok(!/setTimeout\(\s*\(\)\s*=>\s*ctrl\.abort\(\),\s*\d/.test(loadCode), '전체 시간 고정 제한이 생겼다');
   const sample = [{ id: 1 }];
@@ -110,7 +111,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   env.fetch = (url, init) => { urls.push(url); return serve({ file: colsFile })(url, init); };
   got = await mod.loadStaticSpots();
   assert.deepStrictEqual(got, full, '열 형식 본문을 행으로 바꾸지 못했다');
-  assert.deepStrictEqual(urls, ['./data/spots.cols.json'], '열 형식 파일을 먼저 받지 않았다');
+  assert.deepStrictEqual(urls, ['/oneul-date/data/spots.cols.json'], '열 형식 파일을 먼저 받지 않았다');
   assert.strictEqual(mod.bytes(), colsFile.length, '열 형식 받기의 바이트를 세지 않았다');
   assert.strictEqual(mod.flag(), false);
   urls.length = 0;
@@ -121,7 +122,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   };
   got = await mod.loadStaticSpots();
   assert.deepStrictEqual(got, full, '404 뒤 행 파일을 받지 못했다');
-  assert.deepStrictEqual(urls, ['./data/spots.cols.json', './data/spots.json'], '404 뒤 행 파일을 한 번 받지 않았다');
+  assert.deepStrictEqual(urls, ['/oneul-date/data/spots.cols.json', '/oneul-date/data/spots.json'], '404 뒤 행 파일을 한 번 받지 않았다');
   assert.strictEqual(seen[seen.length - 1], file.length, '404 뒤 진행이 행 파일 크기로 끝나지 않았다');
   assert.strictEqual(mod.flag(), false);
   assert.strictEqual(env.timers.size, 0, '404 되돌림 뒤 타이머가 남았다');

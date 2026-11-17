@@ -338,11 +338,11 @@ export async function loadStaticSpots(): Promise<Spot[]> {
   spotsBytesReceived = 0;
   try {
     arm();
-    let res = await fetch('./data/spots.cols.json', { signal: ctrl.signal });
+    let res = await fetch(`${import.meta.env.BASE_URL}data/spots.cols.json`, { signal: ctrl.signal });
     // 수집기가 열 형식 파일을 아직 내지 않았거나 되돌렸으면 행 파일을 받는다(P-453)
     if (res.status === 404) {
       arm();
-      res = await fetch('./data/spots.json', { signal: ctrl.signal });
+      res = await fetch(`${import.meta.env.BASE_URL}data/spots.json`, { signal: ctrl.signal });
     }
     if (res.ok) {
       let data: unknown;
@@ -391,7 +391,7 @@ export async function loadStaticSpots(): Promise<Spot[]> {
 
 // 받은 링크 첫 방문은 전체 spots.json(gzip 3.7MB, Slow 4G 21초)이 와야 수신자 화면을 그렸다. 공유 id 행만 Range 요청으로 찾는다.
 // spots.json이 id 오름차순이고 행마다 `{"id":`로 시작한다는 전제에 기댄다(collector/sync_live_spots.py가 쓰기 전에 assert한다)
-const RANGE_URL = './data/spots.json';
+const RANGE_URL = `${import.meta.env.BASE_URL}data/spots.json`;
 const ROW_HEAD = [0x7b, 0x22, 0x69, 0x64, 0x22, 0x3a]; // {"id":
 const RANGE_PROBE_BYTES = 2048; // 행 최대 1,838B(2026-10-20)보다 커야 조각마다 행 머리가 하나 들어 있다
 const RANGE_PROBES = 7;
@@ -483,7 +483,7 @@ export async function findSpotsByRange(ids: number[]): Promise<Spot[]> {
 export async function loadSpotAliases(): Promise<Record<string, number>> {
   try {
     // 응답이 멈추면 받은 링크가 대기 카드에 머문다. 8초가 지나면 아래 catch로 빈 객체를 돌려준다(P-409)
-    const res = await fetch('./data/spot_aliases.json', { signal: AbortSignal.timeout(8000) });
+    const res = await fetch(`${import.meta.env.BASE_URL}data/spot_aliases.json`, { signal: AbortSignal.timeout(8000) });
     if (res.ok) return (await res.json()) as Record<string, number>;
   } catch {
     // 별칭이 없어도 앱은 동작한다. 병합된 옛 id만 찾지 못한다
@@ -494,7 +494,7 @@ export async function loadSpotAliases(): Promise<Record<string, number>> {
 /** 도시철도 역 이름 → 역사 좌표([위도, 경도]) (한국철도공사 도시철도역사정보, public/data/stations.json). 실패하면 빈 객체 */
 export async function loadStations(): Promise<Record<string, [number, number][]>> {
   try {
-    const res = await fetch('./data/stations.json');
+    const res = await fetch(`${import.meta.env.BASE_URL}data/stations.json`);
     if (res.ok) return ((await res.json()) as { stations: Record<string, [number, number][]> }).stations;
   } catch {
     // 역 좌표가 없어도 앱은 동작한다. 역 이름 검색만 기존 방식으로 처리한다
