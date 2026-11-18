@@ -5116,7 +5116,10 @@ function applyDailyCourseIfEmpty(): void {
   if (last) {
     if (!loadedRegionKeys.has('ALL')) return;
     const steps = buildSharedSteps(last.ids);
-    if (steps.length > 0 && steps.length === last.ids.length) {
+    // 랜딩·?r=&s= 진입은 이 탭 마지막 코스가 그 지역·시간대와 같을 때만 되살린다. 다르면 랜딩 값으로 시작한다(P-489)
+    const sameEntry = (!entryArea.region || (last.conditions.regions.length === 1 && last.conditions.regions[0] === entryArea.region))
+      && (!entryArea.slot || steps.every((st) => st.slot === entryArea.slot));
+    if (sameEntry && steps.length > 0 && steps.length === last.ids.length) {
       prevCourse = null;
       state.course = steps;
       const c = { ...last.conditions, budgetFilter: knownBudgetFilter(last.conditions.budgetFilter) ?? undefined, moodPreset: knownMoodPreset(last.conditions.moodPreset) ?? undefined };
@@ -5136,7 +5139,8 @@ function applyDailyCourseIfEmpty(): void {
       renderResults();
       return;
     }
-    try { sessionStorage.removeItem(LAST_COURSE_STORAGE_KEY); } catch {} // 닫힌 스팟이 섞였으면 버리고 오늘 추천으로
+    // 닫힌 스팟이 섞였으면 버리고 오늘 추천으로. 랜딩 값과 달라 건너뛴 코스는 루트로 돌아갈 때 되살리도록 남긴다
+    if (sameEntry) try { sessionStorage.removeItem(LAST_COURSE_STORAGE_KEY); } catch {}
   }
   // 랜딩에서 온 첫 지역·시간대는 오늘 추천의 다른 지역 코스로 덮지 않는다(P-488)
   if (state.searchQuery || state.subZones.length > 0 || entryArea.region || entryArea.slot) return;

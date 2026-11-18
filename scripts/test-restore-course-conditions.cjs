@@ -24,6 +24,7 @@ function run(conditions, ids, slotsOf) {
     state, spots: [1], location: { hash: '' }, sessionStorage: { getItem: (k) => store[k], removeItem() {} },
     LAST_COURSE_STORAGE_KEY: 'k', loadedRegionKeys: new Set(['ALL']), buildSharedSteps: () => steps,
     renderConditions() {}, renderResults() {}, buildDailyRecommendedCourse: () => null,
+    entryArea: { region: null, slot: null },
   };
   const names = Object.keys(env);
   new Function(...names, `let prevCourse = null;${code};applyDailyCourseIfEmpty();`)(...names.map((n) => env[n]));

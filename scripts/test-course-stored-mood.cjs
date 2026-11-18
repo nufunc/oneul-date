@@ -47,13 +47,13 @@ for (const m of ['BLIND_DATE', 'ANNIVERSARY', 'NIGHT_LIFE']) {
 }
 
 // 2) 새로 고침 복원(sessionStorage)
-const AS = ['state', 'location', 'spots', 'sessionStorage', 'LAST_COURSE_STORAGE_KEY', 'loadedRegionKeys', 'buildSharedSteps', 'renderConditions', 'renderResults'];
+const AS = ['state', 'location', 'spots', 'sessionStorage', 'LAST_COURSE_STORAGE_KEY', 'loadedRegionKeys', 'buildSharedSteps', 'renderConditions', 'renderResults', 'entryArea'];
 const makeApply = new Function(...AS, `let prevCourse = null;\n${js(['MOOD_PRESETS', 'knownMoodPreset', 'knownBudgetFilter', 'applyDailyCourseIfEmpty'])}\nreturn applyDailyCourseIfEmpty;`);
 const refresh = (cond) => {
   const state = { course: null, courseConditions: null, regions: [], subZones: [], slots: {}, budgetFilter: 'ALL', moodPreset: null, searchQuery: '' };
   const last = { ids: [5], conditions: { regions: ['SEOUL'], subZones: [], mood: 'ALL', ...cond } };
   const ss = { getItem: () => JSON.stringify(last), removeItem: noop };
-  makeApply(state, { hash: '' }, [{}], ss, 'k', new Set(['ALL']), (idsArr) => idsArr.map((id) => ({ slot: 'day', spotId: id })), noop, noop)();
+  makeApply(state, { hash: '' }, [{}], ss, 'k', new Set(['ALL']), (idsArr) => idsArr.map((id) => ({ slot: 'day', spotId: id })), noop, noop, { region: null, slot: null })();
   assert.deepStrictEqual(state.course, [{ slot: 'day', spotId: 5 }], '새로 고침 복원 경로를 타지 않았다');
   return state;
 };
