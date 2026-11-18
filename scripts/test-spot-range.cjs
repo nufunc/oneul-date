@@ -45,8 +45,10 @@ assert.strictEqual(extractRow(whole, 1001), null, '없는 id');
 // Range 요청을 흉내 내는 fetch
 let opts = {};
 let requests = 0;
+let ranges = [];
 global.fetch = async (url, init) => {
   requests++;
+  ranges.push(init.headers.Range);
   const m = /^bytes=(\d+)-(\d+)$/.exec(init.headers.Range);
   const a = +m[1];
   const z = Math.min(+m[2], file.length - 1);
@@ -63,6 +65,7 @@ global.fetch = async (url, init) => {
 const run = async (ids, o = {}) => {
   opts = o;
   requests = 0;
+  ranges = [];
   const found = await findSpotsByRange(ids);
   return { found, requests };
 };
@@ -73,6 +76,9 @@ const run = async (ids, o = {}) => {
   const ok = await run(ids);
   assert.deepStrictEqual(ok.found, [rows[0], rows.at(-1), rows[101], rows[333]], '탐색 결과');
   assert.ok(ok.requests < 300, `요청 ${ok.requests}건`);
+  // 같은 구간은 한 번만 요청한다(장소마다 첫 라운드 구간이 같다)
+  await run(ids);
+  assert.strictEqual(new Set(ranges).size, ranges.length, `같은 구간 중복 요청 ${ranges.length - new Set(ranges).size}건`);
   // 모든 행을 하나씩 찾아도 맞는다
   for (const r of rows) assert.deepStrictEqual((await run([r.id])).found, [r], `id ${r.id}`);
 

@@ -442,7 +442,15 @@ export async function findSpotsByRange(ids: number[]): Promise<Spot[]> {
   const timer = setTimeout(() => ctrl.abort(), RANGE_TIMEOUT_MS);
   let total = -1;
   let requests = 0;
-  const get = async (from: number, to: number): Promise<Uint8Array> => {
+  // 장소마다 따로 탐색해도 첫 라운드는 같은 구간을 고르므로 같은 구간은 한 번만 요청한다(ux-reviewer-380 Pre-existing, 3곳 링크에서 7구간 3중)
+  const seen = new Map<string, Promise<Uint8Array>>();
+  const get = (from: number, to: number): Promise<Uint8Array> => {
+    const key = `${from}-${to}`;
+    let p = seen.get(key);
+    if (!p) seen.set(key, (p = fetchRange(from, to)));
+    return p;
+  };
+  const fetchRange = async (from: number, to: number): Promise<Uint8Array> => {
     if (++requests > RANGE_MAX_REQUESTS) throw new Error('range: too many requests');
     const res = await fetch(RANGE_URL, { headers: { Range: `bytes=${from}-${to - 1}` }, cache: 'no-store', signal: ctrl.signal });
     if (res.status !== 206 || res.headers.get('content-encoding')) throw new Error(`range: status ${res.status}`);
