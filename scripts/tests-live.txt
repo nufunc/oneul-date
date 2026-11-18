@@ -1,0 +1,2 @@
+# npm test(CI 기본 실행)에서 빼고 npm run test:live로만 돌리는 시험. 한 줄에 파일 이름 하나.
+# 대상: 실제 네트워크(라이브 URL, 외부 fetch)나 Playwright 브라우저가 있어야 하는 scripts/test-*.cjs

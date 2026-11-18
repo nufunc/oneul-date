@@ -35,6 +35,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      # 시험 다수가 dist를 읽으므로 빌드 뒤에 돌린다. 실패하면 업로드와 배포가 멈춘다
+      - run: npm test
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
