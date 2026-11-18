@@ -8,9 +8,12 @@
     "build": "tsc && vite build && node scripts/generate_seo_pages.mjs && node scripts/build_home_magazine.mjs && node scripts/build_blog_related.mjs && node scripts/build_blog_image_sizes.mjs && node scripts/build_blog_dates.mjs && node scripts/build_blog_fonts.mjs && node scripts/build_blog_breadcrumb.mjs && node scripts/rebase_dist.mjs",
     "preview": "vite preview",
     "test": "node scripts/run-tests.cjs",
-    "test:live": "node scripts/run-tests.cjs --live"
+    "test:live": "node scripts/run-tests.cjs --live",
+    "e2e": "playwright test",
+    "e2e:live": "E2E_URL=https://nufunc.github.io/oneul-date/ playwright test"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.1",
     "typescript": "~6.0.2",
     "vite": "^8.2.0"
   }

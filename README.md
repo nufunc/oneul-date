@@ -52,6 +52,11 @@ npm run dev
 
 # 프로덕션 빌드 검증
 npm run build
+
+# 사용자 흐름 e2e: 처음 한 번 npx playwright install chromium, 빌드한 dist를 vite preview로 띄워 시험
+npm run e2e
+# 라이브 주소(https://nufunc.github.io/oneul-date/) 대상 e2e
+npm run e2e:live
 ```
 
 ### 2. 백엔드 도커 수집기 배포

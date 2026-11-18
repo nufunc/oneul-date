@@ -89,3 +89,7 @@ scripts/_deleted_youtube_junk.json
 # Supabase (CLI 로컬 상태·함수 시크릿 — 커밋 금지)
 supabase/.temp/
 supabase/functions/.env.local
+
+# Playwright e2e 결과(P-508)
+playwright-report/
+test-results/
