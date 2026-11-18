@@ -4269,6 +4269,8 @@ function renderShell(): void {
     </footer>
     <div class="overlay-root" id="overlay-root"></div>
   `;
+  // 지역 랜딩은 #seo-landing(링크 24개)이 #app 앞에 있어 건너뛰기 링크가 Tab 25번째였다. 문서 맨 앞으로 옮긴다(WCAG 2.4.1, P-500)
+  if (document.getElementById('seo-landing')) document.body.prepend(...app.querySelectorAll(':scope > .skip-link'));
   // Chromium은 반쯤 보이는 칩에 Tab해도 줄을 넘기지 않아 칩 이름이 잘린 채 남았다. 키보드 초점일 때만 넘겨
   // 마우스와 터치로 누를 때의 움직임은 그대로 둔다(P-417)
   document.getElementById('conditions-area')?.addEventListener('focusin', (e) => {
@@ -7777,6 +7779,8 @@ function clearCourseHash(): void {
 const homeDocTitle = document.title;
 /** 루트 HTML의 정적 매거진 블록(scripts/build_home_magazine.mjs)은 홈 셸에서만 보이고 받은 코스 화면에서는 숨는다 */
 function setSharedCourseView(shared: boolean): void {
+  // 지역 랜딩에서 #app 밖으로 옮긴 건너뛰기 링크를 화면을 다시 그릴 때마다 걷어 두 벌 생기지 않게 한다(P-500)
+  document.querySelectorAll('body > .skip-link').forEach((el) => el.remove());
   document.documentElement.toggleAttribute('data-shared-course', shared);
   if (!shared) document.title = homeDocTitle;
 }
@@ -7857,7 +7861,10 @@ function showSpotsFailedBanner(count: number): void {
     document.getElementById('main-content')?.focus({ preventScroll: true });
   });
   // body 끝에 붙이면 「다시 받기」가 1280px에서 Tab 64번째라 #app 앞에 둔다. 화면 위치는 position:fixed라 그대로다(WCAG 2.4.3, P-496)
-  document.body.prepend(bar);
+  // 지역 랜딩은 맨 앞의 건너뛰기 링크 뒤, #seo-landing 앞에 둔다(P-500)
+  const landing = document.getElementById('seo-landing');
+  if (landing) landing.before(bar);
+  else document.body.prepend(bar);
   announce(bar.querySelector('.data-failed-text')!.textContent!);
 }
 
