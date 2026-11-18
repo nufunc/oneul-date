@@ -976,6 +976,12 @@ label,
   box-shadow: 0 0 0 3px var(--color-accent-soft), var(--shadow-card);
 }
 
+/* 3px 고리 --color-accent-soft는 배경 대비 1.11:1이라 키보드 초점이 테두리 색 변화로만 보였다. 전역 포커스 링과 같은 외곽선을 켠다(WCAG 2.4.7) */
+.search-input:focus-visible {
+  outline-color: var(--color-accent-text);
+  outline-offset: 2px;
+}
+
 .search-box:focus-within .search-input-icon {
   color: var(--color-accent-text);
 }
