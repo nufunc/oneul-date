@@ -34,7 +34,7 @@ assert.ok(/landing\?\.region \?\? query\.get\('r'\)/.test(entry) && /landing\?\.
 assert.ok(/REGIONS\.some\(\(r\) => r\.key !== 'ALL' && r\.key === region\)/.test(entry), '알 수 없는 지역 키를 버리지 않는다');
 assert.ok(/SLOT_ORDER\.find\(\(k\) => k === slot\) \?\? null/.test(entry), '알 수 없는 시간대 키를 버리지 않는다');
 const stateInit = src.slice(src.indexOf('const state: AppState'), src.indexOf('};', src.indexOf('const state: AppState')));
-assert.ok(/slots: entryArea\.slot \? \{ day: false, evening: false, night: false, stay: false, \[entryArea\.slot\]: true \} : getDefaultSlots\(\)/.test(stateInit), '첫 시간대를 랜딩 값으로 두지 않는다');
+assert.ok(/slots: entryArea\.slot \? \{ \.\.\.getDefaultSlots\(\), \[entryArea\.slot\]: true \} : getDefaultSlots\(\)/.test(stateInit), '첫 시간대가 루트 기본 칸에 랜딩 시간대를 더한 집합이 아니다(P-490)');
 assert.ok(/regions: entryArea\.region \? \[entryArea\.region\] : \[\]/.test(stateInit), '첫 지역을 랜딩 값으로 두지 않는다');
 // 오늘 추천 코스와 GPS 자동 지역이 랜딩 값을 덮지 않는다
 assert.ok(/state\.subZones\.length > 0 \|\| entryArea\.region \|\| entryArea\.slot\) return;/.test(src), '오늘 추천 코스가 랜딩 값을 덮는다');

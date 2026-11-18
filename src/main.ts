@@ -3759,7 +3759,8 @@ const entryArea = (() => {
 
 const state: AppState = {
   mainMode: 'course',
-  slots: entryArea.slot ? { day: false, evening: false, night: false, stay: false, [entryArea.slot]: true } : getDefaultSlots(),
+  // 랜딩 시간대는 루트 기본 칸에 더한다. 하나만 켜면 「완성하기」 결과가 장소 1곳이 된다(P-490)
+  slots: entryArea.slot ? { ...getDefaultSlots(), [entryArea.slot]: true } : getDefaultSlots(),
   regions: entryArea.region ? [entryArea.region] : [],
   subZones: [],
   mood: 'ALL',
@@ -5116,9 +5117,9 @@ function applyDailyCourseIfEmpty(): void {
   if (last) {
     if (!loadedRegionKeys.has('ALL')) return;
     const steps = buildSharedSteps(last.ids);
-    // 랜딩·?r=&s= 진입은 이 탭 마지막 코스가 그 지역·시간대와 같을 때만 되살린다. 다르면 랜딩 값으로 시작한다(P-489)
+    // 랜딩·?r=&s= 진입은 이 탭 마지막 코스가 그 지역이고 랜딩 시간대 칸을 품을 때만 되살린다. 아니면 랜딩 값으로 시작한다(P-489, P-490)
     const sameEntry = (!entryArea.region || (last.conditions.regions.length === 1 && last.conditions.regions[0] === entryArea.region))
-      && (!entryArea.slot || steps.every((st) => st.slot === entryArea.slot));
+      && (!entryArea.slot || steps.some((st) => st.slot === entryArea.slot));
     if (sameEntry && steps.length > 0 && steps.length === last.ids.length) {
       prevCourse = null;
       state.course = steps;
