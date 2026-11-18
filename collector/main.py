@@ -27,7 +27,6 @@ from enrich_worker import run_social_enrichment
 from youtube_vlog_miner import run_youtube_vlog_mining
 from miners.catchtable_miner import run_catchtable_mining
 from miners.tourapi_miner import run_tourapi_mining
-from heal_and_verify_spots import heal_all_spots
 from merge_duplicates import run_merge
 from event_period import run_event_sync
 from tour_fee import run_parking_backfill
@@ -504,23 +503,6 @@ def run_cycle():
             log(f"8단계 TourAPI 마이닝 오류: {e}", level="ERROR")
     else:
         log("⏩ 8단계(TourAPI) 대기 중 (4시간 주기 보호)")
-
-    # 9단계: 상호명 정제 및 AI 가공/폐업 스팟 자동 보정 (2시간 주기)
-    if is_step_due("heal_spots", 2.0):
-        log("▶ 9단계: 상호명 정제 및 AI 가공/더미/폐업 스팟 자동 보정 파이프라인 가동")
-        try:
-            spots_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "public", "data", "spots.json"))
-            if os.path.exists(spots_file):
-                with open(spots_file, "r", encoding="utf-8") as f:
-                    spots_data = json.load(f)
-                healed_spots, h_stats = heal_all_spots(spots_data)
-                with open(spots_file, "w", encoding="utf-8") as f:
-                    json.dump(healed_spots, f, ensure_ascii=False, indent=2)
-                log(f"9단계 완료: 더미비활성화 {h_stats.get('deactivated_dummies', 0)}개, 상호정제 {h_stats.get('cleaned_names', 0)}개 (활성: {h_stats.get('active_total', 0)}개)")
-        except Exception as e:
-            log(f"9단계 자동 보정 오류: {e}", level="ERROR")
-    else:
-        log("⏩ 9단계(자동 보정 파이프라인) 대기 중 (2시간 주기 보호)")
 
     # 10단계: 정규화 이름·주소가 같은 열린 중복 소프트 병합 (24시간 주기). 백업과 id 매핑은 볼륨에 남긴다
     if is_step_due("merge_duplicates", 24.0):
