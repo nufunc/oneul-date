@@ -2734,6 +2734,11 @@ label,
   padding-right: var(--space-2);
 }
 
+/* 결과 영역으로 내린 뒤 결과 머리로 옮긴 초점 링(외곽선 2px, offset 2px)의 위쪽 변이 화면 밖 y -4px에 그려졌다(P-491 뒤 ux-reviewer-383 N-1) */
+#results-area {
+  scroll-margin-top: 8px;
+}
+
 /* 🚀 직후 📋 🔗 💾 막대가 첫 화면 밖 124~679px 아래라 저장하려면 더 내려야 했다. 사용자가 코스를 만든 뒤
    (#results-area[data-engaged], main.ts markResultsEngaged)에만 화면 아래에 붙이고 문서 끝에서는 제자리로 돌아간다.
    첫 로드의 기본 코스에는 붙이지 않는다. 값은 받은 코스 저장 막대와 같다(P-295, P-238) */
