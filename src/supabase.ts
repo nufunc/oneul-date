@@ -398,6 +398,9 @@ const RANGE_PROBES = 7;
 const RANGE_FINAL_BYTES = 16384;
 const RANGE_MAX_REQUESTS = 300; // 공유 3곳에 88건(라운드 4번)이다
 const RANGE_TIMEOUT_MS = 25000; // Slow 3G(응답 약 2.5초)에서 순차 라운드 6번이 약 17초 걸려 15초도 모자랐다(P-410)
+// 첫 요청(bytes=0-0)의 응답 헤더 대기 제한. 응답이 없는 망에서 25초를 다 기다린 뒤 전체 파일 15초가 더해져 실패 카드가 40초에 떴다.
+// 전체 파일의 SPOTS_IDLE_MS와 같은 값이다(P-492)
+const RANGE_HEAD_MS = 15000;
 
 /** 조각에서 from 이후 첫 행 머리의 바이트 위치와 id. 문자열로 디코드해 세면 다중 바이트 문자에서 위치가 어긋나 바이트로 센다 */
 export function findRowHead(buf: Uint8Array, from = 0): { pos: number; id: number } | null {
@@ -468,7 +471,13 @@ export async function findSpotsByRange(ids: number[]): Promise<Spot[]> {
     return extractRow(await get(lo, hi), id);
   };
   try {
-    await get(0, 1); // 전체 크기를 먼저 안다
+    // 전체 크기를 먼저 안다. 헤더가 RANGE_HEAD_MS 안에 오지 않으면 그만두고 호출부가 전체 파일로 넘어간다(P-492)
+    const headTimer = setTimeout(() => ctrl.abort(), RANGE_HEAD_MS);
+    try {
+      await get(0, 1);
+    } finally {
+      clearTimeout(headTimer);
+    }
     const rows = await Promise.all(ids.map(find));
     return rows.every(Boolean) ? normalizeSpots(rows as Spot[]) : [];
   } catch {
