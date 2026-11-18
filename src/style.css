@@ -2875,6 +2875,11 @@ body:has(.data-failed-banner) #app {
   padding-bottom: calc(160px + env(safe-area-inset-bottom, 0px));
 }
 
+/* Tab 초점이 띠 밑으로 가지 않게 초점 이동 스크롤도 같은 높이만큼 띄운다(WCAG 2.4.11, P-493). ✕로 띠를 닫으면 함께 없어진다 */
+html:has(.data-failed-banner) {
+  scroll-padding-bottom: calc(160px + env(safe-area-inset-bottom, 0px));
+}
+
 .data-failed-text {
   flex: 1;
   margin: 0;
