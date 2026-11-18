@@ -290,12 +290,6 @@ html[data-theme-resolved="dark"] .badge-parking {
   border-color: var(--color-border);
   color: var(--color-text-sub);
 }
-html[data-theme="dark"] .badge-price,
-html[data-theme-resolved="dark"] .badge-price {
-  background: var(--color-surface-sub);
-  border-color: var(--color-border);
-  color: var(--color-text);
-}
 
 html[data-theme="dark"] .btn-swap-chip:hover,
 html[data-theme-resolved="dark"] .btn-swap-chip:hover {
@@ -2704,12 +2698,6 @@ label,
   gap: 3px;
 }
 
-.badge-price {
-  color: #B45309;
-  background: #FFFBEB;
-  border-color: #FDE68A;
-  font-weight: 700;
-}
 
 /* 결과 하단 액션 */
 .result-actions {

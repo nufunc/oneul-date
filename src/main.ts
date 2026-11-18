@@ -6155,10 +6155,6 @@ function renderStepCard(
     metaBadges.push(`<span class="badge-meta badge-parking">🅿️ 주차불가</span>`);
   }
 
-  if (spot.price_tier && spot.price_tier !== 'FREE') {
-    metaBadges.push(`<span class="badge-meta badge-price">${spot.price_tier}</span>`);
-  }
-
   // P-372: 오늘 영업시간 한 줄. 오늘 휴무 카드는 ⚠️ 배지와 모순되므로 그리지 않는다
   const hoursLabel = isClosedToday ? '' : todayHoursLabel(spot);
   if (hoursLabel) {
