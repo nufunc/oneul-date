@@ -7852,7 +7852,8 @@ function showSpotsFailedBanner(count: number): void {
   `;
   bar.querySelector('.btn-data-retry')!.addEventListener('click', () => location.reload());
   bar.querySelector('.btn-data-dismiss')!.addEventListener('click', () => bar.remove());
-  document.body.appendChild(bar);
+  // body 끝에 붙이면 「다시 받기」가 1280px에서 Tab 64번째라 #app 앞에 둔다. 화면 위치는 position:fixed라 그대로다(WCAG 2.4.3, P-496)
+  document.body.prepend(bar);
   announce(bar.querySelector('.data-failed-text')!.textContent!);
 }
 

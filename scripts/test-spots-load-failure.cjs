@@ -147,7 +147,7 @@ const cut = (src, from, to) => {
     return el;
   };
   const doc = {
-    body: { children: [], appendChild(el) { this.children.push(el); } },
+    body: { children: [], appendChild(el) { this.children.push(el); }, prepend(el) { this.children.unshift(el); } },
     createElement: makeEl,
     getElementById: (id) => doc.body.children.find((c) => c.id === id) || null,
   };
