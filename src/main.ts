@@ -2485,7 +2485,11 @@ function courseTitle(cond: NonNullable<AppState['courseConditions']>, course: Co
     return region ? `❤️ 찜한 코스 · ${region}` : '❤️ 찜한 코스';
   }
   // 켠 테마 칩 이름을 적는다. 맞춤 코스 탭에는 분위기 입력이 없어 고르지 않은 '모든 분위기'를 적지 않는다(P-280)
-  return areaThemeLabel(regionsLabel(cond.regions, cond.subZones), cond.mood, cond.categoryKey);
+  // 지역 칩이 비었으면 「전국 어디서나」 대신 코스 장소로 정한 지역 이름을 쓴다. 저장 목록 이름이 모두 같아지지 않게 한다(P-506)
+  const noChip = cond.regions.length === 0 && (cond.subZones ?? []).length === 0;
+  const stepSpots = noChip ? course.map((st) => (st.spotId !== null ? spotById.get(st.spotId) : undefined)).filter((s): s is Spot => Boolean(s)) : [];
+  const area = (noChip && courseAreaLabel(stepSpots)) || regionsLabel(cond.regions, cond.subZones);
+  return areaThemeLabel(area, cond.mood, cond.categoryKey);
 }
 
 /** 지역 라벨 뒤에 켠 테마 칩(`이모지 이름`)을 붙인다. 칩이 없고 분위기도 ALL이면 지역만. 코스 제목과 복사 글 머리줄이 함께 쓴다 */
