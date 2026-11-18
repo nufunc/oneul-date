@@ -20,15 +20,16 @@ function run(failed, fellBack) {
   const app = { innerHTML: '' };
   const document = {
     getElementById: (id) => (app.innerHTML.includes(`id="${id}"`) ? { addEventListener: (type, fn) => { listeners[id] = fn; } } : null),
+    querySelector: () => ({ textContent: '' }),
   };
   new Function(
     'state', 'getThemeModeLabel', 'getThemeModeHtml', 'applyTheme', 'setSharedCourseView', 'app', 'document', 'cycleThemeMode', 'location',
-    'clearCourseHash', 'renderShell', 'spotsFellBackToSample', 'showSpotsFailedBanner', 'spots', 'isCourseEligible',
+    'clearCourseHash', 'renderShell', 'spotsFellBackToSample', 'showSpotsFailedBanner', 'spots', 'isCourseEligible', 'announce',
     `${code};renderReceiverLoading(${failed});`,
   )(
     { themeMode: 'light' }, () => '낮', () => '☀️', () => {}, () => {}, app, document, () => {}, { reload: () => calls.push('reload') },
     () => calls.push('clearCourseHash'), () => calls.push('renderShell'), fellBack, (n) => calls.push(`banner:${n}`),
-    [{ is_closed: false }, { is_closed: true }, { is_closed: false }], () => true,
+    [{ is_closed: false }, { is_closed: true }, { is_closed: false }], () => true, () => {},
   );
   return { html: app.innerHTML, listeners, calls };
 }

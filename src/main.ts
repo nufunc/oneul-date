@@ -7801,7 +7801,7 @@ function receiverLoadingHtml(failed = false): string {
         ${
           // spots.json을 받지 못하면 샘플로 판정하지 않는다. 판정하면 '찾을 수 없어요'와 함께 해시를 지워 받은 링크를 잃는다(P-255)
           failed
-            ? `<p class="receiver-hero-desc" role="alert">연결이 끊겨 코스를 불러오지 못했어요. 링크는 그대로예요.</p>
+            ? `<p class="receiver-hero-desc">연결이 끊겨 코스를 불러오지 못했어요. 링크는 그대로예요.</p>
         <div class="receiver-failed-actions">
           <button type="button" class="btn-data-retry" id="btn-receiver-retry">다시 불러오기</button>
           <button type="button" class="btn-secondary" id="btn-receiver-home">홈으로</button>
@@ -7819,6 +7819,8 @@ function renderReceiverLoading(failed = false): void {
   applyTheme(state.themeMode, false);
   setSharedCourseView(true);
   app.innerHTML = receiverLoadingHtml(failed);
+  // 글자를 담은 채 삽입한 alert는 낭독되지 않을 수 있어 홈 띠(P-423)처럼 문장을 #sr-announce로 알린다(P-494)
+  if (failed) announce(document.querySelector('#receiver-loading .receiver-hero-desc')!.textContent!);
   document.getElementById('btn-theme-toggle')?.addEventListener('click', cycleThemeMode);
   document.getElementById('btn-receiver-retry')?.addEventListener('click', () => location.reload());
   // 홈은 샘플로 그려지므로 실패 띠로 이유를 함께 알린다(P-413)

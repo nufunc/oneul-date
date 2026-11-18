@@ -101,7 +101,8 @@ const cut = (src, from, to) => {
   assert.ok(failedHtml.includes('id="receiver-loading"'), '실패 카드가 자리표시 자리를 떠났다');
   assert.ok(failedHtml.includes('연결이 끊겨 코스를 불러오지 못했어요. 링크는 그대로예요.'), '실패 문구가 없다');
   assert.ok(/<button type="button" class="btn-data-retry" id="btn-receiver-retry">다시 불러오기<\/button>/.test(failedHtml), '다시 불러오기 버튼이 없다');
-  assert.ok(failedHtml.includes('role="alert"'), '실패를 낭독기에 알리지 않는다');
+  // 낭독은 #sr-announce가 맡는다(P-494, scripts/test-receiver-failed-announce.cjs). 문단에 alert를 두면 두 번 읽힌다
+  assert.ok(!/role="(alert|status)"/.test(failedHtml), '실패 문단에 라이브 영역 role이 남아 두 번 읽힌다');
   assert.ok(!failedHtml.includes('불러오는 중'), '실패 카드에 불러오는 중 문구가 남았다');
   assert.ok(html().includes('불러오는 중') && !html().includes('btn-receiver-retry'), '기본 자리표시가 바뀌었다');
   const renderLoading = cut(main, 'function renderReceiverLoading(', '\n}\n');
