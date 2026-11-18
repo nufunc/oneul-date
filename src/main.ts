@@ -5011,6 +5011,7 @@ function triggerCourseGeneration(): void {
   const resultsEl = document.getElementById('results-area');
   if (resultsEl && resultsEl.getBoundingClientRect().top > window.innerHeight * 0.6) {
     resultsEl.scrollIntoView({ behavior: scrollMotion(), block: 'start' });
+    if (document.activeElement?.id === 'btn-generate') focusResultsHead();
   }
 
   // 검색어가 포함된 경우 토스트 피드백
@@ -5057,6 +5058,15 @@ function triggerCourseGeneration(): void {
   }
   announceCourse('코스를 만들었어요.');
   announceZoneRelaxed();
+}
+
+/** 🚀로 결과까지 내려갈 때 초점도 결과 머리로 옮긴다. 버튼에 남으면 화면 밖에서 다시 눌려 코스가 통째로 바뀌었다(P-491).
+ * 머리는 tabindex=-1이라 다음 Tab이 지금처럼 후보 1이나 결과 첫 버튼으로 가고, 마우스로 누른 뒤에는 :focus-visible이 걸리지 않는다 */
+function focusResultsHead(): void {
+  const head = document.querySelector<HTMLElement>('#results-area .course-candidates, #results-area .course-title, #results-area .results-empty');
+  if (!head) return;
+  head.tabIndex = -1;
+  head.focus({ preventScroll: true });
 }
 
 /** 결과 머리 존 완화 안내 줄의 문구. 코스를 만든 경로(🚀·다시 추천)만 zoneRelaxed를 채우므로 받은 코스와 저장 코스에서는 빈 문자열 */
