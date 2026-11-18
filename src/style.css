@@ -1657,7 +1657,7 @@ label,
 
 .results-empty {
   text-align: center;
-  color: var(--color-text-faint);
+  color: var(--color-text-sub); /* 배경 그라디언트 위 4.5:1 이상(ux-reviewer-377 Nit) */
   font-size: var(--font-md);
   padding: var(--space-6) 0;
 }
