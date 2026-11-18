@@ -1,0 +1,89 @@
+name: Health check
+
+# 사용자에게 보이는 외부 링크 표본과 수집기 단계 실행을 매일 10:00 KST에 재고,
+# 기준을 넘으면 라벨 health 이슈를 열거나 열린 이슈에 코멘트를 달아 알림으로 받게 한다(P-509)
+on:
+  schedule:
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+    inputs:
+      max_rate:
+        description: '표본 종류별 깨짐 비율 상한(카카오·유튜브)'
+        default: '0.05'
+      naver_max_rate:
+        description: '네이버 지도 검색 결과 0건 비율 상한'
+        default: '0.2'
+      max_static:
+        description: '전수 정적 판정으로 깨지는 링크 수 상한(실패 경로 시험은 0)'
+        default: '20'
+      naver_sample:
+        description: '네이버 지도 검색 표본 수(0이면 건너뜀)'
+        default: '30'
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: health-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - id: pw
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+      - run: npx playwright install --with-deps chromium
+      # 수집기 로그는 deploy-collector.yml과 같은 비밀값으로 ssh해 읽기만 한다
+      - name: ssh key
+        env:
+          OCI_SSH_KEY: ${{ secrets.OCI_SSH_KEY }}
+        run: |
+          if [ -n "$OCI_SSH_KEY" ]; then
+            mkdir -p ~/.ssh && printf '%s\n' "$OCI_SSH_KEY" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
+          fi
+      - id: check
+        env:
+          OCI_HOST: ${{ secrets.OCI_HOST }}
+          OCI_USERNAME: ${{ secrets.OCI_USERNAME }}
+        run: |
+          set +e
+          collector=""
+          [ -n "$OCI_HOST" ] && collector="--collector $OCI_USERNAME@$OCI_HOST"
+          node scripts/check_link_health.mjs $collector \
+            --max-rate "${{ inputs.max_rate || '0.05' }}" \
+            --naver-max-rate "${{ inputs.naver_max_rate || '0.2' }}" \
+            --max-static "${{ inputs.max_static || '20' }}" \
+            --naver "${{ inputs.naver_sample || '30' }}" > report.txt
+          code=$?
+          cat report.txt
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          { echo '## Health check'; echo '```'; grep -v '^{' report.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      - name: report issue
+        if: steps.check.outputs.code != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          { echo "점검 실행: $RUN_URL (종료 코드 ${{ steps.check.outputs.code }})"; echo; echo '```'; grep -v '^{' report.txt; echo '```'; } > body.md
+          gh label create health --color D93F0B --description '링크·수집기 자동 점검' 2>/dev/null || true
+          num=$(gh issue list --label health --state open --limit 1 --json number -q '.[0].number')
+          if [ -n "$num" ]; then
+            gh issue comment "$num" --body-file body.md
+          else
+            gh issue create --title "자동 점검: 링크 또는 수집기 단계 기준 초과" --label health --body-file body.md
+          fi
+      - if: steps.check.outputs.code != '0'
+        run: exit 1
