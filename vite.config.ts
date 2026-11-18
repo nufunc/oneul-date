@@ -7,9 +7,10 @@ const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 
 const spotsIndexUrl = new URL('./public/data/spots/index.json', import.meta.url);
 const spotsIndex = existsSync(spotsIndexUrl) ? JSON.parse(readFileSync(spotsIndexUrl, 'utf-8')).files : {};
 
-// GitHub Pages 프로젝트 페이지 경로: https://nufunc.github.io/oneul-date/
+// 기본은 GitHub Pages 프로젝트 페이지 경로(https://nufunc.github.io/oneul-date/)다.
+// 다른 호스팅은 BASE_PATH로 바꾸고, 정적 파일의 주소는 빌드 끝의 scripts/rebase_dist.mjs가 같은 값으로 바꾼다(P-485)
 export default defineConfig({
-  base: '/oneul-date/',
+  base: process.env.BASE_PATH || '/oneul-date/',
   define: {
     __APP_VERSION__: JSON.stringify(`v${pkg.version}`),
     __SPOTS_INDEX__: JSON.stringify(spotsIndex),

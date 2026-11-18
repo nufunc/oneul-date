@@ -33,7 +33,8 @@ for (const slug of fs.readdirSync(blogDir)) {
   if (fs.existsSync(f)) assert.ok(!fs.readFileSync(f, 'utf8').includes('seo-landing'), `글에 지역 랜딩 본문이 있다: ${slug}`);
 }
 
-const SITE_URL = 'https://nufunc.github.io/oneul-date/';
+// 빌드가 SITE_ORIGIN·BASE_PATH를 받았으면 그 주소다(P-485)
+const SITE_URL = `${process.env.SITE_ORIGIN || 'https://nufunc.github.io'}${process.env.BASE_PATH || '/oneul-date/'}`;
 const canonicals = [...root.matchAll(/<link rel="canonical" href="([^"]*)"/g)];
 assert.strictEqual(canonicals.length, 1, '루트 canonical이 1개가 아니다');
 assert.strictEqual(canonicals[0][1], SITE_URL, '루트 canonical 값이 다르다');

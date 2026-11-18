@@ -11,6 +11,8 @@ const src = fs.readFileSync(path.join(root, 'src', 'main.ts'), 'utf8');
 
 const APP_REGION = { seoul: 'SEOUL', gyeonggi: 'GYEONGGI', incheon: 'GYEONGGI', gangwon: 'GANGWON', chungcheong: 'CHUNGCHEONG', yeongnam: 'YEONGNAM', honam: 'HONAM', jeju: 'JEJU' };
 const SLOTS = ['day', 'evening', 'night', 'stay'];
+// 빌드가 SITE_ORIGIN·BASE_PATH를 받았으면 그 주소다(P-485)
+const SITE_URL = `${process.env.SITE_ORIGIN || 'https://nufunc.github.io'}${process.env.BASE_PATH || '/oneul-date/'}`;
 
 let count = 0;
 for (const [slug, app] of Object.entries(APP_REGION)) {
@@ -21,7 +23,7 @@ for (const [slug, app] of Object.entries(APP_REGION)) {
     const html = fs.readFileSync(f, 'utf8');
     const rel = `${slug}/${slot}`;
     assert.ok(html.includes(`<section id="seo-landing" data-region="${app}" data-slot="${slot}"`), `${rel}: 랜딩 구획에 지역·시간대 data 속성이 없다`);
-    assert.ok(html.includes(`<a href="https://nufunc.github.io/oneul-date/?r=${app}&amp;s=${slot}">오늘 데이트에서 직접 코스 만들기 →</a>`), `${rel}: 하단 링크가 같은 지역·시간대를 싣지 않는다`);
+    assert.ok(html.includes(`<a href="${SITE_URL}?r=${app}&amp;s=${slot}">오늘 데이트에서 직접 코스 만들기 →</a>`), `${rel}: 하단 링크가 같은 지역·시간대를 싣지 않는다`);
   }
 }
 assert.strictEqual(count, 32, `지역 랜딩이 32쪽이 아니다: ${count}`);
