@@ -3568,10 +3568,12 @@ function tmapUrl(spot: Spot): string {
 
 /** 카카오내비 길안내 딥링크 */
 function kakaoNaviUrl(spot: Spot): string {
+  // 쉼표와 슬래시는 getKakaomapUrl처럼 공백으로 바꾼다. 인코딩해도 카카오가 구분자로 읽는다
+  const name = encodeURIComponent(spot.name.replace(/[,/]/g, ' '));
   if (typeof spot.lat === 'number' && typeof spot.lng === 'number') {
-    return `https://map.kakao.com/link/to/${encodeURIComponent(spot.name)},${spot.lat},${spot.lng}`;
+    return `https://map.kakao.com/link/to/${name},${spot.lat},${spot.lng}`;
   }
-  return `https://map.kakao.com/link/to/${encodeURIComponent(spot.name)},${spot.lat || ''},${spot.lng || ''}`;
+  return `https://map.kakao.com/link/to/${name},${spot.lat || ''},${spot.lng || ''}`;
 }
 
 /** 카카오 T 택시 호출 딥링크 */
@@ -5223,10 +5225,12 @@ function getKakaomapUrl(spot: Spot): string {
 
 /** 인스타그램 공식 프로필 링크 (수집된 실제 계정이 있을 때만 노출) */
 function getInstagramUrl(spot: Spot): string | null {
+  // 검색(/search/)과 게시물(/p/) 주소는 프로필이 아니라 링크로 내지 않는다
+  const notProfile = (u: string): boolean => /instagram\.com\/(search|p)\//.test(u);
   const soc = spot.social_links?.instagram?.url;
-  if (soc && soc.includes('instagram.com/')) return soc;
+  if (soc && soc.includes('instagram.com/') && !notProfile(soc)) return soc;
   const src = spot.source?.url;
-  if (src && src.includes('instagram.com/')) return src;
+  if (src && src.includes('instagram.com/') && !notProfile(src)) return src;
   return null;
 }
 

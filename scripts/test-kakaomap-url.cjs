@@ -23,7 +23,24 @@ const CASES = [
   ['둘 다 없음: 검색어 링크', { name: '가게' }, SEARCH('가게')],
 ];
 
+// kakaoNaviUrl: 쉼표와 슬래시는 공백으로 바꾼다
+const nStart = src.indexOf('function kakaoNaviUrl');
+const nEnd = src.indexOf('\n}\n', nStart) + 3;
+const getNavi = new Function(`${ts.transpile(src.slice(nStart, nEnd), { target: 'es2022' })};return kakaoNaviUrl;`)();
+const NAVI = [
+  ['길찾기 쉼표 든 이름', { name: '한옥,만월 프리미엄스테이', lat: 35.8, lng: 128.5 }, `https://map.kakao.com/link/to/${encodeURIComponent('한옥 만월 프리미엄스테이')},35.8,128.5`],
+  ['길찾기 슬래시 든 이름', { name: 'A/B', lat: 37.5, lng: 127 }, 'https://map.kakao.com/link/to/A%20B,37.5,127'],
+  ['길찾기 일반 이름', { name: '가게', lat: 37.5, lng: 127 }, `https://map.kakao.com/link/to/${encodeURIComponent('가게')},37.5,127`],
+];
+
 let failed = 0;
+for (const [label, spot, expected] of NAVI) {
+  const actual = getNavi(spot);
+  if (actual !== expected) {
+    failed++;
+    console.error(`FAIL ${label}: ${actual} != ${expected}`);
+  }
+}
 for (const [label, spot, expected] of CASES) {
   const actual = getUrl(spot);
   if (actual !== expected) {
@@ -32,4 +49,4 @@ for (const [label, spot, expected] of CASES) {
   }
 }
 if (failed) process.exit(1);
-console.log(`ok ${CASES.length}`);
+console.log(`ok ${CASES.length + NAVI.length}`);
