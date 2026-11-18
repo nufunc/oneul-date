@@ -5348,7 +5348,7 @@ function renderResultsContent(): void {
     </div>
     <div class="result-actions result-actions-3">
       <button class="btn-secondary" id="btn-copy"><span aria-hidden="true">📋</span> 복사</button>
-      <button class="btn-secondary" id="btn-share-link"><span aria-hidden="true">🔗</span> 링크</button>
+      <button class="btn-secondary" id="btn-share-link"><span aria-hidden="true">🔗</span> ${CAN_SHARE ? '링크 공유' : '링크 복사'}</button>
       <button class="btn-primary" id="btn-save" aria-label="저장">💾 저장</button>
     </div>
   `;
