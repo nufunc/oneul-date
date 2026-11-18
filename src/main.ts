@@ -7851,7 +7851,11 @@ function showSpotsFailedBanner(count: number): void {
     <button type="button" class="btn-data-dismiss" aria-label="안내 닫기">✕</button>
   `;
   bar.querySelector('.btn-data-retry')!.addEventListener('click', () => location.reload());
-  bar.querySelector('.btn-data-dismiss')!.addEventListener('click', () => bar.remove());
+  // 누른 닫기 단추가 띠와 함께 사라져 초점이 BODY로 떨어진다. 건너뛰기 링크와 같은 본문으로 옮긴다(P-415, ux-reviewer-383 N-2)
+  bar.querySelector('.btn-data-dismiss')!.addEventListener('click', () => {
+    bar.remove();
+    document.getElementById('main-content')?.focus({ preventScroll: true });
+  });
   // body 끝에 붙이면 「다시 받기」가 1280px에서 Tab 64번째라 #app 앞에 둔다. 화면 위치는 position:fixed라 그대로다(WCAG 2.4.3, P-496)
   document.body.prepend(bar);
   announce(bar.querySelector('.data-failed-text')!.textContent!);
