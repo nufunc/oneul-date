@@ -1,18 +1,17 @@
 import { defineConfig } from 'vite';
-import { existsSync, readFileSync, statSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8'));
-// 완성 버튼 받은 비율의 분모. 응답 스트림은 풀린 바이트를 내주므로 gzip 크기(Content-Length)가 아니라 파일 크기를 넣는다(P-257)
-// 앱은 열 형식 spots.cols.json을 먼저 받고 없으면 spots.json을 받으므로 같은 순서로 잰다(P-453)
-const spotsCols = new URL('./public/data/spots.cols.json', import.meta.url);
-const spotsJson = existsSync(spotsCols) ? spotsCols : new URL('./public/data/spots.json', import.meta.url);
-const spotsJsonBytes = existsSync(spotsJson) ? statSync(spotsJson).size : 0;
+// 권역 파일 색인(collector/sync_live_spots.py가 쓴다)을 번들에 넣어 첫 방문이 색인을 따로 받지 않게 한다(P-505).
+// bytes는 완성 버튼 받은 비율의 분모다. 응답 스트림은 풀린 바이트를 내주므로 gzip 크기가 아니라 파일 크기다(P-257)
+const spotsIndexUrl = new URL('./public/data/spots/index.json', import.meta.url);
+const spotsIndex = existsSync(spotsIndexUrl) ? JSON.parse(readFileSync(spotsIndexUrl, 'utf-8')).files : {};
 
 // GitHub Pages 프로젝트 페이지 경로: https://nufunc.github.io/oneul-date/
 export default defineConfig({
   base: '/oneul-date/',
   define: {
     __APP_VERSION__: JSON.stringify(`v${pkg.version}`),
-    __SPOTS_JSON_BYTES__: JSON.stringify(spotsJsonBytes),
+    __SPOTS_INDEX__: JSON.stringify(spotsIndex),
   },
 });

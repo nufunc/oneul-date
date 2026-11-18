@@ -36,8 +36,19 @@ MIN_EXPECTED_SPOTS = 9000  # 비정상 데이터 누락 방지 안전 가드
 CLIENT_UNUSED_KEYS = {"metrics", "created_at", "updated_at", "provider_ids", "reservation_type", "fail_count"}
 ALIAS_FILE = os.path.join(os.path.dirname(TARGET_FILE), "spot_aliases.json")
 # 첫 방문자가 spots.json을 받는 동안 보이는 번들 샘플. 실제 id로 다시 써야 그동안 찜한 스팟이 도착 뒤에도 남는다
-# 앱 첫 방문 전체 받기용 열 형식 사본. 받은 링크 Range는 계속 행 파일 TARGET_FILE을 읽는다(P-453)
-COLS_FILE = os.path.join(os.path.dirname(TARGET_FILE), "spots.cols.json")
+# 앱이 받는 권역별 열 형식 파일과 색인(P-505). 받은 링크 Range는 계속 행 파일 TARGET_FILE을 읽는다(P-453)
+REGION_DIR = os.path.join(os.path.dirname(TARGET_FILE), "spots")
+# 파일 이름 → 그 파일에 담는 region 값. 앱 REGIONS(src/main.ts)의 key를 소문자로 쓴 것이고 match와 같아야 한다.
+# scripts/test-spots-regions.cjs가 둘이 같은지 단언한다
+REGION_FILES = {
+    "seoul": ["서울"],
+    "gyeonggi": ["경기", "인천"],
+    "gangwon": ["강원"],
+    "chungcheong": ["충청"],
+    "yeongnam": ["영남"],
+    "honam": ["호남"],
+    "jeju": ["제주"],
+}
 SAMPLE_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src", "data", "spots.sample.json"))
 SAMPLE_MAX_COUNT = 480
 SAMPLE_MAX_BYTES = 305_000  # 2026-09-13 샘플 크기(305,327B). 번들이 이보다 커지지 않게 한다
@@ -192,6 +203,52 @@ def columns_text(out_spots):
     return text
 
 
+def region_files(out_spots):
+    """행 배열을 {파일 이름: 열 형식 JSON 문자열}과 색인 dict로 나눈다. 쓰기 전에 나눈 결과가 원본과 같은지 단언한다"""
+    file_of = {r: name for name, regions in REGION_FILES.items() for r in regions}
+    unknown = sorted({sp.get("region") for sp in out_spots} - set(file_of), key=str)
+    # 앱은 REGIONS에 없는 region을 지역 선택에서 빼므로 새 값이 생기면 두 곳의 목록을 함께 고친다
+    assert not unknown, f"REGION_FILES에 없는 region 값이 있다: {unknown}"
+    groups = {name: [] for name in REGION_FILES}
+    for sp in out_spots:
+        groups[file_of[sp["region"]]].append(sp)
+    texts = {name: columns_text(rows) for name, rows in groups.items() if rows}
+    assert sum(len(rows) for rows in groups.values()) == len(out_spots), "권역 파일 행 합이 전체 행 수와 다르다"
+    back = sorted((row for t in texts.values() for row in _rows_of(json.loads(t))), key=lambda r: r["id"])
+    assert back == json.loads(json.dumps(out_spots, ensure_ascii=False)), "권역 파일을 합친 결과가 spots.json과 다르다"
+    index = {
+        "total": len(out_spots),
+        "files": {
+            name: {"regions": REGION_FILES[name], "rows": len(groups[name]), "bytes": len(t.encode())}
+            for name, t in texts.items()
+        },
+    }
+    return texts, index
+
+
+def _rows_of(cols):
+    keys = list(cols)
+    return [{k: cols[k][i] for k in keys} for i in range(len(cols["id"]))]
+
+
+def write_region_files(out_spots, out_dir=REGION_DIR):
+    """권역 파일과 index.json을 out_dir에 쓰고, 목록에 없는 옛 권역 파일은 지운다"""
+    texts, index = region_files(out_spots)
+    os.makedirs(out_dir, exist_ok=True)
+    for name, text in texts.items():
+        path = os.path.join(out_dir, f"{name}.cols.json")
+        with open(f"{path}.tmp", "w", encoding="utf-8") as f:
+            f.write(text)
+        os.replace(f"{path}.tmp", path)
+    for old in os.listdir(out_dir):
+        if old.endswith(".cols.json") and old[: -len(".cols.json")] not in texts:
+            os.remove(os.path.join(out_dir, old))
+    with open(os.path.join(out_dir, "index.json"), "w", encoding="utf-8") as f:
+        json.dump(index, f, ensure_ascii=False, separators=(",", ":"))
+    logger.info("권역 파일 %d개 기록: %s", len(texts), ", ".join(f"{n} {i['rows']}곳 {i['bytes']:,}B" for n, i in index["files"].items()))
+    return index
+
+
 def main():
     spots = fetch_all_active_spots()
     total = len(spots)
@@ -231,10 +288,7 @@ def main():
         os.remove(TARGET_FILE)
     os.rename(tmp_file, TARGET_FILE)
 
-    with open(f"{COLS_FILE}.tmp", "w", encoding="utf-8") as f:
-        f.write(columns_text(out_spots))
-    os.replace(f"{COLS_FILE}.tmp", COLS_FILE)
-    logger.info(f"열 형식 사본 기록: {COLS_FILE} ({os.path.getsize(COLS_FILE):,}B)")
+    write_region_files(out_spots)
 
     active_ids = {sp["id"] for sp in healed_spots if not sp.get("is_closed")}
     aliases = fetch_merge_aliases(active_ids)
@@ -255,4 +309,9 @@ def main():
     logger.info(f"동기화 완료: {TARGET_FILE} ({total}개 스팟, {file_size_mb:.2f} MB)")
 
 if __name__ == "__main__":
-    main()
+    if sys.argv[1:] == ["--split-only"]:
+        # 동기화 없이 지금 spots.json에서 권역 파일만 다시 만든다(로컬 재생성용)
+        with open(TARGET_FILE, encoding="utf-8") as f:
+            write_region_files(json.load(f))
+    else:
+        main()

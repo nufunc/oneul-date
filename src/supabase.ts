@@ -250,8 +250,9 @@ export async function getCachedSpots(): Promise<Spot[] | null> {
 
 /**
  * 스팟 목록을 IndexedDB에 비동기 캐시 저장합니다.
+ * regionKeys를 주면 그 권역의 저장 시각만 지금으로 바꾸고(P-505), 주지 않으면 전체를 받은 것으로 보고 시각 하나를 남긴다
  */
-export async function saveSpotsToCache(spots: Spot[]): Promise<void> {
+export async function saveSpotsToCache(spots: Spot[], regionKeys?: string[]): Promise<void> {
   if (!Array.isArray(spots) || spots.length === 0) return;
   try {
     const db = await openCacheDB();
@@ -264,7 +265,14 @@ export async function saveSpotsToCache(spots: Spot[]): Promise<void> {
       tx.onerror = tx.onabort = () => reject(tx.error);
     });
     try {
-      localStorage.setItem(SPOTS_SAVED_AT_KEY, String(Date.now()));
+      const now = Date.now();
+      if (!regionKeys) localStorage.setItem(SPOTS_SAVED_AT_KEY, String(now));
+      else {
+        const map = readSpotsSavedAt();
+        const next: Record<string, number> = typeof map === 'number' ? {} : { ...map };
+        for (const k of regionKeys) next[k] = now;
+        localStorage.setItem(SPOTS_SAVED_AT_KEY, JSON.stringify(next));
+      }
     } catch {
       // localStorage를 못 쓰면 시각이 없어 항상 새로고침한다
     }
@@ -273,37 +281,29 @@ export async function saveSpotsToCache(spots: Spot[]): Promise<void> {
   }
 }
 
-/** IndexedDB 스팟 캐시를 저장한 지 maxAgeMs 안이면 참. 시각이 없거나 깨졌거나 미래이면 거짓 */
-export function isSpotsCacheFresh(maxAgeMs: number): boolean {
+/** 저장 시각. 전체를 한 번에 받던 캐시는 숫자 하나, 권역별 캐시는 {권역 키: 시각}이다. 없거나 깨졌으면 빈 객체 */
+function readSpotsSavedAt(): number | Record<string, number> {
   try {
-    const savedAt = Number(localStorage.getItem(SPOTS_SAVED_AT_KEY));
-    const age = Date.now() - savedAt;
-    return Number.isFinite(savedAt) && savedAt > 0 && age >= 0 && age < maxAgeMs;
+    const raw: unknown = JSON.parse(localStorage.getItem(SPOTS_SAVED_AT_KEY) ?? '{}');
+    return typeof raw === 'number' ? raw : raw && typeof raw === 'object' ? (raw as Record<string, number>) : {};
   } catch {
-    return false;
+    return {};
   }
 }
 
-/**
- * 두 스팟 배열을 ID 기준으로 중복 없이 병합합니다.
- */
-export function mergeSpots(base: Spot[], incoming: Spot[]): Spot[] {
-  const map = new Map<number, Spot>();
-  for (const s of base) {
-    if (s && typeof s.id === 'number') {
-      map.set(s.id, s);
-    }
-  }
-  for (const s of incoming) {
-    if (s && typeof s.id === 'number') {
-      map.set(s.id, s);
-    }
-  }
-  return Array.from(map.values());
+/** regionKeys 가운데 저장한 지 maxAgeMs가 지났거나, 시각이 없거나 깨졌거나 미래인 권역 키 */
+export function staleSpotRegionKeys(regionKeys: string[], maxAgeMs: number): string[] {
+  const map = readSpotsSavedAt();
+  const now = Date.now();
+  return regionKeys.filter((k) => {
+    const savedAt = typeof map === 'number' ? map : Number(map[k]);
+    const age = now - savedAt;
+    return !(Number.isFinite(savedAt) && savedAt > 0 && age >= 0 && age < maxAgeMs);
+  });
 }
 
 /**
- * spots.cols.json({칸 이름: 행 수만큼의 값 배열})을 행 배열로 바꾼다. id 칸이 배열이 아니면 빈 배열이다.
+ * 권역 열 형식 파일({칸 이름: 행 수만큼의 값 배열})을 행 배열로 바꾼다. id 칸이 배열이 아니면 빈 배열이다.
  * 같은 칸 값을 붙여 두어 gzip이 행 배열보다 28% 작다. 받은 링크 Range는 계속 행 파일 spots.json을 읽는다(P-453)
  */
 export function rowsFromColumns(cols: unknown): Spot[] {
@@ -317,72 +317,89 @@ export function rowsFromColumns(cols: unknown): Spot[] {
   });
 }
 
-/**
- * 정적 CDN (public/data/spots.json)에서 10,000여 개 스팟 데이터를 비동기 로드합니다.
- * Supabase 일시 장애 또는 대역폭 초과 시에도 100% 무중단 서비스를 보장합니다.
- */
-/** 마지막 loadStaticSpots가 spots.json을 받지 못해 번들 샘플을 돌려줬는지. 화면은 이 값으로 실패를 알리고 다시 받기를 보인다(P-255) */
+// 권역 파일 색인 {파일 이름: {regions: 담은 region 값, bytes: 풀린 크기}}. 빌드가 public/data/spots/index.json에서 넣는다(P-505)
+declare const __SPOTS_INDEX__: Record<string, { regions: string[]; bytes: number }>;
+const SPOTS_INDEX: Record<string, { regions: string[]; bytes: number }> = typeof __SPOTS_INDEX__ !== 'undefined' ? __SPOTS_INDEX__ : {};
+
+/** region 값 목록을 담은 권역 파일 이름. 목록이 비었으면 전부다 */
+export function regionFilesFor(regionMatches?: string[]): string[] {
+  const names = Object.keys(SPOTS_INDEX);
+  if (!regionMatches || regionMatches.length === 0) return names;
+  return names.filter((n) => SPOTS_INDEX[n].regions.some((r) => regionMatches.includes(r)));
+}
+
+/** 마지막 loadStaticSpots가 장소 파일을 받지 못해 번들 샘플을 돌려줬는지. 화면은 이 값으로 실패를 알리고 다시 받기를 보인다(P-255) */
 export let spotsFellBackToSample = false;
-/** 전체 spots.json에서 지금까지 받은 풀린 바이트. 버튼을 다시 그릴 때 이 값으로 비율을 잇는다(P-257) */
+/** 마지막 loadStaticSpots가 지금까지 받은 풀린 바이트. 버튼을 다시 그릴 때 이 값으로 비율을 잇는다(P-257) */
 export let spotsBytesReceived = 0;
+/** 마지막 loadStaticSpots가 받을 권역 파일들의 풀린 크기 합. 모르면 0이고 화면은 비율 없이 그린다(P-505) */
+export let spotsBytesExpected = 0;
 let spotsProgressListener: ((bytes: number) => void) | null = null;
-/** 전체 spots.json을 받는 동안 바이트가 올 때마다 받은 풀린 바이트 수로 부를 함수를 등록한다 */
+/** 장소 파일을 받는 동안 바이트가 올 때마다 받은 풀린 바이트 수로 부를 함수를 등록한다 */
 export const onSpotsProgress = (cb: ((bytes: number) => void) | null): void => { spotsProgressListener = cb; };
 // 헤더나 바이트가 이만큼 오지 않으면 끊고 샘플로 떨어진다. Slow 4G 정상 받기가 20초를 넘어 전체 시간 제한은 두지 않는다(P-257)
 const SPOTS_IDLE_MS = 15000;
 
-export async function loadStaticSpots(): Promise<Spot[]> {
+/**
+ * regionMatches(region 값 목록, 비면 전국)의 장소를 정적 파일에서 받는다. 권역 파일 data/spots/<이름>.cols.json을 나란히 받고(P-505),
+ * 권역 파일이 없으면(404, 색인 없는 빌드) 행 파일 spots.json 전체를 받아 고른 권역만 남긴다.
+ * 받지 못하면 번들 샘플의 고른 권역 행을 돌려주고 spotsFellBackToSample을 세운다. 캐시 저장은 합친 목록을 가진 호출부가 한다
+ */
+export async function loadStaticSpots(regionMatches?: string[]): Promise<Spot[]> {
   const ctrl = new AbortController();
   let timer: ReturnType<typeof setTimeout> | undefined;
   const arm = () => { clearTimeout(timer); timer = setTimeout(() => ctrl.abort(), SPOTS_IDLE_MS); };
+  const inRegions = (s: Spot) => !regionMatches || regionMatches.length === 0 || regionMatches.includes(s.region);
+  const files = regionFilesFor(regionMatches);
+  let got = 0; // 지역별 loadSpots가 겹쳐 불려도 한 호출의 값만 내도록 호출마다 센다
   spotsBytesReceived = 0;
+  spotsBytesExpected = files.reduce((n, f) => n + SPOTS_INDEX[f].bytes, 0);
+  const readBody = async (res: Response): Promise<unknown> => {
+    // 스트림은 풀린 바이트를 내준다. Content-Length는 gzip 크기라 분모로 쓰지 않는다
+    if (!res.body) return res.json();
+    const reader = res.body.getReader();
+    const chunks: Uint8Array[] = [];
+    for (let r = await reader.read(); !r.done; r = await reader.read()) {
+      arm();
+      chunks.push(r.value);
+      spotsBytesReceived = got += r.value.length;
+      spotsProgressListener?.(got);
+    }
+    return JSON.parse(await new Blob(chunks as BlobPart[]).text());
+  };
   try {
     arm();
-    let res = await fetch(`${import.meta.env.BASE_URL}data/spots.cols.json`, { signal: ctrl.signal });
-    // 수집기가 열 형식 파일을 아직 내지 않았거나 되돌렸으면 행 파일을 받는다(P-453)
-    if (res.status === 404) {
+    const res = await Promise.all(files.map((f) => fetch(`${import.meta.env.BASE_URL}data/spots/${f}.cols.json`, { signal: ctrl.signal })));
+    let rows: Spot[] = [];
+    if (files.length > 0 && res.every((r) => r.ok)) {
       arm();
-      res = await fetch(`${import.meta.env.BASE_URL}data/spots.json`, { signal: ctrl.signal });
+      const parts = (await Promise.all(res.map(readBody))).map(rowsFromColumns);
+      // 한 권역이라도 비었으면 실패로 보고 샘플로 떨어진다
+      if (parts.every((p) => p.length > 0)) rows = parts.flat();
+    } else if (files.length === 0 || res.some((r) => r.status === 404)) {
+      spotsBytesExpected = 0;
+      arm();
+      const r = await fetch(`${import.meta.env.BASE_URL}data/spots.json`, { signal: ctrl.signal });
+      if (r.ok) {
+        const data = await readBody(r);
+        rows = (Array.isArray(data) ? (data as Spot[]) : []).filter(inRegions);
+      }
     }
-    if (res.ok) {
-      let data: unknown;
-      if (res.body) {
-        // 스트림은 풀린 바이트를 내준다. Content-Length는 gzip 크기라 분모로 쓰지 않는다
-        arm();
-        const reader = res.body.getReader();
-        const chunks: Uint8Array[] = [];
-        let got = 0; // 지역별 loadSpots가 겹쳐 불려도 한 요청의 값만 내도록 요청마다 센다
-        for (let r = await reader.read(); !r.done; r = await reader.read()) {
-          arm();
-          chunks.push(r.value);
-          spotsBytesReceived = got += r.value.length;
-          spotsProgressListener?.(got);
-        }
-        clearTimeout(timer);
-        data = JSON.parse(await new Blob(chunks as BlobPart[]).text());
-      } else {
-        clearTimeout(timer);
-        data = await res.json();
-      }
-      const rows = Array.isArray(data) ? (data as Spot[]) : rowsFromColumns(data);
-      if (rows.length > 0) {
-        const normalized = normalizeSpots(rows);
-        saveSpotsToCache(normalized);
-        spotsFellBackToSample = false;
-        return normalized;
-      }
+    if (rows.length > 0) {
+      spotsFellBackToSample = false;
+      return normalizeSpots(rows);
     }
   } catch {
     // CDN 로드 실패 시 빌드 번들 내장 샘플로 최종 폴백
   } finally {
     clearTimeout(timer);
   }
-  // 샘플은 IndexedDB에 저장하지 않는다. 저장하면 다시 받기(새로 고침)가 캐시의 샘플을 먼저 읽어 전체 파일을 다시 요청하지 않는다
+  // 샘플은 IndexedDB에 저장하지 않는다. 저장하면 다시 받기(새로 고침)가 캐시의 샘플을 먼저 읽어 장소 파일을 다시 요청하지 않는다
   spotsFellBackToSample = true;
   // 샘플 JSON의 business_hours가 빈 객체와 {영업시간}, {이용시간}으로 섞이면 TS가 빈 객체를 {영업시간?: undefined}로 추론해 Spot[] 단언이 TS2352로 실패한다. 값은 normalizeSpots가 정리한다
   // 샘플은 실패할 때만 따로 받는다. 정적 import하면 앱 JS gzip의 절반(약 69KB)이 첫 화면을 늦췄다(P-414)
   try {
-    return normalizeSpots((await import('./data/spots.sample.json')).default as unknown as Spot[]);
+    return normalizeSpots((await import('./data/spots.sample.json')).default as unknown as Spot[]).filter(inRegions);
   } catch {
     // 오프라인 첫 방문처럼 샘플 조각도 받지 못하면 빈 목록이다
     return [];
@@ -526,12 +543,12 @@ export async function loadStations(): Promise<Record<string, [number, number][]>
  */
 export async function loadSpots(regionMatches?: string[]): Promise<Spot[]> {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    return loadStaticSpots();
+    return loadStaticSpots(regionMatches);
   }
 
   // 브라우저 Mixed Content 방어: 프로덕션(HTTPS)에서 비보안 HTTP API 호출 시 브라우저 차단 에러 방지 -> 정적 CDN 폴백
   if (typeof window !== 'undefined' && window.location.protocol === 'https:' && SUPABASE_URL.startsWith('http://')) {
-    return loadStaticSpots();
+    return loadStaticSpots(regionMatches);
   }
 
   try {
@@ -609,13 +626,13 @@ export async function loadSpots(regionMatches?: string[]): Promise<Spot[]> {
       }
     } else {
       console.warn(`⚠️ Supabase 응답 실패 (${firstRes.status}). 정적 CDN 데이터로 자동 전환합니다.`);
-      return loadStaticSpots();
+      return loadStaticSpots(regionMatches);
     }
   } catch (err) {
     console.warn('⚠️ Supabase 통신 오류 발생. 정적 CDN 데이터로 자동 전환합니다:', err);
-    return loadStaticSpots();
+    return loadStaticSpots(regionMatches);
   }
 
-  return loadStaticSpots();
+  return loadStaticSpots(regionMatches);
 }
 

@@ -30,13 +30,12 @@ assert.match(refresh, /\.saved-item-spots/, '장소 칸(.saved-item-spots)만 �
 assert.match(refresh, /innerHTML = savedCourseSpotsHtml\(item\)/, '장소 칸을 savedCourseSpotsHtml로 다시 채우지 않는다');
 assert.ok(!/renderOverlay(Content)?\(/.test(refresh), '시트를 통째로 다시 그려 스크롤과 포커스가 처음으로 돌아간다');
 
-// 3. 로드가 끝나면 대기 해제 뒤 갱신하고, 기다리는 코스가 없어도 갱신한다(성공과 실패 모두 finally로 온다)
+// 3. 받기가 끝나면 대기 수를 내린 뒤 resolveWaitingCourse가 갱신하고, 기다리는 코스가 없어도 갱신한다(성공과 실패 모두 finally로 온다, P-505)
 const resolve = body(/^function resolveWaitingCourse\(/m, /^\}/m);
-const off = resolve.indexOf('fullSpotsPending = false;');
 const call = resolve.indexOf('refreshSavedSpots();');
 const early = resolve.indexOf('if (!courseWaitingForSpots) return;');
-assert.ok(off >= 0 && call > off, '대기를 해제한 뒤 refreshSavedSpots()를 부르지 않는다');
-assert.ok(early > call, 'refreshSavedSpots()가 기다리는 코스 없음 조기 반환 뒤에 있어 갱신이 빠진다');
-assert.match(src, /\.finally\(resolveWaitingCourse\)/, '로드 성공·실패 모두 resolveWaitingCourse로 오지 않는다');
+assert.ok(call >= 0 && early > call, 'refreshSavedSpots()가 없거나 기다리는 코스 없음 조기 반환 뒤에 있어 갱신이 빠진다');
+const loadFn = src.slice(src.indexOf('async function loadRegionFiles'), src.indexOf('async function init()'));
+assert.match(loadFn, /finally \{[\s\S]*fullSpotsPending = foregroundLoads > 0;\s*resolveWaitingCourse\(\);/, '받기가 끝난 뒤 대기를 내리고 resolveWaitingCourse로 오지 않는다');
 
 console.log('saved-spots-pending: ok');

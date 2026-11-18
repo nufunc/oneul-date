@@ -16,20 +16,20 @@ const cut = (src, from, to) => {
 };
 
 (async () => {
-  // 1. loadStaticSpots: 실패면 샘플을 돌려주고 표시를 세우며 IndexedDB에 저장하지 않는다
+  // 1. loadStaticSpots: 실패면 고른 권역의 샘플 행을 돌려주고 표시를 세운다. 캐시 저장은 합친 목록을 가진 main.ts가 한다(P-505)
   const supa = read('supabase.ts');
   // 샘플 동적 import(P-414)는 new Function 안에서 받을 수 없어 주입한 rawSpotsData로 바꾼다
   const colsCode = cut(supa, 'export function rowsFromColumns', '\n}\n').replace(/^export /gm, '');
-  const loadCode = cut(supa, 'export let spotsFellBackToSample', '\n}\n').replace(/^export /gm, '')
+  const loadCode = cut(supa, '// 권역 파일 색인', '\n}\n\n// 받은 링크').replace(/^export /gm, '').replace(/\n\/\/ 받은 링크$/, '')
     .replace("(await import('./data/spots.sample.json')).default", 'rawSpotsData')
     .replace(/import\.meta\.env\.BASE_URL/g, "'/oneul-date/'");
-  const sample = [{ id: 1 }, { id: 2 }];
-  const env = { response: null, saved: [], urls: [] };
+  const sample = [{ id: 1, region: '서울' }, { id: 2, region: '제주' }];
+  const env = { response: null, urls: [] };
   const mod = new Function(
     'env',
     'normalizeSpots',
     'rawSpotsData',
-    'saveSpotsToCache',
+    '__SPOTS_INDEX__',
     `const fetch = async (url) => {
       env.urls.push(url);
       const r = typeof env.response === 'function' ? env.response(url) : env.response;
@@ -38,55 +38,58 @@ const cut = (src, from, to) => {
     };
     ${ts.transpile(colsCode, { target: 'es2022' })}
     ${ts.transpile(loadCode, { target: 'es2022' })}
-    return { loadStaticSpots, flag: () => spotsFellBackToSample };`,
-  )(env, (rows) => rows, sample, (rows) => env.saved.push(rows.length));
+    return { loadStaticSpots, flag: () => spotsFellBackToSample, expected: () => spotsBytesExpected };`,
+  )(env, (rows) => rows, sample, { seoul: { regions: ['서울'], bytes: 10 }, jeju: { regions: ['제주'], bytes: 5 } });
 
-  const full = Array.from({ length: 5 }, (_, i) => ({ id: 100 + i }));
+  const seoulRows = Array.from({ length: 5 }, (_, i) => ({ id: 100 + i, region: '서울' }));
+  const toCols = (rows) => ({ id: rows.map((r) => r.id), region: rows.map((r) => r.region) });
   const cases = [
     ['500', { ok: false, status: 500, json: async () => ({}) }],
     ['연결 끊김', new TypeError('Failed to fetch')],
-    ['받는 도중 끊김', { ok: true, json: async () => { throw new SyntaxError('Unexpected end of JSON'); } }],
-    ['빈 배열', { ok: true, json: async () => [] }],
+    ['받는 도중 끊김', { ok: true, status: 200, json: async () => { throw new SyntaxError('Unexpected end of JSON'); } }],
+    ['빈 열', { ok: true, status: 200, json: async () => ({ id: [] }) }],
   ];
   for (const [label, response] of cases) {
     env.response = response;
-    env.saved = [];
-    const got = await mod.loadStaticSpots();
-    assert.strictEqual(got, sample, `${label}: 샘플을 돌려주지 않았다`);
+    const got = await mod.loadStaticSpots(['서울']);
+    assert.deepStrictEqual(got, [sample[0]], `${label}: 고른 권역의 샘플을 돌려주지 않았다`);
     assert.strictEqual(mod.flag(), true, `${label}: 샘플로 떨어졌다는 표시가 없다`);
-    assert.deepStrictEqual(env.saved, [], `${label}: 샘플을 캐시에 저장했다(다시 받기가 소용없어진다)`);
   }
-  env.response = { ok: true, json: async () => full };
-  env.saved = [];
-  assert.strictEqual((await mod.loadStaticSpots()).length, 5);
-  assert.strictEqual(mod.flag(), false, '성공한 뒤에도 실패 표시가 남았다');
-  assert.deepStrictEqual(env.saved, [5], '성공한 데이터를 캐시에 저장하지 않았다');
 
-  // P-453: 열 형식 본문은 행으로 바꿔 저장하고, 404면 행 파일을 한 번 더 받으며, 둘 다 없으면 샘플이다
-  const cols = { id: full.map((r) => r.id) };
-  env.response = { ok: true, status: 200, json: async () => cols };
-  env.saved = [];
+  // 권역 파일 하나만 받아 행으로 바꾸고, 분모는 그 파일의 풀린 크기다
+  env.response = { ok: true, status: 200, json: async () => toCols(seoulRows) };
   env.urls = [];
-  assert.deepStrictEqual(await mod.loadStaticSpots(), full, '열 형식 본문을 행으로 바꾸지 못했다');
-  assert.deepStrictEqual(env.urls, ['/oneul-date/data/spots.cols.json']);
-  assert.deepStrictEqual(env.saved, [5]);
+  assert.deepStrictEqual(await mod.loadStaticSpots(['서울']), seoulRows, '권역 열 형식 본문을 행으로 바꾸지 못했다');
+  assert.deepStrictEqual(env.urls, ['/oneul-date/data/spots/seoul.cols.json'], '고른 권역 파일 하나만 받지 않았다');
+  assert.strictEqual(mod.flag(), false, '성공한 뒤에도 실패 표시가 남았다');
+  assert.strictEqual(mod.expected(), 10, '분모가 고른 권역 파일 크기가 아니다');
+  // 지역을 고르지 않으면(전국) 권역 파일을 모두 받는다
+  env.urls = [];
+  env.response = (url) => ({ ok: true, status: 200, json: async () => toCols(url.includes('jeju') ? [{ id: 7, region: '제주' }] : seoulRows) });
+  assert.strictEqual((await mod.loadStaticSpots()).length, 6);
+  assert.deepStrictEqual(env.urls, ['/oneul-date/data/spots/seoul.cols.json', '/oneul-date/data/spots/jeju.cols.json']);
+  assert.strictEqual(mod.expected(), 15);
+  // 한 권역이라도 비면 샘플이다
+  env.response = (url) => ({ ok: true, status: 200, json: async () => (url.includes('jeju') ? { id: [] } : toCols(seoulRows)) });
+  assert.deepStrictEqual(await mod.loadStaticSpots(), sample, '빈 권역 파일을 실패로 보지 않았다');
+
+  // 권역 파일이 404면 행 파일을 받아 고른 권역만 남기고, 둘 다 없으면 샘플이다
   const notFound = { ok: false, status: 404, json: async () => ({}) };
-  env.response = (url) => (url.endsWith('/spots.cols.json') ? notFound : { ok: true, status: 200, json: async () => full });
+  const rowFile = [...seoulRows, { id: 7, region: '제주' }];
+  env.response = (url) => (url.endsWith('.cols.json') ? notFound : { ok: true, status: 200, json: async () => rowFile });
   env.urls = [];
-  assert.strictEqual((await mod.loadStaticSpots()).length, 5, '404 뒤 행 파일을 받지 못했다');
-  assert.deepStrictEqual(env.urls, ['/oneul-date/data/spots.cols.json', '/oneul-date/data/spots.json']);
+  assert.deepStrictEqual(await mod.loadStaticSpots(['제주']), [{ id: 7, region: '제주' }], '404 뒤 행 파일에서 고른 권역만 남기지 않았다');
+  assert.deepStrictEqual(env.urls, ['/oneul-date/data/spots/jeju.cols.json', '/oneul-date/data/spots.json']);
   assert.strictEqual(mod.flag(), false);
+  assert.strictEqual(mod.expected(), 0, '행 파일로 넘어가면 분모를 모른다');
   env.response = notFound;
-  env.urls = [];
-  env.saved = [];
-  assert.strictEqual(await mod.loadStaticSpots(), sample, '두 파일 모두 404인데 샘플이 아니다');
+  assert.deepStrictEqual(await mod.loadStaticSpots(['서울']), [sample[0]], '두 파일 모두 404인데 샘플이 아니다');
   assert.strictEqual(mod.flag(), true);
-  assert.deepStrictEqual(env.saved, []);
   // 500은 되돌림 대상이 아니다: 행 파일을 다시 받지 않고 샘플로 떨어진다
   env.response = { ok: false, status: 500, json: async () => ({}) };
   env.urls = [];
-  assert.strictEqual(await mod.loadStaticSpots(), sample);
-  assert.deepStrictEqual(env.urls, ['/oneul-date/data/spots.cols.json']);
+  await mod.loadStaticSpots(['서울']);
+  assert.deepStrictEqual(env.urls, ['/oneul-date/data/spots/seoul.cols.json']);
 
   // 2. 받은 링크 실패 카드: 해시를 지우지 않고 문구와 다시 불러오기 버튼을 보인다
   const main = read('main.ts');
@@ -108,22 +111,23 @@ const cut = (src, from, to) => {
   const renderLoading = cut(main, 'function renderReceiverLoading(', '\n}\n');
   assert.ok(renderLoading.includes("getElementById('btn-receiver-retry')?.addEventListener('click', () => location.reload())"), '다시 불러오기가 새로 고침이 아니다');
 
-  // 3. init: 샘플로 떨어지면 받은 링크는 판정(handleRoute → clearCourseHash)하지 않고, 홈은 띠를 띄운다
-  const initThen = cut(main, '      loadSpots()\n        .then((firstSpots) => {', '        .finally(resolveWaitingCourse);');
+  // 3. 샘플로 떨어지면 받은 링크는 판정(handleRoute → clearCourseHash)하지 않고, 홈은 띠를 띄운다(P-505: 권역 받기 loadRegionFiles)
+  const initShared = cut(main, '  if (isSharedLink && !sharedReady()) {', '      .catch(() => {\n');
   assert.ok(
-    /if \(isSharedLink && document\.getElementById\('receiver-loading'\)\) \{\s*if \(spotsFellBackToSample\) renderReceiverLoading\(true\);\s*else handleRoute\(\);/.test(initThen),
+    /if \(!document\.getElementById\('receiver-loading'\)\) return;\s*if \(spotsFellBackToSample\) renderReceiverLoading\(true\);\s*else if \(spots\.length > 0\) handleRoute\(\);/.test(initShared),
     '실패한 받은 링크가 handleRoute로 판정된다',
   );
+  const loadFn = cut(main, 'async function loadRegionFiles', '\n}\n');
   // 띠의 곳 수는 스팟 탐색 탭 목록과 같은 거르기로 센다. spots.length면 폐업과 코스 제외가 섞여 탭 수와 어긋났다(P-256)
   const listable = '!s.is_closed && isCourseEligible(s)';
   assert.ok(
-    initThen.includes(`} else {\n              if (spotsFellBackToSample) showSpotsFailedBanner(spots.filter((s) => ${listable}).length);`),
+    loadFn.includes(`if (!document.getElementById('receiver-loading')) showSpotsFailedBanner(spots.filter((s) => ${listable}).length);`),
     '홈에서 실패 띠를 띄우지 않거나 곳 수를 탐색 탭과 다르게 센다',
   );
   assert.ok(cut(main, 'function renderSpotDiscovery(', '\n}\n').includes(`deduplicateSpotList(spots.filter((s) => ${listable}))`), '탐색 탭 후보 거르기가 띠와 달라졌다');
-  // 캐시가 있는 재방문에서 받지 못하면 캐시의 전체 데이터를 샘플로 바꾸지 않는다
-  const cachedSync = cut(main, '      loadSpots()\n        .then((liveSpots) => {', '\n          }\n');
-  assert.ok(cachedSync.includes('!spotsFellBackToSample'), '캐시 동기화가 실패한 샘플로 덮는다');
+  // 이미 받은 실제 권역(캐시 새로 고침 포함)은 받지 못해도 샘플로 바꾸지 않고, 샘플 권역 행은 캐시에 저장하지 않는다
+  assert.ok(loadFn.includes('if (spotsFellBackToSample && keys.every((k) => loadedRegionKeys.has(k) && !sampleRegionKeys.has(k))) return;'), '받지 못한 새로 고침이 캐시의 실제 데이터를 샘플로 덮는다');
+  assert.ok(/saveSpotsToCache\(spots\.filter\(\(s\) => \{ const k = regionKeyOf\(s\); return k === null \|\| !sampleRegionKeys\.has\(k\); \}\), keys\)/.test(loadFn), '샘플 권역 행을 캐시에 저장한다');
 
   // 4. 홈 띠: 고정 위치, 이름 있는 영역, 안내 문장은 #sr-announce로(P-423), 실제 개수, 다시 받기와 닫기
   const bannerCode = cut(main, 'function showSpotsFailedBanner(', '\n}\n');

@@ -39,11 +39,16 @@ function setup({ mode = 'course', hash = '', hasButton = true } = {}) {
     'state', 'location', 'document', 'renderConditions', 'calls', 'announce',
     `${block}
     function refreshSavedSpots() {}
+    // P-505: 대기 여부는 고른 지역 권역이 들어왔는지로 정한다. setPending(true)는 그 권역을 받는 중인 상태다
+    let loaded = true;
+    function regionsLoaded() { return loaded; }
+    function ensureSpotsForRegions() { calls.ensured = (calls.ensured || 0) + 1; return Promise.resolve(); }
     function triggerCourseGeneration() { if (waitForFullSpots()) return; calls.generated++; }
     return {
       trigger: triggerCourseGeneration,
-      resolve: resolveWaitingCourse,
-      setPending: (v) => { fullSpotsPending = v; },
+      // 받기가 끝나면 loadRegionFiles가 대기 수를 내리고 resolveWaitingCourse를 부른다
+      resolve: () => { fullSpotsPending = false; loaded = true; resolveWaitingCourse(); },
+      setPending: (v) => { fullSpotsPending = v; loaded = !v; },
       waiting: () => courseWaitingForSpots,
     };`,
   )(env.state, env.location, env.document, env.renderConditions, calls, env.announce);
@@ -123,7 +128,9 @@ for (const opts of [{ mode: 'spots' }, { hash: '#c=1,2,3' }, { hasButton: false 
 // 버튼은 대기 동안 aria-disabled라 초점을 받고, 문구는 알림 영역이 아니다(대기 span은 두 번 읽혀 지웠다). 로드가 끝나면 성공·실패 모두 대기를 푼다
 assert.ok(/id="btn-generate"\$\{courseWaitingForSpots \? ' aria-disabled="true" aria-busy="true"'/.test(src), '대기 중 버튼 aria-disabled가 없다');
 assert.ok(!src.includes('role="status">스팟 불러오는 중…</span>'), '대기 role=status span이 남았다');
-assert.ok(/fullSpotsPending = true;\s*\n\s*const loadFullSpots = \(\) =>\s*loadSpots\(\)/.test(src), '캐시 없는 로드에서만 대기를 켜야 한다');
-assert.ok(src.includes('.finally(resolveWaitingCourse)'), '로드가 끝나도 대기를 풀지 않는다');
-assert.ok(src.includes('if (!courseWaitingForSpots) applyDailyCourseIfEmpty();'), '기다리던 코스를 오늘의 코스가 먼저 덮는다');
+// P-505: 화면을 기다리게 하는 받기만 대기를 켜고, 받기가 끝나면 성공·실패 모두 resolveWaitingCourse를 부른다
+const loadFn = src.slice(src.indexOf('async function loadRegionFiles'), src.indexOf('async function init()'));
+assert.ok(/if \(foreground\) \{\s*foregroundLoads\+\+;\s*fullSpotsPending = true;/.test(loadFn), '화면 받기에서 대기를 켜지 않는다');
+assert.ok(/finally \{[\s\S]*fullSpotsPending = foregroundLoads > 0;\s*resolveWaitingCourse\(\);/.test(loadFn), '받기가 끝나도 대기를 풀지 않는다');
+assert.ok(src.includes('if (state.mainMode === \'course\' && !courseWaitingForSpots) applyDailyCourseIfEmpty();'), '기다리던 코스를 오늘의 코스가 먼저 덮는다');
 console.log('ok course-wait');

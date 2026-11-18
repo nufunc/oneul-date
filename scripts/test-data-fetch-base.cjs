@@ -29,7 +29,8 @@ if (!fs.existsSync(assets)) {
   console.log('SKIP dist/assets 없음: 산출물 검사를 건너뜀(src 검사는 통과)');
 } else {
   const js = fs.readdirSync(assets).filter((f) => f.endsWith('.js')).map((f) => fs.readFileSync(path.join(assets, f), 'utf8')).join('\n');
-  for (const name of ['spots.cols.json', 'spots.json', 'spot_aliases.json', 'stations.json']) {
+  // 권역 파일은 `${base}data/spots/${f}.cols.json` 꼴이라 앞부분만 본다(P-505)
+  for (const name of ['spots/', 'spots.json', 'spot_aliases.json', 'stations.json']) {
     assert.ok(js.includes(`/oneul-date/data/${name}`), `산출물에 /oneul-date/data/${name} 요청이 없다`);
   }
   const bad = js.match(/['"`]\.\/data\/[\w.]+\.json['"`]/g) || [];

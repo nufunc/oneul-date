@@ -243,7 +243,7 @@ const ZONE_CENTERS: Record<string, { lat: number; lng: number }> = {
 const STORAGE_KEY = 'oneul_saved_courses';
 const RECENT_KEY = 'oneul_recent_spots';
 const LAST_COURSE_STORAGE_KEY = 'oneul_last_course';
-import { loadSpots, getCachedSpots, isSpotsCacheFresh, mergeSpots, loadSpotAliases, loadStations, findSpotsByRange, spotsFellBackToSample, spotsBytesReceived, onSpotsProgress } from './supabase';
+import { loadSpots, getCachedSpots, saveSpotsToCache, staleSpotRegionKeys, loadSpotAliases, loadStations, findSpotsByRange, spotsFellBackToSample, spotsBytesReceived, spotsBytesExpected, onSpotsProgress } from './supabase';
 
 const RECENT_MAX = 100;
 
@@ -2398,13 +2398,9 @@ function generateCourse(
 /**
  * 오늘 날짜(YYYYMMDD) 기반 결정론적 시드 PRNG를 사용하여 에디터 추천 일일 코스 생성
  */
-function buildDailyRecommendedCourse(all: Spot[]): { steps: CourseStep[]; regionKey: string; moodKey: string } | null {
-  if (!all || all.length === 0) return null;
-  const now = new Date();
-  const seedNum = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
-
-  // Mulberry32 결정론적 의사 난수 생성기
-  let s = seedNum;
+/** 오늘 날짜로 시드한 Mulberry32 의사 난수와, 그 첫 값으로 고른 오늘 추천 권역. 첫 방문은 이 권역 파일만 먼저 받는다(P-505) */
+function dailyPick(now = new Date()): { dailyRng: () => number; pickedRegion: string } {
+  let s = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
   const dailyRng = () => {
     s |= 0;
     s = (s + 0x6d2b79f5) | 0;
@@ -2412,9 +2408,13 @@ function buildDailyRecommendedCourse(all: Spot[]): { steps: CourseStep[]; region
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
-
   const candidateRegions = ['SEOUL', 'GYEONGGI', 'YEONGNAM', 'JEJU', 'GANGWON'];
-  const pickedRegion = candidateRegions[Math.floor(dailyRng() * candidateRegions.length)];
+  return { dailyRng, pickedRegion: candidateRegions[Math.floor(dailyRng() * candidateRegions.length)] };
+}
+
+function buildDailyRecommendedCourse(all: Spot[], now = new Date()): { steps: CourseStep[]; regionKey: string; moodKey: string } | null {
+  if (!all || all.length === 0) return null;
+  const { dailyRng, pickedRegion } = dailyPick(now);
 
   // MOODS에 없는 키('hip', 'cozy')가 섞여 있어 그 키가 뽑힌 날(약 52%)은 후보 0건으로 조용히 실패했다
   const candidateMoods = ['romantic', 'trendy', 'healing', 'active'];
@@ -4879,9 +4879,13 @@ function renderConditionsKeepGenerateFocus(): void {
   if (hadFocus) document.getElementById('btn-generate')?.focus({ preventScroll: true });
 }
 
-/** 전체 데이터를 기다려야 하면 버튼을 대기 상태로 그리고 true. 버튼 글자는 알림 영역이 아니라 대기를 #sr-announce로 알린다(P-421) */
+/**
+ * 고른 지역(비었으면 전국)의 권역 파일이 아직 없으면 받기 시작하고 버튼을 대기 상태로 그리고 true(P-505).
+ * 버튼 글자는 알림 영역이 아니라 대기를 #sr-announce로 알린다(P-421)
+ */
 function waitForFullSpots(): boolean {
-  if (!fullSpotsPending) return false;
+  if (regionsLoaded(state.regions)) return false;
+  ensureSpotsForRegions(state.regions);
   if (!courseWaitingForSpots) {
     courseWaitingForSpots = true;
     renderConditionsKeepGenerateFocus();
@@ -4890,24 +4894,22 @@ function waitForFullSpots(): boolean {
   return true;
 }
 
-/** 전체 데이터 로드가 끝나면(실패면 loadStaticSpots가 돌려준 샘플로) 기다리던 코스를 만든다. 다른 화면으로 갔으면 덮지 않는다 */
+/** 받기가 끝날 때마다 부른다. 고른 지역이 다 오면(실패면 loadStaticSpots가 돌려준 샘플로) 기다리던 코스를 만든다. 다른 화면으로 갔으면 덮지 않는다 */
 function resolveWaitingCourse(): void {
-  fullSpotsPending = false;
   // 성공이든 실패(샘플 폴백)든 받는 중 표시를 거둔다. 실패 때 로딩으로 남지 않는다
   refreshSavedSpots();
   if (!courseWaitingForSpots) return;
+  // 기다리는 사이 지역을 바꿨으면(지역 칩이 그 지역 받기를 시작한다) 그 받기가 끝날 때 다시 온다
+  if (fullSpotsPending && !regionsLoaded(state.regions)) return;
   courseWaitingForSpots = false;
   if (state.mainMode !== 'course' || location.hash.startsWith('#c=') || !document.getElementById('btn-generate')) return;
   renderConditionsKeepGenerateFocus();
   triggerCourseGeneration();
 }
 
-declare const __SPOTS_JSON_BYTES__: number;
-const SPOTS_JSON_BYTES = typeof __SPOTS_JSON_BYTES__ !== 'undefined' ? __SPOTS_JSON_BYTES__ : 0;
-
-/** 대기 버튼 문구. 분모(빌드 때 잰 spots.json 크기)가 없으면 기존 문구를 쓰고, 다 받기 전에 100%를 보이지 않게 99에서 멈춘다(P-257) */
+/** 대기 버튼 문구. 분모(빌드 때 잰, 지금 받는 권역 파일들의 크기 합)가 없으면 기존 문구를 쓰고, 다 받기 전에 100%를 보이지 않게 99에서 멈춘다(P-257, P-505) */
 function spotsLoadPct(): number | null {
-  return SPOTS_JSON_BYTES > 0 ? Math.min(99, Math.floor((spotsBytesReceived / SPOTS_JSON_BYTES) * 100)) : null;
+  return spotsBytesExpected > 0 ? Math.min(99, Math.floor((spotsBytesReceived / spotsBytesExpected) * 100)) : null;
 }
 function spotsWaitLabel(): string {
   const pct = spotsLoadPct();
@@ -5127,8 +5129,12 @@ function applyDailyCourseIfEmpty(): void {
     last = JSON.parse(sessionStorage.getItem(LAST_COURSE_STORAGE_KEY) ?? 'null');
   } catch {}
   if (last) {
-    if (!loadedRegionKeys.has('ALL')) return;
     const steps = buildSharedSteps(last.ids);
+    // 권역 파일만 받았으면 이 코스 장소가 다 있을 때만 판정한다. 모자라면 전국을 받은 뒤 다시 본다(P-505)
+    if (steps.length !== last.ids.length && !loadedRegionKeys.has('ALL')) {
+      ensureSpotsForRegions(['ALL']).then(() => { if (loadedRegionKeys.has('ALL')) applyDailyCourseIfEmpty(); });
+      return;
+    }
     // 랜딩·?r=&s= 진입은 이 탭 마지막 코스가 그 지역이고 랜딩 시간대 칸을 품을 때만 되살린다. 아니면 랜딩 값으로 시작한다(P-489, P-490)
     const sameEntry = (!entryArea.region || (last.conditions.regions.length === 1 && last.conditions.regions[0] === entryArea.region))
       && (!entryArea.slot || steps.some((st) => st.slot === entryArea.slot));
@@ -5157,6 +5163,12 @@ function applyDailyCourseIfEmpty(): void {
   }
   // 랜딩에서 온 첫 지역·시간대는 오늘 추천의 다른 지역 코스로 덮지 않는다(P-488)
   if (state.searchQuery || state.subZones.length > 0 || entryArea.region || entryArea.slot) return;
+  // 오늘 추천 권역 파일이 아직 없으면 받은 뒤 다시 본다. 첫 방문은 init이 이 권역부터 받는다(P-505)
+  const dailyRegion = dailyPick().pickedRegion;
+  if (!regionsLoaded([dailyRegion])) {
+    ensureSpotsForRegions([dailyRegion]).then(() => { if (regionsLoaded([dailyRegion])) applyDailyCourseIfEmpty(); });
+    return;
+  }
   const daily = buildDailyRecommendedCourse(spots);
   if (daily) {
     prevCourse = null;
@@ -7065,6 +7077,9 @@ let lastDiscoveryList: { list: (Spot & { _dist?: number })[]; pageSize: number }
 function renderSpotDiscovery(): void {
   const area = document.getElementById('spot-discovery-area');
   if (!area) return;
+  // 검색은 고른 지역에 없으면 전국으로 넓히고 찜 모아 보기는 어느 권역이든 보이므로 전국이 필요하다. 받으면 다시 그린다(P-505)
+  const discoveryKeys = state.spotSearchQuery.trim() || state.savedOnly ? ['ALL'] : state.regions;
+  if (!regionsLoaded(discoveryKeys)) ensureSpotsForRegions(discoveryKeys).catch(() => {});
 
   // 1. GPS 위치 자동 획득 (한 번만 시도, 무한 중복 방지)
   if (!userCoords && !geoRequestedOnce && !isRequestingGeo) {
@@ -9137,42 +9152,85 @@ function handleRoute(): void {
 }
 
 const loadedRegionKeys = new Set<string>();
+/** 권역 파일 하나에 맞는 REGIONS 키. 'ALL'은 이 키가 모두 들어왔다는 표시다(P-505) */
+const REGION_FILE_KEYS = REGIONS.filter((r) => r.key !== 'ALL').map((r) => r.key);
+/** 받는 중인 권역 키 → 그 받기. 같은 권역을 두 번 요청하지 않는다 */
+const regionLoads = new Map<string, Promise<void>>();
+/** 받지 못해 번들 샘플 행으로 채운 권역. 이 권역 행은 IndexedDB에 저장하지 않는다(P-255) */
+const sampleRegionKeys = new Set<string>();
+/** 화면을 기다리게 하는 받기 수. 캐시를 새로 고치는 뒤쪽 받기는 세지 않는다 */
+let foregroundLoads = 0;
+
+/** 지역 키 목록(빈 목록은 전국)을 권역 파일 키로 바꾼다 */
+function regionFileKeysFor(regionKeys: string[]): string[] {
+  return regionKeys.length === 0 || regionKeys.includes('ALL') ? REGION_FILE_KEYS : regionKeys.filter((k) => REGION_FILE_KEYS.includes(k));
+}
+
+/** 지역 키 목록(빈 목록은 전국)의 장소가 모두 메모리에 있는지 */
+function regionsLoaded(regionKeys: string[]): boolean {
+  return regionFileKeysFor(regionKeys).every((k) => loadedRegionKeys.has(k));
+}
+
+function markRegionsLoaded(keys: string[]): void {
+  keys.forEach((k) => loadedRegionKeys.add(k));
+  if (REGION_FILE_KEYS.every((k) => loadedRegionKeys.has(k))) loadedRegionKeys.add('ALL');
+}
+
+/** 스팟이 든 권역 키. REGIONS에 없는 region이면 null */
+function regionKeyOf(spot: Spot): string | null {
+  return REGION_FILE_KEYS.find((k) => matchesRegion(spot, [k])) ?? null;
+}
+
+/** 찜이나 저장한 코스가 있으면 어느 권역 장소든 그릴 수 있어야 하므로 전국이 필요하다 */
+function hasSavedSpotData(): boolean {
+  return state.savedSpotIds.size > 0 || loadSavedCourses().length > 0;
+}
 
 /**
- * 지정된 지역 키 목록에 해당하는 스팟이 메모리에 로드되어 있는지 확인하고,
- * 아직 없는 경우 해당 지역 스팟을 온디맨드로 페칭하여 병합합니다.
+ * 지역 키 목록(빈 목록이나 'ALL'은 전국)의 권역 파일 가운데 아직 없는 것만 받아 메모리에 합친다(P-505).
+ * refresh면 이미 있는 권역도 다시 받아 그 권역 행을 바꾼다(캐시 새로 고침). 받는 중인 권역은 그 받기를 기다린다
  */
-async function ensureSpotsForRegions(regionKeys: string[]): Promise<void> {
-  const targets = regionKeys.length === 0 ? ['ALL'] : regionKeys;
-  const missingKeys = targets.filter((k) => !loadedRegionKeys.has(k) && !loadedRegionKeys.has('ALL'));
-  if (missingKeys.length === 0) return;
-
-  if (missingKeys.includes('ALL')) {
-    const allSpots = await loadSpots();
-    if (allSpots && allSpots.length > 0) {
-      // 전체를 받았으니 합치지 않고 바꾼다. 합치면 번들 샘플에만 있는 닫힌 행(가평 글램핑이 서울 숙소로 나온 7056 등)이 남는다
-      spots = deduplicateSpotList(allSpots);
-      spotById = buildSpotIndex(spots);
-      canonicalizeSavedSpotIds();
-      loadedRegionKeys.add('ALL');
-      if (state.mainMode === 'spots') {
-        renderSpotDiscovery();
-      }
-    }
-    return;
+async function ensureSpotsForRegions(regionKeys: string[], refresh = false): Promise<void> {
+  const want = regionFileKeysFor(regionKeys);
+  const missing = want.filter((k) => (refresh || !loadedRegionKeys.has(k)) && !regionLoads.has(k));
+  if (missing.length > 0) {
+    const load = loadRegionFiles(missing, !refresh);
+    missing.forEach((k) => regionLoads.set(k, load));
   }
+  await Promise.all(want.map((k) => regionLoads.get(k)).filter(Boolean));
+}
 
-  const matchesToFetch = REGIONS.filter((r) => missingKeys.includes(r.key)).flatMap((r) => r.match);
-  if (matchesToFetch.length === 0) return;
-
-  const newSpots = await loadSpots(matchesToFetch);
-  if (newSpots && newSpots.length > 0) {
-    spots = deduplicateSpotList(mergeSpots(spots, newSpots));
+async function loadRegionFiles(keys: string[], foreground: boolean): Promise<void> {
+  if (foreground) {
+    foregroundLoads++;
+    fullSpotsPending = true;
+    paintSpotsProgress();
+  }
+  try {
+    const got = await loadSpots(REGIONS.filter((r) => keys.includes(r.key)).flatMap((r) => r.match));
+    // 받지 못해 샘플이 왔으면 이미 받은 실제 행을 샘플로 바꾸지 않는다(P-255)
+    if (spotsFellBackToSample && keys.every((k) => loadedRegionKeys.has(k) && !sampleRegionKeys.has(k))) return;
+    if (got.length === 0) return;
+    // 그 권역 행은 합치지 않고 바꾼다. 합치면 닫힌 행이나 샘플에만 있는 행(가평 글램핑이 서울 숙소로 나온 7056 등)이 남는다
+    const inKeys = (s: Spot) => { const k = regionKeyOf(s); return k !== null && keys.includes(k); };
+    spots = deduplicateSpotList([...spots.filter((s) => !inKeys(s)), ...got]);
     spotById = buildSpotIndex(spots);
     canonicalizeSavedSpotIds();
-    missingKeys.forEach((k) => loadedRegionKeys.add(k));
-    if (state.mainMode === 'spots') {
-      renderSpotDiscovery();
+    markRegionsLoaded(keys);
+    if (spotsFellBackToSample) {
+      keys.forEach((k) => sampleRegionKeys.add(k));
+      if (!document.getElementById('receiver-loading')) showSpotsFailedBanner(spots.filter((s) => !s.is_closed && isCourseEligible(s)).length);
+    } else {
+      keys.forEach((k) => sampleRegionKeys.delete(k));
+      saveSpotsToCache(spots.filter((s) => { const k = regionKeyOf(s); return k === null || !sampleRegionKeys.has(k); }), keys);
+    }
+    if (state.mainMode === 'spots') renderSpotDiscovery();
+  } finally {
+    keys.forEach((k) => regionLoads.delete(k));
+    if (foreground) {
+      foregroundLoads--;
+      fullSpotsPending = foregroundLoads > 0;
+      resolveWaitingCourse();
     }
   }
 }
@@ -9254,19 +9312,25 @@ async function init(): Promise<void> {
     handleRoute();
   }
 
-  let hasCachedData = false;
+  // 공유 id가 지금 메모리에 다 있거나 전국을 받았으면 받은 링크를 판정할 수 있다. 권역 캐시만 있으면 아직 판정하지 않는다(P-505)
+  const sharedIds = isSharedLink ? [...new Set((parseCourseHash(location.hash) || []).map((id) => spotAliasIds.get(id) ?? id))] : [];
+  const sharedReady = () => loadedRegionKeys.has('ALL') || (sharedIds.length > 0 && sharedIds.every((id) => spotById.has(id)));
+  onSpotsProgress(paintSpotsProgress);
 
-  // 2. IndexedDB 캐시에서 즉시 복원 (10~20ms)
+  // 2. IndexedDB 캐시에서 즉시 복원 (10~20ms). 캐시에 든 권역은 행의 region으로 안다
   try {
     const cachedSpots = await getCachedSpots();
     if (cachedSpots && cachedSpots.length > 0) {
-      hasCachedData = true;
       spots = deduplicateSpotList(cachedSpots);
       spotById = buildSpotIndex(spots);
       canonicalizeSavedSpotIds();
-      loadedRegionKeys.add('ALL');
+      const cachedKeys = REGION_FILE_KEYS.filter((k) => spots.some((sp) => regionKeyOf(sp) === k));
+      markRegionsLoaded(cachedKeys);
+      // 6시간 안에 저장한 권역은 새로 받지 않는다. 지난 권역만 뒤에서 다시 받는다(P-321)
+      const stale = staleSpotRegionKeys(cachedKeys, 6 * 60 * 60 * 1000);
+      if (stale.length > 0) setTimeout(() => { ensureSpotsForRegions(stale, true).catch(() => {}); }, 1000);
       if (isSharedLink) {
-        handleRoute();
+        if (sharedReady()) handleRoute();
       } else if (state.mainMode === 'course') {
         applyDailyCourseIfEmpty();
       }
@@ -9275,86 +9339,48 @@ async function init(): Promise<void> {
     // 캐시 로드 실패 시 무시
   }
 
-  // 3. 백그라운드 비동기 최적화 로딩
-  if (!hasCachedData) {
-    // 캐시가 없는 첫 방문 시: 전국 전체 스팟 로드
-    onSpotsProgress(paintSpotsProgress);
-    fullSpotsPending = true;
-    const loadFullSpots = () =>
-      loadSpots()
-        .then((firstSpots) => {
-          if (firstSpots && firstSpots.length > 0) {
-            // 위와 같은 이유로 번들 샘플을 전체 데이터로 바꾼다
-            spots = deduplicateSpotList(firstSpots);
-            spotById = buildSpotIndex(spots);
-            canonicalizeSavedSpotIds();
-            loadedRegionKeys.add('ALL');
-            // 자리표시가 아직 떠 있을 때만 받은 코스를 그린다. 사용자가 해시를 바꿔 다른 화면으로 갔으면 덮지 않는다
-            // 샘플로 떨어졌으면 받은 링크는 판정하지 않고 실패 카드에 머물고, 그 밖의 화면은 띠로 알린다(P-255)
-            if (isSharedLink && document.getElementById('receiver-loading')) {
-              if (spotsFellBackToSample) renderReceiverLoading(true);
-              else handleRoute();
-            } else {
-              if (spotsFellBackToSample) showSpotsFailedBanner(spots.filter((s) => !s.is_closed && isCourseEligible(s)).length);
-              if (state.mainMode === 'spots') {
-                renderSpotDiscovery();
-              } else if (state.mainMode === 'course') {
-                if (!courseWaitingForSpots) applyDailyCourseIfEmpty();
-              }
-            }
-          } else if (document.getElementById('receiver-loading')) {
-            renderShell();
-          }
-        })
-        .catch(() => {
-          // 받지 못하면 자리표시에 머물지 않고 홈 셸로 떨어진다
-          if (document.getElementById('receiver-loading')) renderShell();
-        })
-        .finally(resolveWaitingCourse);
-    // 받은 링크는 공유 id 행만 Range 요청으로 먼저 찾아 그린다. Range 조각이 전체 파일과 대역폭을 나누지 않도록
-    // 전체 파일은 Range가 끝난 뒤(성공이든 실패든) 받는다(P-410)
-    if (isSharedLink) {
-      const sharedIds = [...new Set((parseCourseHash(location.hash) || []).map((id) => spotAliasIds.get(id) ?? id))];
-      findSpotsByRange(sharedIds)
-        .then((found) => {
-          // 일부만 찾았으면 그리지 않는다: 못 찾은 곳을 뺐다는 알림이 잘못 뜬다. 전체 데이터가 오면 위 loadFullSpots가 그린다
-          if (found.length === 0 || found.length !== sharedIds.length || !document.getElementById('receiver-loading')) return;
+  // 3. 이 화면에 필요한 권역만 받는다(P-505). 찜·저장한 코스가 있으면 전국, 아니면 고른 지역(랜딩 ?r=), 그것도 없으면 오늘 추천 권역이다
+  if (isSharedLink && !sharedReady()) {
+    // 받은 링크는 공유 id 행만 Range 요청으로 먼저 찾아 그리고, 찾은 장소의 권역 파일을 받는다. 다 찾지 못했으면 전국을 받는다.
+    // Range 조각이 권역 파일과 대역폭을 나누지 않도록 권역 파일은 Range가 끝난 뒤(성공이든 실패든) 받는다(P-410)
+    findSpotsByRange(sharedIds)
+      .then((found) => {
+        // 일부만 찾았으면 그리지 않는다: 못 찾은 곳을 뺐다는 알림이 잘못 뜬다. 전국 데이터가 오면 아래에서 그린다
+        if (found.length === 0 || found.length !== sharedIds.length) return ['ALL'];
+        if (document.getElementById('receiver-loading')) {
           spotById = buildSpotIndex([...spots, ...found]);
           handleRoute();
-        })
-        .catch(() => {})
-        .then(loadFullSpots);
-    } else {
-      loadFullSpots();
-    }
-  } else {
-    // 이미 캐시가 있는 경우: 백그라운드에서 최신 전체 데이터 동기화. 6시간 안에 저장한 캐시면 건너뛴다(P-321)
-    if (!isSpotsCacheFresh(6 * 60 * 60 * 1000)) setTimeout(() => {
-      loadSpots()
-        .then((liveSpots) => {
-          // 받지 못해 샘플이 왔으면 캐시의 전체 데이터를 샘플로 바꾸지 않는다(P-255)
-          if (liveSpots && liveSpots.length > 0 && !spotsFellBackToSample) {
-            spots = deduplicateSpotList(liveSpots);
-            spotById = buildSpotIndex(spots);
-            canonicalizeSavedSpotIds();
-            loadedRegionKeys.add('ALL');
-          }
-        })
-        .catch(() => {});
-    }, 1000);
+        }
+        const keys = found.map(regionKeyOf);
+        return keys.every((k): k is string => k !== null) ? [...new Set(keys)] : ['ALL'];
+      })
+      .catch(() => ['ALL'])
+      .then((keys) => ensureSpotsForRegions(hasSavedSpotData() ? ['ALL'] : keys))
+      .then(() => {
+        // 자리표시가 아직 떠 있을 때만 받은 코스를 그린다. 사용자가 해시를 바꿔 다른 화면으로 갔으면 덮지 않는다
+        // 샘플로 떨어졌으면 받은 링크는 판정하지 않고 실패 카드에 머문다(P-255)
+        if (!document.getElementById('receiver-loading')) return;
+        if (spotsFellBackToSample) renderReceiverLoading(true);
+        else if (spots.length > 0) handleRoute();
+        else renderShell();
+      })
+      .catch(() => {
+        // 받지 못하면 자리표시에 머물지 않고 홈 셸로 떨어진다
+        if (document.getElementById('receiver-loading')) renderShell();
+      });
+  } else if (!isSharedLink) {
+    const firstKeys = hasSavedSpotData() ? ['ALL'] : state.regions.length > 0 ? state.regions : [dailyPick().pickedRegion];
+    ensureSpotsForRegions(firstKeys)
+      .then(() => {
+        if (state.mainMode === 'course' && !courseWaitingForSpots) applyDailyCourseIfEmpty();
+      })
+      .catch(() => {});
   }
 
-  // 공유 링크인데 캐시/라이브 전 초기 렌더링이 안 된 경우 폴백 렌더링.
-  // 캐시가 전혀 없는 첫 방문자는 이 시점에 spots가 아직 정적 샘플
-  // 번들(spots.sample.json, id가 서비스 스팟 id와 겹치지 않음)이라
-  // handleRoute()를 바로 부르면 항상 매칭 실패로 판정돼 hash가
-  // 영구 제거된다(clearCourseHash) — 공유 링크의 실사용 대상이 정확히
-  // 이 "캐시 없는 첫 방문자"라 사실상 공유 기능이 상시 실패했다
-  // (2026-09-23 발견). 라이브 데이터가 아직 없으면 실패 판정을 미루고
-  // 수신자 자리표시만 보여준다. 실제 판정은 위 loadSpots().then() 콜백이
-  // 라이브 데이터로 다시 handleRoute()를 부를 때 이뤄진다.
+  // 공유 링크인데 판정할 데이터가 아직 없으면 실패 판정을 미루고 수신자 자리표시만 보여준다.
+  // 캐시 없는 첫 방문자가 받은 링크의 실사용 대상이라, 바로 handleRoute()를 부르면 매칭 실패로 hash가 지워졌다(2026-09-23 발견)
   if (isSharedLink && (!state.course || state.course.length === 0)) {
-    if (hasCachedData) {
+    if (sharedReady()) {
       handleRoute();
     } else if (!document.getElementById('receiver-loading')) {
       // 위에서 그린 대기 카드가 있으면 다시 그리지 않는다: 회전 표시가 처음부터 다시 돈다

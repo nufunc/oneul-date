@@ -52,7 +52,8 @@ self.addEventListener('fetch', (event) => {
 
   // spots.json은 앱이 IndexedDB에 따로 보관하므로 서비스 워커가 22.5MB 사본을 Cache Storage에 또 두지 않는다
   if (url.pathname.endsWith('/data/spots.json')) return;
-  if (url.pathname.endsWith('/data/spots.cols.json')) return;
+  // 권역별 열 형식 파일도 같은 이유로 빼고(P-505), 옛 앱이 받던 전체 열 형식 파일은 지금 없다(404)
+  if (url.pathname.includes('/data/spots/')) return;
 
   // GET 요청에 대해 네트워크 우선 + 캐시 폴백 전략
   if (event.request.method === 'GET') {

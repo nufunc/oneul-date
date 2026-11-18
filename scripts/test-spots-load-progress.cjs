@@ -22,7 +22,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const supa = read('supabase.ts');
   // 샘플 동적 import(P-414)는 new Function 안에서 받을 수 없어 주입한 rawSpotsData로 바꾼다
   const colsCode = cut(supa, 'export function rowsFromColumns', '\n}\n').replace(/^export /gm, '');
-  const loadCode = cut(supa, 'export let spotsFellBackToSample', '\n}\n').replace(/^export /gm, '')
+  const loadCode = cut(supa, '// 권역 파일 색인', '\n}\n\n// 받은 링크').replace(/^export /gm, '').replace(/\n\/\/ 받은 링크$/, '')
     .replace("(await import('./data/spots.sample.json')).default", 'rawSpotsData')
     .replace(/import\.meta\.env\.BASE_URL/g, "'/oneul-date/'");
   assert.ok(/const SPOTS_IDLE_MS = 15000;/.test(loadCode), '무응답 제한이 15초가 아니다');
@@ -33,30 +33,33 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     'env',
     'normalizeSpots',
     'rawSpotsData',
-    'saveSpotsToCache',
+    '__SPOTS_INDEX__',
     `const fetch = (...a) => env.fetch(...a);
     const setTimeout = (fn, ms) => { const h = globalThis.setTimeout(() => { env.timers.delete(h); fn(); }, ms); env.timers.add(h); return h; };
     const clearTimeout = (h) => { env.timers.delete(h); globalThis.clearTimeout(h); };
     ${ts.transpile(colsCode, { target: 'es2022' })}
     ${ts.transpile(loadCode.replace('SPOTS_IDLE_MS = 15000', `SPOTS_IDLE_MS = ${IDLE}`), { target: 'es2022' })}
-    return { loadStaticSpots, onSpotsProgress, flag: () => spotsFellBackToSample, bytes: () => spotsBytesReceived };`,
-  )(env, (rows) => rows, sample, () => {});
+    return { loadStaticSpots, onSpotsProgress, flag: () => spotsFellBackToSample, bytes: () => spotsBytesReceived, expected: () => spotsBytesExpected };`,
+  )(env, (rows) => rows, sample, { seoul: { regions: ['서울'], bytes: 12345 } });
 
   const full = Array.from({ length: 50 }, (_, i) => ({ id: 100 + i, name: `한글 스팟 ${i}` }));
-  const file = Buffer.from(JSON.stringify(full), 'utf8');
-  const rowFile = file;
+  // P-505: 앱은 권역 열 형식 파일을 받으므로 기본 본문은 열 형식이다. 행 파일은 404 되돌림에서만 쓴다
+  const colsObj = {};
+  for (const k of Object.keys(full[0])) colsObj[k] = full.map((r) => r[k]);
+  const file = Buffer.from(JSON.stringify(colsObj), 'utf8');
+  const rowFile = Buffer.from(JSON.stringify(full), 'utf8');
   // 조각을 gap 간격으로 count개만 내고 멈춘다(count가 전체면 닫는다). 요청이 끊기면 스트림도 오류로 끝난다
-  const serve = ({ headerDelay = 0, gap = 0, count = Infinity, parts = 10, file = rowFile }) => (url, init) =>
+  const serve = ({ headerDelay = 0, gap = 0, count = Infinity, parts = 10, file: body0 = file }) => (url, init) =>
     new Promise((resolve, reject) => {
       assert.ok(init && init.signal, 'fetch에 signal을 넘기지 않았다');
-      const size = Math.ceil(file.length / parts);
+      const size = Math.ceil(body0.length / parts);
       const body = new ReadableStream({
         async start(c) {
           init.signal.addEventListener('abort', () => c.error(new DOMException('aborted', 'AbortError')));
           for (let i = 0; i < Math.min(count, parts); i++) {
             await sleep(gap);
             if (init.signal.aborted) return;
-            c.enqueue(new Uint8Array(file.subarray(i * size, (i + 1) * size)));
+            c.enqueue(new Uint8Array(body0.subarray(i * size, (i + 1) * size)));
           }
           if (count >= parts) c.close();
         },
@@ -85,7 +88,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   t0 = Date.now();
   got = await mod.loadStaticSpots();
   let took = Date.now() - t0;
-  assert.strictEqual(got, sample, '헤더 무응답에서 샘플로 떨어지지 않았다');
+  assert.deepStrictEqual(got, sample, '헤더 무응답에서 샘플로 떨어지지 않았다');
   assert.strictEqual(mod.flag(), true);
   assert.ok(took >= IDLE && took < IDLE * 4, `헤더 무응답 제한 시각이 어긋난다: ${took}ms`);
   assert.strictEqual(env.timers.size, 0, '끊은 뒤 타이머가 남았다');
@@ -96,34 +99,33 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   t0 = Date.now();
   got = await mod.loadStaticSpots();
   took = Date.now() - t0;
-  assert.strictEqual(got, sample, '본문 무응답에서 샘플로 떨어지지 않았다');
+  assert.deepStrictEqual(got, sample, '본문 무응답에서 샘플로 떨어지지 않았다');
   assert.strictEqual(mod.flag(), true);
   assert.strictEqual(seen.length, 3);
   assert.ok(seen[0] < file.length / 5, '새 받기가 앞 받기의 바이트에 이어 셌다');
   assert.ok(took >= IDLE && took < IDLE * 4, `본문 무응답 제한 시각이 어긋난다: ${took}ms`);
   assert.strictEqual(env.timers.size, 0, '끊은 뒤 타이머가 남았다');
 
-  // 3b. P-453: 열 형식 spots.cols.json을 먼저 받아 행으로 바꾸고, 404면 spots.json을 받아 바이트를 0부터 센다
-  const colsObj = {};
-  for (const k of Object.keys(full[0])) colsObj[k] = full.map((r) => r[k]);
-  const colsFile = Buffer.from(JSON.stringify(colsObj), 'utf8');
+  // 3b. P-505: 권역 파일 data/spots/<권역>.cols.json을 받아 행으로 바꾸고 분모는 색인의 풀린 크기다. 404면 spots.json을 받아 바이트를 0부터 센다
   const urls = [];
-  env.fetch = (url, init) => { urls.push(url); return serve({ file: colsFile })(url, init); };
-  got = await mod.loadStaticSpots();
+  env.fetch = (url, init) => { urls.push(url); return serve({})(url, init); };
+  got = await mod.loadStaticSpots(['서울']);
   assert.deepStrictEqual(got, full, '열 형식 본문을 행으로 바꾸지 못했다');
-  assert.deepStrictEqual(urls, ['/oneul-date/data/spots.cols.json'], '열 형식 파일을 먼저 받지 않았다');
-  assert.strictEqual(mod.bytes(), colsFile.length, '열 형식 받기의 바이트를 세지 않았다');
+  assert.deepStrictEqual(urls, ['/oneul-date/data/spots/seoul.cols.json'], '권역 파일을 받지 않았다');
+  assert.strictEqual(mod.bytes(), file.length, '권역 파일 받기의 바이트를 세지 않았다');
+  assert.strictEqual(mod.expected(), 12345, '분모가 색인의 권역 파일 크기가 아니다');
   assert.strictEqual(mod.flag(), false);
   urls.length = 0;
   seen.length = 0;
   env.fetch = (url, init) => {
     urls.push(url);
-    return url.endsWith('/spots.cols.json') ? Promise.resolve({ ok: false, status: 404 }) : serve({})(url, init);
+    return url.endsWith('.cols.json') ? Promise.resolve({ ok: false, status: 404 }) : serve({ file: rowFile })(url, init);
   };
   got = await mod.loadStaticSpots();
   assert.deepStrictEqual(got, full, '404 뒤 행 파일을 받지 못했다');
-  assert.deepStrictEqual(urls, ['/oneul-date/data/spots.cols.json', '/oneul-date/data/spots.json'], '404 뒤 행 파일을 한 번 받지 않았다');
-  assert.strictEqual(seen[seen.length - 1], file.length, '404 뒤 진행이 행 파일 크기로 끝나지 않았다');
+  assert.deepStrictEqual(urls, ['/oneul-date/data/spots/seoul.cols.json', '/oneul-date/data/spots.json'], '404 뒤 행 파일을 한 번 받지 않았다');
+  assert.strictEqual(seen[seen.length - 1], rowFile.length, '404 뒤 진행이 행 파일 크기로 끝나지 않았다');
+  assert.strictEqual(mod.expected(), 0, '행 파일로 넘어갔는데 권역 분모가 남았다');
   assert.strictEqual(mod.flag(), false);
   assert.strictEqual(env.timers.size, 0, '404 되돌림 뒤 타이머가 남았다');
   mod.onSpotsProgress(null);
@@ -131,9 +133,9 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   // 4. 버튼 문구: 분모가 없으면 기존 문구, 다 받아도 99%에서 멈춘다
   const main = read('main.ts');
   const pctCode = cut(main, 'function spotsLoadPct', 'function paintSpotsProgress');
-  assert.ok(/declare const __SPOTS_JSON_BYTES__: number;/.test(main), '빌드 상수 선언이 없다');
+  assert.ok(/declare const __SPOTS_INDEX__/.test(read('supabase.ts')), '빌드 색인 선언이 없다');
   const label = (total, bytes) =>
-    new Function('SPOTS_JSON_BYTES', 'spotsBytesReceived', `${ts.transpile(pctCode.replace('function paintSpotsProgress', ''), { target: 'es2022' })};return spotsWaitLabel();`)(total, bytes);
+    new Function('spotsBytesExpected', 'spotsBytesReceived', `${ts.transpile(pctCode.replace('function paintSpotsProgress', ''), { target: 'es2022' })};return spotsWaitLabel();`)(total, bytes);
   assert.strictEqual(label(0, 5000), '스팟 불러오는 중…', '분모가 0인데 비율을 냈다');
   assert.strictEqual(label(1000, 0), '스팟 받는 중 0%');
   assert.strictEqual(label(1000, 437), '스팟 받는 중 43%');
@@ -154,7 +156,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   assert.ok(/getElementById\('discovery-load-pct'\)/.test(paint), '진행 알림이 탐색 탭 상태 글자를 바꾸지 않는다');
   const discCode = cut(main, 'function spotsLoadPct', 'function paintSpotsProgress').replace('function paintSpotsProgress', '');
   const disc = (total, bytes, pending) =>
-    new Function('SPOTS_JSON_BYTES', 'spotsBytesReceived', 'fullSpotsPending', `${ts.transpile(discCode, { target: 'es2022' })};return discoveryLoadPctText();`)(total, bytes, pending);
+    new Function('spotsBytesExpected', 'spotsBytesReceived', 'fullSpotsPending', `${ts.transpile(discCode, { target: 'es2022' })};return discoveryLoadPctText();`)(total, bytes, pending);
   assert.strictEqual(disc(1000, 437, true), ' 43%');
   assert.strictEqual(disc(0, 437, true), '', '분모가 0인데 탐색 탭에 비율을 냈다');
   assert.strictEqual(disc(1000, 437, false), '', '받기가 끝났는데 탐색 탭에 비율이 남았다');
