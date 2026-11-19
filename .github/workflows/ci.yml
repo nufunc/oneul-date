@@ -1,10 +1,12 @@
-name: Deploy to GitHub Pages
+name: CI
 
+# 배포는 Cloudflare Workers Builds가 main 푸시마다 따로 한다(wrangler.jsonc, P-485).
+# 여기서는 같은 커밋을 빌드해 시험하고, Cloudflare 배포가 끝나면 https://oneul.date 에서 @smoke를 본다(P-540)
 on:
   push:
     branches: [main]
   # 동기화 워크플로는 기본 GITHUB_TOKEN으로 push해서 위 push 트리거가 발동하지 않는다(GitHub 규칙).
-  # 동기화가 성공하면 여기서 배포해 그날 데이터가 라이브에 나가게 한다
+  # 동기화가 성공하면 여기서 그 데이터 커밋을 시험한다
   workflow_run:
     workflows: ["Auto Sync Spots from OCI DB"]
     types: [completed]
@@ -12,12 +14,11 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
+  checks: read
 
-# 성공하지 않은 workflow_run은 job을 건너뛰므로 실행별 그룹에 둬 돌던 배포를 취소하지 않게 한다
+# 성공하지 않은 workflow_run은 job을 건너뛰므로 실행별 그룹에 둬 돌던 시험을 취소하지 않게 한다
 concurrency:
-  group: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'success' && format('pages-skip-{0}', github.run_id) || 'pages' }}
+  group: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'success' && format('ci-skip-{0}', github.run_id) || 'ci' }}
   cancel-in-progress: true
 
 jobs:
@@ -35,9 +36,9 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      # 시험 다수가 dist를 읽으므로 빌드 뒤에 돌린다. 실패하면 업로드와 배포가 멈춘다
+      # 시험 다수가 dist를 읽으므로 빌드 뒤에 돌린다
       - run: npm test
-      # 사용자 흐름 e2e(P-508). 브라우저는 @playwright/test 버전별로 캐시하고, 실패하면 업로드와 배포가 멈춘다
+      # 사용자 흐름 e2e(P-508). 브라우저는 @playwright/test 버전별로 캐시한다
       - id: pw
         run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
       - uses: actions/cache@v4
@@ -54,23 +55,11 @@ jobs:
             playwright-report
             test-results
           retention-days: 7
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
-
-  # 배포된 라이브 주소에서 첫 방문과 공유 흐름(@smoke)만 다시 본다(P-508)
+  # 배포된 라이브 주소에서 첫 방문과 공유 흐름(@smoke)만 다시 본다(P-508).
+  # Cloudflare 배포는 이 워크플로와 따로 돌므로 같은 커밋의 Workers Builds 검사가 끝나기를 기다린 뒤 본다(P-540)
   smoke-live:
-    needs: deploy
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -86,6 +75,24 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
       - run: npx playwright install --with-deps chromium
+      # 검사 이름 대신 Cloudflare 앱(cloudflare-workers-and-pages)으로 찾는다. 20초 간격으로 최대 20분 기다린다
+      - name: wait for Cloudflare deploy
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.sha }}
+        run: |
+          for i in $(seq 1 60); do
+            st=$(gh api "repos/${{ github.repository }}/commits/$SHA/check-runs" \
+              -q '([.check_runs[] | select(.app.slug == "cloudflare-workers-and-pages")][0] // empty) | "\(.status) \(.conclusion)"')
+            echo "try $i: ${st:-none}"
+            case "$st" in
+              "completed success") exit 0 ;;
+              completed*) echo "::error::Cloudflare 배포가 성공하지 않았다: $st"; exit 1 ;;
+            esac
+            sleep 20
+          done
+          echo "::error::20분 안에 $SHA의 Cloudflare 배포가 끝나지 않았다"
+          exit 1
       - run: npm run e2e:live -- --grep @smoke
       - if: failure()
         uses: actions/upload-artifact@v4
