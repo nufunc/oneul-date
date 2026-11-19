@@ -45,4 +45,5 @@ services:
     deploy:
       resources:
         limits:
-          memory: 128M
+          # anthropic SDK import가 약 64MB를 더해 128M 한도에 가까워짐(P-533)
+          memory: 256M
