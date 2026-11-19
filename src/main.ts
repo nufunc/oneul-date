@@ -4565,6 +4565,7 @@ function renderConditions(): void {
     .filter((cat) => !(seoulOnly && cat.key === 'OCEAN'));
   // 줄에 없는 칩이 켜진 채 남으면 보이지 않는 테마로 코스를 짠다. 지역 칩, 지역 시트, 코스 불러오기, 받은 코스에서 돌아오기가 모두 여기를 지난다
   if (!themeChips.some((cat) => cat.key === state.courseCategory)) state.courseCategory = 'ALL';
+  const buddyPick = courseBuddyHidden() ? null : pickCourseBuddyTheme(themeChips);
 
   area.innerHTML = `
     <div class="conditions-card">
@@ -4621,6 +4622,8 @@ function renderConditions(): void {
         </div>
       </div>
 
+      ${buddyPick ? renderCourseBuddy(buddyPick) : ''}
+
       <!-- 5. 코스 완성하기 버튼군: 맞춤 생성 + 찜한 코스 -->
       <div class="course-generate-btn-group">
         <button class="btn-primary btn-generate" id="btn-generate"${courseWaitingForSpots ? ' aria-disabled="true" aria-busy="true"' : ''}>
@@ -4639,7 +4642,70 @@ function renderConditions(): void {
   restoreFocusIn(area, refocusSelector, '#search-input');
 }
 
+// 코스 추천 캐릭터(P-529). 누르면 그 세션 동안 다시 그리지 않는다. 받은 코스 링크와 지역 랜딩에서는 받은 화면을 가리지 않게 띄우지 않는다
+const COURSE_BUDDY_HIDDEN_KEY = 'oneul_course_buddy_popped';
+function courseBuddyHidden(): boolean {
+  if (location.hash.startsWith('#c=') || document.getElementById('seo-landing')) return true;
+  try {
+    return sessionStorage.getItem(COURSE_BUDDY_HIDDEN_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+/** 지금 줄에 보이는 테마 칩 가운데 날짜로 하나. 새 추천 로직 없이 칩 하나를 대신 눌러 준다 */
+function pickCourseBuddyTheme(chips: SpotCategoryItem[], now = new Date()): SpotCategoryItem | null {
+  const pool = chips.filter((c) => c.key !== 'ALL');
+  return pool.length > 0 ? pool[now.getDate() % pool.length] : null;
+}
+
+const COURSE_BUDDY_SVG = `<svg class="buddy-svg" viewBox="0 0 48 48" width="44" height="44" aria-hidden="true" focusable="false">
+  <path class="buddy-sprout" d="M24 11c0-4 2-6 5-7-1 3-2 5-5 7zm0 0c-1-3-3-4-6-4 1 3 3 4 6 4z"/>
+  <path class="buddy-body" d="M24 11c10 0 17 8 17 18 0 9-7 14-17 14S7 38 7 29c0-10 7-18 17-18z"/>
+  <g class="buddy-eyes"><ellipse cx="18" cy="27" rx="2.2" ry="3"/><ellipse cx="30" cy="27" rx="2.2" ry="3"/></g>
+  <ellipse class="buddy-cheek" cx="13.5" cy="32" rx="2.6" ry="1.6"/><ellipse class="buddy-cheek" cx="34.5" cy="32" rx="2.6" ry="1.6"/>
+  <path class="buddy-mouth" d="M21.5 33q2.5 2.4 5 0"/>
+</svg>`;
+
+function renderCourseBuddy(pick: SpotCategoryItem): string {
+  const line = `오늘은 ${pick.label} 코스 어때요?`;
+  return `
+      <button type="button" class="course-buddy" id="course-buddy" data-buddy-cat="${pick.key}" aria-label="${escapeHtml(line)} 누르면 이 테마로 코스를 만들어요">
+        <span class="buddy-figure">${COURSE_BUDDY_SVG}</span>
+        <span class="buddy-bubble" aria-hidden="true">오늘은 ${pick.emoji} ${escapeHtml(pick.label)} 코스 어때요?</span>
+      </button>`;
+}
+
+/** 캐릭터 자리에 문서 좌표로 복제본을 띄워 0.4초 「뿅」 뒤 지운다. 원본은 조건 영역을 다시 그릴 때 빠진다 */
+function popCourseBuddy(btn: HTMLElement): void {
+  const fig = btn.querySelector('.buddy-figure');
+  if (!fig) return;
+  const r = fig.getBoundingClientRect();
+  const poof = document.createElement('div');
+  poof.className = 'buddy-poof';
+  poof.setAttribute('aria-hidden', 'true');
+  poof.style.left = `${r.left + window.scrollX}px`;
+  poof.style.top = `${r.top + window.scrollY}px`;
+  poof.innerHTML = `${COURSE_BUDDY_SVG}${'<i class="buddy-spark"></i>'.repeat(6)}`;
+  document.body.appendChild(poof);
+  setTimeout(() => poof.remove(), 450);
+}
+
 function bindConditionEvents(area: HTMLElement): void {
+  // 캐릭터를 누르면 그 테마 칩을 켠 뒤 🚀 단추와 같은 경로로 코스를 만든다(P-529)
+  area.querySelector<HTMLButtonElement>('#course-buddy')?.addEventListener('click', (e) => {
+    const btn = e.currentTarget as HTMLButtonElement;
+    try {
+      sessionStorage.setItem(COURSE_BUDDY_HIDDEN_KEY, '1');
+    } catch {}
+    popCourseBuddy(btn);
+    state.courseCategory = btn.dataset.buddyCat || 'ALL';
+    renderConditions();
+    // 누른 단추가 사라져 초점이 BODY로 떨어지지 않게 🚀에 두면 결과로 내려갈 때 결과 머리로 옮겨 간다(P-491)
+    document.getElementById('btn-generate')?.focus({ preventScroll: true });
+    triggerCourseGeneration();
+  });
+
   // 찜한 스팟 기반 코스 생성
   area.querySelector('#btn-saved-recommend')?.addEventListener('click', () => {
     buildCourseFromSavedSpots();

@@ -41,9 +41,9 @@ const calls = src.split('focusResultsHead();').length - 1;
 assert.strictEqual(calls, 1, '부르는 자리는 한 곳');
 const trig = fn('triggerCourseGeneration');
 assert.ok(/scrollIntoView\(\{ behavior: scrollMotion\(\), block: 'start' \}\);\n\s+if \(document\.activeElement\?\.id === 'btn-generate'\) focusResultsHead\(\);/.test(trig), '스크롤 분기 안에서 🚀 초점일 때만');
-// 받은 코스(#c=)와 오늘 추천 자동 표시는 triggerCourseGeneration을 거치지 않는다: 부르는 곳은 🚀 클릭, 검색 Enter, 데이터 대기 해소뿐
+// 받은 코스(#c=)와 오늘 추천 자동 표시는 triggerCourseGeneration을 거치지 않는다: 부르는 곳은 🚀 클릭, 검색 Enter, 데이터 대기 해소, 코스 추천 캐릭터(P-529)뿐
 const callers = src.split('triggerCourseGeneration();').length - 1;
-assert.strictEqual(callers, 3, `triggerCourseGeneration 호출 ${callers}곳`);
+assert.strictEqual(callers, 4, `triggerCourseGeneration 호출 ${callers}곳`);
 
 // 마우스 클릭 뒤 링: 전역 :focus-visible 규칙만 링을 그린다. 머리에 :focus 링 규칙을 따로 두지 않는다
 const css = fs.readFileSync(path.join(__dirname, '..', 'src', 'style.css'), 'utf8');

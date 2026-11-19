@@ -37,6 +37,7 @@ const stubs = {
   bindConditionEvents: () => {},
   paintSpotsProgress: () => {},
   restoreFocusIn: () => {},
+  courseBuddyHidden: () => true,
 };
 const area = { innerHTML: '', contains: () => false };
 const state = { regions: [], courseCategory: 'ALL', searchQuery: '', savedSpotIds: new Set(), slots: {} };
