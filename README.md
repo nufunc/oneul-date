@@ -3,7 +3,7 @@
 시간대 슬롯(☀️낮 → 🌆저녁 → 🌙밤) 기반 감성 데이트 코스 자동 큐레이션 서비스.
 전국 4,100여 곳 이상의 검증된 핫플레이스를 기반으로 맞춤 코스를 추천받고, 원클릭으로 카카오톡/메신저에 공유합니다.
 
-🌐 **Live Website**: [https://nufunc.github.io/oneul-date/](https://nufunc.github.io/oneul-date/)
+🌐 **Live Website**: [https://oneul.date/](https://oneul.date/)
 
 ---
 
@@ -22,7 +22,7 @@
  └──────────────────────────────────────────────┘
           ▲
           │ (실시간 쿼리)
- [GitHub Pages 웹 프론트엔드]
+ [Cloudflare Workers 웹 프론트엔드 (oneul.date)]
    - 초경량 Vite + TypeScript (번들 크기 28KB)
    - Supabase 실시간 클라우드 DB 연동 & 로컬 자동 폴백
 ```
@@ -55,7 +55,7 @@ npm run build
 
 # 사용자 흐름 e2e: 처음 한 번 npx playwright install chromium, 빌드한 dist를 vite preview로 띄워 시험
 npm run e2e
-# 라이브 주소(https://nufunc.github.io/oneul-date/) 대상 e2e
+# 라이브 주소(https://oneul.date/) 대상 e2e
 npm run e2e:live
 ```
 

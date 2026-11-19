@@ -231,7 +231,7 @@ def generate_report_html(stats: dict, top_spots: list = None, regional_stats: di
 
                 <!-- 서비스 열기 버튼 -->
                 <div style="margin-top: 24px; text-align: center;">
-                    <a href="https://nufunc.github.io/oneul-date/" target="_blank" style="display: inline-block; background: #0F172A; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 24px; font-size: 13px; font-weight: 800; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);">
+                    <a href="https://oneul.date/" target="_blank" style="display: inline-block; background: #0F172A; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 24px; font-size: 13px; font-weight: 800; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);">
                         오늘 데이트 서비스 바로가기 ↗
                     </a>
                 </div>
@@ -350,7 +350,7 @@ def send_google_chat_report(stats: dict, top_spots: list = None, regional_stats:
                     "text": "오늘 데이트 서비스 열기 ↗",
                     "onClick": {
                         "openLink": {
-                            "url": "https://nufunc.github.io/oneul-date/"
+                            "url": "https://oneul.date/"
                         }
                     }
                 }

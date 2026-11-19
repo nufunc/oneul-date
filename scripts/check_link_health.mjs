@@ -18,7 +18,7 @@ const opt = (name, def) => {
   return i >= 0 && args[i + 1] !== undefined ? args[i + 1] : def;
 };
 // URL이 /로 끝나면 배포된 권역 파일 폴더(index.json과 <권역>.cols.json)다. 단일 spots.json은 배포하지 않는다(P-513)
-const SPOTS = opt('spots', 'https://nufunc.github.io/oneul-date/data/spots/');
+const SPOTS = opt('spots', 'https://oneul.date/data/spots/');
 const SAMPLE = Number(opt('sample', '40'));
 const KAKAO_PANEL_LIMIT = Math.min(Number(opt('kakao-sample', '40')), 50); // 카카오 한도는 수집기와 공유라 50회 이하
 const MAX_RATE = Number(opt('max-rate', '0.05')); // 표본 종류별 깨짐 비율 상한

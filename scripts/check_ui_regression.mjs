@@ -20,7 +20,7 @@ async function loadPlaywright() {
   }
 }
 
-const URL = process.env.URL || 'https://nufunc.github.io/oneul-date/';
+const URL = process.env.URL || 'https://oneul.date/';
 const OUT = process.env.OUT || '';
 const PREV = process.env.PREV ? JSON.parse(process.env.PREV) : null;
 const QUERIES = ['', '성수 카페', '부산', '제주', '서울 데이트', '강릉', '홍대'];

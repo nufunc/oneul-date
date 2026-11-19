@@ -10,7 +10,7 @@
     "test": "node scripts/run-tests.cjs",
     "test:live": "node scripts/run-tests.cjs --live",
     "e2e": "playwright test",
-    "e2e:live": "E2E_URL=https://nufunc.github.io/oneul-date/ playwright test"
+    "e2e:live": "E2E_URL=https://oneul.date/ playwright test"
   },
   "devDependencies": {
     "@playwright/test": "^1.65.1",
