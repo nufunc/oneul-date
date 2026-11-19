@@ -1030,27 +1030,34 @@ const WALK_MAX_KM = 1.5;
 /** 두 지점 사이 거리(km)로 표기 문구와 아이콘과 길찾기 모드를 만든다. WALK_MAX_KM 미만은 도보, 그 이상은 차량이다.
  * 도보 거리는 1km 미만이 m, 1km부터 소수 한 자리 km다. 차량은 30km 미만이 25km/h에 3분, 30km부터는 그 30km 값(75분)에 60km/h를 이어 붙인다.
  * 종전에는 30km 이상이 dist/60시간이라 29.9km는 75분, 37km는 0.6시간(37분)으로 더 먼 구간이 짧게 나왔다 */
-function describeTransit(dist: number): { distanceText: string; timeText: string; icon: string; mode: 'walk' | 'transit' } {
+function describeTransit(dist: number): { distanceText: string; timeText: string; icon: string; mode: 'walk' | 'transit'; minutes: number } {
   if (dist < WALK_MAX_KM) {
+    const walkMin = Math.max(1, Math.round(dist * 15));
     return {
       distanceText: dist < 1.0 ? `${Math.round(dist * 1000)}m` : `${dist.toFixed(1)}km`,
-      timeText: `도보 약 ${Math.max(1, Math.round(dist * 15))}분`,
+      timeText: `도보 약 ${walkMin}분`,
       icon: '🚶‍♂️',
       mode: 'walk',
+      minutes: walkMin,
     };
   }
   const carMin = dist < 30.0
     ? Math.max(3, Math.round((dist / 25) * 60 + 3))
     : Math.round((30 / 25) * 60 + 3 + (dist - 30));
-  const hours = Math.floor(carMin / 60);
-  const rest = carMin % 60;
-  const time = hours === 0 ? `${carMin}분` : rest === 0 ? `${hours}시간` : `${hours}시간 ${rest}분`;
   return {
     distanceText: dist < 30.0 ? `${dist.toFixed(1)}km` : `${dist.toFixed(0)}km`,
-    timeText: `차량·이동 약 ${time}`,
+    timeText: `차량·이동 약 ${formatTransitMinutes(carMin)}`,
     icon: '🚗',
     mode: 'transit',
+    minutes: carMin,
   };
+}
+
+/** 분을 `9분`, `1시간`, `1시간 22분`으로 적는다. 구간 띠와 코스 머리 총 이동 줄(P-534)이 같이 쓴다 */
+function formatTransitMinutes(min: number): string {
+  const hours = Math.floor(min / 60);
+  const rest = min % 60;
+  return hours === 0 ? `${min}분` : rest === 0 ? `${hours}시간` : `${hours}시간 ${rest}분`;
 }
 
 
@@ -2931,7 +2938,9 @@ async function formatCourseTextAsync(
   const headSpots = steps.map((st) => (st.spotId !== null ? byId.get(st.spotId) : undefined)).filter((s): s is Spot => Boolean(s));
   const headText = areaThemeLabel(courseAreaLabel(headSpots, regionKeys, zoneKeys) || '전국 어디서나', moodKey, categoryKey);
 
-  blocks.push(`💖 [오늘 데이트 코스] ${headText}`);
+  // P-534: 화면 코스 제목 아래 줄과 같은 총 이동 요약. 좌표 없는 장소가 있으면 줄을 뺀다
+  const travelText = courseTravelSummary(steps);
+  blocks.push(`💖 [오늘 데이트 코스] ${headText}${travelText ? `\n🧭 ${travelText}` : ''}`);
 
   const filled = steps.filter((st): st is CourseStep & { spotId: number } => st.spotId !== null);
 
@@ -5259,7 +5268,10 @@ function renderResultsContent(): void {
       </div>
     ` : ''}
     <div class="course-head">
-      <span class="course-title">${escapeHtml(courseTitle(cond, state.course))}</span>
+      <div class="course-head-main">
+        <span class="course-title">${escapeHtml(courseTitle(cond, state.course))}</span>
+        ${courseTravelLineHtml(state.course)}
+      </div>
       <div class="course-head-actions">
         ${prevCourse ? UNDO_COURSE_BTN_HTML : ''}
         ${routeOptimizableSteps(state.course) ? `
@@ -6366,6 +6378,12 @@ function refreshTransitDividers(): void {
   list.querySelectorAll<HTMLElement>(':scope > .step-transit-divider:not(.origin-start)').forEach((el, i) => {
     el.outerHTML = renderStepTransitDivider(course[i], course[i + 1]);
   });
+  // 코스 머리 총 이동 줄(P-534)도 바뀐 장소 기준으로 다시 쓴다. 좌표 없는 장소가 들어오면 줄이 빠진다
+  const headMain = document.querySelector<HTMLElement>('#results-area .course-head-main');
+  if (headMain) {
+    headMain.querySelector('.course-travel')?.remove();
+    headMain.insertAdjacentHTML('beforeend', courseTravelLineHtml(course));
+  }
 }
 
 const SAVED_REGENERATE_NOTICE = '찜을 빼고 새로 추천했어요. ↩ 이전으로 찜 코스를 되돌릴 수 있어요.';
@@ -6513,6 +6531,34 @@ function getDistanceBetweenSpots(s1: Spot, s2: Spot): number | null {
     return getDistanceKm(c1.lat, c1.lng, c2.lat, c2.lng);
   }
   return getDistanceKm(s1.lat, s1.lng, s2.lat, s2.lng);
+}
+
+/** 코스 머리 총 이동 요약 줄(P-534): `총 2.9km · 도보 약 18분 + 차량 약 9분`. 구간 띠와 같은 describeTransit 판정을 더한다.
+ * 장소가 둘 미만이거나 실제 좌표가 없는 장소가 하나라도 있으면 빈 문자열이다. calculateCourseTotalDistance는 좌표가 없으면
+ * 동네 중심 추정 좌표를 써서 그 합계가 틀릴 수 있다 */
+function courseTravelSummary(steps: CourseStep[]): string {
+  const spots = steps
+    .map((st) => (st.spotId !== null ? spotById.get(st.spotId) : undefined))
+    .filter((s): s is Spot => Boolean(s));
+  if (spots.length < 2 || spots.some((s) => !s.lat || !s.lng)) return '';
+  let walkMin = 0;
+  let carMin = 0;
+  for (let i = 0; i < spots.length - 1; i++) {
+    const { mode, minutes } = describeTransit(getDistanceKm(spots[i].lat!, spots[i].lng!, spots[i + 1].lat!, spots[i + 1].lng!));
+    if (mode === 'walk') walkMin += minutes;
+    else carMin += minutes;
+  }
+  const parts = [
+    walkMin > 0 ? `도보 약 ${formatTransitMinutes(walkMin)}` : '',
+    carMin > 0 ? `차량 약 ${formatTransitMinutes(carMin)}` : '',
+  ].filter(Boolean);
+  return `총 ${describeTransit(calculateCourseTotalDistance(steps)).distanceText} · ${parts.join(' + ')}`;
+}
+
+/** 결과 화면 코스 제목 아래 총 이동 줄. 다시 그리기(renderResultsContent)와 칸 교체(refreshTransitDividers)가 같이 쓴다 */
+function courseTravelLineHtml(steps: CourseStep[]): string {
+  const text = courseTravelSummary(steps);
+  return text ? `<p class="course-travel">${escapeHtml(text)}</p>` : '';
 }
 
 /** 코스 전체 총 이동거리 계산 (1->2 + 2->3) */
@@ -7859,6 +7905,8 @@ function renderReceiverView(steps: CourseStep[]): void {
   const routeNames = sharedSpots.map((s) => s.name);
   const heroRoute = routeNames.slice(0, 3).join(' → ') + (routeNames.length > 3 ? ` 외 ${routeNames.length - 3}곳` : '');
   // 매거진 글에서 연 코스는 글을 알아볼 말이 없어 저장 제목과 탭 제목이 같은 지역 글끼리 겹친다. 첫 장소 이름으로 가른다(P-312)
+  // 받은 코스 머리에도 결과 화면과 같은 총 이동 줄(P-534). 매거진 코스도 카드 사이 이동 띠를 그리므로 같이 보인다
+  const sharedTravel = courseTravelSummary(steps);
   const blogFirst = routeNames.length > 0 ? `${routeNames[0]}${routeNames.length > 1 ? ` 외 ${routeNames.length - 1}곳` : ''}` : '';
 
   app.innerHTML = `
@@ -7878,6 +7926,7 @@ function renderReceiverView(steps: CourseStep[]): void {
           : `<span class="receiver-hero-badge"><span aria-hidden="true">✨</span> 공유받은 데이트 코스${sharedTheme ? ` · <span aria-hidden="true">${sharedTheme.emoji}</span> ${escapeHtml(sharedTheme.label)}` : ''}</span>
         <h2 class="receiver-hero-title">${escapeHtml(heroTitle)}</h2>
         <p class="receiver-hero-desc receiver-hero-route">${escapeHtml(heroRoute)}</p>`}
+        ${sharedTravel ? `<p class="receiver-hero-desc receiver-hero-travel">${escapeHtml(sharedTravel)}</p>` : ''}
         <button class="btn-primary btn-make-own-hero" id="btn-make-own-hero" type="button"><span aria-hidden="true">🚀</span> 나도 이런 코스 만들기 <span aria-hidden="true">→</span></button>
       </div>
 

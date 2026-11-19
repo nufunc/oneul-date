@@ -22,6 +22,8 @@ const stubs = {
   naverMapUrl: (s) => `https://map.example/${s.id}`,
   displaySpotSummary: () => ({ text: '', isFact: false }),
   getDistanceKm: () => 0.5,
+  // 총 이동 줄(P-534)은 test-course-total-travel.cjs가 본다. 여기서는 줄이 없는 코스로 머리 형식만 본다
+  courseTravelSummary: () => '',
   // 실제 buildShareUrl처럼 유효한 칩 키(CAFE)일 때만 ?t=를 싣는다
   buildShareUrl: (ids, key) => `https://share.example/${key === 'CAFE' ? '?t=CAFE' : ''}#c=${ids.join('.')}`,
   SLOT_META: { day: { emoji: '☀️', label: '낮' } },

@@ -42,6 +42,8 @@ const stubs = {
   naverMapUrl: (s) => `https://map.example/${s.id}`,
   displaySpotSummary: () => ({ text: '', isFact: false }),
   getDistanceKm: () => 0.5,
+  // 총 이동 줄(P-534)은 test-course-total-travel.cjs가 본다. 여기서는 줄이 없는 코스로 머리 형식만 본다
+  courseTravelSummary: () => '',
   buildShareUrl: (ids) => `https://share.example/${ids.join('-')}`,
   isSpotClosedToday: (s) => Boolean(s.closedToday),
   SLOT_META: { day: { emoji: '☀️', label: '낮' }, evening: { emoji: '🌆', label: '저녁' }, night: { emoji: '🌙', label: '밤' } },

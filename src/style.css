@@ -1716,12 +1716,27 @@ label,
   overflow-wrap: anywhere;
 }
 
+/* 제목과 그 아래 총 이동 줄(P-534)을 한 칸으로 묶는다. min-width: 0이 없으면 긴 제목이 버튼 칸을 밀어낸다 */
+.course-head-main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* 코스 총 이동 요약(P-534). 받은 코스 머리 보조 문구(.receiver-hero-desc)와 같은 크기와 색 */
+.course-travel {
+  margin: var(--space-1) 0 0;
+  font-size: var(--font-xs);
+  color: var(--color-text-sub);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
 /* 휴대폰 폭에서는 제목이 버튼 옆 좁은 칸에서 4줄로 눌렸다. 제목을 한 줄 전체로 두고 버튼은 아래 줄 오른쪽으로 보낸다 */
 @media (max-width: 559px) {
   .course-head {
     flex-wrap: wrap;
   }
-  .course-head .course-title {
+  .course-head .course-head-main {
     flex: 1 1 100%;
   }
   .course-head .course-head-actions {

@@ -12,21 +12,21 @@ const cut = (from, to) => {
   assert(start >= 0, `src/main.ts에 ${from}이 없다`);
   return src.slice(start, src.indexOf(to, start) + to.length);
 };
-const code = [cut('const WALK_MAX_KM', ';\n'), cut('function describeTransit', '\n}\n')].join('\n');
+const code = [cut('const WALK_MAX_KM', ';\n'), cut('function describeTransit', '\n}\n'), cut('function formatTransitMinutes', '\n}\n')].join('\n');
 const { WALK_MAX_KM, describeTransit } = new Function(
   `${ts.transpile(code, { target: 'es2022' })};return { WALK_MAX_KM, describeTransit };`,
 )();
 
 assert.strictEqual(WALK_MAX_KM, 1.5);
 // 1km 미만 도보는 m 표기
-assert.deepStrictEqual(describeTransit(0.931), { distanceText: '931m', timeText: '도보 약 14분', icon: '🚶‍♂️', mode: 'walk' });
+assert.deepStrictEqual(describeTransit(0.931), { distanceText: '931m', timeText: '도보 약 14분', icon: '🚶‍♂️', mode: 'walk', minutes: 14 });
 // 1.0~1.5km는 도보로 바뀜, 거리는 km
-assert.deepStrictEqual(describeTransit(1.1), { distanceText: '1.1km', timeText: '도보 약 17분', icon: '🚶‍♂️', mode: 'walk' });
-assert.deepStrictEqual(describeTransit(1.4), { distanceText: '1.4km', timeText: '도보 약 21분', icon: '🚶‍♂️', mode: 'walk' });
+assert.deepStrictEqual(describeTransit(1.1), { distanceText: '1.1km', timeText: '도보 약 17분', icon: '🚶‍♂️', mode: 'walk', minutes: 17 });
+assert.deepStrictEqual(describeTransit(1.4), { distanceText: '1.4km', timeText: '도보 약 21분', icon: '🚶‍♂️', mode: 'walk', minutes: 21 });
 // 1.5km부터 차량
-assert.deepStrictEqual(describeTransit(1.5), { distanceText: '1.5km', timeText: '차량·이동 약 7분', icon: '🚗', mode: 'transit' });
+assert.deepStrictEqual(describeTransit(1.5), { distanceText: '1.5km', timeText: '차량·이동 약 7분', icon: '🚗', mode: 'transit', minutes: 7 });
 // 30km 분기(P-016)
-assert.deepStrictEqual(describeTransit(37), { distanceText: '37km', timeText: '차량·이동 약 1시간 22분', icon: '🚗', mode: 'transit' });
+assert.deepStrictEqual(describeTransit(37), { distanceText: '37km', timeText: '차량·이동 약 1시간 22분', icon: '🚗', mode: 'transit', minutes: 82 });
 
 // 길찾기 링크 두 곳이 describeTransit의 mode를 쓰고 1.0 기준이 남지 않았는지
 assert.strictEqual((src.match(/< 1\.0\) \? 'walk'|dist < 1\.0 \? 'walk'/g) || []).length, 0, '1.0km 링크 기준이 남아 있다');
