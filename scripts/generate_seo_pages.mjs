@@ -210,7 +210,7 @@ for (const post of blogPosts) {
   sitemapUrls.push(`${SITE_URL}/blog/${post}/`);
 }
 // 소개와 개인정보처리방침(P-536)
-sitemapUrls.push(`${SITE_URL}/about.html`, `${SITE_URL}/privacy.html`);
+sitemapUrls.push(`${SITE_URL}/about`, `${SITE_URL}/privacy`);
 
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

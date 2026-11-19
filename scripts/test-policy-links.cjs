@@ -27,7 +27,7 @@ try {
     const html = fs.readFileSync(f, 'utf8');
     assert.strictEqual(html.split('class="site-policy-links"').length, 2, `${f}: 링크 줄이 한 번이 아니다`);
     assert.ok(html.indexOf('site-policy-links') < html.indexOf('</body>'), `${f}: 링크 줄이 </body> 앞이 아니다`);
-    for (const href of [`${SITE}about.html`, `${SITE}privacy.html`, 'https://github.com/nufunc/oneul-date/issues']) {
+    for (const href of [`${SITE}about`, `${SITE}privacy`, 'https://github.com/nufunc/oneul-date/issues']) {
       assert.ok(html.includes(`href="${href}"`), `${f}: ${href} 링크가 없다`);
     }
   }
@@ -40,7 +40,7 @@ try {
     cwd: tmp, stdio: 'pipe', env: { ...process.env, SITE_ORIGIN: 'https://oneul.date', BASE_PATH: '/' },
   });
   const moved = fs.readFileSync(files.post, 'utf8');
-  assert.ok(moved.includes('href="https://oneul.date/about.html"'), '소개 주소가 새 도메인으로 바뀌지 않았다');
+  assert.ok(moved.includes('href="https://oneul.date/about"'), '소개 주소가 새 도메인으로 바뀌지 않았다');
   assert.ok(moved.includes('href="https://github.com/nufunc/oneul-date/issues"'), '저장소 이슈 주소가 바뀌었다');
   console.log('test-policy-links: 통과');
 } finally {
