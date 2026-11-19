@@ -7,62 +7,6 @@ import { renderNativeInfeedAdCard, initAdSense } from './ads';
 
 type SlotKey = 'day' | 'evening' | 'night' | 'stay';
 
-interface Spot {
-  id: number;
-  name: string;
-  slot: SlotKey | null;
-  region: string;
-  mood: string[]; // 'romantic' | 'healing' | 'luxury' | 'gourmet' | 'active' | 'view' | 'retro' | 'trendy'
-  /** 시·군·구 단위 근접 지역 (파서가 병렬 추가 중 — 필드 부재/null 허용, spotArea()로만 접근) */
-  area?: string | null;
-  /** 도로명 또는 지번 정밀 주소 (검색 및 지역 분류 무결성용) */
-  address?: string | null;
-  location: string;
-  price: string | null;
-  summary: string;
-  category?: string | null;
-  image_url?: string | null;
-  lat?: number | null;
-  lng?: number | null;
-  quality_score?: number;
-  source: { type: string; url: string | null; note: string; event?: { start?: string; end?: string } };
-  verified: boolean;
-  is_closed?: boolean;
-
-  // v4.0 메타 확장
-  parking_type?: string;
-  parking_info?: import('./supabase').ParkingInfo;
-  parking_detail?: string;
-  subway_info?: string;
-
-  business_hours?: Record<string, string>;
-  break_time?: Record<string, string>;
-  closed_days?: string[];
-  is_24h?: boolean;
-
-  reservation_type?: string;
-  reservation_url?: string;
-  booking_tips?: string;
-  booking_info?: import('./supabase').BookingInfo;
-
-  price_tier?: '₩' | '₩₩' | '₩₩₩' | '₩₩₩₩' | 'FREE' | null;
-  avg_price_per_person?: number | null;
-  signature_items?: string[];
-
-  mood_tags?: string[];
-  date_contexts?: string[];
-
-  curation_badges?: import('./supabase').CurationBadges;
-  provider_ids?: import('./supabase').ProviderIds;
-  ai_summary_editorial?: string;
-
-  social_links?: import('./supabase').SocialLinks;
-  metrics?: import('./supabase').SpotMetrics;
-  hot_score?: number;
-  last_verified_at?: string;
-  created_at?: string;
-}
-
 interface CourseStep {
   slot: SlotKey;
   spotId: number | null; // null = 후보 없음
@@ -243,7 +187,7 @@ const ZONE_CENTERS: Record<string, { lat: number; lng: number }> = {
 const STORAGE_KEY = 'oneul_saved_courses';
 const RECENT_KEY = 'oneul_recent_spots';
 const LAST_COURSE_STORAGE_KEY = 'oneul_last_course';
-import { loadSpots, getCachedSpots, saveSpotsToCache, staleSpotRegionKeys, loadSpotAliases, loadStations, findSpotsByRange, spotsFellBackToSample, spotsBytesReceived, spotsBytesExpected, onSpotsProgress } from './supabase';
+import { type Spot, loadSpots, getCachedSpots, saveSpotsToCache, staleSpotRegionKeys, loadSpotAliases, loadStations, findSpotsByRange, spotsFellBackToSample, spotsBytesReceived, spotsBytesExpected, onSpotsProgress } from './supabase';
 
 const RECENT_MAX = 100;
 

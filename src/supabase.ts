@@ -74,7 +74,7 @@ export interface Spot {
   lat?: number | null;
   lng?: number | null;
   quality_score?: number;
-  source: { type: string; url: string | null; note: string };
+  source: { type: string; url: string | null; note: string; event?: { start?: string; end?: string } };
   verified: boolean;
   is_closed?: boolean;
 
