@@ -25,14 +25,11 @@ const run = (classes) => {
   return els;
 };
 
-// 후보가 있으면 후보 그룹이 결과 제목보다 먼저 받는다. 다음 Tab이 후보 1로 가 Tab 수가 바뀌지 않는다
-let els = run(['search-miss', 'course-candidates', 'course-title']);
-assert.deepStrictEqual(els[1].focused, { preventScroll: true }, '후보 그룹에 초점, 스크롤 충돌 없음');
+// 검색 대체 안내가 있어도 결과 제목이 받는다
+let els = run(['search-miss', 'course-title']);
+assert.deepStrictEqual(els[1].focused, { preventScroll: true }, '결과 제목에 초점, 스크롤 충돌 없음');
 assert.strictEqual(els[1].tabIndex, -1, '머리는 Tab 순서에 들지 않는다');
-assert.strictEqual(els[2].focused, null);
-// 후보 없이 코스 하나면 결과 제목
-els = run(['course-title']);
-assert.deepStrictEqual(els[0].focused, { preventScroll: true }, '결과 제목에 초점');
+assert.strictEqual(els[0].focused, null);
 // 빈 코스면 빈 상태 문구
 els = run(['results-empty']);
 assert.deepStrictEqual(els[0].focused, { preventScroll: true }, '빈 상태에 초점');
@@ -50,6 +47,6 @@ assert.strictEqual(callers, 3, `triggerCourseGeneration 호출 ${callers}곳`);
 
 // 마우스 클릭 뒤 링: 전역 :focus-visible 규칙만 링을 그린다. 머리에 :focus 링 규칙을 따로 두지 않는다
 const css = fs.readFileSync(path.join(__dirname, '..', 'src', 'style.css'), 'utf8');
-assert.ok(!/\.course-(candidates|title)[^{]*:focus(?!-visible)/.test(css), ':focus 링 규칙 없음');
+assert.ok(!/\.course-title[^{]*:focus(?!-visible)/.test(css), ':focus 링 규칙 없음');
 
 console.log('test-results-head-focus: ok');

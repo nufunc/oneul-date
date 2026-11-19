@@ -3814,86 +3814,15 @@ type PrevChips = {
   moodPreset: AppState['moodPreset'];
   searchQuery: string;
 };
-// candidates는 후보를 보던 중 저장 코스를 불러올 때만 둔다. 후보 묶음과 보던 번호와 후보별 ↩ 이전을 함께 되돌려 후보 단추와 전환을 살린다(P-477)
-type PrevCandidates = { list: CourseStep[][]; index: number; prev: (PrevCourse | null)[] };
-type PrevCourse = { course: CourseStep[]; conditions: AppState['courseConditions']; chips?: PrevChips; candidates?: PrevCandidates };
+type PrevCourse = { course: CourseStep[]; conditions: AppState['courseConditions']; chips?: PrevChips };
 let prevCourse: PrevCourse | null = null;
 // 저장 코스 불러오기가 그린 코스. 지금 코스가 이 객체면 불러온 뒤 다른 코스로 바꾸지 않은 것이다(🔄·다시 추천·⚡는 칩 없는 보관분으로 바꿔 보관분 유지 조건을 끊는다, P-480)
 let loadedCourse: CourseStep[] | null = null;
 
 /** 코스를 바꾸기 직전에 부른다. 한 단계만 보관하므로 연달아 바꾸면 가장 최근 직전 코스가 남는다 */
-// 맞춤 코스 후보(P-469). 🚀 한 번에 같은 조건으로 최대 3개를 짜고 고른 후보를 state.course로 둔다.
-// 받은 코스·저장 코스·앵커 코스처럼 state.course를 이 배열 밖의 코스로 바꾸는 경로에서는 후보 단추가 숨는다
-let courseCandidates: CourseStep[][] = [];
-let candidateIndex = 0;
-// ↩ 이전(P-470)은 후보별로 둔다. prevCourse는 보는 후보의 것이고, 다른 후보의 것은 전환할 때 여기 맡겼다 되찾는다
-let candidatePrev: (PrevCourse | null)[] = [];
-
-/** 앞 후보에 쓴 장소를 피할 목록에 더해 후보를 차례로 짠다. 피하면 후보가 없는 칸은 generateCourse가 겹침을 허용하고, 장소 구성이 앞 후보와 같으면 버린다 */
-function buildCourseCandidates(make: (avoidIds: Set<number>) => CourseStep[], baseAvoid: ReadonlySet<number>, count = 3): CourseStep[][] {
-  const out: CourseStep[][] = [];
-  const used = new Set<number>(baseAvoid);
-  const seen = new Set<string>();
-  for (let i = 0; i < count; i++) {
-    const course = make(new Set(used));
-    const ids = course.flatMap((st) => (st.spotId !== null ? [st.spotId] : []));
-    const key = [...ids].sort((a, b) => a - b).join(',');
-    if (i > 0 && (ids.length === 0 || seen.has(key))) continue;
-    seen.add(key);
-    ids.forEach((id) => used.add(id));
-    out.push(course);
-  }
-  return out;
-}
-
-function inCandidateMode(): boolean {
-  return courseCandidates.length > 1 && state.course === courseCandidates[candidateIndex];
-}
-
-/** 후보를 보는 중이면 바꾼 코스를 그 후보 자리에 넣는다. 다시 추천·최적 동선·되돌리기가 현재 후보만 바꾸고 후보 단추를 유지한다 */
-function replaceCourseKeepingCandidate(next: CourseStep[]): void {
-  if (inCandidateMode()) courseCandidates[candidateIndex] = next;
-  state.course = next;
-}
-
-// 후보 전환 렌더에서만 true. lazy 이미지는 캐시돼 있어도 보이기 전까지 complete가 되지 않아 is-loaded를 같은 동기 구간에서 붙일 수 없다(P-471)
-let thumbEager = false;
-
-function selectCandidate(index: number): void {
-  if (!inCandidateMode() || index === candidateIndex || !courseCandidates[index]) return;
-  candidatePrev[candidateIndex] = prevCourse; // 후보별로 보관해 그 후보의 직전 코스만 그 후보 자리에 되돌린다
-  candidateIndex = index;
-  prevCourse = candidatePrev[index] ?? null;
-  state.course = courseCandidates[index];
-  if (state.courseConditions) {
-    state.courseConditions = { ...state.courseConditions, zoneRelaxed: zoneRelaxedSlots(spots, state.course, state.courseConditions.subZones) };
-  }
-  addRecentSpotIds(courseSpotIds());
-  thumbEager = true;
-  try { renderResults(); } finally { thumbEager = false; }
-  document.querySelector<HTMLElement>(`#results-area [data-candidate="${index}"]`)?.focus({ preventScroll: true });
-  announceCourse(`후보 ${index + 1} 코스를 골랐어요.`);
-}
-
-/** 후보를 보는 중이면 "후보 N ", 아니면 빈 문자열. 다시 추천이 어느 후보를 바꾸는지 이름과 알림에 밝힌다 */
-function candidateLabel(): string {
-  return inCandidateMode() ? `후보 ${candidateIndex + 1} ` : '';
-}
-
-function renderCandidateTabs(): string {
-  if (!inCandidateMode()) return '';
-  return `<div class="course-candidates" role="group" aria-label="코스 후보">${courseCandidates.map((course, i) => {
-    const first = course.find((st) => st.spotId !== null);
-    const name = first ? spotById.get(first.spotId as number)?.name : undefined;
-    const active = i === candidateIndex;
-    // 보이는 글자(후보 N + 첫 장소)와 aria-label을 같게 둔다(WCAG 2.5.3). 이름은 둘째 줄에서 말줄임한다
-    return `<button type="button" class="quick-region-chip${active ? ' is-active' : ''}" data-candidate="${i}" aria-pressed="${active}" aria-label="후보 ${i + 1}${name ? ` ${escapeHtml(name)}` : ''}"><span class="cand-num">후보 ${i + 1}</span>${name ? `<span class="cand-name">${escapeHtml(name)}</span>` : ''}</button>`;
-  }).join('')}</div>`;
-}
-
-function snapshotPrevCourse(chips?: PrevChips, candidates?: PrevCandidates): void {
+function snapshotPrevCourse(chips?: PrevChips): void {
   if (!state.course || !state.courseConditions) return;
-  prevCourse = { course: state.course.map((s) => ({ ...s })), conditions: state.courseConditions, chips, candidates };
+  prevCourse = { course: state.course.map((s) => ({ ...s })), conditions: state.courseConditions, chips };
 }
 
 // 이름이 보이는 글자 「이전」으로 시작해야 음성 명령으로 누를 수 있다(WCAG 2.5.3, P-397)
@@ -3901,20 +3830,10 @@ const UNDO_COURSE_BTN_HTML = `<button class="btn-regenerate" id="btn-undo-course
 
 function undoCourse(): void {
   if (!prevCourse) return;
-  const cand = prevCourse.candidates;
-  if (cand) {
-    // 후보 묶음을 되돌리고 보던 후보 자리에 보관한 코스를 넣어 state.course와 같은 객체로 맞춘다
-    cand.list[cand.index] = prevCourse.course;
-    courseCandidates = cand.list;
-    candidateIndex = cand.index;
-    candidatePrev = cand.prev;
-    state.course = cand.list[cand.index];
-  } else {
-    replaceCourseKeepingCandidate(prevCourse.course);
-  }
+  state.course = prevCourse.course;
   state.courseConditions = prevCourse.conditions;
   const chips = prevCourse.chips;
-  prevCourse = cand ? (cand.prev[cand.index] ?? null) : null;
+  prevCourse = null;
   if (chips) {
     state.regions = chips.regions;
     state.subZones = chips.subZones;
@@ -4974,29 +4893,23 @@ function triggerCourseGeneration(): void {
   const zoneKeys = state.subZones.length > 0 ? state.subZones : zoneKeysForQuery(state.searchQuery);
   const zoneFromQuery = state.subZones.length === 0 && zoneKeys.length > 0;
   prevCourse = null; // P-363: 코스를 통째로 바꾸는 자리라 ↩ 이전 보관분을 비운다
-  const makeCandidates = (searchQuery: string) => buildCourseCandidates(
-    (avoidIds) => generateCourse(
-      spots,
-      slotsOn,
-      state.regions,
-      state.mood,
-      {
-        avoidIds,
-        searchQuery,
-        categoryKey: state.courseCategory,
-        indoorOnly: state.indoorOnly,
-        moodPreset: state.moodPreset,
-        budgetFilter: state.budgetFilter,
-        zoneFromQuery,
-      },
-      zoneKeys,
-    ),
-    recentSpotIdSet(),
+  const makeCourse = (searchQuery: string) => generateCourse(
+    spots,
+    slotsOn,
+    state.regions,
+    state.mood,
+    {
+      avoidIds: recentSpotIdSet(),
+      searchQuery,
+      categoryKey: state.courseCategory,
+      indoorOnly: state.indoorOnly,
+      moodPreset: state.moodPreset,
+      budgetFilter: state.budgetFilter,
+      zoneFromQuery,
+    },
+    zoneKeys,
   );
-  courseCandidates = makeCandidates(state.searchQuery);
-  candidateIndex = 0;
-  candidatePrev = [];
-  state.course = courseCandidates[0];
+  state.course = makeCourse(state.searchQuery);
   const matchesIn = (q: string) =>
     state.course?.some((st) => {
       if (!st.spotId) return false;
@@ -5038,9 +4951,7 @@ function triggerCourseGeneration(): void {
     if (place) {
       const rest = state.searchQuery.trim().slice(place.length).trim();
       const shownCourse = state.course;
-      const shownCandidates = courseCandidates;
-      courseCandidates = makeCandidates(place);
-      state.course = courseCandidates[0];
+      state.course = makeCourse(place);
       if (matchesIn(place)) {
         if (state.courseConditions) {
           state.courseConditions = {
@@ -5059,7 +4970,6 @@ function triggerCourseGeneration(): void {
       }
       // 동네 재시도가 실패하면 그리지 않은 코스가 남아 저장·교체·알림이 화면과 다른 코스를 읽었다
       state.course = shownCourse;
-      courseCandidates = shownCandidates;
     }
     // 검색 토스트에도 칩 완화 문구를 한 토스트로 붙인다. 붙이지 않아 검색+칩 코스 36/140이 칩 밖 칸을 말없이 넣었다(P-435)
     if (hasMatchedSpot) {
@@ -5077,9 +4987,9 @@ function triggerCourseGeneration(): void {
 }
 
 /** 🚀로 결과까지 내려갈 때 초점도 결과 머리로 옮긴다. 버튼에 남으면 화면 밖에서 다시 눌려 코스가 통째로 바뀌었다(P-491).
- * 머리는 tabindex=-1이라 다음 Tab이 지금처럼 후보 1이나 결과 첫 버튼으로 가고, 마우스로 누른 뒤에는 :focus-visible이 걸리지 않는다 */
+ * 머리는 tabindex=-1이라 다음 Tab이 지금처럼 결과 첫 버튼으로 가고, 마우스로 누른 뒤에는 :focus-visible이 걸리지 않는다 */
 function focusResultsHead(): void {
-  const head = document.querySelector<HTMLElement>('#results-area .course-candidates, #results-area .course-title, #results-area .results-empty');
+  const head = document.querySelector<HTMLElement>('#results-area .course-title, #results-area .results-empty');
   if (!head) return;
   head.tabIndex = -1;
   head.focus({ preventScroll: true });
@@ -5328,7 +5238,6 @@ function renderResultsContent(): void {
         <button type="button" class="search-miss-btn" id="btn-search-edit">검색어 바꾸기</button>
       </div>
     ` : ''}
-    ${renderCandidateTabs()}
     <div class="course-head">
       <span class="course-title">${escapeHtml(courseTitle(cond, state.course))}</span>
       <div class="course-head-actions">
@@ -5338,7 +5247,7 @@ function renderResultsContent(): void {
             ⚡ 최적 동선
           </button>
         ` : ''}
-        <button class="btn-regenerate" id="btn-regenerate" aria-label="${candidateLabel() || '전체 '}다시 추천받기">
+        <button class="btn-regenerate" id="btn-regenerate" aria-label="전체 다시 추천받기">
           ${ICON_REFRESH_SVG}
           <span class="btn-regenerate-text">다시 추천</span>
         </button>
@@ -6184,7 +6093,7 @@ function renderStepCard(
       ${isClosedToday ? `<span class="badge-closed-floating">⚠️ 오늘 휴무</span>` : ''}
       ${isClosedAtSlot ? `<span class="badge-closed-floating">⚠️ 영업시간 확인</span>` : ''}
       <div class="step-fallback-box">${fallbackIcon}</div>
-      ${targetImgUrl ? `<img class="step-thumb-img" src="${escapeHtml(toCardThumbUrl(targetImgUrl))}"${toCardThumbUrl(targetImgUrl) !== targetImgUrl ? ` data-orig="${escapeHtml(targetImgUrl)}"` : ''} alt="${escapeHtml(spot.name)}" loading="${thumbEager ? 'eager' : 'lazy'}" fetchpriority="low" decoding="async" referrerpolicy="no-referrer" onload="this.classList.add('is-loaded');" onerror="var o=this.dataset.orig; if(o){this.dataset.orig=''; this.src=o; return;} this.classList.add('is-hidden'); this.previousElementSibling?.classList.add('is-active');" />` : ''}
+      ${targetImgUrl ? `<img class="step-thumb-img" src="${escapeHtml(toCardThumbUrl(targetImgUrl))}"${toCardThumbUrl(targetImgUrl) !== targetImgUrl ? ` data-orig="${escapeHtml(targetImgUrl)}"` : ''} alt="${escapeHtml(spot.name)}" loading="lazy" fetchpriority="low" decoding="async" referrerpolicy="no-referrer" onload="this.classList.add('is-loaded');" onerror="var o=this.dataset.orig; if(o){this.dataset.orig=''; this.src=o; return;} this.classList.add('is-hidden'); this.previousElementSibling?.classList.add('is-active');" />` : ''}
     </div>`;
 
   return `
@@ -6452,7 +6361,7 @@ function regenerateCourse(): void {
     state.course = buildAnchorCourse(anchor);
     addRecentSpotIds(courseSpotIds());
     renderResults();
-    announceCourse(`${candidateLabel()}코스를 다시 추천했어요.`);
+    announceCourse('코스를 다시 추천했어요.');
     return;
   }
   // 다시 추천한 코스에는 찜이 들어가지 않으므로 찜 코스 제목을 끈다. 사용자는 찜 위에서 다시 뽑는다고 읽기 쉬워 사실을 알린다(P-471)
@@ -6464,7 +6373,7 @@ function regenerateCourse(): void {
   // 끈 예산으로 짠 코스에 켠 칩 기준 토스트가 떴고, 칩을 끈 뒤에도 스페셜이 계속 걸렸다(P-433)
   const budgetFilter = state.budgetFilter;
   const moodPreset = state.moodPreset;
-  replaceCourseKeepingCandidate(generateCourse(
+  state.course = generateCourse(
     spots,
     slotsOn,
     cond.regions,
@@ -6479,7 +6388,7 @@ function regenerateCourse(): void {
       zoneFromQuery: cond.zoneFromQuery,
     },
     cond.subZones,
-  ));
+  );
   state.courseConditions = {
     ...cond,
     budgetFilter,
@@ -6489,15 +6398,12 @@ function regenerateCourse(): void {
   addRecentSpotIds(courseSpotIds());
   renderResults();
   notifyRelaxedSlots(budgetFilter, moodPreset);
-  announceCourse(`${candidateLabel()}코스를 다시 추천했어요.`);
+  announceCourse('코스를 다시 추천했어요.');
   announceZoneRelaxed();
   if (wasFromSaved) showToast(SAVED_REGENERATE_NOTICE);
 }
 
 function bindResultEvents(area: HTMLElement): void {
-  area.querySelectorAll<HTMLElement>('[data-candidate]').forEach((btn) => {
-    btn.addEventListener('click', () => selectCandidate(Number(btn.dataset.candidate)));
-  });
   area.querySelector('#btn-search-edit')?.addEventListener('click', () => {
     const input = document.querySelector<HTMLInputElement>('#search-input');
     if (!input) return;
@@ -6675,12 +6581,12 @@ function optimizeCourseRoute(): boolean {
   // 낮·저녁·밤이므로 순서가 바뀔 때마다 `저녁 → 낮`처럼 시각 순서가 깨졌다(P-447).
   // 밤 술집이 저녁 칸에 붙는 문제(2026-09-23)는 위의 새 칸 시각 영업 검사로 막는다.
   snapshotPrevCourse();
-  replaceCourseKeepingCandidate([
+  state.course = [
     { slot: initialSteps[0].slot, spotId: currentSpots[bestPerm[0]].id },
     { slot: initialSteps[1].slot, spotId: currentSpots[bestPerm[1]].id },
     { slot: initialSteps[2].slot, spotId: currentSpots[bestPerm[2]].id },
     ...stayTail,
-  ]);
+  ];
 
   const savedKm = (initialDistance - minDistance).toFixed(1);
   showToast(`⚡ 최적 동선으로 정렬 완료! 이동 거리가 ${savedKm}km 단축되었어요.`);
@@ -9069,10 +8975,8 @@ function resolveSavedSteps(spotIds: number[]): { steps: CourseStep[]; dropped: n
 
 function restoreCourse(item: Pick<SavedCourse, 'conditions'>, steps: CourseStep[]): void {
   // 저장하지 않은 현재 코스는 ↩ 이전으로 되찾게 보관한다(조건 칩 포함). 이미 저장한 코스는 잃는 것이 없어 비운다(P-475)
-  const candidates: PrevCandidates | undefined = inCandidateMode() ? { list: courseCandidates, index: candidateIndex, prev: [...candidatePrev] } : undefined;
-  if (candidates) candidates.prev[candidates.index] = prevCourse; // 보던 후보의 ↩ 이전도 불러오기가 비우기 전에 함께 둔다
   const currentSaved = !!state.course && isCourseSaved(courseSpotIds());
-  // 칩이 있는 보관분은 코스·조건·후보를 모두 담은 불러오기의 보관분이라, 저장 코스 X에서 Y를 이어 열어도 처음 미저장 코스를 되찾게 둔다(P-479)
+  // 칩이 있는 보관분은 코스·조건을 모두 담은 불러오기의 보관분이라, 저장 코스 X에서 Y를 이어 열어도 처음 미저장 코스를 되찾게 둔다(P-479)
   // 불러온 X를 지워 미저장이 돼도 X를 그대로 보는 중이면 같은 규칙으로 둔다(P-480)
   const keepPrev = (currentSaved || (!!state.course && state.course === loadedCourse)) && !!prevCourse?.chips;
   if (!keepPrev) prevCourse = null;
@@ -9086,7 +8990,7 @@ function restoreCourse(item: Pick<SavedCourse, 'conditions'>, steps: CourseStep[
       budgetFilter: state.budgetFilter,
       moodPreset: state.moodPreset,
       searchQuery: state.searchQuery,
-    }, candidates);
+    });
   }
 
   // 하위호환: 과거 저장분은 region이 문자열 — 배열로 정규화해 복원

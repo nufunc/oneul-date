@@ -14,10 +14,10 @@ for (const st of sf.statements) {
 }
 const toJs = (st) => ts.transpileModule(st.getText().replace(/^export\s+/, ''), { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
 
-const names = ['SLOT_ORDER', 'normalizeRegionCond', 'courseSpotIds', 'prevCourse', 'snapshotPrevCourse', 'undoCourse', 'courseCandidates', 'candidateIndex', 'candidatePrev', 'inCandidateMode', 'replaceCourseKeepingCandidate', 'MOOD_PRESETS', 'knownMoodPreset', 'knownBudgetFilter', 'loadedCourse', 'restoreCourse'];
+const names = ['SLOT_ORDER', 'normalizeRegionCond', 'courseSpotIds', 'prevCourse', 'snapshotPrevCourse', 'undoCourse', 'MOOD_PRESETS', 'knownMoodPreset', 'knownBudgetFilter', 'loadedCourse', 'restoreCourse'];
 const body = names.map((n) => { assert.ok(decls.has(n), `${n}이 없다`); return toJs(decls.get(n)); }).join('\n');
 const RS = ['state', 'isCourseSaved', 'updateModeView', 'renderConditions', 'renderResults', 'document', 'cancelOverlayFocusReturn', 'markResultsEngaged', 'announce', 'scrollMotion'];
-const make = new Function(...RS, `${body}\nreturn { restoreCourse, undoCourse, snapshotPrevCourse, get prev() { return prevCourse; }, get cands() { return courseCandidates; }, get idx() { return candidateIndex; }, setCands(list, i) { courseCandidates = list; candidateIndex = i; candidatePrev = []; prevCourse = null; } };`);
+const make = new Function(...RS, `${body}\nreturn { restoreCourse, undoCourse, snapshotPrevCourse, get prev() { return prevCourse; } };`);
 
 const ids = (course) => course.map((s) => s.spotId);
 const mk = (a, b) => [{ slot: 'day', spotId: a }, { slot: 'evening', spotId: b }];
@@ -28,19 +28,17 @@ const S = { conditions: { region: ['GYEONGNAM'], subZones: [], mood: 'ALL', slot
 const T = { conditions: { region: ['JEJU'], subZones: [], mood: 'ALL', slots: ['day', 'evening'], categoryKey: 'DINING' } };
 
 const setup = () => {
-  const list = [mk(1, 2), mk(3, 4), mk(5, 6)]; // U: 서울 칩으로 🚀한 미저장 후보 3개
   const state = {
     mainMode: 'course', regions: ['SEOUL'], subZones: [], slots: { day: true, evening: true, night: false, stay: false },
-    course: list[0], courseConditions: { regions: ['SEOUL'], subZones: [], mood: 'ALL' },
+    course: mk(1, 2), courseConditions: { regions: ['SEOUL'], subZones: [], mood: 'ALL' },
     courseCategory: 'ALL', indoorOnly: false, budgetFilter: 'ALL', moodPreset: null, searchQuery: '', mood: 'ALL',
   };
   const saved = new Set([key([9, 10]), key([20, 21])]); // S와 T만 저장돼 있다
   const api = make(state, (a) => saved.has(key(a)), noop, noop, noop, doc, noop, noop, noop, () => 'auto');
-  api.setCands(list, 0);
   return { api, state, saved };
 };
 
-// 시나리오 C: U → S 불러오기 → S 삭제 → T 불러오기 → ↩ 이전이면 U와 서울 칩과 후보 3개가 돌아온다
+// 시나리오 C: U → S 불러오기 → S 삭제 → T 불러오기 → ↩ 이전이면 U와 서울 칩이 돌아온다
 {
   const { api, state, saved } = setup();
   api.restoreCourse(S, mk(9, 10));
@@ -52,8 +50,6 @@ const setup = () => {
   assert.deepStrictEqual(ids(state.course), [1, 2], '↩ 이전이 U가 아니다(지운 S가 남았다)');
   assert.deepStrictEqual(state.regions, ['SEOUL'], '↩ 이전 뒤 지역 칩이 U의 서울이 아니다');
   assert.strictEqual(state.courseCategory, 'ALL', '↩ 이전 뒤 테마 칩이 U의 값이 아니다');
-  assert.strictEqual(api.cands.length, 3, '↩ 이전 뒤 후보 3개가 돌아오지 않았다');
-  assert.strictEqual(state.course, api.cands[api.idx]);
   assert.strictEqual(api.prev, null);
 }
 
@@ -88,7 +84,6 @@ const setup = () => {
   saved.delete(key([9, 10]));
   api.undoCourse();
   assert.deepStrictEqual(ids(state.course), [1, 2]);
-  assert.strictEqual(api.cands.length, 3);
 }
 
 console.log('test-course-load-delete-undo: ok');

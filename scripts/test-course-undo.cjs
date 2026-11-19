@@ -22,7 +22,7 @@ for (const name of ['prevCourse', 'snapshotPrevCourse', 'undoCourse', 'bindUndoB
 
 // 보관·복원·다시 추천을 한 범위에 넣고 나머지 의존은 가짜로 둔다. 코스 대입이 일어나는 generateCourse 가짜는 새 id를 돌려준다
 const STUBS = ['state', 'announce', 'renderResults', 'announceCourse', 'markResultsEngaged', 'spotById', 'buildAnchorCourse', 'addRecentSpotIds', 'courseSpotIds', 'generateCourse', 'spots', 'recentSpotIdSet', 'notifyRelaxedSlots', 'zoneRelaxedSlots', 'announceZoneRelaxed', 'showToast', 'renderConditions'];
-const body = ['courseCandidates', 'candidateIndex', 'candidatePrev', 'inCandidateMode', 'candidateLabel', 'replaceCourseKeepingCandidate', 'prevCourse', 'snapshotPrevCourse', 'undoCourse', 'bindUndoButton', 'UNDO_COURSE_BTN_HTML', 'SAVED_REGENERATE_NOTICE', 'regenerateCourse'].map((n) => toJs(decls.get(n))).join('\n');
+const body = ['prevCourse', 'snapshotPrevCourse', 'undoCourse', 'bindUndoButton', 'UNDO_COURSE_BTN_HTML', 'SAVED_REGENERATE_NOTICE', 'regenerateCourse'].map((n) => toJs(decls.get(n))).join('\n');
 const make = new Function(...STUBS, `${body}\nreturn { snapshotPrevCourse, undoCourse, regenerateCourse, bindUndoButton, get prev() { return prevCourse; }, clear() { prevCourse = null; } };`);
 
 const setup = () => {
@@ -100,9 +100,9 @@ const ids = (course) => course.map((s) => s.spotId);
 
 // 3-2) 저장 코스 불러오기(P-475): 미저장 현재 코스는 ↩ 이전으로 되찾고 조건 칩도 함께 돌아온다. 저장된 코스면 보관분이 없다
 {
-  const restoreJs = ['SLOT_ORDER', 'normalizeRegionCond', 'courseSpotIds', 'prevCourse', 'snapshotPrevCourse', 'undoCourse', 'courseCandidates', 'candidateIndex', 'candidatePrev', 'inCandidateMode', 'replaceCourseKeepingCandidate', 'MOOD_PRESETS', 'knownMoodPreset', 'knownBudgetFilter', 'loadedCourse', 'restoreCourse'].map((n) => toJs(decls.get(n))).join('\n');
+  const restoreJs = ['SLOT_ORDER', 'normalizeRegionCond', 'courseSpotIds', 'prevCourse', 'snapshotPrevCourse', 'undoCourse', 'MOOD_PRESETS', 'knownMoodPreset', 'knownBudgetFilter', 'loadedCourse', 'restoreCourse'].map((n) => toJs(decls.get(n))).join('\n');
   const RS = ['state', 'isCourseSaved', 'updateModeView', 'renderConditions', 'renderResults', 'document', 'cancelOverlayFocusReturn', 'markResultsEngaged', 'announce', 'scrollMotion'];
-  const makeRestore = new Function(...RS, `${restoreJs}\nreturn { restoreCourse, undoCourse, get prev() { return prevCourse; }, get cands() { return courseCandidates; }, get idx() { return candidateIndex; }, setCands(list, i, prev) { courseCandidates = list; candidateIndex = i; candidatePrev = []; prevCourse = prev; } };`);
+  const makeRestore = new Function(...RS, `${restoreJs}\nreturn { restoreCourse, undoCourse, get prev() { return prevCourse; }, set prev(v) { prevCourse = v; } };`);
   const run = (saved, extraState = {}, extraCond = {}) => {
     const log = { conditions: 0, render: 0 };
     const cur = [{ slot: 'day', spotId: 1 }, { slot: 'evening', spotId: 2 }];
@@ -158,57 +158,35 @@ const ids = (course) => course.map((s) => s.spotId);
     assert.strictEqual(state.moodPreset, null);
     assert.strictEqual(state.searchQuery, '');
   }
-  // 후보 묶음(P-477): 후보 3개를 보던 중 불러오면 묶음과 보던 번호와 후보별 ↩ 이전이 함께 보관되고, ↩ 이전이 단추 3개와 전환을 되살린다
+  // 후보 탭 시절(P-469~P-477) 형식이 남은 입력: 저장 코스에 후보 필드가 붙어 있어도 코스 하나로 열고 ↩ 이전은 지금 코스 하나다(P-510)
   {
-    const log = { conditions: 0, render: 0 };
-    const mk = (a, b) => [{ slot: 'day', spotId: a }, { slot: 'evening', spotId: b }];
-    const list = [mk(1, 2), mk(3, 4), mk(5, 6)];
-    const state = {
-      mainMode: 'course', regions: ['SEOUL'], subZones: [], slots: { day: true, evening: true, night: false, stay: false },
-      course: list[1], courseConditions: { regions: ['SEOUL'], subZones: [], mood: 'ALL' },
-      courseCategory: 'ALL', indoorOnly: false, budgetFilter: 'ALL', moodPreset: null, searchQuery: '', mood: 'ALL',
-    };
-    const noop = () => {};
-    const api = makeRestore(state, () => false, noop, () => {}, () => { log.render += 1; }, { getElementById: () => null, querySelector: () => null }, noop, noop, noop, () => 'auto');
-    const viewedPrev = { course: mk(7, 8), conditions: state.courseConditions };
-    api.setCands(list, 1, viewedPrev);
-    api.restoreCourse({ conditions: { region: ['GYEONGGI'], subZones: [], mood: 'ALL', slots: ['night'] } }, [{ slot: 'night', spotId: 9 }]);
-    assert.deepStrictEqual(ids(state.course), [9]);
-    assert.notStrictEqual(state.course, api.cands[api.idx], '불러온 코스가 후보 자리에 들어가 후보 모드가 이어진다');
+    const { api, state, cur } = run(false, {}, { candidates: [[1, 2], [3, 4]], candidateIndex: 1 });
+    assert.deepStrictEqual(ids(state.course), [9], '후보 필드가 붙은 저장 코스를 코스 하나로 열지 않았다');
+    assert.ok(api.prev && !('candidates' in api.prev), '↩ 이전 보관분에 후보 묶음이 남았다');
     api.undoCourse();
-    assert.strictEqual(api.cands.length, 3, '↩ 이전 뒤 후보 묶음이 돌아오지 않는다');
-    assert.strictEqual(api.idx, 1, '↩ 이전 뒤 보던 후보 번호가 유지되지 않는다');
-    assert.strictEqual(state.course, api.cands[api.idx], '↩ 이전 뒤 state.course가 보던 후보와 같은 객체가 아니다');
-    assert.deepStrictEqual(ids(state.course), [3, 4]);
-    assert.deepStrictEqual(ids(api.cands[0]), [1, 2]);
-    assert.deepStrictEqual(ids(api.cands[2]), [5, 6]);
-    assert.strictEqual(api.prev, viewedPrev, '보던 후보의 ↩ 이전이 함께 돌아오지 않는다');
+    assert.deepStrictEqual(ids(state.course), ids(cur));
+    assert.strictEqual(api.prev, null);
   }
-  // 저장 코스를 연달아 불러오기(P-479): 미저장 B(후보 3개) → 저장 X → 저장 Y 뒤에도 ↩ 이전이 B와 후보 묶음과 칩을 되살린다
+  // 저장 코스를 연달아 불러오기(P-479): 미저장 B → 저장 X → 저장 Y 뒤에도 ↩ 이전이 B와 칩을 되살린다
   {
     const mk = (a, b) => [{ slot: 'day', spotId: a }, { slot: 'evening', spotId: b }];
-    const list = [mk(1, 2), mk(3, 4), mk(5, 6)];
     const state = {
       mainMode: 'course', regions: ['SEOUL'], subZones: ['seongsu'], slots: { day: true, evening: true, night: false, stay: false },
-      course: list[1], courseConditions: { regions: ['SEOUL'], subZones: ['seongsu'], mood: 'ALL' },
+      course: mk(3, 4), courseConditions: { regions: ['SEOUL'], subZones: ['seongsu'], mood: 'ALL' },
       courseCategory: 'DINING', indoorOnly: true, budgetFilter: 'ALL', moodPreset: null, searchQuery: '성수', mood: 'ALL',
     };
     const noop = () => {};
     const savedKeys = ['9,10']; // X만 저장돼 있다(B는 미저장)
     const isSaved = (idsArr) => savedKeys.includes([...idsArr].sort((a, b) => a - b).join(','));
     const api = makeRestore(state, isSaved, noop, noop, noop, { getElementById: () => null, querySelector: () => null }, noop, noop, noop, () => 'auto');
-    api.setCands(list, 1, null);
     const cond = (region) => ({ conditions: { region: [region], subZones: [], mood: 'ALL', slots: ['day', 'evening'], categoryKey: 'CAFE' } });
     api.restoreCourse(cond('GYEONGGI'), mk(9, 10)); // X
-    assert.ok(api.prev && api.prev.candidates, '첫 불러오기 뒤 B가 ↩ 이전에 없다');
+    assert.ok(api.prev && api.prev.chips, '첫 불러오기 뒤 B가 ↩ 이전에 없다');
     api.restoreCourse(cond('BUSAN'), mk(20, 21)); // Y: 저장된 X 위에서 B 보관분을 비우지 않는다
     assert.ok(api.prev, 'X에서 Y로 불러온 뒤 B의 ↩ 이전이 사라졌다');
     assert.deepStrictEqual(ids(state.course), [20, 21]);
     api.undoCourse();
     assert.deepStrictEqual(ids(state.course), [3, 4], '↩ 이전이 B로 돌아가지 않는다');
-    assert.strictEqual(api.cands.length, 3, '↩ 이전 뒤 후보 묶음이 돌아오지 않는다');
-    assert.strictEqual(api.idx, 1, '↩ 이전 뒤 보던 후보 번호가 유지되지 않는다');
-    assert.strictEqual(state.course, api.cands[api.idx]);
     assert.strictEqual(state.courseCategory, 'DINING', '↩ 이전 뒤 칩이 B의 값이 아니다');
     assert.strictEqual(state.searchQuery, '성수');
     assert.deepStrictEqual(state.subZones, ['seongsu']);
@@ -223,7 +201,7 @@ const ids = (course) => course.map((s) => s.spotId);
     };
     const noop = () => {};
     const api = makeRestore(state, () => true, noop, noop, noop, { getElementById: () => null, querySelector: () => null }, noop, noop, noop, () => 'auto');
-    api.setCands([], 0, { course: [{ slot: 'day', spotId: 1 }, { slot: 'evening', spotId: 2 }], conditions: state.courseConditions }); // 칩 없는 보관분
+    api.prev = { course: [{ slot: 'day', spotId: 1 }, { slot: 'evening', spotId: 2 }], conditions: state.courseConditions }; // 칩 없는 보관분
     api.restoreCourse({ conditions: { region: ['BUSAN'], subZones: [], mood: 'ALL', slots: ['day', 'evening'] } }, [{ slot: 'day', spotId: 20 }, { slot: 'evening', spotId: 21 }]);
     assert.strictEqual(api.prev, null, '칩 없는 보관분이 저장 코스 불러오기에서 비워지지 않았다');
   }
@@ -244,7 +222,7 @@ const ids = (course) => course.map((s) => s.spotId);
 }
 
 // 4) 소스 훑기: state.course를 통째로 대입하는 자리는 보관 세 동작이 아니면 같은 함수 앞쪽에서 prevCourse를 비워야 한다
-const SNAPSHOTTING = new Set(['regenerateCourse', 'optimizeCourseRoute', 'undoCourse', 'replaceCourseKeepingCandidate', 'selectCandidate']); // 뒤 둘은 후보 유지 대입(P-469)과 후보별 prevCourse 맞바꿈(P-470)
+const SNAPSHOTTING = new Set(['regenerateCourse', 'optimizeCourseRoute', 'undoCourse']);
 const fnOf = (node) => {
   for (let n = node.parent; n; n = n.parent) if (ts.isFunctionLike(n)) return n;
   return null;
@@ -274,7 +252,7 @@ for (const a of assigns) {
 assert.ok(guarded >= 7, `비우는 자리 ${guarded}곳: 저장 열기, 받은 코스, 앵커, 🚀가 모두 들어 있어야 한다`);
 
 // 5) 보관은 세 동작에서 코스를 바꾸기 전에 일어난다
-for (const [name, marker] of [['swapStep', 'state.course[index] ='], ['regenerateCourse', 'state.course = '], ['optimizeCourseRoute', 'replaceCourseKeepingCandidate([']]) {
+for (const [name, marker] of [['swapStep', 'state.course[index] ='], ['regenerateCourse', 'state.course = '], ['optimizeCourseRoute', 'state.course = [']]) {
   const text = decls.get(name).getText();
   const snap = text.indexOf('snapshotPrevCourse()');
   const change = text.indexOf(marker);

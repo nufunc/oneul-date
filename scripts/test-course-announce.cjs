@@ -83,7 +83,7 @@ const iAnn = swap.indexOf('announce(');
 assert.ok(iChosen >= 0 && iAnn > swap.indexOf('return;', iChosen), '🔄: 후보 없음 반환 뒤에만 알린다');
 assert.ok(/saveLastCourse\(\);\s*(\/\/[^\n]*\n\s*)?announce\(/.test(swap), '🔄: 교체 확정 직후');
 const regen = fn('regenerateCourse');
-assert.strictEqual(regen.split("announceCourse(`${candidateLabel()}코스를 다시 추천했어요.`)").length - 1, 2, '다시 추천: 앵커 분기와 끝');
+assert.strictEqual(regen.split("announceCourse('코스를 다시 추천했어요.')").length - 1, 2, '다시 추천: 앵커 분기와 끝');
 assert.ok(regen.indexOf('if (!state.course') < regen.indexOf('announceCourse'), '다시 추천: 코스 없음 반환 뒤');
 // 동네 재시도가 실패하면 그리지 않은 코스를 버리고 화면의 코스로 돌아간다
 assert.ok(/const shownCourse = state\.course;[\s\S]*if \(matchesIn\(place\)\)[\s\S]*return;\s*\}\s*(\/\/[^\n]*\n\s*)?state\.course = shownCourse;/.test(gen), '동네 재시도 실패 복원');
@@ -92,7 +92,7 @@ for (const name of ['applyDailyCourseIfEmpty', 'renderResults', 'renderResultsCo
   assert.ok(!/announce\w*\(/.test(fn(name)), `${name}은 알리지 않는다`);
 }
 // 조건 칩은 선택 상태를 접근성 트리에 알린다(화면은 is-active 클래스뿐이었다)
-assert.strictEqual((src.match(/class="(quick-region-chip|spot-category-chip)[^\n]*aria-pressed="/g) ?? []).length, 10, '조건 칩과 코스 후보(P-469) aria-pressed');
+assert.strictEqual((src.match(/class="(quick-region-chip|spot-category-chip)[^\n]*aria-pressed="/g) ?? []).length, 9, '조건 칩 aria-pressed');
 // 지역 시트의 지역 줄은 tab 역할 자식이 없으므로 tablist가 아니다(axe aria-required-children)
 assert.ok(!src.includes('class="location-regions" role="tablist"') && /region-tab-item[^\n]*aria-pressed=/.test(src), '지역 줄 역할');
 // 토스트는 화면에만 두고 낭독은 처음부터 있는 #sr-announce가 맡는다(첫 토스트가 글자와 함께 생겨 읽히지 않았다)

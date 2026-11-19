@@ -19,7 +19,7 @@ const doc = { getElementById: () => null, querySelector: () => null };
 
 // 1) 저장 코스 불러오기
 const RS = ['state', 'isCourseSaved', 'updateModeView', 'renderConditions', 'renderResults', 'document', 'cancelOverlayFocusReturn', 'markResultsEngaged', 'announce', 'scrollMotion'];
-const makeRestore = new Function(...RS, `${js(['SLOT_ORDER', 'normalizeRegionCond', 'courseSpotIds', 'prevCourse', 'snapshotPrevCourse', 'courseCandidates', 'candidateIndex', 'candidatePrev', 'inCandidateMode', 'MOOD_PRESETS', 'knownMoodPreset', 'knownBudgetFilter', 'loadedCourse', 'restoreCourse'])}\nreturn restoreCourse;`);
+const makeRestore = new Function(...RS, `${js(['SLOT_ORDER', 'normalizeRegionCond', 'courseSpotIds', 'prevCourse', 'snapshotPrevCourse', 'MOOD_PRESETS', 'knownMoodPreset', 'knownBudgetFilter', 'loadedCourse', 'restoreCourse'])}\nreturn restoreCourse;`);
 const restore = (cond) => {
   const state = { mainMode: 'course', regions: [], subZones: [], slots: {}, course: null, courseConditions: null, courseCategory: 'ALL', indoorOnly: false, budgetFilter: 'LUXURY', moodPreset: 'BLIND_DATE', searchQuery: '' };
   const item = JSON.parse(JSON.stringify({ conditions: { region: ['GYEONGNAM'], subZones: [], mood: 'ALL', slots: ['day'], ...cond } }));

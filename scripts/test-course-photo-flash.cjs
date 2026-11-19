@@ -28,21 +28,18 @@ need(['markLoadedThumbs']);
   markLoadedThumbs(null);
 }
 
-// 2) 소스 훑기: renderResults가 renderResultsContent 바로 뒤에 부르고, 후보 전환 렌더만 eager로 둔다
+// 2) 소스 훑기: renderResults가 renderResultsContent 바로 뒤에 부른다. 카드 사진은 lazy로 받는다
 {
   const rr = decls.get('renderResults').getText();
   assert.ok(/renderResultsContent\(\);\s*markLoadedThumbs\(area\);/.test(rr), 'renderResults가 렌더 직후 markLoadedThumbs를 부르지 않음');
-  const sc = decls.get('selectCandidate').getText();
-  assert.ok(/thumbEager = true;\s*try \{ renderResults\(\); \} finally \{ thumbEager = false; \}/.test(sc), 'selectCandidate가 렌더 동안만 thumbEager를 켜지 않음');
-  assert.ok(src.includes(`loading="\${thumbEager ? 'eager' : 'lazy'}" fetchpriority="low"`), '카드 사진이 thumbEager로 loading을 정하지 않음');
-  assert.strictEqual(src.split('thumbEager = true').length - 1, 1, 'eager는 후보 전환 한 곳에서만 켠다');
+  assert.ok(src.includes('loading="lazy" fetchpriority="low"'), '카드 사진이 lazy가 아님');
 }
 
 // 3) 찜 코스 다시 추천은 알림과 토스트에 사실을 밝히고, 일반 코스는 밝히지 않는다
 need(['regenerateCourse', 'SAVED_REGENERATE_NOTICE']);
 {
   const STUBS = ['state', 'showToast', 'renderResults', 'announceCourse', 'markResultsEngaged', 'spotById', 'buildAnchorCourse', 'addRecentSpotIds', 'courseSpotIds', 'generateCourse', 'spots', 'recentSpotIdSet', 'notifyRelaxedSlots', 'zoneRelaxedSlots', 'announceZoneRelaxed', 'announce'];
-  const body = ['courseCandidates', 'candidateIndex', 'inCandidateMode', 'candidateLabel', 'replaceCourseKeepingCandidate', 'prevCourse', 'snapshotPrevCourse', 'SAVED_REGENERATE_NOTICE', 'regenerateCourse'].map((n) => toJs(decls.get(n))).join('\n');
+  const body = ['prevCourse', 'snapshotPrevCourse', 'SAVED_REGENERATE_NOTICE', 'regenerateCourse'].map((n) => toJs(decls.get(n))).join('\n');
   const make = new Function(...STUBS, `${body}\nreturn { regenerateCourse };`);
   const run = (fromSaved) => {
     const toasts = [];

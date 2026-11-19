@@ -26,7 +26,7 @@ for (const name of NAMES) assert.ok(decls.has(name), `${name}이 없다`);
 assert.ok(/\$\{routeOptimizableSteps\(state\.course\) \? `\s*<button class="btn-optimize-route"/.test(src), '⚡ 단추 조건이 routeOptimizableSteps를 쓰지 않는다');
 
 const STUBS = ['state', 'spotById', 'showToast', 'snapshotPrevCourse', 'renderResults', 'getSpotGenre', 'getSpotCoordinates'];
-const body = ['courseCandidates', 'candidateIndex', 'inCandidateMode', 'replaceCourseKeepingCandidate', ...NAMES].map((n) => toJs(decls.get(n))).join('\n'); // 후보 유지(P-469)
+const body = [...NAMES].map((n) => toJs(decls.get(n))).join('\n'); // 후보 유지(P-469)
 const make = new Function(...STUBS, `${body}\nreturn { routeOptimizableSteps, optimizeCourseRoute };`);
 
 // 경도를 고정하고 위도만 달리해 거리를 정한다. 0.01도는 약 1.1km
