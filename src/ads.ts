@@ -23,7 +23,7 @@ export function renderNativeInfeedAdCard(): string {
     return `
       <article class="step-card ad-card has-adsense">
         <div class="ad-badge-row">
-          <span class="ad-sponsor-label">Sponsored</span>
+          <span class="ad-sponsor-label">광고</span>
         </div>
         <div class="ad-container">
           <ins class="adsbygoogle"
