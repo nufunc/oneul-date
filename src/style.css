@@ -2308,10 +2308,12 @@ label,
   flex-wrap: wrap;
 }
 
-/* 360px 이하에서 고정 여백과 100px 썸네일 때문에 글자 칸이 86px까지 줄어 상호명이 음절 가운데서
-   꺾이고 320px에서는 아이콘 줄이 접혔다(P-102). 여백과 썸네일을 줄여 글자 칸을 넓힌다. */
-@media (max-width: 360px) {
+/* 고정 여백과 100px 썸네일 때문에 글자 칸이 360px에서 86px(P-102), 390px에서 156px까지 줄어
+   상호명이 꺾였다(P-520). 휴대폰 폭 전체에서 여백과 썸네일을 줄여 글자 칸을 넓힌다.
+   번호 원은 줄어든 왼쪽 여백 안에 두어 타임라인 선(left 12px)과 가운데를 맞춘다. */
+@media (max-width: 480px) {
   .step-list { padding-left: 28px; }
+  .step-card:not(.ad-card)::before { left: -28px; }
   .step-card { padding: var(--space-4) 14px; }
   .step-card-split { gap: 12px; }
   .step-thumb-col {
@@ -2319,6 +2321,10 @@ label,
     width: 80px; min-width: 80px; max-width: 80px;
     height: 80px; min-height: 80px; max-height: 80px;
   }
+}
+
+/* 320px에서 아이콘 줄이 접혔다(P-102) */
+@media (max-width: 360px) {
   .step-actions-bar { gap: 6px; }
   /* 320px에서 아이콘 7개(260px)가 막대(222px)를 넘어 왼쪽 묶음이 접혔다(P-106). 28px로 줄인다.
      .step-card 접두가 없으면 .step-map-chip.icon-only가 이긴다. */
