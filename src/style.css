@@ -1097,6 +1097,13 @@ label,
   transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* 390px에서 안쪽 컨트롤 폭을 318px 이상으로 둔다(P-517) */
+@media (max-width: 480px) {
+  .conditions-card {
+    padding: var(--space-3);
+  }
+}
+
 .course-compact-controls {
   display: flex;
   align-items: center;
@@ -1333,15 +1340,11 @@ label,
    조건 영역
    ========================================================================== */
 
+/* 카드 테두리·그림자·패딩은 안쪽 .conditions-card 한 겹만 둔다(P-517) */
 .conditions {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-5);
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
-  box-shadow: var(--shadow-card);
 }
 
 /* 슬롯 토글 4개 (미니멀 캡슐 아웃라인 토글) */
