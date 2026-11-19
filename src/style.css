@@ -4925,9 +4925,12 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   gap: 7px 8px;
   overflow-x: auto;
   scrollbar-width: none;
-  padding: 4px 2px 6px;
+  padding: 4px 20px 6px 2px;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x proximity;
+  /* 지역 바와 같게 오른쪽 20px를 흐려 줄이 더 있음을 보인다 */
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 20px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 20px), transparent);
 }
 .spot-category-scroll::-webkit-scrollbar {
   display: none;
@@ -4937,6 +4940,7 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  min-height: 44px;
   padding: 6px 12px;
   border-radius: var(--radius-full);
   border: 1px solid var(--color-border);
