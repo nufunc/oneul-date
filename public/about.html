@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>소개 - 오늘 데이트</title>
+    <meta name="description" content="오늘 데이트가 하는 일, 장소 정보의 출처, 운영 방식과 문의 방법을 안내합니다." />
+    <link rel="canonical" href="https://nufunc.github.io/oneul-date/about.html" />
+    <style>
+      :root {
+        --color-bg: #FAF8F5;
+        --color-text: #2D2A26;
+        --color-sub: #766E65;
+        --color-card: #FFFFFF;
+        --color-border: #E8E2D9;
+        --color-accent: #C36A4D;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif;
+        background-color: var(--color-bg);
+        color: var(--color-text);
+        line-height: 1.7;
+        margin: 0;
+        padding: 32px 20px;
+      }
+      .container {
+        max-width: 680px;
+        margin: 0 auto;
+        background: var(--color-card);
+        border: 1px solid var(--color-border);
+        border-radius: 16px;
+        padding: 36px 28px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+      }
+      h1 {
+        font-size: 1.5rem;
+        color: var(--color-accent);
+        margin-top: 0;
+        margin-bottom: 20px;
+        border-bottom: 2px solid var(--color-bg);
+        padding-bottom: 12px;
+      }
+      h2 {
+        font-size: 1.15rem;
+        margin-top: 24px;
+        margin-bottom: 8px;
+        color: var(--color-text);
+      }
+      p, li {
+        font-size: 0.92rem;
+        color: var(--color-sub);
+      }
+      ul {
+        padding-left: 20px;
+      }
+      a { color: var(--color-accent); }
+      .footer-note {
+        margin-top: 32px;
+        font-size: 0.85rem;
+        color: #A0988E;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>오늘 데이트 소개</h1>
+      <p>‘오늘 데이트’는 지역과 시간대와 분위기를 고르면 그날 다녀올 데이트 코스를 짜 주는 무료 웹 서비스입니다. 회원가입 없이 쓸 수 있고, 만든 코스는 기기에 저장하거나 링크로 공유할 수 있습니다.</p>
+
+      <h2>1. 서비스가 하는 일</h2>
+      <ul>
+        <li><strong>맞춤 코스:</strong> 지역, 시간대(낮·저녁·밤·숙박), 이동 수단과 조건에 맞춰 식당, 카페, 볼거리를 이동 순서대로 묶어 보여 줍니다.</li>
+        <li><strong>저장과 공유:</strong> 마음에 드는 코스는 기기 안에 저장하고, 링크 하나로 상대에게 보낼 수 있습니다.</li>
+        <li><strong>여행 매거진:</strong> 지역별 데이트와 여행 동선을 정리한 글을 모아 둡니다.</li>
+      </ul>
+
+      <h2>2. 장소 정보의 출처</h2>
+      <ul>
+        <li><strong>카카오 로컬 API와 카카오맵:</strong> 장소 이름, 주소, 좌표, 업종을 확인합니다.</li>
+        <li><strong>한국관광공사 TourAPI:</strong> 관광지, 축제, 숙박 정보와 공공누리 사진을 씁니다. 사진마다 이용 조건을 글 끝에 밝힙니다.</li>
+        <li><strong>유튜브 영상과 블로그, 커뮤니티의 공개 글:</strong> 실제로 데이트 장소로 언급된 곳인지 판단하는 근거로만 씁니다. 원문은 옮겨 싣지 않고 링크로 안내합니다.</li>
+      </ul>
+      <p>영업시간과 가격은 바뀔 수 있으므로 방문 전에 각 장소의 공식 안내나 지도 서비스에서 한 번 더 확인해 주세요.</p>
+
+      <h2>3. 운영 방식</h2>
+      <ul>
+        <li>수집 프로그램이 위 출처에서 후보 장소를 모으고, 카카오 장소 정보로 주소와 업종을 확인한 곳만 코스 후보로 올립니다.</li>
+        <li>폐업이 확인된 장소는 코스 후보에서 뺍니다.</li>
+        <li>서비스는 개인이 운영하며, 광고 수익으로 운영비를 충당할 수 있습니다. 광고는 본문과 구분되게 ‘Sponsored’ 표시를 붙입니다.</li>
+      </ul>
+
+      <h2>4. 문의</h2>
+      <p>정보 수정 요청, 오류 제보, 그 밖의 문의는 <a href="https://github.com/nufunc/oneul-date/issues" target="_blank" rel="noopener">GitHub 저장소 이슈</a>로 남겨 주세요. 개인정보 처리에 관한 내용은 <a href="https://nufunc.github.io/oneul-date/privacy.html">개인정보처리방침</a>에 있습니다.</p>
+
+      <div class="footer-note">
+        <p>© 2026 오늘 데이트 (oneul-date). All rights reserved.</p>
+      </div>
+    </div>
+  </body>
+</html>
