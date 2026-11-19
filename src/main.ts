@@ -1119,6 +1119,16 @@ function pickRandom<T>(arr: T[], rng: () => number = Math.random): T | undefined
   return arr[Math.floor(rng() * arr.length)];
 }
 
+/**
+ * 칸 후보를 마지막으로 뽑을 때 영업시간 원문이 있는 곳만 남긴다. 하나도 없으면 그대로 둔다(P-531).
+ * 영업시간이 없으면 isOpenAtSlotClock이 열림으로 보아 서울 코스 카드의 약 1/3이 '영업시간 정보 없음'이었다.
+ * 후보 풀(getCandidates)에서 거르면 이름 검색과 근접 반경 단계가 영업시간 없는 가까운 곳을 잃으므로, 거리 단계를 정한 뒤 고르는 자리에서만 건다
+ */
+function preferKnownHours(spots: Spot[]): Spot[] {
+  const known = spots.filter((s) => !hasNoHoursInfo(s));
+  return known.length > 0 ? known : spots;
+}
+
 /** 스폿의 자치구/지역 안전 추출 — spot.area 우선 사용, 없으면 spot.location에서 구/시/군 정규식 파싱 */
 function spotArea(spot: Spot | undefined): string | null {
   if (!spot) return null;
@@ -1156,6 +1166,7 @@ function spotSigunguLabel(spot: Spot): string | null {
  * 2순위: 앵커와 동일 자치구/행정구역 스폿 (예: 둘 다 영등포구, 마포구, 성동구 등)
  * 3순위: 앵커와 물리적 거리 10km 이내 인접 생활권 스폿
  * 4순위: 전체 조건 통과 후보 폴백 (지역어 검색이면 검색 지역 안을 먼저 본다)
+ * 각 순위 안에서는 영업시간이 있는 곳을 먼저 뽑는다(preferKnownHours, P-531)
  */
 function pickNearRandom(
   candidates: Spot[],
@@ -1164,7 +1175,7 @@ function pickNearRandom(
   scope: ((s: Spot) => boolean) | null = null,
 ): Spot | undefined {
   if (!anchor || candidates.length === 0) {
-    return pickRandom(candidates, rng);
+    return pickRandom(preferKnownHours(candidates), rng);
   }
 
   // 1순위: 위경도 반경 1.5km, 3km, 5km 순으로 보며 후보 10곳 이상인 첫 반경. 10곳 미만이면 5km 안에서 고른다
@@ -1175,7 +1186,7 @@ function pickNearRandom(
     const near = [1.5, 3, 5].map((r) => within5km.filter((s) => dist(s) <= r)).find((c) => c.length >= 10);
     const pool1 = near ?? within5km;
     if (pool1.length > 0) {
-      return pickRandom(pool1, rng);
+      return pickRandom(preferKnownHours(pool1), rng);
     }
   }
 
@@ -1184,7 +1195,7 @@ function pickNearRandom(
   if (aArea !== null) {
     const sameArea = candidates.filter((s) => spotArea(s) === aArea && spotSido(s) === spotSido(anchor));
     if (sameArea.length > 0) {
-      return pickRandom(sameArea, rng);
+      return pickRandom(preferKnownHours(sameArea), rng);
     }
   }
 
@@ -1194,7 +1205,7 @@ function pickNearRandom(
       (s) => s.lat != null && s.lng != null && getDistanceKm(anchor.lat!, anchor.lng!, s.lat!, s.lng!) <= 10.0,
     );
     if (within10km.length > 0) {
-      return pickRandom(within10km, rng);
+      return pickRandom(preferKnownHours(within10km), rng);
     }
   }
 
@@ -1211,12 +1222,11 @@ function pickNearRandom(
       .sort((a, b) => a.dist - b.dist);
 
     if (withDist.length > 0) {
-      const top3 = withDist.slice(0, 3);
-      return pickRandom(top3, rng)?.spot;
+      return pickRandom(preferKnownHours(withDist.slice(0, 3).map((x) => x.spot)), rng);
     }
   }
 
-  return pickRandom(pool, rng);
+  return pickRandom(preferKnownHours(pool), rng);
 }
 
 /**
@@ -2223,7 +2233,7 @@ function generateCourse(
   const pickedGenres = new Set<SpotGenre>();
   let anchorSpot: Spot | null = null;
   if (anchorSlot !== null) {
-    const anchor = pickRandom(anchorPool, rng);
+    const anchor = pickRandom(preferKnownHours(anchorPool), rng);
     if (anchor) {
       picked.push(anchor.id);
       pickedSpots.push(anchor);

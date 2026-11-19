@@ -14,7 +14,7 @@ const slice = (head, end) => {
 const code = [
   slice('const DISTRICT_END', ';\n'),
   slice('const FAMOUS_AREAS', '];\n'),
-  ...['pickRandom<T>', 'getDistanceKm', 'spotArea', 'spotSido', 'pickNearRandom', 'placeScopeOf'].map((n) => slice(`function ${n}(`, '\n}\n')),
+  ...['pickRandom<T>', 'preferKnownHours', 'hasNoHoursInfo', 'getDistanceKm', 'spotArea', 'spotSido', 'pickNearRandom', 'placeScopeOf'].map((n) => slice(`function ${n}(`, '\n}\n')),
 ].join('\n');
 const { pickNearRandom, placeScopeOf } = new Function(
   `${ts.transpile(code, { target: 'es2022' })};return { pickNearRandom, placeScopeOf };`,

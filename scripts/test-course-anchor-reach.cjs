@@ -54,6 +54,8 @@ const templates = {};
 for (const slot of ['day', 'evening', 'night']) {
   templates[slot] = getCandidates(open, slot, ['SEOUL'], 'ALL', [], [], null, false)
     .filter((s) => s.lat != null && s.lng != null)
+    // 영업시간 있는 곳을 먼저 뽑는 규칙(P-531)이 앵커 분포를 바꾸지 않게 영업시간 있는 틀만 쓴다
+    .filter((s) => s.is_24h || (s.business_hours && Object.keys(s.business_hours).length > 0))
     .slice(0, 12);
   assert.ok(templates[slot].length >= 12, `${slot} 틀 장소가 모자란다`);
 }
