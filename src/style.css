@@ -2728,6 +2728,23 @@ label,
   box-shadow: var(--shadow-sm);
 }
 
+/* 360px 이하에서 단추 폭이 79~93px라 `🔗 링크 공유`가 2줄로 꺾여 막대가 69px에서 82px로 커지고, 그 높이가
+   아래 scroll-margin-bottom 80px을 넘어 Tab 초점 일부가 막대 뒤에 들어갔다. 글자와 안쪽 여백을 줄여 한 줄에 담는다(P-525) */
+@media (max-width: 380px) {
+  #results-area .result-actions.result-actions-3 {
+    gap: var(--space-2);
+    padding: 6px;
+  }
+
+  #results-area .result-actions-3 :is(.btn-secondary, .btn-primary) {
+    font-size: var(--font-sm);
+    padding-left: var(--space-1);
+    padding-right: var(--space-1);
+    gap: var(--space-1);
+    white-space: nowrap;
+  }
+}
+
 /* Tab으로 옮긴 초점 요소가 붙은 막대 뒤로 들어가지 않게 그 높이만큼 위에서 멈춘다 */
 #results-area :is(a, button) {
   scroll-margin-bottom: 80px;
