@@ -192,6 +192,87 @@ def call_groq_json(prompt: str, system_prompt: str = "", model: str = None, max_
     return None
 
 
+CLAUDE_MODEL = "claude-haiku-5-5"
+_claude_client = None  # 키가 있을 때만 만든다. anthropic은 무거워 키가 없으면 불러오지 않는다
+
+def get_anthropic_api_key():
+    key = os.environ.get("ANTHROPIC_API_KEY")
+    if key:
+        return key
+    search_paths = [
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"),
+        os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"),
+    ]
+    for env_path in search_paths:
+        if os.path.exists(env_path):
+            try:
+                with open(env_path, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if line.startswith("ANTHROPIC_API_KEY="):
+                            return line.split("=", 1)[1].strip().strip('"').strip("'")
+            except Exception:
+                pass
+    return None
+
+_SPOTS_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "spots": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "signature_items": {"type": "array", "items": {"type": "string"}},
+                    "parking": {"type": "string", "enum": ["valet", "free", "paid", "none", "unknown"]},
+                    "date_context": {"type": "array", "items": {"type": "string"}},
+                },
+                "required": ["name", "signature_items", "parking", "date_context"],
+                "additionalProperties": False,
+            },
+        },
+    },
+    "required": ["spots"],
+    "additionalProperties": False,
+}
+
+def call_claude_json(prompt: str, system_prompt: str, schema: dict, max_tokens: int = 1024) -> dict | None:
+    """Claude 구조화 출력(output_config.format)으로 JSON을 받는다. 키가 없으면 None, 호출 오류는 호출처로 올린다."""
+    global _claude_client
+    api_key = get_anthropic_api_key()
+    if not api_key:
+        return None
+    if _claude_client is None:
+        import anthropic
+        _claude_client = anthropic.Anthropic(api_key=api_key, timeout=20.0, max_retries=1)
+    res = _claude_client.messages.create(
+        model=CLAUDE_MODEL,
+        max_tokens=max_tokens,
+        system=system_prompt,
+        messages=[{"role": "user", "content": prompt}],
+        thinking={"type": "disabled"},
+        output_config={"effort": "low", "format": {"type": "json_schema", "schema": schema}},
+    )
+    # refusal이나 max_tokens로 끊긴 응답은 스키마를 지킨다는 보장이 없다
+    if res.stop_reason != "end_turn":
+        raise RuntimeError(f"stop_reason={res.stop_reason}")
+    text = next(b.text for b in res.content if b.type == "text")
+    return json.loads(text)
+
+
+def _valid_spots(res) -> list[dict] | None:
+    if not (res and isinstance(res.get("spots"), list)):
+        return None
+    valid_spots = []
+    for s in res["spots"]:
+        if isinstance(s, dict) and s.get("name"):
+            name = str(s["name"]).strip()
+            if 2 <= len(name) <= 30:
+                valid_spots.append(s)
+    return valid_spots
+
+
 def extract_spots_from_unstructured_text(text: str, video_title: str = "") -> list[dict]:
     """
     유튜브 고정 댓글, 자막, 영상 설명란 등 비정형 텍스트에서
@@ -211,15 +292,24 @@ def extract_spots_from_unstructured_text(text: str, video_title: str = "") -> li
 
     prompt = f"Title: {video_title}\nText:\n{clipped_text}\n\nExtract places and format as JSON."
 
+    # ANTHROPIC_API_KEY가 있으면 Claude를 먼저 쓰고, 키가 없거나 실패하면 종전 Groq 경로로 간다
+    claude_note = ""
+    if get_anthropic_api_key():
+        try:
+            spots = _valid_spots(call_claude_json(prompt, system_prompt, _SPOTS_SCHEMA))
+            if spots is not None:
+                print(f"    🧠 장소 추출 경로: claude ({len(spots)}곳)")
+                return spots
+            claude_note = ", Claude 응답 형식 불일치"
+        except Exception as e:
+            claude_note = f", Claude 실패: {type(e).__name__}"
+
     res = call_groq_json(prompt, system_prompt=system_prompt, max_tokens=500)
-    if res and isinstance(res.get("spots"), list):
-        valid_spots = []
-        for s in res["spots"]:
-            if isinstance(s, dict) and s.get("name"):
-                name = str(s["name"]).strip()
-                if 2 <= len(name) <= 30:
-                    valid_spots.append(s)
-        return valid_spots
+    spots = _valid_spots(res)
+    if spots is not None:
+        print(f"    🧠 장소 추출 경로: groq ({len(spots)}곳{claude_note})")
+        return spots
+    print(f"    🧠 장소 추출 경로: rule (LLM 결과 없음{claude_note})")
     return []
 
 
