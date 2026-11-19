@@ -33,7 +33,7 @@ except ImportError:
 API_URL = os.environ.get("ONEUL_API_URL", "https://152-70-89-210.sslip.io/rest/v1/spots")
 TARGET_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "public", "data", "spots.json"))
 MIN_EXPECTED_SPOTS = 9000  # 비정상 데이터 누락 방지 안전 가드
-CLIENT_UNUSED_KEYS = {"metrics", "created_at", "updated_at", "provider_ids", "reservation_type", "fail_count"}
+CLIENT_UNUSED_KEYS = {"metrics", "created_at", "updated_at", "provider_ids", "reservation_type", "fail_count", "last_verified_at"}
 ALIAS_FILE = os.path.join(os.path.dirname(TARGET_FILE), "spot_aliases.json")
 # 첫 방문자가 spots.json을 받는 동안 보이는 번들 샘플. 실제 id로 다시 써야 그동안 찜한 스팟이 도착 뒤에도 남는다
 # 앱이 받는 권역별 열 형식 파일과 색인(P-505). 받은 링크 Range는 계속 행 파일 TARGET_FILE을 읽는다(P-453)
