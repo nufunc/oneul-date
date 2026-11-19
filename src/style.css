@@ -2310,8 +2310,9 @@ label,
 
 /* 고정 여백과 100px 썸네일 때문에 글자 칸이 360px에서 86px(P-102), 390px에서 156px까지 줄어
    상호명이 꺾였다(P-520). 휴대폰 폭 전체에서 여백과 썸네일을 줄여 글자 칸을 넓힌다.
-   번호 원은 줄어든 왼쪽 여백 안에 두어 타임라인 선(left 12px)과 가운데를 맞춘다. */
-@media (max-width: 480px) {
+   번호 원은 줄어든 왼쪽 여백 안에 두어 타임라인 선(left 12px)과 가운데를 맞춘다.
+   경계를 480px에 두면 481px에서 글자 칸이 290px에서 247px로 줄었다(P-523). 다른 코스 레이아웃 전환점 559px에 맞춘다. */
+@media (max-width: 559px) {
   .step-list { padding-left: 28px; }
   .step-card:not(.ad-card)::before { left: -28px; }
   .step-card { padding: var(--space-4) 14px; }
