@@ -6458,10 +6458,17 @@ function bindResultEvents(area: HTMLElement): void {
   });
   area.querySelector('#btn-regenerate')?.addEventListener('click', function (this: HTMLButtonElement) {
     this.classList.add('is-spinning');
-    setTimeout(() => {
+    // 아이콘이 한 바퀴(0.4초)를 다 돈 뒤 새 코스를 그린다. 150ms 뒤 다시 그려 회전이 1/3쯤에서 끊겼다
+    let done = false;
+    const go = () => {
+      if (done) return;
+      done = true;
       regenerateCourse();
-    }, 150);
+    };
+    this.querySelector('.icon-refresh')?.addEventListener('animationend', go, { once: true });
+    setTimeout(go, 450);
   });
+    if (this.classList.contains('is-spinning')) return;
   area.querySelector('#btn-copy')?.addEventListener('click', async () => {
     if (!state.course || !state.courseConditions) return;
     try {

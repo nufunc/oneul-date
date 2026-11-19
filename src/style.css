@@ -1802,6 +1802,15 @@ label,
   }
 }
 
+@keyframes spin-from-hover {
+  from {
+    transform: rotate(60deg);
+  }
+  to {
+    transform: rotate(420deg);
+  }
+}
+
 /* 전체 코스 통합 길찾기 & 동선 바 */
 
 /* 타임라인 — 모던 슬레이트 넘버링 & 정갈한 연결선 */
@@ -3983,6 +3992,11 @@ body:has(#results-area .result-actions-3) .toast-msg {
 
   .btn-regenerate:hover .icon-refresh {
     transform: rotate(60deg);
+  }
+
+  /* hover로 60도 기운 아이콘이 0도로 튀지 않고 그 자리에서 한 바퀴 돈다 */
+  .btn-regenerate.is-spinning:hover .icon-refresh {
+    animation-name: spin-from-hover;
   }
 
   /* 터치로 끈 칩에 :hover가 남아 hover 글자색이 다크 면 위 2.92:1이 됐다(P-419) */
