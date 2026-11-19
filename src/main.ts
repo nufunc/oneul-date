@@ -6099,7 +6099,7 @@ function renderStepCard(
 
   const thumbHtml = `
     <div class="step-thumb-col">
-      ${isHot ? `<span class="badge-hot-floating">🔥 핫플</span>` : ''}
+      ${isHot ? `<span class="badge-hot-floating" role="img" aria-label="핫플" title="핫플">🔥</span>` : ''}
       ${isClosedToday ? `<span class="badge-closed-floating">⚠️ 오늘 휴무</span>` : ''}
       ${isClosedAtSlot ? `<span class="badge-closed-floating">⚠️ 영업시간 확인</span>` : ''}
       <div class="step-fallback-box">${fallbackIcon}</div>

@@ -1996,25 +1996,24 @@ label,
   align-self: flex-start;
 }
 
-/* 사진 좌측 상단 플로팅 핫플 뱃지 (안 A) */
+/* 사진 우측 상단 플로팅 핫플 아이콘. 좌측 상단의 휴무 배지와 겹치지 않는다 */
 .badge-hot-floating {
   position: absolute;
   top: 6px;
-  left: 6px;
+  right: 6px;
   z-index: 3;
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  /* 흰 10px 글자가 #FF385C 쪽에서 3.52:1이라 단색으로 4.70:1을 맞춘다. 탐색 카드 핫플 배지와 같은 색(ux-reviewer-286) */
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  /* 탐색 카드 핫플 배지와 같은 단색(ux-reviewer-286) */
   background: #e11d48;
   color: #FFFFFF;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  padding: 2.5px 7px;
+  font-size: 12px;
   border-radius: var(--radius-full);
   box-shadow: 0 2px 6px rgba(225, 29, 72, 0.4);
-  line-height: 1.25;
+  line-height: 1;
   pointer-events: none;
   backdrop-filter: blur(4px);
 }
@@ -5405,11 +5404,6 @@ html[data-theme-resolved="dark"] .btn-saved-recommend {
   font-weight: 700;
   backdrop-filter: blur(4px);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-}
-
-/* 핫플이면서 오늘 휴무면 두 배지가 같은 자리에 겹쳐 휴무 경고가 가려진다. 휴무를 핫플 아래로 내린다 */
-.badge-hot-floating + .badge-closed-floating {
-  top: 32px;
 }
 
 /* discovery-badge-dist(top:8px/left:8px, z-index:5)가 같은 카드에서 이
