@@ -4062,18 +4062,19 @@ function announceCourse(lead: string): void {
 function getThemeModeLabel(mode: ThemeMode): string {
   switch (mode) {
     case 'light':
-      return '☀️ 낮';
+      return '낮';
     case 'dark':
-      return '🌙 밤';
+      return '밤';
     case 'auto':
-      return '⚙️ 시스템';
+      return '시스템';
   }
 }
 
 // 좁은 화면에서 낱말만 숨기도록 아이콘과 낱말을 나눈다
 function getThemeModeHtml(mode: ThemeMode): string {
-  const [icon, word] = getThemeModeLabel(mode).split(' ');
-  return `<span aria-hidden="true">${icon}</span><span class="topbar-label">${word}</span>`;
+  // 글자 라벨을 빼고 아이콘만 보인다. 모드 이름은 aria-label과 title이 전한다(P-542)
+  const icon = mode === 'light' ? '☀️' : mode === 'dark' ? '🌙' : '🖥️';
+  return `<span aria-hidden="true">${icon}</span>`;
 }
 
 function applyTheme(mode: ThemeMode, notify = false): void {
@@ -4098,6 +4099,7 @@ function applyTheme(mode: ThemeMode, notify = false): void {
     themeBtn.innerHTML = getThemeModeHtml(mode);
     // 고정 aria-label이 보이는 문구를 가려 스크린리더에는 현재 테마가 전해지지 않았다
     themeBtn.setAttribute('aria-label', `테마 변경, 현재 ${getThemeModeLabel(mode)}`);
+    themeBtn.title = `테마: ${getThemeModeLabel(mode)}`;
   }
 
   // 모바일 브라우저 상단 상태바 테마 컬러 동기화
@@ -4150,7 +4152,7 @@ function renderShell(): void {
     <header class="topbar">
       <h1 class="app-title"><a href="#" class="app-title-link" id="brand-home-link" aria-label="오늘 데이트 홈으로 이동">오늘 데이트</a></h1>
       <div class="topbar-actions">
-        <button class="btn-theme-toggle" id="btn-theme-toggle" aria-label="테마 변경, 현재 ${getThemeModeLabel(state.themeMode)}">${getThemeModeHtml(state.themeMode)}</button>
+        <button class="btn-theme-toggle" id="btn-theme-toggle" aria-label="테마 변경, 현재 ${getThemeModeLabel(state.themeMode)}" title="테마: ${getThemeModeLabel(state.themeMode)}">${getThemeModeHtml(state.themeMode)}</button>
         <a class="btn-saved btn-magazine" id="btn-open-magazine" href="./blog/" aria-label="여행 매거진" title="오늘 데이트 여행 매거진 열기"><span aria-hidden="true">📖</span><span class="topbar-label">매거진</span></a>
         <button class="btn-saved" id="btn-open-saved">저장한 코스</button>
       </div>
@@ -7807,7 +7809,7 @@ function receiverLoadingHtml(failed = false): string {
     <header class="topbar">
       <h1 class="app-title">${failed ? '<a href="#" class="app-title-link" id="receiver-home-link" aria-label="오늘 데이트 홈으로 이동">오늘 데이트</a>' : '오늘 데이트'}</h1>
       <div class="topbar-actions">
-        <button class="btn-theme-toggle" id="btn-theme-toggle" aria-label="테마 변경, 현재 ${getThemeModeLabel(state.themeMode)}">${getThemeModeHtml(state.themeMode)}</button>
+        <button class="btn-theme-toggle" id="btn-theme-toggle" aria-label="테마 변경, 현재 ${getThemeModeLabel(state.themeMode)}" title="테마: ${getThemeModeLabel(state.themeMode)}">${getThemeModeHtml(state.themeMode)}</button>
       </div>
     </header>
     <main class="receiver-view" id="receiver-loading">
@@ -7926,7 +7928,7 @@ function renderReceiverView(steps: CourseStep[]): void {
       <h1 class="app-title"><a href="#" class="app-title-link" id="receiver-home-link" aria-label="오늘 데이트 홈으로 이동">오늘 데이트</a></h1>
       <div class="topbar-actions">
         <button class="btn-saved" id="btn-open-saved">저장한 코스</button>
-        <button class="btn-theme-toggle" id="btn-theme-toggle" aria-label="테마 변경, 현재 ${getThemeModeLabel(state.themeMode)}">${getThemeModeHtml(state.themeMode)}</button>
+        <button class="btn-theme-toggle" id="btn-theme-toggle" aria-label="테마 변경, 현재 ${getThemeModeLabel(state.themeMode)}" title="테마: ${getThemeModeLabel(state.themeMode)}">${getThemeModeHtml(state.themeMode)}</button>
       </div>
     </header>
     <main class="receiver-view">

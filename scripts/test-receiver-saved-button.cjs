@@ -17,13 +17,13 @@ const body = (startRe, endRe) => {
 
 const receiver = body(/^function renderReceiverView\(/m, /^\/\/ --- 저장한 코스 오버레이/m);
 
-// 1. 머리 topbar-actions에 저장한 코스 버튼이 ⚙️(테마 버튼) 앞에 있다
+// 1. 머리 topbar-actions에 저장한 코스 버튼이 테마 버튼 앞에 있다
 const actions = receiver.match(/<div class="topbar-actions">([\s\S]*?)<\/div>/);
 assert.ok(actions, '받은 코스 머리의 topbar-actions를 찾지 못했다');
 const saved = actions[1].indexOf('id="btn-open-saved"');
 const theme = actions[1].indexOf('id="btn-theme-toggle"');
 assert.ok(saved >= 0, '받은 코스 머리에 저장한 코스 버튼(#btn-open-saved)이 없다');
-assert.ok(saved < theme, '저장한 코스 버튼이 ⚙️ 앞에 있지 않다');
+assert.ok(saved < theme, '저장한 코스 버튼이 테마 버튼 앞에 있지 않다');
 assert.match(actions[1], /id="btn-open-saved">저장한 코스<\/button>/, '버튼 글이 홈과 같은 `저장한 코스`가 아니다');
 
 // 2. 홈과 받은 코스가 같은 열기 함수를 쓴다
