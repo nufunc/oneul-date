@@ -24,6 +24,11 @@ for (const [slug, app] of Object.entries(APP_REGION)) {
     const rel = `${slug}/${slot}`;
     assert.ok(html.includes(`<section id="seo-landing" data-region="${app}" data-slot="${slot}"`), `${rel}: 랜딩 구획에 지역·시간대 data 속성이 없다`);
     assert.ok(html.includes(`<a href="${SITE_URL}?r=${app}&amp;s=${slot}">오늘 데이트에서 직접 코스 만들기 →</a>`), `${rel}: 하단 링크가 같은 지역·시간대를 싣지 않는다`);
+    // 설명 바로 아래 입구 단추(P-528): 같은 href, 첫 장소 목록 앞, 단추 한 개
+    const topBtn = `<a class="seo-cta-btn" href="${SITE_URL}?r=${app}&amp;s=${slot}">오늘 데이트에서 직접 코스 만들기 →</a>`;
+    assert.ok(html.includes(topBtn), `${rel}: 설명 아래 입구 단추가 없거나 href가 루트 ?r=..&s=..가 아니다`);
+    assert.ok(html.indexOf('<h1>') < html.indexOf(topBtn) && html.indexOf(topBtn) < html.indexOf('<ul>'), `${rel}: 입구 단추가 설명과 장소 목록 사이에 없다`);
+    assert.strictEqual(html.split('class="seo-cta-btn"').length - 1, 1, `${rel}: 입구 단추가 하나가 아니다`);
   }
 }
 assert.strictEqual(count, 32, `지역 랜딩이 32쪽이 아니다: ${count}`);

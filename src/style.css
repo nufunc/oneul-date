@@ -6088,6 +6088,27 @@ html[data-theme-resolved="dark"] .spot-link-btn.kakao {
   font-size: var(--font-sm);
   margin: 0 0 var(--space-4);
 }
+/* 설명 바로 아래 앱 입구 단추. 첫 화면 안에 앱으로 가는 길을 둔다(P-528) */
+#seo-landing > p.seo-cta {
+  margin: 0 0 var(--space-4);
+}
+#seo-landing .seo-cta-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-5);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  border-radius: var(--radius-md);
+  font-size: var(--font-md);
+  font-weight: 700;
+  text-decoration: none;
+  text-align: center;
+}
+#seo-landing .seo-cta-btn:hover {
+  background: var(--color-accent-hover);
+}
 #seo-landing ul {
   list-style: none;
   padding: 0;

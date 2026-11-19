@@ -148,6 +148,7 @@ function buildPage(region, slot, pageSpots, generated) {
     <section id="seo-landing" data-region="${region.app}" data-slot="${slot.key}" aria-label="${escapeHtml(region.key)} ${escapeHtml(slot.label)} 데이트 코스 추천">
       <h1>${escapeHtml(title)}</h1>
       <p>${escapeHtml(description)}</p>
+      <p class="seo-cta"><a class="seo-cta-btn" href="${SITE_URL}/?r=${region.app}&amp;s=${slot.key}">오늘 데이트에서 직접 코스 만들기 →</a></p>
       <ul>${listItems}
       </ul>
       ${buildNav(region, slot, generated)}
