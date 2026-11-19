@@ -28,7 +28,8 @@ if (origin === DEFAULT_ORIGIN && base === DEFAULT_BASE) {
 const RULES = [
   [`${DEFAULT_ORIGIN}${DEFAULT_BASE}`, `${origin}${base}`],
   [`${DEFAULT_ORIGIN}${DEFAULT_BASE.slice(0, -1)}`, `${origin}${base.slice(0, -1)}`],
-  [DEFAULT_BASE, base],
+  // 저장소 주소 github.com/nufunc/oneul-date/는 사이트 경로가 아니므로 남긴다(P-536 문의 링크)
+  [new RegExp(`(?<!github\\.com/nufunc)${DEFAULT_BASE}`, 'g'), base],
   [DEFAULT_BASE.replaceAll('/', '\\/'), base.replaceAll('/', '\\/')],
 ];
 const TEXT_EXT = new Set(['.html', '.js', '.css', '.xml', '.txt', '.json', '.webmanifest', '.svg']);
