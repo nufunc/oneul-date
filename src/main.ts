@@ -9016,6 +9016,8 @@ const loadedRegionKeys = new Set<string>();
 const REGION_FILE_KEYS = REGIONS.filter((r) => r.key !== 'ALL').map((r) => r.key);
 /** 받는 중인 권역 키 → 그 받기. 같은 권역을 두 번 요청하지 않는다 */
 const regionLoads = new Map<string, Promise<void>>();
+/** 캐시에서 복원했지만 6시간이 지난 권역. 그 권역을 쓸 때 뒤에서 다시 받는다(P-527) */
+const staleRegionKeys = new Set<string>();
 /** 받지 못해 번들 샘플 행으로 채운 권역. 이 권역 행은 IndexedDB에 저장하지 않는다(P-255) */
 const sampleRegionKeys = new Set<string>();
 /** 화면을 기다리게 하는 받기 수. 캐시를 새로 고치는 뒤쪽 받기는 세지 않는다 */
@@ -9048,7 +9050,8 @@ function hasSavedSpotData(): boolean {
 
 /**
  * 지역 키 목록(빈 목록이나 'ALL'은 전국)의 권역 파일 가운데 아직 없는 것만 받아 메모리에 합친다(P-505).
- * refresh면 이미 있는 권역도 다시 받아 그 권역 행을 바꾼다(캐시 새로 고침). 받는 중인 권역은 그 받기를 기다린다
+ * refresh면 이미 있는 권역도 다시 받아 그 권역 행을 바꾼다(캐시 새로 고침). 받는 중인 권역은 그 받기를 기다린다.
+ * 지난 권역(staleRegionKeys)은 기다리지 않는 뒤쪽 받기로 다시 받는다(P-527)
  */
 async function ensureSpotsForRegions(regionKeys: string[], refresh = false): Promise<void> {
   const want = regionFileKeysFor(regionKeys);
@@ -9057,7 +9060,13 @@ async function ensureSpotsForRegions(regionKeys: string[], refresh = false): Pro
     const load = loadRegionFiles(missing, !refresh);
     missing.forEach((k) => regionLoads.set(k, load));
   }
-  await Promise.all(want.map((k) => regionLoads.get(k)).filter(Boolean));
+  const waits = want.map((k) => regionLoads.get(k)).filter(Boolean);
+  const due = want.filter((k) => staleRegionKeys.has(k));
+  if (due.length > 0) {
+    due.forEach((k) => staleRegionKeys.delete(k));
+    ensureSpotsForRegions(due, true).catch(() => {});
+  }
+  await Promise.all(waits);
 }
 
 async function loadRegionFiles(keys: string[], foreground: boolean): Promise<void> {
@@ -9186,9 +9195,8 @@ async function init(): Promise<void> {
       canonicalizeSavedSpotIds();
       const cachedKeys = REGION_FILE_KEYS.filter((k) => spots.some((sp) => regionKeyOf(sp) === k));
       markRegionsLoaded(cachedKeys);
-      // 6시간 안에 저장한 권역은 새로 받지 않는다. 지난 권역만 뒤에서 다시 받는다(P-321)
-      const stale = staleSpotRegionKeys(cachedKeys, 6 * 60 * 60 * 1000);
-      if (stale.length > 0) setTimeout(() => { ensureSpotsForRegions(stale, true).catch(() => {}); }, 1000);
+      // 6시간 안에 저장한 권역은 새로 받지 않는다(P-321). 지난 권역은 표시만 하고 그 권역을 쓸 때 뒤에서 다시 받는다(P-527)
+      staleSpotRegionKeys(cachedKeys, 6 * 60 * 60 * 1000).forEach((k) => staleRegionKeys.add(k));
       if (isSharedLink) {
         if (sharedReady()) handleRoute();
       } else if (state.mainMode === 'course') {

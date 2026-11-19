@@ -89,7 +89,7 @@ assert.ok(
     const saveSpotsToCache = () => {};
     const loadSavedCourses = () => [];
     ${ts.transpile(colsCode + loaderCode + matchesCode + ensureCode, { target: 'es2022' })}
-    return { ensureSpotsForRegions, hasSavedSpotData, loaded: () => loadedRegionKeys, spots: () => spots };`,
+    return { ensureSpotsForRegions, hasSavedSpotData, staleRegionKeys, loaded: () => loadedRegionKeys, spots: () => spots };`,
   )(fetched, fs, path, regionDir, Object.fromEntries(Object.entries(index.files).map(([n, i]) => [n, { regions: i.regions, bytes: i.bytes }])), REGIONS);
 
   assert.strictEqual(app2.hasSavedSpotData(), false);
@@ -106,6 +106,23 @@ assert.ok(
   assert.strictEqual(fetched.length, Object.keys(index.files).length, '전국으로 넓힐 때 받은 권역을 다시 요청했거나 빠뜨렸다');
   assert.ok(app2.loaded().has('ALL'), '전국을 받았다는 표시가 없다');
   assert.strictEqual(app2.spots().length, rows.length, '전국을 합친 행 수가 전체와 다르다');
+
+  // P-527 단위 1: 지난 권역 7개를 표시해 두면 이번에 쓰는 권역만 뒤에서 다시 받고, 나머지는 쓸 때 받는다
+  const before = fetched.length;
+  const settle = () => new Promise((r) => setTimeout(r, 50));
+  REGIONS.filter((r) => r.key !== 'ALL').forEach((r) => app2.staleRegionKeys.add(r.key));
+  await app2.ensureSpotsForRegions([daily]);
+  await settle();
+  assert.deepStrictEqual(fetched.slice(before), [`/oneul-date/data/spots/${daily.toLowerCase()}.cols.json`], '지난 권역 7개 중 필요한 1개만 다시 요청하지 않았다');
+  assert.ok(!app2.staleRegionKeys.has(daily) && app2.staleRegionKeys.size === 6, '다시 받은 권역의 지난 표시가 남았거나 나머지 표시가 지워졌다');
+  await app2.ensureSpotsForRegions([daily]);
+  await settle();
+  assert.strictEqual(fetched.length, before + 1, '다시 받은 권역을 또 요청했다');
+  await app2.ensureSpotsForRegions(['ALL']);
+  await settle();
+  assert.strictEqual(fetched.length, before + 7, '전국을 쓸 때 나머지 지난 권역을 다시 받지 않았다');
+  assert.strictEqual(app2.staleRegionKeys.size, 0, '지난 표시가 남았다');
+  assert.strictEqual(app2.spots().length, rows.length, '다시 받은 뒤 행 수가 전체와 다르다');
 
   // 4. 오늘 추천 코스: 권역 파일만으로 만든 코스와 전국 데이터로 만든 코스가 같은 장소다
   const sf = ts.createSourceFile('main.ts', mainSrc, ts.ScriptTarget.ES2022, true);

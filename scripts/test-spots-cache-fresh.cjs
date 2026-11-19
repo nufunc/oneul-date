@@ -46,8 +46,13 @@ const saveM = src.match(/export async function saveSpotsToCache[\s\S]*?\n}\n/)[0
 assert(saveM.indexOf('tx.oncomplete') < saveM.indexOf('localStorage.setItem'), '저장 완료 전에 시각을 쓴다');
 // 권역 시각은 받은 권역만 바꾼다
 assert(/for \(const k of regionKeys\) next\[k\] = now;/.test(saveM), '받은 권역의 시각만 바꾸지 않는다');
-// 새로고침은 캐시가 있는 분기에서 지난 권역만 뒤에서(refresh) 다시 받는다
-assert(/const stale = staleSpotRegionKeys\(cachedKeys, 6 \* 60 \* 60 \* 1000\);\s*if \(stale\.length > 0\) setTimeout\(\(\) => \{ ensureSpotsForRegions\(stale, true\)/.test(mainTs), '시작 새로고침 건너뛰기 연결이 바뀌었다');
+// 새로고침은 캐시가 있는 분기에서 지난 권역을 표시만 하고, 그 권역을 쓸 때 뒤에서(refresh) 다시 받는다(P-527)
+assert(/staleSpotRegionKeys\(cachedKeys, 6 \* 60 \* 60 \* 1000\)\.forEach\(\(k\) => staleRegionKeys\.add\(k\)\);/.test(mainTs), '캐시 복원 뒤 지난 권역을 표시하지 않는다');
+assert(!/ensureSpotsForRegions\(stale, true\)/.test(mainTs), '지난 권역을 쓰기 전에 모두 다시 받는다');
+const ensureFn = mainTs.slice(mainTs.indexOf('async function ensureSpotsForRegions'), mainTs.indexOf('async function loadRegionFiles'));
+assert(/staleRegionKeys\.delete\(k\)[\s\S]*ensureSpotsForRegions\(\w+, true\)/.test(ensureFn), '쓰는 권역의 지난 표시를 지우고 뒤에서 다시 받지 않는다');
+// 뒤쪽 받기를 시작하기 전에 기다릴 받기를 정해, 화면이 다시 받기를 기다리지 않게 한다
+assert(ensureFn.indexOf('const waits') >= 0 && ensureFn.indexOf('const waits') < ensureFn.indexOf('staleRegionKeys.delete'), '다시 받기를 화면이 기다린다');
 // 청크 일부가 실패한 전체 조회는 캐시에 저장하지 않는다
 assert.ok(src.includes('uniqueIdMap.size >= total'), '부분 데이터 저장 차단 없음');
 console.log('ok test-spots-cache-fresh');
