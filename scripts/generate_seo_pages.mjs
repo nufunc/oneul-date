@@ -6,10 +6,11 @@ import * as path from 'path';
 const SITE_URL = 'https://nufunc.github.io/oneul-date';
 const distDir = path.resolve('dist');
 const templatePath = path.join(distDir, 'index.html');
-const spotsPath = path.join(distDir, 'data', 'spots.json');
+// 산출물에는 단일 spots.json이 없으므로(P-513) 원본을 읽는다
+const spotsPath = path.resolve('public', 'data', 'spots.json');
 
 if (!fs.existsSync(templatePath) || !fs.existsSync(spotsPath)) {
-  console.error('dist/index.html 또는 dist/data/spots.json이 없다. vite build 이후에 실행해야 한다.');
+  console.error('dist/index.html 또는 public/data/spots.json이 없다. vite build 이후에 실행해야 한다.');
   process.exit(1);
 }
 

@@ -30,6 +30,7 @@ const cut = (src, from, to) => {
     'normalizeSpots',
     'rawSpotsData',
     '__SPOTS_INDEX__',
+    '__SPOTS_SHARDS__',
     `const fetch = async (url) => {
       env.urls.push(url);
       const r = typeof env.response === 'function' ? env.response(url) : env.response;
@@ -39,7 +40,7 @@ const cut = (src, from, to) => {
     ${ts.transpile(colsCode, { target: 'es2022' })}
     ${ts.transpile(loadCode, { target: 'es2022' })}
     return { loadStaticSpots, flag: () => spotsFellBackToSample, expected: () => spotsBytesExpected };`,
-  )(env, (rows) => rows, sample, { seoul: { regions: ['서울'], bytes: 10 }, jeju: { regions: ['제주'], bytes: 5 } });
+  )(env, (rows) => rows, sample, { seoul: { regions: ['서울'], bytes: 10 }, jeju: { regions: ['제주'], bytes: 5 } }, [100, 104]);
 
   const seoulRows = Array.from({ length: 5 }, (_, i) => ({ id: 100 + i, region: '서울' }));
   const toCols = (rows) => ({ id: rows.map((r) => r.id), region: rows.map((r) => r.region) });
@@ -73,19 +74,19 @@ const cut = (src, from, to) => {
   env.response = (url) => ({ ok: true, status: 200, json: async () => (url.includes('jeju') ? { id: [] } : toCols(seoulRows)) });
   assert.deepStrictEqual(await mod.loadStaticSpots(), sample, '빈 권역 파일을 실패로 보지 않았다');
 
-  // 권역 파일이 404면 행 파일을 받아 고른 권역만 남기고, 둘 다 없으면 샘플이다
+  // 권역 파일이 404면 id 구간 조각 전부를 받아 고른 권역만 남기고(P-513), 둘 다 없으면 샘플이다
   const notFound = { ok: false, status: 404, json: async () => ({}) };
-  const rowFile = [...seoulRows, { id: 7, region: '제주' }];
-  env.response = (url) => (url.endsWith('.cols.json') ? notFound : { ok: true, status: 200, json: async () => rowFile });
+  const shardRows = { 100: seoulRows.slice(0, 4), 104: [seoulRows[4], { id: 107, region: '제주' }] };
+  env.response = (url) => (url.endsWith('.cols.json') ? notFound : { ok: true, status: 200, json: async () => shardRows[/(\d+)\.json$/.exec(url)[1]] });
   env.urls = [];
-  assert.deepStrictEqual(await mod.loadStaticSpots(['제주']), [{ id: 7, region: '제주' }], '404 뒤 행 파일에서 고른 권역만 남기지 않았다');
-  assert.deepStrictEqual(env.urls, ['/oneul-date/data/spots/jeju.cols.json', '/oneul-date/data/spots.json']);
+  assert.deepStrictEqual(await mod.loadStaticSpots(['제주']), [{ id: 107, region: '제주' }], '404 뒤 조각에서 고른 권역만 남기지 않았다');
+  assert.deepStrictEqual(env.urls, ['/oneul-date/data/spots/jeju.cols.json', '/oneul-date/data/spots/by-id/100.json', '/oneul-date/data/spots/by-id/104.json']);
   assert.strictEqual(mod.flag(), false);
   assert.strictEqual(mod.expected(), 0, '행 파일로 넘어가면 분모를 모른다');
   env.response = notFound;
   assert.deepStrictEqual(await mod.loadStaticSpots(['서울']), [sample[0]], '두 파일 모두 404인데 샘플이 아니다');
   assert.strictEqual(mod.flag(), true);
-  // 500은 되돌림 대상이 아니다: 행 파일을 다시 받지 않고 샘플로 떨어진다
+  // 500은 되돌림 대상이 아니다: 조각을 받지 않고 샘플로 떨어진다
   env.response = { ok: false, status: 500, json: async () => ({}) };
   env.urls = [];
   await mod.loadStaticSpots(['서울']);

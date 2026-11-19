@@ -304,7 +304,7 @@ export function staleSpotRegionKeys(regionKeys: string[], maxAgeMs: number): str
 
 /**
  * 권역 열 형식 파일({칸 이름: 행 수만큼의 값 배열})을 행 배열로 바꾼다. id 칸이 배열이 아니면 빈 배열이다.
- * 같은 칸 값을 붙여 두어 gzip이 행 배열보다 28% 작다. 받은 링크 Range는 계속 행 파일 spots.json을 읽는다(P-453)
+ * 같은 칸 값을 붙여 두어 gzip이 행 배열보다 28% 작다(P-453)
  */
 export function rowsFromColumns(cols: unknown): Spot[] {
   const c = cols as Record<string, unknown[]> | null;
@@ -320,6 +320,11 @@ export function rowsFromColumns(cols: unknown): Spot[] {
 // 권역 파일 색인 {파일 이름: {regions: 담은 region 값, bytes: 풀린 크기}}. 빌드가 public/data/spots/index.json에서 넣는다(P-505)
 declare const __SPOTS_INDEX__: Record<string, { regions: string[]; bytes: number }>;
 const SPOTS_INDEX: Record<string, { regions: string[]; bytes: number }> = typeof __SPOTS_INDEX__ !== 'undefined' ? __SPOTS_INDEX__ : {};
+
+// id 구간 조각 data/spots/by-id/<첫 id>.json의 첫 id 목록(오름차순). 빌드가 spots.json에서 나눠 넣는다(vite.config.ts, P-513)
+declare const __SPOTS_SHARDS__: number[];
+const SPOT_SHARDS: number[] = typeof __SPOTS_SHARDS__ !== 'undefined' ? __SPOTS_SHARDS__ : [];
+const shardUrl = (first: number) => `${import.meta.env.BASE_URL}data/spots/by-id/${first}.json`;
 
 /** region 값 목록을 담은 권역 파일 이름. 목록이 비었으면 전부다 */
 export function regionFilesFor(regionMatches?: string[]): string[] {
@@ -342,7 +347,7 @@ const SPOTS_IDLE_MS = 15000;
 
 /**
  * regionMatches(region 값 목록, 비면 전국)의 장소를 정적 파일에서 받는다. 권역 파일 data/spots/<이름>.cols.json을 나란히 받고(P-505),
- * 권역 파일이 없으면(404, 색인 없는 빌드) 행 파일 spots.json 전체를 받아 고른 권역만 남긴다.
+ * 권역 파일이 없으면(404, 색인 없는 빌드) id 구간 조각 전부를 받아 고른 권역만 남긴다.
  * 받지 못하면 번들 샘플의 고른 권역 행을 돌려주고 spotsFellBackToSample을 세운다. 캐시 저장은 합친 목록을 가진 호출부가 한다
  */
 export async function loadStaticSpots(regionMatches?: string[]): Promise<Spot[]> {
@@ -379,10 +384,11 @@ export async function loadStaticSpots(regionMatches?: string[]): Promise<Spot[]>
     } else if (files.length === 0 || res.some((r) => r.status === 404)) {
       spotsBytesExpected = 0;
       arm();
-      const r = await fetch(`${import.meta.env.BASE_URL}data/spots.json`, { signal: ctrl.signal });
-      if (r.ok) {
-        const data = await readBody(r);
-        rows = (Array.isArray(data) ? (data as Spot[]) : []).filter(inRegions);
+      // 단일 spots.json은 배포하지 않으므로(P-513) 같은 행을 담은 id 구간 조각 전부를 받는다
+      const rs = await Promise.all(SPOT_SHARDS.map((f) => fetch(shardUrl(f), { signal: ctrl.signal })));
+      if (rs.length > 0 && rs.every((r) => r.ok)) {
+        const data = await Promise.all(rs.map(readBody));
+        rows = data.flatMap((d) => (Array.isArray(d) ? (d as Spot[]) : [])).filter(inRegions);
       }
     }
     if (rows.length > 0) {
@@ -406,109 +412,59 @@ export async function loadStaticSpots(regionMatches?: string[]): Promise<Spot[]>
   }
 }
 
-// 받은 링크 첫 방문은 전체 spots.json(gzip 3.7MB, Slow 4G 21초)이 와야 수신자 화면을 그렸다. 공유 id 행만 Range 요청으로 찾는다.
-// spots.json이 id 오름차순이고 행마다 `{"id":`로 시작한다는 전제에 기댄다(collector/sync_live_spots.py가 쓰기 전에 assert한다)
-const RANGE_URL = `${import.meta.env.BASE_URL}data/spots.json`;
-const ROW_HEAD = [0x7b, 0x22, 0x69, 0x64, 0x22, 0x3a]; // {"id":
-const RANGE_PROBE_BYTES = 2048; // 행 최대 1,838B(2026-10-20)보다 커야 조각마다 행 머리가 하나 들어 있다
-const RANGE_PROBES = 7;
-const RANGE_FINAL_BYTES = 16384;
-const RANGE_MAX_REQUESTS = 300; // 공유 3곳에 88건(라운드 4번)이다
+// 받은 링크 첫 방문은 권역 파일이 와야 수신자 화면을 그린다. 공유 id 행이 든 id 구간 조각(약 1MB)만 먼저 받는다.
+// 조각은 빌드가 spots.json에서 나눈다(vite.config.ts spotShards). Cloudflare Pages가 Range에 200을 돌려줘 Range 탐색을 그만뒀다(P-513)
 const RANGE_TIMEOUT_MS = 25000; // Slow 3G(응답 약 2.5초)에서 순차 라운드 6번이 약 17초 걸려 15초도 모자랐다(P-410)
-// 첫 요청(bytes=0-0)의 응답 헤더 대기 제한. 응답이 없는 망에서 25초를 다 기다린 뒤 전체 파일 15초가 더해져 실패 카드가 40초에 떴다.
+// 첫 응답 헤더 대기 제한. 응답이 없는 망에서 25초를 다 기다린 뒤 전체 파일 15초가 더해져 실패 카드가 40초에 떴다.
 // 전체 파일의 SPOTS_IDLE_MS와 같은 값이다(P-492)
 const RANGE_HEAD_MS = 15000;
 
-/** 조각에서 from 이후 첫 행 머리의 바이트 위치와 id. 문자열로 디코드해 세면 다중 바이트 문자에서 위치가 어긋나 바이트로 센다 */
-export function findRowHead(buf: Uint8Array, from = 0): { pos: number; id: number } | null {
-  outer: for (let i = from; i + ROW_HEAD.length < buf.length; i++) {
-    for (let j = 0; j < ROW_HEAD.length; j++) if (buf[i + j] !== ROW_HEAD[j]) continue outer;
-    let k = i + ROW_HEAD.length;
-    let id = 0;
-    while (k < buf.length && buf[k] >= 0x30 && buf[k] <= 0x39) id = id * 10 + (buf[k++] - 0x30);
-    // 숫자가 없거나 조각 끝에서 잘렸으면 id를 믿을 수 없다
-    if (k === i + ROW_HEAD.length || k === buf.length) return null;
-    return { pos: i, id };
+/** id가 들어 있을 조각의 첫 id. 첫 조각보다 작으면 null */
+export function shardFor(id: number, shards: number[] = SPOT_SHARDS): number | null {
+  let found: number | null = null;
+  for (const first of shards) {
+    if (first > id) break;
+    found = first;
   }
-  return null;
-}
-
-/** 조각에서 id 행을 꺼낸다. 행 끝은 다음 행 머리 앞이나 배열 끝 `]` 앞의 마지막 `}`다 */
-export function extractRow(buf: Uint8Array, id: number): Spot | null {
-  let head = findRowHead(buf);
-  while (head && head.id !== id) head = findRowHead(buf, head.pos + 1);
-  if (!head) return null;
-  const next = findRowHead(buf, head.pos + 1);
-  let end = next ? next.pos : buf.length;
-  while (end > head.pos && buf[end - 1] !== 0x7d) end--;
-  try {
-    const row = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(buf.subarray(head.pos, end)));
-    return row && row.id === id ? (row as Spot) : null;
-  } catch {
-    return null;
-  }
+  return found;
 }
 
 /**
- * spots.json에서 ids 행을 Range 요청 k분 탐색으로 찾는다. 하나라도 못 찾았거나 아래 조건에 걸리면 빈 배열이고 호출부는 전체 파일을 기다린다.
- * 206이 아님, content-encoding 있음(압축본 기준 조각), 응답마다 전체 크기가 다름(탐색 중 동기화), 요청 수 상한, 15초 초과
+ * ids 행을 id 구간 조각에서 찾는다. 같은 조각은 한 번만 받는다. 하나라도 못 찾았거나 조각을 받지 못했으면(404 포함)
+ * 빈 배열이고 호출부는 권역 파일을 기다린다. 첫 응답 헤더는 RANGE_HEAD_MS, 전체는 RANGE_TIMEOUT_MS 안에 와야 한다
  */
 export async function findSpotsByRange(ids: number[]): Promise<Spot[]> {
   if (ids.length === 0) return [];
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), RANGE_TIMEOUT_MS);
-  let total = -1;
-  let requests = 0;
-  // 장소마다 따로 탐색해도 첫 라운드는 같은 구간을 고르므로 같은 구간은 한 번만 요청한다(ux-reviewer-380 Pre-existing, 3곳 링크에서 7구간 3중)
-  const seen = new Map<string, Promise<Uint8Array>>();
-  const get = (from: number, to: number): Promise<Uint8Array> => {
-    const key = `${from}-${to}`;
-    let p = seen.get(key);
-    if (!p) seen.set(key, (p = fetchRange(from, to)));
+  const headTimer = setTimeout(() => ctrl.abort(), RANGE_HEAD_MS);
+  const files = new Map<number, Promise<Spot[]>>();
+  const get = (first: number): Promise<Spot[]> => {
+    let p = files.get(first);
+    if (!p) {
+      p = fetch(shardUrl(first), { signal: ctrl.signal }).then(async (res) => {
+        clearTimeout(headTimer);
+        if (!res.ok) throw new Error(`shard: status ${res.status}`);
+        const rows = await res.json();
+        return Array.isArray(rows) ? (rows as Spot[]) : [];
+      });
+      files.set(first, p);
+    }
     return p;
   };
-  const fetchRange = async (from: number, to: number): Promise<Uint8Array> => {
-    if (++requests > RANGE_MAX_REQUESTS) throw new Error('range: too many requests');
-    const res = await fetch(RANGE_URL, { headers: { Range: `bytes=${from}-${to - 1}` }, cache: 'no-store', signal: ctrl.signal });
-    if (res.status !== 206 || res.headers.get('content-encoding')) throw new Error(`range: status ${res.status}`);
-    const m = /^bytes (\d+)-\d+\/(\d+)$/.exec(res.headers.get('content-range') || '');
-    if (!m || Number(m[1]) !== from || (total >= 0 && Number(m[2]) !== total)) throw new Error('range: content-range');
-    total = Number(m[2]);
-    return new Uint8Array(await res.arrayBuffer());
-  };
-  const find = async (id: number): Promise<Spot | null> => {
-    let lo = 0;
-    let hi = total;
-    while (hi - lo > RANGE_FINAL_BYTES) {
-      const offs = Array.from({ length: RANGE_PROBES }, (_, i) => Math.floor(lo + ((hi - lo) * (i + 1)) / (RANGE_PROBES + 1)));
-      const heads = await Promise.all(
-        offs.map(async (o) => {
-          const h = findRowHead(await get(o, Math.min(o + RANGE_PROBE_BYTES, total)));
-          return h && { pos: o + h.pos, id: h.id };
-        }),
-      );
-      for (const h of heads) {
-        if (!h) continue;
-        if (h.id <= id) lo = Math.max(lo, h.pos);
-        else hi = Math.min(hi, h.pos);
-      }
-    }
-    return extractRow(await get(lo, hi), id);
-  };
   try {
-    // 전체 크기를 먼저 안다. 헤더가 RANGE_HEAD_MS 안에 오지 않으면 그만두고 호출부가 전체 파일로 넘어간다(P-492)
-    const headTimer = setTimeout(() => ctrl.abort(), RANGE_HEAD_MS);
-    try {
-      await get(0, 1);
-    } finally {
-      clearTimeout(headTimer);
-    }
-    const rows = await Promise.all(ids.map(find));
+    const rows = await Promise.all(
+      ids.map(async (id) => {
+        const first = shardFor(id);
+        return first === null ? null : (await get(first)).find((s) => s.id === id) ?? null;
+      }),
+    );
     return rows.every(Boolean) ? normalizeSpots(rows as Spot[]) : [];
   } catch {
     return [];
   } finally {
     clearTimeout(timer);
+    clearTimeout(headTimer);
     ctrl.abort(); // 실패했을 때 남은 요청을 끊는다
   }
 }

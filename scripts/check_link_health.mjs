@@ -1,6 +1,6 @@
 // 사용자에게 보이는 외부 링크의 깨짐 비율과 수집기 단계 실행 여부를 한 번에 재는 점검이다(P-509).
 // 사용자가 직접 눌러 보지 않아도 깨진 링크와 출력 없이 끝나는 수집기 단계를 알 수 있게 하려고 만들었다.
-//   node scripts/check_link_health.mjs                          # 배포된 spots.json 표본 링크 점검만
+//   node scripts/check_link_health.mjs                          # 배포된 권역 장소 파일 표본 링크 점검만
 //   node scripts/check_link_health.mjs --collector opc@HOST     # 수집기 로그 단계 요약까지(ssh)
 //   node scripts/check_link_health.mjs --naver 30                # 네이버 지도 검색 표본까지(playwright)
 //   node scripts/check_link_health.mjs --spots public/data/spots.json --sample 40 --max-rate 0.05
@@ -17,7 +17,8 @@ const opt = (name, def) => {
   const i = args.indexOf(`--${name}`);
   return i >= 0 && args[i + 1] !== undefined ? args[i + 1] : def;
 };
-const SPOTS = opt('spots', 'https://nufunc.github.io/oneul-date/data/spots.json');
+// URL이 /로 끝나면 배포된 권역 파일 폴더(index.json과 <권역>.cols.json)다. 단일 spots.json은 배포하지 않는다(P-513)
+const SPOTS = opt('spots', 'https://nufunc.github.io/oneul-date/data/spots/');
 const SAMPLE = Number(opt('sample', '40'));
 const KAKAO_PANEL_LIMIT = Math.min(Number(opt('kakao-sample', '40')), 50); // 카카오 한도는 수집기와 공유라 50회 이하
 const MAX_RATE = Number(opt('max-rate', '0.05')); // 표본 종류별 깨짐 비율 상한
@@ -63,11 +64,18 @@ async function get(url, init = {}, readBody = true) {
 }
 
 async function loadSpots() {
-  if (/^https?:/.test(SPOTS)) {
-    const r = await fetch(SPOTS, { signal: AbortSignal.timeout(120000) });
-    if (!r.ok) throw new Error(`spots.json ${r.status}`);
+  const getJson = async (url) => {
+    const r = await fetch(url, { signal: AbortSignal.timeout(120000) });
+    if (!r.ok) throw new Error(`${url} ${r.status}`);
     return r.json();
+  };
+  if (/^https?:.*\/$/.test(SPOTS)) {
+    // 권역 열 형식 파일({칸: 값 배열})을 행으로 되돌린다(src/supabase.ts rowsFromColumns와 같다)
+    const { files } = await getJson(`${SPOTS}index.json`);
+    const parts = await Promise.all(Object.keys(files).map((n) => getJson(`${SPOTS}${n}.cols.json`)));
+    return parts.flatMap((c) => c.id.map((_, i) => Object.fromEntries(Object.keys(c).map((k) => [k, c[k][i]]))));
   }
+  if (/^https?:/.test(SPOTS)) return getJson(SPOTS);
   return JSON.parse(fs.readFileSync(SPOTS, 'utf8'));
 }
 

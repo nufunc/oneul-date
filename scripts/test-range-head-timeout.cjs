@@ -1,5 +1,5 @@
-// 받은 링크 Range 첫 요청 헤더 대기 제한 회귀 테스트: node scripts/test-range-head-timeout.cjs
-// P-492가 막은 결함: 응답이 없는 망에서 첫 bytes=0-0 헤더가 오지 않아도 Range 전체 제한 25초를 다 기다린 뒤
+// 받은 링크 조각 조회 첫 응답 헤더 대기 제한 회귀 테스트: node scripts/test-range-head-timeout.cjs
+// P-492가 막은 결함: 응답이 없는 망에서 첫 응답 헤더가 오지 않아도 Range 전체 제한 25초를 다 기다린 뒤
 // 전체 파일 15초가 더해져 공유 링크 실패 카드가 40초에 떴다
 const assert = require('assert');
 const fs = require('fs');
@@ -12,21 +12,22 @@ const idle = Number(/^const SPOTS_IDLE_MS = (\d+);/m.exec(src)[1]);
 assert.strictEqual(Number(/^const RANGE_HEAD_MS = (\d+);/m.exec(src)[1]), idle, 'RANGE_HEAD_MS가 SPOTS_IDLE_MS와 다르다');
 assert.ok(/^const RANGE_TIMEOUT_MS = 25000;/m.test(src), 'RANGE_TIMEOUT_MS가 25000이 아니다');
 
-// findSpotsByRange를 떼어 제한만 줄여 실행한다: 헤더 60ms, 전체 600ms
-const start = src.indexOf('const RANGE_URL');
+// findSpotsByRange를 떼어 제한만 줄여 실행한다: 헤더 60ms, 전체 600ms. 조각은 둘이다(P-513)
+const urlLine = /^const shardUrl = .*$/m.exec(src)[0];
+const start = src.indexOf('const RANGE_TIMEOUT_MS');
 const end = src.indexOf('\n}\n', src.indexOf('async function findSpotsByRange')) + 3;
-const body = src
-  .slice(start, end)
+const body = `${urlLine}\n${src.slice(start, end)}`
   .replace(/^export /gm, '')
   .replace(/import\.meta\.env\.BASE_URL/g, "'/oneul-date/'")
   .replace(/^const RANGE_HEAD_MS = \d+;/m, 'const RANGE_HEAD_MS = 60;')
   .replace(/^const RANGE_TIMEOUT_MS = \d+;/m, 'const RANGE_TIMEOUT_MS = 600;');
-const { findSpotsByRange } = new Function('normalizeSpots', `${ts.transpile(body, { target: 'es2022' })};return { findSpotsByRange };`)(
-  (rows) => rows,
+const rows = Array.from({ length: 50 }, (_, i) => ({ id: 10 + i * 3, name: `스팟 ${i}`, summary: 'x'.repeat(300) }));
+const files = { [rows[0].id]: rows.slice(0, 25), [rows[25].id]: rows.slice(25) };
+const { findSpotsByRange } = new Function('normalizeSpots', 'SPOT_SHARDS', `${ts.transpile(body, { target: 'es2022' })};return { findSpotsByRange };`)(
+  (r) => r,
+  Object.keys(files).map(Number),
 );
 
-const rows = Array.from({ length: 50 }, (_, i) => ({ id: 10 + i * 3, name: `스팟 ${i}`, summary: 'x'.repeat(300) }));
-const file = Buffer.from(JSON.stringify(rows), 'utf8');
 const sleep = (ms, signal) =>
   new Promise((resolve, reject) => {
     const t = setTimeout(resolve, ms);
@@ -37,18 +38,11 @@ let delay = () => 0;
 let requests = 0;
 global.fetch = async (url, init) => {
   const n = requests++;
-  const m = /^bytes=(\d+)-(\d+)$/.exec(init.headers.Range);
-  const a = +m[1];
-  const z = Math.min(+m[2], file.length - 1);
   const d = delay(n);
   if (d === Infinity) await new Promise((_, reject) => init.signal.addEventListener('abort', () => reject(new Error('aborted'))));
   else await sleep(d, init.signal);
-  const part = file.subarray(a, z + 1);
-  return {
-    status: 206,
-    headers: { get: (k) => (k.toLowerCase() === 'content-range' ? `bytes ${a}-${z}/${file.length}` : null) },
-    arrayBuffer: async () => part.buffer.slice(part.byteOffset, part.byteOffset + part.length),
-  };
+  const part = files[/(\d+)\.json$/.exec(url)[1]];
+  return { ok: true, status: 200, json: () => sleep(d * 3, init.signal).then(() => part) };
 };
 const run = async (ids, d) => {
   delay = d;
@@ -66,13 +60,13 @@ const run = async (ids, d) => {
   assert.strictEqual(hang.requests, 1, `hang에서 첫 요청 뒤 더 요청했다: ${hang.requests}건`);
   assert.ok(hang.ms >= 50 && hang.ms < 300, `hang에서 헤더 제한으로 그만두지 않았다: ${hang.ms}ms`);
 
-  // 3. 느린 망(P-410): 첫 헤더가 제한 안에 오면 탐색 전체가 헤더 제한보다 길어도 끝까지 찾는다
+  // 3. 느린 망(P-410): 첫 헤더가 제한 안에 오면 본문까지 헤더 제한보다 길어도 끝까지 찾는다
   const slow = await run([rows[7].id, rows[40].id], () => 30);
   assert.deepStrictEqual(slow.found, [rows[7], rows[40]], '느린 망에서 찾지 못했다');
   assert.ok(slow.ms > 60, `탐색이 헤더 제한보다 짧아 시험이 느린 망을 흉내 내지 못했다: ${slow.ms}ms`);
 
-  // 4. 첫 헤더 뒤 다음 요청이 멈추면 전체 제한(600ms)까지 기다린 뒤 그만둔다(헤더 제한은 첫 요청에만 걸린다)
-  const later = await run([rows[7].id], (n) => (n === 0 ? 0 : Infinity));
+  // 4. 첫 헤더 뒤 다른 조각 요청이 멈추면 전체 제한(600ms)까지 기다린 뒤 그만둔다(헤더 제한은 첫 응답까지만 걸린다)
+  const later = await run([rows[7].id, rows[40].id], (n) => (n === 0 ? 0 : Infinity));
   assert.deepStrictEqual(later.found, []);
   assert.ok(later.ms >= 550, `첫 요청 뒤 멈춤에서 헤더 제한이 걸렸다: ${later.ms}ms`);
 

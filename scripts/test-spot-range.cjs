@@ -1,96 +1,93 @@
-// 받은 링크 Range 탐색 회귀 테스트: node scripts/test-spot-range.cjs
-// findRowHead·extractRow·findSpotsByRange를 src/supabase.ts에서 그대로 떼어 TypeScript로 변환해 실행한다(앱 번들과 같은 코드를 검사)
+// 받은 링크 id 구간 조각 조회 회귀 테스트: node scripts/test-spot-range.cjs
+// shardFor·findSpotsByRange를 src/supabase.ts에서 그대로 떼어 TypeScript로 변환해 실행한다(앱 번들과 같은 코드를 검사).
+// P-513: Cloudflare Pages가 Range에 200을 돌려줘 단일 spots.json Range 탐색을 id 구간 조각(data/spots/by-id/<첫 id>.json)으로 바꿨다.
+// dist가 있으면 빌드한 조각을 합친 결과가 public/data/spots.json과 같고, 조각이 25MiB보다 훨씬 작고, dist에 spots.json이 없는지도 본다
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const ts = require('typescript');
 
-const src = fs.readFileSync(path.join(__dirname, '..', 'src', 'supabase.ts'), 'utf8');
-const start = src.indexOf('const RANGE_URL');
+const root = path.join(__dirname, '..');
+const src = fs.readFileSync(path.join(root, 'src', 'supabase.ts'), 'utf8');
+const urlLine = /^const shardUrl = .*$/m.exec(src)[0];
+const start = src.indexOf('const RANGE_TIMEOUT_MS');
 const end = src.indexOf('\n}\n', src.indexOf('async function findSpotsByRange')) + 3;
-const code = ts.transpile(src.slice(start, end).replace(/^export /gm, '').replace(/import\.meta\.env\.BASE_URL/g, "'/oneul-date/'"), { target: 'es2022' });
-const { findRowHead, extractRow, findSpotsByRange } = new Function(
-  'normalizeSpots',
-  `${code};return { findRowHead, extractRow, findSpotsByRange };`,
-)((rows) => rows);
+const code = ts.transpile(
+  `${urlLine}\n${src.slice(start, end)}`.replace(/^export /gm, '').replace(/import\.meta\.env\.BASE_URL/g, "'/oneul-date/'"),
+  { target: 'es2022' },
+);
+const load = (shards) =>
+  new Function('normalizeSpots', 'SPOT_SHARDS', `${code};return { shardFor, findSpotsByRange };`)((rows) => rows, shards);
 
-// 동기화와 같은 형식(id 오름차순, 공백 없음, 한글 그대로)의 가짜 spots.json. 행마다 길이가 달라 탐색이 여러 라운드를 돈다
-const rows = Array.from({ length: 600 }, (_, i) => ({
-  id: 1000 + i * 7,
-  name: `한글 스팟 ${i} ${'가나다😀'.repeat(i % 40)}`,
-  summary: 'x'.repeat(200 + (i % 13) * 50),
-}));
-const file = Buffer.from(JSON.stringify(rows), 'utf8');
-const posOf = (id) => file.indexOf(`{"id":${id},`);
+// 가짜 행 600개를 조각 6개로 나눈다(조각 첫 id가 오름차순)
+const rows = Array.from({ length: 600 }, (_, i) => ({ id: 1000 + i * 7, name: `한글 스팟 ${i}` }));
+const files = {};
+for (let i = 0; i < rows.length; i += 100) files[rows[i].id] = rows.slice(i, i + 100);
+const firsts = Object.keys(files).map(Number);
+const { shardFor, findSpotsByRange } = load(firsts);
 
-// 1. 바이트 위치: 조각이 다중 바이트 문자 가운데서 시작해도 행 머리 위치를 바이트로 센다
-const target = rows[101];
-const headPos = posOf(target.id);
-// 앞 행 이름의 첫 4바이트 문자 둘째 바이트에서 자른다. 그 뒤에도 한글이 이어진다
-const cut = file.indexOf(Buffer.from('😀'), posOf(rows[100].id)) + 1;
-const h = findRowHead(new Uint8Array(file.subarray(cut, cut + 2048)));
-assert.deepStrictEqual(h, { pos: headPos - cut, id: target.id }, '잘린 다중 바이트 문자 뒤 행 머리 위치가 어긋난다');
-// 문자열로 디코드해 세면 위치가 달라진다(feature-76 첫 시도가 놓친 까닭)
-assert.notStrictEqual(new TextDecoder().decode(file.subarray(cut, cut + 2048)).indexOf('{"id":'), headPos - cut);
-// id 숫자가 조각 끝에서 잘리면 믿지 않는다
-assert.strictEqual(findRowHead(new Uint8Array(file.subarray(headPos, headPos + 8))), null);
+// 1. 조각 고르기: 첫 id 이하의 마지막 조각, 첫 조각보다 작으면 null
+assert.strictEqual(shardFor(rows[0].id), rows[0].id);
+assert.strictEqual(shardFor(rows[99].id), rows[0].id, '조각 마지막 행');
+assert.strictEqual(shardFor(rows[100].id), rows[100].id, '다음 조각 첫 행');
+assert.strictEqual(shardFor(rows.at(-1).id + 100), rows[500].id, '마지막 조각 뒤 id');
+assert.strictEqual(shardFor(999), null, '첫 조각보다 작은 id');
+assert.strictEqual(shardFor(5, []), null, '조각 목록이 비면 null');
 
-// 2. 첫 행과 마지막 행을 꺼낸다(마지막 행은 배열 끝 `]` 앞에서 끝난다)
-const whole = new Uint8Array(file);
-assert.deepStrictEqual(extractRow(whole, rows[0].id), rows[0], '첫 행');
-assert.deepStrictEqual(extractRow(whole, rows.at(-1).id), rows.at(-1), '마지막 행');
-assert.deepStrictEqual(extractRow(new Uint8Array(file.subarray(posOf(rows.at(-1).id))), rows.at(-1).id), rows.at(-1), '마지막 행 조각');
-assert.strictEqual(extractRow(whole, 1001), null, '없는 id');
-
-// Range 요청을 흉내 내는 fetch
-let opts = {};
-let requests = 0;
-let ranges = [];
+let urls = [];
+let status = 200;
 global.fetch = async (url, init) => {
-  requests++;
-  ranges.push(init.headers.Range);
-  const m = /^bytes=(\d+)-(\d+)$/.exec(init.headers.Range);
-  const a = +m[1];
-  const z = Math.min(+m[2], file.length - 1);
-  const total = opts.growAfter && requests > opts.growAfter ? file.length + 10 : file.length;
-  const headers = new Map([['content-range', `bytes ${a}-${z}/${total}`]]);
-  if (opts.encoding) headers.set('content-encoding', opts.encoding);
-  const body = opts.status === 200 ? file : file.subarray(a, z + 1);
-  return {
-    status: opts.status || 206,
-    headers: { get: (k) => headers.get(k.toLowerCase()) ?? null },
-    arrayBuffer: async () => body.buffer.slice(body.byteOffset, body.byteOffset + body.length),
-  };
+  assert.ok(init && init.signal, 'fetch에 signal을 넘기지 않았다');
+  urls.push(url);
+  const m = /\/oneul-date\/data\/spots\/by-id\/(\d+)\.json$/.exec(url);
+  const body = m && files[m[1]];
+  const st = body ? status : 404;
+  return { ok: st === 200, status: st, json: async () => body };
 };
-const run = async (ids, o = {}) => {
-  opts = o;
-  requests = 0;
-  ranges = [];
-  const found = await findSpotsByRange(ids);
-  return { found, requests };
+const run = async (ids, st = 200) => {
+  urls = [];
+  status = st;
+  return findSpotsByRange(ids);
 };
 
 (async () => {
-  // 3. 첫 행, 마지막 행, 다중 바이트 문자가 많은 가운데 행을 함께 찾는다
-  const ids = [rows[0].id, rows.at(-1).id, rows[101].id, rows[333].id];
-  const ok = await run(ids);
-  assert.deepStrictEqual(ok.found, [rows[0], rows.at(-1), rows[101], rows[333]], '탐색 결과');
-  assert.ok(ok.requests < 300, `요청 ${ok.requests}건`);
-  // 같은 구간은 한 번만 요청한다(장소마다 첫 라운드 구간이 같다)
-  await run(ids);
-  assert.strictEqual(new Set(ranges).size, ranges.length, `같은 구간 중복 요청 ${ranges.length - new Set(ranges).size}건`);
-  // 모든 행을 하나씩 찾아도 맞는다
-  for (const r of rows) assert.deepStrictEqual((await run([r.id])).found, [r], `id ${r.id}`);
+  // 2. 여러 조각에 걸친 id를 찾고, 같은 조각은 한 번만 받는다
+  const ids = [rows[0].id, rows[42].id, rows.at(-1).id, rows[99].id];
+  assert.deepStrictEqual(await run(ids), [rows[0], rows[42], rows.at(-1), rows[99]], '조각 조회 결과');
+  assert.deepStrictEqual(urls.sort(), [`/oneul-date/data/spots/by-id/${rows[0].id}.json`, `/oneul-date/data/spots/by-id/${rows[500].id}.json`], '받은 조각');
+  for (const r of rows) assert.deepStrictEqual(await run([r.id]), [r], `id ${r.id}`);
 
-  // 4. 하나라도 못 찾으면 빈 배열이다(호출부가 전체 파일을 기다린다)
-  assert.deepStrictEqual((await run([rows[5].id, 1001])).found, []);
+  // 3. 하나라도 못 찾으면 빈 배열이다(호출부가 권역 파일을 기다린다)
+  assert.deepStrictEqual(await run([rows[5].id, rows[5].id + 1]), [], '조각 안에 없는 id');
+  assert.deepStrictEqual(await run([rows[5].id, 999]), [], '첫 조각보다 작은 id');
+  assert.deepStrictEqual(await run([rows[5].id], 404), [], '조각 404');
+  assert.deepStrictEqual(await run([rows[5].id], 500), [], '조각 500');
+  assert.deepStrictEqual(await run([]), []);
+  assert.deepStrictEqual(await load([]).findSpotsByRange([rows[5].id]), [], '조각 목록이 빈 빌드(개발 서버)');
 
-  // 5. 되돌아가기: 206이 아님, 압축 응답, 탐색 중 전체 크기 변경
-  assert.deepStrictEqual((await run([rows[5].id], { status: 200 })).found, [], '200 응답');
-  assert.deepStrictEqual((await run([rows[5].id], { encoding: 'gzip' })).found, [], '압축 응답');
-  assert.deepStrictEqual((await run([rows[5].id], { growAfter: 3 })).found, [], '전체 크기 변경');
-  assert.deepStrictEqual((await run([])).found, []);
-
+  // 4. 빌드 산출물: 조각을 합치면 spots.json과 같고, 조각은 작고, 단일 spots.json은 배포하지 않는다
+  const dist = path.join(root, 'dist', 'data');
+  const shardDir = path.join(dist, 'spots', 'by-id');
+  if (!fs.existsSync(shardDir)) {
+    console.log('SKIP dist/data/spots/by-id 없음: 산출물 검사를 건너뜀');
+  } else {
+    assert.ok(!fs.existsSync(path.join(dist, 'spots.json')), 'dist/data/spots.json이 남아 있다');
+    const names = fs.readdirSync(shardDir).filter((f) => f.endsWith('.json'));
+    const sizes = names.map((f) => fs.statSync(path.join(shardDir, f)).size);
+    assert.ok(Math.max(...sizes) < 2 * 1024 * 1024, `조각 최대 ${Math.max(...sizes)}B가 2MiB를 넘는다`);
+    const merged = names
+      .map((f) => Number(f.replace('.json', '')))
+      .sort((a, b) => a - b)
+      .flatMap((first) => {
+        const part = JSON.parse(fs.readFileSync(path.join(shardDir, `${first}.json`), 'utf8'));
+        assert.strictEqual(part[0].id, first, `조각 ${first}의 첫 행 id가 파일 이름과 다르다`);
+        return part;
+      });
+    // 바이트가 아니라 값으로 비교한다: 수집기(Python)와 빌드(JSON.stringify)의 실수 표기가 다르다(1e-05와 0.00001)
+    const all = JSON.parse(fs.readFileSync(path.join(root, 'public', 'data', 'spots.json'), 'utf8'));
+    assert.deepStrictEqual(merged, all, '조각을 합친 결과가 public/data/spots.json과 다르다');
+    console.log(`OK 조각 ${names.length}개, 최대 ${Math.max(...sizes)}B, 합친 행 ${merged.length}개`);
+  }
   console.log('ok spot-range');
 })().catch((e) => {
   console.error(e);

@@ -34,13 +34,14 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     'normalizeSpots',
     'rawSpotsData',
     '__SPOTS_INDEX__',
+    '__SPOTS_SHARDS__',
     `const fetch = (...a) => env.fetch(...a);
     const setTimeout = (fn, ms) => { const h = globalThis.setTimeout(() => { env.timers.delete(h); fn(); }, ms); env.timers.add(h); return h; };
     const clearTimeout = (h) => { env.timers.delete(h); globalThis.clearTimeout(h); };
     ${ts.transpile(colsCode, { target: 'es2022' })}
     ${ts.transpile(loadCode.replace('SPOTS_IDLE_MS = 15000', `SPOTS_IDLE_MS = ${IDLE}`), { target: 'es2022' })}
     return { loadStaticSpots, onSpotsProgress, flag: () => spotsFellBackToSample, bytes: () => spotsBytesReceived, expected: () => spotsBytesExpected };`,
-  )(env, (rows) => rows, sample, { seoul: { regions: ['서울'], bytes: 12345 } });
+  )(env, (rows) => rows, sample, { seoul: { regions: ['서울'], bytes: 12345 } }, [100]);
 
   const full = Array.from({ length: 50 }, (_, i) => ({ id: 100 + i, name: `한글 스팟 ${i}` }));
   // P-505: 앱은 권역 열 형식 파일을 받으므로 기본 본문은 열 형식이다. 행 파일은 404 되돌림에서만 쓴다
@@ -106,7 +107,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   assert.ok(took >= IDLE && took < IDLE * 4, `본문 무응답 제한 시각이 어긋난다: ${took}ms`);
   assert.strictEqual(env.timers.size, 0, '끊은 뒤 타이머가 남았다');
 
-  // 3b. P-505: 권역 파일 data/spots/<권역>.cols.json을 받아 행으로 바꾸고 분모는 색인의 풀린 크기다. 404면 spots.json을 받아 바이트를 0부터 센다
+  // 3b. P-505: 권역 파일 data/spots/<권역>.cols.json을 받아 행으로 바꾸고 분모는 색인의 풀린 크기다. 404면 id 구간 조각을 받아 바이트를 0부터 센다(P-513)
   const urls = [];
   env.fetch = (url, init) => { urls.push(url); return serve({})(url, init); };
   got = await mod.loadStaticSpots(['서울']);
@@ -123,7 +124,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   };
   got = await mod.loadStaticSpots();
   assert.deepStrictEqual(got, full, '404 뒤 행 파일을 받지 못했다');
-  assert.deepStrictEqual(urls, ['/oneul-date/data/spots/seoul.cols.json', '/oneul-date/data/spots.json'], '404 뒤 행 파일을 한 번 받지 않았다');
+  assert.deepStrictEqual(urls, ['/oneul-date/data/spots/seoul.cols.json', '/oneul-date/data/spots/by-id/100.json'], '404 뒤 조각을 한 번 받지 않았다');
   assert.strictEqual(seen[seen.length - 1], rowFile.length, '404 뒤 진행이 행 파일 크기로 끝나지 않았다');
   assert.strictEqual(mod.expected(), 0, '행 파일로 넘어갔는데 권역 분모가 남았다');
   assert.strictEqual(mod.flag(), false);

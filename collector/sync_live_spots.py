@@ -273,7 +273,7 @@ def main():
     # 화면이 이 값을 쓰게 되면 여기서 빼야 한다
     drop_keys = empty_keys | CLIENT_UNUSED_KEYS
     out_spots = [slim_spot({k: v for k, v in sp.items() if k not in drop_keys}) for sp in healed_spots]
-    # 앱의 받은 링크 Range 탐색(src/supabase.ts findSpotsByRange)이 id 오름차순과 행마다 하나뿐인 `{"id":` 머리에 기댄다
+    # 빌드의 id 구간 조각 나누기(vite.config.ts spotShards)가 id 오름차순에 기댄다. 행 머리 단언은 옛 Range 탐색의 전제다(P-513)
     out_text = json.dumps(out_spots, ensure_ascii=False, separators=(",", ":"))
     out_ids = [sp["id"] for sp in out_spots]
     assert all(isinstance(i, int) for i in out_ids), "spots.json id가 정수가 아니다"

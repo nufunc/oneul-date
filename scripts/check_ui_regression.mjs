@@ -35,8 +35,8 @@ const errors = [];
 page.on('pageerror', (e) => errors.push(e.message));
 
 await page.goto(`${URL}?v=${Date.now()}`, { waitUntil: 'load' });
-// 전체 스팟(spots.json, 약 20MB)을 다 받은 뒤에 잰다. 그 전에는 일부 스팟만으로 카드가 그려진다
-await page.waitForFunction(() => performance.getEntriesByType('resource').some((r) => r.name.includes('spots.json') && r.responseEnd > 0), null, { timeout: 200000 });
+// 권역 장소 파일(data/spots/<권역>.cols.json)을 다 받은 뒤에 잰다. 그 전에는 일부 스팟만으로 카드가 그려진다(P-505, P-513)
+await page.waitForFunction(() => performance.getEntriesByType('resource').some((r) => r.name.includes('/data/spots/') && r.responseEnd > 0), null, { timeout: 200000 });
 const bundle = await page.evaluate(() => [...document.scripts].map((s) => s.src).find((s) => s.includes('/index-'))?.split('/').pop() || '');
 await page.click('#tab-mode-spots');
 await page.waitForSelector('.spot-discovery-grid .discovery-card', { timeout: 60000 });
