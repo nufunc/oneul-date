@@ -38,4 +38,11 @@ assert.ok(call >= 0 && early > call, 'refreshSavedSpots()가 없거나 기다리
 const loadFn = src.slice(src.indexOf('async function loadRegionFiles'), src.indexOf('async function init()'));
 assert.match(loadFn, /finally \{[\s\S]*fullSpotsPending = foregroundLoads > 0;\s*resolveWaitingCourse\(\);/, '받기가 끝난 뒤 대기를 내리고 resolveWaitingCourse로 오지 않는다');
 
+// 4. 첫 받기는 찜과 저장 코스 장소의 권역을 더한다. 저장 코스는 모든 코스의 spotIds를 본다(P-527)
+const savedKeys = body(/^function savedSpotRegionKeys\(/m, /^\}/m);
+assert.match(savedKeys, /state\.savedSpotIds/, '찜 id를 보지 않는다');
+assert.match(savedKeys, /loadSavedCourses\(\)\.flatMap\(\(c\) => c\.spotIds\)/, '저장 코스 전부의 spotIds를 보지 않는다');
+assert.match(savedKeys, /\['ALL'\]/, '못 찾은 장소가 있을 때 전국으로 떨어지지 않는다');
+assert.ok(!src.includes('hasSavedSpotData()'), '찜·저장이 있으면 전국을 받는 판정이 남았다');
+
 console.log('saved-spots-pending: ok');

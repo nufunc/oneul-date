@@ -9043,9 +9043,14 @@ function regionKeyOf(spot: Spot): string | null {
   return REGION_FILE_KEYS.find((k) => matchesRegion(spot, [k])) ?? null;
 }
 
-/** 찜이나 저장한 코스가 있으면 어느 권역 장소든 그릴 수 있어야 하므로 전국이 필요하다 */
-function hasSavedSpotData(): boolean {
-  return state.savedSpotIds.size > 0 || loadSavedCourses().length > 0;
+/**
+ * 찜과 저장한 코스 장소가 든 권역 키(P-527). 저장 목록이 모든 저장 코스를 그리려면 그 권역 행이 있어야 한다.
+ * 메모리(캐시)에서 행을 하나라도 못 찾으면 어느 권역인지 모르므로 전국이다
+ */
+function savedSpotRegionKeys(): string[] {
+  const ids = [...state.savedSpotIds, ...loadSavedCourses().flatMap((c) => c.spotIds)];
+  const keys = ids.map((id) => { const s = spotById.get(id); return s ? regionKeyOf(s) : null; });
+  return keys.every((k): k is string => k !== null) ? [...new Set(keys)] : ['ALL'];
 }
 
 /**
@@ -9207,7 +9212,7 @@ async function init(): Promise<void> {
     // 캐시 로드 실패 시 무시
   }
 
-  // 3. 이 화면에 필요한 권역만 받는다(P-505). 찜·저장한 코스가 있으면 전국, 아니면 고른 지역(랜딩 ?r=), 그것도 없으면 오늘 추천 권역이다
+  // 3. 이 화면에 필요한 권역만 받는다(P-505). 고른 지역(랜딩 ?r=), 없으면 오늘 추천 권역에 찜·저장한 코스 장소의 권역을 더한다(P-527)
   if (isSharedLink && !sharedReady()) {
     // 받은 링크는 공유 id 행을 id 구간 조각에서 먼저 찾아 그리고, 찾은 장소의 권역 파일을 받는다. 다 찾지 못했으면 전국을 받는다.
     // 조각이 권역 파일과 대역폭을 나누지 않도록 권역 파일은 조각 조회가 끝난 뒤(성공이든 실패든) 받는다(P-410, P-513)
@@ -9223,7 +9228,7 @@ async function init(): Promise<void> {
         return keys.every((k): k is string => k !== null) ? [...new Set(keys)] : ['ALL'];
       })
       .catch(() => ['ALL'])
-      .then((keys) => ensureSpotsForRegions(hasSavedSpotData() ? ['ALL'] : keys))
+      .then((keys) => ensureSpotsForRegions([...keys, ...savedSpotRegionKeys()]))
       .then(() => {
         // 자리표시가 아직 떠 있을 때만 받은 코스를 그린다. 사용자가 해시를 바꿔 다른 화면으로 갔으면 덮지 않는다
         // 샘플로 떨어졌으면 받은 링크는 판정하지 않고 실패 카드에 머문다(P-255)
@@ -9237,7 +9242,7 @@ async function init(): Promise<void> {
         if (document.getElementById('receiver-loading')) renderShell();
       });
   } else if (!isSharedLink) {
-    const firstKeys = hasSavedSpotData() ? ['ALL'] : state.regions.length > 0 ? state.regions : [dailyPick().pickedRegion];
+    const firstKeys = [...savedSpotRegionKeys(), ...(state.regions.length > 0 ? state.regions : [dailyPick().pickedRegion])];
     ensureSpotsForRegions(firstKeys)
       .then(() => {
         if (state.mainMode === 'course' && !courseWaitingForSpots) applyDailyCourseIfEmpty();

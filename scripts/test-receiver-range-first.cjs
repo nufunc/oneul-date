@@ -30,7 +30,7 @@ const run = (isSharedLink, range) => {
     `let spots = [{ id: 9 }], spotById = null, state = { mainMode: 'course', regions: [] }, courseWaitingForSpots = false;
     const spotsFellBackToSample = false;
     const document = { getElementById: () => ({}) };
-    const sharedIds = [1, 2], sharedReady = () => false, hasSavedSpotData = () => false;
+    const sharedIds = [1, 2], sharedReady = () => false, savedSpotRegionKeys = () => [];
     const dailyPick = () => ({ pickedRegion: 'SEOUL' }), regionKeyOf = (s) => s.region ?? null;
     const ensureSpotsForRegions = (keys) => { env.log.push('ensure:' + keys.join(',')); return Promise.resolve(); };
     const findSpotsByRange = () => { env.log.push('range'); return env.range(); };

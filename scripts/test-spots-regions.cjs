@@ -65,7 +65,7 @@ const dailyPick = new Function(`${ts.transpile(dailyCode, { target: 'es2022' })}
 const daily = dailyPick(DAY).pickedRegion;
 // init 첫 받기 키: 찜·저장한 코스가 없고 지역을 고르지 않았으면 오늘 추천 권역 하나다
 assert.ok(
-  cut(mainSrc, '    const firstKeys = ', '\n').includes("hasSavedSpotData() ? ['ALL'] : state.regions.length > 0 ? state.regions : [dailyPick().pickedRegion]"),
+  cut(mainSrc, '    const firstKeys = ', '\n').includes('[...savedSpotRegionKeys(), ...(state.regions.length > 0 ? state.regions : [dailyPick().pickedRegion])]'),
   '첫 방문 받기 키 순서가 바뀌었다',
 );
 
@@ -87,12 +87,17 @@ assert.ok(
     const canonicalizeSavedSpotIds = () => {}, paintSpotsProgress = () => {}, resolveWaitingCourse = () => {};
     const showSpotsFailedBanner = () => { throw new Error('실패 띠'); }, isCourseEligible = () => true, renderSpotDiscovery = () => {};
     const saveSpotsToCache = () => {};
-    const loadSavedCourses = () => [];
+    let savedCourses = [];
+    const loadSavedCourses = () => savedCourses;
     ${ts.transpile(colsCode + loaderCode + matchesCode + ensureCode, { target: 'es2022' })}
-    return { ensureSpotsForRegions, hasSavedSpotData, staleRegionKeys, loaded: () => loadedRegionKeys, spots: () => spots };`,
+    return { ensureSpotsForRegions, savedSpotRegionKeys, state, setSavedCourses: (c) => { savedCourses = c; }, staleRegionKeys, loaded: () => loadedRegionKeys, spots: () => spots };`,
   )(fetched, fs, path, regionDir, Object.fromEntries(Object.entries(index.files).map(([n, i]) => [n, { regions: i.regions, bytes: i.bytes }])), REGIONS);
 
-  assert.strictEqual(app2.hasSavedSpotData(), false);
+  // 찜·저장 코스가 없으면 더할 권역이 없고, 캐시가 없어 행을 못 찾으면 전국이다(P-527)
+  assert.deepStrictEqual(app2.savedSpotRegionKeys(), [], '찜·저장이 없는데 권역을 더한다');
+  app2.state.savedSpotIds.add(rows[0].id);
+  assert.deepStrictEqual(app2.savedSpotRegionKeys(), ['ALL'], '캐시에 없는 찜이 전국으로 떨어지지 않는다');
+  app2.state.savedSpotIds.clear();
   await app2.ensureSpotsForRegions([daily]);
   assert.deepStrictEqual(fetched, [`/oneul-date/data/spots/${daily.toLowerCase()}.cols.json`], '첫 방문이 권역 파일 하나만 요청하지 않았다');
   const want = REGIONS.find((r) => r.key === daily).match;
@@ -106,6 +111,19 @@ assert.ok(
   assert.strictEqual(fetched.length, Object.keys(index.files).length, '전국으로 넓힐 때 받은 권역을 다시 요청했거나 빠뜨렸다');
   assert.ok(app2.loaded().has('ALL'), '전국을 받았다는 표시가 없다');
   assert.strictEqual(app2.spots().length, rows.length, '전국을 합친 행 수가 전체와 다르다');
+
+  // P-527 단위 2: 찜 id와 저장 코스 spotIds를 행으로 찾아 그 권역만 더한다. 하나라도 못 찾으면 전국이다
+  const keyOf = (r) => REGIONS.find((g) => g.key !== 'ALL' && g.match.includes(r.region)).key;
+  const seoulRow = rows.find((r) => keyOf(r) === 'SEOUL');
+  const jejuRow = rows.find((r) => keyOf(r) === 'JEJU');
+  app2.state.savedSpotIds.add(seoulRow.id);
+  assert.deepStrictEqual(app2.savedSpotRegionKeys(), ['SEOUL'], '찜 권역을 행으로 찾지 못했다');
+  app2.setSavedCourses([{ spotIds: [jejuRow.id, seoulRow.id] }]);
+  assert.deepStrictEqual(app2.savedSpotRegionKeys().sort(), ['JEJU', 'SEOUL'], '저장 코스 장소 권역을 더하지 않는다');
+  app2.setSavedCourses([{ spotIds: [jejuRow.id, 999999999] }]);
+  assert.deepStrictEqual(app2.savedSpotRegionKeys(), ['ALL'], '못 찾은 저장 코스 장소가 있는데 전국으로 떨어지지 않는다');
+  app2.setSavedCourses([]);
+  app2.state.savedSpotIds.clear();
 
   // P-527 단위 1: 지난 권역 7개를 표시해 두면 이번에 쓰는 권역만 뒤에서 다시 받고, 나머지는 쓸 때 받는다
   const before = fetched.length;
