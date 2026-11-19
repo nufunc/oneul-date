@@ -227,6 +227,8 @@ function searchNaver(spots) {
 // 수집기 로그에서 단계별 마지막 두 번의 실행을 찾는다. 단계 구간은 "▶ N단계" 줄부터 다음 "▶"나 "💤"나 기동 줄 앞까지다
 // 결과 줄 없이 기동 줄(main.py main()의 "데이터 엔진 가동")에서 끊긴 구간은 컨테이너 재시작으로 중단된 것이라 restart로 따로 센다(P-541)
 const STAGE_RESULT = /완료|자동 병합|반영|쓸 행|등록/;
+// 수집기에서 지운 단계. 옛 실행 줄이 로그 끝에 남아도 「시작하지 않음」으로 세지 않는다(9단계: P-515 5c9eecc)
+const RETIRED_STAGES = new Set(['9']);
 const ENGINE_START = /데이터 엔진 가동/;
 function summarizeCollector(text, sinceHours) {
   const lines = text.split('\n');
@@ -322,7 +324,9 @@ async function main() {
       for (const s of sum.perStage) {
         const last = s.last_two.map((r) => `${r.start.slice(5, 16)}~${(r.end || '').slice(11, 16)} ${r.status} · ${r.result || '(결과 줄 없음)'}`);
         console.log(`${pad(s.stage, 5)}${pad(s.runs_in_window, 5)}${pad(s.ok_in_window, 5)}${pad(s.restart_in_window, 9)}${last.join('\n                        ')}`);
-        if (s.runs_in_window === 0) failures.push(`수집기 ${s.stage}단계가 ${SINCE_HOURS}시간 안에 시작하지 않음`);
+        if (s.runs_in_window === 0) {
+          if (!RETIRED_STAGES.has(String(s.stage))) failures.push(`수집기 ${s.stage}단계가 ${SINCE_HOURS}시간 안에 시작하지 않음`);
+        }
         // 재시작으로 중단된 실행만 있으면 단계 결함이 아니므로 실패로 세지 않는다
         else if (s.ok_in_window === 0 && s.runs_in_window > s.restart_in_window) failures.push(`수집기 ${s.stage}단계가 ${SINCE_HOURS}시간 안에 결과 줄 없이 끝남(${s.last_two.at(-1).status})`);
       }
