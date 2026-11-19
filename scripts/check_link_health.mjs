@@ -224,8 +224,10 @@ function searchNaver(spots) {
   return fs.existsSync(outFile) ? JSON.parse(fs.readFileSync(outFile, 'utf8')) : {};
 }
 
-// 수집기 로그에서 단계별 마지막 두 번의 실행을 찾는다. 단계 구간은 "▶ N단계" 줄부터 다음 "▶"나 "💤" 줄 앞까지다
+// 수집기 로그에서 단계별 마지막 두 번의 실행을 찾는다. 단계 구간은 "▶ N단계" 줄부터 다음 "▶"나 "💤"나 기동 줄 앞까지다
+// 결과 줄 없이 기동 줄(main.py main()의 "데이터 엔진 가동")에서 끊긴 구간은 컨테이너 재시작으로 중단된 것이라 restart로 따로 센다(P-541)
 const STAGE_RESULT = /완료|자동 병합|반영|쓸 행|등록/;
+const ENGINE_START = /데이터 엔진 가동/;
 function summarizeCollector(text, sinceHours) {
   const lines = text.split('\n');
   const ts = (l) => (l.match(/^\[(\d{4}-\d\d-\d\d \d\d:\d\d:\d\d)\]/) || [])[1];
@@ -233,11 +235,11 @@ function summarizeCollector(text, sinceHours) {
   const toMs = (t) => Date.parse(t.replace(' ', 'T') + '+09:00'); // 수집기 로그 시각은 KST
   const runs = [];
   let cur = null;
-  const close = (endTs) => {
+  const close = (endTs, restarted) => {
     if (!cur) return;
     cur.end = endTs || cur.lastTs;
     const body = cur.body.join('\n');
-    cur.status = /\[ERROR\]|Traceback|오류/.test(body) ? 'error' : STAGE_RESULT.test(body) ? 'ok' : 'silent';
+    cur.status = /\[ERROR\]|Traceback|오류/.test(body) ? 'error' : STAGE_RESULT.test(body) ? 'ok' : restarted ? 'restart' : 'silent';
     cur.result = (cur.body.filter((l) => STAGE_RESULT.test(l)).pop() || '').replace(/^\[[^\]]+\]\s*\[\w+\]\s*/, '').trim().slice(0, 110);
     delete cur.body;
     runs.push(cur);
@@ -245,7 +247,7 @@ function summarizeCollector(text, sinceHours) {
   };
   for (const l of lines) {
     const t = ts(l);
-    if (/▶ \d+단계/.test(l) || /💤/.test(l)) close(t);
+    if (/▶ \d+단계/.test(l) || /💤/.test(l) || ENGINE_START.test(l)) close(t, ENGINE_START.test(l));
     const m = l.match(/▶ (\d+)단계/);
     if (m) cur = { stage: Number(m[1]), start: t, lastTs: t, body: [] };
     else if (cur) {
@@ -263,6 +265,7 @@ function summarizeCollector(text, sinceHours) {
       stage: n,
       runs_in_window: inWindow.length,
       ok_in_window: inWindow.filter((r) => r.status === 'ok').length,
+      restart_in_window: inWindow.filter((r) => r.status === 'restart').length,
       last_two: all.slice(-2),
     };
   });
@@ -271,7 +274,7 @@ function summarizeCollector(text, sinceHours) {
 
 function readCollectorLog(target) {
   // docker logs는 컨테이너 재시작 때 비워지므로 볼륨의 누적 로그 끝부분을 읽는다(읽기만 한다)
-  const cmd = "docker exec oneul-collector tail -n 30000 /mnt/data/logs/collector.log | grep -E '▶ [0-9]+단계|💤|완료|자동 병합|반영|쓸 행|등록|ERROR|Traceback|오류' | grep -v '소셜 마이닝 중'";
+  const cmd = "docker exec oneul-collector tail -n 30000 /mnt/data/logs/collector.log | grep -E '▶ [0-9]+단계|💤|데이터 엔진 가동|완료|자동 병합|반영|쓸 행|등록|ERROR|Traceback|오류' | grep -v '소셜 마이닝 중'";
   const r = spawnSync('ssh', ['-o', 'ConnectTimeout=20', '-o', 'BatchMode=yes', '-o', 'StrictHostKeyChecking=accept-new', target, cmd], {
     encoding: 'utf8',
     maxBuffer: 64 * 1024 * 1024,
@@ -313,14 +316,15 @@ async function main() {
   if (COLLECTOR) {
     try {
       const sum = summarizeCollector(readCollectorLog(COLLECTOR), SINCE_HOURS);
-      report.collector = sum.perStage.map((s) => ({ stage: s.stage, runs: s.runs_in_window, ok: s.ok_in_window, last: s.last_two.at(-1)?.status }));
+      report.collector = sum.perStage.map((s) => ({ stage: s.stage, runs: s.runs_in_window, ok: s.ok_in_window, restart: s.restart_in_window, last: s.last_two.at(-1)?.status }));
       console.log(`\n## 수집기 단계(최근 ${SINCE_HOURS}시간, 시각 KST)`);
-      console.log(`${pad('단계', 5)}${pad('실행', 5)}${pad('정상', 5)}마지막 두 번(시작~끝 상태 · 결과 줄)`);
+      console.log(`${pad('단계', 5)}${pad('실행', 5)}${pad('정상', 5)}${pad('중단(재시작)', 9)}마지막 두 번(시작~끝 상태 · 결과 줄)`);
       for (const s of sum.perStage) {
         const last = s.last_two.map((r) => `${r.start.slice(5, 16)}~${(r.end || '').slice(11, 16)} ${r.status} · ${r.result || '(결과 줄 없음)'}`);
-        console.log(`${pad(s.stage, 5)}${pad(s.runs_in_window, 5)}${pad(s.ok_in_window, 5)}${last.join('\n               ')}`);
+        console.log(`${pad(s.stage, 5)}${pad(s.runs_in_window, 5)}${pad(s.ok_in_window, 5)}${pad(s.restart_in_window, 9)}${last.join('\n                        ')}`);
         if (s.runs_in_window === 0) failures.push(`수집기 ${s.stage}단계가 ${SINCE_HOURS}시간 안에 시작하지 않음`);
-        else if (s.ok_in_window === 0) failures.push(`수집기 ${s.stage}단계가 ${SINCE_HOURS}시간 안에 결과 줄 없이 끝남(${s.last_two.at(-1).status})`);
+        // 재시작으로 중단된 실행만 있으면 단계 결함이 아니므로 실패로 세지 않는다
+        else if (s.ok_in_window === 0 && s.runs_in_window > s.restart_in_window) failures.push(`수집기 ${s.stage}단계가 ${SINCE_HOURS}시간 안에 결과 줄 없이 끝남(${s.last_two.at(-1).status})`);
       }
     } catch (e) {
       failures.push(`수집기 로그 읽기 실패: ${e.message}`);
