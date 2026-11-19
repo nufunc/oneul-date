@@ -34,7 +34,12 @@ const js = ts.transpileModule(code, { compilerOptions: { target: ts.ScriptTarget
 const spots = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'public', 'data', 'spots.json'), 'utf8'));
 const seongsu = spots.filter((s) => /^서울\S* 성동구/.test(s.address || '')).slice(0, 3);
 assert.strictEqual(seongsu.length, 3, '성동구 장소 셋을 찾지 못했다');
-const spotById = new Map(seongsu.map((s) => [s.id, s]));
+// 구가 셋인 서울 코스와 서울·제주 코스: 장소로 정한 지역 이름(courseAreaLabel)이 비는 경우다(P-514)
+const one = (re) => spots.find((s) => re.test(s.address || '') && s.region);
+const scattered = [one(/^서울\S* 노원구/), one(/^서울\S* 중구/), one(/^서울\S* 강서구/)];
+const mixed = [one(/^서울\S* 노원구/), one(/^제주/)];
+assert.ok([...scattered, ...mixed].every(Boolean), '흩어진 코스 장소를 찾지 못했다');
+const spotById = new Map([...seongsu, ...scattered, ...mixed].map((s) => [s.id, s]));
 const { courseTitle, courseAreaLabel } = new Function('spotById', `${js}\nreturn { courseTitle, courseAreaLabel };`)(spotById);
 
 const course = seongsu.map((s) => ({ spotId: s.id }));
@@ -45,6 +50,9 @@ assert.strictEqual(courseTitle(none, course), area, '칩 없는 제목이 장소
 assert.ok(!courseTitle(none, course).includes('전국 어디서나'));
 // 칩을 고른 제목은 칩 이름 뒤에 동네 이름을 붙인다(P-516)
 assert.strictEqual(courseTitle({ ...none, regions: ['SEOUL'] }, course), `서울 · ${area.replace(/^서울 /, '')}`, '칩을 고른 제목에 동네 이름이 없다');
+// 장소가 흩어져 지역 이름이 비면 「전국 어디서나」가 아니라 장소들의 권역 이름(P-514)
+assert.strictEqual(courseTitle(none, scattered.map((s) => ({ spotId: s.id }))), '서울', '구가 셋인 서울 코스 제목');
+assert.strictEqual(courseTitle(none, mixed.map((s) => ({ spotId: s.id }))), '서울·제주', '서울·제주 코스 제목');
 // 장소가 없으면 기존 대체 이름으로 떨어진다
 assert.strictEqual(courseTitle(none, []), courseTitle(none, [{ spotId: null }]));
 assert.ok(courseTitle(none, []).length > 0, '장소 없는 칩 없는 제목이 비었다');

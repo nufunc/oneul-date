@@ -2492,7 +2492,9 @@ function courseTitle(cond: NonNullable<AppState['courseConditions']>, course: Co
   const chip = regionsLabel(cond.regions, cond.subZones);
   const near = courseAreaLabel(stepSpots, cond.regions, cond.subZones);
   const nearShort = near.startsWith(`${chip} `) ? near.slice(chip.length + 1) : near;
-  const area = noChip ? near || chip : nearShort && nearShort !== chip ? `${chip} · ${nearShort}` : chip;
+  // 칩 없는 코스의 장소가 흩어져 지역 이름이 비면 「전국 어디서나」 대신 장소들의 권역 이름을 쓴다(P-514)
+  const spotRegions = [...new Set(stepSpots.map(regionKeyOf).filter((k): k is string => k !== null))];
+  const area = noChip ? near || regionsLabel(spotRegions) : nearShort && nearShort !== chip ? `${chip} · ${nearShort}` : chip;
   return areaThemeLabel(area, cond.mood, cond.categoryKey);
 }
 
