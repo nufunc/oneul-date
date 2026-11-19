@@ -4812,7 +4812,7 @@ function paintSpotsProgress(): void {
   if (status && status.textContent !== text) status.textContent = text;
 }
 
-// 사용자가 코스를 만든 뒤에만 결과 막대(📋 🔗 💾)를 화면 아래에 붙인다. 첫 로드의 기본 코스에는 켜지 않는다(P-295)
+// 결과 영역에 data-engaged를 켠다. 결과 막대(📋 🔗 💾)의 붙임은 CSS가 첫 로드의 기본 코스에도 위쪽 여백 50vh로 처리해 이 표시를 읽지 않는다(P-295, P-519)
 function markResultsEngaged(): void {
   document.getElementById('results-area')?.setAttribute('data-engaged', '');
 }
