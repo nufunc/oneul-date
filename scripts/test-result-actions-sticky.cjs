@@ -1,5 +1,5 @@
-// 코스 결과 막대(📋 🔗 💾)를 코스를 만든 뒤에만 화면 아래에 붙이는지 시험(P-295): node scripts/test-result-actions-sticky.cjs
-// src/style.css: #results-area[data-engaged]에서만 sticky이고 기본 규칙에는 sticky가 없으며, 토스트가 막대 위로 올라간다
+// 코스 결과 막대(📋 🔗 💾)를 결과 영역 안에서 화면 아래에 붙이는지 시험(P-295, P-519): node scripts/test-result-actions-sticky.cjs
+// src/style.css: #results-area 안의 막대만 sticky이고 기본 규칙에는 sticky가 없으며, 토스트가 막대 위로 올라간다
 // src/main.ts: 첫 로드 기본 코스 경로에는 속성을 켜지 않고, 코스를 만드는 경로(🚀, 다시 추천, 앵커, 불러오기)에서 켠다
 const assert = require('assert');
 const fs = require('fs');
@@ -20,13 +20,13 @@ const px = (body, prop) => {
   return Number(m[1]);
 };
 
-// 1. 기본 막대 규칙은 sticky가 아니다(첫 로드 기본 코스에 붙지 않는다)
+// 1. 기본 막대 규칙은 sticky가 아니다(결과 영역 밖의 막대에 붙지 않는다)
 assert.ok(!/position:\s*sticky/.test(rule('.result-actions')), '.result-actions가 항상 붙는다');
 assert.ok(!/position:\s*sticky/.test(rule('.result-actions.result-actions-3')), '.result-actions-3이 항상 붙는다');
 
-// 2. 코스를 만든 뒤에만 sticky, 받은 코스 저장 막대와 같은 아래 여백
-const bar = rule('#results-area[data-engaged] .result-actions.result-actions-3');
-assert.ok(/position:\s*sticky/.test(bar), '코스를 만든 뒤 결과 막대가 sticky가 아니다');
+// 2. 결과 영역 안에서 sticky, 받은 코스 저장 막대와 같은 아래 여백
+const bar = rule('#results-area .result-actions.result-actions-3');
+assert.ok(/position:\s*sticky/.test(bar), '결과 영역 안의 결과 막대가 sticky가 아니다');
 const barBottom = px(bar, 'bottom');
 assert.strictEqual(barBottom, 8, '결과 막대 아래 여백이 받은 코스 막대(8px)와 다르다');
 const pad = Number(bar.match(/(?:^|\s)padding:\s*(\d+)px;/)[1]);
@@ -35,7 +35,7 @@ const border = Number(bar.match(/(?:^|\s)border:\s*(\d+)px solid/)[1]);
 // 3. 토스트는 막대가 있을 때 막대 위로: 막대 위 끝 = 아래 여백 + 패딩 + 버튼 + 테두리(버튼 높이는 .btn-secondary의 최소 높이)
 const btnH = Number((css.match(/^\.btn-secondary \{[^}]*?min-height:\s*(\d+)px;/m) || css.match(/^\.btn-primary \{[^}]*?min-height:\s*(\d+)px;/m) || [0, 44])[1]);
 const barTop = barBottom + pad * 2 + btnH + border * 2;
-const toastRule = css.match(/body:has\(#results-area\[data-engaged\] \.result-actions-3\) \.toast-msg\s*\{([^}]*)\}/);
+const toastRule = css.match(/body:has\(#results-area \.result-actions-3\) \.toast-msg\s*\{([^}]*)\}/);
 assert.ok(toastRule, '결과 막대가 붙은 화면의 토스트 규칙이 없다');
 const lifted = px(toastRule[1], 'bottom');
 assert.ok(lifted >= barTop + 8, `토스트 아래 끝(${lifted}px)이 결과 막대 위 끝(${barTop}px)보다 8px 이상 높지 않다`);
@@ -43,7 +43,7 @@ assert.ok(lifted <= barTop + 40, `토스트가 결과 막대에서 너무 멀다
 assert.strictEqual(px(rule('.toast-msg'), 'bottom'), 28, '기본 토스트 위치가 바뀌었다');
 
 // 4. 초점 가림 방지
-assert.ok(/#results-area\[data-engaged\] :is\(a, button\) \{[^}]*scroll-margin-bottom:\s*80px/.test(css), 'scroll-margin-bottom 규칙이 없다');
+assert.ok(/#results-area :is\(a, button\) \{[^}]*scroll-margin-bottom:\s*80px/.test(css), 'scroll-margin-bottom 규칙이 없다');
 
 // 5. 속성은 코스를 만드는 경로에서만 켠다: 함수 본문별로 호출 여부를 본다
 function body(name) {
