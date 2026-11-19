@@ -43,8 +43,8 @@ assert.ok(area, '성동구 장소 셋의 지역 이름이 비었다');
 const none = { regions: [], subZones: [], mood: 'ALL', searchQuery: '' };
 assert.strictEqual(courseTitle(none, course), area, '칩 없는 제목이 장소 지역 이름이 아니다');
 assert.ok(!courseTitle(none, course).includes('전국 어디서나'));
-// 칩을 고른 제목은 칩 이름 그대로다
-assert.strictEqual(courseTitle({ ...none, regions: ['SEOUL'] }, course), '서울', '칩을 고른 제목이 바뀌었다');
+// 칩을 고른 제목은 칩 이름 뒤에 동네 이름을 붙인다(P-516)
+assert.strictEqual(courseTitle({ ...none, regions: ['SEOUL'] }, course), `서울 · ${area.replace(/^서울 /, '')}`, '칩을 고른 제목에 동네 이름이 없다');
 // 장소가 없으면 기존 대체 이름으로 떨어진다
 assert.strictEqual(courseTitle(none, []), courseTitle(none, [{ spotId: null }]));
 assert.ok(courseTitle(none, []).length > 0, '장소 없는 칩 없는 제목이 비었다');

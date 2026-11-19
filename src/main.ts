@@ -2486,9 +2486,13 @@ function courseTitle(cond: NonNullable<AppState['courseConditions']>, course: Co
   }
   // 켠 테마 칩 이름을 적는다. 맞춤 코스 탭에는 분위기 입력이 없어 고르지 않은 '모든 분위기'를 적지 않는다(P-280)
   // 지역 칩이 비었으면 「전국 어디서나」 대신 코스 장소로 정한 지역 이름을 쓴다. 저장 목록 이름이 모두 같아지지 않게 한다(P-506)
+  // 칩을 켰어도 장소로 정한 동네가 칩 이름과 다르면 `서울 · 마곡`처럼 붙인다. 같은 칩 저장 코스 이름이 모두 같았다(P-516)
   const noChip = cond.regions.length === 0 && (cond.subZones ?? []).length === 0;
-  const stepSpots = noChip ? course.map((st) => (st.spotId !== null ? spotById.get(st.spotId) : undefined)).filter((s): s is Spot => Boolean(s)) : [];
-  const area = (noChip && courseAreaLabel(stepSpots)) || regionsLabel(cond.regions, cond.subZones);
+  const stepSpots = course.map((st) => (st.spotId !== null ? spotById.get(st.spotId) : undefined)).filter((s): s is Spot => Boolean(s));
+  const chip = regionsLabel(cond.regions, cond.subZones);
+  const near = courseAreaLabel(stepSpots, cond.regions, cond.subZones);
+  const nearShort = near.startsWith(`${chip} `) ? near.slice(chip.length + 1) : near;
+  const area = noChip ? near || chip : nearShort && nearShort !== chip ? `${chip} · ${nearShort}` : chip;
   return areaThemeLabel(area, cond.mood, cond.categoryKey);
 }
 
