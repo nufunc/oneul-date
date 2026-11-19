@@ -142,6 +142,10 @@ assert.ok(
   assert.strictEqual(app2.staleRegionKeys.size, 0, '지난 표시가 남았다');
   assert.strictEqual(app2.spots().length, rows.length, '다시 받은 뒤 행 수가 전체와 다르다');
 
+  // P-527: 검색어와 찜 모아 보기가 쓰는 전국 키도 지난 권역이 있으면 다시 받기를 시작한다(받은 권역이어도 가드가 막지 않는다)
+  const discoveryFn = mainSrc.slice(mainSrc.indexOf('function renderSpotDiscovery'), mainSrc.indexOf('// 1. GPS 위치 자동 획득'));
+  assert.ok(/if \(!regionsLoaded\(discoveryKeys\) \|\| regionFileKeysFor\(discoveryKeys\)\.some\(\(k\) => staleRegionKeys\.has\(k\)\)\) ensureSpotsForRegions\(discoveryKeys\)/.test(discoveryFn), '지난 권역이 있어도 검색 경로가 다시 받기를 시작하지 않는다');
+
   // 4. 오늘 추천 코스: 권역 파일만으로 만든 코스와 전국 데이터로 만든 코스가 같은 장소다
   const sf = ts.createSourceFile('main.ts', mainSrc, ts.ScriptTarget.ES2022, true);
   const decls = new Map();

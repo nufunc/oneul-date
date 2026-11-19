@@ -6941,7 +6941,8 @@ function renderSpotDiscovery(): void {
   if (!area) return;
   // 검색은 고른 지역에 없으면 전국으로 넓히고 찜 모아 보기는 어느 권역이든 보이므로 전국이 필요하다. 받으면 다시 그린다(P-505)
   const discoveryKeys = state.spotSearchQuery.trim() || state.savedOnly ? ['ALL'] : state.regions;
-  if (!regionsLoaded(discoveryKeys)) ensureSpotsForRegions(discoveryKeys).catch(() => {});
+  // 지난 권역은 loaded라도 쓸 때 뒤에서 다시 받는다(P-527). 받기가 끝나면 loadRegionFiles가 이 화면을 다시 그린다
+  if (!regionsLoaded(discoveryKeys) || regionFileKeysFor(discoveryKeys).some((k) => staleRegionKeys.has(k))) ensureSpotsForRegions(discoveryKeys).catch(() => {});
 
   // 1. GPS 위치 자동 획득 (한 번만 시도, 무한 중복 방지)
   if (!userCoords && !geoRequestedOnce && !isRequestingGeo) {
