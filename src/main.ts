@@ -2963,7 +2963,7 @@ async function formatCourseTextAsync(
 
     const lines: string[] = [];
     // P-428: 카드 칸 표시와 같은 글자. 이모지만으로는 🌆이 저녁인지 읽기 어려웠다
-    lines.push(`${i + 1}차 ${meta.emoji} ${meta.label} ${spot.name}${catText}`);
+    lines.push(`${i + 1}차 ${meta.emoji} ${slotLabelWithClock(step.slot)} ${spot.name}${catText}`);
     // 카드와 시트가 보이는 문장과 같게 한다(P-344)
     const summary = displaySpotSummary(spot).text;
     if (summary) lines.push(`✨ ${summary}`);
@@ -3298,6 +3298,11 @@ function closedDaysFromHours(spot: Spot): string[] {
  * 이 시각에 이미 닫았거나 아직 열지 않은 장소는 코스 후보에서 거른다. 숙박은 시각이 없어 거르지 않는다.
  */
 const SLOT_CLOCK_MIN: Partial<Record<SlotKey, number>> = { day: 13 * 60, evening: 19 * 60, night: 21 * 60 };
+/** 칸 표시 글자. 판정 기준 시각이 있는 칸은 「낮 · 13시」처럼 붙여 「영업시간 확인」 경고의 기준을 보인다. 숙박은 이름만(P-535) */
+function slotLabelWithClock(slot: SlotKey): string {
+  const clock = SLOT_CLOCK_MIN[slot];
+  return clock === undefined ? SLOT_META[slot].label : `${SLOT_META[slot].label} · ${clock / 60}시`;
+}
 /** 저녁과 밤 칸은 칸 시각 뒤 이만큼(분) 더 열려 있어야 후보로 둔다. 20:00 마감 식당이 19시 저녁 칸에 들어가 주문을 못 할 수 있었다(P-425) */
 const SLOT_CLOSE_MARGIN_MIN = 60;
 
@@ -6037,7 +6042,7 @@ function renderStepCard(
   const swappable = opts.swappable !== false;
   const meta = SLOT_META[step.slot];
   // 매거진 코스는 시간대를 글이 정하는데 링크에는 장소 ID만 실려 DB slot이 글과 어긋난다. 그 화면에서는 시간대 표시를 뺀다(P-484)
-  const slotTag = opts.hideSlot ? '' : `<div class="step-slot">${meta.emoji} ${meta.label}</div>`;
+  const slotTag = opts.hideSlot ? '' : `<div class="step-slot">${meta.emoji} ${slotLabelWithClock(step.slot)}</div>`;
   if (step.spotId === null) {
     return `
       <article class="step-card empty">

@@ -19,6 +19,7 @@ const code = [
   // P-427: 카드 배지와 같은 영업시간 판정을 실제 코드로 돌린다
   cut('const KOREAN_DAY_NAMES', ';\n'),
   cut('const SLOT_CLOCK_MIN', ';\n'),
+  cut('function slotLabelWithClock', '\n}\n'),
   cut('const SLOT_CLOSE_MARGIN_MIN', ';\n'),
   cut('const slotClockOpenCache', ';\n'),
   cut('function isOpenAtSlotClock', '\n}\n'),
@@ -87,10 +88,10 @@ const secondLine = (text) => text.split('\n')[2];
     [{ slot: 'day', spotId: 1 }, { slot: 'evening', spotId: 2 }, { slot: 'night', spotId: 3 }], hoursById, [], 'ALL',
   );
   const [b1, b2, b3] = hoursText.split(/\n(?=\d차 )/).slice(1);
-  // P-428: 장소 줄에 카드 칸 표시와 같은 칸 이름
-  assert.ok(b1.startsWith('1차 ☀️ 낮 낙원장 (주점)\n'), `낮 칸 장소 줄: ${b1}`);
-  assert.ok(b2.startsWith('2차 🌆 저녁 휴무집 (한식)\n'), `저녁 칸 장소 줄: ${b2}`);
-  assert.ok(b3.startsWith('3차 🌙 밤 모름집 (카페)\n'), `밤 칸 장소 줄: ${b3}`);
+  // P-428: 장소 줄에 카드 칸 표시와 같은 칸 이름, P-535: 판정 기준 시각도 같게
+  assert.ok(b1.startsWith('1차 ☀️ 낮 · 13시 낙원장 (주점)\n'), `낮 칸 장소 줄: ${b1}`);
+  assert.ok(b2.startsWith('2차 🌆 저녁 · 19시 휴무집 (한식)\n'), `저녁 칸 장소 줄: ${b2}`);
+  assert.ok(b3.startsWith('3차 🌙 밤 · 21시 모름집 (카페)\n'), `밤 칸 장소 줄: ${b3}`);
   assert.ok(b1.includes('\n⚠️ 영업시간 확인\n🕒 오늘 17:00~01:00\n📍 종로 1'), `낮 칸 17시 개점 블록: ${b1}`);
   assert.ok(b2.includes('\n⚠️ 오늘 휴무\n📍 종로 2'), `휴무 블록: ${b2}`);
   assert.ok(!/🕒|영업시간 확인/.test(b2), '휴무 블록에 영업시간 줄이 있다');

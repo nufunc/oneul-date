@@ -10,7 +10,7 @@ assert.ok(start > 0, 'renderStepCard를 찾지 못했다');
 const card = src.slice(start, src.indexOf('\nfunction ', start + 10));
 
 // 시간대 글자는 slotTag 한 곳에서만 만들고 hideSlot이면 빈 문자열이다
-const def = card.match(/const slotTag = opts\.hideSlot \? '' : `<div class="step-slot">\$\{meta\.emoji\} \$\{meta\.label\}<\/div>`;/);
+const def = card.match(/const slotTag = opts\.hideSlot \? '' : `<div class="step-slot">\$\{meta\.emoji\} \$\{slotLabelWithClock\(step\.slot\)\}<\/div>`;/);
 assert.ok(def, 'slotTag 정의가 hideSlot을 따르지 않는다');
 assert.strictEqual((card.match(/class="step-slot"/g) || []).length, 1, '카드 안에 slotTag를 거치지 않는 시간대 표시가 남았다');
 assert.strictEqual((card.match(/\$\{slotTag\}/g) || []).length, 3, '빈 카드 둘과 장소 카드 하나 모두 slotTag를 써야 한다');
