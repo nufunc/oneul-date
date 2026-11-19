@@ -1,0 +1,10 @@
+// Cloudflare Workers Builds(GitHub 연동)로 dist를 정적 자산으로 배포한다(P-485).
+// name은 Cloudflare 대시보드의 Worker 이름과 같아야 한다.
+{
+  "name": "oneul-date",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "none"
+  }
+}
