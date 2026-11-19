@@ -5134,6 +5134,8 @@ function applyDailyCourseIfEmpty(): void {
   try {
     last = JSON.parse(sessionStorage.getItem(LAST_COURSE_STORAGE_KEY) ?? 'null');
   } catch {}
+  // 데이터가 오기 전에 지역을 골랐으면 마지막 코스 지역으로 그 선택을 덮지 않는다. 지우지 않고 건너뛴다(P-514)
+  if (state.subZones.length > 0 || state.regions.join() !== (entryArea.region ?? '')) last = null;
   if (last) {
     const steps = buildSharedSteps(last.ids);
     // 권역 파일만 받았으면 이 코스 장소가 다 있을 때만 판정한다. 모자라면 전국을 받은 뒤 다시 본다(P-505)
