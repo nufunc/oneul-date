@@ -6164,6 +6164,23 @@ html[data-theme-resolved="dark"] .spot-link-btn.kakao {
   font-size: var(--font-sm);
   color: var(--color-text-sub);
 }
+/* 장소 목록 아래 집계 본문(P-538). 첫 화면 단추 위치에 영향을 주지 않게 목록 뒤에 둔다 */
+#seo-landing .seo-guide h2 {
+  font-size: var(--font-md);
+  margin: var(--space-5) 0 var(--space-2);
+}
+#seo-landing .seo-guide p,
+#seo-landing .seo-guide li {
+  font-size: var(--font-sm);
+  color: var(--color-text-sub);
+  line-height: 1.6;
+}
+#seo-landing .seo-guide p {
+  margin: 0 0 var(--space-3);
+}
+#seo-landing .seo-guide-hoods p {
+  margin: 0;
+}
 
 /* 앱 전용 스킴(T맵·카카오 T)은 마우스 기기에서 열리지 않으므로 숨긴다(P-090) */
 @media (hover: hover) and (pointer: fine) {

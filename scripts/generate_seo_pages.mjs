@@ -96,7 +96,165 @@ function buildDescription(region, slot, pageSpots) {
   return make(n);
 }
 
-function buildPage(region, slot, pageSpots, generated) {
+// 랜딩 집계 본문(P-538): 그 권역·시간대 후보 전체(candidates)에서 업종, 동네, 영업시간, 휴무일을 세어 문장으로 쓴다.
+// 데이터에 없는 분위기·후기·가격은 쓰지 않는다. 문장은 집계 값의 크기에 따라 다른 틀을 고른다.
+const CATEGORY_GROUPS = [
+  ['숙소', /숙박|펜션|호텔|캠핑|글램핑|리조트|콘도|한옥|민박|모텔|게스트/],
+  ['카페와 디저트', /카페|커피|디저트|베이커리|제과|떡|아이스크림|찻집|차$/],
+  ['술집', /호프|주점|와인|이자카야|포장마차|맥주|칵테일|술집|바$/],
+  ['자연과 관광지', /자연|산책|관광|명소|공원|해수욕장|해변|섬|계곡|전망|수목원|폭포|산$|호수|사찰|유적|테마거리|도보|케이블카|생가|고택|산성|성곽|하천|숲|천문대|온천/],
+  ['문화와 체험', /문화|전시|박물관|미술|공예|공연|체험|레포츠|테마파크|쇼핑|공방|소품|놀이|스파|워터|시장|서점|스포츠|도자기|음악|페스티벌|향수|사진|잡화|꽃|화랑|아쿠아리움|클라이밍|승마|팝업/],
+  ['식당', /식|고기|육류|초밥|스테이크|곱창|국수|면|돈까스|해물|회|치킨|피자|이탈리안|뷔페|분식|샤브|족발|요리|갈비|국밥|찌개|해산물|생선|장어|오리|닭|버거|브런치|삼겹살|두부|순대|바베큐|조개|먹자골목|대게|쌈밥|멕시칸/],
+];
+const SLOT_CHECK = { day: [14, '오후 2시'], evening: [19, '저녁 7시'], night: [22, '밤 10시'], stay: [20, '저녁 8시'] };
+const WEEKDAYS = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일'];
+
+function groupOf(category) {
+  const c = String(category || '');
+  const hit = CATEGORY_GROUPS.find(([, re]) => re.test(c));
+  return hit ? hit[0] : '기타';
+}
+
+// 동네: 광역시·도가 섞이는 권역은 시·도와 시·군·구를, 제주는 시와 읍·면·동을, 나머지는 시·군·구를 쓴다
+function neighborhoodOf(spot, region) {
+  const t = String(spot.address || '').split(/\s+/).filter(Boolean);
+  if (t.length < 2) return spot.area || '';
+  if (region.slug === 'jeju') return t[2] && /[읍면]$/.test(t[2]) ? `${t[1]} ${t[2]}` : `${t[1]} 동 지역`;
+  if (['seoul', 'gyeonggi', 'incheon'].includes(region.slug)) return t[1];
+  return `${t[0]} ${t[1]}`;
+}
+
+// 영업시간 문자열의 HH:MM~HH:MM 구간 가운데 하나라도 그 시각을 덮으면 연 것으로 본다. 상시 개방과 24시간도 연 것으로 본다
+function openAt(spot, hour) {
+  if (spot.is_24h) return true;
+  const raw = Object.values(spot.business_hours || {}).join(' / ');
+  if (!raw) return null;
+  if (/상시|24시간/.test(raw)) return true;
+  const ranges = [...raw.matchAll(/(\d{1,2}):(\d{2})\s*~\s*(\d{1,2}):(\d{2})/g)];
+  if (!ranges.length) return null;
+  const t = hour * 60;
+  return ranges.some(([, h1, m1, h2, m2]) => {
+    const a = Number(h1) * 60 + Number(m1);
+    let b = Number(h2) * 60 + Number(m2);
+    if (b <= a) b += 24 * 60;
+    return (a <= t && t < b) || (a <= t + 1440 && t + 1440 < b);
+  });
+}
+
+const pct = (n, d) => Math.round((n / d) * 100);
+const hasBatchim = (w) => {
+  const c = String(w).trim().slice(-1).charCodeAt(0);
+  return c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 !== 0;
+};
+const josa = (w, withB, without) => `${w}${hasBatchim(w) ? withB : without}`;
+const top = (counter, n) => [...counter.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, n);
+function count(items) {
+  const m = new Map();
+  for (const k of items) if (k) m.set(k, (m.get(k) || 0) + 1);
+  return m;
+}
+
+function buildGuide(region, slot, candidates) {
+  const total = candidates.length;
+  const where = `${region.key} ${slot.label}`;
+  const paras = [];
+
+  // 1. 업종 구성
+  const cats = top(count(candidates.map((s) => s.category)), 5);
+  const groups = top(count(candidates.map((s) => groupOf(s.category)).filter((g) => g !== '기타')), 3);
+  const [g1, g1n] = groups[0];
+  const g1p = pct(g1n, total);
+  const catList = cats.map(([c, n]) => `${c} ${n}곳`).join(', ');
+  let comp = `${where} 후보는 모두 ${total}곳이고 업종은 ${catList} 순으로 많다.`;
+  if (g1p >= 50) comp += ` 묶어서 보면 ${josa(g1, '이', '가')} ${g1n}곳으로 절반이 넘는 ${g1p}%를 차지한다.`;
+  else if (g1p >= 30) comp += ` 묶어서 보면 ${g1} ${g1n}곳(${g1p}%)이 가장 크고, ${groups[1] ? `${groups[1][0]} ${groups[1][1]}곳이 뒤를 잇는다` : '나머지는 흩어져 있다'}.`;
+  else comp += ` 가장 큰 묶음인 ${g1}도 ${g1n}곳(${g1p}%)에 그쳐 업종이 고르게 나뉜다.`;
+  if (groups[2]) comp += ` 그다음 묶음은 ${groups[2][0]} ${groups[2][1]}곳(${pct(groups[2][1], total)}%)이다.`;
+  paras.push(comp);
+  paras.push(`위 목록 ${Math.min(TOP_N, total)}곳은 후보 ${total}곳 가운데 카카오 확인 여부, 큐레이션 배지 수, 카카오맵 평점, 언급 점수를 더한 점수가 높은 순으로 골랐다.`);
+
+  // 2. 동네 분포와 동네별 구성
+  const hoods = top(count(candidates.map((s) => neighborhoodOf(s, region))), 5).filter(([, n]) => n >= 3);
+  if (hoods.length) {
+    const top3 = hoods.slice(0, 3);
+    const top3n = top3.reduce((a, [, n]) => a + n, 0);
+    const top3p = pct(top3n, total);
+    const names = top3.map(([h, n]) => `${h} ${n}곳`).join(', ');
+    let spread = `후보가 많은 동네는 ${names}이다.`;
+    if (top3p >= 60) spread += ` 이 ${top3.length}곳에 전체의 ${top3p}%가 모여 있어 한 동네 안에서 코스를 짜기 쉽다.`;
+    else if (top3p >= 30) spread += ` 상위 ${top3.length}곳이 ${top3p}%를 차지하고 나머지 ${total - top3n}곳은 그 밖의 동네에 있다.`;
+    else spread += ` 상위 ${top3.length}곳을 합해도 ${top3p}%라 후보가 ${region.key} 곳곳에 흩어져 있다.`;
+    paras.push(spread);
+
+    const hoodLines = hoods.slice(0, 5).map(([h, n]) => {
+      const inHood = candidates.filter((s) => neighborhoodOf(s, region) === h);
+      const hc = top(count(inHood.map((s) => s.category)), 2);
+      const picks = [...new Set(inHood.map((s) => s.name))].slice(0, 3).join(', ');
+      const lead = hc[0] && pct(hc[0][1], n) >= 50
+        ? `${josa(h, '은', '는')} ${n}곳 가운데 ${josa(hc[0][0], '이', '가')} ${hc[0][1]}곳으로 절반을 넘는다.`
+        : `${josa(h, '은', '는')} ${n}곳이고 ${hc.map(([c, k]) => `${c} ${k}곳`).join(', ')} 순이다.`;
+      return `<li><p>${escapeHtml(lead)} 점수가 높은 곳은 ${escapeHtml(picks)} 순이다.</p></li>`;
+    });
+    paras.push({ list: hoodLines });
+  }
+
+  // 3. 영업시간과 휴무일
+  const [hour, hourLabel] = SLOT_CHECK[slot.key];
+  const known = candidates.map((s) => openAt(s, hour)).filter((v) => v !== null);
+  const openN = known.filter(Boolean).length;
+  const knownP = pct(known.length, total);
+  let hours = '';
+  if (known.length === 0) hours = `${where} 후보 ${total}곳에는 영업시간 정보가 아직 없다.`;
+  else {
+    hours = `영업시간 정보가 있는 곳은 ${known.length}곳(${knownP}%)이고, 그 가운데 ${openN}곳(${pct(openN, known.length)}%)이 ${hourLabel}에 영업시간 안에 든다.`;
+    const always = candidates.filter((s) => s.is_24h || /상시|24시간/.test(Object.values(s.business_hours || {}).join(' '))).length;
+    if (always) hours += ` 후보 ${total}곳 가운데 상시 개방이거나 24시간 여는 곳은 ${always}곳이다.`;
+    const ends = top(count(candidates.map((s) => {
+      const m = [...Object.values(s.business_hours || {}).join(' ').matchAll(/~\s*(\d{1,2}:\d{2})/g)];
+      return m.length ? m[0][1] : null;
+    })), 1);
+    if (ends.length) hours += ` 영업을 마치는 시각은 ${ends[0][0]}이 ${ends[0][1]}곳(영업시간을 아는 곳의 ${pct(ends[0][1], known.length)}%)으로 가장 흔하다.`;
+  }
+  const closed = top(count(candidates.flatMap((s) => s.closed_days || []).filter((d) => WEEKDAYS.includes(d))), 2);
+  if (closed.length) hours += ` 쉬는 날이 정해진 곳은 ${josa(closed[0][0], '이', '가')} ${closed[0][1]}곳으로 가장 많고${closed[1] ? ` ${closed[1][0]} ${closed[1][1]}곳이 다음이다` : ' 다른 요일은 적다'}.`;
+  else hours += ` 후보 ${total}곳 가운데 요일별 휴무일이 등록된 곳은 없다.`;
+  paras.push(hours);
+
+  // 4. 외부 근거
+  const rated = candidates.map((s) => s.social_links?.kakaomap?.rating).filter((r) => r > 0);
+  const yt = candidates.filter((s) => s.social_links?.youtube?.url).length;
+  const verified = candidates.filter((s) => s.verified).length;
+  let ev = `카카오 장소 정보로 주소와 업종을 확인한 곳은 ${verified}곳(${pct(verified, total)}%)이다.`;
+  if (rated.length) ev += ` 카카오맵 평점이 있는 ${rated.length}곳의 평균은 ${(rated.reduce((a, b) => a + b, 0) / rated.length).toFixed(1)}점이다.`;
+  ev += yt ? ` 유튜브 소개 영상이 연결된 곳은 ${yt}곳(${pct(yt, total)}%)이다.` : ` ${where} 후보에는 유튜브 소개 영상이 연결된 곳이 아직 없다.`;
+  paras.push(ev);
+
+  // 5. 코스 고르는 법: 위 집계에서 가장 두드러진 값에 따라 안내를 고른다
+  const tips = [];
+  if (groups[1]) tips.push(`${g1} ${g1n}곳과 ${groups[1][0]} ${groups[1][1]}곳이 후보의 큰 몫이니, 두 묶음에서 한 곳씩 골라 ${where} 코스의 앞뒤를 채운다.`);
+  else tips.push(`후보 ${total}곳 대부분이 ${g1}이라 ${g1} 가운데 동선이 맞는 두세 곳을 이어 ${where} 코스를 만든다.`);
+  if (hoods.length) {
+    const [h1, h1n] = hoods[0];
+    tips.push(pct(h1n, total) >= 25
+      ? `${h1}에만 ${h1n}곳이 있으니 이 동네 안에서 두세 곳을 이어 코스를 짤 수 있다.`
+      : `가장 많은 ${h1}도 ${h1n}곳(${pct(h1n, total)}%)이라, 앱에서 세부 지역을 먼저 고르면 이동 거리를 줄일 수 있다.`);
+  }
+  if (known.length && knownP < 50) tips.push(`영업시간을 모르는 곳이 ${total - known.length}곳이라 장소 이름의 지도 링크에서 ${hourLabel} 영업 여부를 한 번 더 확인한다.`);
+  else if (known.length) tips.push(`영업시간을 아는 ${known.length}곳 가운데 ${hourLabel}에 닫는 ${known.length - openN}곳은 빼고 남은 ${openN}곳에서 먼저 고른다.`);
+  if (closed.length) tips.push(`${closed[0][0]}에 나간다면 그날 쉬는 ${closed[0][1]}곳을 빼고 남은 ${total - closed[0][1]}곳에서 고른다.`);
+
+  const body = paras.map((p) => (typeof p === 'string'
+    ? `<p>${escapeHtml(p)}</p>`
+    : `<ul class="seo-guide-hoods">${p.list.join('')}</ul>`)).join('\n        ');
+  return `<div class="seo-guide">
+        <h2>${escapeHtml(where)} 후보 한눈에 보기</h2>
+        ${body}
+        <h2>${escapeHtml(where)} 코스 고르는 법</h2>
+        <ol>${tips.map((t) => `<li>${escapeHtml(t)}</li>`).join('')}</ol>
+      </div>`;
+}
+
+function buildPage(region, slot, pageSpots, generated, candidates) {
   const url = `${SITE_URL}/${region.slug}/${slot.key}/`;
   const title = `${region.key} ${slot.label} 데이트 코스 추천 | 오늘 데이트`;
   const description = buildDescription(region, slot, pageSpots);
@@ -151,6 +309,7 @@ function buildPage(region, slot, pageSpots, generated) {
       <p class="seo-cta"><a class="seo-cta-btn" href="${SITE_URL}/?r=${region.app}&amp;s=${slot.key}">오늘 데이트에서 직접 코스 만들기 →</a></p>
       <ul>${listItems}
       </ul>
+      ${buildGuide(region, slot, candidates)}
       ${buildNav(region, slot, generated)}
       <p><a href="${SITE_URL}/?r=${region.app}&amp;s=${slot.key}">오늘 데이트에서 직접 코스 만들기 →</a></p>
     </section>`;
@@ -182,16 +341,16 @@ for (const region of REGIONS) {
       continue;
     }
 
-    plannedPages.push({ region, slot, pageSpots: candidates.slice(0, TOP_N) });
+    plannedPages.push({ region, slot, pageSpots: candidates.slice(0, TOP_N), candidates });
   }
 }
 const generated = new Set(plannedPages.map(({ region, slot }) => `${region.slug}/${slot.key}`));
 
 // 2단계: 페이지를 쓴다.
-for (const { region, slot, pageSpots } of plannedPages) {
+for (const { region, slot, pageSpots, candidates } of plannedPages) {
   const outDir = path.join(distDir, region.slug, slot.key);
   fs.mkdirSync(outDir, { recursive: true });
-  fs.writeFileSync(path.join(outDir, 'index.html'), buildPage(region, slot, pageSpots, generated));
+  fs.writeFileSync(path.join(outDir, 'index.html'), buildPage(region, slot, pageSpots, generated, candidates));
   sitemapUrls.push(`${SITE_URL}/${region.slug}/${slot.key}/`);
   pageCount += 1;
 }
