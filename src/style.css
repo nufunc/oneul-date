@@ -6181,6 +6181,17 @@ html[data-theme-resolved="dark"] .spot-link-btn.kakao {
 #seo-landing .seo-guide-hoods p {
   margin: 0;
 }
+/* 본문 끝과 다른 쪽 링크 사이 여백, 번호 목록 들여쓰기와 항목 간격(ux-reviewer-437 Nit). 번호가 상자 왼쪽 밖에 그려졌다 */
+#seo-landing .seo-guide {
+  margin-bottom: var(--space-5);
+}
+#seo-landing .seo-guide ol {
+  margin: 0 0 var(--space-3);
+  padding-left: 1.5em;
+}
+#seo-landing .seo-guide ol li + li {
+  margin-top: var(--space-2);
+}
 
 /* 앱 전용 스킴(T맵·카카오 T)은 마우스 기기에서 열리지 않으므로 숨긴다(P-090) */
 @media (hover: hover) and (pointer: fine) {
