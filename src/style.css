@@ -785,7 +785,7 @@ label,
 }
 
 .btn-theme-toggle {
-  min-height: 40px;
+  min-height: 44px;
   font-size: var(--font-sm);
   font-weight: 600;
   color: var(--color-text-sub);
