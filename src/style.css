@@ -6159,6 +6159,13 @@ html[data-theme-resolved="dark"] .spot-link-btn.kakao {
 #seo-landing .seo-cta-btn:hover {
   background: var(--color-accent-hover);
 }
+/* 아래쪽 지역·시간대 교차 링크와 마지막 앱 링크는 글줄 높이(16~19px)만 차지해 터치 기준 44px에 못 미쳤다 */
+#seo-landing nav a,
+#seo-landing > p > a:not(.seo-cta-btn) {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
 #seo-landing ul {
   list-style: none;
   padding: 0;
