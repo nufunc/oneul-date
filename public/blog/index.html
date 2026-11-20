@@ -290,6 +290,10 @@
     .site-footer a {
       color: var(--color-text-main);
       text-decoration: underline;
+      /* 지역·홈 링크 높이가 15px로 터치 기준 44px에 못 미쳤다(agy 검토 11-20 Nit 2) */
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
     }
     header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
     .header-nav a,.header-title a,.blog-tagline a{display:inline-block}
