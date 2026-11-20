@@ -6855,7 +6855,9 @@ function buildAnchorCourse(anchorSpot: Spot): CourseStep[] {
     } else if (!anchorHasCoords) {
       const local = getCandidates(spots, slot, [], 'ALL', [], [])
         .filter((s) => s.id !== anchorSpot.id && isCourseEligible(s) && inAnchorArea(s));
-      steps.push({ slot, spotId: local.length > 0 ? local[Math.floor(Math.random() * local.length)].id : null });
+      // 장소 중심 코스는 pickNearRandom을 거치지 않아 P-531이 빠져 앵커 밖 카드의 25~35%가 영업시간 없음이었다(measure-439)
+      const localPool = preferKnownHours(local);
+      steps.push({ slot, spotId: localPool.length > 0 ? localPool[Math.floor(Math.random() * localPool.length)].id : null });
     } else {
       const candidates = getCandidates(spots, slot, [], 'ALL', [], []);
       const withDist = candidates
@@ -6875,9 +6877,10 @@ function buildAnchorCourse(anchorSpot: Spot): CourseStep[] {
       // 무작위 원거리 대신 빈 스텝으로 남긴다.
       let picked: Spot | null = null;
       for (const radiusKm of [8.0, 20.0, 50.0]) {
-        const nearby = withDist.filter((item) => item.dist <= radiusKm);
+        // 거리순을 지킨 채 영업시간 있는 곳만 남겨 가까운 3곳 안에서 뽑는다
+        const nearby = preferKnownHours(withDist.filter((item) => item.dist <= radiusKm).map((item) => item.spot));
         if (nearby.length > 0) {
-          picked = nearby[Math.floor(Math.random() * Math.min(3, nearby.length))].spot;
+          picked = nearby[Math.floor(Math.random() * Math.min(3, nearby.length))];
           break;
         }
       }
