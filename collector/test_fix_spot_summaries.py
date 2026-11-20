@@ -108,6 +108,11 @@ def _with_claude(key, client, fn):
 GOOD = "따뜻한 조명 아래 마주 앉아 천천히 이야기 나누기 좋은 곳이에요."
 
 
+def test_claude_summary_ends_with_period():
+    fake = FakeClaude(payload={"summary": GOOD.rstrip(".")})
+    assert _with_claude("test-key", fake, lambda: f.claude_summary("어느 카페", "카페", "서울", "")) == GOOD
+
+
 def test_claude_success():
     fake = FakeClaude(payload={"summary": GOOD})
     assert _with_claude("test-key", fake, lambda: f.claude_summary("어느 카페", "카페", "서울", "성수", ["라떼"])) == GOOD

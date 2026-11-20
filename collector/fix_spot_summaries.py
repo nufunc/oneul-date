@@ -220,7 +220,8 @@ def claude_summary(name: str, cat: str, region: str, area: str, sig_items: list 
     clean = res["summary"].replace('"', '').replace("'", "").strip()
     if not (10 <= len(clean) <= 60) or is_bad_summary(clean, name) or (name and name.strip() in clean):
         return None
-    return clean
+    # 표본 10건 중 6건이 마침표 없이 끝나 기존 설명과 섞이면 들쭉날쭉했다
+    return clean.rstrip(".") + "."
 
 
 def generate_curated_summary(name: str, cat: str, region: str, area: str, sig_items: list = None, spot_id: int = 0) -> str:
