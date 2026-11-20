@@ -11,7 +11,7 @@ const MARK = 'class="site-policy-links"';
 // assets는 번들, data는 장소 자료라 HTML 쪽이 없다
 const SKIP_DIRS = new Set(['assets', 'data']);
 const link = (href, text, ext = false) =>
-  `<a href="${href}" style="color:inherit"${ext ? ' target="_blank" rel="noopener"' : ''}>${text}</a>`;
+  `<a href="${href}" style="color:inherit;display:inline-flex;align-items:center;min-height:44px;padding:0 6px"${ext ? ' target="_blank" rel="noopener"' : ''}>${text}</a>`;
 const POLICY_NAV = `<nav ${MARK} aria-label="사이트 정보" style="grid-column:1 / -1;max-width:680px;margin:0 auto;`
   + `padding:16px 20px calc(16px + env(safe-area-inset-bottom, 0px));text-align:center;font-size:13px;line-height:1.6;opacity:.75">`
   + [link(`${SITE}about`, '소개'), link(`${SITE}privacy`, '개인정보처리방침'),
@@ -36,7 +36,9 @@ const walk = (dir) => {
     if (!ent.name.endsWith('.html')) continue;
     const html = fs.readFileSync(p, 'utf-8');
     if (html.includes(MARK)) continue;
-    const at = html.lastIndexOf('</body>');
+    // P-544: 매거진 글의 고정 코스 막대 여백(.od-course-spacer)보다 앞에 넣어야 최하단에서 막대에 가리지 않는다
+    const spacer = html.lastIndexOf('<div class="od-course-spacer"');
+    const at = spacer >= 0 ? spacer : html.lastIndexOf('</body>');
     if (at < 0) { missing.push(path.relative(distDir, p)); continue; }
     fs.writeFileSync(p, `${html.slice(0, at)}  ${POLICY_NAV}\n  ${html.slice(at)}`);
     done++;
