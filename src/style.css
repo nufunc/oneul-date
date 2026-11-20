@@ -4560,14 +4560,18 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
    5열은 위로 넘친 영역이 이름 버튼을 덮어 넣지 않는다 */
 .discovery-card.cols-3 .btn-discovery-save,
 .discovery-card.cols-3 .btn-discovery-action-build,
+.discovery-card.cols-3 .btn-discovery-action-map,
 .discovery-card.cols-2 .btn-discovery-save,
-.discovery-card.cols-2 .btn-discovery-action-build {
+.discovery-card.cols-2 .btn-discovery-action-build,
+.discovery-card.cols-2 .btn-discovery-action-map {
   position: relative;
 }
 .discovery-card.cols-3 .btn-discovery-save::after,
 .discovery-card.cols-3 .btn-discovery-action-build::after,
+.discovery-card.cols-3 .btn-discovery-action-map::after,
 .discovery-card.cols-2 .btn-discovery-save::after,
-.discovery-card.cols-2 .btn-discovery-action-build::after {
+.discovery-card.cols-2 .btn-discovery-action-build::after,
+.discovery-card.cols-2 .btn-discovery-action-map::after {
   content: '';
   position: absolute;
   left: -2px;
@@ -5537,6 +5541,7 @@ html[data-theme-resolved="dark"] .spot-closed-badge {
 }
 
 .btn-discovery-more {
+  min-height: 44px;
   padding: 10px 24px;
   border-radius: var(--radius-full);
   background: var(--color-surface);
