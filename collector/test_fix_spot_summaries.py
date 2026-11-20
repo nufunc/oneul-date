@@ -1,7 +1,11 @@
 """풀 선택과 과대 문장 회귀 테스트(P-074, P-080): python3 test_fix_spot_summaries.py 또는 pytest"""
+import io
+import json
 import re
+from types import SimpleNamespace
 
 import fix_spot_summaries as f
+import groq_helper as g
 
 # 룰 풀만 쓴다. Groq 키가 있으면 문장이 바뀌어 풀 판정을 할 수 없다
 f.get_groq_api_key = lambda: None
@@ -76,6 +80,92 @@ def test_no_unsupported_popularity_claims():
     pools = re.findall(r'^\s+f?"([^"\n]{10,}[.])",?\s*$', src, re.M)
     assert len(pools) > 100
     assert [p for p in pools if OVERCLAIM.search(p)] == []
+
+
+# Claude 경로(P-533 단위 2)
+class FakeClaude:
+    def __init__(self, payload=None, error=None):
+        self.calls, self.payload, self.error = [], payload, error
+        self.messages = self
+
+    def create(self, **kw):
+        self.calls.append(kw)
+        if self.error:
+            raise self.error
+        return SimpleNamespace(stop_reason="end_turn",
+                               content=[SimpleNamespace(type="text", text=json.dumps(self.payload, ensure_ascii=False))])
+
+
+def _with_claude(key, client, fn):
+    orig = (g.get_anthropic_api_key, g._claude_client)
+    g.get_anthropic_api_key, g._claude_client = (lambda: key), client
+    try:
+        return fn()
+    finally:
+        g.get_anthropic_api_key, g._claude_client = orig
+
+
+GOOD = "따뜻한 조명 아래 마주 앉아 천천히 이야기 나누기 좋은 곳이에요."
+
+
+def test_claude_success():
+    fake = FakeClaude(payload={"summary": GOOD})
+    assert _with_claude("test-key", fake, lambda: f.claude_summary("어느 카페", "카페", "서울", "성수", ["라떼"])) == GOOD
+    assert fake.calls[0]["output_config"]["format"]["schema"] is f._SUMMARY_SCHEMA
+
+
+def test_claude_error_or_no_key_returns_none():
+    assert _with_claude("test-key", FakeClaude(error=TimeoutError("boom")),
+                        lambda: f.claude_summary("어느 카페", "카페", "서울", "")) is None
+    fake = FakeClaude(payload={"summary": GOOD})
+    assert _with_claude(None, fake, lambda: f.claude_summary("어느 카페", "카페", "서울", "")) is None
+    assert fake.calls == []
+
+
+def test_claude_invalid_output_returns_none():
+    for bad in ["trendy, romantic", "짧다", "어느 카페에서 따뜻한 조명 아래 이야기 나누기 좋은 곳이에요.", "가" * 61]:
+        assert _with_claude("test-key", FakeClaude(payload={"summary": bad}),
+                            lambda: f.claude_summary("어느 카페", "카페", "서울", "")) is None, bad
+
+
+def _run_fix(dry_run, claude):
+    """GET은 스팟 7곳(같은 summary 6회 중복 + 영문 태그 1곳)을 내고 PATCH는 기록만 한다"""
+    spots = [{"id": i, "name": f"가게{i}", "category": "카페", "region": "서울", "area": "",
+              "summary": "같은 문장이 여러 번 반복되는 설명이에요.", "signature_items": []} for i in range(1, 7)]
+    spots.append({"id": 7, "name": "가게7", "category": "카페", "region": "서울", "area": "", "summary": "trendy", "signature_items": []})
+    patches, backups = [], []
+
+    class Resp(io.BytesIO):
+        status = 204
+
+    def fake_urlopen(req, timeout=0):
+        if req.get_method() == "PATCH":
+            patches.append(req.full_url)
+            return Resp(b"")
+        return Resp(json.dumps(spots).encode())
+
+    orig = (f.urllib.request.urlopen, f._backup_summaries, f.time.sleep)
+    f.urllib.request.urlopen = fake_urlopen
+    f._backup_summaries = lambda targets: backups.append([t["id"] for t in targets]) or "backup.json"
+    f.time.sleep = lambda *a: None
+    try:
+        _with_claude("test-key", claude, lambda: f.fix_all_spot_summaries("http://db", "k", dry_run=dry_run))
+    finally:
+        f.urllib.request.urlopen, f._backup_summaries, f.time.sleep = orig
+    return patches, backups
+
+
+def test_dry_run_does_not_patch_or_backup():
+    claude = FakeClaude(payload={"summary": GOOD})
+    patches, backups = _run_fix(3, claude)
+    assert patches == [] and backups == []
+    assert len(claude.calls) == 3
+
+
+def test_real_run_backs_up_before_patch():
+    patches, backups = _run_fix(0, FakeClaude(error=TimeoutError("boom")))  # Claude 실패는 기존 경로로 대체
+    assert backups == [[1, 2, 3, 4, 5, 6, 7]]
+    assert len(patches) == 7
 
 
 if __name__ == "__main__":

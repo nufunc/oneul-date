@@ -26,7 +26,7 @@ if sys.platform == "win32":
     except Exception:
         pass
 
-from groq_helper import get_groq_api_key, call_groq_json
+from groq_helper import get_groq_api_key, call_groq_json, call_claude_json
 
 def _load_env_credentials():
     """collector/.env를 먼저 찾고 있으면 거기서 멈춘다. 예전엔 두 경로를 전부 읽어
@@ -190,6 +190,37 @@ OPENER_BANK = {
         "편안한 침묵마저 즐거운 이곳에서,", "오늘 하루의 마무리를 이곳에서,",
     ],
 }
+
+
+_SUMMARY_SCHEMA = {
+    "type": "object",
+    "properties": {"summary": {"type": "string"}},
+    "required": ["summary"],
+    "additionalProperties": False,
+}
+
+
+def claude_summary(name: str, cat: str, region: str, area: str, sig_items: list = None) -> str | None:
+    """Claude로 한 줄 소개를 받는다. 키가 없거나 호출 실패, 검증 실패면 None을 내 generate_curated_summary로 넘긴다(P-533)"""
+    sig_text = f", 대표메뉴: {', '.join(sig_items[:2])}" if sig_items else ""
+    prompt = (
+        f"장소명: {name}, 카테고리: {cat or '데이트 스팟'}, 지역: {region} {area or ''}{sig_text}\n\n"
+        "위 장소를 2030 커플에게 소개하는 데이트 매거진 한 줄(25~45자, 한국어)을 써 주세요.\n"
+        "규칙: '~하기 좋은 곳이에요', '~즐겨보세요' 같은 다정한 추천 어조. '~한다' 문어체 금지. "
+        "장소명을 문장에 넣지 않는다. 영문 단어와 태그 나열 금지. "
+        "인기, 핫플, 실패 없는, 강력 추천, SNS 같은 확인할 수 없는 과장 금지. 주어진 정보에 없는 사실을 지어내지 않는다.")  # 과장 낱말 목록이 풀 문장 검사(test_no_unsupported_popularity_claims)에 걸리지 않게 괄호를 같은 줄에 둔다
+    system_prompt = "당신은 한국 데이트 매거진 에디터입니다. 장소마다 다른 한 줄 소개를 씁니다."
+    try:
+        res = call_claude_json(prompt, system_prompt, _SUMMARY_SCHEMA, max_tokens=200)
+    except Exception as e:
+        print(f"  ⚠️ Claude 호출 실패, 기존 경로로 대체 ({type(e).__name__})")
+        return None
+    if not (res and isinstance(res.get("summary"), str)):
+        return None
+    clean = res["summary"].replace('"', '').replace("'", "").strip()
+    if not (10 <= len(clean) <= 60) or is_bad_summary(clean, name) or (name and name.strip() in clean):
+        return None
+    return clean
 
 
 def generate_curated_summary(name: str, cat: str, region: str, area: str, sig_items: list = None, spot_id: int = 0) -> str:
@@ -394,8 +425,18 @@ def generate_curated_summary(name: str, cat: str, region: str, area: str, sig_it
     ]
     return _opener("default", master_default_pool[id_hash % len(master_default_pool)])
 
-def fix_all_spot_summaries(supabase_url: str, service_key: str, limit: int = 5000):
-    """DB 내 비정상 summary 스팟들을 조회하여 교정 수행"""
+def _backup_summaries(targets: list) -> str:
+    """PATCH 전에 대상 id와 이전 summary를 남긴다. 되돌릴 때 이 파일로 summary를 다시 PATCH한다"""
+    backup_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "backups")
+    os.makedirs(backup_dir, exist_ok=True)
+    path = os.path.join(backup_dir, f"spot_summaries_{time.strftime('%Y%m%d_%H%M%S')}.json")
+    with open(path, "w", encoding="utf-8") as fp:
+        json.dump([{"id": s.get("id"), "summary": s.get("summary")} for s in targets], fp, ensure_ascii=False)
+    return path
+
+
+def fix_all_spot_summaries(supabase_url: str, service_key: str, limit: int = 5000, dry_run: int = 0):
+    """DB 내 비정상 summary 스팟들을 조회하여 교정 수행. dry_run>0이면 그 수만 만들어 보이고 PATCH하지 않는다"""
     if not supabase_url or not service_key:
         print("⚠️ Supabase 접속 정보가 없습니다.")
         return
@@ -448,10 +489,15 @@ def fix_all_spot_summaries(supabase_url: str, service_key: str, limit: int = 500
         print("🎉 모든 스팟의 설명이 이미 완벽하게 정제되어 있습니다!")
         return
 
-    targets = bad_spots[:limit]
-    print(f"🚀 이번 배치 {len(targets)}개 스팟 설명 교정 시작 (Groq AI + 스마트 풀)...\n")
+    targets = bad_spots[:dry_run] if dry_run else bad_spots[:limit]
+    if dry_run:
+        print(f"🧪 dry-run: {len(targets)}개만 새 설명을 만들고 DB는 바꾸지 않습니다.\n")
+    else:
+        print(f"💾 백업: {_backup_summaries(targets)}")
+        print(f"🚀 이번 배치 {len(targets)}개 스팟 설명 교정 시작 (Claude → Groq AI + 스마트 풀)...\n")
 
     success_count = 0
+    claude_count = 0
     for idx, s in enumerate(targets, 1):
         s_id = s.get("id")
         name = s.get("name", "")
@@ -461,10 +507,17 @@ def fix_all_spot_summaries(supabase_url: str, service_key: str, limit: int = 500
         old_sum = s.get("summary", "")
         sig = s.get("signature_items") or []
 
-        new_sum = generate_curated_summary(name, cat, region, area, sig, spot_id=s_id)
-        print(f"[{idx}/{len(targets)}] [{s_id}] '{name}' ({cat or '미분류'})")
+        new_sum = claude_summary(name, cat, region, area, sig)
+        source = "claude" if new_sum else "fallback"
+        if new_sum:
+            claude_count += 1
+        else:
+            new_sum = generate_curated_summary(name, cat, region, area, sig, spot_id=s_id)
+        print(f"[{idx}/{len(targets)}] [{s_id}] '{name}' ({cat or '미분류'}) [{source}]")
         print(f"  - 이전: {old_sum}")
         print(f"  + 교정: {new_sum}")
+        if dry_run:
+            continue
 
         # PATCH 업데이트
         patch_url = f"{supabase_url}/rest/v1/spots?id=eq.{s_id}"
@@ -482,10 +535,17 @@ def fix_all_spot_summaries(supabase_url: str, service_key: str, limit: int = 500
 
         time.sleep(0.05)
 
-    print(f"🎉 [완료] 총 {success_count}/{len(targets)}개 스팟 설명 교정 완료!")
+    if dry_run:
+        print(f"🧪 [dry-run 완료] {len(targets)}개 중 Claude {claude_count}개, 대체 경로 {len(targets) - claude_count}개. 전체 교정 대상 {len(bad_spots)}개")
+        return
+    print(f"🎉 [완료] 총 {success_count}/{len(targets)}개 스팟 설명 교정 완료! (Claude {claude_count}개)")
 
 if __name__ == "__main__":
     _load_env_credentials()
     sb_url = os.environ.get("SUPABASE_URL") or os.environ.get("VITE_SUPABASE_URL", "")
     sb_key = os.environ.get("SUPABASE_SERVICE_KEY") or os.environ.get("SUPABASE_KEY") or os.environ.get("VITE_SUPABASE_ANON_KEY", "")
-    fix_all_spot_summaries(sb_url, sb_key, limit=5000)
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--dry-run", type=int, default=0, metavar="N", help="대상 중 N곳만 이전/이후를 출력하고 PATCH하지 않는다")
+    args = ap.parse_args()
+    fix_all_spot_summaries(sb_url, sb_key, limit=5000, dry_run=args.dry_run)
