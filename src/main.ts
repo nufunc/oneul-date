@@ -6800,7 +6800,8 @@ function buildCourseFromSavedSpots(): boolean {
         .sort((x, y) => x.d - y.d)
         .map((x) => x.c);
     }
-    place(slot, candidates[0]);
+    // 가장 가까운 3곳 안에서 영업시간 있는 곳을 먼저 쓴다. 이 칸만 P-531이 빠져 강원 찜 코스 채움 칸 15%가 영업시간 없음이었다(measure-439)
+    place(slot, preferKnownHours(candidates.slice(0, 3))[0]);
   }
   for (const slot of slotsOn) steps.push({ slot, spotId: picks.get(slot)?.id ?? null });
   const savedPicks = [...picks.values()].filter((s) => savedList.includes(s));
