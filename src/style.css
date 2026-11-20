@@ -18,7 +18,7 @@
   
   --color-text: #111827; /* 딥 잉크 차콜 본문 */
   --color-text-sub: #4b5563; /* 쿨 슬레이트 보조 본문 */
-  --color-text-faint: #64748b; /* 차분한 라벨 및 장식 */
+  --color-text-faint: #5b6b82; /* 차분한 라벨 및 장식. 배경·카드·호버 면에서 모두 4.5:1 이상 */
   
   --color-accent: #0f172a; /* 딥 미드나잇 슬레이트 네이비 포인트 */
   --color-accent-hover: #1e293b;
