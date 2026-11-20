@@ -4321,6 +4321,26 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   max-width: 96px;
 }
 
+/* 지역 단추와 정렬 선택이 28px라 터치 기준 44px에 못 미쳤다(agy 개선 요청 11-20 Important 2).
+   모양은 두고 지역 단추는 눌리는 영역만 세로로 넓히고, ::after를 못 붙이는 select는 터치 화면에서 높이를 올린다 */
+.status-left .btn-region-pill {
+  position: relative;
+}
+.status-left .btn-region-pill::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 44px;
+  transform: translateY(-50%);
+}
+@media (pointer: coarse) {
+  .discovery-sort-select {
+    min-height: 44px;
+  }
+}
+
 .status-count-badge {
   font-size: var(--font-sm);
   font-weight: 800;
