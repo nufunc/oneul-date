@@ -2318,9 +2318,10 @@ label,
 /* --- 스텝 카드 하단 액션 툴바 (미니멀 아이콘 + 네이버 지도 칩) --- */
 .step-actions-bar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 14px 12px; /* 줄이 접혀도, 두 묶음이 한 줄에 있어도 44px 터치 영역이 겹치지 않는 간격 */
   margin-top: 14px;
   padding-top: 12px;
   border-top: 1px dashed var(--color-border);
@@ -2329,7 +2330,8 @@ label,
 .step-actions-icons {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 14px 12px; /* 아이콘 32px + 간격 절반씩이라 눌리는 폭 46px가 이웃과 겹치지 않는다 */
+  --icon-gap: 12px;
   flex-wrap: wrap;
 }
 
@@ -2349,46 +2351,8 @@ label,
   }
 }
 
-/* 320px에서 아이콘 줄이 접혔다(P-102) */
-@media (max-width: 360px) {
-  .step-actions-bar { gap: 6px; }
-  /* 320px에서 아이콘 7개(260px)가 막대(222px)를 넘어 왼쪽 묶음이 접혔다(P-106). 28px로 줄인다.
-     .step-card 접두가 없으면 .step-map-chip.icon-only가 이긴다. */
-  .step-card .step-actions-bar,
-  .step-card .step-actions-icons { gap: 4px; --icon-gap: 4px; }
-  .step-card .step-actions-right { gap: 16px; --icon-gap: 16px; }
-  .step-card .step-actions-bar .btn-action-icon,
-  .step-card .step-actions-right > a,
-  .step-card .step-actions-right > button {
-    width: 28px; height: 28px; min-width: 28px; min-height: 28px; padding: 0;
-  }
-  /* 칩이 28px로 줄어도 터치 영역을 44px로 두고 가로는 간격 16px의 절반까지 넓힌다(P-450) */
-  .step-card .step-actions-right > a::after,
-  .step-card .step-actions-right > button::after { inset: -9px -9px; }
-}
-
-/* 왼쪽 아이콘이 4개면(다시 추천 포함) 4+4가 390px에서 300px, 320px에서 252px로 막대를 넘어
-   왼쪽 묶음이 접혔다(P-110). 그 막대만 모든 폭에서 28px, 340px 이하에서 24px로 줄인다. */
-.step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)),
-.step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .step-actions-icons,
-.step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .step-actions-right { gap: 4px; --icon-gap: 4px; }
-.step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .btn-action-icon,
-.step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .step-actions-right > a,
-.step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .step-actions-right > button {
-  width: 28px; height: 28px; min-width: 28px; min-height: 28px; padding: 0;
-}
-.step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .step-actions-right > a::after,
-.step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .step-actions-right > button::after { inset: -9px -3px; }
-@media (max-width: 340px) {
-  .step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .btn-action-icon,
-  .step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .step-actions-right > a,
-  .step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .step-actions-right > button {
-    width: 24px; height: 24px; min-width: 24px; min-height: 24px;
-  }
-  /* 24px 칩도 터치 영역 세로 44px를 지킨다 */
-  .step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .step-actions-right > a::after,
-  .step-card .step-actions-bar:has(.step-actions-icons > :nth-child(4)) .step-actions-right > button::after { inset: -11px -3px; }
-}
+/* 좁은 폭에서 아이콘을 28px, 24px로 줄여 한 줄에 넣던 규칙(P-102, P-106, P-110)은 눌리는 폭이 32px까지 줄어
+   지웠다. 아이콘은 모든 폭에서 32px로 두고, 한 줄에 들어가지 않으면 지도 링크 묶음이 다음 줄 오른쪽으로 내려간다 */
 
 /* 모든 플랫폼 미니멀 동일 크기 원형 아이콘 버튼 (32x32px 시각적 크기 + 44x44px 터치 히트 영역) */
 .btn-action-icon {

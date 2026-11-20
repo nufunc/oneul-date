@@ -23,20 +23,21 @@ assert.match(base, /right:\s*calc\(-1px - var\(--icon-gap, 6px\) \/ 2\);/, '오�
 assert.doesNotMatch(base, /min-width:\s*44px/, '가운데 44px 박스(이웃과 겹침)가 남았다');
 assert.match(rule('.btn-action-icon'), /position:\s*relative;/, '.btn-action-icon에 position: relative가 없다');
 
-// 기본 간격 6px이 폴백과 같아야 하고, 간격을 4px로 줄이는 규칙은 --icon-gap도 4px로 맞춰야 한다
-assert.match(rule('.step-actions-icons'), /gap:\s*6px;/, '.step-actions-icons 기본 간격이 6px가 아니다');
-const gap4 = css.match(/\{ gap: 4px;[^}]*\}/g) || [];
-assert.ok(gap4.length >= 2, '간격 4px 규칙을 찾지 못했다');
-gap4.forEach((r) => assert.match(r, /--icon-gap:\s*4px;/, `간격 4px 규칙에 --icon-gap이 없다: ${r}`));
+// 아이콘 간격 12px와 --icon-gap이 같아야 눌리는 폭 32 + 2×(1 + 6) = 46px가 이웃과 겹치지 않는다
+const icons = rule('.step-actions-icons');
+assert.match(icons, /gap:\s*14px 12px;/, '.step-actions-icons 간격이 14px 12px가 아니다');
+assert.match(icons, /--icon-gap:\s*12px;/, '.step-actions-icons --icon-gap이 12px가 아니다');
+// 좁은 폭에서 아이콘을 28px, 24px로 줄이면 눌리는 폭이 32px까지 줄었다(agy 검토). 줄이지 않고 줄을 접는다
+assert.doesNotMatch(css, /width: (28|24)px; height: \1px;/, '코스 아이콘을 줄이는 규칙이 다시 생겼다');
+const bars = css.match(/^\.step-actions-bar \{([^}]*)\}/gm);
+assert.match(bars[bars.length - 1], /flex-wrap:\s*wrap;/, '액션 막대가 줄을 접지 않는다');
+assert.match(bars[bars.length - 1], /gap:\s*14px 12px;/, '액션 막대 간격이 14px 12px가 아니다');
 
 // 🔄: 첫 아이콘이라 왼쪽으로 넓혀 가로도 44px, 오른쪽은 공통 규칙대로 간격 절반에서 멈춘다
 const swap = rule('.btn-swap-icon::after');
 assert.match(swap, /left:\s*auto;/, '🔄 왼쪽을 풀지 않았다');
 assert.match(swap, /width:\s*44px;/, '🔄 눌리는 폭이 44px가 아니다');
 assert.ok(!/right:/.test(swap), '🔄 오른쪽은 공통 규칙을 따라야 한다');
-// 340px 이하 4개 막대의 아이콘이 24px일 때 🔄는 왼쪽으로 44-24-4/2=18px 넓어진다. 이 크기가 바뀌면 다시 계산한다
-const iconMin = Number(css.match(/@media \(max-width: 340px\) \{[\s\S]*?width: (\d+)px; height: \1px;/)[1]);
-assert.strictEqual(iconMin, 24, '340px 이하 아이콘 크기가 바뀌었다. 🔄 왼쪽 확장을 다시 계산한다');
 
 // 다시 추천: 모양(min-height 38px)은 그대로, ::after로 세로만 44px, 가로는 넓히지 않는다
 const regen = rule('.btn-regenerate');
