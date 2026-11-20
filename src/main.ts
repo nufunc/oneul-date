@@ -2933,6 +2933,8 @@ async function formatCourseTextAsync(
   moodKey: string,
   zoneKeys: string[] = [],
   categoryKey?: string,
+  // 매거진 코스는 카드에서 칸 표시를 감추므로(hideSlot) 복사 글도 칸 줄을 뺀다
+  hideSlot = false,
 ): Promise<string> {
   const blocks: string[] = [];
   const headSpots = steps.map((st) => (st.spotId !== null ? byId.get(st.spotId) : undefined)).filter((s): s is Spot => Boolean(s));
@@ -2963,7 +2965,7 @@ async function formatCourseTextAsync(
 
     const lines: string[] = [];
     // P-428: 카드 칸 표시와 같은 글자. 이모지만으로는 🌆이 저녁인지 읽기 어려웠다
-    lines.push(`${i + 1}차 ${meta.emoji} ${slotLabelWithClock(step.slot)} ${spot.name}${catText}`);
+    lines.push(hideSlot ? `${i + 1}차 ${spot.name}${catText}` : `${i + 1}차 ${meta.emoji} ${slotLabelWithClock(step.slot)} ${spot.name}${catText}`);
     // 카드와 시트가 보이는 문장과 같게 한다(P-344)
     const summary = displaySpotSummary(spot).text;
     if (summary) lines.push(`✨ ${summary}`);
@@ -8018,7 +8020,7 @@ function renderReceiverView(steps: CourseStep[]): void {
   document.getElementById('btn-receiver-copy')?.addEventListener('click', async () => {
     try {
       const area = sharedArea();
-      const text = await formatCourseTextAsync(steps, spotById, area.regions, 'ALL', area.subZones, sharedCategoryKey);
+      const text = await formatCourseTextAsync(steps, spotById, area.regions, 'ALL', area.subZones, sharedCategoryKey, Boolean(blogSlug));
       await copyOrShowText(text, '📋 코스가 복사되었어요');
     } catch {
       showToast('복사하지 못했어요');

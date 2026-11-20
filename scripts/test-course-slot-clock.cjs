@@ -44,7 +44,10 @@ assert.ok(/renderStepCard\(step, i, \{ swappable: false, usedImages, hideSlot: B
 
 // 5) 복사 글 칸 줄도 같은 함수
 const copy = cut('async function formatCourseTextAsync', '\n}\n');
-assert.ok(copy.includes('lines.push(`${i + 1}차 ${meta.emoji} ${slotLabelWithClock(step.slot)} ${spot.name}${catText}`);'), '복사 글 칸 줄이 slotLabelWithClock을 쓰지 않는다');
+assert.ok(copy.includes(': `${i + 1}차 ${meta.emoji} ${slotLabelWithClock(step.slot)} ${spot.name}${catText}`);'), '복사 글 칸 줄이 slotLabelWithClock을 쓰지 않는다');
+// 6) 매거진 코스 복사 글은 카드처럼 칸 줄을 뺀다
+assert.ok(copy.includes('lines.push(hideSlot ? `${i + 1}차 ${spot.name}${catText}` :'), '복사 글이 hideSlot일 때 칸 줄을 빼지 않는다');
+assert.ok(/formatCourseTextAsync\(steps, spotById, area\.regions, 'ALL', area\.subZones, sharedCategoryKey, Boolean\(blogSlug\)\)/.test(recv), '받은 코스 복사가 매거진 여부를 넘기지 않는다');
 assert.ok(!/meta\.label/.test(copy), '복사 글에 시각 없는 칸 이름이 남았다');
 
-console.log('ok 칸 표시 기준 시각 12');
+console.log('ok 칸 표시 기준 시각 14');
