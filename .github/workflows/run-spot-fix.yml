@@ -33,7 +33,6 @@ jobs:
           key: ${{ secrets.OCI_SSH_KEY }}
           port: ${{ secrets.OCI_PORT || 22 }}
           envs: PROPOSAL,MODE
-          script_stop: true
           script: |
             set -eo pipefail
             REPO=/mnt/data/git/oneul-date
@@ -43,8 +42,24 @@ jobs:
             git fetch -q origin main
             git checkout origin/main -- scripts/merge_verified_spots.py scripts/judge_date_fit.py
             mkdir -p "$HOME/oneul-backups"
-            # script_stop은 줄마다 종료 코드를 보므로 거짓인 [ ] && 줄을 두지 않는다
             if [ "$MODE" = "apply" ]; then APPLY="--apply"; else APPLY=""; fi
             echo "교정 $PROPOSAL 모드 $MODE, 저장소 $REPO"
-            cd scripts
-            COLLECTOR_DIR="$REPO/collector" python3 merge_verified_spots.py "$PROPOSAL" --backup-dir "$HOME/oneul-backups" $APPLY
+            # 호스트 python 3.9는 수집기 모듈 문법을 못 읽어 컨테이너(/app) 안에서 돌린다(impl-446과 같은 방식)
+            C=oneul-collector
+            T=/tmp/spotfix
+            docker exec $C rm -rf $T
+            docker exec $C mkdir -p $T/env $T/backups
+            docker cp scripts/merge_verified_spots.py $C:$T/
+            docker cp scripts/judge_date_fit.py $C:$T/
+            # connect()가 host.docker.internal을 127.0.0.1로 바꾸므로 임시 .env에는 그 이름의 IP를 넣는다
+            H=$(docker exec $C getent hosts host.docker.internal | awk '{print $1}')
+            echo "중계 서버 주소 $H"
+            sed "s/host\.docker\.internal/$H/g" collector/.env | docker exec -i $C sh -c "cat > $T/env/.env"
+            set +e
+            docker exec -w $T -e COLLECTOR_DIR=$T/env -e PYTHONPATH=/app $C python3 merge_verified_spots.py "$PROPOSAL" --backup-dir $T/backups $APPLY
+            RC=$?
+            set -e
+            docker cp $C:$T/backups/. "$HOME/oneul-backups/"
+            docker exec $C rm -rf $T
+            ls -t "$HOME/oneul-backups" | head -3
+            exit $RC
