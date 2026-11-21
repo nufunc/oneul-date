@@ -4846,6 +4846,32 @@ html[data-theme-resolved="dark"] .step-transit-divider.origin-start .step-transi
   color: #ffffff;
 }
 
+/* 탐색 카드 사진 위 아이콘 배지: 코스 카드 .badge-hot-floating과 같은 자리·크기 */
+.discovery-card .badge-card-curation.is-icon,
+.discovery-card.cols-3 .badge-card-curation.is-icon {
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  line-height: 1;
+}
+
+/* 사진 폭이 좁아 위치 배지와 같은 줄이면 겹치는 카드는 둘째 줄 오른쪽에 둔다(5열 65px, 320px 화면 3열 87px) */
+.discovery-card.cols-5 .badge-card-curation.is-icon {
+  top: 23px;
+  right: 4px;
+}
+@media (max-width: 359px) {
+  .discovery-card.cols-3 .badge-card-curation.is-icon {
+    top: 34px;
+  }
+}
+
 /* 상세 시트에만 붙는다. 배경이 없어 사진 위에서 글씨가 보이지 않았다 */
 .badge-card-curation.tourapi {
   background: #15803d; /* 흰 글씨 5.02:1 */

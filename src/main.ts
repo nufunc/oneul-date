@@ -7418,12 +7418,15 @@ function renderDiscoverySpotCard(spot: Spot & { _dist?: number }, cols: 2 | 3 | 
   const yt = spot.social_links?.youtube;
   const hasYt = isValidYoutubeHotclip(yt) && yt?.url;
 
+  // 사진 위 배지는 문구 없이 아이콘만, 코스 카드 🔥(.badge-hot-floating)와 같은 우측 상단 22px 원으로 둔다
+  const iconPill = (kind: string, icon: string, label: string) =>
+    `<span class="badge-card-curation ${kind} is-icon" role="img" aria-label="${label}" title="${label}">${icon}</span>`;
   const curationPill = spot.curation_badges?.blue_ribbon
-    ? `<span class="badge-card-curation blueribbon">${cols === 5 ? '🎀' : '🎀 블루리본'}</span>`
+    ? iconPill('blueribbon', '🎀', '블루리본')
     : spot.curation_badges?.michelin
-    ? `<span class="badge-card-curation michelin">${cols === 5 ? '⭐' : '⭐ 미쉐린'}</span>`
+    ? iconPill('michelin', '⭐', '미쉐린')
     : isHot
-    ? `<span class="badge-card-curation hot">${cols === 5 ? '🔥' : '🔥 핫플'}</span>`
+    ? iconPill('hot', '🔥', '핫플')
     : '';
 
   if (cols === 5) {
