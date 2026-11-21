@@ -48,4 +48,8 @@ assert.ok(/Boolean\(item\.blogSlug\),\s*\);/.test(savedCopy), '저장한 코스 
 // 5. 결과 화면에서 다시 저장해도 출처가 남는다
 assert.ok(/title: courseTitle\(state\.courseConditions, state\.course\),\s*blogSlug: state\.courseConditions\.blogSlug,/.test(src), '결과 저장에 blogSlug가 없다');
 
+// 6. 받은 화면 🔄 바꿔서 쓰기로 연 결과 화면도 매거진 출처를 넘긴다(P-549 후속)
+const edit = cut("getElementById('btn-receiver-edit')?.addEventListener", 'showToast(');
+assert.ok(/restoreCourse\(\{ conditions, blogSlug: blogSlug \?\? undefined \}, steps\)/.test(edit), '바꿔서 쓰기 경로에 blogSlug가 없다');
+
 console.log('test-saved-blog-course-slot: ok');

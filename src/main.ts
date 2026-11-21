@@ -8026,7 +8026,8 @@ function renderReceiverView(steps: CourseStep[]): void {
     renderShell();
     const area = sharedArea();
     const conditions = { region: area.regions, subZones: area.subZones, mood: 'ALL', slots: steps.map((st) => st.slot), categoryKey: sharedCategoryKey };
-    restoreCourse({ conditions }, steps);
+    // 매거진 코스는 결과 화면에서도 시간대 칸을 숨긴다(P-549 후속)
+    restoreCourse({ conditions, blogSlug: blogSlug ?? undefined }, steps);
     showToast('🔄로 장소를 바꿀 수 있어요');
   });
 
