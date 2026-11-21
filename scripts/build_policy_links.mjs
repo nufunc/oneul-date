@@ -16,7 +16,7 @@ const link = (href, text, ext = false) =>
 const POLICY_NAV = `<nav ${MARK} aria-label="사이트 정보" style="grid-column:1 / -1;max-width:680px;margin:0 auto;`
   + `padding:16px 20px calc(16px + env(safe-area-inset-bottom, 0px));text-align:center;font-size:13px;line-height:1.6;opacity:.75">`
   + [link(`${SITE}about`, '소개'), link(`${SITE}privacy`, '개인정보처리방침'),
-    link('https://github.com/nufunc/oneul-date/issues', '문의', true)].join(' · ')
+    link('mailto:contact@oneul.date', '문의')].join(' · ')
   + '</nav>';
 
 const distDir = path.resolve('dist');
