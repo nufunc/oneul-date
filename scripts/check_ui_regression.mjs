@@ -348,7 +348,12 @@ for (const [name, width, height, hash] of [['home1280', 1280, 800, ''], ['home19
       const c = document.querySelector('#conditions-area').getBoundingClientRect();
       const r = document.querySelector('#results-area').getBoundingClientRect();
       const chips = [...document.querySelectorAll('.quick-region-chip')];
+      // 두 열에서는 결과 막대가 화면 아래에 뜨지 않고 3번째 카드 아래 제자리인가(P-553)
+      const bar = document.querySelector('#results-area .result-actions-3')?.getBoundingClientRect();
+      const cards = [...document.querySelectorAll('#results-area .step-list .step-card')].map((e) => e.getBoundingClientRect());
+      const barOverlap = bar ? cards.reduce((m, k) => Math.max(m, Math.max(0, Math.min(bar.bottom, k.bottom) - Math.max(bar.top, k.top)) * Math.max(0, Math.min(bar.right, k.right) - Math.max(bar.left, k.left))), 0) : -1;
       return {
+        barOverlap: Math.round(barOverlap), barGap: bar && cards.length ? Math.round(bar.top - cards[cards.length - 1].bottom) : null,
         condIn: Math.round(Math.max(0, Math.min(c.bottom, innerHeight) - Math.max(c.top, 0))), condH: Math.round(c.height),
         chipsIn: chips.filter((e) => { const b = e.getBoundingClientRect(); return b.height && b.bottom > 0 && b.top < innerHeight; }).length, chipsN: chips.length,
         resLeft: Math.round(r.left), condRight: Math.round(c.right),
@@ -413,7 +418,7 @@ for (const [k, d] of Object.entries(desktop)) {
   const centered = Math.abs(d.appGap[0] - d.appGap[1]) <= 1;
   let ok = d.scrollW === d.vw && centered && d.homeBlocks === 0;
   if (k.startsWith('home')) ok &&= d.cls < 0.01;
-  if (d.twoCol) ok &&= d.twoCol.condIn === d.twoCol.condH && d.twoCol.chipsN > 0 && d.twoCol.chipsIn === d.twoCol.chipsN && d.twoCol.resLeft > d.twoCol.condRight;
+  if (d.twoCol) ok &&= d.twoCol.condIn === d.twoCol.condH && d.twoCol.chipsN > 0 && d.twoCol.chipsIn === d.twoCol.chipsN && d.twoCol.resLeft > d.twoCol.condRight && d.twoCol.barOverlap === 0 && d.twoCol.barGap >= 0;
   if (!ok) fails.push(`desktop ${k} ${JSON.stringify(d)}`);
 }
 result.fails = fails;

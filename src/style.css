@@ -926,6 +926,15 @@ label,
   html:not([data-shared-course]) body > :is(#app:first-child, .data-failed-banner:first-child + #app) #results-area:has(> .results-empty) {
     min-height: 100svh;
   }
+  /* 결과 막대의 50vh 위 여백과 화면 아래 sticky는 한 열 모바일에서 결과 머리를 덮지 않으려는 값이라 두 열에서는
+     막대가 y 732에 떠 3번째 카드 하단과 겹쳤다. 두 열에서는 3번째 카드 아래 20px 제자리에 둔다(P-553) */
+  html:not([data-shared-course]) body > :is(#app:first-child, .data-failed-banner:first-child + #app) #results-area .step-list:has(+ .result-actions-3) {
+    margin-bottom: var(--space-5);
+  }
+  html:not([data-shared-course]) body > :is(#app:first-child, .data-failed-banner:first-child + #app) #results-area .result-actions.result-actions-3 {
+    margin-top: 0;
+    position: static;
+  }
 }
 
 .btn-saved:hover {
