@@ -49,8 +49,8 @@ jobs:
             T=/tmp/spotfix
             docker exec $C rm -rf $T
             docker exec $C mkdir -p $T/env $T/backups
-            docker cp scripts/merge_verified_spots.py $C:$T/
-            docker cp scripts/judge_date_fit.py $C:$T/
+            # judge_date_fit.py가 옆의 json 목록 파일을 읽으므로 scripts 폴더째 넣는다
+            docker cp scripts/. $C:$T/
             # connect()가 host.docker.internal을 127.0.0.1로 바꾸므로 임시 .env에는 그 이름의 IP를 넣는다
             H=$(docker exec $C getent hosts host.docker.internal | awk '{print $1}')
             echo "중계 서버 주소 $H"
