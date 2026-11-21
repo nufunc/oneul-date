@@ -104,6 +104,18 @@ def test_p552_coord_fix_asserts_and_is_idempotent():
     assert skipped[5401] == "닫힘" and skipped[6006].startswith("이름 바뀜")  # 쓰기 직전 열림과 이름 확인
 
 
+def test_p558_merge_closes_6006_into_4995():
+    rows = {4995: {"id": 4995, "name": "꽁티드툴레아 도산", "is_closed": False, "category": "카페", "business_hours": {},
+                   "parking_info": {}, "social_links": {"kakaomap": {"url": "https://place.map.kakao.com/179244712"}}},
+            6006: {"id": 6006, "name": "꽁티드툴레아", "is_closed": False, "category": "카페", "business_hours": {},
+                   "parking_info": {}, "social_links": {"kakaomap": {"url": "https://place.map.kakao.com/179244712"}}}}
+    merges, fills, skipped = plan("P-558", {}, rows)
+    assert len(merges) == 1 and merges[0]["keep"]["id"] == 4995 and [d["id"] for d in merges[0]["dups"]] == [6006]
+    assert merges[0]["fill"] == {} and fills == [] and skipped == {}  # 남길 행이 이미 다 채워져 옮길 값 없음
+    rows[6006]["is_closed"] = True
+    assert plan("P-558", {}, rows)[0] == []  # 재실행은 아무것도 쓰지 않는다
+
+
 if __name__ == "__main__":
     test_keep_fix_patch()
     test_plan_skips_closed_and_changed()
@@ -111,4 +123,5 @@ if __name__ == "__main__":
     test_p548_merge_fills_parking_and_fix_is_idempotent()
     test_fix_body_kakao_address_category()
     test_p552_coord_fix_asserts_and_is_idempotent()
+    test_p558_merge_closes_6006_into_4995()
     print("ok")

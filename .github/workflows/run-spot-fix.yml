@@ -8,7 +8,7 @@ on:
       proposal:
         description: 교정 제안 번호
         type: choice
-        options: [P-552]
+        options: [P-552, P-558]
       mode:
         description: dry-run은 계획만 출력, apply는 백업 뒤 DB에 쓴다
         type: choice

@@ -14,6 +14,7 @@ P-064: R3 같은 주소 전수(review-rule-20261004.json)의 병합 3곳은 MERG
 P-101: 접두어만 다른 같은 주소 중복(--result p101_duplicate_suffix_pairs.json)의 merge 쌍을 close 행에서 keep 행으로 합친다.
 P-548: 덕수궁 대한문을 덕수궁으로 합치고, 정동전망대 값을 받은 덕수궁돌담길과 예술장터의 주소, 좌표, 카테고리를 TourAPI 129186 값으로 고친다.
   교정은 지금 값과 같은 필드를 빼고 써서 다시 돌려도 결과가 같다.
+P-558: P-552로 같은 주소와 좌표가 된 꽁티드툴레아 중복(6006)을 4995로 합친다.
 P-552: 같은 좌표 묶음에서 자기 카카오 장소와 멀리 떨어진 4행(꽁티드툴레아 둘, 모나용평, 마복산)의 좌표를 카카오 장소 좌표로 고친다. 주소가 다른 3행은 주소도 바꾸고 area를 다시 계산한다.
 병합은 닫는 행 source.note에 merged_into를 남기고 남는 행의 빈 필드만 채운다(category는 옮기지 않는다). 소속 명소로 합치는 행(야경, 공연)은
 영업시간과 가격이 명소의 값이 아니어서 분위기 값만 옮긴다. 쓰기 직전에 다시 읽어 지금도 열려 있고 이름이 결과 파일 때와 같은 행만 고친다.
@@ -94,6 +95,9 @@ MERGES = {
     },
     "P-548": {  # 대한문은 덕수궁 정문. TourAPI 1605981과 126509의 주소, 이용시간, 휴무가 같다
         1790386510260: ("덕수궁 대한문", 1789407849101, "same"),
+    },
+    "P-558": {  # P-552 뒤 같은 카카오 179244712, 같은 주소와 좌표. 채운 필드 수 같음(24), 이름이 카카오 「꽁티드툴레아 도산점」에 가까운 4995를 남긴다
+        6006: ("꽁티드툴레아", 4995, "same"),
     },
 }
 # 카테고리 채움: id: (지금 이름, 카테고리, 바꿀 이름). 카테고리는 카카오 경로의 저장 단계(kakao_category_from_path)다.
@@ -290,7 +294,7 @@ def plan(proposal, result, rows):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("proposal", choices=["P-053", "P-051", "P-054", "P-055", "P-056", "P-058", "P-064", "P-101", "P-548", "P-552"])
+    ap.add_argument("proposal", choices=["P-053", "P-051", "P-054", "P-055", "P-056", "P-058", "P-064", "P-101", "P-548", "P-552", "P-558"])
     ap.add_argument("--result", help="P-053 결과 파일(duplicate-merge-YYYYMMDD.json), P-058 층 파일(r5-strata-YYYYMMDD.json), P-101 쌍 파일")
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--backup-dir", default=os.path.expanduser("~/oneul-backups"))
