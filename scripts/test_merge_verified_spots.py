@@ -61,15 +61,18 @@ def test_p548_merge_fills_parking_and_fix_is_idempotent():
                             "parking_info": {"type": "impossible", "detail": "불가"}, "curation_badges": {"tour_api": "한국관광공사 관광정보"}},
             5996: {"id": 5996, "name": "덕수궁돌담길", "is_closed": False, "address": "서울 중구 덕수궁길 15", "lat": 37.56456211,
                    "lng": 126.97560817, "category": "전망대", "price": "정동전망대 무료", "image_url": "k"},
-            3168: {"id": 3168, "name": "덕수궁 돌담길 예술장터", "is_closed": False, "lat": 37.5677154, "lng": 126.9744616}}
+            3168: {"id": 3168, "name": "덕수궁 돌담길 예술장터", "is_closed": False, "address": "서울 중구 덕수궁길 15", "lat": 37.5677154,
+                   "lng": 126.9744616, "category": "전망대", "price": "전통 모티브 공예품 15,000원~"}}
     merges, _, _ = plan("P-548", {}, rows)
     assert merges[0]["fill"] == {"closed_days": ["월요일"], "parking_info": {"type": "impossible", "detail": "불가"},
                                  "curation_badges": {"tour_api": "한국관광공사 관광정보"}}
     skipped = {}
     fixes = fix_list("P-548", {}, rows, skipped)
-    assert [f["row"]["id"] for f in fixes] == [5996] and skipped == {3168: "이미 고침"}  # 3168 좌표는 이미 맞다
+    assert [f["row"]["id"] for f in fixes] == [5996, 3168] and skipped == {}
     assert set(fixes[0]["patch"]) == {"address", "lat", "lng", "category", "price", "image_url"}
-    rows[5996].update(fixes[0]["patch"])
+    assert fixes[1]["patch"] == {"address": "서울 중구 세종대로19길 24", "category": "도보여행"}  # 3168 좌표는 이미 맞고 가격은 건드리지 않는다
+    for f in fixes:
+        rows[f["row"]["id"]].update(f["patch"])
     rows[1790386510260]["is_closed"] = True
     assert fix_list("P-548", {}, rows, {}) == [] and plan("P-548", {}, rows)[0] == []  # 재실행은 아무것도 쓰지 않는다
 
