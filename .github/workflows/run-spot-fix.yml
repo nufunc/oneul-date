@@ -43,7 +43,8 @@ jobs:
             git fetch -q origin main
             git checkout origin/main -- scripts/merge_verified_spots.py scripts/judge_date_fit.py
             mkdir -p "$HOME/oneul-backups"
-            APPLY=""
-            [ "$MODE" = "apply" ] && APPLY="--apply"
+            # script_stop은 줄마다 종료 코드를 보므로 거짓인 [ ] && 줄을 두지 않는다
+            if [ "$MODE" = "apply" ]; then APPLY="--apply"; else APPLY=""; fi
+            echo "교정 $PROPOSAL 모드 $MODE, 저장소 $REPO"
             cd scripts
             COLLECTOR_DIR="$REPO/collector" python3 merge_verified_spots.py "$PROPOSAL" --backup-dir "$HOME/oneul-backups" $APPLY
