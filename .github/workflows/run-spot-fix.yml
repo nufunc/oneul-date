@@ -1,0 +1,49 @@
+name: Run Spot Fix
+
+# 승인된 스팟 교정(scripts/merge_verified_spots.py)을 OCI 호스트에서 돌린다.
+# 로컬 SSH 키가 호스트에서 거부돼(2026-11-21) 배포와 같은 OCI_SSH_KEY로 붙는다. 수동 실행만 받는다.
+on:
+  workflow_dispatch:
+    inputs:
+      proposal:
+        description: 교정 제안 번호
+        type: choice
+        options: [P-552]
+      mode:
+        description: dry-run은 계획만 출력, apply는 백업 뒤 DB에 쓴다
+        type: choice
+        options: [dry-run, apply]
+        default: dry-run
+
+concurrency:
+  group: spot-fix
+  cancel-in-progress: false
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: appleboy/ssh-action@v1.2.0
+        env:
+          PROPOSAL: ${{ inputs.proposal }}
+          MODE: ${{ inputs.mode }}
+        with:
+          host: ${{ secrets.OCI_HOST }}
+          username: ${{ secrets.OCI_USERNAME }}
+          key: ${{ secrets.OCI_SSH_KEY }}
+          port: ${{ secrets.OCI_PORT || 22 }}
+          envs: PROPOSAL,MODE
+          script_stop: true
+          script: |
+            set -eo pipefail
+            REPO=/mnt/data/git/oneul-date
+            [ -d "$REPO" ] || REPO="$HOME/oneul-date"
+            cd "$REPO"
+            # 배포 미러의 다른 파일은 건드리지 않고 교정 스크립트 두 개만 main 판으로 맞춘다
+            git fetch -q origin main
+            git checkout origin/main -- scripts/merge_verified_spots.py scripts/judge_date_fit.py
+            mkdir -p "$HOME/oneul-backups"
+            APPLY=""
+            [ "$MODE" = "apply" ] && APPLY="--apply"
+            cd scripts
+            COLLECTOR_DIR="$REPO/collector" python3 merge_verified_spots.py "$PROPOSAL" --backup-dir "$HOME/oneul-backups" $APPLY
