@@ -841,14 +841,15 @@ label,
     padding-left: 8px;
     padding-right: 8px;
   }
-  /* 묶음이 4px 넘쳐 있어 머리 줄바꿈(P-399)을 켜면 기본 글자에서도 두 줄이 됐다. 간격과 여백을 줄여 한 줄에 맞춘다 */
+  /* 묶음이 넘쳐 있어 머리 줄바꿈(P-399)을 켜면 기본 글자에서도 두 줄이 됐다(320px에서 282px > 280px, agy Nit 1).
+     간격과 여백을 줄여 한 줄에 맞춘다. 단추마다 44px 이상이라 간격 2px에서도 터치 영역은 겹치지 않는다 */
   .btn-saved {
-    padding-left: 8px;
-    padding-right: 8px;
+    padding-left: 6px;
+    padding-right: 6px;
   }
   /* 뒤에 오는 480px 이하 규칙(gap 6px)보다 앞서도록 머리 안으로 좁힌다 */
   .topbar .topbar-actions {
-    gap: 4px;
+    gap: 2px;
   }
 }
 
