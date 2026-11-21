@@ -1,5 +1,5 @@
-// 코스 지역 이름 회귀 테스트: node scripts/test-course-area-label.cjs (P-350)
-// courseAreaLabel과 spotSigunguLabel을 src/main.ts에서 떼어 실행한다. 존 > 한 시·군·구 > 시·군 둘 > 선택한 지역 라벨 순서를 본다
+// 코스 지역 이름 회귀 테스트: node scripts/test-course-area-label.cjs (P-350, P-547)
+// courseAreaLabel과 spotSigunguLabel을 src/main.ts에서 떼어 실행한다. 존 > 한 시·군·구 > 시·군 둘 > 한 시·도 > 선택한 지역 라벨 순서를 본다
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
@@ -49,12 +49,16 @@ assert.strictEqual(label(['경기 수원시 권선구 호매실로 70', '경기 
 assert.strictEqual(label(['울산 중구 신기9길 45', '대전 중구 중앙로 1'], ['YEONGNAM']), '영남');
 // 3) 시·군이 둘이면 A·B. 광역시의 구가 끼면 쓰지 않는다
 assert.strictEqual(label(['경기 포천시 신북면 1', '경기 남양주시 별내동 2'], ['GYEONGGI']), '포천·남양주');
-assert.strictEqual(courseAreaLabel(at('울산 남구 대공원로 1', '울산 중구 태화동 2'), ['YEONGNAM'], []), '영남');
-// 시·군이 셋이거나 정하지 못한 장소가 섞이면 선택한 지역 라벨, 선택도 없으면 빈 이름
-assert.strictEqual(label(['충북 충주시 1', '충북 제천시 2', '충북 단양군 3'], ['CHUNGCHEONG']), '충청');
 assert.strictEqual(label(['충북 충주시 1', '세종 도움3로 105-6'], ['CHUNGCHEONG']), '충주·세종');
-assert.strictEqual(label(['충북 충주시 1', '충북 중앙탑로 105'], ['CHUNGCHEONG']), '충청');
-assert.strictEqual(label(['충북 충주시 1', '충북 제천시 2', '충북 단양군 3']), '');
+// 4) 묶지 못해도 모든 장소가 한 시·도면 그 시·도 이름(P-547)
+assert.strictEqual(courseAreaLabel(at('울산 남구 대공원로 1', '울산광역시 중구 태화동 2'), ['YEONGNAM'], []), '울산');
+assert.strictEqual(label(['대전 유성구 1', '대전광역시 서구 2'], ['CHUNGCHEONG']), '대전');
+assert.strictEqual(label(['충북 충주시 1', '충북 제천시 2', '충청북도 단양군 3'], ['CHUNGCHEONG']), '충북');
+assert.strictEqual(label(['충북 충주시 1', '충북 중앙탑로 105'], ['CHUNGCHEONG']), '충북');
+assert.strictEqual(label(['충북 충주시 1', '충북 제천시 2', '충북 단양군 3']), '충북');
+// 5) 시·도가 둘 이상이면 선택한 지역 라벨, 선택도 없으면 빈 이름
+assert.strictEqual(label(['부산 연제구 1', '울산 중구 2', '경남 김해시 3'], ['YEONGNAM']), '영남');
+assert.strictEqual(label(['충북 충주시 1', '대전 서구 2', '세종 3']), '');
 assert.strictEqual(courseAreaLabel([], ['YEONGNAM'], []), '영남');
 assert.strictEqual(courseAreaLabel([], [], []), '');
 

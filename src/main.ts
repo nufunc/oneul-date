@@ -2424,6 +2424,10 @@ function courseAreaLabel(spots: Spot[], regionKeys: string[] = [], zoneKeys: str
       if (labels.length === 1) return labels[0];
       if (labels.length === 2 && labels.every((l) => !l.includes(' '))) return labels.join('·');
     }
+    // 시·군·구로 묶지 못해도 모든 장소가 한 시·도면 그 이름을 쓴다. 울산만 도는 코스가 「영남」으로 보였다(P-547)
+    const sidos = new Set(spots.map(spotSido));
+    const [sido] = sidos;
+    if (sidos.size === 1 && sido) return sido;
   }
   return regionKeys.length > 0 || zoneKeys.length > 0 ? regionsLabel(regionKeys, zoneKeys) : '';
 }
