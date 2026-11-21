@@ -294,6 +294,9 @@
       display: inline-flex;
       align-items: center;
       min-height: 44px;
+      /* 두 글자 지역 링크 폭이 21.8px로 가로 터치 기준에 못 미쳤다(agy 검토 11-21 Important 4, P-555) */
+      min-width: 44px;
+      justify-content: center;
     }
     header:not(.article-header) a{min-height:44px;align-content:center;align-items:center}
     .header-nav a,.header-title a,.blog-tagline a{display:inline-block}
