@@ -315,6 +315,20 @@
     .od-more-wrap{max-width:var(--max-width);margin:8px auto 0;padding:0 24px;text-align:center}
     .od-more{min-height:48px;padding:0 28px;border-radius:999px;border:1px solid var(--color-border);background:#fff;color:var(--color-text-main);font:inherit;font-size:15px;font-weight:700;cursor:pointer}
     .od-more:focus-visible{outline:3px solid #0284c7;outline-offset:2px}
+    /* 어두움 테마(P-556): OS 설정을 따르고, 배경·글자·테두리는 앱 어두움 토큰(src/style.css)과 같은 값 */
+    @media (prefers-color-scheme: dark) {
+      :root { color-scheme: dark; --bg-page: #0b0f17; --bg-card: #151c28; --color-primary: #f0f4f8; --color-accent: #f87171; --color-text-main: #f0f4f8; --color-text-sub: #cbd5e1; --color-text-faint: #94a3b8; --color-border: #28354b; }
+      .site-header { background: rgba(11, 15, 23, 0.95); }
+      .header-link, .card-thumb-wrap { background: #1e2638; }
+      .header-link:hover { background: #242f44; }
+      .hero-badge { background: rgba(248, 113, 113, 0.12); color: #fda4af; border-color: rgba(253, 164, 175, 0.35); }
+      .filter-chip, .site-footer, .od-search input, .od-empty button, .od-more { background: var(--bg-card); }
+      .filter-chip:hover { border-color: #3d4f6f; }
+      .filter-chip.active { color: #0b0f17; }
+      .card-badge-tag { background: rgba(21, 28, 40, 0.95); color: #f0f4f8; }
+      .card-cost { color: #34d399; }
+      .od-search input:focus-visible, .od-more:focus-visible { outline-color: #38bdf8; }
+    }
   </style>
 </head>
 <body>
