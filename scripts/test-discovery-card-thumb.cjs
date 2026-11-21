@@ -35,7 +35,7 @@ const attrs = (html) => {
 // 카카오 사진: 축소 주소로 받고 원본은 data-orig에 둔다
 const K = 'https://t1.daumcdn.net/local/kakaomapPhoto/review/abc?original';
 const a = attrs(render(K, { name: '가게' }));
-assert.strictEqual(a.src, `https://img1.daumcdn.net/thumb/R400x400/?fname=${encodeURIComponent(K)}`);
+assert.strictEqual(a.src, `https://img1.daumcdn.net/thumb/R400x400.fwebp/?fname=${encodeURIComponent(K)}`);
 assert.strictEqual(a['data-orig'], K);
 assert.strictEqual(a.class, 'discovery-card-img discovery-img');
 

@@ -9,7 +9,7 @@ const start = src.indexOf('function toCardThumbUrl');
 const end = src.indexOf('\n}\n', start) + 3;
 const toThumb = new Function(`${ts.transpile(src.slice(start, end), { target: 'es2022' })};return toCardThumbUrl;`)();
 
-const wrap = (u) => `https://img1.daumcdn.net/thumb/R400x400/?fname=${encodeURIComponent(u)}`;
+const wrap = (u) => `https://img1.daumcdn.net/thumb/R400x400.fwebp/?fname=${encodeURIComponent(u)}`;
 const K = 'https://t1.kakaocdn.net/mystore/BEFA474F?x=1&y=2';
 const D = 'http://t1.daumcdn.net/local/kakaomapPhoto/review/abc?original';
 const CASES = [

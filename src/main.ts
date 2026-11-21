@@ -5492,9 +5492,10 @@ function pickImagePool(text: string, cat: string, name: string, slot: SlotKey, u
 /**
  * 코스 카드 썸네일용 주소: 카카오·다음 CDN 원본을 같은 회사의 리사이즈 주소(400px)로 바꾼다. 그 밖의 주소는 그대로 둔다
  */
+// WebP 축소본으로 받는다. PNG 리뷰 사진이 첫 방문 전송의 49%였다(P-550)
 function toCardThumbUrl(url: string): string {
   return /^https?:\/\/t1\.(kakaocdn|daumcdn)\.net\//.test(url)
-    ? `https://img1.daumcdn.net/thumb/R400x400/?fname=${encodeURIComponent(url)}`
+    ? `https://img1.daumcdn.net/thumb/R400x400.fwebp/?fname=${encodeURIComponent(url)}`
     : url;
 }
 
