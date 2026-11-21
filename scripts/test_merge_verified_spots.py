@@ -1,5 +1,5 @@
 """merge_verified_spots 계획 회귀 테스트: python3 scripts/test_merge_verified_spots.py 또는 pytest. 값은 2026-10-04 라이브 행을 줄인 것이다."""
-from merge_verified_spots import fix_body, keep_fix_patch, plan
+from merge_verified_spots import fix_body, fix_list, keep_fix_patch, plan
 
 
 def test_keep_fix_patch():
@@ -54,9 +54,30 @@ def test_fix_body_kakao_address_category():
     assert fix_body(row, {"category": "중식"}, "20261004-090000", "now", "P-055")["category"] == "중식"  # P-055 꼴은 그대로
 
 
+def test_p548_merge_fills_parking_and_fix_is_idempotent():
+    rows = {1789407849101: {"id": 1789407849101, "name": "덕수궁", "is_closed": False, "category": "고궁,궁", "closed_days": [],
+                            "parking_info": {"type": "unknown"}, "curation_badges": {}},
+            1790386510260: {"id": 1790386510260, "name": "덕수궁 대한문", "is_closed": False, "category": "관광지", "closed_days": ["월요일"],
+                            "parking_info": {"type": "impossible", "detail": "불가"}, "curation_badges": {"tour_api": "한국관광공사 관광정보"}},
+            5996: {"id": 5996, "name": "덕수궁돌담길", "is_closed": False, "address": "서울 중구 덕수궁길 15", "lat": 37.56456211,
+                   "lng": 126.97560817, "category": "전망대", "price": "정동전망대 무료", "image_url": "k"},
+            3168: {"id": 3168, "name": "덕수궁 돌담길 예술장터", "is_closed": False, "lat": 37.5677154, "lng": 126.9744616}}
+    merges, _, _ = plan("P-548", {}, rows)
+    assert merges[0]["fill"] == {"closed_days": ["월요일"], "parking_info": {"type": "impossible", "detail": "불가"},
+                                 "curation_badges": {"tour_api": "한국관광공사 관광정보"}}
+    skipped = {}
+    fixes = fix_list("P-548", {}, rows, skipped)
+    assert [f["row"]["id"] for f in fixes] == [5996] and skipped == {3168: "이미 고침"}  # 3168 좌표는 이미 맞다
+    assert set(fixes[0]["patch"]) == {"address", "lat", "lng", "category", "price", "image_url"}
+    rows[5996].update(fixes[0]["patch"])
+    rows[1790386510260]["is_closed"] = True
+    assert fix_list("P-548", {}, rows, {}) == [] and plan("P-548", {}, rows)[0] == []  # 재실행은 아무것도 쓰지 않는다
+
+
 if __name__ == "__main__":
     test_keep_fix_patch()
     test_plan_skips_closed_and_changed()
     test_plan_p101_pairs()
+    test_p548_merge_fills_parking_and_fix_is_idempotent()
     test_fix_body_kakao_address_category()
     print("ok")

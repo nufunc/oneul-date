@@ -12,6 +12,8 @@ P-058: R5 층 B(--result r5-strata-YYYYMMDD.json의 rules.R5B_fix)의 rename은 
   목록의 이름은 내보낸 이름이라 지금 행의 이름이나 내보낸 이름 가운데 하나가 같으면 바뀌지 않은 것으로 본다.
 P-064: R3 같은 주소 전수(review-rule-20261004.json)의 병합 3곳은 MERGES, 교정 5곳과 남길 행 이름 2곳은 FIXES 표로 쓴다.
 P-101: 접두어만 다른 같은 주소 중복(--result p101_duplicate_suffix_pairs.json)의 merge 쌍을 close 행에서 keep 행으로 합친다.
+P-548: 덕수궁 대한문을 덕수궁으로 합치고, 정동전망대 값을 받은 덕수궁돌담길과 예술장터를 TourAPI 129186 값으로 고친다.
+  교정은 지금 값과 같은 필드를 빼고 써서 다시 돌려도 결과가 같다.
 병합은 닫는 행 source.note에 merged_into를 남기고 남는 행의 빈 필드만 채운다(category는 옮기지 않는다). 소속 명소로 합치는 행(야경, 공연)은
 영업시간과 가격이 명소의 값이 아니어서 분위기 값만 옮긴다. 쓰기 직전에 다시 읽어 지금도 열려 있고 이름이 결과 파일 때와 같은 행만 고친다.
 
@@ -89,6 +91,9 @@ MERGES = {
         7708: ("오르페오 서울 용산구 한남동", 2256, "same"),  # 사운즈한남 5층. 남길 행은 2256(리드 결정)
         7777: ("재즈257 경기 인천 연수구 송도동", 1788908614471, "same"),
     },
+    "P-548": {  # 대한문은 덕수궁 정문. TourAPI 1605981과 126509의 주소, 이용시간, 휴무가 같다
+        1790386510260: ("덕수궁 대한문", 1789407849101, "same"),
+    },
 }
 # 카테고리 채움: id: (지금 이름, 카테고리, 바꿀 이름). 카테고리는 카카오 경로의 저장 단계(kakao_category_from_path)다.
 # 카카오에 없고 네이버에만 있는 행은 네이버 분류의 마지막 단계를 쓴다. 797 인천 개항장 문화지구는 검색 카테고리가 없어 뺐다
@@ -152,6 +157,11 @@ FIXES = {
         6914: ("요트메이트 부산", {"name": "부산요트투어 요트메이트"}),
         4839: ("다이닝 송 경원재 바이 워커힐", {"address": "인천 연수구 테크노파크로 200"}),  # 카카오 579964345 주소
     },
+    "P-548": {  # 5996은 정동전망대(1788683668582)의 주소, 좌표, 카테고리, 가격을 받았다. TourAPI 129186 값으로 고친다
+        5996: ("덕수궁돌담길", {"address": "서울 중구 세종대로19길 24", "lat": 37.5677154, "lng": 126.9744616, "category": "도보여행",
+                             "price": "무료", "image_url": "https://tong.visitkorea.or.kr/cms/resource/54/4126554_image2_1.jpg"}),
+        3168: ("덕수궁 돌담길 예술장터", {"lat": 37.5677154, "lng": 126.9744616}),  # 5996과 같은 복사 좌표
+    },
 }
 
 
@@ -170,8 +180,12 @@ def fix_list(proposal, result, rows, skipped):
     fixes = []
     for i, (name, patch) in fix_table(proposal, result).items():
         row = rows.get(i)
-        if not row or row.get("is_closed") or name_changed(row, name):
-            skipped[i] = "행 없음" if not row else "닫힘" if row.get("is_closed") else f"이름 바뀜: {row['name']}"
+        if row:  # 재실행하면 이미 고친 값은 건너뛴다
+            patch = {k: v for k, v in patch.items()
+                     if (str((row.get("provider_ids") or {}).get("kakao")) if k == "kakao" else row.get(k)) != (str(v) if k == "kakao" else v)}
+        if not row or row.get("is_closed") or name_changed(row, name) or not patch:
+            skipped[i] = ("행 없음" if not row else "닫힘" if row.get("is_closed") else
+                          f"이름 바뀜: {row['name']}" if name_changed(row, name) else "이미 고침")
         else:
             fixes.append({"row": row, "patch": patch})
     return fixes
@@ -246,6 +260,9 @@ def plan(proposal, result, rows):
         keep, fill = rows[keep_id], {}
         for row, kind in dups:
             _, _, f = plan_merge([keep, row])
+            # 주차 정보 {"type": "unknown"}은 빈 값으로 본다
+            if (keep.get("parking_info") or {}).get("type") == "unknown" and (row.get("parking_info") or {}).get("type") not in (None, "unknown"):
+                f["parking_info"] = row["parking_info"]
             if kind == "venue":
                 f = {k: v for k, v in f.items() if k in VENUE_FIELDS}
             fill.update({k: v for k, v in f.items() if k not in fill})
@@ -265,7 +282,7 @@ def plan(proposal, result, rows):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("proposal", choices=["P-053", "P-051", "P-054", "P-055", "P-056", "P-058", "P-064", "P-101"])
+    ap.add_argument("proposal", choices=["P-053", "P-051", "P-054", "P-055", "P-056", "P-058", "P-064", "P-101", "P-548"])
     ap.add_argument("--result", help="P-053 결과 파일(duplicate-merge-YYYYMMDD.json), P-058 층 파일(r5-strata-YYYYMMDD.json), P-101 쌍 파일")
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--backup-dir", default=os.path.expanduser("~/oneul-backups"))
