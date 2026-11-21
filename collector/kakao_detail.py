@@ -4,8 +4,12 @@
 기본은 드라이런, --apply일 때만 쓴다.
 
 - 대상: 열림, source.type이 tourapi가 아님, provider_ids.kakao 있음, business_hours가 빈 행. id 오름차순으로 커서 뒤부터 본다.
+  그 회차에 남은 호출 몫이 있으면 business_hours가 차 있고 '매일'로 시작하지 않으며 closed_days가 빈 행을 따로 둔 커서(closed_last_id) 뒤부터 보고
+  이 행에는 closed_days만 쓴다(P-548).
 - business_hours: {"영업시간": 문구}. 상세 시트가 키를 그대로 라벨로 보인다(src/main.ts:8101-8104).
 - closed_days: open_hours.headline_addition.current_off_day_desc가 '매주 ~ 휴무'일 때 parse_closed_days로 읽은 요일.
+  그 문구가 없거나 '매주'로 시작하지 않으면 open_hours.all.all_days_off_info('매주 화요일', '매주 일요일, 설전날')가 '매주'로 시작할 때 같은 함수로 읽는다(P-548).
+  '매달 둘째, 넷째 수요일' 같은 문구와 이번 주 7일(week_from_today)의 '휴무일'은 쓰지 않는다.
 - 쓰지 않는 행: 응답 실패(404 포함), summary.status가 Y가 아님, 영업시간 안내에 '임시 휴업', 패널과 DB 주소의 도로명이 다르거나
   어느 한쪽에 도로명이 없음. 읽을 때 빈 칸만 쓰고, 읽은 updated_at이 그대로인 행에만 쓴다.
 - price_tier(P-300, P-322, P-333): 식음료(category가 DINING)이고 육류·횟집·주점(NO_PRICE_TIER)이 아니며 price_tier·avg_price_per_person·price가 모두 빈 행만,
@@ -172,8 +176,18 @@ def parking_from_panel(panel):
     return {"type": kind, "detail": summary or text or next(iter(icon_kinds))}
 
 
-def panel_fields(panel, row):
-    """패널 응답과 DB 행 → (쓸 칸, 건너뛴 까닭). 쓸 칸은 읽을 때 빈 칸만 담는다."""
+def off_day_text(open_hours):
+    """정기 휴무 문구. headline_addition.current_off_day_desc, all.all_days_off_info 순서로 '매주'로 시작하는 첫 문구다. 없으면 ''."""
+    oh = open_hours or {}
+    for text in ((oh.get("headline_addition") or {}).get("current_off_day_desc"), (oh.get("all") or {}).get("all_days_off_info")):
+        text = (text or "").strip()
+        if text.startswith("매주"):
+            return text
+    return ""
+
+
+def panel_fields(panel, row, closed_only=False):
+    """패널 응답과 DB 행 → (쓸 칸, 건너뛴 까닭). 쓸 칸은 읽을 때 빈 칸만 담는다. closed_only면 closed_days만 담는다(P-548)."""
     summary = panel.get("summary") or {}
     if summary.get("status") != "Y":
         return {}, "status"
@@ -190,13 +204,14 @@ def panel_fields(panel, row):
     if not same:
         return {}, "road"
     fields = {}
-    text = hours_text(oh) if not row.get("business_hours") else None
+    text = hours_text(oh) if not row.get("business_hours") and not closed_only else None
     if text:
         fields["business_hours"] = {"영업시간": text}
-    off = ((oh.get("headline_addition") or {}).get("current_off_day_desc") or "").strip()
-    closed = parse_closed_days(off) if off.startswith("매주") and not row.get("closed_days") else []
+    closed = parse_closed_days(off_day_text(oh)) if not row.get("closed_days") else []
     if closed:
         fields["closed_days"] = closed
+    if closed_only:
+        return fields, None if fields else "empty"
     tier = price_tier_from_panel(panel, row) if price_empty(row) else None
     if tier:
         fields["price_tier"] = tier
@@ -228,19 +243,27 @@ def run_kakao_detail_backfill(apply=False, log=print, backup_dir=None, limit=Non
         headers.update({"apikey": key, "Authorization": f"Bearer {key}"})
 
     cond = {"is_closed": "eq.false", "source->>type": "neq.tourapi"}
-    last = load_json(STATE, {}).get("last_id", 0)
-    q = urllib.parse.urlencode({"select": "id,name,address,category,business_hours,closed_days,parking_info,provider_ids,price,price_tier,avg_price_per_person,updated_at", **cond,
-                                "provider_ids->>kakao": "not.is.null", "business_hours": "eq.{}", "id": f"gt.{last}",
+    state = load_json(STATE, {})
+    cursor = {"last_id": state.get("last_id", 0), "closed_last_id": state.get("closed_last_id", 0)}
+    select = "id,name,address,category,business_hours,closed_days,parking_info,provider_ids,price,price_tier,avg_price_per_person,updated_at"
+    q = urllib.parse.urlencode({"select": select, **cond,
+                                "provider_ids->>kakao": "not.is.null", "business_hours": "eq.{}", "id": f"gt.{cursor['last_id']}",
                                 "order": "id.asc", "limit": limit})
-    todo = _request(f"{base_url}/rest/v1/spots?{q}", headers) or []
+    todo = [(r, "last_id") for r in _request(f"{base_url}/rest/v1/spots?{q}", headers) or []]
+    if limit > len(todo):
+        # 남은 몫으로 영업시간은 차 있고 정기 휴무만 빈 행을 본다(P-548). '매일'로 시작하는 영업시간은 쉬는 요일이 없어 부르지 않는다
+        q = urllib.parse.urlencode({"select": select, **cond, "provider_ids->>kakao": "not.is.null", "business_hours": "neq.{}",
+                                    "closed_days": "eq.{}", "business_hours->>영업시간": "not.like.매일*",
+                                    "id": f"gt.{cursor['closed_last_id']}", "order": "id.asc", "limit": limit - len(todo)})
+        todo += [(r, "closed_last_id") for r in _request(f"{base_url}/rest/v1/spots?{q}", headers) or []]
     stamp = datetime.now(KST).strftime('%Y%m%d-%H%M')
     if apply and todo:
         os.makedirs(backup_dir, exist_ok=True)
         with open_new(os.path.join(backup_dir, f"p226_{stamp}.json")) as fp:
-            json.dump([{k: r.get(k) for k in ("id", "name", "business_hours", "closed_days", "parking_info", "updated_at")} for r in todo],
+            json.dump([{k: r.get(k) for k in ("id", "name", "business_hours", "closed_days", "parking_info", "updated_at")} for r, _ in todo],
                       fp, ensure_ascii=False, indent=2)
         log(f"백업: {fp.name}")
-        priced = [r for r in todo if price_empty(r)]
+        priced = [r for r, key in todo if key == "last_id" and price_empty(r)]
         if priced:
             with open_new(os.path.join(backup_dir, f"p300_{stamp}.json")) as fp:
                 json.dump([{k: r.get(k) for k in ("id", "name", "price_tier", "avg_price_per_person", "updated_at")} for r in priced],
@@ -248,7 +271,7 @@ def run_kakao_detail_backfill(apply=False, log=print, backup_dir=None, limit=Non
             log(f"백업: {fp.name}")
 
     plans, skipped, calls, fails, streak_start = [], {}, 0, 0, None
-    for r in todo:
+    for r, key in todo:
         if calls:
             time.sleep(PANEL_INTERVAL)
         calls += 1
@@ -257,16 +280,16 @@ def run_kakao_detail_backfill(apply=False, log=print, backup_dir=None, limit=Non
         except PanelFailed as e:
             fails += 1
             skipped["fail"] = skipped.get("fail", 0) + 1
-            streak_start = last if streak_start is None else streak_start
-            last = r["id"]
+            streak_start = dict(cursor) if streak_start is None else streak_start
+            cursor[key] = r["id"]
             if fails >= MAX_CONSECUTIVE_FAILS:
                 # 차단일 수 있으므로 연속 실패한 행은 지나간 것으로 남기지 않고 다음 날 다시 본다
-                last = streak_start
+                cursor = streak_start
                 log(f"  패널 연속 실패 {fails}회로 오늘 단계를 멈춘다(마지막 오류: {e})")
                 break
             continue
-        fails, streak_start, last = 0, None, r["id"]
-        fields, why = panel_fields(panel, r)
+        fails, streak_start, cursor[key] = 0, None, r["id"]
+        fields, why = panel_fields(panel, r, closed_only=key == "closed_last_id")
         if fields:
             plans.append((r, fields))
         else:
@@ -275,7 +298,8 @@ def run_kakao_detail_backfill(apply=False, log=print, backup_dir=None, limit=Non
     closed_n = sum(1 for _, f in plans if f.get("closed_days"))
     tier_n = sum(1 for _, f in plans if f.get("price_tier"))
     parking_n = sum(1 for _, f in plans if f.get("parking_info"))
-    log(f"카카오 영업시간 백필: 대상 {len(todo)}행 · 패널 호출 {calls}회 · 쓸 행 {len(plans)}(영업시간 {hours_n}, 정기 휴무 {closed_n}, 가격대 {tier_n}, 주차 {parking_n}) · "
+    closed_only_n = sum(1 for _, key in todo if key == "closed_last_id")
+    log(f"카카오 영업시간 백필: 대상 {len(todo)}행(정기 휴무만 {closed_only_n}) · 패널 호출 {calls}회 · 쓸 행 {len(plans)}(영업시간 {hours_n}, 정기 휴무 {closed_n}, 가격대 {tier_n}, 주차 {parking_n}) · "
         f"건너뜀 {skipped}")
     if not apply:
         os.makedirs(backup_dir, exist_ok=True)
@@ -301,7 +325,7 @@ def run_kakao_detail_backfill(apply=False, log=print, backup_dir=None, limit=Non
     for r, fields in plans:
         q = urllib.parse.urlencode({"id": f"eq.{r['id']}", **cond, "updated_at": f"eq.{r['updated_at']}"})
         _request(f"{base_url}/rest/v1/spots?{q}", {**headers, "Prefer": "return=minimal"}, "PATCH", {**fields, "updated_at": now})
-    atomic_dump(STATE, {"last_id": last})
+    atomic_dump(STATE, cursor)
     log(f"반영 완료: {len(plans)}행")
     return 0
 

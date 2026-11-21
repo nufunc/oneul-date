@@ -45,15 +45,16 @@ def _row(i, **kw):
             "provider_ids": {"kakao": str(i)}, "updated_at": "t", **kw}
 
 
-def _run(panels, rows=None, apply=True, backup_dir=None, limit=None, state=None):
-    """panels: 카카오 번호 → 패널 응답(예외면 실패). 쓴 PATCH 목록, 호출한 번호, 저장된 커서를 돌려준다."""
-    rows = rows if rows is not None else [_row(int(i)) for i in panels]
+def _run(panels, rows=None, apply=True, backup_dir=None, limit=None, state=None, closed_rows=()):
+    """panels: 카카오 번호 → 패널 응답(예외면 실패). closed_rows는 정기 휴무만 빈 행 조회(P-548)가 돌려줄 행이다.
+    쓴 PATCH 목록, 호출한 번호, 저장된 커서를 돌려준다."""
+    rows = rows if rows is not None else [_row(int(i)) for i in panels if i not in {str(r["id"]) for r in closed_rows}]
     patches, gets, calls = [], [], []
 
     def request(url, headers, method="GET", body=None):
         if method == "GET":
             gets.append(url)
-            return rows
+            return list(closed_rows) if "closed_days=eq.%7B%7D" in url else rows
         patches.append((url, body))
 
     def fetch(kid):
@@ -94,7 +95,7 @@ def test_converts_five_panel_shapes():
     for cond in ("business_hours=eq.%7B%7D", "provider_ids-%3E%3Ekakao=not.is.null", "id=gt.0", "order=id.asc"):
         assert cond in gets[0], cond
     # 임시 휴업과 404도 지나간 것으로 남겨 다음 날 다시 부르지 않는다
-    assert state == {"last_id": 5}
+    assert state == {"last_id": 5, "closed_last_id": 0}
 
 
 def test_does_not_overwrite_filled_columns():
@@ -108,7 +109,7 @@ def test_skips_row_whose_road_name_differs_or_is_missing():
     rows = [_row(1, address="서울 마포구 연희로 47"), _row(2, address="서울 마포구 연희동 123-4"), _row(3)]
     patches, _, _, state = _run({"1": P_ALL, "2": P_ALL, "3": P_ALL}, rows=rows)
     assert [_id(u) for u, _ in patches] == ["id=eq.3"]
-    assert state == {"last_id": 3}
+    assert state == {"last_id": 3, "closed_last_id": 0}
 
 
 def test_jibun_match_passes_only_when_both_addresses_lack_road_name():
@@ -141,13 +142,13 @@ def test_stops_after_five_consecutive_failures_and_retries_them_next_day():
     assert calls == ["1", "2", "3", "4", "5", "6"]
     assert [_id(u) for u, _ in patches] == ["id=eq.1"]
     # 연속 실패한 2~6은 다음 날 다시 본다
-    assert state == {"last_id": 1}
+    assert state == {"last_id": 1, "closed_last_id": 0}
 
 
 def test_isolated_failures_do_not_stop():
     panels = {"1": NOT_FOUND, "2": P_ALL, "3": NOT_FOUND, "4": NOT_FOUND, "5": NOT_FOUND, "6": NOT_FOUND, "7": P_ALL}
     patches, _, calls, state = _run(panels)
-    assert len(calls) == 7 and len(patches) == 2 and state == {"last_id": 7}
+    assert len(calls) == 7 and len(patches) == 2 and state == {"last_id": 7, "closed_last_id": 0}
 
 
 def test_daily_cap_and_cursor_go_into_query():
@@ -164,6 +165,66 @@ def test_runs_once_a_day_and_backs_up_before_writing():
     assert json.load(open(os.path.join(d, name))) == [{"id": 1, "name": "장소1", "business_hours": {}, "closed_days": [], "parking_info": None, "updated_at": "t"}]
     patches, gets, calls, _ = _run({"1": P_ALL}, backup_dir=d)
     assert (patches, gets, calls) == ([], [], [])
+
+
+# P-548 표본(2026-11-21 패널, docs/team/results/2026-11-21-data-steward-449.md)의 open_hours.all.all_days_off_info. headline_addition에는 정기 휴무 문구가 없다
+ALL_OFF = {"9620057": "매주 화요일", "2053149852": "매주 일요일, 설전날", "18619553": "매주 화요일", "14559343": "매주 수요일, 공휴일",
+           "21212902": "매주 월요일, 화요일, 설당일, 추석당일", "1368818187": "매주 화요일"}
+ALL_OFF_DAYS = {"9620057": ["화요일"], "2053149852": ["일요일"], "18619553": ["화요일"], "14559343": ["수요일"],
+                "21212902": ["월요일", "화요일"], "1368818187": ["화요일"]}
+
+
+def _all_off(off, headline=None):
+    """흑돼지가있는풍경(9620057)형: all에 기본 영업시간과 all_days_off_info가 있다"""
+    return {"summary": {"status": "Y", "address": ADDR}, "open_hours": {
+        "headline_addition": headline or {"business_hours_desc": "설명절 전날과 명절당일은 오후 4시에 오픈합니다"},
+        "week_from_today": _week({"일": "11:00 ~ 22:00", "월": "11:00 ~ 22:00", "화": None, "수": "11:00 ~ 22:00",
+                                  "목": "11:00 ~ 22:00", "금": "11:00 ~ 22:00", "토": "11:00 ~ 22:00"}),
+        "all": {"periods": [{"period_title": "기본 영업시간", "days": [{"day_of_the_week": "수~월", "on_days": {"start_end_time_desc": "11:00 ~ 22:00"}}]}],
+                "all_days_off_info": off}}}
+
+
+def test_reads_weekly_all_days_off_info_from_sample_panels():
+    for kid, off in ALL_OFF.items():
+        assert k.panel_fields(_all_off(off), _row(1))[0].get("closed_days") == ALL_OFF_DAYS[kid], kid
+
+
+def test_monthly_or_biweekly_all_days_off_info_is_not_read():
+    for off in ("매달 둘째, 넷째 수요일", "매월 첫째 주 월요일", "격주 화요일", "연중무휴", "", None):
+        assert "closed_days" not in k.panel_fields(_all_off(off), _row(1))[0], off
+
+
+def test_headline_weekly_text_comes_before_all_days_off_info():
+    p = _all_off("매주 화요일", headline={"current_off_day_desc": "매주 월요일 휴무"})
+    assert k.panel_fields(p, _row(1))[0]["closed_days"] == ["월요일"]
+    # headline이 '매주'가 아니면 all_days_off_info를 읽는다
+    p = _all_off("매주 화요일", headline={"current_off_day_desc": "매달 둘째 월요일 휴무"})
+    assert k.panel_fields(p, _row(1))[0]["closed_days"] == ["화요일"]
+
+
+def test_closed_only_rows_get_only_closed_days_and_own_cursor():
+    """business_hours가 차 있고 closed_days가 빈 행은 남은 몫으로 따로 보고 closed_days만 쓴다(P-548)"""
+    p = {**_all_off("매주 화요일"), "place_add_info": {"simple_parking_infos": {"texts": ["무료 주차"], "summary": ""},
+                                                     "store_facility_icons": [{"text": "무료주차"}]},
+         "ai_mate": {"price_level": {"symbol": "₩₩"}}}
+    hours = {"영업시간": "수 11:00 ~ 22:00 / 목 11:00 ~ 22:00"}
+    closed_rows = [_row(9, business_hours=hours, category="카페", parking_info=None)]
+    patches, gets, calls, state = _run({"1": P_ALL, "9": p}, closed_rows=closed_rows, limit=5, state={"last_id": 0, "closed_last_id": 3})
+    assert calls == ["1", "9"]
+    assert [(_id(u), {c: v for c, v in b.items() if c != "updated_at"}) for u, b in patches] == [
+        ("id=eq.1", {"business_hours": {"영업시간": "매일 10:00 ~ 18:00"}}), ("id=eq.9", {"closed_days": ["화요일"]})]
+    assert state == {"last_id": 1, "closed_last_id": 9}
+    main, closed = gets
+    assert "limit=5" in main and "business_hours=eq.%7B%7D" in main
+    for cond in ("business_hours=neq.%7B%7D", "closed_days=eq.%7B%7D", "id=gt.3", "limit=4", "provider_ids-%3E%3Ekakao=not.is.null",
+                 "is_closed=eq.false", "source-%3E%3Etype=neq.tourapi", "order=id.asc"):
+        assert cond in closed, cond
+    assert "not.like.%EB%A7%A4%EC%9D%BC%2A" in closed  # '매일'로 시작하는 영업시간은 부르지 않는다
+
+
+def test_closed_only_pass_is_skipped_when_main_pass_uses_whole_limit():
+    _, gets, calls, _ = _run({"1": P_ALL, "2": P_ALL}, limit=2, closed_rows=[_row(9, business_hours={"영업시간": "수 10:00"})])
+    assert len(gets) == 1 and calls == ["1", "2"]
 
 
 def test_parking_is_backed_up_recorded_and_written_only_to_empty_cells():
