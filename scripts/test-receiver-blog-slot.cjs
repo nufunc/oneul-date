@@ -15,10 +15,14 @@ assert.ok(def, 'slotTag 정의가 hideSlot을 따르지 않는다');
 assert.strictEqual((card.match(/class="step-slot"/g) || []).length, 1, '카드 안에 slotTag를 거치지 않는 시간대 표시가 남았다');
 assert.strictEqual((card.match(/\$\{slotTag\}/g) || []).length, 3, '빈 카드 둘과 장소 카드 하나 모두 slotTag를 써야 한다');
 
-// 받은 코스 화면만 blogSlug가 있을 때 hideSlot을 켠다
+// 받은 코스 화면은 blogSlug가 있을 때, 결과 화면은 저장한 매거진 코스를 불러왔을 때(cond.blogSlug, P-549)만 hideSlot을 켠다
 const calls = src.split('\n').filter((l) => /renderStepCard\(step/.test(l)).map((l) => l.trim());
 const hidden = calls.filter((c) => c.includes('hideSlot'));
-assert.deepStrictEqual(hidden, ['let html = renderStepCard(step, i, { swappable: false, usedImages, hideSlot: Boolean(blogSlug) });'], `hideSlot 호출이 받은 코스의 blogSlug 분기 하나여야 한다: ${hidden.join(' | ')}`);
+assert.deepStrictEqual(hidden, [
+  'const card = renderStepCard(step, i, { usedImages, hideSlot: Boolean(cond.blogSlug) });',
+  'let html = renderStepCard(step, i, { swappable: false, usedImages, hideSlot: Boolean(blogSlug) });',
+], `hideSlot 호출이 blogSlug 분기 둘이어야 한다: ${hidden.join(' | ')}`);
+hidden.shift();
 const recv = src.slice(src.indexOf('function renderReceiverView('), src.indexOf('\nfunction ', src.indexOf('function renderReceiverView(') + 10));
 assert.ok(recv.includes(hidden[0].replace(/^let html = /, '')), 'hideSlot 호출이 renderReceiverView 밖에 있다');
 assert.ok(/let blogSlug: string \| null = null;/.test(recv), 'renderReceiverView에 blogSlug가 없다');

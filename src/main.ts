@@ -36,6 +36,8 @@ interface SavedCourse {
   spotIds: number[];
   /** 저장할 때의 코스 제목('🔍 성수 카페 코스' 등). 예전 저장분에는 없다 */
   title?: string;
+  /** 매거진 코스 상자로 연 받은 화면에서 저장한 글의 slug. 있으면 불러온 카드·목록·복사 글이 칸 표시를 뺀다(P-549) */
+  blogSlug?: string;
 }
 
 const SLOT_ORDER: SlotKey[] = ['day', 'evening', 'night', 'stay'];
@@ -3613,6 +3615,8 @@ interface AppState {
     searchFallback?: { query: string; byFilter: boolean };
     /** 세부존 안에 후보가 없어 권역 전체에서 고른 낮·저녁·밤 칸. 결과 머리 안내 줄이 읽는다(P-431) */
     zoneRelaxed?: SlotKey[];
+    /** 저장한 매거진 코스를 불러온 결과. 받은 화면처럼 카드와 복사 글에서 칸 표시를 뺀다(P-549) */
+    blogSlug?: string;
   } | null;
   savedOpen: boolean;
   regionSheetOpen: boolean;
@@ -5301,7 +5305,7 @@ function renderResultsContent(): void {
     <div class="step-list">
       ${state.course.length > 0 ? renderUserOriginTransitDivider(state.course[0]) : ''}
       ${state.course.map((step, i) => {
-        const card = renderStepCard(step, i, { usedImages });
+        const card = renderStepCard(step, i, { usedImages, hideSlot: Boolean(cond.blogSlug) });
         let html = card;
         if (i === 1 && state.course && state.course.length >= 3) {
           html += renderNativeInfeedAdCard();
@@ -6337,7 +6341,7 @@ function swapStep(index: number, refocus = false): void {
   }
 
   const temp = document.createElement('div');
-  temp.innerHTML = renderStepCard(state.course[index], index, { usedImages });
+  temp.innerHTML = renderStepCard(state.course[index], index, { usedImages, hideSlot: Boolean(state.courseConditions?.blogSlug) });
   const newCard = temp.firstElementChild as HTMLElement | null;
   if (!newCard) {
     renderResults();
@@ -6493,6 +6497,7 @@ function bindResultEvents(area: HTMLElement): void {
         state.courseConditions.subZones,
         // 칩은 지역으로 만든 코스에서만 싣는다(🔗 공유와 같은 규칙)
         state.courseConditions.anchorId || state.courseConditions.fromSaved ? undefined : state.courseConditions.categoryKey,
+        Boolean(state.courseConditions.blogSlug),
       );
       await copyOrShowText(text, '📋 코스가 복사되었어요');
     } catch {
@@ -6538,6 +6543,7 @@ function bindResultEvents(area: HTMLElement): void {
       },
       spotIds: ids,
       title: courseTitle(state.courseConditions, state.course),
+      blogSlug: state.courseConditions.blogSlug,
     };
     saveCourseWithToast(item);
   });
@@ -8059,6 +8065,7 @@ function renderReceiverView(steps: CourseStep[]): void {
         ? `📖 ${blogFirst} · 매거진 코스`
         // 맞춤 코스 결과 저장 제목과 같은 규칙: 테마가 없으면 고르지 않은 '모든 분위기'를 적지 않고 지역만(P-280, P-482)
         : `${blogSlug ? '📖 매거진 코스 · ' : ''}${areaThemeLabel(regionsLabel(area.regions, area.subZones), 'ALL', sharedCategoryKey)}`,
+      blogSlug: blogSlug ?? undefined,
     };
     saveCourseWithToast(item);
   });
@@ -8102,7 +8109,8 @@ function savedCourseSpotsHtml(item: SavedCourse): string {
     <span class="saved-step-flow">
       ${steps
         .map((entry) => {
-          const emoji = entry.slot && SLOT_META[entry.slot] ? SLOT_META[entry.slot].emoji : '📍';
+          // 매거진 코스는 시간대를 글이 정하므로 DB slot 이모지 대신 📍(P-549)
+          const emoji = !item.blogSlug && entry.slot && SLOT_META[entry.slot] ? SLOT_META[entry.slot].emoji : '📍';
           return `
             <span class="saved-step-chip">
               <span class="saved-step-emoji">${emoji}</span>
@@ -8430,6 +8438,7 @@ function renderOverlayContent(): void {
             item.conditions.mood,
             item.conditions.subZones || [],
             item.conditions.categoryKey,
+            Boolean(item.blogSlug),
           );
           // 제외 안내를 먼저 띄우면 바로 이 토스트가 덮어써 한 번에 합친다
           await copyOrShowText(text, dropped > 0 ? `📋 ${dropped}곳을 빼고 코스를 복사했어요` : '📋 코스가 복사되었어요');
@@ -9067,7 +9076,7 @@ function resolveSavedSteps(spotIds: number[]): { steps: CourseStep[]; dropped: n
   return { steps, dropped: spotIds.length - steps.length };
 }
 
-function restoreCourse(item: Pick<SavedCourse, 'conditions'>, steps: CourseStep[]): void {
+function restoreCourse(item: Pick<SavedCourse, 'conditions' | 'blogSlug'>, steps: CourseStep[]): void {
   // 저장하지 않은 현재 코스는 ↩ 이전으로 되찾게 보관한다(조건 칩 포함). 이미 저장한 코스는 잃는 것이 없어 비운다(P-475)
   const currentSaved = !!state.course && isCourseSaved(courseSpotIds());
   // 칩이 있는 보관분은 코스·조건을 모두 담은 불러오기의 보관분이라, 저장 코스 X에서 Y를 이어 열어도 처음 미저장 코스를 되찾게 둔다(P-479)
@@ -9118,6 +9127,7 @@ function restoreCourse(item: Pick<SavedCourse, 'conditions'>, steps: CourseStep[
     searchQuery: item.conditions.searchQuery,
     fromSaved: item.conditions.fromSaved,
     zoneFromQuery: item.conditions.zoneFromQuery,
+    blogSlug: item.blogSlug,
   };
 
   // 스팟 탐색 탭에서 불러오면 결과가 숨겨진 코스 탭에 그려져 화면에 아무 변화가 없었다. 코스 탭으로 옮기고 결과로 내린다
