@@ -61,5 +61,5 @@ jobs:
             set -e
             docker cp $C:$T/backups/. "$HOME/oneul-backups/"
             docker exec $C rm -rf $T
-            ls -t "$HOME/oneul-backups" | head -3
+            ls -t "$HOME/oneul-backups" | head -3 || true  # pipefail에서 head가 먼저 닫으면 ls가 SIGPIPE로 끝난다
             exit $RC
