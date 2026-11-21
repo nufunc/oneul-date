@@ -77,10 +77,38 @@ def test_p548_merge_fills_parking_and_fix_is_idempotent():
     assert fix_list("P-548", {}, rows, {}) == [] and plan("P-548", {}, rows)[0] == []  # 재실행은 아무것도 쓰지 않는다
 
 
+def test_p552_coord_fix_asserts_and_is_idempotent():
+    rows = {4995: {"id": 4995, "name": "꽁티드툴레아 도산", "is_closed": False, "address": "서울 강남구 도산대로49길 39", "area": "강남구",
+                   "location": "서울 강남구", "lat": 37.52556362, "lng": 127.03688884, "source": {"note": "n"}, "provider_ids": {"kakao": "179244712"}},
+            6006: {"id": 6006, "name": "꽁티드툴레아", "is_closed": False, "address": "서울 강남구 도산대로49길 39", "area": "강남구",
+                   "location": "서울 강남구", "lat": 37.52556362, "lng": 127.03688884, "source": {}, "provider_ids": {"kakao": "179244712"}},
+            5401: {"id": 5401, "name": "모나용평", "is_closed": False, "address": "강원 평창군 대관령면 올림픽로 715", "area": "평창군",
+                   "lat": 37.6509448898618, "lng": 128.705556644413, "source": {}},
+            1790838390093: {"id": 1790838390093, "name": "마복산(고흥)", "is_closed": False, "address": "전남 고흥군 봉래면 예회리 산 1",
+                            "area": "고흥군", "location": "전남 고흥군", "lat": 34.434903682, "lng": 127.5058737174, "source": {}}}
+    skipped = {}
+    fixes = fix_list("P-552", {}, rows, skipped)
+    assert [f["row"]["id"] for f in fixes] == [4995, 6006, 5401, 1790838390093] and skipped == {}
+    assert set(fixes[2]["patch"]) == {"lat", "lng"}  # 5401은 주소가 이미 맞다
+    body = fix_body(rows[4995], fixes[0]["patch"], "20261121-180000", "now", "P-552")
+    assert body["address"] == "서울 강남구 압구정로4길 13-14" and (body["lat"], body["lng"]) == (37.522164388753495, 127.02124451182162)
+    assert body.get("area", "강남구") == "강남구"  # 시군구가 같으면 area는 그대로
+    for f in fixes:
+        rows[f["row"]["id"]].update(f["patch"])
+    assert fix_list("P-552", {}, rows, {}) == []  # 재실행은 아무것도 쓰지 않는다
+    skipped = {}
+    rows[5401]["is_closed"] = True
+    rows[6006]["name"] = "다른 가게"
+    rows[4995].update(lat=0)
+    assert [f["row"]["id"] for f in fix_list("P-552", {}, rows, skipped)] == [4995]
+    assert skipped[5401] == "닫힘" and skipped[6006].startswith("이름 바뀜")  # 쓰기 직전 열림과 이름 확인
+
+
 if __name__ == "__main__":
     test_keep_fix_patch()
     test_plan_skips_closed_and_changed()
     test_plan_p101_pairs()
     test_p548_merge_fills_parking_and_fix_is_idempotent()
     test_fix_body_kakao_address_category()
+    test_p552_coord_fix_asserts_and_is_idempotent()
     print("ok")
