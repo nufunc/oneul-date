@@ -10,7 +10,7 @@ const gridStart = html.indexOf('<div class="posts-grid">');
 const gridEnd = html.indexOf('</section>', gridStart);
 assert.ok(gridStart > 0 && gridEnd > gridStart, '.posts-grid를 찾지 못했다');
 
-for (const id of ['od-q', 'od-count', 'od-empty']) {
+for (const id of ['od-q', 'od-count', 'od-empty', 'od-more']) {
   const hits = html.split(`id="${id}"`).length - 1;
   assert.strictEqual(hits, 1, `#${id}가 1개가 아니다: ${hits}`);
   const at = html.indexOf(`id="${id}"`);
@@ -22,5 +22,10 @@ assert.ok(html.indexOf('id="od-q"') < chips, '#od-q가 지역 칩 줄 위에 없
 assert.ok(chips < html.indexOf('id="od-count"') && html.indexOf('id="od-empty"') < gridStart, '결과 수 줄과 빈 상태가 칩 줄과 목록 사이에 없다');
 assert.ok(/<input id="od-q" type="search"/.test(html), '#od-q가 type=search가 아니다');
 assert.ok(/id="od-count" aria-live="polite"/.test(html), '#od-count에 aria-live가 없다');
+
+// 목록 나눠 보기(agy Important 5): 단추는 목록 뒤, 숨긴 카드도 링크는 HTML에 남는다
+assert.ok(html.indexOf('id="od-more"') > gridEnd && html.indexOf('id="od-more"') < html.indexOf('</main>'), '#od-more가 목록 뒤에 없다');
+assert.ok(/const PAGE = 18;/.test(html), '한 번에 보이는 글 수가 18이 아니다');
+assert.ok(/\.posts-grid\.od-paged \.post-card\.od-later\{display:none!important\}/.test(html), '나눠 보기 숨김 규칙이 없다');
 
 console.log('blog search OK');

@@ -307,6 +307,11 @@
     .od-count{max-width:var(--max-width);margin:0 auto 8px;scroll-margin-top:90px;padding:0 24px;font-size:14px;color:var(--color-text-sub)}
     .od-empty{max-width:var(--max-width);margin:0 auto;padding:24px;text-align:center;font-size:15px;color:var(--color-text-sub)}
     .od-empty button{margin-top:12px;min-height:44px;padding:0 20px;border-radius:999px;border:1px solid var(--color-border);background:#fff;color:var(--color-text-main);font:inherit;font-weight:700;cursor:pointer}
+    /* 목록 나눠 보기(agy Important 5): 전체 보기일 때 18편씩 보이고, 나머지 링크도 HTML에 그대로 둔다 */
+    .posts-grid.od-paged .post-card.od-later{display:none!important}
+    .od-more-wrap{max-width:var(--max-width);margin:8px auto 0;padding:0 24px;text-align:center}
+    .od-more{min-height:48px;padding:0 28px;border-radius:999px;border:1px solid var(--color-border);background:#fff;color:var(--color-text-main);font:inherit;font-size:15px;font-weight:700;cursor:pointer}
+    .od-more:focus-visible{outline:3px solid #0284c7;outline-offset:2px}
   </style>
 </head>
 <body>
@@ -2413,6 +2418,7 @@
 
       </div>
     </section>
+    <div class="od-more-wrap"><button type="button" class="od-more" id="od-more" hidden>글 더 보기</button></div>
   </main>
 
   <footer class="site-footer">
@@ -2562,6 +2568,39 @@
         q.value = initial;
         apply();
       }
+    })();
+  </script>
+
+  <script>
+    // 목록 나눠 보기(agy Important 5): 지역 칩이 전체이고 검색어가 없을 때만 18편씩 보인다
+    (function() {
+      const PAGE = 18;
+      const grid = document.querySelector('.posts-grid');
+      const cards = Array.prototype.slice.call(document.querySelectorAll('.post-card'));
+      const more = document.getElementById('od-more');
+      const q = document.getElementById('od-q');
+      let shown = PAGE;
+      if (!grid || !more || cards.length <= PAGE) return;
+
+      function sync() {
+        const chip = document.querySelector('.filter-chip.active');
+        const all = !chip || chip.getAttribute('data-region') === 'all';
+        const paged = all && !(q && q.value.trim()) && shown < cards.length;
+        grid.classList.toggle('od-paged', paged);
+        cards.forEach(function(c, i) { c.classList.toggle('od-later', i >= shown); });
+        more.hidden = !paged;
+        more.textContent = '글 더 보기 (남은 ' + (cards.length - shown) + '편)';
+      }
+
+      more.addEventListener('click', function() {
+        const next = cards[shown];
+        shown += PAGE;
+        sync();
+        if (next) next.focus();
+      });
+      document.querySelectorAll('.filter-chip').forEach(function(chip) { chip.addEventListener('click', sync); });
+      if (q) q.addEventListener('input', sync);
+      sync();
     })();
   </script>
 
