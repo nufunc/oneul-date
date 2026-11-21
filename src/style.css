@@ -759,6 +759,10 @@ label,
   gap: 6px;
   cursor: pointer;
   transition: opacity 0.15s ease;
+  /* 링크 높이가 글줄 높이 1.2em(320px 22px, 390px 이상 30px)뿐이라 터치 기준 44px에 못 미쳤다.
+     높이를 44px로 늘리고 늘린 만큼 위아래 음수 여백으로 덜어 제목과 머리 높이는 그대로 둔다(P-554) */
+  min-height: 44px;
+  margin-block: calc(0.6em - 22px);
 }
 
 .app-title-link:hover {
