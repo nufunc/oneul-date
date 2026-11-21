@@ -889,6 +889,45 @@ label,
   }
 }
 
+/* 1100px 이상에서 한 열 640px이라 🚀 뒤 조건 카드가 화면 밖 718px 위로 나가 조건을 바꿀 때마다 오르내렸고 가로 50~67%가 비었다.
+   루트 홈만 조건(왼쪽, sticky)과 결과(오른쪽) 두 열로 둔다. 받은 코스와 지역 랜딩은 위 규칙과 같은 조건으로 뺀다.
+   스팟 탐색 탭은 지금 폭 600px을 유지한다(P-551) */
+@media (min-width: 1100px) {
+  html:not([data-shared-course]) body > :is(#app:first-child, .data-failed-banner:first-child + #app) {
+    max-width: 1120px;
+  }
+  html:not([data-shared-course]) body > :is(#app:first-child, .data-failed-banner:first-child + #app) #main-content {
+    display: grid;
+    grid-template-columns: minmax(0, 440px) minmax(0, 600px);
+    column-gap: 32px;
+    align-items: start;
+    justify-content: center;
+  }
+  html:not([data-shared-course]) body > :is(#app:first-child, .data-failed-banner:first-child + #app) :is(#main-mode-nav, #spot-discovery-area) {
+    grid-column: 1 / -1;
+  }
+  html:not([data-shared-course]) body > :is(#app:first-child, .data-failed-banner:first-child + #app) #spot-discovery-area {
+    width: 100%;
+    max-width: 600px;
+    justify-self: center;
+  }
+  html:not([data-shared-course]) body > :is(#app:first-child, .data-failed-banner:first-child + #app) #conditions-area {
+    grid-column: 1;
+    grid-row: 2;
+    position: sticky;
+    top: 16px;
+  }
+  html:not([data-shared-course]) body > :is(#app:first-child, .data-failed-banner:first-child + #app) #results-area {
+    grid-column: 2;
+    grid-row: 2;
+    margin-top: 0;
+  }
+  /* 두 열에서는 조건 카드 옆에 빈 결과가 서므로 위 700px 공제로는 바닥글이 첫 화면 y 776에 들어왔다 내려갔다(1920 CLS 0.018) */
+  html:not([data-shared-course]) body > :is(#app:first-child, .data-failed-banner:first-child + #app) #results-area:has(> .results-empty) {
+    min-height: 100svh;
+  }
+}
+
 .btn-saved:hover {
   border-color: var(--color-border-strong);
   color: var(--color-text);

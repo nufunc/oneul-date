@@ -340,6 +340,21 @@ for (const [name, width, height, hash] of [['home1280', 1280, 800, ''], ['home19
   d.appGap = [app.l, d.vw - app.r];
   d.homeBlocks = await p.evaluate(() => document.querySelectorAll('#home-magazine, #home-regions').length);
   if (shot(`desktop_${name}`)) { await p.evaluate(() => window.scrollTo(0, 0)); await p.screenshot(shot(`desktop_${name}`)); }
+  // 1100px 이상 루트 홈은 두 열: 🚀 뒤에도 조건 카드 전부와 지역 칩이 화면 안이고 결과가 오른쪽 열인가(P-551)
+  if (name === 'home1280') {
+    await p.click('#btn-generate');
+    await p.waitForTimeout(2000);
+    d.twoCol = await p.evaluate(() => {
+      const c = document.querySelector('#conditions-area').getBoundingClientRect();
+      const r = document.querySelector('#results-area').getBoundingClientRect();
+      const chips = [...document.querySelectorAll('.quick-region-chip')];
+      return {
+        condIn: Math.round(Math.max(0, Math.min(c.bottom, innerHeight) - Math.max(c.top, 0))), condH: Math.round(c.height),
+        chipsIn: chips.filter((e) => { const b = e.getBoundingClientRect(); return b.height && b.bottom > 0 && b.top < innerHeight; }).length, chipsN: chips.length,
+        resLeft: Math.round(r.left), condRight: Math.round(c.right),
+      };
+    });
+  }
   desktop[name] = d;
   await p.close();
 }
@@ -398,6 +413,7 @@ for (const [k, d] of Object.entries(desktop)) {
   const centered = Math.abs(d.appGap[0] - d.appGap[1]) <= 1;
   let ok = d.scrollW === d.vw && centered && d.homeBlocks === 0;
   if (k.startsWith('home')) ok &&= d.cls < 0.01;
+  if (d.twoCol) ok &&= d.twoCol.condIn === d.twoCol.condH && d.twoCol.chipsN > 0 && d.twoCol.chipsIn === d.twoCol.chipsN && d.twoCol.resLeft > d.twoCol.condRight;
   if (!ok) fails.push(`desktop ${k} ${JSON.stringify(d)}`);
 }
 result.fails = fails;
